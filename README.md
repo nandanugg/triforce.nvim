@@ -9,7 +9,7 @@ Nexus Backend Server
 
 Tools tambahan (opsional):
 
-* [Docker + Docker Compsoe](https://docs.docker.com/compose/gettingstarted/) -
+* [Docker + Docker Compose](https://docs.docker.com/compose/gettingstarted/) -
   untuk menyediakan PostgreSQL di environment local.
 * [golangci-lint](https://golangci-lint.run/welcome/install/) - linter &
   formatter untuk kode Go.
