@@ -7,6 +7,7 @@ servers:
   - url: http://localhost:8000
 tags:
   - name: Data Pribadi
+  - name: Pelatihan Fungsional
   - name: Pelatihan Struktural
   - name: Pendidikan Formal
 paths:
@@ -120,6 +121,48 @@ paths:
                         type: string
                       gelar_belakang:
                         type: string
+  /pelatihan-fungsional:
+    get:
+      tags:
+        - Pelatihan Fungsional
+      summary: Lihat daftar pelatihan fungsional.
+      description: >-
+        Lihat daftar pelatihan fungsional dari user yang login, urut
+        berdasarkan tanggal.
+      operationId: listPelatihanFungsional
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        jenis_diklat:
+                          type: string
+                        nama_diklat:
+                          type: string
+                        tanggal:
+                          type: string
+                          format: date
+                        tahun:
+                          type: string
+                        institusi_penyelenggara:
+                          type: string
+                        nomor_sertifikat:
+                          type: string
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
   /pelatihan-struktural:
     get:
       tags:
