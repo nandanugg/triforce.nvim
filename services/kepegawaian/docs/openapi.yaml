@@ -9,6 +9,7 @@ tags:
   - name: Data Pribadi
   - name: Pelatihan Fungsional
   - name: Pelatihan Struktural
+  - name: Pelatihan Teknis
   - name: Pendidikan Formal
 paths:
   /data-pribadi:
@@ -199,6 +200,48 @@ paths:
                           format: date
                         tahun:
                           type: integer
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /pelatihan-teknis:
+    get:
+      tags:
+        - Pelatihan Teknis
+      summary: Lihat daftar pelatihan teknis/seminar/workshop/kursus.
+      description: >-
+        Lihat daftar pelatihan teknis/seminar/workshop/kursus dari user yang
+        login, urut berdasarkan tanggal.
+      operationId: listPelatihanTeknis
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        tipe_diklat:
+                          type: string
+                        jenis_diklat:
+                          type: string
+                        nama_diklat:
+                          type: string
+                        jumlah_jam:
+                          type: integer
+                        tanggal_diklat:
+                          type: string
+                          format: date
+                        nomor_sertifikat:
+                          type: string
                   meta:
                     $ref: "#/components/schemas/metaPagination"
   /pendidikan-formal:
