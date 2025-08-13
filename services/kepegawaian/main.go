@@ -11,6 +11,7 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/config"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/docs"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/datapribadi"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/pendidikanformal"
 )
 
 func main() {
@@ -31,6 +32,7 @@ func main() {
 	mwAuth := api.NewAuthMiddleware(jwtPublicKey)
 
 	datapribadi.RegisterRoutes(e, db, mwAuth)
+	pendidikanformal.RegisterRoutes(e, db, mwAuth)
 
 	err = api.StartEchoServer(e, c.Server.Port)
 	exitIfError("Error starting server.", err)

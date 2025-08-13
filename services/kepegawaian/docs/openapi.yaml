@@ -7,6 +7,7 @@ servers:
   - url: http://localhost:8000
 tags:
   - name: Data Pribadi
+  - name: Pendidikan Formal
 paths:
   /data-pribadi:
     get:
@@ -118,6 +119,47 @@ paths:
                         type: string
                       gelar_belakang:
                         type: string
+  /pendidikan-formal:
+    get:
+      tags:
+        - Pendidikan Formal
+      summary: Lihat daftar pendidikan formal
+      description: >-
+        Lihat daftar pendidikan formal dari user yang login, urut berdasarkan
+        tahun lulus.
+      operationId: listPendidikanFormal
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        jenjang_pendidikan:
+                          type: string
+                        nama_sekolah:
+                          type: string
+                        jurusan:
+                          type: string
+                        keterangan_pendidikan:
+                          type: string
+                        tahun_lulus:
+                          type: string
+                        nomor_ijazah:
+                          type: string
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
 components:
   parameters:
     authRequired:
@@ -144,6 +186,7 @@ components:
   schemas:
     metaPagination:
       type: object
+      additionalProperties: false
       properties:
         limit:
           type: integer
