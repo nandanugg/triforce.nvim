@@ -7,7 +7,7 @@ lint-go:
 	golangci-lint run
 
 lint-openapi:
-	spectral lint services/sampleservice1/docs/openapi.yaml
+	spectral lint services/kepegawaian/docs/openapi.yaml
 
 lint: lint-go lint-openapi
 
@@ -26,22 +26,22 @@ build service:
 db-migrate-new service migration_name:
 	migrate create -ext sql -dir services/{{service}}/dbmigrations -seq {{migration_name}}
 
-db-create-schema-sampleservice1:
-	psql "host=$NEXUS_SAMPLESERVICE1_DB_HOST user=$NEXUS_SAMPLESERVICE1_DB_USER password=$NEXUS_SAMPLESERVICE1_DB_PASSWORD dbname=$NEXUS_SAMPLESERVICE1_DB_NAME" \
-		-c "create schema $NEXUS_SAMPLESERVICE1_DB_SCHEMA"
+db-create-schema-kepegawaian:
+	psql "host=$NEXUS_KEPEGAWAIAN_DB_HOST user=$NEXUS_KEPEGAWAIAN_DB_USER password=$NEXUS_KEPEGAWAIAN_DB_PASSWORD dbname=$NEXUS_KEPEGAWAIAN_DB_NAME" \
+		-c "create schema kepegawaian"
 
-db-migrate-up-sampleservice1:
+db-migrate-up-kepegawaian:
 	migrate \
-	-path services/sampleservice1/dbmigrations \
-	-database "pgx://$NEXUS_SAMPLESERVICE1_DB_USER:$NEXUS_SAMPLESERVICE1_DB_PASSWORD@$NEXUS_SAMPLESERVICE1_DB_HOST/$NEXUS_SAMPLESERVICE1_DB_NAME?search_path=$NEXUS_SAMPLESERVICE1_DB_SCHEMA" \
+	-path services/kepegawaian/dbmigrations \
+	-database "pgx://$NEXUS_KEPEGAWAIAN_DB_USER:$NEXUS_KEPEGAWAIAN_DB_PASSWORD@$NEXUS_KEPEGAWAIAN_DB_HOST/$NEXUS_KEPEGAWAIAN_DB_NAME?search_path=kepegawaian" \
 	up
 
-db-migrate-down-sampleservice1:
+db-migrate-down-kepegawaian:
 	migrate \
-	-path services/sampleservice1/dbmigrations \
-	-database "pgx://$NEXUS_SAMPLESERVICE1_DB_USER:$NEXUS_SAMPLESERVICE1_DB_PASSWORD@$NEXUS_SAMPLESERVICE1_DB_HOST/$NEXUS_SAMPLESERVICE1_DB_NAME?search_path=$NEXUS_SAMPLESERVICE1_DB_SCHEMA" \
+	-path services/kepegawaian/dbmigrations \
+	-database "pgx://$NEXUS_KEPEGAWAIAN_DB_USER:$NEXUS_KEPEGAWAIAN_DB_PASSWORD@$NEXUS_KEPEGAWAIAN_DB_HOST/$NEXUS_KEPEGAWAIAN_DB_NAME?search_path=kepegawaian" \
 	down
 
-db-doc-sampleservice1:
-	tbls doc "postgres://$NEXUS_SAMPLESERVICE1_DB_USER:$NEXUS_SAMPLESERVICE1_DB_PASSWORD@$NEXUS_SAMPLESERVICE1_DB_HOST/$NEXUS_SAMPLESERVICE1_DB_NAME?search_path=$NEXUS_SAMPLESERVICE1_DB_SCHEMA&sslmode=disable" services/sampleservice1/docs/db --rm-dist -t mermaid
-	rm services/sampleservice1/docs/db/schema.json
+db-doc-kepegawaian:
+	tbls doc "postgres://$NEXUS_KEPEGAWAIAN_DB_USER:$NEXUS_KEPEGAWAIAN_DB_PASSWORD@$NEXUS_KEPEGAWAIAN_DB_HOST/$NEXUS_KEPEGAWAIAN_DB_NAME?search_path=kepegawian&sslmode=disable" services/kepegawaian/docs/db --rm-dist -t mermaid
+	rm services/kepegawaian/docs/db/schema.json

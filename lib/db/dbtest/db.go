@@ -17,16 +17,24 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
 )
 
-var adminDB *sql.DB
+var (
+	adminDB         *sql.DB
+	testDBHost      string
+	testDBSuperuser string
+	testDBPassword  string
+)
 
 func init() {
+	testDBSuperuser = os.Getenv("NEXUS_TEST_DB_SUPERUSER")
+	testDBPassword = os.Getenv("NEXUS_TEST_DB_PASSWORD")
+	testDBHost = os.Getenv("NEXUS_TEST_DB_HOST")
+
 	var err error
 	adminDB, err = db.New(
-		os.Getenv("NEXUS_TEST_DB_HOST"),
-		os.Getenv("NEXUS_TEST_DB_SUPERUSER"),
-		os.Getenv("NEXUS_TEST_DB_PASSWORD"),
+		testDBHost,
+		testDBSuperuser,
+		testDBPassword,
 		os.Getenv("NEXUS_TEST_DB_NAME"),
-		"public",
 	)
 	if err != nil {
 		fmt.Println("Error connecting to database: " + err.Error())
@@ -35,23 +43,25 @@ func init() {
 }
 
 // New creates an isolated database for t, using application config values only
-// as initial connection parameters. DB user specified in config must be a
-// superuser (or at least have the capability to create roles and schemas).
-// DB schema specified in config will be left untouched.
-func New(t *testing.T, migrationsFS embed.FS) *sql.DB {
+// as initial connection parameters.
+func New(t *testing.T, schema string, migrationsFS embed.FS) *sql.DB {
 	t.Helper()
 
 	testID := randomString()
 	var (
-		host     = os.Getenv("NEXUS_TEST_DB_HOST")
-		dbname   = os.Getenv("NEXUS_TEST_DB_NAME")
-		schema   = "nexus_test_schema_" + testID
+		dbname   = "nexus_test_db_" + testID
 		user     = "nexus_test_user_" + testID
 		password = "any"
 	)
 
-	createTestRoleAndSchema(t, user, password, schema)
-	return createTestTables(t, host, user, password, dbname, schema, migrationsFS)
+	// Using superuser, create new DB and app user:
+	createTestDBAndRole(t, dbname, user, password)
+
+	// Do necessary preparation in new DB before applying migration files:
+	prepareTestDB(t, user, password, dbname, schema)
+
+	// Apply migration files:
+	return applyMigrations(t, user, password, dbname, migrationsFS)
 }
 
 func randomString() string {
@@ -59,26 +69,45 @@ func randomString() string {
 	return hex.EncodeToString(sum[:4])
 }
 
-func createTestRoleAndSchema(t *testing.T, user, password, schema string) {
-	_, err := adminDB.Exec(fmt.Sprintf(`
+func createTestDBAndRole(t *testing.T, dbname, user, password string) {
+	_, err := adminDB.Exec("create database " + dbname)
+	require.NoError(t, err)
+
+	_, err = adminDB.Exec(fmt.Sprintf(`
 		create role %[1]s login password '%[2]s';
-		create schema %[3]s authorization %[1]s;
-		`, user, password, schema,
+		grant create on database %[3]s to %[1]s;
+		`, user, password, dbname,
 	))
 	require.NoError(t, err)
 
 	t.Cleanup(func() {
-		_, err = adminDB.Exec(fmt.Sprintf(`
-			drop schema %s cascade;
-			drop role %s;
-			`, schema, user,
-		))
+		_, err := adminDB.Exec("drop database " + dbname)
+		assert.NoError(t, err)
+		_, err = adminDB.Exec("drop role " + user)
 		assert.NoError(t, err)
 	})
 }
 
-func createTestTables(t *testing.T, host, user, password, dbname, schema string, migrationsFS embed.FS) *sql.DB {
-	db, err := db.New(host, user, password, dbname, schema)
+func prepareTestDB(t *testing.T, user, password, dbname, schema string) {
+	d, err := db.New(testDBHost, testDBSuperuser, testDBPassword, dbname)
+	require.NoError(t, err)
+	defer d.Close()
+
+	// NOTE: 'update pg_language' dibutuhkan di DB kepegawaian (search
+	// "LANGUAGE c" di file migrations).
+	_, err = d.Exec("update pg_language set lanpltrusted = true where lanname = 'c'")
+	require.NoError(t, err)
+
+	d2, err := db.New(testDBHost, user, password, dbname)
+	require.NoError(t, err)
+	defer d2.Close()
+
+	_, err = d2.Exec("create schema " + schema)
+	require.NoError(t, err)
+}
+
+func applyMigrations(t *testing.T, user, password, dbname string, migrationsFS embed.FS) *sql.DB {
+	db, err := db.New(testDBHost, user, password, dbname)
 	require.NoError(t, err)
 	t.Cleanup(func() { db.Close() })
 

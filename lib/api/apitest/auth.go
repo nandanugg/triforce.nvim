@@ -23,7 +23,7 @@ func init() {
 }
 
 // GenerateAuthHeader generates HTTP Authorization header for use in tests.
-func GenerateAuthHeader(userID string) string {
+func GenerateAuthHeader(userID int64) string {
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{"user_id": userID})
 	tokenString, _ := token.SignedString(JWTPrivateKey)
 	return "Bearer " + tokenString

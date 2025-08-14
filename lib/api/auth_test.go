@@ -32,10 +32,10 @@ func TestNewAuthMiddleware(t *testing.T) {
 		{
 			name: "ok: valid auth header",
 			requestHeader: http.Header{
-				"Authorization": []string{generateHeader("user1", privateKey)},
+				"Authorization": []string{generateHeader(100, privateKey)},
 			},
 			wantResponseCode: http.StatusOK,
-			wantUser:         &User{ID: "user1"},
+			wantUser:         &User{ID: int64(100)},
 		},
 		{
 			name:             "error: missing auth header",
@@ -66,10 +66,10 @@ func TestNewAuthMiddleware(t *testing.T) {
 			name: "error: tampered jwt payload",
 			requestHeader: http.Header{
 				"Authorization": []string{func() string {
-					header := generateHeader("user1", privateKey)
+					header := generateHeader(100, privateKey)
 					encodedClaims := strings.Split(header, ".")[1]
 					claims, _ := base64.RawStdEncoding.DecodeString(encodedClaims)
-					claims = bytes.ReplaceAll(claims, []byte("user1"), []byte("admin"))
+					claims = bytes.ReplaceAll(claims, []byte("100"), []byte("200"))
 
 					return strings.ReplaceAll(header, encodedClaims, base64.RawStdEncoding.EncodeToString(claims))
 				}()},
@@ -110,7 +110,7 @@ func TestNewAuthMiddleware(t *testing.T) {
 	}
 }
 
-func generateHeader(userID string, signingKey *rsa.PrivateKey) string {
+func generateHeader(userID int64, signingKey *rsa.PrivateKey) string {
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{"user_id": userID})
 	tokenString, _ := token.SignedString(signingKey)
 	return "Bearer " + tokenString

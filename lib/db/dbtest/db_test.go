@@ -1,79 +1,29 @@
 package dbtest
 
 import (
-	"embed"
-	"slices"
-	"strings"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/sampleservice1/dbmigrations"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db/dbtest/testmigrations"
 )
 
 func TestNew(t *testing.T) {
 	t.Parallel()
 
-	tests := []struct {
-		name     string
-		dbData   string
-		wantData Rows
-	}{
-		{
-			name:     "creates isolated DB unaffected by parallel test cases - #1",
-			dbData:   `create table foo (id int primary key); insert into foo values(1);`,
-			wantData: Rows{{"id": int64(1)}},
-		},
-		{
-			name:     "creates isolated DB unaffected by parallel test cases - #2",
-			dbData:   `create table foo (id text primary key); insert into foo values('bar');`,
-			wantData: Rows{{"id": "bar"}},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for i := range 10 {
+		t.Run(fmt.Sprintf("safe to execute in parallel - %d", i), func(t *testing.T) {
 			t.Parallel()
 
-			db := New(t, dbmigrations.FS)
-			_, err := db.Exec(tt.dbData)
+			db := New(t, "test", testmigrations.FS)
+			_, err := db.Exec(fmt.Sprintf("insert into test.foo values (1, %d)", i))
 			require.NoError(t, err)
 
-			data, err := QueryAll(db, "foo", "id")
+			data, err := QueryAll(db, "test.foo", "foo")
 			require.NoError(t, err)
-			assert.Equal(t, tt.wantData, data)
+			assert.Equal(t, Rows{{"foo": int64(1), "bar": int64(i)}}, data)
 		})
 	}
-}
-
-func TestMigrationDown(t *testing.T) {
-	t.Parallel()
-
-	sqls := getMigrationDownSQLs(t, dbmigrations.FS)
-	require.NotEmpty(t, sqls)
-
-	db := New(t, dbmigrations.FS)
-	for _, sql := range sqls {
-		_, err := db.Exec(sql)
-		require.NoError(t, err)
-	}
-}
-
-func getMigrationDownSQLs(t *testing.T, fs embed.FS) []string {
-	dir, err := fs.ReadDir(".")
-	require.NoError(t, err)
-
-	result := []string{}
-	for _, de := range dir {
-		name := de.Name()
-		if strings.HasSuffix(name, ".down.sql") {
-			b, err := fs.ReadFile(name)
-			require.NoError(t, err)
-			result = append(result, string(b))
-		}
-	}
-	slices.Reverse(result)
-
-	return result
 }
