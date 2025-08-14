@@ -48,6 +48,7 @@ func Test_handler_list(t *testing.T) {
 			wantResponseBody: `{
 				"data": [
 					{
+						"id":                      "23",
 						"institusi_penyelenggara": "23h",
 						"jenis_diklat":            "23c",
 						"nama_diklat":             "23d",
@@ -55,6 +56,7 @@ func Test_handler_list(t *testing.T) {
 						"tanggal":                 "2001-01-02"
 					},
 					{
+						"id":                      "22",
 						"institusi_penyelenggara": "22h",
 						"jenis_diklat":            "22c",
 						"nama_diklat":             "22d",
@@ -63,6 +65,7 @@ func Test_handler_list(t *testing.T) {
 						"tanggal":                 "2002-01-02"
 					},
 					{
+						"id":                      "21",
 						"institusi_penyelenggara": "21h",
 						"jenis_diklat":            "21c",
 						"nama_diklat":             "21d",
@@ -81,6 +84,7 @@ func Test_handler_list(t *testing.T) {
 			wantResponseBody: `{
 				"data": [
 					{
+						"id":                      "22",
 						"institusi_penyelenggara": "22h",
 						"jenis_diklat":            "22c",
 						"nama_diklat":             "22d",

@@ -48,6 +48,7 @@ func Test_handler_list(t *testing.T) {
 			wantResponseBody: `{
 				"data": [
 					{
+						"id":               21,
 						"jenis_diklat":     "21a",
 						"jumlah_jam":       1,
 						"nama_diklat":      "21m",
@@ -56,6 +57,7 @@ func Test_handler_list(t *testing.T) {
 						"tipe_diklat":      "TODO: Tipe Diklat"
 					},
 					{
+						"id":               23,
 						"jenis_diklat":     "23a",
 						"jumlah_jam":       3,
 						"nama_diklat":      "23m",
@@ -64,6 +66,7 @@ func Test_handler_list(t *testing.T) {
 						"tipe_diklat":      "TODO: Tipe Diklat"
 					},
 					{
+						"id":               22,
 						"jenis_diklat":     "22a",
 						"jumlah_jam":       2,
 						"nama_diklat":      "22m",
@@ -83,6 +86,7 @@ func Test_handler_list(t *testing.T) {
 			wantResponseBody: `{
 				"data": [
 					{
+						"id":               23,
 						"jenis_diklat":     "23a",
 						"jumlah_jam":       3,
 						"nama_diklat":      "23m",

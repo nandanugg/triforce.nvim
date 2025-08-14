@@ -52,6 +52,7 @@ func Test_handler_list(t *testing.T) {
 			wantResponseBody: `{
 				"data": [
 					{
+						"id":                    31,
 						"jenjang_pendidikan":    "21b",
 						"jurusan":               "TODO: Jurusan",
 						"keterangan_pendidikan": "31r",
@@ -60,6 +61,7 @@ func Test_handler_list(t *testing.T) {
 						"tahun_lulus":           "a31j"
 					},
 					{
+						"id":                    33,
 						"jenjang_pendidikan":    "22b",
 						"jurusan":               "TODO: Jurusan",
 						"keterangan_pendidikan": "33r",
@@ -68,6 +70,7 @@ func Test_handler_list(t *testing.T) {
 						"tahun_lulus":           "b33j"
 					},
 					{
+						"id":                    32,
 						"jenjang_pendidikan":    "21b",
 						"jurusan":               "TODO: Jurusan",
 						"keterangan_pendidikan": "32r",
@@ -88,6 +91,7 @@ func Test_handler_list(t *testing.T) {
 			wantResponseBody: `{
 				"data": [
 					{
+						"id":                    33,
 						"jenjang_pendidikan":    "22b",
 						"jurusan":               "TODO: Jurusan",
 						"keterangan_pendidikan": "33r",

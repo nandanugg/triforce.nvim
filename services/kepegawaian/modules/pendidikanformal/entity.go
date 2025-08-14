@@ -1,6 +1,7 @@
 package pendidikanformal
 
 type pendidikanFormal struct {
+	ID                   int    `json:"id"`
 	JenjangPendidikan    string `json:"jenjang_pendidikan"`
 	NamaSekolah          string `json:"nama_sekolah"`
 	Jurusan              string `json:"jurusan"`

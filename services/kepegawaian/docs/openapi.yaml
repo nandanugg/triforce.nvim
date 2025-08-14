@@ -191,6 +191,8 @@ paths:
                       type: object
                       additionalProperties: false
                       properties:
+                        id:
+                          type: string
                         jenis_diklat:
                           type: string
                         nama_diklat:
@@ -233,6 +235,8 @@ paths:
                       type: object
                       additionalProperties: false
                       properties:
+                        id:
+                          type: string
                         nama_diklat:
                           type: string
                         nomor:
@@ -271,6 +275,8 @@ paths:
                       type: object
                       additionalProperties: false
                       properties:
+                        id:
+                          type: integer
                         tipe_diklat:
                           type: string
                         jenis_diklat:
@@ -313,6 +319,8 @@ paths:
                       type: object
                       additionalProperties: false
                       properties:
+                        id:
+                          type: integer
                         jenjang_pendidikan:
                           type: string
                         nama_sekolah:

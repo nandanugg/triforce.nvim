@@ -17,6 +17,7 @@ func newRepository(db *sql.DB) *repository {
 func (r *repository) list(ctx context.Context, userID int64, limit, offset uint) ([]pelatihanStruktural, error) {
 	rows, err := r.db.QueryContext(ctx, `
 		select
+			rds."ID",
 			rds."NAMA_DIKLAT",
 			rds."NOMOR",
 			rds."TANGGAL",
@@ -38,6 +39,7 @@ func (r *repository) list(ctx context.Context, userID int64, limit, offset uint)
 	for rows.Next() {
 		var row pelatihanStruktural
 		err := rows.Scan(
+			&row.ID,
 			&row.NamaDiklat,
 			&row.Nomor,
 			&row.Tanggal,
