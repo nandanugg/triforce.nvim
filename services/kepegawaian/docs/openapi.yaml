@@ -7,6 +7,7 @@ servers:
   - url: http://localhost:8000
 tags:
   - name: Data Pribadi
+  - name: Kepangkatan
   - name: Pelatihan Fungsional
   - name: Pelatihan Struktural
   - name: Pelatihan Teknis
@@ -122,6 +123,47 @@ paths:
                         type: string
                       gelar_belakang:
                         type: string
+  /kepangkatan:
+    get:
+      tags:
+        - Kepangkatan
+      summary: Lihat riwayat kepangkatan.
+      description: >-
+        Lihat riwayat kepangkatan dari user yang login, urut berdasarkan TMT.
+      operationId: listPelatihanFungsional
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: string
+                        pangkat:
+                          type: string
+                        golongan:
+                          type: string
+                        tmt:
+                          type: string
+                          format: date
+                        mk_golongan_tahun:
+                          type: string
+                        mk_golongan_bulan:
+                          type: string
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
   /pelatihan-fungsional:
     get:
       tags:
