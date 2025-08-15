@@ -197,6 +197,41 @@ paths:
                           type: string
                         tanggal_lahir:
                           type: string
+  /keluarga/pasangan:
+    get:
+      tags:
+        - Keluarga
+      summary: Lihat daftar pasangan.
+      description: >-
+        Lihat daftar pasangan dari user yang login.
+      operationId: listPasangan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: integer
+                        peran:
+                          type: string
+                          enum:
+                            - ISTRI
+                            - SUAMI
+                        nama:
+                          type: string
+                        tanggal_lahir:
+                          type: string
   /kepangkatan:
     get:
       tags:

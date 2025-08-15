@@ -209,3 +209,82 @@ func Test_handler_listOrangTua(t *testing.T) {
 		})
 	}
 }
+
+func Test_handler_listPasangan(t *testing.T) {
+	dbData := `
+		insert into kepegawaian.users
+			(id, role_id, email, username, password_hash, reset_hash, last_login,  last_ip, created_on,  deleted, reset_by, banned, ban_message, display_name, display_name_changed, timezone, language, active, activate_hash, password_iterations, force_password_reset, nip,  satkers, admin_nomor, imei, token, real_imei, fcm,  banned_asigo) values
+			(41, 41,      '41a', '41b',    '41c',         '41d',      '2001-01-02','41f',   '2001-01-03',1,       1,        1,      '41k',       '41l',        '2001-01-04',         '41n',    '41o',    1,      '41q',         1,                   1,                    '1c', '41u',   1,           '41w','41x', '41y',     '41z',1);
+		insert into kepegawaian.istri
+			("ID", "PNS", "NAMA", "TANGGAL_MENIKAH", "AKTE_NIKAH", "TANGGAL_MENINGGAL", "AKTE_MENINGGAL", "TANGGAL_CERAI", "AKTE_CERAI", "KARSUS", "STATUS", "HUBUNGAN", "PNS_ID", "NIP") values
+			(31,   1,     '31a',  '2000-01-01',      '31c',        '2000-01-01',        '31e',            '2000-01-02',    '31f',        '31g',    1,        1,          '31i',    '1c'),
+			(32,   2,     '32a',  '2001-01-01',      '32c',        '2001-01-01',        '32e',            '2001-01-02',    '32f',        '32g',    2,        2,          '32i',    '1c'),
+			(33,   3,     '33a',  '2002-01-01',      '33c',        '2002-01-01',        '33e',            '2002-01-02',    '33f',        '33g',    3,        1,          '33i',    '2c');
+	`
+
+	tests := []struct {
+		name             string
+		dbData           string
+		requestQuery     url.Values
+		requestHeader    http.Header
+		wantResponseCode int
+		wantResponseBody string
+	}{
+		{
+			name:             "ok",
+			dbData:           dbData,
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(41)}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{
+						"id":            31,
+						"nama":          "31a",
+						"peran":         "ISTRI"
+					},
+					{
+						"id":            32,
+						"nama":          "32a",
+						"peran":         "SUAMI"
+					}
+				]
+			}`,
+		},
+		{
+			name:             "ok: tidak ada data milik user",
+			dbData:           dbData,
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(200)}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{"data": []}`,
+		},
+		{
+			name:             "error: auth header tidak valid",
+			dbData:           dbData,
+			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			db := dbtest.New(t, "kepegawaian", dbmigrations.FS)
+			_, err := db.Exec(tt.dbData)
+			require.NoError(t, err)
+
+			req := httptest.NewRequest(http.MethodGet, "/keluarga/pasangan", nil)
+			req.URL.RawQuery = tt.requestQuery.Encode()
+			req.Header = tt.requestHeader
+			rec := httptest.NewRecorder()
+
+			e, err := api.NewEchoServer(docs.OpenAPIBytes)
+			require.NoError(t, err)
+			RegisterRoutes(e, db, api.NewAuthMiddleware(apitest.JWTPublicKey))
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
+			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+		})
+	}
+}

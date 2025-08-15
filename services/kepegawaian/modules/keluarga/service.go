@@ -44,3 +44,12 @@ func (s *service) listOrangTua(ctx context.Context, userID int64) ([]keluarga, e
 
 	return data, nil
 }
+
+func (s *service) listPasangan(ctx context.Context, userID int64) ([]keluarga, error) {
+	data, err := s.repo.listPasangan(ctx, userID)
+	if err != nil {
+		return nil, fmt.Errorf("repo list pasangan: %w", err)
+	}
+
+	return data, nil
+}

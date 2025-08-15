@@ -42,3 +42,14 @@ func (h *handler) listOrangTua(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, listResponse{Data: data})
 }
+
+func (h *handler) listPasangan(c echo.Context) error {
+	ctx := c.Request().Context()
+	data, err := h.service.listPasangan(ctx, api.CurrentUser(c).ID)
+	if err != nil {
+		slog.ErrorContext(ctx, "Error getting list pasangan.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	return c.JSON(http.StatusOK, listResponse{Data: data})
+}
