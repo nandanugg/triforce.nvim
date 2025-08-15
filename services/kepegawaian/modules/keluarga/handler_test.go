@@ -129,6 +129,87 @@ func Test_handler_list(t *testing.T) {
 	}
 }
 
+func Test_handler_listAnak(t *testing.T) {
+	dbData := `
+		insert into kepegawaian.users
+			(id, role_id, email, username, password_hash, reset_hash, last_login,  last_ip, created_on,  deleted, reset_by, banned, ban_message, display_name, display_name_changed, timezone, language, active, activate_hash, password_iterations, force_password_reset, nip,  satkers, admin_nomor, imei, token, real_imei, fcm,  banned_asigo) values
+			(41, 41,      '41a', '41b',    '41c',         '41d',      '2001-01-02','41f',   '2001-01-03',1,       1,        1,      '41k',       '41l',        '2001-01-04',         '41n',    '41o',    1,      '41q',         1,                   1,                    '1c', '41u',   1,           '41w','41x', '41y',     '41z',1);
+		insert into kepegawaian.anak
+			("ID", "PASANGAN", "NAMA", "JENIS_KELAMIN", "TANGGAL_LAHIR", "TEMPAT_LAHIR", "STATUS_ANAK", "PNS_ID", "NIP") values
+			(11,   1,          '11a',  '1',             '2000-01-01',    '11b',          '1',           '11c',    '1c'),
+			(12,   2,          '12a',  '2',             '2001-01-01',    '12b',          '2',           '12c',    '1c'),
+			(13,   3,          '13a',  '3',             '2002-01-01',    '13b',          '3',           '13c',    '2c');
+	`
+
+	tests := []struct {
+		name             string
+		dbData           string
+		requestQuery     url.Values
+		requestHeader    http.Header
+		wantResponseCode int
+		wantResponseBody string
+	}{
+		{
+			name:             "ok",
+			dbData:           dbData,
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(41)}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{
+						"id":            11,
+						"nama":          "11a",
+						"peran":         "ANAK",
+						"tanggal_lahir": "2000-01-01"
+					},
+					{
+						"id":            12,
+						"nama":          "12a",
+						"peran":         "ANAK",
+						"tanggal_lahir": "2001-01-01"
+					}
+				]
+			}`,
+		},
+		{
+			name:             "ok: tidak ada data milik user",
+			dbData:           dbData,
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(200)}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{"data": []}`,
+		},
+		{
+			name:             "error: auth header tidak valid",
+			dbData:           dbData,
+			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			db := dbtest.New(t, "kepegawaian", dbmigrations.FS)
+			_, err := db.Exec(tt.dbData)
+			require.NoError(t, err)
+
+			req := httptest.NewRequest(http.MethodGet, "/keluarga/anak", nil)
+			req.URL.RawQuery = tt.requestQuery.Encode()
+			req.Header = tt.requestHeader
+			rec := httptest.NewRecorder()
+
+			e, err := api.NewEchoServer(docs.OpenAPIBytes)
+			require.NoError(t, err)
+			RegisterRoutes(e, db, api.NewAuthMiddleware(apitest.JWTPublicKey))
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
+			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+		})
+	}
+}
+
 func Test_handler_listOrangTua(t *testing.T) {
 	dbData := `
 		insert into kepegawaian.users

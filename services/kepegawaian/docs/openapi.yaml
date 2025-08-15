@@ -162,6 +162,40 @@ paths:
                           type: string
                         tanggal_lahir:
                           type: string
+  /keluarga/anak:
+    get:
+      tags:
+        - Keluarga
+      summary: Lihat daftar anak.
+      description: >-
+        Lihat daftar anak dari user yang login.
+      operationId: listAnak
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: integer
+                        peran:
+                          type: string
+                          enum:
+                            - ANAK
+                        nama:
+                          type: string
+                        tanggal_lahir:
+                          type: string
   /keluarga/orang-tua:
     get:
       tags:

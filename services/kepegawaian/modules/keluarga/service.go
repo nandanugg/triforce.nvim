@@ -36,6 +36,15 @@ func (s *service) list(ctx context.Context, userID int64) ([]keluarga, error) {
 	return data, nil
 }
 
+func (s *service) listAnak(ctx context.Context, userID int64) ([]keluarga, error) {
+	data, err := s.repo.listAnak(ctx, userID)
+	if err != nil {
+		return nil, fmt.Errorf("repo list anak: %w", err)
+	}
+
+	return data, nil
+}
+
 func (s *service) listOrangTua(ctx context.Context, userID int64) ([]keluarga, error) {
 	data, err := s.repo.listOrangTua(ctx, userID)
 	if err != nil {
