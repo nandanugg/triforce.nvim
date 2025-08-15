@@ -31,3 +31,14 @@ func (h *handler) list(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, listResponse{Data: data})
 }
+
+func (h *handler) listOrangTua(c echo.Context) error {
+	ctx := c.Request().Context()
+	data, err := h.service.listOrangTua(ctx, api.CurrentUser(c).ID)
+	if err != nil {
+		slog.ErrorContext(ctx, "Error getting list orang tua.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	return c.JSON(http.StatusOK, listResponse{Data: data})
+}

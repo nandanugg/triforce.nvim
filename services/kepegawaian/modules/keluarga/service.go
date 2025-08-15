@@ -35,3 +35,12 @@ func (s *service) list(ctx context.Context, userID int64) ([]keluarga, error) {
 
 	return data, nil
 }
+
+func (s *service) listOrangTua(ctx context.Context, userID int64) ([]keluarga, error) {
+	data, err := s.repo.listOrangTua(ctx, userID)
+	if err != nil {
+		return nil, fmt.Errorf("repo list orang tua: %w", err)
+	}
+
+	return data, nil
+}
