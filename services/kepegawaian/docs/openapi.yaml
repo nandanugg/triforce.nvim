@@ -273,7 +273,7 @@ paths:
       summary: Lihat riwayat kepangkatan.
       description: >-
         Lihat riwayat kepangkatan dari user yang login, urut berdasarkan TMT.
-      operationId: listPelatihanFungsional
+      operationId: listKepangkatan
       parameters:
         - $ref: "#/components/parameters/authRequired"
         - $ref: "#/components/parameters/limit"
