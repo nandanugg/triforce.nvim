@@ -7,6 +7,7 @@ servers:
   - url: http://localhost:8000
 tags:
   - name: Data Pribadi
+  - name: Keluarga
   - name: Kepangkatan
   - name: Pelatihan Fungsional
   - name: Pelatihan Struktural
@@ -123,6 +124,44 @@ paths:
                         type: string
                       gelar_belakang:
                         type: string
+  /keluarga:
+    get:
+      tags:
+        - Keluarga
+      summary: Lihat daftar keluarga.
+      description: >-
+        Lihat daftar keluarga dari user yang login.
+      operationId: listKeluarga
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: integer
+                        peran:
+                          type: string
+                          enum:
+                            - AYAH
+                            - IBU
+                            - ISTRI
+                            - SUAMI
+                            - ANAK
+                        nama:
+                          type: string
+                        tanggal_lahir:
+                          type: string
   /kepangkatan:
     get:
       tags:
