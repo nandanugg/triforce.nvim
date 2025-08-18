@@ -17,6 +17,8 @@ import (
 )
 
 func Test_handler_list(t *testing.T) {
+	t.Parallel()
+
 	dbData := `
 		insert into kepegawaian.users
 			(id, role_id, email, username, password_hash, reset_hash, last_login,  last_ip, created_on,  deleted, reset_by, banned, ban_message, display_name, display_name_changed, timezone, language, active, activate_hash, password_iterations, force_password_reset, nip,  satkers, admin_nomor, imei, token, real_imei, fcm,  banned_asigo) values
@@ -108,6 +110,8 @@ func Test_handler_list(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			db := dbtest.New(t, "kepegawaian", dbmigrations.FS)
 			_, err := db.Exec(tt.dbData)
 			require.NoError(t, err)
@@ -130,6 +134,8 @@ func Test_handler_list(t *testing.T) {
 }
 
 func Test_handler_listAnak(t *testing.T) {
+	t.Parallel()
+
 	dbData := `
 		insert into kepegawaian.users
 			(id, role_id, email, username, password_hash, reset_hash, last_login,  last_ip, created_on,  deleted, reset_by, banned, ban_message, display_name, display_name_changed, timezone, language, active, activate_hash, password_iterations, force_password_reset, nip,  satkers, admin_nomor, imei, token, real_imei, fcm,  banned_asigo) values
@@ -189,6 +195,8 @@ func Test_handler_listAnak(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			db := dbtest.New(t, "kepegawaian", dbmigrations.FS)
 			_, err := db.Exec(tt.dbData)
 			require.NoError(t, err)
@@ -211,6 +219,8 @@ func Test_handler_listAnak(t *testing.T) {
 }
 
 func Test_handler_listOrangTua(t *testing.T) {
+	t.Parallel()
+
 	dbData := `
 		insert into kepegawaian.users
 			(id, role_id, email, username, password_hash, reset_hash, last_login,  last_ip, created_on,  deleted, reset_by, banned, ban_message, display_name, display_name_changed, timezone, language, active, activate_hash, password_iterations, force_password_reset, nip,  satkers, admin_nomor, imei, token, real_imei, fcm,  banned_asigo) values
@@ -270,6 +280,8 @@ func Test_handler_listOrangTua(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			db := dbtest.New(t, "kepegawaian", dbmigrations.FS)
 			_, err := db.Exec(tt.dbData)
 			require.NoError(t, err)
@@ -292,6 +304,8 @@ func Test_handler_listOrangTua(t *testing.T) {
 }
 
 func Test_handler_listPasangan(t *testing.T) {
+	t.Parallel()
+
 	dbData := `
 		insert into kepegawaian.users
 			(id, role_id, email, username, password_hash, reset_hash, last_login,  last_ip, created_on,  deleted, reset_by, banned, ban_message, display_name, display_name_changed, timezone, language, active, activate_hash, password_iterations, force_password_reset, nip,  satkers, admin_nomor, imei, token, real_imei, fcm,  banned_asigo) values
@@ -349,6 +363,8 @@ func Test_handler_listPasangan(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			db := dbtest.New(t, "kepegawaian", dbmigrations.FS)
 			_, err := db.Exec(tt.dbData)
 			require.NoError(t, err)
