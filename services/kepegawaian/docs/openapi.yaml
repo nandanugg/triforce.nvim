@@ -18,6 +18,7 @@ tags:
   - name: Pelatihan Teknis
   - name: Pendidikan Formal
   - name: Penghargaan
+  - name: Sertifikasi
 paths:
   /data-pribadi:
     get:
@@ -693,6 +694,43 @@ paths:
                         deskripsi:
                           type: string
                         tanggal:
+                          type: string
+                          format: date
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /sertifikasi:
+    get:
+      tags:
+        - Sertifikasi
+      summary: Lihat riwayat sertifikasi.
+      description: >-
+        Lihat riwayat sertifikasi dari user yang login, urut berdasarkan tahun.
+      operationId: listSertifikasi
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: integer
+                        nama_sertifikasi:
+                          type: string
+                        tahun:
+                          type: integer
+                        tanggal_upload:
                           type: string
                           format: date
                   meta:

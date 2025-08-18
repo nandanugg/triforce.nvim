@@ -196,6 +196,7 @@
 | [kepegawaian.vw_unor_satker_w_eselonid](kepegawaian.vw_unor_satker_w_eselonid.md) | 9 |  | VIEW |
 | [kepegawaian.vw_unor_satker_w_id_eselon1](kepegawaian.vw_unor_satker_w_id_eselon1.md) | 8 |  | VIEW |
 | [kepegawaian.wage](kepegawaian.wage.md) | 5 |  | BASE TABLE |
+| [kepegawaian.rwt_sertifikasi](kepegawaian.rwt_sertifikasi.md) | 7 |  | BASE TABLE |
 
 ## Stored procedures and functions
 
@@ -3519,6 +3520,15 @@ erDiagram
   integer BASIC
   integer TSP
   integer ETC
+}
+"kepegawaian.rwt_sertifikasi" {
+  bigint id
+  varchar nip
+  bigint tahun
+  varchar nama_sertifikasi
+  text base64
+  timestamp_without_time_zone createddate
+  text deskripsi
 }
 ```
 

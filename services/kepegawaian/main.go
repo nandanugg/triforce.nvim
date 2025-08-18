@@ -21,6 +21,7 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/pelatihanteknis"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/pendidikanformal"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/penghargaan"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/sertifikasi"
 )
 
 func main() {
@@ -51,6 +52,7 @@ func main() {
 	pelatihanteknis.RegisterRoutes(e, db, mwAuth)
 	pendidikanformal.RegisterRoutes(e, db, mwAuth)
 	penghargaan.RegisterRoutes(e, db, mwAuth)
+	sertifikasi.RegisterRoutes(e, db, mwAuth)
 
 	err = api.StartEchoServer(e, c.Server.Port)
 	exitIfError("Error starting server.", err)
