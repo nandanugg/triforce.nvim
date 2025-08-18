@@ -11,6 +11,7 @@ tags:
   - name: Jabatan
   - name: Keluarga
   - name: Kepangkatan
+  - name: Pekerjaan
   - name: Pelatihan Fungsional
   - name: Pelatihan Struktural
   - name: Pelatihan Teknis
@@ -388,6 +389,55 @@ paths:
                         mk_golongan_tahun:
                           type: string
                         mk_golongan_bulan:
+                          type: string
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /pekerjaan:
+    get:
+      tags:
+        - Pekerjaan
+      summary: Lihat riwayat pekerjaan.
+      description: >-
+        Lihat riwayat pekerjaan dari user yang login, urut berdasarkan tanggal
+        mulai.
+      operationId: listPekerjaan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: integer
+                        pns_nip:
+                          type: string
+                        jenis_perusahaan:
+                          type: string
+                        nama_perusahaan:
+                          type: string
+                        sebagai:
+                          type: string
+                        dari_tanggal:
+                          type: string
+                          format: date
+                        sampai_tanggal:
+                          type: string
+                          format: date
+                        pns_id:
+                          type: string
+                        keterangan_berkas:
                           type: string
                   meta:
                     $ref: "#/components/schemas/metaPagination"
