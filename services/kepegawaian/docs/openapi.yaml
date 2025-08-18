@@ -17,6 +17,7 @@ tags:
   - name: Pelatihan Struktural
   - name: Pelatihan Teknis
   - name: Pendidikan Formal
+  - name: Penghargaan
 paths:
   /data-pribadi:
     get:
@@ -654,6 +655,46 @@ paths:
                           type: string
                         nomor_ijazah:
                           type: string
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /penghargaan:
+    get:
+      tags:
+        - Penghargaan
+      summary: Lihat riwayat penghargaan.
+      description: >-
+        Lihat riwayat penghargaan dari user yang login, urut berdasarkan
+        tanggal.
+      operationId: listPenghargaan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: integer
+                        jenis_penghargaan:
+                          type: string
+                        nama_penghargaan:
+                          type: string
+                        deskripsi:
+                          type: string
+                        tanggal:
+                          type: string
+                          format: date
                   meta:
                     $ref: "#/components/schemas/metaPagination"
 components:
