@@ -10,6 +10,7 @@ tags:
   - name: Hukuman Disiplin
   - name: Jabatan
   - name: Keluarga
+  - name: Kenaikan Gaji Berkala
   - name: Kepangkatan
   - name: Pekerjaan
   - name: Pelatihan Fungsional
@@ -351,6 +352,49 @@ paths:
                           type: string
                         tanggal_lahir:
                           type: string
+  /kenaikan-gaji-berkala:
+    get:
+      tags:
+        - Kenaikan Gaji Berkala
+      summary: Lihat riwayat kenaikan gaji berkala.
+      description: >-
+        Lihat riwayat kenaikan gaji berkala dari user yang login, urut
+        berdasarkan TMT.
+      operationId: listKenaikanGajiBerkala
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: integer
+                        tmt_kgb:
+                          type: string
+                          format: date
+                        no_sk:
+                          type: string
+                        tgl_sk:
+                          type: string
+                          format: date
+                        gol_ruang:
+                          type: string
+                        gaji_pokok:
+                          type: string
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
   /kepangkatan:
     get:
       tags:
