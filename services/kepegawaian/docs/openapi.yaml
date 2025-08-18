@@ -7,6 +7,7 @@ servers:
   - url: http://localhost:8000
 tags:
   - name: Data Pribadi
+  - name: Jabatan
   - name: Keluarga
   - name: Kepangkatan
   - name: Pelatihan Fungsional
@@ -124,6 +125,43 @@ paths:
                         type: string
                       gelar_belakang:
                         type: string
+  /jabatan:
+    get:
+      tags:
+        - Jabatan
+      summary: Lihat riwayat jabatan.
+      description: >-
+        Lihat riwayat jabatan dari user yang login, urut berdasarkan TMT.
+      operationId: listJabatan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: string
+                        jabatan:
+                          type: string
+                        unit_kerja:
+                          type: string
+                        tmt:
+                          type: string
+                          format: date
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
   /keluarga:
     get:
       tags:

@@ -11,6 +11,7 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/config"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/docs"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/datapribadi"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/jabatan"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/keluarga"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/kepangkatan"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/pelatihanfungsional"
@@ -37,6 +38,7 @@ func main() {
 	mwAuth := api.NewAuthMiddleware(jwtPublicKey)
 
 	datapribadi.RegisterRoutes(e, db, mwAuth)
+	jabatan.RegisterRoutes(e, db, mwAuth)
 	keluarga.RegisterRoutes(e, db, mwAuth)
 	kepangkatan.RegisterRoutes(e, db, mwAuth)
 	pelatihanfungsional.RegisterRoutes(e, db, mwAuth)
