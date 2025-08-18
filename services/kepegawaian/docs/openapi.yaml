@@ -7,6 +7,7 @@ servers:
   - url: http://localhost:8000
 tags:
   - name: Data Pribadi
+  - name: Hukuman Disiplin
   - name: Jabatan
   - name: Keluarga
   - name: Kepangkatan
@@ -125,6 +126,51 @@ paths:
                         type: string
                       gelar_belakang:
                         type: string
+  /hukuman-disiplin:
+    get:
+      tags:
+        - Hukuman Disiplin
+      summary: Lihat riwayat hukuman disiplin.
+      description: >-
+        Lihat riwayat hukuman disiplin dari user yang login, urut berdasarkan
+        tanggal mulai.
+      operationId: listHukumanDisiplin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: integer
+                        jenis_hukuman:
+                          type: string
+                        nomor_sk:
+                          type: string
+                        tanggal_sk:
+                          type: string
+                          format: date
+                        tanggal_mulai:
+                          type: string
+                          format: date
+                        masa_tahun:
+                          type: integer
+                        masa_bulan:
+                          type: integer
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
   /jabatan:
     get:
       tags:
