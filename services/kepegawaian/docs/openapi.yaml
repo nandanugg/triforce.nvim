@@ -19,6 +19,7 @@ tags:
   - name: Pendidikan Formal
   - name: Penghargaan
   - name: Sertifikasi
+  - name: Penugasan
 paths:
   /data-pribadi:
     get:
@@ -485,6 +486,47 @@ paths:
                           type: string
                         keterangan_berkas:
                           type: string
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /penugasan:
+    get:
+      tags:
+        - Penugasan
+      summary: Lihat riwayat penugasan.
+      description: >-
+        Lihat riwayat penugasan dari user yang login, urut berdasarkan tanggal
+        mulai (terbaru di atas).
+      operationId: listPenugasan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: integer
+                        tipe_jabatan:
+                          type: string
+                        deskripsi_jabatan:
+                          type: string
+                        tanggal_mulai:
+                          type: string
+                          format: date
+                        tanggal_selesai:
+                          type: string
+                          format: date
                   meta:
                     $ref: "#/components/schemas/metaPagination"
   /pelatihan-fungsional:

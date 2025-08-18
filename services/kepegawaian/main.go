@@ -14,6 +14,7 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/hukumandisiplin"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/jabatan"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/keluarga"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/kenaikangajiberkala"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/kepangkatan"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/pekerjaan"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/pelatihanfungsional"
@@ -21,6 +22,7 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/pelatihanteknis"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/pendidikanformal"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/penghargaan"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/penugasan"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/sertifikasi"
 )
 
@@ -53,6 +55,8 @@ func main() {
 	pendidikanformal.RegisterRoutes(e, db, mwAuth)
 	penghargaan.RegisterRoutes(e, db, mwAuth)
 	sertifikasi.RegisterRoutes(e, db, mwAuth)
+	penugasan.RegisterRoutes(e, db, mwAuth)
+	kenaikangajiberkala.RegisterRoutes(e, db, mwAuth)
 
 	err = api.StartEchoServer(e, c.Server.Port)
 	exitIfError("Error starting server.", err)
