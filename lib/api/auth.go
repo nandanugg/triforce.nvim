@@ -11,8 +11,11 @@ import (
 
 const contextKeyUser = "http-auth-user"
 
+const RoleAdmin = "admin"
+
 type User struct {
-	ID int64
+	ID   int64
+	Role string
 }
 
 func CurrentUser(c echo.Context) *User {
@@ -48,7 +51,11 @@ func NewAuthMiddleware(jwtPublicKey *rsa.PublicKey) echo.MiddlewareFunc {
 				return echo.NewHTTPError(http.StatusUnauthorized, msg)
 			}
 
-			c.Set(contextKeyUser, &User{ID: int64(claims["user_id"].(float64))})
+			user := User{ID: int64(claims["user_id"].(float64))}
+			if role, ok := claims["role"]; ok {
+				user.Role = role.(string)
+			}
+			c.Set(contextKeyUser, &user)
 
 			return next(c)
 		}

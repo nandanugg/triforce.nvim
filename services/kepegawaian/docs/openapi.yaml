@@ -12,6 +12,7 @@ tags:
   - name: Keluarga
   - name: Kenaikan Gaji Berkala
   - name: Kepangkatan
+  - name: Pegawai
   - name: Pekerjaan
   - name: Pelatihan Fungsional
   - name: Pelatihan Struktural
@@ -436,6 +437,74 @@ paths:
                         mk_golongan_tahun:
                           type: string
                         mk_golongan_bulan:
+                          type: string
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /pegawai:
+    get:
+      tags:
+        - Pegawai
+      summary: Lihat daftar pegawai aktif.
+      description: Lihat daftar pegawai aktif.
+      operationId: listPegawai
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+        - name: cari
+          in: query
+          schema:
+            type: string
+        - name: unit_id
+          in: query
+          schema:
+            type: string
+        - name: golongan_id
+          in: query
+          schema:
+            type: integer
+        - name: jabatan_id
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum:
+              - PNS
+              - CPNS
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: integer
+                        nip:
+                          type: string
+                        nama_pegawai:
+                          type: string
+                        gelar_depan:
+                          type: string
+                        gelar_belakang:
+                          type: string
+                        golongan:
+                          type: string
+                        jabatan:
+                          type: string
+                        unit_kerja:
+                          type: string
+                        status_pegawai:
                           type: string
                   meta:
                     $ref: "#/components/schemas/metaPagination"
