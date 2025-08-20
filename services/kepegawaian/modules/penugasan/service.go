@@ -13,13 +13,13 @@ func newService(r *repository) *service {
 	return &service{repo: r}
 }
 
-func (s *service) list(ctx context.Context, userID int64, limit, offset uint) ([]penugasan, uint, error) {
-	data, err := s.repo.list(ctx, userID, limit, offset)
+func (s *service) list(ctx context.Context, limit, offset uint) ([]penugasan, uint, error) {
+	data, err := s.repo.list(ctx, limit, offset)
 	if err != nil {
 		return nil, 0, fmt.Errorf("repo list: %w", err)
 	}
 
-	count, err := s.repo.count(ctx, userID)
+	count, err := s.repo.count(ctx)
 	if err != nil {
 		return nil, 0, fmt.Errorf("repo count: %w", err)
 	}

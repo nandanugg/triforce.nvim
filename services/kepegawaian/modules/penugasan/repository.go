@@ -14,7 +14,7 @@ func newRepository(db *sql.DB) *repository {
 	return &repository{db: db}
 }
 
-func (r *repository) list(ctx context.Context, userID int64, limit, offset uint) ([]penugasan, error) {
+func (r *repository) list(ctx context.Context, limit, offset uint) ([]penugasan, error) {
 	rows, err := r.db.QueryContext(ctx, `
 		select
 			rp.id,
@@ -56,7 +56,7 @@ func (r *repository) list(ctx context.Context, userID int64, limit, offset uint)
 	return result, nil
 }
 
-func (r *repository) count(ctx context.Context, userID int64) (uint, error) {
+func (r *repository) count(ctx context.Context) (uint, error) {
 	var result uint
 	err := r.db.QueryRowContext(ctx, `
 		select count(1)
