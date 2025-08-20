@@ -47,6 +47,8 @@ paths:
                         type: integer
                       nip:
                         type: string
+                      nip_baru:
+                        type: string
                       nik:
                         type: string
                       tempat_lahir:
@@ -85,6 +87,10 @@ paths:
                       tmt_golongan:
                         type: string
                         format: date
+                      jabatan:
+                        type: string
+                      unit_kerja:
+                        type: string
                       gaji_pokok:
                         type: string
                       tmt_asn:

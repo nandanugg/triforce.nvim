@@ -5,6 +5,7 @@ import "gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
 type dataPribadi struct {
 	ID                       int     `json:"id"`
 	NIP                      string  `json:"nip"`
+	NIPBaru                  string  `json:"nip_baru"`
 	NIK                      string  `json:"nik"`
 	TempatLahir              string  `json:"tempat_lahir"`
 	TanggalLahir             db.Date `json:"tanggal_lahir"`
@@ -27,6 +28,8 @@ type dataPribadi struct {
 	GolonganRuangAwal        string  `json:"golongan_ruang_awal"`
 	GolonganRuangTerakhir    string  `json:"golongan_ruang_terakhir"`
 	TMTGolongan              db.Date `json:"tmt_golongan"`
+	Jabatan                  string  `json:"jabatan"`
+	UnitKerja                string  `json:"unit_kerja"`
 	GajiPokok                string  `json:"gaji_pokok"`
 	TMTASN                   db.Date `json:"tmt_asn"`
 	SKASN                    string  `json:"sk_asn"`

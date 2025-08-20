@@ -38,6 +38,10 @@ func Test_handler_getDataPribadi(t *testing.T) {
 		insert into kepegawaian.jenis_kawin
 		("ID", "NAMA") values
 		('5',  '5a');
+
+		insert into kepegawaian.unitkerja
+		("ID",  "NO",  "KODE_INTERNAL", "NAMA_UNOR", "ESELON_ID", "CEPAT_KODE", "NAMA_JABATAN", "NAMA_PEJABAT", "DIATASAN_ID", "INSTANSI_ID", "PEMIMPIN_NON_PNS_ID", "PEMIMPIN_PNS_ID", "JENIS_UNOR_ID", "UNOR_INDUK", "JUMLAH_IDEAL_STAFF", "ORDER", "deleted", "IS_SATKER", "ESELON_1", "ESELON_2", "ESELON_3", "ESELON_4", "EXPIRED_DATE", "KETERANGAN", "JENIS_SATKER", "ABBREVIATION", "UNOR_INDUK_PENYETARAAN", "JABATAN_ID", "WAKTU", "PERATURAN") values
+		('1al', '61a', '61b',           '61c',       '61d',       '61e',        '61f',          '61g',          '61h',         '61i',         '61j',                 '61k',             '61l',           '61m',        '61n',                61,      61,        61,          '61o',      '61p',      '61q',      '61r',      '2000-01-01',   '61s',        '61t',          '61u',          '61v',                    '61w',        '61x',   '61y');
 	`
 
 	tests := []struct {
@@ -65,6 +69,8 @@ func Test_handler_getDataPribadi(t *testing.T) {
 						"gelar_depan": "1e",
 						"golongan_ruang_awal": "TODO: GolonganRuangAwal",
 						"golongan_ruang_terakhir": "TODO: GolonganRuangTerakhir",
+						"jabatan": "1bp",
+						"unit_kerja": "61c",
 						"id": 11,
 						"jenis_kelamin": "1h",
 						"jenis_pegawai": "31a",
@@ -73,7 +79,8 @@ func Test_handler_getDataPribadi(t *testing.T) {
 						"masa_kerja": "1cs",
 						"nama": "1d",
 						"nik": "1k",
-						"nip": "1c",
+						"nip": "1b",
+						"nip_baru": "1c",
 						"nomor_bpjs": "1q",
 						"nomor_catatan_polisi": "1bb",
 						"nomor_darurat": "1l",

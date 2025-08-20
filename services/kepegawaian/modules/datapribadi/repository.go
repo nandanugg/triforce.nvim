@@ -18,6 +18,7 @@ func (r *repository) getDataPribadi(ctx context.Context, userID int64) (*dataPri
 	q := `
 		select
 			p."ID",
+			p."NIP_LAMA",
 			p."NIP_BARU",
 			p."NIK",
 			p."TEMPAT_LAHIR",
@@ -37,6 +38,8 @@ func (r *repository) getDataPribadi(ctx context.Context, userID int64) (*dataPri
 			'TODO: GolonganRuangAwal',
 			'TODO: GolonganRuangTerakhir',
 			p."TMT_GOLONGAN",
+			p."JABATAN_NAMA",
+			uk."NAMA_UNOR",
 			'TODO: GajiPokok',
 			'1990-01-01'::date,
 			'TODO: SKASN',
@@ -63,6 +66,7 @@ func (r *repository) getDataPribadi(ctx context.Context, userID int64) (*dataPri
 		join kepegawaian.users u on p."NIP_BARU" = u.nip
 		join kepegawaian.jenis_pegawai jp on p."JENIS_PEGAWAI_ID" = jp."ID"
 		join kepegawaian.jenis_kawin jk on p."JENIS_KAWIN_ID" = jk."ID"
+		join kepegawaian.unitkerja uk on p."UNOR_ID" = uk."ID"
 		where u.id = $1
 	`
 
@@ -70,6 +74,7 @@ func (r *repository) getDataPribadi(ctx context.Context, userID int64) (*dataPri
 	err := r.db.QueryRowContext(ctx, q, userID).Scan(
 		&data.ID,
 		&data.NIP,
+		&data.NIPBaru,
 		&data.NIK,
 		&data.TempatLahir,
 		&data.TanggalLahir,
@@ -88,6 +93,8 @@ func (r *repository) getDataPribadi(ctx context.Context, userID int64) (*dataPri
 		&data.GolonganRuangAwal,
 		&data.GolonganRuangTerakhir,
 		&data.TMTGolongan,
+		&data.Jabatan,
+		&data.UnitKerja,
 		&data.GajiPokok,
 		&data.TMTASN,
 		&data.SKASN,
@@ -122,6 +129,7 @@ func (r *repository) getDataPribadi(ctx context.Context, userID int64) (*dataPri
 		&data.NomorSuratDokter,
 		&data.Pendidikan,
 		&data.TempatLahir,
+		&data.Jabatan,
 	} {
 		*toTrim = strings.TrimSpace(*toTrim)
 	}
