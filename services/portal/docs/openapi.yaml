@@ -1,0 +1,94 @@
+openapi: 3.1.1
+info:
+  title: API Portal
+  version: 0.1.0
+  description: Dokumentasi API untuk service portal.
+servers:
+  - url: http://localhost:8000
+tags:
+  - name: Pemberitahuan
+paths:
+  /pemberitahuan:
+    get:
+      tags:
+        - Pemberitahuan
+      summary: Lihat daftar pemberitahuan.
+      description: Lihat daftar pemberitahuan.
+      operationId: listPemberitahuan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: integer
+                        judul_berita:
+                          type: string
+                        deskripsi_berita:
+                          type: string
+                        status:
+                          type: string
+                          enum:
+                            - Menunggu Diberitakan
+                            - Aktif
+                            - Sudah Tidak Aktif
+                        diperbarui_oleh:
+                          type: string
+                        terakhir_diperbarui:
+                          type: string
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+components:
+  parameters:
+    authRequired:
+      name: Authorization
+      in: header
+      required: true
+      schema:
+        type: string
+    limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        default: 10
+        minimum: 1
+        maximum: 50
+    offset:
+      name: offset
+      in: query
+      schema:
+        type: integer
+        default: 0
+        minimum: 0
+  schemas:
+    metaPagination:
+      type: object
+      additionalProperties: false
+      properties:
+        limit:
+          type: integer
+          example: 10
+          minimum: 1
+          maximum: 50
+        offset:
+          type: integer
+          example: 0
+          minimum: 0
+        total:
+          type: integer
+          example: 100
+          minimum: 0
