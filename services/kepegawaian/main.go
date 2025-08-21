@@ -16,6 +16,7 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/keluarga"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/kenaikangajiberkala"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/kepangkatan"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/pegawai"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/pekerjaan"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/pelatihanfungsional"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/pelatihanstruktural"
@@ -47,16 +48,17 @@ func main() {
 	hukumandisiplin.RegisterRoutes(e, db, mwAuth)
 	jabatan.RegisterRoutes(e, db, mwAuth)
 	keluarga.RegisterRoutes(e, db, mwAuth)
+	kenaikangajiberkala.RegisterRoutes(e, db, mwAuth)
 	kepangkatan.RegisterRoutes(e, db, mwAuth)
+	pegawai.RegisterRoutes(e, db, mwAuth)
 	pekerjaan.RegisterRoutes(e, db, mwAuth)
 	pelatihanfungsional.RegisterRoutes(e, db, mwAuth)
 	pelatihanstruktural.RegisterRoutes(e, db, mwAuth)
 	pelatihanteknis.RegisterRoutes(e, db, mwAuth)
 	pendidikanformal.RegisterRoutes(e, db, mwAuth)
 	penghargaan.RegisterRoutes(e, db, mwAuth)
-	sertifikasi.RegisterRoutes(e, db, mwAuth)
 	penugasan.RegisterRoutes(e, db, mwAuth)
-	kenaikangajiberkala.RegisterRoutes(e, db, mwAuth)
+	sertifikasi.RegisterRoutes(e, db, mwAuth)
 
 	err = api.StartEchoServer(e, c.Server.Port)
 	exitIfError("Error starting server.", err)
