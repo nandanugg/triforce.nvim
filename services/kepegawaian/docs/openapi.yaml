@@ -879,6 +879,33 @@ paths:
                           format: date
                   meta:
                     $ref: "#/components/schemas/metaPagination"
+  /status-pernikahan:
+    get:
+      tags:
+        - Data Pribadi
+      summary: Daftar status pernikahan.
+      description: Daftar status pernikahan.
+      operationId: listStatusPernikahan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: string
+                        nama:
+                          type: string
 components:
   parameters:
     authRequired:

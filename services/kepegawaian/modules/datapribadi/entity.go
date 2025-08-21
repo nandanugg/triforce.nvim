@@ -48,3 +48,8 @@ type dataPribadi struct {
 	TanggalNPWP              db.Date `json:"tanggal_npwp"`
 	NomorDarurat             string  `json:"nomor_darurat"`
 }
+
+type statusPernikahan struct {
+	ID   string `json:"id"`
+	Nama string `json:"nama"`
+}

@@ -3,6 +3,7 @@ package datapribadi
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"strings"
 )
 
@@ -135,4 +136,29 @@ func (r *repository) getDataPribadi(ctx context.Context, userID int64) (*dataPri
 	}
 
 	return &data, err
+}
+
+func (r *repository) listStatusPernikahan(ctx context.Context) ([]statusPernikahan, error) {
+	rows, err := r.db.QueryContext(ctx, `select "ID", "NAMA" from kepegawaian.jenis_kawin order by 2 asc`)
+	if err != nil {
+		return nil, fmt.Errorf("sql select: %w", err)
+	}
+	defer rows.Close()
+
+	result := []statusPernikahan{}
+	for rows.Next() {
+		var row statusPernikahan
+		err := rows.Scan(&row.ID, &row.Nama)
+		if err != nil {
+			return nil, fmt.Errorf("row scan: %w", err)
+		}
+
+		result = append(result, row)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows scan: %w", err)
+	}
+
+	return result, nil
 }
