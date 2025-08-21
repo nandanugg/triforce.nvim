@@ -879,6 +879,33 @@ paths:
                           format: date
                   meta:
                     $ref: "#/components/schemas/metaPagination"
+  /status-pegawai:
+    get:
+      tags:
+        - Pegawai
+      summary: Daftar status pegawai.
+      description: Daftar status pegawai.
+      operationId: listStatusPegawai
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: string
+                        nama:
+                          type: string
   /status-pernikahan:
     get:
       tags:

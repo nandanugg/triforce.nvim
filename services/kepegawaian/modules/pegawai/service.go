@@ -34,3 +34,12 @@ func (s *service) list(ctx context.Context, limit, offset uint64, opts listOptio
 
 	return data, count, nil
 }
+
+func (s *service) listStatusPegawai(ctx context.Context) ([]statusPegawai, error) {
+	data, err := s.repo.listStatusPegawai(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("repo list: %w", err)
+	}
+
+	return data, nil
+}
