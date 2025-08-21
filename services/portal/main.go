@@ -10,6 +10,7 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/config"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/docs"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/modules/dokumenpendukung"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/modules/pemberitahuan"
 )
 
@@ -30,6 +31,7 @@ func main() {
 
 	mwAuth := api.NewAuthMiddleware(jwtPublicKey)
 
+	dokumenpendukung.RegisterRoutes(e, db, mwAuth)
 	pemberitahuan.RegisterRoutes(e, db, mwAuth)
 
 	err = api.StartEchoServer(e, c.Server.Port)

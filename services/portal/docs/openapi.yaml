@@ -6,8 +6,48 @@ info:
 servers:
   - url: http://localhost:8000
 tags:
+  - name: Dokumen Pendukung
   - name: Pemberitahuan
 paths:
+  /dokumen-pendukung:
+    get:
+      tags:
+        - Dokumen Pendukung
+      summary: Lihat daftar dokumen pendukung.
+      description: Lihat daftar dokumen pendukung.
+      operationId: listDokumenPendukung
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: integer
+                        nama_tombol:
+                          type: string
+                        nama_halaman:
+                          type: string
+                        diperbarui_oleh:
+                          type: string
+                        terakhir_diperbarui:
+                          type: string
+                          format: date
+                        status:
+                          type: string
+                          enum:
+                            - Sudah Upload
+                            - Belum Upload
   /pemberitahuan:
     get:
       tags:

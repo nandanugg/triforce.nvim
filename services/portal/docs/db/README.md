@@ -6,6 +6,7 @@
 | ---- | ------- | ------- | ---- |
 | [portal.schema_migrations](portal.schema_migrations.md) | 2 |  | BASE TABLE |
 | [portal.pemberitahuan](portal.pemberitahuan.md) | 6 |  | BASE TABLE |
+| [portal.dokumen_pendukung](portal.dokumen_pendukung.md) | 6 |  | BASE TABLE |
 
 ## Relations
 
@@ -22,6 +23,14 @@ erDiagram
   text judul_berita
   text deskripsi_berita
   text status
+  text updated_by
+  date updated_at
+}
+"portal.dokumen_pendukung" {
+  bigint id
+  text nama_tombol
+  text nama_halaman
+  bytea dokumen
   text updated_by
   date updated_at
 }
