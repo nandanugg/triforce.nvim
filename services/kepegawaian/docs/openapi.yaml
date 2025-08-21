@@ -220,6 +220,33 @@ paths:
                           format: date
                   meta:
                     $ref: "#/components/schemas/metaPagination"
+  /jenis-jabatan:
+    get:
+      tags:
+        - Jabatan
+      summary: Daftar jenis jabatan.
+      description: Daftar jenis jabatan.
+      operationId: listJenisJabatan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: string
+                        nama:
+                          type: string
   /keluarga:
     get:
       tags:

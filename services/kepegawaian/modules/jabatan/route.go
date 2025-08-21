@@ -13,4 +13,5 @@ func RegisterRoutes(e *echo.Echo, db *sql.DB, mwAuth echo.MiddlewareFunc) {
 	h := newHandler(s)
 
 	e.Add(http.MethodGet, "/jabatan", h.list, mwAuth)
+	e.Add(http.MethodGet, "/jenis-jabatan", h.listJenis, mwAuth)
 }

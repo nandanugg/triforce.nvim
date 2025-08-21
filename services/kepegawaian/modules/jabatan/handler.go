@@ -45,3 +45,14 @@ func (h *handler) list(c echo.Context) error {
 		Meta: api.MetaPagination{Limit: req.Limit, Offset: req.Offset, Total: total},
 	})
 }
+
+func (h *handler) listJenis(c echo.Context) error {
+	ctx := c.Request().Context()
+	data, err := h.service.listJenis(ctx)
+	if err != nil {
+		slog.ErrorContext(ctx, "Error getting list jabatan.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	return c.JSON(http.StatusOK, map[string]any{"data": data})
+}

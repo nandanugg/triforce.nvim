@@ -26,3 +26,12 @@ func (s *service) list(ctx context.Context, userID int64, limit, offset uint) ([
 
 	return data, count, nil
 }
+
+func (s *service) listJenis(ctx context.Context) ([]jenisJabatan, error) {
+	data, err := s.repo.listJenis(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("repo list: %w", err)
+	}
+
+	return data, nil
+}
