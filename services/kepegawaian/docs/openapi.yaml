@@ -6,6 +6,7 @@ info:
 servers:
   - url: http://localhost:8000
 tags:
+  - name: Asesmen Nine Box
   - name: Data Pribadi
   - name: Hukuman Disiplin
   - name: Jabatan
@@ -23,6 +24,40 @@ tags:
   - name: Sertifikasi
   - name: Penugasan
 paths:
+  /v1/asesmen-nine-box:
+    get:
+      tags:
+        - Asesmen Nine Box
+      summary: Lihat riwayat asesmen nine box.
+      description: >-
+        Lihat riwayat asesmen nine box dari user yang login, urut berdasarkan tahun.
+      operationId: listAsesmenNineBox
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: integer
+                        tahun:
+                          type: string
+                        kesimpulan:
+                          type: string
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
   /v1/data-pribadi:
     get:
       tags:
