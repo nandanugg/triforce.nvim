@@ -1,11 +1,9 @@
 package api
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
-	"slices"
-	"strings"
+	"strconv"
 
 	"github.com/MicahParks/keyfunc/v3"
 	"github.com/golang-jwt/jwt/v5"
@@ -45,48 +43,57 @@ func NewAuthKeyfunc(host, realm, audience string) (*Keyfunc, error) {
 func NewAuthMiddleware(keyfunc *Keyfunc) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			header := c.Request().Header.Get("Authorization")
-			if !strings.HasPrefix(header, "Bearer ") {
-				return echo.NewHTTPError(http.StatusUnauthorized, "token otentikasi tidak valid")
-			}
-
-			token := strings.TrimPrefix(header, "Bearer ")
-			claims := jwt.MapClaims{}
-			_, err := jwt.ParseWithClaims(token, &claims, keyfunc.Keyfunc)
+			userID, err := strconv.ParseInt(c.Request().Header.Get("Authorization"), 10, 64)
 			if err != nil {
-				msg := "akses ditolak"
-				switch {
-				case errors.Is(err, jwt.ErrTokenMalformed):
-					msg = "token otentikasi tidak valid"
-				case errors.Is(err, jwt.ErrTokenExpired):
-					msg = "token otentikasi sudah kedaluwarsa"
-				case errors.Is(err, jwt.ErrTokenSignatureInvalid):
-					msg = "signature token otentikasi tidak valid"
-				}
-				return echo.NewHTTPError(http.StatusUnauthorized, msg)
+				return echo.NewHTTPError(http.StatusUnauthorized, "akses ditolak")
 			}
 
-			switch aud := claims["aud"].(type) {
-			case string:
-				if aud != keyfunc.Audience {
-					return echo.NewHTTPError(http.StatusUnauthorized, "audience tidak valid")
-				}
-			case []any:
-				if !slices.Contains(aud, any(keyfunc.Audience)) {
-					return echo.NewHTTPError(http.StatusUnauthorized, "audience tidak valid")
-				}
-			default:
-				return echo.NewHTTPError(http.StatusUnauthorized, "audience tidak valid")
-			}
-
-			// TODO: @yap fix user_id & roles, role structure `realm_access.roles[]`
-			user := User{ID: int64(claims["user_id"].(float64))}
-			if role, ok := claims["role"]; ok {
-				user.Role = role.(string)
-			}
+			user := User{ID: userID}
 			c.Set(contextKeyUser, &user)
-
 			return next(c)
+
+			// header := c.Request().Header.Get("Authorization")
+			// if !strings.HasPrefix(header, "Bearer ") {
+			// 	return echo.NewHTTPError(http.StatusUnauthorized, "token otentikasi tidak valid")
+			// }
+			//
+			// token := strings.TrimPrefix(header, "Bearer ")
+			// claims := jwt.MapClaims{}
+			// _, err := jwt.ParseWithClaims(token, &claims, keyfunc.Keyfunc)
+			// if err != nil {
+			// 	msg := "akses ditolak"
+			// 	switch {
+			// 	case errors.Is(err, jwt.ErrTokenMalformed):
+			// 		msg = "token otentikasi tidak valid"
+			// 	case errors.Is(err, jwt.ErrTokenExpired):
+			// 		msg = "token otentikasi sudah kedaluwarsa"
+			// 	case errors.Is(err, jwt.ErrTokenSignatureInvalid):
+			// 		msg = "signature token otentikasi tidak valid"
+			// 	}
+			// 	return echo.NewHTTPError(http.StatusUnauthorized, msg)
+			// }
+			//
+			// switch aud := claims["aud"].(type) {
+			// case string:
+			// 	if aud != keyfunc.Audience {
+			// 		return echo.NewHTTPError(http.StatusUnauthorized, "audience tidak valid")
+			// 	}
+			// case []any:
+			// 	if !slices.Contains(aud, any(keyfunc.Audience)) {
+			// 		return echo.NewHTTPError(http.StatusUnauthorized, "audience tidak valid")
+			// 	}
+			// default:
+			// 	return echo.NewHTTPError(http.StatusUnauthorized, "audience tidak valid")
+			// }
+			//
+			// // TODO: @yap fix user_id & roles, role structure `realm_access.roles[]`
+			// user := User{ID: int64(claims["user_id"].(float64))}
+			// if role, ok := claims["role"]; ok {
+			// 	user.Role = role.(string)
+			// }
+			// c.Set(contextKeyUser, &user)
+			//
+			// return next(c)
 		}
 	}
 }
