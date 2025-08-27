@@ -12,6 +12,7 @@ tags:
   - name: Keluarga
   - name: Kenaikan Gaji Berkala
   - name: Kepangkatan
+  - name: Kinerja
   - name: Pegawai
   - name: Pekerjaan
   - name: Pelatihan Fungsional
@@ -470,6 +471,44 @@ paths:
                         mk_golongan_tahun:
                           type: string
                         mk_golongan_bulan:
+                          type: string
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/kinerja:
+    get:
+      tags:
+        - Kinerja
+      summary: Lihat riwayat kinerja.
+      description: >-
+        Lihat riwayat kinerja dari user yang login, urut berdasarkan tahun.
+      operationId: listKinerja
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: integer
+                        tahun:
+                          type: integer
+                        hasil_kinerja:
+                          type: string
+                        perilaku_kerja:
+                          type: string
+                        kuadran_kinerja:
                           type: string
                   meta:
                     $ref: "#/components/schemas/metaPagination"
