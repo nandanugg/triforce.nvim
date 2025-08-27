@@ -7,8 +7,9 @@ import (
 )
 
 type Config struct {
-	Server Server   `envPrefix:"NEXUS_KEPEGAWAIAN_SERVER_"`
-	DB     Database `envPrefix:"NEXUS_KEPEGAWAIAN_DB_"`
+	Server   Server   `envPrefix:"NEXUS_KEPEGAWAIAN_SERVER_"`
+	DB       Database `envPrefix:"NEXUS_KEPEGAWAIAN_DB_"`
+	Keycloak Keycloak `envPrefix:"NEXUS_KEYCLOAK_"`
 
 	LogLevel slog.Level `env:"NEXUS_KEPEGAWAIAN_LOG_LEVEL"`
 }
@@ -23,6 +24,12 @@ type Database struct {
 	Name     string `env:"NAME"`
 	User     string `env:"USER"`
 	Password string `env:"PASSWORD"`
+}
+
+type Keycloak struct {
+	Host     string `env:"HOST"`
+	Realm    string `env:"REALM"`
+	Audience string `env:"AUDIENCE"`
 }
 
 func Load() (Config, error) {

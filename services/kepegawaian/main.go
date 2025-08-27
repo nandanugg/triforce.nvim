@@ -4,8 +4,6 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/golang-jwt/jwt/v4"
-
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/config"
@@ -36,13 +34,13 @@ func main() {
 	db, err := db.New(c.DB.Host, c.DB.User, c.DB.Password, c.DB.Name)
 	exitIfError("Error connecting to database.", err)
 
-	jwtPublicKey, err := jwt.ParseRSAPublicKeyFromPEM([]byte(c.Server.AuthPublicKey))
-	exitIfError("Error parsing auth public key.", err)
-
 	e, err := api.NewEchoServer(docs.OpenAPIBytes)
 	exitIfError("Error creating new echo server.", err)
 
-	mwAuth := api.NewAuthMiddleware(jwtPublicKey)
+	keyfunc, err := api.NewAuthKeyfunc(c.Keycloak.Host, c.Keycloak.Realm, c.Keycloak.Audience)
+	exitIfError("Error initializing auth keyfunc.", err)
+
+	mwAuth := api.NewAuthMiddleware(keyfunc)
 
 	datapribadi.RegisterRoutes(e, db, mwAuth)
 	hukumandisiplin.RegisterRoutes(e, db, mwAuth)

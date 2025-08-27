@@ -4,9 +4,10 @@ go 1.24.5
 
 require (
 	github.com/Masterminds/squirrel v1.5.4
+	github.com/MicahParks/keyfunc/v3 v3.6.1
 	github.com/caarlos0/env/v11 v11.3.1
 	github.com/getkin/kin-openapi v0.132.0
-	github.com/golang-jwt/jwt/v4 v4.5.2
+	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.7.5
 	github.com/labstack/echo-contrib v0.17.4
@@ -16,6 +17,7 @@ require (
 )
 
 require (
+	github.com/MicahParks/jwkset v0.8.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect

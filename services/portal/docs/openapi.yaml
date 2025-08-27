@@ -6,9 +6,122 @@ info:
 servers:
   - url: http://localhost:8000
 tags:
+  - name: Authentication
   - name: Dokumen Pendukung
   - name: Pemberitahuan
 paths:
+  /auth/login:
+    get:
+      tags:
+        - Authentication
+      summary: Login.
+      description: Redirect ke laman login keycloak.
+      operationId: authLogin
+      responses:
+        "302":
+          description: Redirect ke laman login keycloak.
+          headers:
+            Location:
+              description: Redirect URL.
+              schema:
+                type: string
+                format: uri
+  /auth/logout:
+    get:
+      tags:
+        - Authentication
+      summary: Logout.
+      description: Redirect ke laman logout keycloak.
+      operationId: authLogout
+      parameters:
+        - name: id_token_hint
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "302":
+          description: Redirect ke laman logout keycloak.
+          headers:
+            Location:
+              description: Redirect URL.
+              schema:
+                type: string
+                format: uri
+  /auth/exchange-token:
+    post:
+      tags:
+        - Authentication
+      summary: Exchange Token.
+      description: Tukar callback code dengan token.
+      operationId: authExchangeToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              code: e512390d-b20c-41fc-a0b1-3a006107dc77.3bbc36e9-db2c-4801-8f81-5384d17a2a64
+            schema:
+              additionalProperties: false
+              properties:
+                code:
+                  type: string
+              required:
+                - code
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              example:
+                data:
+                  access_token: eyJhbGciOiJSUzI...
+                  expires_in: 300
+                  refresh_token: eyJhbGciOiJSUzI...
+                  refresh_expires_in: 1800
+                  id_token: eyJhbGciOiJSUzI...
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/tokenResponse"
+  /auth/refresh-token:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh Token.
+      description: Tukar refresh_token dengan token baru.
+      operationId: authRefreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              refresh_token: eyJhbGciOiJSUzI...
+            schema:
+              additionalProperties: false
+              properties:
+                refresh_token:
+                  type: string
+              required:
+                - refresh_token
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              example:
+                data:
+                  access_token: eyJhbGciOiJSUzI...
+                  expires_in: 300
+                  refresh_token: eyJhbGciOiJSUzI...
+                  refresh_expires_in: 1800
+                  id_token: eyJhbGciOiJSUzI...
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/tokenResponse"
   /dokumen-pendukung:
     get:
       tags:
@@ -132,3 +245,23 @@ components:
           type: integer
           example: 100
           minimum: 0
+    tokenResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        access_token:
+          type: string
+        expires_in:
+          type: integer
+        refresh_token:
+          type: string
+        refresh_expires_in:
+          type: integer
+        id_token:
+          type: string
+      required:
+        - access_token
+        - expires_in
+        - refresh_token
+        - refresh_expires_in
+        - id_token

@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 )
@@ -21,6 +21,10 @@ func TestNewAuthMiddleware(t *testing.T) {
 
 	privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
 	publicKey := &privateKey.PublicKey
+	keyfunc := &Keyfunc{
+		Keyfunc:  func(*jwt.Token) (any, error) { return publicKey, nil },
+		Audience: "testing",
+	}
 
 	tests := []struct {
 		name             string
@@ -30,9 +34,17 @@ func TestNewAuthMiddleware(t *testing.T) {
 		wantUser         *User
 	}{
 		{
-			name: "ok: valid auth header",
+			name: "ok: valid auth header with string audience",
 			requestHeader: http.Header{
-				"Authorization": []string{generateHeader(100, privateKey)},
+				"Authorization": []string{generateHeader(100, privateKey, "testing")},
+			},
+			wantResponseCode: http.StatusOK,
+			wantUser:         &User{ID: int64(100)},
+		},
+		{
+			name: "ok: valid auth header with list audience",
+			requestHeader: http.Header{
+				"Authorization": []string{generateHeader(100, privateKey, []string{"nexus", "testing"})},
 			},
 			wantResponseCode: http.StatusOK,
 			wantUser:         &User{ID: int64(100)},
@@ -66,7 +78,7 @@ func TestNewAuthMiddleware(t *testing.T) {
 			name: "error: tampered jwt payload",
 			requestHeader: http.Header{
 				"Authorization": []string{func() string {
-					header := generateHeader(100, privateKey)
+					header := generateHeader(100, privateKey, "testing")
 					encodedClaims := strings.Split(header, ".")[1]
 					claims, _ := base64.RawStdEncoding.DecodeString(encodedClaims)
 					claims = bytes.ReplaceAll(claims, []byte("100"), []byte("200"))
@@ -76,6 +88,30 @@ func TestNewAuthMiddleware(t *testing.T) {
 			},
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{ "message": "signature token otentikasi tidak valid" }`,
+		},
+		{
+			name: "error: missing audience",
+			requestHeader: http.Header{
+				"Authorization": []string{generateHeader(100, privateKey, nil)},
+			},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{ "message": "audience tidak valid" }`,
+		},
+		{
+			name: "error: different string audience",
+			requestHeader: http.Header{
+				"Authorization": []string{generateHeader(100, privateKey, "nexus")},
+			},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{ "message": "audience tidak valid" }`,
+		},
+		{
+			name: "error: audience not in the array list",
+			requestHeader: http.Header{
+				"Authorization": []string{generateHeader(100, privateKey, []string{"nexus", "portal"})},
+			},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{ "message": "audience tidak valid" }`,
 		},
 	}
 
@@ -94,7 +130,7 @@ func TestNewAuthMiddleware(t *testing.T) {
 				actualUser = CurrentUser(c)
 				return nil
 			}
-			middleware := NewAuthMiddleware(publicKey)
+			middleware := NewAuthMiddleware(keyfunc)
 			e.Add(http.MethodGet, "/", handler, middleware)
 			e.ServeHTTP(rec, req)
 
@@ -110,8 +146,8 @@ func TestNewAuthMiddleware(t *testing.T) {
 	}
 }
 
-func generateHeader(userID int64, signingKey *rsa.PrivateKey) string {
-	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{"user_id": userID})
+func generateHeader(userID int64, signingKey *rsa.PrivateKey, audience any) string {
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{"user_id": userID, "aud": audience})
 	tokenString, _ := token.SignedString(signingKey)
 	return "Bearer " + tokenString
 }

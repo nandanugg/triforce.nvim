@@ -4,32 +4,35 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
+
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
 )
 
 var (
-	// JWTPrivateKey pairs with JWTPublicKey, used for signing HTTP
-	// Authorization header in tests.
-	JWTPrivateKey *rsa.PrivateKey
+	jwtPrivateKey *rsa.PrivateKey
 
-	// JWTPublicKey pairs with JWTPrivateKey, used for verifying HTTP
+	// Keyfunc encapsulate jwt.Keyfunc, used for verifying HTTP
 	// Authorization header in tests.
-	JWTPublicKey *rsa.PublicKey
+	Keyfunc *api.Keyfunc
 )
 
 func init() {
-	JWTPrivateKey, _ = rsa.GenerateKey(rand.Reader, 2048)
-	JWTPublicKey = &JWTPrivateKey.PublicKey
+	jwtPrivateKey, _ = rsa.GenerateKey(rand.Reader, 2048)
+	Keyfunc = &api.Keyfunc{
+		Keyfunc:  func(*jwt.Token) (any, error) { return &jwtPrivateKey.PublicKey, nil },
+		Audience: "testing",
+	}
 }
 
 // GenerateAuthHeader generates HTTP Authorization header for use in tests.
 func GenerateAuthHeader(userID int64, role ...string) string {
-	claims := jwt.MapClaims{"user_id": userID}
+	claims := jwt.MapClaims{"user_id": userID, "aud": "testing"}
 	if len(role) > 0 {
 		claims["role"] = role[0]
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
-	tokenString, _ := token.SignedString(JWTPrivateKey)
+	tokenString, _ := token.SignedString(jwtPrivateKey)
 	return "Bearer " + tokenString
 }

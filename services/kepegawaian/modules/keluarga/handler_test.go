@@ -123,7 +123,7 @@ func Test_handler_list(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
-			RegisterRoutes(e, db, api.NewAuthMiddleware(apitest.JWTPublicKey))
+			RegisterRoutes(e, db, api.NewAuthMiddleware(apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -208,7 +208,7 @@ func Test_handler_listAnak(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
-			RegisterRoutes(e, db, api.NewAuthMiddleware(apitest.JWTPublicKey))
+			RegisterRoutes(e, db, api.NewAuthMiddleware(apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -293,7 +293,7 @@ func Test_handler_listOrangTua(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
-			RegisterRoutes(e, db, api.NewAuthMiddleware(apitest.JWTPublicKey))
+			RegisterRoutes(e, db, api.NewAuthMiddleware(apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -376,7 +376,7 @@ func Test_handler_listPasangan(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
-			RegisterRoutes(e, db, api.NewAuthMiddleware(apitest.JWTPublicKey))
+			RegisterRoutes(e, db, api.NewAuthMiddleware(apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)

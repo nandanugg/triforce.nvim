@@ -11,5 +11,85 @@ services:
     volumes:
       - postgres:/var/lib/postgresql/data
 
+  keycloak:
+    container_name: keycloak_app
+    image: keycloak/keycloak:26.3.2
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+      - "9000:9000"
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_METRICS_ENABLED: true
+      KC_LOG: console
+      KC_LOG_LEVEL: debug
+      KC_HOSTNAME: localhost
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak_postgres:5432/keycloak
+      KC_DB_USERNAME: postgres
+      KC_DB_PASSWORD: postgres
+    depends_on:
+      - keycloak_postgres
+    networks:
+      - keycloak-network
+    command:
+      - 'start-dev'
+
+  keycloak_postgres:
+    container_name: keycloak_postgres
+    image: postgres:17-alpine
+    restart: unless-stopped
+    ports:
+      - "35432:5432"
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_keycloak:/var/lib/postgresql/data
+    networks:
+      - keycloak-network
+
+  openldap:
+    image: osixia/openldap:1.5.0
+    container_name: openldap
+    restart: unless-stopped
+    ports:
+      - "389:389"
+    environment:
+      LDAP_ORGANISATION: Example
+      LDAP_DOMAIN: example.com
+      LDAP_ADMIN_PASSWORD: admin
+    volumes:
+      - openldap_data:/var/lib/ldap
+      - openldap_config:/etc/ldap/slapd.d
+    networks:
+      - keycloak-network
+
+  phpldapadmin:
+    image: osixia/phpldapadmin:0.9.0
+    container_name: phpldapadmin
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      PHPLDAPADMIN_LDAP_HOSTS: openldap
+      PHPLDAPADMIN_HTTPS: false
+      PHPLDAPADMIN_LDAP_PORT: 389
+      PHPLDAPADMIN_LDAP_PROTOCOL: ldap
+    depends_on:
+      - openldap
+    networks:
+      - keycloak-network
+
+networks:
+  keycloak-network:
+    name: keycloak-network
+    driver: bridge
+
 volumes:
   postgres:
+  postgres_keycloak:
+  openldap_data:
+  openldap_config:
