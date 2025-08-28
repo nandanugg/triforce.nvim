@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/MicahParks/keyfunc/v3"
 	"github.com/golang-jwt/jwt/v5"
@@ -43,12 +44,16 @@ func NewAuthKeyfunc(host, realm, audience string) (*Keyfunc, error) {
 func NewAuthMiddleware(keyfunc *Keyfunc) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			userID, err := strconv.ParseInt(c.Request().Header.Get("Authorization"), 10, 64)
+			ss := strings.SplitN(c.Request().Header.Get("Authorization"), ":", 2)
+			userID, err := strconv.ParseInt(ss[0], 10, 64)
 			if err != nil {
-				return echo.NewHTTPError(http.StatusUnauthorized, "akses ditolak")
+				return echo.NewHTTPError(http.StatusUnauthorized, "token otentikasi tidak valid")
 			}
 
 			user := User{ID: userID}
+			if len(ss) > 1 {
+				user.Role = ss[1]
+			}
 			c.Set(contextKeyUser, &user)
 			return next(c)
 

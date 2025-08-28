@@ -28,7 +28,11 @@ func init() {
 
 // GenerateAuthHeader generates HTTP Authorization header for use in tests.
 func GenerateAuthHeader(userID int64, role ...string) string {
-	return strconv.FormatInt(userID, 10)
+	h := strconv.FormatInt(userID, 10)
+	if len(role) > 0 {
+		h += ":" + role[0]
+	}
+	return h
 
 	// claims := jwt.MapClaims{"user_id": userID, "aud": "testing"}
 	// if len(role) > 0 {
