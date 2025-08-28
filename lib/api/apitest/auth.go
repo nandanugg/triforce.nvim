@@ -32,7 +32,7 @@ func GenerateAuthHeader(userID int64, role ...string) string {
 	if len(role) > 0 {
 		h += ":" + role[0]
 	}
-	return h
+	return api.TempAuthSecret + h
 
 	// claims := jwt.MapClaims{"user_id": userID, "aud": "testing"}
 	// if len(role) > 0 {

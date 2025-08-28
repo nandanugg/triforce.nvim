@@ -41,10 +41,18 @@ func NewAuthKeyfunc(host, realm, audience string) (*Keyfunc, error) {
 	return &Keyfunc{keyfunc.Keyfunc, audience}, nil
 }
 
+const TempAuthSecret = "ioujhernqweppiu97eargyhapeworm98pq3tu4y5"
+
 func NewAuthMiddleware(keyfunc *Keyfunc) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			ss := strings.SplitN(c.Request().Header.Get("Authorization"), ":", 2)
+			authHeader := c.Request().Header.Get("Authorization")
+			if !strings.HasPrefix(authHeader, TempAuthSecret) {
+				return echo.NewHTTPError(http.StatusUnauthorized, "token otentikasi tidak valid")
+			}
+			authHeader = strings.TrimPrefix(authHeader, TempAuthSecret)
+
+			ss := strings.SplitN(authHeader, ":", 2)
 			userID, err := strconv.ParseInt(ss[0], 10, 64)
 			if err != nil {
 				return echo.NewHTTPError(http.StatusUnauthorized, "token otentikasi tidak valid")
