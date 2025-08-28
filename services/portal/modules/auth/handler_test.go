@@ -22,7 +22,7 @@ func Test_handler_login(t *testing.T) {
 	t.Run("success redirect", func(t *testing.T) {
 		t.Parallel()
 
-		req := httptest.NewRequest(http.MethodGet, "/auth/login", nil)
+		req := httptest.NewRequest(http.MethodGet, "/v1/auth/login", nil)
 		rec := httptest.NewRecorder()
 
 		e, err := api.NewEchoServer(docs.OpenAPIBytes)
@@ -72,7 +72,7 @@ func Test_handler_logout(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			req := httptest.NewRequest(http.MethodGet, "/auth/logout", nil)
+			req := httptest.NewRequest(http.MethodGet, "/v1/auth/logout", nil)
 			req.URL.RawQuery = tt.requestQuery.Encode()
 			rec := httptest.NewRecorder()
 
@@ -200,7 +200,7 @@ func Test_handler_exchangeToken(t *testing.T) {
 				keycloakHost = keycloakSrv.URL
 			}
 
-			req := httptest.NewRequest(http.MethodPost, "/auth/exchange-token", strings.NewReader(tt.requestBody))
+			req := httptest.NewRequest(http.MethodPost, "/v1/auth/exchange-token", strings.NewReader(tt.requestBody))
 			req.Header.Set("Content-Type", "application/json")
 			rec := httptest.NewRecorder()
 
@@ -324,7 +324,7 @@ func Test_handler_refreshToken(t *testing.T) {
 				keycloakHost = keycloakSrv.URL
 			}
 
-			req := httptest.NewRequest(http.MethodPost, "/auth/refresh-token", strings.NewReader(tt.requestBody))
+			req := httptest.NewRequest(http.MethodPost, "/v1/auth/refresh-token", strings.NewReader(tt.requestBody))
 			req.Header.Set("Content-Type", "application/json")
 			rec := httptest.NewRecorder()
 

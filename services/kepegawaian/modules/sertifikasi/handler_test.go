@@ -110,7 +110,7 @@ func Test_handler_list(t *testing.T) {
 			_, err := db.Exec(tt.dbData)
 			require.NoError(t, err)
 
-			req := httptest.NewRequest(http.MethodGet, "/sertifikasi", nil)
+			req := httptest.NewRequest(http.MethodGet, "/v1/sertifikasi", nil)
 			req.URL.RawQuery = tt.requestQuery.Encode()
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()

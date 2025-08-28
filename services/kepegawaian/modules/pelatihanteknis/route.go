@@ -12,5 +12,5 @@ func RegisterRoutes(e *echo.Echo, db *sql.DB, mwAuth echo.MiddlewareFunc) {
 	s := newService(r)
 	h := newHandler(s)
 
-	e.Add(http.MethodGet, "/pelatihan-teknis", h.list, mwAuth)
+	e.Add(http.MethodGet, "/v1/pelatihan-teknis", h.list, mwAuth)
 }

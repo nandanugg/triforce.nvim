@@ -115,7 +115,7 @@ func Test_handler_list(t *testing.T) {
 				require.NoError(t, err)
 			}
 
-			req := httptest.NewRequest(http.MethodGet, "/penugasan", nil)
+			req := httptest.NewRequest(http.MethodGet, "/v1/penugasan", nil)
 			req.URL.RawQuery = tt.requestQuery.Encode()
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()

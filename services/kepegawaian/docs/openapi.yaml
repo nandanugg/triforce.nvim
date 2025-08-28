@@ -22,7 +22,7 @@ tags:
   - name: Sertifikasi
   - name: Penugasan
 paths:
-  /data-pribadi:
+  /v1/data-pribadi:
     get:
       tags:
         - Data Pribadi
@@ -138,7 +138,7 @@ paths:
                         type: string
                       gelar_belakang:
                         type: string
-  /hukuman-disiplin:
+  /v1/hukuman-disiplin:
     get:
       tags:
         - Hukuman Disiplin
@@ -183,7 +183,7 @@ paths:
                           type: integer
                   meta:
                     $ref: "#/components/schemas/metaPagination"
-  /jabatan:
+  /v1/jabatan:
     get:
       tags:
         - Jabatan
@@ -220,7 +220,7 @@ paths:
                           format: date
                   meta:
                     $ref: "#/components/schemas/metaPagination"
-  /jenis-jabatan:
+  /v1/jenis-jabatan:
     get:
       tags:
         - Jabatan
@@ -247,7 +247,7 @@ paths:
                           type: string
                         nama:
                           type: string
-  /keluarga:
+  /v1/keluarga:
     get:
       tags:
         - Keluarga
@@ -285,7 +285,7 @@ paths:
                           type: string
                         tanggal_lahir:
                           type: string
-  /keluarga/anak:
+  /v1/keluarga/anak:
     get:
       tags:
         - Keluarga
@@ -319,7 +319,7 @@ paths:
                           type: string
                         tanggal_lahir:
                           type: string
-  /keluarga/orang-tua:
+  /v1/keluarga/orang-tua:
     get:
       tags:
         - Keluarga
@@ -354,7 +354,7 @@ paths:
                           type: string
                         tanggal_lahir:
                           type: string
-  /keluarga/pasangan:
+  /v1/keluarga/pasangan:
     get:
       tags:
         - Keluarga
@@ -389,7 +389,7 @@ paths:
                           type: string
                         tanggal_lahir:
                           type: string
-  /kenaikan-gaji-berkala:
+  /v1/kenaikan-gaji-berkala:
     get:
       tags:
         - Kenaikan Gaji Berkala
@@ -432,7 +432,7 @@ paths:
                           type: string
                   meta:
                     $ref: "#/components/schemas/metaPagination"
-  /kepangkatan:
+  /v1/kepangkatan:
     get:
       tags:
         - Kepangkatan
@@ -473,7 +473,7 @@ paths:
                           type: string
                   meta:
                     $ref: "#/components/schemas/metaPagination"
-  /pegawai:
+  /v1/pegawai:
     get:
       tags:
         - Pegawai
@@ -541,7 +541,7 @@ paths:
                           type: string
                   meta:
                     $ref: "#/components/schemas/metaPagination"
-  /pekerjaan:
+  /v1/pekerjaan:
     get:
       tags:
         - Pekerjaan
@@ -590,7 +590,7 @@ paths:
                           type: string
                   meta:
                     $ref: "#/components/schemas/metaPagination"
-  /penugasan:
+  /v1/penugasan:
     get:
       tags:
         - Penugasan
@@ -631,7 +631,7 @@ paths:
                           format: date
                   meta:
                     $ref: "#/components/schemas/metaPagination"
-  /pelatihan-fungsional:
+  /v1/pelatihan-fungsional:
     get:
       tags:
         - Pelatihan Fungsional
@@ -675,7 +675,7 @@ paths:
                           type: string
                   meta:
                     $ref: "#/components/schemas/metaPagination"
-  /pelatihan-struktural:
+  /v1/pelatihan-struktural:
     get:
       tags:
         - Pelatihan Struktural
@@ -715,7 +715,7 @@ paths:
                           type: integer
                   meta:
                     $ref: "#/components/schemas/metaPagination"
-  /pelatihan-teknis:
+  /v1/pelatihan-teknis:
     get:
       tags:
         - Pelatihan Teknis
@@ -759,7 +759,7 @@ paths:
                           type: string
                   meta:
                     $ref: "#/components/schemas/metaPagination"
-  /pendidikan-formal:
+  /v1/pendidikan-formal:
     get:
       tags:
         - Pendidikan Formal
@@ -802,7 +802,7 @@ paths:
                           type: string
                   meta:
                     $ref: "#/components/schemas/metaPagination"
-  /penghargaan:
+  /v1/penghargaan:
     get:
       tags:
         - Penghargaan
@@ -842,7 +842,7 @@ paths:
                           format: date
                   meta:
                     $ref: "#/components/schemas/metaPagination"
-  /sertifikasi:
+  /v1/sertifikasi:
     get:
       tags:
         - Sertifikasi
@@ -879,7 +879,7 @@ paths:
                           format: date
                   meta:
                     $ref: "#/components/schemas/metaPagination"
-  /status-pegawai:
+  /v1/status-pegawai:
     get:
       tags:
         - Pegawai
@@ -906,7 +906,7 @@ paths:
                           type: string
                         nama:
                           type: string
-  /status-pernikahan:
+  /v1/status-pernikahan:
     get:
       tags:
         - Data Pribadi

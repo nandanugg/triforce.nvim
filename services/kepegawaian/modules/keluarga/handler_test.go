@@ -116,7 +116,7 @@ func Test_handler_list(t *testing.T) {
 			_, err := db.Exec(tt.dbData)
 			require.NoError(t, err)
 
-			req := httptest.NewRequest(http.MethodGet, "/keluarga", nil)
+			req := httptest.NewRequest(http.MethodGet, "/v1/keluarga", nil)
 			req.URL.RawQuery = tt.requestQuery.Encode()
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
@@ -201,7 +201,7 @@ func Test_handler_listAnak(t *testing.T) {
 			_, err := db.Exec(tt.dbData)
 			require.NoError(t, err)
 
-			req := httptest.NewRequest(http.MethodGet, "/keluarga/anak", nil)
+			req := httptest.NewRequest(http.MethodGet, "/v1/keluarga/anak", nil)
 			req.URL.RawQuery = tt.requestQuery.Encode()
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
@@ -286,7 +286,7 @@ func Test_handler_listOrangTua(t *testing.T) {
 			_, err := db.Exec(tt.dbData)
 			require.NoError(t, err)
 
-			req := httptest.NewRequest(http.MethodGet, "/keluarga/orang-tua", nil)
+			req := httptest.NewRequest(http.MethodGet, "/v1/keluarga/orang-tua", nil)
 			req.URL.RawQuery = tt.requestQuery.Encode()
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
@@ -369,7 +369,7 @@ func Test_handler_listPasangan(t *testing.T) {
 			_, err := db.Exec(tt.dbData)
 			require.NoError(t, err)
 
-			req := httptest.NewRequest(http.MethodGet, "/keluarga/pasangan", nil)
+			req := httptest.NewRequest(http.MethodGet, "/v1/keluarga/pasangan", nil)
 			req.URL.RawQuery = tt.requestQuery.Encode()
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()

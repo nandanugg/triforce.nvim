@@ -370,7 +370,7 @@ func Test_handler_list(t *testing.T) {
 			_, err := db.Exec(tt.dbData)
 			require.NoError(t, err)
 
-			req := httptest.NewRequest(http.MethodGet, "/pegawai", nil)
+			req := httptest.NewRequest(http.MethodGet, "/v1/pegawai", nil)
 			req.URL.RawQuery = tt.requestQuery.Encode()
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
@@ -436,7 +436,7 @@ func Test_handler_listStatusPegawai(t *testing.T) {
 			_, err := db.Exec(tt.dbData)
 			require.NoError(t, err)
 
-			req := httptest.NewRequest(http.MethodGet, "/status-pegawai", nil)
+			req := httptest.NewRequest(http.MethodGet, "/v1/status-pegawai", nil)
 			req.URL.RawQuery = tt.requestQuery.Encode()
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()

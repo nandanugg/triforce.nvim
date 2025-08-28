@@ -12,8 +12,8 @@ func RegisterRoutes(e *echo.Echo, db *sql.DB, mwAuth echo.MiddlewareFunc) {
 	s := newService(r)
 	h := newHandler(s)
 
-	e.Add(http.MethodGet, "/keluarga", h.list, mwAuth)
-	e.Add(http.MethodGet, "/keluarga/anak", h.listAnak, mwAuth)
-	e.Add(http.MethodGet, "/keluarga/orang-tua", h.listOrangTua, mwAuth)
-	e.Add(http.MethodGet, "/keluarga/pasangan", h.listPasangan, mwAuth)
+	e.Add(http.MethodGet, "/v1/keluarga", h.list, mwAuth)
+	e.Add(http.MethodGet, "/v1/keluarga/anak", h.listAnak, mwAuth)
+	e.Add(http.MethodGet, "/v1/keluarga/orang-tua", h.listOrangTua, mwAuth)
+	e.Add(http.MethodGet, "/v1/keluarga/pasangan", h.listPasangan, mwAuth)
 }
