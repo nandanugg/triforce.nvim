@@ -29,6 +29,7 @@ func NewEchoServer(openapiBytes []byte) (*echo.Echo, error) {
 		middleware.RequestID(),
 		newLogMiddleware(),
 		newPrometheusMiddleware(),
+		middleware.CORS(),
 	)
 	e.Add(http.MethodGet, "/health", func(echo.Context) error { return nil })
 	e.Add(http.MethodGet, "/metrics", echoprometheus.NewHandler())
