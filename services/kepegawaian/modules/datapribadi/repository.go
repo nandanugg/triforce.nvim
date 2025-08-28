@@ -63,11 +63,11 @@ func (r *repository) getDataPribadi(ctx context.Context, userID int64) (*dataPri
 			p."GELAR_DEPAN",
 			p."GELAR_BELAKANG"
 		from kepegawaian.pegawai p
-		join kepegawaian.agama a on p."AGAMA_ID" = a."ID"
-		join kepegawaian.users u on p."NIP_BARU" = u.nip
-		join kepegawaian.jenis_pegawai jp on p."JENIS_PEGAWAI_ID" = jp."ID"
-		join kepegawaian.jenis_kawin jk on p."JENIS_KAWIN_ID" = jk."ID"
-		join kepegawaian.unitkerja uk on p."UNOR_ID" = uk."ID"
+		left join kepegawaian.agama a on p."AGAMA_ID" = a."ID"
+		left join kepegawaian.users u on p."NIP_BARU" = u.nip
+		left join kepegawaian.jenis_pegawai jp on p."JENIS_PEGAWAI_ID" = jp."ID"
+		left join kepegawaian.jenis_kawin jk on p."JENIS_KAWIN_ID" = jk."ID"
+		left join kepegawaian.unitkerja uk on p."UNOR_ID" = uk."ID"
 		where u.id = $1
 	`
 
