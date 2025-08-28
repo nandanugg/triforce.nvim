@@ -1,0 +1,52 @@
+stages:
+  - test
+  - build
+
+default:
+  tags:
+    - nexus-staging-1
+
+test:
+  stage: test
+  image: golang:1.25.0-alpine3.22
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  services:
+    - name: postgres:17-alpine
+      alias: postgres
+      command: ["-c", "fsync=off", "-c", "synchronous_commit=off", "-c", "full_page_writes=off", "-c", "max_connections=1000"]
+      variables:
+        POSTGRES_PASSWORD: postgres
+  variables:
+    GOPATH: $CI_PROJECT_DIR/.go
+    NEXUS_TEST_DB_HOST: postgres
+    NEXUS_TEST_DB_NAME: postgres
+    NEXUS_TEST_DB_PASSWORD: postgres
+    NEXUS_TEST_DB_SUPERUSER: postgres
+  script:
+    - mkdir -p .go
+    - go test ./...
+  cache:
+    when: always
+    key:
+      files:
+        - go.sum
+    paths:
+      - .go
+  # TODO: hapus setelah integrasi auth selesai dibuat.
+  allow_failure: true
+
+# Reference: https://docs.gitlab.com/ci/docker/buildah_rootless_multi_arch/
+build api image:
+  stage: build
+  image: quay.io/buildah/stable
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+  variables:
+    IMAGE: docker.io/unggulrespationo/nexus:be-$CI_COMMIT_SHORT_SHA
+    STORAGE_DRIVER: vfs
+    BUILDAH_FORMAT: docker
+  script:
+    - echo "$CONTAINER_REGISTRY_PASSWORD" | buildah login -u "$CONTAINER_REGISTRY_USERNAME" --password-stdin docker.io
+    - buildah build -t $IMAGE .
+    - buildah push $IMAGE

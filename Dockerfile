@@ -1,4 +1,4 @@
-FROM golang:1.25.0-alpine3.22 AS builder
+FROM docker.io/golang:1.25.0-alpine3.22 AS builder
 
 WORKDIR /app
 
@@ -9,7 +9,7 @@ COPY . .
 RUN go build -o bin/kepegawaian ./services/kepegawaian
 RUN go build -o bin/portal ./services/portal
 
-FROM alpine:3.22
+FROM docker.io/alpine:3.22
 
 WORKDIR /app
 
