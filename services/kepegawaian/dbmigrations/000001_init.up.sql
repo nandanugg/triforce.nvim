@@ -1,9 +1,9 @@
-CREATE TYPE kepegawaian.masa_kerja_type AS (
+CREATE TYPE masa_kerja_type AS (
 	r double precision,
 	i double precision
 );
 
-CREATE FUNCTION kepegawaian.calc_age(param_tanggal date) RETURNS smallint
+CREATE FUNCTION calc_age(param_tanggal date) RETURNS smallint
     LANGUAGE plpgsql
     AS $$BEGIN
 	--Routine body goes here...
@@ -27,10 +27,10 @@ CREATE FUNCTION kepegawaian.calc_age(param_tanggal date) RETURNS smallint
 END
 $$;
 
-CREATE FUNCTION kepegawaian.get_kgb_yad(__tmt_cpns date) RETURNS date
+CREATE FUNCTION get_kgb_yad(__tmt_cpns date) RETURNS date
     LANGUAGE plpgsql
     AS $$
-	declare dt_yad date; 
+	declare dt_yad date;
 	declare y_tmt int;
 	declare m_tmt int;
 	declare d_tmt int;
@@ -41,38 +41,38 @@ CREATE FUNCTION kepegawaian.get_kgb_yad(__tmt_cpns date) RETURNS date
 	    y_tmt = date_part('year',__tmt_cpns);
 			m_tmt = date_part('month',__tmt_cpns);
 			d_tmt = date_part('day',__tmt_cpns);
-			
+
 			y_yad	= date_part('year',CURRENT_DATE);
-			
-			dt_yad = (y_yad||'-'||m_tmt||'-'||d_tmt)::date;	
-			if(mod(y_yad,2) = mod(y_tmt,2)) then -- sama -genap 
-				if(dt_yad >=current_date) then 
+
+			dt_yad = (y_yad||'-'||m_tmt||'-'||d_tmt)::date;
+			if(mod(y_yad,2) = mod(y_tmt,2)) then -- sama -genap
+				if(dt_yad >=current_date) then
 						return dt_yad;
-				else 
+				else
 						return (dt_yad + interval '2 year')::date;
-				end if; 
-				else 
+				end if;
+				else
 						y_yad = y_yad +1;
-						dt_yad = (y_yad||'-'||m_tmt||'-'||d_tmt)::date;	
+						dt_yad = (y_yad||'-'||m_tmt||'-'||d_tmt)::date;
 						return dt_yad;
 			end if;
 	RETURN dt_yad;
 END
 $$;
 
-CREATE FUNCTION kepegawaian.get_masa_kerja(date_start date, date_end date) RETURNS character varying
+CREATE FUNCTION get_masa_kerja(date_start date, date_end date) RETURNS character varying
     LANGUAGE plpgsql
     AS $$
 	declare _month varchar;
 	BEGIN
 	-- Routine body goes here...
-	
+
 	select  extract(year from age(date_end,date_start)) || ' thn ' || extract(month from age(date_end,date_start)) || ' bln 'into _month;
 	return _month;
 END
 $$;
 
-CREATE FUNCTION kepegawaian.get_masa_kerja_arr(date_start date, date_end date) RETURNS integer[]
+CREATE FUNCTION get_masa_kerja_arr(date_start date, date_end date) RETURNS integer[]
     LANGUAGE plpgsql
     AS $$
 	declare _month int;
@@ -81,8 +81,8 @@ CREATE FUNCTION kepegawaian.get_masa_kerja_arr(date_start date, date_end date) R
 	BEGIN
 		select extract(year from age(date_end,date_start)) ,extract(month from age(date_end,date_start))
 		into _year,_month;
-		
-		
+
+
 	 _json[0]= _year;
 	 _json[1]= _month;
 	--select json_build_object('year'::text,extract(year from age(date_end,date_start))::int,'month'::text,extract(month from age(date_end,date_start))) into _json;
@@ -91,55 +91,55 @@ CREATE FUNCTION kepegawaian.get_masa_kerja_arr(date_start date, date_end date) R
 END
 $$;
 
-CREATE FUNCTION kepegawaian.get_month_masa_kerja(date_start date, date_end date) RETURNS smallint
+CREATE FUNCTION get_month_masa_kerja(date_start date, date_end date) RETURNS smallint
     LANGUAGE plpgsql
     AS $$
 	declare _month int4;
 	BEGIN
 	-- Routine body goes here...
-	
+
 	select  extract(year from age(date_end,date_start))*12 + extract(month from age(date_end,date_start)) into _month;
 	return _month;
 END
 $$;
 
-CREATE FUNCTION kepegawaian.uuid_generate_v1() RETURNS uuid
+CREATE FUNCTION uuid_generate_v1() RETURNS uuid
     LANGUAGE c STRICT
     AS '$libdir/uuid-ossp', 'uuid_generate_v1';
 
-CREATE FUNCTION kepegawaian.uuid_generate_v1mc() RETURNS uuid
+CREATE FUNCTION uuid_generate_v1mc() RETURNS uuid
     LANGUAGE c STRICT
     AS '$libdir/uuid-ossp', 'uuid_generate_v1mc';
 
-CREATE FUNCTION kepegawaian.uuid_generate_v3(namespace uuid, name text) RETURNS uuid
+CREATE FUNCTION uuid_generate_v3(namespace uuid, name text) RETURNS uuid
     LANGUAGE c IMMUTABLE STRICT
     AS '$libdir/uuid-ossp', 'uuid_generate_v3';
 
-CREATE FUNCTION kepegawaian.uuid_generate_v4() RETURNS uuid
+CREATE FUNCTION uuid_generate_v4() RETURNS uuid
     LANGUAGE c STRICT
     AS '$libdir/uuid-ossp', 'uuid_generate_v4';
 
-CREATE FUNCTION kepegawaian.uuid_generate_v5(namespace uuid, name text) RETURNS uuid
+CREATE FUNCTION uuid_generate_v5(namespace uuid, name text) RETURNS uuid
     LANGUAGE c IMMUTABLE STRICT
     AS '$libdir/uuid-ossp', 'uuid_generate_v5';
 
-CREATE FUNCTION kepegawaian.uuid_nil() RETURNS uuid
+CREATE FUNCTION uuid_nil() RETURNS uuid
     LANGUAGE c IMMUTABLE STRICT
     AS '$libdir/uuid-ossp', 'uuid_nil';
 
-CREATE FUNCTION kepegawaian.uuid_ns_dns() RETURNS uuid
+CREATE FUNCTION uuid_ns_dns() RETURNS uuid
     LANGUAGE c IMMUTABLE STRICT
     AS '$libdir/uuid-ossp', 'uuid_ns_dns';
 
-CREATE FUNCTION kepegawaian.uuid_ns_oid() RETURNS uuid
+CREATE FUNCTION uuid_ns_oid() RETURNS uuid
     LANGUAGE c IMMUTABLE STRICT
     AS '$libdir/uuid-ossp', 'uuid_ns_oid';
 
-CREATE FUNCTION kepegawaian.uuid_ns_url() RETURNS uuid
+CREATE FUNCTION uuid_ns_url() RETURNS uuid
     LANGUAGE c IMMUTABLE STRICT
     AS '$libdir/uuid-ossp', 'uuid_ns_url';
 
-CREATE FUNCTION kepegawaian.uuid_ns_x500() RETURNS uuid
+CREATE FUNCTION uuid_ns_x500() RETURNS uuid
     LANGUAGE c IMMUTABLE STRICT
     AS '$libdir/uuid-ossp', 'uuid_ns_x500';
 
@@ -147,7 +147,7 @@ SET default_tablespace = '';
 
 SET default_table_access_method = heap;
 
-CREATE TABLE kepegawaian.rwt_nine_box (
+CREATE TABLE rwt_nine_box (
     "ID" integer NOT NULL,
     "PNS_NIP" character varying(32),
     "NAMA" character varying(200),
@@ -157,16 +157,16 @@ CREATE TABLE kepegawaian.rwt_nine_box (
     "TAHUN" character varying(4)
 );
 
-CREATE SEQUENCE kepegawaian."NINE_BOX_ID_seq"
+CREATE SEQUENCE "NINE_BOX_ID_seq"
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian."NINE_BOX_ID_seq" OWNED BY kepegawaian.rwt_nine_box."ID";
+ALTER SEQUENCE "NINE_BOX_ID_seq" OWNED BY rwt_nine_box."ID";
 
-CREATE TABLE kepegawaian.absen (
+CREATE TABLE absen (
     "ID" integer NOT NULL,
     "NIP" character varying(30),
     "NAMA" character varying(200),
@@ -185,28 +185,28 @@ CREATE TABLE kepegawaian.absen (
     created_at timestamp(6) without time zone
 );
 
-COMMENT ON COLUMN kepegawaian.absen."VERIFIKASI" IS '1=veririkasi ok, 0 : blm verifikasi';
+COMMENT ON COLUMN absen."VERIFIKASI" IS '1=veririkasi ok, 0 : blm verifikasi';
 
-COMMENT ON COLUMN kepegawaian.absen.input_type IS '2 untuk pake browser';
+COMMENT ON COLUMN absen.input_type IS '2 untuk pake browser';
 
-CREATE SEQUENCE kepegawaian."absen_ID_seq"
+CREATE SEQUENCE "absen_ID_seq"
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian."absen_ID_seq" OWNED BY kepegawaian.absen."ID";
+ALTER SEQUENCE "absen_ID_seq" OWNED BY absen."ID";
 
-CREATE SEQUENCE kepegawaian.activities_activity_id_seq
+CREATE SEQUENCE activities_activity_id_seq
     START WITH 52450
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-CREATE TABLE kepegawaian.activities (
-    activity_id integer DEFAULT nextval('kepegawaian.activities_activity_id_seq'::regclass) NOT NULL,
+CREATE TABLE activities (
+    activity_id integer DEFAULT nextval('activities_activity_id_seq'::regclass) NOT NULL,
     user_id bigint DEFAULT (0)::bigint NOT NULL,
     activity text NOT NULL,
     module character varying(255) NOT NULL,
@@ -214,21 +214,21 @@ CREATE TABLE kepegawaian.activities (
     deleted integer DEFAULT 0 NOT NULL
 );
 
-CREATE SEQUENCE kepegawaian.agama_id_seq
+CREATE SEQUENCE agama_id_seq
     START WITH 7
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-CREATE TABLE kepegawaian.agama (
-    "ID" smallint DEFAULT nextval('kepegawaian.agama_id_seq'::regclass) NOT NULL,
+CREATE TABLE agama (
+    "ID" smallint DEFAULT nextval('agama_id_seq'::regclass) NOT NULL,
     "NAMA" character varying(20),
     "NCSISTIME" character varying(30),
     deleted smallint
 );
 
-CREATE TABLE kepegawaian.anak (
+CREATE TABLE anak (
     "ID" bigint NOT NULL,
     "PASANGAN" bigint,
     "NAMA" character varying(255),
@@ -240,16 +240,16 @@ CREATE TABLE kepegawaian.anak (
     "NIP" character varying(30)
 );
 
-CREATE SEQUENCE kepegawaian."anak_ID_seq"
+CREATE SEQUENCE "anak_ID_seq"
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian."anak_ID_seq" OWNED BY kepegawaian.anak."ID";
+ALTER SEQUENCE "anak_ID_seq" OWNED BY anak."ID";
 
-CREATE TABLE kepegawaian.arsip (
+CREATE TABLE arsip (
     "ID" integer NOT NULL,
     "ID_JENIS_ARSIP" integer,
     "NIP" character varying(25),
@@ -266,23 +266,23 @@ CREATE TABLE kepegawaian.arsip (
     location character varying(255),
     name character varying(255),
     sk_number character varying(100),
-    ref uuid DEFAULT kepegawaian.uuid_generate_v4()
+    ref uuid DEFAULT uuid_generate_v4()
 );
 
-COMMENT ON COLUMN kepegawaian.arsip."EXTENSION_FILE" IS '.doc, .xls, dll';
+COMMENT ON COLUMN arsip."EXTENSION_FILE" IS '.doc, .xls, dll';
 
-COMMENT ON COLUMN kepegawaian.arsip."JENIS_FILE" IS 'image, document, zip, pdf';
+COMMENT ON COLUMN arsip."JENIS_FILE" IS 'image, document, zip, pdf';
 
-CREATE SEQUENCE kepegawaian."arsip_ID_seq"
+CREATE SEQUENCE "arsip_ID_seq"
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian."arsip_ID_seq" OWNED BY kepegawaian.arsip."ID";
+ALTER SEQUENCE "arsip_ID_seq" OWNED BY arsip."ID";
 
-CREATE TABLE kepegawaian.asesmen_hasil_asesmen (
+CREATE TABLE asesmen_hasil_asesmen (
     id bigint NOT NULL,
     nip character varying,
     jenis_asesmen_jabatan character varying,
@@ -300,16 +300,16 @@ CREATE TABLE kepegawaian.asesmen_hasil_asesmen (
     perekat_bangsa numeric
 );
 
-CREATE SEQUENCE kepegawaian.asesmen_hasil_asesmen_id_seq
+CREATE SEQUENCE asesmen_hasil_asesmen_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.asesmen_hasil_asesmen_id_seq OWNED BY kepegawaian.asesmen_hasil_asesmen.id;
+ALTER SEQUENCE asesmen_hasil_asesmen_id_seq OWNED BY asesmen_hasil_asesmen.id;
 
-CREATE TABLE kepegawaian.asesmen_pegawai_berpotensi_jpt (
+CREATE TABLE asesmen_pegawai_berpotensi_jpt (
     id bigint NOT NULL,
     nip character varying,
     usia character varying,
@@ -338,16 +338,16 @@ CREATE TABLE kepegawaian.asesmen_pegawai_berpotensi_jpt (
     nama character varying
 );
 
-CREATE SEQUENCE kepegawaian.asesmen_pegawai_berpotensi_jpt_id_seq
+CREATE SEQUENCE asesmen_pegawai_berpotensi_jpt_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.asesmen_pegawai_berpotensi_jpt_id_seq OWNED BY kepegawaian.asesmen_pegawai_berpotensi_jpt.id;
+ALTER SEQUENCE asesmen_pegawai_berpotensi_jpt_id_seq OWNED BY asesmen_pegawai_berpotensi_jpt.id;
 
-CREATE TABLE kepegawaian.asesmen_riwayat_hukuman_disiplin (
+CREATE TABLE asesmen_riwayat_hukuman_disiplin (
     id bigint NOT NULL,
     nip character varying,
     tingkat_hukuman_disiplin character varying,
@@ -359,16 +359,16 @@ CREATE TABLE kepegawaian.asesmen_riwayat_hukuman_disiplin (
     alasan text
 );
 
-CREATE SEQUENCE kepegawaian.asesmen_riwayat_hukuman_disiplin_id_seq
+CREATE SEQUENCE asesmen_riwayat_hukuman_disiplin_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.asesmen_riwayat_hukuman_disiplin_id_seq OWNED BY kepegawaian.asesmen_riwayat_hukuman_disiplin.id;
+ALTER SEQUENCE asesmen_riwayat_hukuman_disiplin_id_seq OWNED BY asesmen_riwayat_hukuman_disiplin.id;
 
-CREATE TABLE kepegawaian.baperjakat (
+CREATE TABLE baperjakat (
     "ID" integer NOT NULL,
     "TANGGAL" date NOT NULL,
     "KETERANGAN" character varying(50),
@@ -378,24 +378,24 @@ CREATE TABLE kepegawaian.baperjakat (
     "TANGGAL_PELANTIKAN" date
 );
 
-CREATE SEQUENCE kepegawaian."baperjakat_ID_seq"
+CREATE SEQUENCE "baperjakat_ID_seq"
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian."baperjakat_ID_seq" OWNED BY kepegawaian.baperjakat."ID";
+ALTER SEQUENCE "baperjakat_ID_seq" OWNED BY baperjakat."ID";
 
-CREATE SEQUENCE kepegawaian.pegawai_id_seq
+CREATE SEQUENCE pegawai_id_seq
     START WITH 32781
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-CREATE TABLE kepegawaian.pegawai (
-    "ID" integer DEFAULT nextval('kepegawaian.pegawai_id_seq'::regclass) NOT NULL,
+CREATE TABLE pegawai (
+    "ID" integer DEFAULT nextval('pegawai_id_seq'::regclass) NOT NULL,
     "PNS_ID" character varying(36) NOT NULL,
     "NIP_LAMA" character varying(9),
     "NIP_BARU" character varying(18),
@@ -497,9 +497,9 @@ CREATE TABLE kepegawaian.pegawai (
     "KARTU_ASN" character varying
 );
 
-COMMENT ON COLUMN kepegawaian.pegawai.status_pegawai IS '1=pns,2=honorer';
+COMMENT ON COLUMN pegawai.status_pegawai IS '1=pns,2=honorer';
 
-CREATE TABLE kepegawaian.unitkerja (
+CREATE TABLE unitkerja (
     "NO" character varying(255),
     "KODE_INTERNAL" character varying(255),
     "ID" character varying(255) NOT NULL,
@@ -532,7 +532,7 @@ CREATE TABLE kepegawaian.unitkerja (
     "PERATURAN" character varying(100)
 );
 
-CREATE MATERIALIZED VIEW kepegawaian.vw_unit_list AS
+CREATE MATERIALIZED VIEW vw_unit_list AS
  SELECT uk."NO",
     uk."KODE_INTERNAL",
     uk."ID",
@@ -563,22 +563,22 @@ CREATE MATERIALIZED VIEW kepegawaian.vw_unit_list AS
     es4."NAMA_UNOR" AS "NAMA_UNOR_ESELON_4",
     x."NAMA_UNOR" AS "NAMA_UNOR_FULL",
     uk."UNOR_INDUK_PENYETARAAN"
-   FROM (((((kepegawaian.unitkerja uk
-     LEFT JOIN kepegawaian.unitkerja es1 ON (((es1."ID")::text = (uk."ESELON_1")::text)))
-     LEFT JOIN kepegawaian.unitkerja es2 ON (((es2."ID")::text = (uk."ESELON_2")::text)))
-     LEFT JOIN kepegawaian.unitkerja es3 ON (((es3."ID")::text = (uk."ESELON_3")::text)))
-     LEFT JOIN kepegawaian.unitkerja es4 ON (((es4."ID")::text = (uk."ESELON_4")::text)))
+   FROM (((((unitkerja uk
+     LEFT JOIN unitkerja es1 ON (((es1."ID")::text = (uk."ESELON_1")::text)))
+     LEFT JOIN unitkerja es2 ON (((es2."ID")::text = (uk."ESELON_2")::text)))
+     LEFT JOIN unitkerja es3 ON (((es3."ID")::text = (uk."ESELON_3")::text)))
+     LEFT JOIN unitkerja es4 ON (((es4."ID")::text = (uk."ESELON_4")::text)))
      LEFT JOIN ( WITH RECURSIVE r AS (
                  SELECT unitkerja."ID",
                     (unitkerja."NAMA_UNOR")::text AS "NAMA_UNOR",
                     (unitkerja."ID")::text AS arr_id
-                   FROM kepegawaian.unitkerja
+                   FROM unitkerja
                   WHERE ((unitkerja."DIATASAN_ID")::text = 'A8ACA7397AEB3912E040640A040269BB'::text)
                 UNION ALL
                  SELECT a."ID",
                     (((a."NAMA_UNOR")::text || ' - '::text) || r_1."NAMA_UNOR"),
                     ((r_1.arr_id || '#'::text) || (a."ID")::text)
-                   FROM (kepegawaian.unitkerja a
+                   FROM (unitkerja a
                      JOIN r r_1 ON (((r_1."ID")::text = (a."DIATASAN_ID")::text)))
                 )
          SELECT r."ID",
@@ -588,7 +588,7 @@ CREATE MATERIALIZED VIEW kepegawaian.vw_unit_list AS
   WHERE (uk."EXPIRED_DATE" IS NULL)
   WITH NO DATA;
 
-CREATE VIEW kepegawaian.daftar_pegawai AS
+CREATE VIEW daftar_pegawai AS
  SELECT pegawai."ID",
     pegawai."PNS_ID",
     pegawai."NIP_LAMA",
@@ -672,10 +672,10 @@ CREATE VIEW kepegawaian.daftar_pegawai AS
     vw."ESELON_3",
     vw."ESELON_4",
     date_part('year'::text, pegawai."TGL_LAHIR") AS tahun_lahir
-   FROM (kepegawaian.pegawai
-     LEFT JOIN kepegawaian.vw_unit_list vw ON (((pegawai."UNOR_ID")::text = (vw."ID")::text)));
+   FROM (pegawai
+     LEFT JOIN vw_unit_list vw ON (((pegawai."UNOR_ID")::text = (vw."ID")::text)));
 
-CREATE VIEW kepegawaian.daftar_pns_aktif AS
+CREATE VIEW daftar_pns_aktif AS
  SELECT "ID",
     "PNS_ID",
     "NIP_LAMA",
@@ -754,10 +754,10 @@ CREATE VIEW kepegawaian.daftar_pns_aktif AS
     "JABATAN_INSTANSI_ID",
     "BUP",
     date_part('year'::text, age(("TGL_LAHIR")::timestamp with time zone)) AS "AGE"
-   FROM kepegawaian.pegawai pegawai
+   FROM pegawai pegawai
   WHERE ((status_pegawai = 1) AND ((terminated_date IS NULL) OR ((terminated_date IS NOT NULL) AND (terminated_date > ('now'::text)::date))));
 
-CREATE TABLE kepegawaian.daftar_rohaniawan (
+CREATE TABLE daftar_rohaniawan (
     id integer NOT NULL,
     nip character varying(30),
     nama character varying(100),
@@ -767,16 +767,16 @@ CREATE TABLE kepegawaian.daftar_rohaniawan (
     pangkat_gol character varying(30)
 );
 
-CREATE SEQUENCE kepegawaian.daftar_rohaniawan_id_seq
+CREATE SEQUENCE daftar_rohaniawan_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.daftar_rohaniawan_id_seq OWNED BY kepegawaian.daftar_rohaniawan.id;
+ALTER SEQUENCE daftar_rohaniawan_id_seq OWNED BY daftar_rohaniawan.id;
 
-CREATE TABLE kepegawaian.golongan (
+CREATE TABLE golongan (
     "NAMA" character varying(255),
     "NAMA_PANGKAT" character varying(255),
     "ID" integer NOT NULL,
@@ -785,15 +785,15 @@ CREATE TABLE kepegawaian.golongan (
     "GOL_PPPK" character varying(255)
 );
 
-CREATE SEQUENCE kepegawaian."jabatan_No_seq"
+CREATE SEQUENCE "jabatan_No_seq"
     START WITH 1776
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-CREATE TABLE kepegawaian.jabatan (
-    "NO" integer DEFAULT nextval('kepegawaian."jabatan_No_seq"'::regclass) NOT NULL,
+CREATE TABLE jabatan (
+    "NO" integer DEFAULT nextval('"jabatan_No_seq"'::regclass) NOT NULL,
     "KODE_JABATAN" character varying NOT NULL,
     "NAMA_JABATAN" character varying,
     "NAMA_JABATAN_FULL" text,
@@ -807,12 +807,12 @@ CREATE TABLE kepegawaian.jabatan (
     "BKN_ID" character varying(36)
 );
 
-CREATE TABLE kepegawaian.kedudukan_hukum (
+CREATE TABLE kedudukan_hukum (
     "ID" character varying(4) NOT NULL,
     "NAMA" character varying(255)
 );
 
-CREATE VIEW kepegawaian.data_pegawai AS
+CREATE VIEW data_pegawai AS
  SELECT a."NIP_BARU",
     a."NAMA",
     a."JABATAN_NAMA",
@@ -823,36 +823,36 @@ CREATE VIEW kepegawaian.data_pegawai AS
     a."STATUS_CPNS_PNS",
     e."NAMA" AS status,
     f."NAMA_UNOR" AS satker
-   FROM (((((kepegawaian.pegawai a
-     JOIN kepegawaian.jabatan b ON ((a."JABATAN_INSTANSI_ID" = (b."KODE_JABATAN")::bpchar)))
-     JOIN kepegawaian.golongan c ON ((a."GOL_ID" = c."ID")))
-     JOIN kepegawaian.unitkerja d ON (((a."UNOR_ID")::text = (d."ID")::text)))
-     JOIN kepegawaian.unitkerja f ON (((f."ID")::text = (d."UNOR_INDUK")::text)))
-     JOIN kepegawaian.kedudukan_hukum e ON (((a."KEDUDUKAN_HUKUM_ID")::text = (e."ID")::text)))
+   FROM (((((pegawai a
+     JOIN jabatan b ON ((a."JABATAN_INSTANSI_ID" = (b."KODE_JABATAN")::bpchar)))
+     JOIN golongan c ON ((a."GOL_ID" = c."ID")))
+     JOIN unitkerja d ON (((a."UNOR_ID")::text = (d."ID")::text)))
+     JOIN unitkerja f ON (((f."ID")::text = (d."UNOR_INDUK")::text)))
+     JOIN kedudukan_hukum e ON (((a."KEDUDUKAN_HUKUM_ID")::text = (e."ID")::text)))
   WHERE (a."JABATAN_INSTANSI_ID" <> '0'::bpchar);
 
-CREATE TABLE kepegawaian.hari_libur (
+CREATE TABLE hari_libur (
     "ID" integer NOT NULL,
     "START_DATE" date,
     "END_DATE" date,
     "INFO" character varying(255)
 );
 
-CREATE SEQUENCE kepegawaian."hari_libur_ID_seq"
+CREATE SEQUENCE "hari_libur_ID_seq"
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian."hari_libur_ID_seq" OWNED BY kepegawaian.hari_libur."ID";
+ALTER SEQUENCE "hari_libur_ID_seq" OWNED BY hari_libur."ID";
 
-CREATE TABLE kepegawaian.instansi (
+CREATE TABLE instansi (
     "ID" character varying(64) NOT NULL,
     "NAMA" character varying(255)
 );
 
-CREATE TABLE kepegawaian.istri (
+CREATE TABLE istri (
     "ID" bigint NOT NULL,
     "PNS" smallint,
     "NAMA" character varying(255),
@@ -869,23 +869,23 @@ CREATE TABLE kepegawaian.istri (
     "NIP" character varying(32)
 );
 
-COMMENT ON COLUMN kepegawaian.istri."PNS" IS '1=pns';
+COMMENT ON COLUMN istri."PNS" IS '1=pns';
 
-COMMENT ON COLUMN kepegawaian.istri."STATUS" IS '1=menikah
+COMMENT ON COLUMN istri."STATUS" IS '1=menikah
 2=cerai';
 
-COMMENT ON COLUMN kepegawaian.istri."HUBUNGAN" IS '1=istri, 2= suami';
+COMMENT ON COLUMN istri."HUBUNGAN" IS '1=istri, 2= suami';
 
-CREATE SEQUENCE kepegawaian."istri_ID_seq"
+CREATE SEQUENCE "istri_ID_seq"
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian."istri_ID_seq" OWNED BY kepegawaian.istri."ID";
+ALTER SEQUENCE "istri_ID_seq" OWNED BY istri."ID";
 
-CREATE TABLE kepegawaian.izin (
+CREATE TABLE izin (
     "ID" integer NOT NULL,
     "NIP_PNS" character varying(18) NOT NULL,
     "NAMA" character varying(100),
@@ -940,41 +940,41 @@ CREATE TABLE kepegawaian.izin (
     status_kirim smallint
 );
 
-COMMENT ON COLUMN kepegawaian.izin."STATUS_PENGAJUAN" IS '1=menunggu persetujuan';
+COMMENT ON COLUMN izin."STATUS_PENGAJUAN" IS '1=menunggu persetujuan';
 
-COMMENT ON COLUMN kepegawaian.izin."LUAR_NEGERI" IS '0 = dalam negeri/null, 1= luar negeri';
+COMMENT ON COLUMN izin."LUAR_NEGERI" IS '0 = dalam negeri/null, 1= luar negeri';
 
-COMMENT ON COLUMN kepegawaian.izin."IS_SIGNED" IS '0';
+COMMENT ON COLUMN izin."IS_SIGNED" IS '0';
 
-COMMENT ON COLUMN kepegawaian.izin.source IS '1=web,2=mobile';
+COMMENT ON COLUMN izin.source IS '1=web,2=mobile';
 
-COMMENT ON COLUMN kepegawaian.izin.status_kirim IS '1=sudah pernah dikirim ke ekejadiran';
+COMMENT ON COLUMN izin.status_kirim IS '1=sudah pernah dikirim ke ekejadiran';
 
-CREATE SEQUENCE kepegawaian."izin_ID_seq"
+CREATE SEQUENCE "izin_ID_seq"
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian."izin_ID_seq" OWNED BY kepegawaian.izin."ID";
+ALTER SEQUENCE "izin_ID_seq" OWNED BY izin."ID";
 
-CREATE TABLE kepegawaian.izin_alasan (
+CREATE TABLE izin_alasan (
     "ID" smallint NOT NULL,
     "ALASAN" character varying(255),
     "JENIS_CUTI" smallint
 );
 
-CREATE SEQUENCE kepegawaian."izin_alasan_ID_seq"
+CREATE SEQUENCE "izin_alasan_ID_seq"
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian."izin_alasan_ID_seq" OWNED BY kepegawaian.izin_alasan."ID";
+ALTER SEQUENCE "izin_alasan_ID_seq" OWNED BY izin_alasan."ID";
 
-CREATE TABLE kepegawaian.izin_verifikasi (
+CREATE TABLE izin_verifikasi (
     "ID" integer NOT NULL,
     "ID_PENGAJUAN" integer,
     "NIP_ATASAN" character varying(30),
@@ -983,50 +983,50 @@ CREATE TABLE kepegawaian.izin_verifikasi (
     "ALASAN_DITOLAK" text
 );
 
-COMMENT ON COLUMN kepegawaian.izin_verifikasi."STATUS_VERIFIKASI" IS '''id''=>1,''value''=>''Menunggu Persetujuan''),
+COMMENT ON COLUMN izin_verifikasi."STATUS_VERIFIKASI" IS '''id''=>1,''value''=>''Menunggu Persetujuan''),
 			array(''id''=>2,''value''=>''Proses''),
 			array(''id''=>3,''value''=>''Disetujui''),
 			array(''id''=>4,''value''=>''Perubahan''),
 			array(''id''=>5,''value''=>''Ditangguhkan''),
 			array(''id''=>6,''value''=>''Ditolak''';
 
-CREATE SEQUENCE kepegawaian."izin_verifikasi_ID_seq"
+CREATE SEQUENCE "izin_verifikasi_ID_seq"
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian."izin_verifikasi_ID_seq" OWNED BY kepegawaian.izin_verifikasi."ID";
+ALTER SEQUENCE "izin_verifikasi_ID_seq" OWNED BY izin_verifikasi."ID";
 
-CREATE SEQUENCE kepegawaian.jabatan_id_seq
+CREATE SEQUENCE jabatan_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.jabatan_id_seq OWNED BY kepegawaian.jabatan.id;
+ALTER SEQUENCE jabatan_id_seq OWNED BY jabatan.id;
 
-CREATE TABLE kepegawaian.jenis_arsip (
+CREATE TABLE jenis_arsip (
     "ID" integer NOT NULL,
     "NAMA_JENIS" character varying(255),
     "KETERANGAN" text,
     "KATEGORI_ARSIP" smallint
 );
 
-COMMENT ON COLUMN kepegawaian.jenis_arsip."NAMA_JENIS" IS 'exa : ijazah SD, SK CPNS, SK PNS';
+COMMENT ON COLUMN jenis_arsip."NAMA_JENIS" IS 'exa : ijazah SD, SK CPNS, SK PNS';
 
-CREATE SEQUENCE kepegawaian.jenis_arsip_id_seq
+CREATE SEQUENCE jenis_arsip_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.jenis_arsip_id_seq OWNED BY kepegawaian.jenis_arsip."ID";
+ALTER SEQUENCE jenis_arsip_id_seq OWNED BY jenis_arsip."ID";
 
-CREATE TABLE kepegawaian.jenis_diklat (
+CREATE TABLE jenis_diklat (
     id integer NOT NULL,
     bkn_id integer,
     jenis_diklat character varying(50),
@@ -1034,45 +1034,45 @@ CREATE TABLE kepegawaian.jenis_diklat (
     status smallint DEFAULT 1
 );
 
-CREATE SEQUENCE kepegawaian.jenis_diklat_fungsional_id_seq
+CREATE SEQUENCE jenis_diklat_fungsional_id_seq
     START WITH 217
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-CREATE TABLE kepegawaian.jenis_diklat_fungsional (
-    "ID" bigint DEFAULT nextval('kepegawaian.jenis_diklat_fungsional_id_seq'::regclass) NOT NULL,
-    "NAMA" character varying(255) DEFAULT nextval('kepegawaian.jenis_diklat_fungsional_id_seq'::regclass)
+CREATE TABLE jenis_diklat_fungsional (
+    "ID" bigint DEFAULT nextval('jenis_diklat_fungsional_id_seq'::regclass) NOT NULL,
+    "NAMA" character varying(255) DEFAULT nextval('jenis_diklat_fungsional_id_seq'::regclass)
 );
 
-CREATE SEQUENCE kepegawaian.jenis_diklat_id_seq
+CREATE SEQUENCE jenis_diklat_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.jenis_diklat_id_seq OWNED BY kepegawaian.jenis_diklat.id;
+ALTER SEQUENCE jenis_diklat_id_seq OWNED BY jenis_diklat.id;
 
-CREATE TABLE kepegawaian.jenis_diklat_siasn (
+CREATE TABLE jenis_diklat_siasn (
     id bigint NOT NULL,
     jenis_diklat character varying
 );
 
-CREATE TABLE kepegawaian.jenis_diklat_struktural (
+CREATE TABLE jenis_diklat_struktural (
     "ID" integer NOT NULL,
     "NAMA" character varying(255)
 );
 
-CREATE TABLE kepegawaian.jenis_hukuman (
+CREATE TABLE jenis_hukuman (
     "ID" character(2),
     "NAMA" character(100),
     "TINGKAT_HUKUMAN" character(1),
     "NAMA_TINGKAT_HUKUMAN" character(10)
 );
 
-CREATE TABLE kepegawaian.jenis_izin (
+CREATE TABLE jenis_izin (
     "ID" integer NOT NULL,
     "KODE" character varying(7) NOT NULL,
     "NAMA_IZIN" character varying(50) NOT NULL,
@@ -1083,38 +1083,38 @@ CREATE TABLE kepegawaian.jenis_izin (
     mobile smallint DEFAULT 0
 );
 
-CREATE SEQUENCE kepegawaian."jenis_izin_ID_seq"
+CREATE SEQUENCE "jenis_izin_ID_seq"
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian."jenis_izin_ID_seq" OWNED BY kepegawaian.jenis_izin."ID";
+ALTER SEQUENCE "jenis_izin_ID_seq" OWNED BY jenis_izin."ID";
 
-CREATE SEQUENCE kepegawaian.rwt_jenis_jabatan_id_seq
+CREATE SEQUENCE rwt_jenis_jabatan_id_seq
     START WITH 3
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-CREATE TABLE kepegawaian.jenis_jabatan (
-    "ID" character varying(1) DEFAULT nextval('kepegawaian.rwt_jenis_jabatan_id_seq'::regclass) NOT NULL,
+CREATE TABLE jenis_jabatan (
+    "ID" character varying(1) DEFAULT nextval('rwt_jenis_jabatan_id_seq'::regclass) NOT NULL,
     "NAMA" character varying(255)
 );
 
-CREATE TABLE kepegawaian.jenis_kawin (
+CREATE TABLE jenis_kawin (
     "ID" character varying(255) NOT NULL,
     "NAMA" character varying(255)
 );
 
-CREATE TABLE kepegawaian.jenis_kp (
+CREATE TABLE jenis_kp (
     "ID" character varying(64) NOT NULL,
     "NAMA" character varying(255)
 );
 
-CREATE TABLE kepegawaian.jenis_kursus (
+CREATE TABLE jenis_kursus (
     id integer NOT NULL,
     bkn_id character varying(255),
     kode_cepat character varying(10),
@@ -1122,26 +1122,26 @@ CREATE TABLE kepegawaian.jenis_kursus (
     nama character varying(255)
 );
 
-CREATE SEQUENCE kepegawaian.jenis_kursus_id_seq
+CREATE SEQUENCE jenis_kursus_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.jenis_kursus_id_seq OWNED BY kepegawaian.jenis_kursus.id;
+ALTER SEQUENCE jenis_kursus_id_seq OWNED BY jenis_kursus.id;
 
-CREATE TABLE kepegawaian.jenis_pegawai (
+CREATE TABLE jenis_pegawai (
     "ID" character varying(5) NOT NULL,
     "NAMA" character varying(200)
 );
 
-CREATE TABLE kepegawaian.jenis_penghargaan (
+CREATE TABLE jenis_penghargaan (
     "ID" character(3) NOT NULL,
     "NAMA" character(100)
 );
 
-CREATE TABLE kepegawaian.jenis_rumpun_diklat_siasn (
+CREATE TABLE jenis_rumpun_diklat_siasn (
     id character varying NOT NULL,
     nama character varying,
     urusan character varying,
@@ -1150,21 +1150,21 @@ CREATE TABLE kepegawaian.jenis_rumpun_diklat_siasn (
     keterangan character varying
 );
 
-CREATE TABLE kepegawaian.mst_jenis_satker (
+CREATE TABLE mst_jenis_satker (
     id_jenis smallint NOT NULL,
     nama_jenis_satker character varying(50)
 );
 
-CREATE SEQUENCE kepegawaian.jenis_satker_id_jenis_seq
+CREATE SEQUENCE jenis_satker_id_jenis_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.jenis_satker_id_jenis_seq OWNED BY kepegawaian.mst_jenis_satker.id_jenis;
+ALTER SEQUENCE jenis_satker_id_jenis_seq OWNED BY mst_jenis_satker.id_jenis;
 
-CREATE TABLE kepegawaian.kandidat_baperjakat (
+CREATE TABLE kandidat_baperjakat (
     "ID" smallint NOT NULL,
     "NIP" character varying(32),
     "URUTAN_DEFAULT" smallint,
@@ -1188,63 +1188,63 @@ CREATE TABLE kepegawaian.kandidat_baperjakat (
     "STATUS_MENTERI" smallint
 );
 
-COMMENT ON COLUMN kepegawaian.kandidat_baperjakat."STATUS" IS '1=diterima,0 tidak diterima';
+COMMENT ON COLUMN kandidat_baperjakat."STATUS" IS '1=diterima,0 tidak diterima';
 
-COMMENT ON COLUMN kepegawaian.kandidat_baperjakat."STATUS_TAMBAHAN" IS '1=admin, 2= sistem';
+COMMENT ON COLUMN kandidat_baperjakat."STATUS_TAMBAHAN" IS '1=admin, 2= sistem';
 
-COMMENT ON COLUMN kepegawaian.kandidat_baperjakat."KATEGORI" IS '1=rotasi,2=promosi';
+COMMENT ON COLUMN kandidat_baperjakat."KATEGORI" IS '1=rotasi,2=promosi';
 
-CREATE SEQUENCE kepegawaian."kandidat_baperjakat_ID_seq"
+CREATE SEQUENCE "kandidat_baperjakat_ID_seq"
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian."kandidat_baperjakat_ID_seq" OWNED BY kepegawaian.kandidat_baperjakat."ID";
+ALTER SEQUENCE "kandidat_baperjakat_ID_seq" OWNED BY kandidat_baperjakat."ID";
 
-CREATE TABLE kepegawaian.kategori_ds (
+CREATE TABLE kategori_ds (
     id smallint NOT NULL,
     kategori_ds character varying(100)
 );
 
-CREATE SEQUENCE kepegawaian.kategori_ds_id_seq
+CREATE SEQUENCE kategori_ds_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.kategori_ds_id_seq OWNED BY kepegawaian.kategori_ds.id;
+ALTER SEQUENCE kategori_ds_id_seq OWNED BY kategori_ds.id;
 
-CREATE TABLE kepegawaian.kategori_jenis_arsip (
+CREATE TABLE kategori_jenis_arsip (
     "ID" smallint NOT NULL,
     "KATEGORI" character varying(255)
 );
 
-CREATE SEQUENCE kepegawaian."kategori_jenis_arsip_ID_seq"
+CREATE SEQUENCE "kategori_jenis_arsip_ID_seq"
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian."kategori_jenis_arsip_ID_seq" OWNED BY kepegawaian.kategori_jenis_arsip."ID";
+ALTER SEQUENCE "kategori_jenis_arsip_ID_seq" OWNED BY kategori_jenis_arsip."ID";
 
-CREATE TABLE kepegawaian.kpkn (
+CREATE TABLE kpkn (
     "ID" character varying(255) NOT NULL,
     "NAMA" character varying(255)
 );
 
-CREATE SEQUENCE kepegawaian.kuota_jabatan_id_seq
+CREATE SEQUENCE kuota_jabatan_id_seq
     START WITH 6104
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-CREATE TABLE kepegawaian.kuota_jabatan (
-    "ID" bigint DEFAULT nextval('kepegawaian.kuota_jabatan_id_seq'::regclass) NOT NULL,
+CREATE TABLE kuota_jabatan (
+    "ID" bigint DEFAULT nextval('kuota_jabatan_id_seq'::regclass) NOT NULL,
     "KODE_UNIT_KERJA" character varying(50),
     "ID_JABATAN" character varying(32),
     "JUMLAH_PEMANGKU_JABATAN" smallint,
@@ -1260,7 +1260,7 @@ CREATE TABLE kepegawaian.kuota_jabatan (
     aktif smallint
 );
 
-CREATE TABLE kepegawaian.layanan (
+CREATE TABLE layanan (
     id bigint NOT NULL,
     layanan_tipe_id bigint,
     name character varying(255),
@@ -1270,32 +1270,32 @@ CREATE TABLE kepegawaian.layanan (
     active boolean
 );
 
-CREATE TABLE kepegawaian.layanan_tipe (
+CREATE TABLE layanan_tipe (
     id bigint NOT NULL,
     name character varying(255),
     description character varying(255),
     active boolean
 );
 
-CREATE SEQUENCE kepegawaian.layanan_id_seq
+CREATE SEQUENCE layanan_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.layanan_id_seq OWNED BY kepegawaian.layanan_tipe.id;
+ALTER SEQUENCE layanan_id_seq OWNED BY layanan_tipe.id;
 
-CREATE SEQUENCE kepegawaian.layanan_id_seq1
+CREATE SEQUENCE layanan_id_seq1
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.layanan_id_seq1 OWNED BY kepegawaian.layanan.id;
+ALTER SEQUENCE layanan_id_seq1 OWNED BY layanan.id;
 
-CREATE TABLE kepegawaian.layanan_usulan (
+CREATE TABLE layanan_usulan (
     id bigint NOT NULL,
     layanan_id bigint,
     pegawai_id bigint,
@@ -1327,16 +1327,16 @@ CREATE TABLE kepegawaian.layanan_usulan (
     file_surat_pengantar character varying(255)
 );
 
-CREATE SEQUENCE kepegawaian.layanan_usulan_id_seq
+CREATE SEQUENCE layanan_usulan_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.layanan_usulan_id_seq OWNED BY kepegawaian.layanan_usulan.id;
+ALTER SEQUENCE layanan_usulan_id_seq OWNED BY layanan_usulan.id;
 
-CREATE TABLE kepegawaian.line_approval_izin (
+CREATE TABLE line_approval_izin (
     "ID" integer NOT NULL,
     "PNS_NIP" character varying(30),
     "NIP_ATASAN" character varying(30),
@@ -1346,20 +1346,20 @@ CREATE TABLE kepegawaian.line_approval_izin (
     "SEBAGAI" smallint
 );
 
-COMMENT ON COLUMN kepegawaian.line_approval_izin."JENIS" IS '1=ATASAN LANGSUNG, 2 = PPK';
+COMMENT ON COLUMN line_approval_izin."JENIS" IS '1=ATASAN LANGSUNG, 2 = PPK';
 
-COMMENT ON COLUMN kepegawaian.line_approval_izin."SEBAGAI" IS '1,2,3,4';
+COMMENT ON COLUMN line_approval_izin."SEBAGAI" IS '1,2,3,4';
 
-CREATE SEQUENCE kepegawaian."line_approval_izin_ID_seq"
+CREATE SEQUENCE "line_approval_izin_ID_seq"
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian."line_approval_izin_ID_seq" OWNED BY kepegawaian.line_approval_izin."ID";
+ALTER SEQUENCE "line_approval_izin_ID_seq" OWNED BY line_approval_izin."ID";
 
-CREATE TABLE kepegawaian.log_ds (
+CREATE TABLE log_ds (
     "ID" integer NOT NULL,
     "ID_FILE" character varying(32),
     "NIK" character varying(30),
@@ -1370,20 +1370,20 @@ CREATE TABLE kepegawaian.log_ds (
     "PROSES_CRON" smallint DEFAULT 0
 );
 
-COMMENT ON COLUMN kepegawaian.log_ds."STATUS" IS '1:gagal, 2:berhasil';
+COMMENT ON COLUMN log_ds."STATUS" IS '1:gagal, 2:berhasil';
 
-COMMENT ON COLUMN kepegawaian.log_ds."PROSES_CRON" IS '0 = belum, 1 = sudah';
+COMMENT ON COLUMN log_ds."PROSES_CRON" IS '0 = belum, 1 = sudah';
 
-CREATE SEQUENCE kepegawaian."log_ds_ID_seq"
+CREATE SEQUENCE "log_ds_ID_seq"
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian."log_ds_ID_seq" OWNED BY kepegawaian.log_ds."ID";
+ALTER SEQUENCE "log_ds_ID_seq" OWNED BY log_ds."ID";
 
-CREATE TABLE kepegawaian.log_request (
+CREATE TABLE log_request (
     id integer NOT NULL,
     url text NOT NULL,
     method character varying(10),
@@ -1393,16 +1393,16 @@ CREATE TABLE kepegawaian.log_request (
     created_at timestamp(6) without time zone DEFAULT now()
 );
 
-CREATE SEQUENCE kepegawaian.log_request_id_seq
+CREATE SEQUENCE log_request_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.log_request_id_seq OWNED BY kepegawaian.log_request.id;
+ALTER SEQUENCE log_request_id_seq OWNED BY log_request.id;
 
-CREATE TABLE kepegawaian.log_transaksi (
+CREATE TABLE log_transaksi (
     "ID" integer NOT NULL,
     "NIP" character varying(30),
     "NAMA_KOMPUTER" character varying(30),
@@ -1413,30 +1413,30 @@ CREATE TABLE kepegawaian.log_transaksi (
     "MODULE" character varying(30)
 );
 
-CREATE SEQUENCE kepegawaian."log_transaksi_ID_seq"
+CREATE SEQUENCE "log_transaksi_ID_seq"
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian."log_transaksi_ID_seq" OWNED BY kepegawaian.log_transaksi."ID";
+ALTER SEQUENCE "log_transaksi_ID_seq" OWNED BY log_transaksi."ID";
 
-CREATE SEQUENCE kepegawaian.login_attempts_id_seq
+CREATE SEQUENCE login_attempts_id_seq
     START WITH 9073
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-CREATE TABLE kepegawaian.login_attempts (
+CREATE TABLE login_attempts (
     ip_address character(40) NOT NULL,
     login character(50) NOT NULL,
     "time" time(6) without time zone,
-    id integer DEFAULT nextval('kepegawaian.login_attempts_id_seq'::regclass) NOT NULL
+    id integer DEFAULT nextval('login_attempts_id_seq'::regclass) NOT NULL
 );
 
-CREATE TABLE kepegawaian.lokasi (
+CREATE TABLE lokasi (
     "ID" character varying(255) NOT NULL,
     "KANREG_ID" character varying(255),
     "LOKASI_ID" character varying(255),
@@ -1447,7 +1447,7 @@ CREATE TABLE kepegawaian.lokasi (
     "IBUKOTA" character varying(255)
 );
 
-CREATE VIEW kepegawaian.mapping_unor_induk AS
+CREATE VIEW mapping_unor_induk AS
  SELECT "ID",
     "NAMA_UNOR",
         CASE
@@ -1466,29 +1466,29 @@ CREATE VIEW kepegawaian.mapping_unor_induk AS
             WHEN ((btrim(("NAMA_UNOR_ESELON_1")::text) = 'Sekretariat Jenderal'::text) AND (btrim(("NAMA_UNOR_ESELON_2")::text) = 'Pusat Data dan Teknologi Informasi'::text) AND (btrim(("NAMA_UNOR_ESELON_3")::text) = 'Balai Pengembangan Media Radio Pendidikan dan Kebudayaan'::text)) THEN "NAMA_UNOR_ESELON_3"
             ELSE "NAMA_UNOR_ESELON_2"
         END AS nama_unor_induk
-   FROM kepegawaian.vw_unit_list t;
+   FROM vw_unit_list t;
 
-CREATE TABLE kepegawaian.mst_peraturan_otk (
+CREATE TABLE mst_peraturan_otk (
     id_peraturan smallint NOT NULL,
     no_peraturan character varying(100)
 );
 
-CREATE TABLE kepegawaian.mst_templates (
+CREATE TABLE mst_templates (
     id integer NOT NULL,
     name character varying(255),
     template_file character varying(255)
 );
 
-CREATE SEQUENCE kepegawaian.mst_templates_id_seq
+CREATE SEQUENCE mst_templates_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.mst_templates_id_seq OWNED BY kepegawaian.mst_templates.id;
+ALTER SEQUENCE mst_templates_id_seq OWNED BY mst_templates.id;
 
-CREATE VIEW kepegawaian.pns_aktif AS
+CREATE VIEW pns_aktif AS
  SELECT "ID",
         CASE
             WHEN ((masa_kerja[1] + bulan_swasta) >= 12) THEN ((masa_kerja[0] + tahun_swasta) + 1)
@@ -1499,13 +1499,13 @@ CREATE VIEW kepegawaian.pns_aktif AS
             ELSE (masa_kerja[1] + bulan_swasta)
         END AS masa_kerja_bl
    FROM ( SELECT pegawai."ID",
-            kepegawaian.get_masa_kerja_arr(pegawai."TMT_CPNS", ('now'::text)::date) AS masa_kerja,
+            get_masa_kerja_arr(pegawai."TMT_CPNS", ('now'::text)::date) AS masa_kerja,
             pegawai."MK_TAHUN_SWASTA" AS tahun_swasta,
             pegawai."MK_BULAN_SWASTA" AS bulan_swasta
-           FROM kepegawaian.pegawai
+           FROM pegawai
           WHERE ((pegawai.status_pegawai = 1) AND ((pegawai.terminated_date IS NULL) OR ((pegawai.terminated_date IS NOT NULL) AND (pegawai.terminated_date > ('now'::text)::date))))) temp;
 
-CREATE MATERIALIZED VIEW kepegawaian.mv_duk AS
+CREATE MATERIALIZED VIEW mv_duk AS
  SELECT vw."NAMA_UNOR",
     pegawai."JENIS_JABATAN_ID",
     pegawai."JABATAN_ID",
@@ -1571,31 +1571,31 @@ CREATE MATERIALIZED VIEW kepegawaian.mv_duk AS
     vw."NAMA_UNOR_ESELON_3",
     vw."NAMA_UNOR_ESELON_2",
     vw."NAMA_UNOR_ESELON_1"
-   FROM ((((kepegawaian.pns_aktif pa
-     LEFT JOIN kepegawaian.pegawai pegawai ON ((pa."ID" = pegawai."ID")))
-     LEFT JOIN kepegawaian.golongan ON (((pegawai."GOL_ID")::text = (golongan."ID")::text)))
-     LEFT JOIN kepegawaian.vw_unit_list vw ON (((vw."ID")::text = (pegawai."UNOR_ID")::text)))
-     LEFT JOIN kepegawaian.jabatan jabatan ON ((pegawai."JABATAN_INSTANSI_ID" = (jabatan."KODE_JABATAN")::bpchar)))
+   FROM ((((pns_aktif pa
+     LEFT JOIN pegawai pegawai ON ((pa."ID" = pegawai."ID")))
+     LEFT JOIN golongan ON (((pegawai."GOL_ID")::text = (golongan."ID")::text)))
+     LEFT JOIN vw_unit_list vw ON (((vw."ID")::text = (pegawai."UNOR_ID")::text)))
+     LEFT JOIN jabatan jabatan ON ((pegawai."JABATAN_INSTANSI_ID" = (jabatan."KODE_JABATAN")::bpchar)))
   WHERE ((pegawai."KEDUDUKAN_HUKUM_ID")::text <> ALL (ARRAY[('14'::character varying)::text, ('52'::character varying)::text, ('66'::character varying)::text, ('67'::character varying)::text, ('77'::character varying)::text, ('78'::character varying)::text, ('98'::character varying)::text, ('99'::character varying)::text]))
   ORDER BY pegawai."JENIS_JABATAN_ID", vw."ESELON_ID", vw."ESELON_1", vw."ESELON_2", vw."ESELON_3", vw."ESELON_4", pegawai."JABATAN_ID", vw."NAMA_UNOR_FULL", pegawai."GOL_ID" DESC, pegawai."TMT_GOLONGAN", pegawai."TMT_JABATAN", pegawai."TMT_CPNS", pegawai."TGL_LAHIR"
   WITH NO DATA;
 
-CREATE MATERIALIZED VIEW kepegawaian.mv_jml_unor_induk AS
+CREATE MATERIALIZED VIEW mv_jml_unor_induk AS
  SELECT pegawai."UNOR_INDUK_ID",
     uk."JENIS_SATKER",
     uk."NAMA_UNOR",
     u."NAMA_UNOR" AS nama_unor_atas,
     count(pegawai."ID") AS jumlah
-   FROM (((kepegawaian.pegawai pegawai
-     LEFT JOIN kepegawaian.pns_aktif pa ON ((pegawai."ID" = pa."ID")))
-     LEFT JOIN kepegawaian.unitkerja uk ON (((uk."ID")::text = (pegawai."UNOR_INDUK_ID")::text)))
-     LEFT JOIN kepegawaian.unitkerja u ON (((u."ID")::text = (uk."DIATASAN_ID")::text)))
+   FROM (((pegawai pegawai
+     LEFT JOIN pns_aktif pa ON ((pegawai."ID" = pa."ID")))
+     LEFT JOIN unitkerja uk ON (((uk."ID")::text = (pegawai."UNOR_INDUK_ID")::text)))
+     LEFT JOIN unitkerja u ON (((u."ID")::text = (uk."DIATASAN_ID")::text)))
   WHERE (((pegawai."KEDUDUKAN_HUKUM_ID")::text <> ALL (ARRAY[('14'::character varying)::text, ('52'::character varying)::text, ('66'::character varying)::text, ('67'::character varying)::text, ('77'::character varying)::text, ('88'::character varying)::text, ('98'::character varying)::text, ('99'::character varying)::text, ('100'::character varying)::text])) AND ((pegawai.status_pegawai <> 3) OR (pegawai.status_pegawai IS NULL)) AND (pa."ID" IS NOT NULL))
   GROUP BY pegawai."UNOR_INDUK_ID", uk."JENIS_SATKER", uk."NAMA_UNOR", u."NAMA_UNOR"
   ORDER BY u."NAMA_UNOR", uk."NAMA_UNOR"
   WITH NO DATA;
 
-CREATE TABLE kepegawaian.tbl_file_ds (
+CREATE TABLE tbl_file_ds (
     id_file character varying(200) NOT NULL,
     waktu_buat timestamp(0) without time zone,
     kategori character varying(100),
@@ -1637,40 +1637,40 @@ CREATE TABLE kepegawaian.tbl_file_ds (
     blockchain_hash character varying
 );
 
-COMMENT ON COLUMN kepegawaian.tbl_file_ds.tmt_sampai_dengan IS 'khusus untuk Surat Perintah PLT/PLH';
+COMMENT ON COLUMN tbl_file_ds.tmt_sampai_dengan IS 'khusus untuk Surat Perintah PLT/PLH';
 
-COMMENT ON COLUMN kepegawaian.tbl_file_ds.telah_kirim IS 'Jika 1, tampilkan di dikbudHR';
+COMMENT ON COLUMN tbl_file_ds.telah_kirim IS 'Jika 1, tampilkan di dikbudHR';
 
-COMMENT ON COLUMN kepegawaian.tbl_file_ds.halaman_ttd IS 'halaman diletakan tandataangan digital';
+COMMENT ON COLUMN tbl_file_ds.halaman_ttd IS 'halaman diletakan tandataangan digital';
 
-COMMENT ON COLUMN kepegawaian.tbl_file_ds.show_qrcode IS '0/null : tidak tampilkan (seperti semula), 1 : tampilkan qrdari bssn';
+COMMENT ON COLUMN tbl_file_ds.show_qrcode IS '0/null : tidak tampilkan (seperti semula), 1 : tampilkan qrdari bssn';
 
-COMMENT ON COLUMN kepegawaian.tbl_file_ds.letak_ttd IS '1:tengah bawah, 2 : kiri Bawah 0: kanan bawah';
+COMMENT ON COLUMN tbl_file_ds.letak_ttd IS '1:tengah bawah, 2 : kiri Bawah 0: kanan bawah';
 
-COMMENT ON COLUMN kepegawaian.tbl_file_ds.kode_unit_kerja_internal IS 'untuk menampung nama unit kerja internal via kode';
+COMMENT ON COLUMN tbl_file_ds.kode_unit_kerja_internal IS 'untuk menampung nama unit kerja internal via kode';
 
-COMMENT ON COLUMN kepegawaian.tbl_file_ds.kode_jabatan_internal IS 'untuk menampung nama jabatan dengan kode jabatan internal';
+COMMENT ON COLUMN tbl_file_ds.kode_jabatan_internal IS 'untuk menampung nama jabatan dengan kode jabatan internal';
 
-COMMENT ON COLUMN kepegawaian.tbl_file_ds.kelompok_jabatan IS 'khusus untuk keperluan laporan rekap';
+COMMENT ON COLUMN tbl_file_ds.kelompok_jabatan IS 'khusus untuk keperluan laporan rekap';
 
-COMMENT ON COLUMN kepegawaian.tbl_file_ds.tgl_tandatangan IS 'untuk mengetahui tgl tandatangan';
+COMMENT ON COLUMN tbl_file_ds.tgl_tandatangan IS 'untuk mengetahui tgl tandatangan';
 
-COMMENT ON COLUMN kepegawaian.tbl_file_ds.email_kirim IS 'Untuk menentukan alamat alternatif pengiriman dokumen';
+COMMENT ON COLUMN tbl_file_ds.email_kirim IS 'Untuk menentukan alamat alternatif pengiriman dokumen';
 
-CREATE MATERIALIZED VIEW kepegawaian.mv_kategori_ds AS
+CREATE MATERIALIZED VIEW mv_kategori_ds AS
  SELECT DISTINCT kategori AS kategori_ds
-   FROM kepegawaian.tbl_file_ds
+   FROM tbl_file_ds
   ORDER BY kategori
   WITH NO DATA;
 
-CREATE TABLE kepegawaian.pendidikan (
+CREATE TABLE pendidikan (
     "ID" character varying(255) NOT NULL,
     "TINGKAT_PENDIDIKAN_ID" character varying(255),
     "NAMA" character varying(255),
     "CEPAT_KODE" character varying(255)
 );
 
-CREATE MATERIALIZED VIEW kepegawaian.mv_nominatif_pegawai AS
+CREATE MATERIALIZED VIEW mv_nominatif_pegawai AS
  SELECT pegawai."ID",
     btrim((pegawai."PNS_ID")::text) AS "PNS_ID",
     btrim((pegawai."GELAR_DEPAN")::text) AS "GELAR_DEPAN",
@@ -1719,22 +1719,22 @@ CREATE MATERIALIZED VIEW kepegawaian.mv_nominatif_pegawai AS
     btrim((pegawai."EMAIL_DIKBUD")::text) AS "EMAIL_DIKBUD",
     vw."NAMA_UNOR_FULL",
     lokasi."NAMA" AS "TEMPAT_LAHIR_NAMA"
-   FROM ((((((((((kepegawaian.pegawai pegawai
-     LEFT JOIN kepegawaian.vw_unit_list vw ON (((pegawai."UNOR_ID")::text = (vw."ID")::text)))
-     LEFT JOIN kepegawaian.pns_aktif pa ON ((pegawai."ID" = pa."ID")))
-     LEFT JOIN kepegawaian.unitkerja uk ON (((uk."ID")::text = (vw."UNOR_INDUK")::text)))
-     LEFT JOIN kepegawaian.golongan ON ((pegawai."GOL_ID" = golongan."ID")))
-     LEFT JOIN kepegawaian.lokasi ON (((lokasi."ID")::text = (pegawai."TEMPAT_LAHIR_ID")::text)))
-     LEFT JOIN kepegawaian.pendidikan ON (((pendidikan."ID")::text = (pegawai."PENDIDIKAN_ID")::text)))
-     LEFT JOIN kepegawaian.agama ON ((agama."ID" = pegawai."AGAMA_ID")))
-     LEFT JOIN kepegawaian.kedudukan_hukum ON (((kedudukan_hukum."ID")::text = (pegawai."KEDUDUKAN_HUKUM_ID")::text)))
-     LEFT JOIN kepegawaian.jabatan ON ((pegawai."JABATAN_INSTANSI_REAL_ID" = (jabatan."KODE_JABATAN")::bpchar)))
-     LEFT JOIN kepegawaian.jenis_jabatan ON (((jenis_jabatan."ID")::text = (jabatan."JENIS_JABATAN")::text)))
+   FROM ((((((((((pegawai pegawai
+     LEFT JOIN vw_unit_list vw ON (((pegawai."UNOR_ID")::text = (vw."ID")::text)))
+     LEFT JOIN pns_aktif pa ON ((pegawai."ID" = pa."ID")))
+     LEFT JOIN unitkerja uk ON (((uk."ID")::text = (vw."UNOR_INDUK")::text)))
+     LEFT JOIN golongan ON ((pegawai."GOL_ID" = golongan."ID")))
+     LEFT JOIN lokasi ON (((lokasi."ID")::text = (pegawai."TEMPAT_LAHIR_ID")::text)))
+     LEFT JOIN pendidikan ON (((pendidikan."ID")::text = (pegawai."PENDIDIKAN_ID")::text)))
+     LEFT JOIN agama ON ((agama."ID" = pegawai."AGAMA_ID")))
+     LEFT JOIN kedudukan_hukum ON (((kedudukan_hukum."ID")::text = (pegawai."KEDUDUKAN_HUKUM_ID")::text)))
+     LEFT JOIN jabatan ON ((pegawai."JABATAN_INSTANSI_REAL_ID" = (jabatan."KODE_JABATAN")::bpchar)))
+     LEFT JOIN jenis_jabatan ON (((jenis_jabatan."ID")::text = (jabatan."JENIS_JABATAN")::text)))
   WHERE ((pa."ID" IS NOT NULL) AND ((pegawai."KEDUDUKAN_HUKUM_ID")::text <> ALL (ARRAY[('14'::character varying)::text, ('52'::character varying)::text, ('66'::character varying)::text, ('67'::character varying)::text, ('77'::character varying)::text, ('78'::character varying)::text, ('98'::character varying)::text, ('99'::character varying)::text])) AND ((pegawai.status_pegawai <> 3) OR (pegawai.status_pegawai IS NULL)))
   ORDER BY (btrim((pegawai."NAMA")::text))
   WITH NO DATA;
 
-CREATE TABLE kepegawaian.tkpendidikan (
+CREATE TABLE tkpendidikan (
     "ID" character varying(255) NOT NULL,
     "GOLONGAN_ID" character varying(255),
     "NAMA" character varying(255),
@@ -1744,7 +1744,7 @@ CREATE TABLE kepegawaian.tkpendidikan (
     "TINGKAT" smallint
 );
 
-CREATE MATERIALIZED VIEW kepegawaian.mv_pegawai AS
+CREATE MATERIALIZED VIEW mv_pegawai AS
  SELECT btrim((pegawai."ID")::text) AS "ID",
     btrim((pegawai."PNS_ID")::text) AS "PNS_ID",
     btrim((pegawai."NIP_LAMA")::text) AS "NIP_LAMA",
@@ -1854,22 +1854,22 @@ CREATE MATERIALIZED VIEW kepegawaian.mv_pegawai AS
     pa."ID" AS "PNS_AKTIF_ID",
     jr."KELAS" AS "KELAS_JABATAN",
     btrim((agama."NAMA")::text) AS "NAMA_AGAMA"
-   FROM ((((((((((kepegawaian.pegawai pegawai
-     LEFT JOIN kepegawaian.vw_unit_list vw ON (((pegawai."UNOR_ID")::text = (vw."ID")::text)))
-     LEFT JOIN kepegawaian.golongan ON ((pegawai."GOL_ID" = golongan."ID")))
-     LEFT JOIN kepegawaian.pns_aktif pa ON ((pegawai."ID" = pa."ID")))
-     LEFT JOIN kepegawaian.jabatan ON ((pegawai."JABATAN_INSTANSI_ID" = (jabatan."KODE_JABATAN")::bpchar)))
-     LEFT JOIN kepegawaian.jabatan jr ON ((pegawai."JABATAN_INSTANSI_REAL_ID" = (jr."KODE_JABATAN")::bpchar)))
-     LEFT JOIN kepegawaian.pendidikan ON (((pegawai."PENDIDIKAN_ID")::bpchar = (pendidikan."ID")::bpchar)))
-     LEFT JOIN kepegawaian.tkpendidikan ON (((tkpendidikan."ID")::bpchar = (pendidikan."TINGKAT_PENDIDIKAN_ID")::bpchar)))
-     LEFT JOIN kepegawaian.unitkerja un ON (((vw."UNOR_INDUK")::text = (un."ID")::text)))
-     LEFT JOIN kepegawaian.agama ON ((agama."ID" = pegawai."AGAMA_ID")))
-     LEFT JOIN kepegawaian.kedudukan_hukum ON (((kedudukan_hukum."ID")::text = (pegawai."KEDUDUKAN_HUKUM_ID")::text)))
+   FROM ((((((((((pegawai pegawai
+     LEFT JOIN vw_unit_list vw ON (((pegawai."UNOR_ID")::text = (vw."ID")::text)))
+     LEFT JOIN golongan ON ((pegawai."GOL_ID" = golongan."ID")))
+     LEFT JOIN pns_aktif pa ON ((pegawai."ID" = pa."ID")))
+     LEFT JOIN jabatan ON ((pegawai."JABATAN_INSTANSI_ID" = (jabatan."KODE_JABATAN")::bpchar)))
+     LEFT JOIN jabatan jr ON ((pegawai."JABATAN_INSTANSI_REAL_ID" = (jr."KODE_JABATAN")::bpchar)))
+     LEFT JOIN pendidikan ON (((pegawai."PENDIDIKAN_ID")::bpchar = (pendidikan."ID")::bpchar)))
+     LEFT JOIN tkpendidikan ON (((tkpendidikan."ID")::bpchar = (pendidikan."TINGKAT_PENDIDIKAN_ID")::bpchar)))
+     LEFT JOIN unitkerja un ON (((vw."UNOR_INDUK")::text = (un."ID")::text)))
+     LEFT JOIN agama ON ((agama."ID" = pegawai."AGAMA_ID")))
+     LEFT JOIN kedudukan_hukum ON (((kedudukan_hukum."ID")::text = (pegawai."KEDUDUKAN_HUKUM_ID")::text)))
   WHERE ((pa."ID" IS NOT NULL) AND ((pegawai."KEDUDUKAN_HUKUM_ID")::text <> '14'::text) AND ((pegawai."KEDUDUKAN_HUKUM_ID")::text <> '52'::text) AND ((pegawai."KEDUDUKAN_HUKUM_ID")::text <> '66'::text) AND ((pegawai."KEDUDUKAN_HUKUM_ID")::text <> '67'::text) AND ((pegawai."KEDUDUKAN_HUKUM_ID")::text <> '77'::text) AND ((pegawai."KEDUDUKAN_HUKUM_ID")::text <> '78'::text) AND ((pegawai."KEDUDUKAN_HUKUM_ID")::text <> '98'::text) AND ((pegawai."KEDUDUKAN_HUKUM_ID")::text <> '99'::text) AND ((pegawai.status_pegawai <> 3) OR (pegawai.status_pegawai IS NULL)))
   ORDER BY pegawai."NAMA"
   WITH NO DATA;
 
-CREATE TABLE kepegawaian.pegawai_atasan (
+CREATE TABLE pegawai_atasan (
     "ID" integer NOT NULL,
     "PNS_NIP" character varying(18),
     "NIP_ATASAN" character varying(18),
@@ -1879,7 +1879,7 @@ CREATE TABLE kepegawaian.pegawai_atasan (
     "NAMA_PPK" character varying(100)
 );
 
-CREATE MATERIALIZED VIEW kepegawaian.mv_pegawai_cuti AS
+CREATE MATERIALIZED VIEW mv_pegawai_cuti AS
  SELECT pegawai."ID",
     pegawai."NIP_BARU",
     pegawai."PNS_ID",
@@ -1901,17 +1901,17 @@ CREATE MATERIALIZED VIEW kepegawaian.mv_pegawai_cuti AS
     pt."KETERANGAN_TAMBAHAN",
     vw."UNOR_INDUK",
     vw."NAMA_UNOR_FULL"
-   FROM (((((kepegawaian.pegawai pegawai
-     LEFT JOIN kepegawaian.vw_unit_list vw ON (((pegawai."UNOR_ID")::text = (vw."ID")::text)))
-     LEFT JOIN kepegawaian.golongan ON ((pegawai."GOL_ID" = golongan."ID")))
-     LEFT JOIN kepegawaian.jabatan ON ((pegawai."JABATAN_INSTANSI_ID" = (jabatan."KODE_JABATAN")::bpchar)))
-     LEFT JOIN kepegawaian.pegawai_atasan pt ON (((pegawai."NIP_BARU")::text = (pt."PNS_NIP")::text)))
-     LEFT JOIN kepegawaian.pns_aktif pa ON ((pegawai."ID" = pa."ID")))
+   FROM (((((pegawai pegawai
+     LEFT JOIN vw_unit_list vw ON (((pegawai."UNOR_ID")::text = (vw."ID")::text)))
+     LEFT JOIN golongan ON ((pegawai."GOL_ID" = golongan."ID")))
+     LEFT JOIN jabatan ON ((pegawai."JABATAN_INSTANSI_ID" = (jabatan."KODE_JABATAN")::bpchar)))
+     LEFT JOIN pegawai_atasan pt ON (((pegawai."NIP_BARU")::text = (pt."PNS_NIP")::text)))
+     LEFT JOIN pns_aktif pa ON ((pegawai."ID" = pa."ID")))
   WHERE ((pa."ID" IS NOT NULL) AND ((pegawai."KEDUDUKAN_HUKUM_ID")::text <> '99'::text) AND ((pegawai."KEDUDUKAN_HUKUM_ID")::text <> '66'::text) AND ((pegawai."KEDUDUKAN_HUKUM_ID")::text <> '52'::text) AND ((pegawai."KEDUDUKAN_HUKUM_ID")::text <> '20'::text) AND ((pegawai."KEDUDUKAN_HUKUM_ID")::text <> '04'::text) AND ((pegawai.status_pegawai <> 3) OR (pegawai.status_pegawai IS NULL)))
   ORDER BY vw."UNOR_INDUK"
   WITH NO DATA;
 
-CREATE MATERIALIZED VIEW kepegawaian.mv_pegawai_layanan AS
+CREATE MATERIALIZED VIEW mv_pegawai_layanan AS
  SELECT "ID" AS id,
     "NIP_BARU" AS nip,
     "NAMA" AS nama,
@@ -1929,10 +1929,10 @@ CREATE MATERIALIZED VIEW kepegawaian.mv_pegawai_layanan AS
     "JENIS_KELAMIN" AS jeniskelamin,
     "TEMPAT_LAHIR" AS tempatlahir,
     "TGL_LAHIR" AS tgllahir
-   FROM kepegawaian.pegawai pegawai
+   FROM pegawai pegawai
   WITH NO DATA;
 
-CREATE TABLE kepegawaian.rwt_assesmen (
+CREATE TABLE rwt_assesmen (
     "ID" integer NOT NULL,
     "PNS_ID" character(255),
     "PNS_NIP" character(25),
@@ -1954,20 +1954,20 @@ CREATE TABLE kepegawaian.rwt_assesmen (
     "SATKER_ID" character varying
 );
 
-COMMENT ON COLUMN kepegawaian.rwt_assesmen."TAHUN" IS 'tahun_penilaian_awal';
+COMMENT ON COLUMN rwt_assesmen."TAHUN" IS 'tahun_penilaian_awal';
 
-COMMENT ON COLUMN kepegawaian.rwt_assesmen."FILE_UPLOAD" IS 'file laporan lengkap potensi';
+COMMENT ON COLUMN rwt_assesmen."FILE_UPLOAD" IS 'file laporan lengkap potensi';
 
-COMMENT ON COLUMN kepegawaian.rwt_assesmen."NILAI" IS 'Nilai Potensi';
+COMMENT ON COLUMN rwt_assesmen."NILAI" IS 'Nilai Potensi';
 
-CREATE MATERIALIZED VIEW kepegawaian.mv_riwayat_asesmen AS
+CREATE MATERIALIZED VIEW mv_riwayat_asesmen AS
  SELECT btrim((rwt_assesmen."PNS_NIP")::text) AS "PNS_NIP",
     btrim((rwt_assesmen."TAHUN")::text) AS "TAHUN",
     rwt_assesmen."NILAI",
     btrim((rwt_assesmen."FILE_UPLOAD")::text) AS "FILE_UPLOAD_FB_POTENSI",
     btrim((rwt_assesmen."FILE_UPLOAD")::text) AS "FILE_UPLOAD_LENGKAP_PT",
     btrim((rwt_assesmen."FILE_UPLOAD")::text) AS "FILE_UPLOAD_FB_PT"
-   FROM kepegawaian.rwt_assesmen
+   FROM rwt_assesmen
   WHERE ((btrim((rwt_assesmen."TAHUN")::text) = ('2019'::bpchar)::text) AND (rwt_assesmen."FILE_UPLOAD" ~~* '%a_p%'::text) AND (rwt_assesmen."FILE_UPLOAD_EXISTS" = '1'::smallint))
 UNION ALL
  SELECT btrim((rwt_assesmen."PNS_NIP")::text) AS "PNS_NIP",
@@ -1976,11 +1976,11 @@ UNION ALL
     btrim((rwt_assesmen."FILE_UPLOAD_FB_POTENSI")::text) AS "FILE_UPLOAD_FB_POTENSI",
     btrim((rwt_assesmen."FILE_UPLOAD_LENGKAP_PT")::text) AS "FILE_UPLOAD_LENGKAP_PT",
     btrim((rwt_assesmen."FILE_UPLOAD_FB_PT")::text) AS "FILE_UPLOAD_FB_PT"
-   FROM kepegawaian.rwt_assesmen
+   FROM rwt_assesmen
   WHERE (btrim((rwt_assesmen."TAHUN")::text) <> ('2019'::bpchar)::text)
   WITH NO DATA;
 
-CREATE MATERIALIZED VIEW kepegawaian.mv_unit_list_all AS
+CREATE MATERIALIZED VIEW mv_unit_list_all AS
  SELECT uk."NO",
     uk."KODE_INTERNAL",
     uk."ID",
@@ -2011,22 +2011,22 @@ CREATE MATERIALIZED VIEW kepegawaian.mv_unit_list_all AS
     es4."NAMA_UNOR" AS "NAMA_UNOR_ESELON_4",
     x."NAMA_UNOR" AS "NAMA_UNOR_FULL",
     uk."UNOR_INDUK_PENYETARAAN"
-   FROM (((((kepegawaian.unitkerja uk
-     LEFT JOIN kepegawaian.unitkerja es1 ON (((es1."ID")::text = (uk."ESELON_1")::text)))
-     LEFT JOIN kepegawaian.unitkerja es2 ON (((es2."ID")::text = (uk."ESELON_2")::text)))
-     LEFT JOIN kepegawaian.unitkerja es3 ON (((es3."ID")::text = (uk."ESELON_3")::text)))
-     LEFT JOIN kepegawaian.unitkerja es4 ON (((es4."ID")::text = (uk."ESELON_4")::text)))
+   FROM (((((unitkerja uk
+     LEFT JOIN unitkerja es1 ON (((es1."ID")::text = (uk."ESELON_1")::text)))
+     LEFT JOIN unitkerja es2 ON (((es2."ID")::text = (uk."ESELON_2")::text)))
+     LEFT JOIN unitkerja es3 ON (((es3."ID")::text = (uk."ESELON_3")::text)))
+     LEFT JOIN unitkerja es4 ON (((es4."ID")::text = (uk."ESELON_4")::text)))
      LEFT JOIN ( WITH RECURSIVE r AS (
                  SELECT unitkerja."ID",
                     (unitkerja."NAMA_UNOR")::text AS "NAMA_UNOR",
                     (unitkerja."ID")::text AS arr_id
-                   FROM kepegawaian.unitkerja
+                   FROM unitkerja
                   WHERE ((unitkerja."DIATASAN_ID")::text = 'A8ACA7397AEB3912E040640A040269BB'::text)
                 UNION ALL
                  SELECT a."ID",
                     (((a."NAMA_UNOR")::text || ' - '::text) || r_1."NAMA_UNOR"),
                     ((r_1.arr_id || '#'::text) || (a."ID")::text)
-                   FROM (kepegawaian.unitkerja a
+                   FROM (unitkerja a
                      JOIN r r_1 ON (((r_1."ID")::text = (a."DIATASAN_ID")::text)))
                 )
          SELECT r."ID",
@@ -2035,41 +2035,41 @@ CREATE MATERIALIZED VIEW kepegawaian.mv_unit_list_all AS
            FROM r) x ON (((uk."ID")::text = (x."ID")::text)))
   WITH NO DATA;
 
-CREATE VIEW kepegawaian.nama_unit AS
+CREATE VIEW nama_unit AS
  SELECT "ID",
     "NAMA_UNOR",
     ( SELECT unitkerja."NAMA_UNOR"
-           FROM kepegawaian.unitkerja unitkerja
+           FROM unitkerja unitkerja
           WHERE ((unitkerja."ID")::text = (a."UNOR_INDUK")::text)) AS satker,
     ( SELECT unitkerja."NAMA_UNOR"
-           FROM kepegawaian.unitkerja unitkerja
+           FROM unitkerja unitkerja
           WHERE ((unitkerja."ID")::text = (a."ESELON_4")::text)) AS es4,
     ( SELECT unitkerja."NAMA_UNOR"
-           FROM kepegawaian.unitkerja unitkerja
+           FROM unitkerja unitkerja
           WHERE ((unitkerja."ID")::text = (a."ESELON_3")::text)) AS es3,
     ( SELECT unitkerja."NAMA_UNOR"
-           FROM kepegawaian.unitkerja unitkerja
+           FROM unitkerja unitkerja
           WHERE ((unitkerja."ID")::text = (a."ESELON_2")::text)) AS es2,
     ( SELECT unitkerja."NAMA_UNOR"
-           FROM kepegawaian.unitkerja unitkerja
+           FROM unitkerja unitkerja
           WHERE ((unitkerja."ID")::text = (a."ESELON_1")::text)) AS es1
-   FROM kepegawaian.unitkerja a;
+   FROM unitkerja a;
 
-CREATE TABLE kepegawaian.nip_pejabat (
+CREATE TABLE nip_pejabat (
     "NIP" character varying(18) NOT NULL,
     id bigint NOT NULL
 );
 
-CREATE SEQUENCE kepegawaian.nip_pejabat_id_seq
+CREATE SEQUENCE nip_pejabat_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.nip_pejabat_id_seq OWNED BY kepegawaian.nip_pejabat.id;
+ALTER SEQUENCE nip_pejabat_id_seq OWNED BY nip_pejabat.id;
 
-CREATE TABLE kepegawaian.orang_tua (
+CREATE TABLE orang_tua (
     "ID" integer NOT NULL,
     "HUBUNGAN" smallint,
     "ALAMAT" text,
@@ -2098,32 +2098,32 @@ CREATE TABLE kepegawaian.orang_tua (
     "PNS_ID" character varying(32)
 );
 
-COMMENT ON COLUMN kepegawaian.orang_tua."KODE" IS '1=AYAH
+COMMENT ON COLUMN orang_tua."KODE" IS '1=AYAH
 2=IBU';
 
-CREATE SEQUENCE kepegawaian."orang_tua_ID_seq"
+CREATE SEQUENCE "orang_tua_ID_seq"
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian."orang_tua_ID_seq" OWNED BY kepegawaian.orang_tua."ID";
+ALTER SEQUENCE "orang_tua_ID_seq" OWNED BY orang_tua."ID";
 
-CREATE VIEW kepegawaian.organisasi_ropeg AS
+CREATE VIEW organisasi_ropeg AS
  WITH RECURSIVE org AS (
          SELECT unitkerja."ID" AS idorg,
             unitkerja."DIATASAN_ID" AS idorgparent,
             unitkerja."NAMA_UNOR" AS orgname,
             unitkerja."PEMIMPIN_PNS_ID" AS pemimpinpnsid
-           FROM kepegawaian.unitkerja
+           FROM unitkerja
           WHERE ((unitkerja."ID")::text = '8ae483a8641f817901641fce97d21d1b'::text)
         UNION
          SELECT e."ID",
             e."DIATASAN_ID",
             e."NAMA_UNOR",
             e."PEMIMPIN_PNS_ID"
-           FROM (kepegawaian.unitkerja e
+           FROM (unitkerja e
              JOIN org s ON (((s.idorg)::text = (e."DIATASAN_ID")::text)))
         )
  SELECT idorg,
@@ -2133,24 +2133,24 @@ CREATE VIEW kepegawaian.organisasi_ropeg AS
    FROM org x
   ORDER BY idorg;
 
-CREATE SEQUENCE kepegawaian."pegawai_atasan_ID_seq"
+CREATE SEQUENCE "pegawai_atasan_ID_seq"
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian."pegawai_atasan_ID_seq" OWNED BY kepegawaian.pegawai_atasan."ID";
+ALTER SEQUENCE "pegawai_atasan_ID_seq" OWNED BY pegawai_atasan."ID";
 
-CREATE SEQUENCE kepegawaian.pegawai_bkn_id
+CREATE SEQUENCE pegawai_bkn_id
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-CREATE TABLE kepegawaian.pegawai_bkn (
-    "ID" integer DEFAULT nextval('kepegawaian.pegawai_bkn_id'::regclass) NOT NULL,
+CREATE TABLE pegawai_bkn (
+    "ID" integer DEFAULT nextval('pegawai_bkn_id'::regclass) NOT NULL,
     "PNS_ID" character varying(32) NOT NULL,
     "NIP_LAMA" character varying(9),
     "NIP_BARU" character varying(18),
@@ -2231,7 +2231,7 @@ CREATE TABLE kepegawaian.pegawai_bkn (
     "JENIS_JABATAN_ID" integer
 );
 
-CREATE TABLE kepegawaian.pengajuan_tubel (
+CREATE TABLE pengajuan_tubel (
     "ID" integer NOT NULL,
     "NIP" character varying(30),
     "NOMOR_USUL" character varying(20),
@@ -2249,25 +2249,25 @@ CREATE TABLE kepegawaian.pengajuan_tubel (
     "AKHIR_BELAJAR" date
 );
 
-CREATE SEQUENCE kepegawaian."pengajuan_tubel_ID_seq"
+CREATE SEQUENCE "pengajuan_tubel_ID_seq"
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian."pengajuan_tubel_ID_seq" OWNED BY kepegawaian.pengajuan_tubel."ID";
+ALTER SEQUENCE "pengajuan_tubel_ID_seq" OWNED BY pengajuan_tubel."ID";
 
-CREATE SEQUENCE kepegawaian.peraturan_otk_id_peraturan_seq
+CREATE SEQUENCE peraturan_otk_id_peraturan_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.peraturan_otk_id_peraturan_seq OWNED BY kepegawaian.mst_peraturan_otk.id_peraturan;
+ALTER SEQUENCE peraturan_otk_id_peraturan_seq OWNED BY mst_peraturan_otk.id_peraturan;
 
-CREATE TABLE kepegawaian.perkiraan_kpo (
+CREATE TABLE perkiraan_kpo (
     id bigint NOT NULL,
     nip character varying(255),
     status smallint,
@@ -2299,33 +2299,33 @@ CREATE TABLE kepegawaian.perkiraan_kpo (
     no_surat_pengantar_es1 character varying(255)
 );
 
-COMMENT ON COLUMN kepegawaian.perkiraan_kpo.status IS 'tms/ms';
+COMMENT ON COLUMN perkiraan_kpo.status IS 'tms/ms';
 
-CREATE SEQUENCE kepegawaian.perkiraan_kpo_documents_id_seq
+CREATE SEQUENCE perkiraan_kpo_documents_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-CREATE SEQUENCE kepegawaian.perkiraan_kpo_id_seq
+CREATE SEQUENCE perkiraan_kpo_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.perkiraan_kpo_id_seq OWNED BY kepegawaian.perkiraan_kpo.id;
+ALTER SEQUENCE perkiraan_kpo_id_seq OWNED BY perkiraan_kpo.id;
 
-CREATE SEQUENCE kepegawaian.perkiraan_ppo_id_seq
+CREATE SEQUENCE perkiraan_ppo_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-CREATE TABLE kepegawaian.perkiraan_ppo (
-    id bigint DEFAULT nextval('kepegawaian.perkiraan_ppo_id_seq'::regclass) NOT NULL,
+CREATE TABLE perkiraan_ppo (
+    id bigint DEFAULT nextval('perkiraan_ppo_id_seq'::regclass) NOT NULL,
     nip character varying(255),
     status smallint DEFAULT 1,
     alasan text,
@@ -2357,9 +2357,9 @@ CREATE TABLE kepegawaian.perkiraan_ppo (
     n_jabatan_id character varying
 );
 
-COMMENT ON COLUMN kepegawaian.perkiraan_ppo.status IS 'tms/ms';
+COMMENT ON COLUMN perkiraan_ppo.status IS 'tms/ms';
 
-CREATE TABLE kepegawaian.perkiraan_usulan_log (
+CREATE TABLE perkiraan_usulan_log (
     id bigint NOT NULL,
     usulan_id bigint,
     _created_at timestamp(6) without time zone DEFAULT now(),
@@ -2368,44 +2368,44 @@ CREATE TABLE kepegawaian.perkiraan_usulan_log (
     alasan character varying(255)
 );
 
-CREATE SEQUENCE kepegawaian.perkiraan_usulan_log_id_seq
+CREATE SEQUENCE perkiraan_usulan_log_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.perkiraan_usulan_log_id_seq OWNED BY kepegawaian.perkiraan_usulan_log.id;
+ALTER SEQUENCE perkiraan_usulan_log_id_seq OWNED BY perkiraan_usulan_log.id;
 
-CREATE SEQUENCE kepegawaian.permissions_permission_id_seq
+CREATE SEQUENCE permissions_permission_id_seq
     START WITH 219
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-CREATE TABLE kepegawaian.permissions (
-    permission_id bigint DEFAULT nextval('kepegawaian.permissions_permission_id_seq'::regclass) NOT NULL,
+CREATE TABLE permissions (
+    permission_id bigint DEFAULT nextval('permissions_permission_id_seq'::regclass) NOT NULL,
     name character varying(100),
     description character varying(255),
     status character varying(20)
 );
 
-CREATE TABLE kepegawaian.peta_jabatan_permen (
+CREATE TABLE peta_jabatan_permen (
     id smallint NOT NULL,
     permen character varying(50)
 );
 
-CREATE SEQUENCE kepegawaian.peta_jabatan_permen_id_seq
+CREATE SEQUENCE peta_jabatan_permen_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.peta_jabatan_permen_id_seq OWNED BY kepegawaian.peta_jabatan_permen.id;
+ALTER SEQUENCE peta_jabatan_permen_id_seq OWNED BY peta_jabatan_permen.id;
 
-CREATE TABLE kepegawaian.pindah_unit (
+CREATE TABLE pindah_unit (
     "ID" integer NOT NULL,
     "NIP" character varying(32) NOT NULL,
     "SURAT_PERMOHONAN_PINDAH" character varying(100),
@@ -2429,25 +2429,25 @@ CREATE TABLE kepegawaian.pindah_unit (
     "CREATED_BY" integer
 );
 
-CREATE SEQUENCE kepegawaian."pindah_unit_ID_seq"
+CREATE SEQUENCE "pindah_unit_ID_seq"
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian."pindah_unit_ID_seq" OWNED BY kepegawaian.pindah_unit."ID";
+ALTER SEQUENCE "pindah_unit_ID_seq" OWNED BY pindah_unit."ID";
 
-CREATE VIEW kepegawaian.pns_aktif_old AS
+CREATE VIEW pns_aktif_old AS
  SELECT "ID",
     masa_kerja[0] AS masa_kerja_th,
     masa_kerja[1] AS masa_kerja_bl
    FROM ( SELECT pegawai."ID",
-            kepegawaian.get_masa_kerja_arr(pegawai."TMT_CPNS", ('now'::text)::date) AS masa_kerja
-           FROM kepegawaian.pegawai
+            get_masa_kerja_arr(pegawai."TMT_CPNS", ('now'::text)::date) AS masa_kerja
+           FROM pegawai
           WHERE ((pegawai.status_pegawai = 1) AND ((pegawai.terminated_date IS NULL) OR ((pegawai.terminated_date IS NOT NULL) AND (pegawai.terminated_date > ('now'::text)::date))))) temp;
 
-CREATE TABLE kepegawaian.ref_jabatan (
+CREATE TABLE ref_jabatan (
     "ID_JABATAN" double precision NOT NULL,
     "NAMA_JABATAN" text,
     "JENIS_JABATAN" character varying(100),
@@ -2457,38 +2457,38 @@ CREATE TABLE kepegawaian.ref_jabatan (
     "TUNJANGAN" double precision
 );
 
-CREATE TABLE kepegawaian.ref_tunjangan_jabatan (
+CREATE TABLE ref_tunjangan_jabatan (
     "ID_TUNJAB" integer NOT NULL,
     "ESELON" character varying(10),
     "BESARAN_TUNJAB" character varying(100)
 );
 
-CREATE TABLE kepegawaian.ref_tunjangan_kinerja (
+CREATE TABLE ref_tunjangan_kinerja (
     "ID" integer NOT NULL,
     "KELAS_JABATAN" integer,
     "TUNJANGAN_KINERJA" double precision
 );
 
-CREATE SEQUENCE kepegawaian."ref_tunjangan_kinerja_ID_seq"
+CREATE SEQUENCE "ref_tunjangan_kinerja_ID_seq"
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian."ref_tunjangan_kinerja_ID_seq" OWNED BY kepegawaian.ref_tunjangan_kinerja."ID";
+ALTER SEQUENCE "ref_tunjangan_kinerja_ID_seq" OWNED BY ref_tunjangan_kinerja."ID";
 
-CREATE VIEW kepegawaian.rekap_agama_jenis_kelamin AS
+CREATE VIEW rekap_agama_jenis_kelamin AS
  SELECT pegawai."JENIS_KELAMIN",
     agama."ID",
     agama."NAMA",
     count(*) AS total
-   FROM (kepegawaian.pegawai
-     LEFT JOIN kepegawaian.agama ON ((pegawai."AGAMA_ID" = agama."ID")))
+   FROM (pegawai
+     LEFT JOIN agama ON ((pegawai."AGAMA_ID" = agama."ID")))
   GROUP BY pegawai."JENIS_KELAMIN", agama."ID", agama."NAMA"
   ORDER BY agama."NAMA";
 
-CREATE TABLE kepegawaian.request_formasi (
+CREATE TABLE request_formasi (
     id bigint NOT NULL,
     unit_id character varying(32),
     jumlah_ajuan smallint,
@@ -2499,38 +2499,38 @@ CREATE TABLE kepegawaian.request_formasi (
     skala_prioritas smallint
 );
 
-CREATE SEQUENCE kepegawaian.request_formasi_id_seq
+CREATE SEQUENCE request_formasi_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.request_formasi_id_seq OWNED BY kepegawaian.request_formasi.id;
+ALTER SEQUENCE request_formasi_id_seq OWNED BY request_formasi.id;
 
-CREATE TABLE kepegawaian.role_permissions (
+CREATE TABLE role_permissions (
     role_id bigint,
     permission_id bigint,
     id bigint NOT NULL
 );
 
-CREATE SEQUENCE kepegawaian.role_permissions_id_seq
+CREATE SEQUENCE role_permissions_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.role_permissions_id_seq OWNED BY kepegawaian.role_permissions.id;
+ALTER SEQUENCE role_permissions_id_seq OWNED BY role_permissions.id;
 
-CREATE SEQUENCE kepegawaian.roles_role_id_seq
+CREATE SEQUENCE roles_role_id_seq
     START WITH 6
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-CREATE TABLE kepegawaian.roles (
+CREATE TABLE roles (
     role_name character(60) NOT NULL,
     description character varying(255) DEFAULT NULL::character varying,
     is_default integer DEFAULT 0 NOT NULL,
@@ -2538,25 +2538,25 @@ CREATE TABLE kepegawaian.roles (
     login_destination character(255) DEFAULT '/'::bpchar NOT NULL,
     deleted integer DEFAULT 0 NOT NULL,
     default_context character(255) DEFAULT 'content'::bpchar NOT NULL,
-    role_id integer DEFAULT nextval('kepegawaian.roles_role_id_seq'::regclass) NOT NULL
+    role_id integer DEFAULT nextval('roles_role_id_seq'::regclass) NOT NULL
 );
 
-CREATE TABLE kepegawaian.roles_users (
+CREATE TABLE roles_users (
     role_id bigint,
     user_id bigint,
     role_user_id bigint NOT NULL
 );
 
-CREATE SEQUENCE kepegawaian.roles_users_role_user_id_seq
+CREATE SEQUENCE roles_users_role_user_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.roles_users_role_user_id_seq OWNED BY kepegawaian.roles_users.role_user_id;
+ALTER SEQUENCE roles_users_role_user_id_seq OWNED BY roles_users.role_user_id;
 
-CREATE TABLE kepegawaian.rpt_golongan_bulan (
+CREATE TABLE rpt_golongan_bulan (
     "ID" smallint NOT NULL,
     "GOLONGAN_ID" character varying(10),
     "GOLONGAN_NAMA" character varying(40),
@@ -2565,16 +2565,16 @@ CREATE TABLE kepegawaian.rpt_golongan_bulan (
     "JUMLAH" smallint
 );
 
-CREATE SEQUENCE kepegawaian."rpt_golongan_bulan_ID_seq"
+CREATE SEQUENCE "rpt_golongan_bulan_ID_seq"
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian."rpt_golongan_bulan_ID_seq" OWNED BY kepegawaian.rpt_golongan_bulan."ID";
+ALTER SEQUENCE "rpt_golongan_bulan_ID_seq" OWNED BY rpt_golongan_bulan."ID";
 
-CREATE TABLE kepegawaian.rpt_jumlah_asn (
+CREATE TABLE rpt_jumlah_asn (
     "ID" integer NOT NULL,
     "BULAN" smallint,
     "TAHUN" character varying(4),
@@ -2583,25 +2583,25 @@ CREATE TABLE kepegawaian.rpt_jumlah_asn (
     "JUMLAH" real
 );
 
-CREATE SEQUENCE kepegawaian."rpt_jumlah_asn_ID_seq"
+CREATE SEQUENCE "rpt_jumlah_asn_ID_seq"
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian."rpt_jumlah_asn_ID_seq" OWNED BY kepegawaian.rpt_jumlah_asn."ID";
+ALTER SEQUENCE "rpt_jumlah_asn_ID_seq" OWNED BY rpt_jumlah_asn."ID";
 
-CREATE SEQUENCE kepegawaian.rpt_jumlah_asn_id_seq
+CREATE SEQUENCE rpt_jumlah_asn_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.rpt_jumlah_asn_id_seq OWNED BY kepegawaian.rpt_jumlah_asn."ID";
+ALTER SEQUENCE rpt_jumlah_asn_id_seq OWNED BY rpt_jumlah_asn."ID";
 
-CREATE TABLE kepegawaian.rpt_pendidikan_bulan (
+CREATE TABLE rpt_pendidikan_bulan (
     "ID" smallint NOT NULL,
     "TINGKAT_PENDIDIKAN" character varying(16),
     "NAMA_TINGKAT" character varying(255),
@@ -2610,25 +2610,25 @@ CREATE TABLE kepegawaian.rpt_pendidikan_bulan (
     "JUMLAH" smallint
 );
 
-CREATE SEQUENCE kepegawaian."rpt_pendidikan_bulan_ID_seq"
+CREATE SEQUENCE "rpt_pendidikan_bulan_ID_seq"
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian."rpt_pendidikan_bulan_ID_seq" OWNED BY kepegawaian.rpt_pendidikan_bulan."ID";
+ALTER SEQUENCE "rpt_pendidikan_bulan_ID_seq" OWNED BY rpt_pendidikan_bulan."ID";
 
-CREATE SEQUENCE kepegawaian."rwt_assesmen_ID_seq"
+CREATE SEQUENCE "rwt_assesmen_ID_seq"
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian."rwt_assesmen_ID_seq" OWNED BY kepegawaian.rwt_assesmen."ID";
+ALTER SEQUENCE "rwt_assesmen_ID_seq" OWNED BY rwt_assesmen."ID";
 
-CREATE TABLE kepegawaian.rwt_diklat (
+CREATE TABLE rwt_diklat (
     id bigint NOT NULL,
     jenis_diklat character varying,
     jenis_diklat_id character varying,
@@ -2650,22 +2650,22 @@ CREATE TABLE kepegawaian.rwt_diklat (
     siasn_id character varying
 );
 
-CREATE SEQUENCE kepegawaian."rwt_diklat_ID_seq"
+CREATE SEQUENCE "rwt_diklat_ID_seq"
     START WITH 37
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-CREATE SEQUENCE kepegawaian."rwt_diklat_fungsional_ID_seq"
+CREATE SEQUENCE "rwt_diklat_fungsional_ID_seq"
     START WITH 7
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-CREATE TABLE kepegawaian.rwt_diklat_fungsional (
-    "DIKLAT_FUNGSIONAL_ID" character varying(255) DEFAULT nextval('kepegawaian."rwt_diklat_fungsional_ID_seq"'::regclass) NOT NULL,
+CREATE TABLE rwt_diklat_fungsional (
+    "DIKLAT_FUNGSIONAL_ID" character varying(255) DEFAULT nextval('"rwt_diklat_fungsional_ID_seq"'::regclass) NOT NULL,
     "NIP_BARU" character varying(255),
     "NIP_LAMA" character varying(255),
     "JENIS_DIKLAT" character varying(255),
@@ -2684,17 +2684,17 @@ CREATE TABLE kepegawaian.rwt_diklat_fungsional (
     "SIASN_ID" character varying
 );
 
-CREATE SEQUENCE kepegawaian.rwt_diklat_id_seq
+CREATE SEQUENCE rwt_diklat_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.rwt_diklat_id_seq OWNED BY kepegawaian.rwt_diklat.id;
+ALTER SEQUENCE rwt_diklat_id_seq OWNED BY rwt_diklat.id;
 
-CREATE TABLE kepegawaian.rwt_diklat_struktural (
-    "ID" character varying(255) DEFAULT nextval('kepegawaian."rwt_diklat_ID_seq"'::regclass) NOT NULL,
+CREATE TABLE rwt_diklat_struktural (
+    "ID" character varying(255) DEFAULT nextval('"rwt_diklat_ID_seq"'::regclass) NOT NULL,
     "PNS_ID" character varying(255),
     "PNS_NIP" character varying(255),
     "PNS_NAMA" character varying(255),
@@ -2711,15 +2711,15 @@ CREATE TABLE kepegawaian.rwt_diklat_struktural (
     "SIASN_ID" character varying
 );
 
-CREATE SEQUENCE kepegawaian.rwt_golongan_id_seq
+CREATE SEQUENCE rwt_golongan_id_seq
     START WITH 351278
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-CREATE TABLE kepegawaian.rwt_golongan (
-    "ID" character varying(255) DEFAULT nextval('kepegawaian.rwt_golongan_id_seq'::regclass) NOT NULL,
+CREATE TABLE rwt_golongan (
+    "ID" character varying(255) DEFAULT nextval('rwt_golongan_id_seq'::regclass) NOT NULL,
     "PNS_ID" character varying(255),
     "PNS_NIP" character varying(255),
     "PNS_NAMA" character varying(255),
@@ -2754,7 +2754,7 @@ CREATE TABLE kepegawaian.rwt_golongan (
     "JENIS_RIWAYAT" character varying(50)
 );
 
-CREATE TABLE kepegawaian.rwt_hukdis (
+CREATE TABLE rwt_hukdis (
     "ID" bigint NOT NULL,
     "PNS_ID" character(32),
     "PNS_NIP" character(21),
@@ -2777,23 +2777,23 @@ CREATE TABLE kepegawaian.rwt_hukdis (
     "KETERANGAN_BERKAS" character varying(255)
 );
 
-CREATE SEQUENCE kepegawaian."rwt_hukdis_ID_seq"
+CREATE SEQUENCE "rwt_hukdis_ID_seq"
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian."rwt_hukdis_ID_seq" OWNED BY kepegawaian.rwt_hukdis."ID";
+ALTER SEQUENCE "rwt_hukdis_ID_seq" OWNED BY rwt_hukdis."ID";
 
-CREATE SEQUENCE kepegawaian."rwt_jabatan_ID_seq"
+CREATE SEQUENCE "rwt_jabatan_ID_seq"
     START WITH 94276
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-CREATE TABLE kepegawaian.rwt_jabatan (
+CREATE TABLE rwt_jabatan (
     "ID_BKN" character(64),
     "PNS_ID" character(100),
     "PNS_NIP" character(25),
@@ -2816,7 +2816,7 @@ CREATE TABLE kepegawaian.rwt_jabatan (
     "ESELON2" text,
     "ESELON3" text,
     "ESELON4" text,
-    "ID" bigint DEFAULT nextval('kepegawaian."rwt_jabatan_ID_seq"'::regclass) NOT NULL,
+    "ID" bigint DEFAULT nextval('"rwt_jabatan_ID_seq"'::regclass) NOT NULL,
     "CATATAN" character(255),
     "JENIS_SK" character(100),
     "LAST_UPDATED" date,
@@ -2831,7 +2831,7 @@ CREATE TABLE kepegawaian.rwt_jabatan (
     "TERMINATED_DATE" date
 );
 
-CREATE TABLE kepegawaian.rwt_jabatan_empty (
+CREATE TABLE rwt_jabatan_empty (
     "ID_BKN" character(64),
     "PNS_ID" character(100),
     "PNS_NIP" character(25),
@@ -2854,7 +2854,7 @@ CREATE TABLE kepegawaian.rwt_jabatan_empty (
     "ESELON2" text,
     "ESELON3" text,
     "ESELON4" text,
-    "ID" bigint DEFAULT nextval('kepegawaian."rwt_jabatan_ID_seq"'::regclass) NOT NULL,
+    "ID" bigint DEFAULT nextval('"rwt_jabatan_ID_seq"'::regclass) NOT NULL,
     "CATATAN" character(255),
     "JENIS_SK" character(100),
     "LAST_UPDATED" date,
@@ -2869,7 +2869,7 @@ CREATE TABLE kepegawaian.rwt_jabatan_empty (
     "TERMINATED_DATE" date
 );
 
-CREATE TABLE kepegawaian.rwt_kgb (
+CREATE TABLE rwt_kgb (
     pegawai_id integer,
     tmt_sk date,
     alasan character varying(255),
@@ -2877,7 +2877,7 @@ CREATE TABLE kepegawaian.rwt_kgb (
     no_sk character varying(255),
     pejabat character varying(255),
     id bigint NOT NULL,
-    ref character varying(255) DEFAULT kepegawaian.uuid_generate_v4(),
+    ref character varying(255) DEFAULT uuid_generate_v4(),
     tgl_sk date,
     pegawai_nama character varying(255),
     pegawai_nip character varying(255),
@@ -2909,16 +2909,16 @@ CREATE TABLE kepegawaian.rwt_kgb (
     "KETERANGAN_BERKAS" character varying(255)
 );
 
-CREATE SEQUENCE kepegawaian.rwt_kgb_id_seq
+CREATE SEQUENCE rwt_kgb_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.rwt_kgb_id_seq OWNED BY kepegawaian.rwt_kgb.id;
+ALTER SEQUENCE rwt_kgb_id_seq OWNED BY rwt_kgb.id;
 
-CREATE TABLE kepegawaian.rwt_kinerja (
+CREATE TABLE rwt_kinerja (
     id integer NOT NULL,
     id_simarin integer,
     tahun integer,
@@ -3005,21 +3005,21 @@ CREATE TABLE kepegawaian.rwt_kinerja (
     keputusan_rekomendasi_atasan_pejabat text,
     url_skp_instansi_lama character varying(200),
     is_keberatan_date character varying(5),
-    ref uuid DEFAULT kepegawaian.uuid_generate_v4(),
+    ref uuid DEFAULT uuid_generate_v4(),
     id_arsip integer,
     created_date timestamp(6) without time zone DEFAULT now()
 );
 
-CREATE SEQUENCE kepegawaian.rwt_kinerja_id_seq
+CREATE SEQUENCE rwt_kinerja_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.rwt_kinerja_id_seq OWNED BY kepegawaian.rwt_kinerja.id;
+ALTER SEQUENCE rwt_kinerja_id_seq OWNED BY rwt_kinerja.id;
 
-CREATE TABLE kepegawaian.rwt_kursus (
+CREATE TABLE rwt_kursus (
     "PNS_ID_x" character(32),
     "PNS_NIP" character(30),
     "TIPE_KURSUS" character(10),
@@ -3038,24 +3038,24 @@ CREATE TABLE kepegawaian.rwt_kursus (
     "PNS_ID" character varying
 );
 
-CREATE SEQUENCE kepegawaian."rwt_kursus_ID_seq"
+CREATE SEQUENCE "rwt_kursus_ID_seq"
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian."rwt_kursus_ID_seq" OWNED BY kepegawaian.rwt_kursus."ID";
+ALTER SEQUENCE "rwt_kursus_ID_seq" OWNED BY rwt_kursus."ID";
 
-CREATE SEQUENCE kepegawaian."rwt_pekerjaan_ID_seq"
+CREATE SEQUENCE "rwt_pekerjaan_ID_seq"
     START WITH 3
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-CREATE TABLE kepegawaian.rwt_pekerjaan (
-    "ID" integer DEFAULT nextval('kepegawaian."rwt_pekerjaan_ID_seq"'::regclass) NOT NULL,
+CREATE TABLE rwt_pekerjaan (
+    "ID" integer DEFAULT nextval('"rwt_pekerjaan_ID_seq"'::regclass) NOT NULL,
     "PNS_NIP" character(30),
     "JENIS_PERUSAHAAN" character(100),
     "NAMA_PERUSAHAAN" character(200),
@@ -3067,15 +3067,15 @@ CREATE TABLE kepegawaian.rwt_pekerjaan (
     "KETERANGAN_BERKAS" character varying(255)
 );
 
-CREATE SEQUENCE kepegawaian."rwt_pendidikan_ID_seq"
+CREATE SEQUENCE "rwt_pendidikan_ID_seq"
     START WITH 66872
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-CREATE TABLE kepegawaian.rwt_pendidikan (
-    "ID" integer DEFAULT nextval('kepegawaian."rwt_pendidikan_ID_seq"'::regclass) NOT NULL,
+CREATE TABLE rwt_pendidikan (
+    "ID" integer DEFAULT nextval('"rwt_pendidikan_ID_seq"'::regclass) NOT NULL,
     "PNS_ID_3" character varying(32),
     "TINGKAT_PENDIDIKAN_ID" character varying(32),
     "PENDIDIKAN_ID_3" character varying(32),
@@ -3099,15 +3099,15 @@ CREATE TABLE kepegawaian.rwt_pendidikan (
     "PENDIDIKAN_ID" character varying
 );
 
-CREATE SEQUENCE kepegawaian."rwt_penghargaan_ID_seq"
+CREATE SEQUENCE "rwt_penghargaan_ID_seq"
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-CREATE TABLE kepegawaian.rwt_penghargaan (
-    "ID" integer DEFAULT nextval('kepegawaian."rwt_penghargaan_ID_seq"'::regclass) NOT NULL,
+CREATE TABLE rwt_penghargaan (
+    "ID" integer DEFAULT nextval('"rwt_penghargaan_ID_seq"'::regclass) NOT NULL,
     "PNS_ID" character(32),
     "PNS_NIP" character(21),
     "NAMA" character(200),
@@ -3122,7 +3122,7 @@ CREATE TABLE kepegawaian.rwt_penghargaan (
     "KETERANGAN" text
 );
 
-CREATE TABLE kepegawaian.rwt_penghargaan_umum (
+CREATE TABLE rwt_penghargaan_umum (
     id bigint NOT NULL,
     jenis_penghargaan character varying,
     deskripsi_penghargaan character varying,
@@ -3131,16 +3131,16 @@ CREATE TABLE kepegawaian.rwt_penghargaan_umum (
     exist boolean DEFAULT true
 );
 
-CREATE SEQUENCE kepegawaian.rwt_penghargaan_umum_id_seq
+CREATE SEQUENCE rwt_penghargaan_umum_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.rwt_penghargaan_umum_id_seq OWNED BY kepegawaian.rwt_penghargaan_umum.id;
+ALTER SEQUENCE rwt_penghargaan_umum_id_seq OWNED BY rwt_penghargaan_umum.id;
 
-CREATE TABLE kepegawaian.rwt_penugasan (
+CREATE TABLE rwt_penugasan (
     id bigint NOT NULL,
     tipe_jabatan character varying,
     deskripsi_jabatan text,
@@ -3150,24 +3150,24 @@ CREATE TABLE kepegawaian.rwt_penugasan (
     exist boolean DEFAULT true
 );
 
-CREATE SEQUENCE kepegawaian.rwt_penugasan_id_seq
+CREATE SEQUENCE rwt_penugasan_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.rwt_penugasan_id_seq OWNED BY kepegawaian.rwt_penugasan.id;
+ALTER SEQUENCE rwt_penugasan_id_seq OWNED BY rwt_penugasan.id;
 
-CREATE SEQUENCE kepegawaian.rwt_pindah_unit_kerja_id_seq
+CREATE SEQUENCE rwt_pindah_unit_kerja_id_seq
     START WITH 2
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-CREATE TABLE kepegawaian.rwt_pindah_unit_kerja (
-    "ID" character varying(255) DEFAULT nextval('kepegawaian.rwt_pindah_unit_kerja_id_seq'::regclass) NOT NULL,
+CREATE TABLE rwt_pindah_unit_kerja (
+    "ID" character varying(255) DEFAULT nextval('rwt_pindah_unit_kerja_id_seq'::regclass) NOT NULL,
     "PNS_ID" character varying(255),
     "PNS_NIP" character varying(255),
     "PNS_NAMA" character varying(255),
@@ -3185,7 +3185,7 @@ CREATE TABLE kepegawaian.rwt_pindah_unit_kerja (
     "KETERANGAN_BERKAS" character varying(255)
 );
 
-CREATE TABLE kepegawaian.rwt_pns_cpns (
+CREATE TABLE rwt_pns_cpns (
     "ID" integer NOT NULL,
     "STATUS_KEPEGAWAIAN" character varying(5),
     "TMT_CPNS" date,
@@ -3212,24 +3212,24 @@ CREATE TABLE kepegawaian.rwt_pns_cpns (
     "PNS_NIP" character varying(18)
 );
 
-CREATE SEQUENCE kepegawaian."rwt_pns_cpns_ID_seq"
+CREATE SEQUENCE "rwt_pns_cpns_ID_seq"
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian."rwt_pns_cpns_ID_seq" OWNED BY kepegawaian.rwt_pns_cpns."ID";
+ALTER SEQUENCE "rwt_pns_cpns_ID_seq" OWNED BY rwt_pns_cpns."ID";
 
-CREATE SEQUENCE kepegawaian.rwt_prestasi_kerja_id_seq
+CREATE SEQUENCE rwt_prestasi_kerja_id_seq
     START WITH 16
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-CREATE TABLE kepegawaian.rwt_prestasi_kerja (
-    "ID" character varying(255) DEFAULT nextval('kepegawaian.rwt_prestasi_kerja_id_seq'::regclass) NOT NULL,
+CREATE TABLE rwt_prestasi_kerja (
+    "ID" character varying(255) DEFAULT nextval('rwt_prestasi_kerja_id_seq'::regclass) NOT NULL,
     "PNS_NIP" character varying(255),
     "PNS_NAMA" character varying(255),
     "ATASAN_LANGSUNG_PNS_NAMA" character varying(255),
@@ -3273,7 +3273,7 @@ CREATE TABLE kepegawaian.rwt_prestasi_kerja (
     "PERILAKU_INISIATIF_KERJA" character varying(20)
 );
 
-CREATE TABLE kepegawaian.rwt_tugas_belajar (
+CREATE TABLE rwt_tugas_belajar (
     "ID" integer NOT NULL,
     "NAMA" character varying(100),
     "NIP" character varying(30),
@@ -3292,16 +3292,16 @@ CREATE TABLE kepegawaian.rwt_tugas_belajar (
     "KETERANGAN_BERKAS" character varying(255)
 );
 
-CREATE SEQUENCE kepegawaian."rwt_tugas_belajar_ID_seq"
+CREATE SEQUENCE "rwt_tugas_belajar_ID_seq"
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian."rwt_tugas_belajar_ID_seq" OWNED BY kepegawaian.rwt_tugas_belajar."ID";
+ALTER SEQUENCE "rwt_tugas_belajar_ID_seq" OWNED BY rwt_tugas_belajar."ID";
 
-CREATE TABLE kepegawaian.rwt_ujikom (
+CREATE TABLE rwt_ujikom (
     id bigint NOT NULL,
     jenis_ujikom character varying,
     nip_baru character varying,
@@ -3311,32 +3311,32 @@ CREATE TABLE kepegawaian.rwt_ujikom (
     tahun integer
 );
 
-CREATE SEQUENCE kepegawaian.rwt_ujikom_id_seq
+CREATE SEQUENCE rwt_ujikom_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.rwt_ujikom_id_seq OWNED BY kepegawaian.rwt_ujikom.id;
+ALTER SEQUENCE rwt_ujikom_id_seq OWNED BY rwt_ujikom.id;
 
-CREATE TABLE kepegawaian.settings (
+CREATE TABLE settings (
     name text NOT NULL,
     module character varying(50) NOT NULL,
     value character varying(500) NOT NULL,
     id bigint NOT NULL
 );
 
-CREATE SEQUENCE kepegawaian.settings_id_seq
+CREATE SEQUENCE settings_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.settings_id_seq OWNED BY kepegawaian.settings.id;
+ALTER SEQUENCE settings_id_seq OWNED BY settings.id;
 
-CREATE TABLE kepegawaian.sisa_cuti (
+CREATE TABLE sisa_cuti (
     "ID" integer NOT NULL,
     "PNS_NIP" character varying(18) NOT NULL,
     "TAHUN" character varying(4) NOT NULL,
@@ -3348,16 +3348,16 @@ CREATE TABLE kepegawaian.sisa_cuti (
     "SUDAH_DIAMBIL" smallint
 );
 
-CREATE SEQUENCE kepegawaian."sisa_cuti_ID_seq"
+CREATE SEQUENCE "sisa_cuti_ID_seq"
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian."sisa_cuti_ID_seq" OWNED BY kepegawaian.sisa_cuti."ID";
+ALTER SEQUENCE "sisa_cuti_ID_seq" OWNED BY sisa_cuti."ID";
 
-CREATE TABLE kepegawaian.synch_jumlah_pegawai (
+CREATE TABLE synch_jumlah_pegawai (
     id bigint NOT NULL,
     kode_unit_kerja character varying(20),
     id_unor_bkn character varying(32),
@@ -3369,22 +3369,22 @@ CREATE TABLE kepegawaian.synch_jumlah_pegawai (
     update_time timestamp(6) without time zone
 );
 
-CREATE SEQUENCE kepegawaian.synch_jumlah_pegawai_id_seq
+CREATE SEQUENCE synch_jumlah_pegawai_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.synch_jumlah_pegawai_id_seq OWNED BY kepegawaian.synch_jumlah_pegawai.id;
+ALTER SEQUENCE synch_jumlah_pegawai_id_seq OWNED BY synch_jumlah_pegawai.id;
 
-CREATE TABLE kepegawaian.tb_nomor_batasan (
+CREATE TABLE tb_nomor_batasan (
     "BATAS_AWAL" character varying(100) NOT NULL,
     "BATAS_AKHIR" character varying(100) NOT NULL,
     "TAHUN_NOMOR" character varying(100)
 );
 
-CREATE TABLE kepegawaian.tb_nomor_surat (
+CREATE TABLE tb_nomor_surat (
     id double precision NOT NULL,
     nomor_surat double precision NOT NULL,
     kode character varying(100) NOT NULL,
@@ -3394,11 +3394,11 @@ CREATE TABLE kepegawaian.tb_nomor_surat (
     username character varying(100) NOT NULL
 );
 
-CREATE TABLE kepegawaian.tbl_cek (
+CREATE TABLE tbl_cek (
     id_file character varying(200)
 );
 
-CREATE TABLE kepegawaian.tbl_file_ds_corrector (
+CREATE TABLE tbl_file_ds_corrector (
     korektor_ke smallint,
     id_pegawai_korektor character varying(100),
     is_returned smallint,
@@ -3408,33 +3408,33 @@ CREATE TABLE kepegawaian.tbl_file_ds_corrector (
     id integer NOT NULL
 );
 
-COMMENT ON COLUMN kepegawaian.tbl_file_ds_corrector.is_returned IS '1=dikembalikan, 0/null = sudah oke';
+COMMENT ON COLUMN tbl_file_ds_corrector.is_returned IS '1=dikembalikan, 0/null = sudah oke';
 
-COMMENT ON COLUMN kepegawaian.tbl_file_ds_corrector.is_corrected IS '1=koreksi ok, 2=siap koreksi, 0/null = masih antrian';
+COMMENT ON COLUMN tbl_file_ds_corrector.is_corrected IS '1=koreksi ok, 2=siap koreksi, 0/null = masih antrian';
 
-CREATE SEQUENCE kepegawaian.tbl_file_ds_corrector_id_seq
+CREATE SEQUENCE tbl_file_ds_corrector_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.tbl_file_ds_corrector_id_seq OWNED BY kepegawaian.tbl_file_ds_corrector.id;
+ALTER SEQUENCE tbl_file_ds_corrector_id_seq OWNED BY tbl_file_ds_corrector.id;
 
-CREATE SEQUENCE kepegawaian.tbl_file_ds_id_seq
+CREATE SEQUENCE tbl_file_ds_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.tbl_file_ds_id_seq OWNED BY kepegawaian.tbl_file_ds.id;
+ALTER SEQUENCE tbl_file_ds_id_seq OWNED BY tbl_file_ds.id;
 
-CREATE TABLE kepegawaian.tbl_file_ds_khusus_login (
+CREATE TABLE tbl_file_ds_khusus_login (
     "ID_FILE" character varying(255) NOT NULL
 );
 
-CREATE TABLE kepegawaian.tbl_file_ds_riwayat (
+CREATE TABLE tbl_file_ds_riwayat (
     id_file character varying(200),
     id_pemroses character varying(255),
     tindakan text,
@@ -3444,22 +3444,22 @@ CREATE TABLE kepegawaian.tbl_file_ds_riwayat (
     id_riwayat bigint NOT NULL
 );
 
-CREATE SEQUENCE kepegawaian.tbl_file_ds_riwayat_id_riwayat_seq
+CREATE SEQUENCE tbl_file_ds_riwayat_id_riwayat_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.tbl_file_ds_riwayat_id_riwayat_seq OWNED BY kepegawaian.tbl_file_ds_riwayat.id_riwayat;
+ALTER SEQUENCE tbl_file_ds_riwayat_id_riwayat_seq OWNED BY tbl_file_ds_riwayat.id_riwayat;
 
-CREATE TABLE kepegawaian.tbl_file_ttd (
+CREATE TABLE tbl_file_ttd (
     id_pns_bkn character varying(200) NOT NULL,
     nip character varying(50),
     base64ttd text
 );
 
-CREATE TABLE kepegawaian.tbl_kategori_dokumen (
+CREATE TABLE tbl_kategori_dokumen (
     id_kategori smallint NOT NULL,
     kategori_dokumen character varying(255),
     update_jabatan smallint,
@@ -3473,7 +3473,7 @@ CREATE TABLE kepegawaian.tbl_kategori_dokumen (
     login_untuk_lihat smallint
 );
 
-CREATE TABLE kepegawaian.tbl_kategori_dokumen_penandatangan (
+CREATE TABLE tbl_kategori_dokumen_penandatangan (
     "ID_URUT" bigint NOT NULL,
     "KELOMPOK" character varying(255),
     "PENANDATANGAN" character varying(255),
@@ -3485,13 +3485,13 @@ CREATE TABLE kepegawaian.tbl_kategori_dokumen_penandatangan (
     "ID_UNOR" character varying(255)
 );
 
-CREATE TABLE kepegawaian.tbl_pengantar_dokumen (
+CREATE TABLE tbl_pengantar_dokumen (
     id_pengantar character varying(255) NOT NULL,
     html_lampiran text,
     skema character varying(10)
 );
 
-CREATE TABLE kepegawaian.tte_master_variable (
+CREATE TABLE tte_master_variable (
     id smallint NOT NULL,
     label_variable character varying(50),
     nama_variable character varying(50),
@@ -3499,32 +3499,32 @@ CREATE TABLE kepegawaian.tte_master_variable (
     keterangan character varying(255)
 );
 
-CREATE SEQUENCE kepegawaian."tte_ master_variable_id_seq"
+CREATE SEQUENCE "tte_ master_variable_id_seq"
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian."tte_ master_variable_id_seq" OWNED BY kepegawaian.tte_master_variable.id;
+ALTER SEQUENCE "tte_ master_variable_id_seq" OWNED BY tte_master_variable.id;
 
-CREATE TABLE kepegawaian.tte_master_korektor (
+CREATE TABLE tte_master_korektor (
     id smallint NOT NULL,
     id_tte_master_proses smallint,
     id_pegawai_korektor character varying(32),
     korektor_ke smallint
 );
 
-CREATE SEQUENCE kepegawaian.tte_master_korektor_id_seq
+CREATE SEQUENCE tte_master_korektor_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.tte_master_korektor_id_seq OWNED BY kepegawaian.tte_master_korektor.id;
+ALTER SEQUENCE tte_master_korektor_id_seq OWNED BY tte_master_korektor.id;
 
-CREATE TABLE kepegawaian.tte_master_proses (
+CREATE TABLE tte_master_proses (
     id integer NOT NULL,
     nama_proses character varying(100) NOT NULL,
     template_sk character varying(100),
@@ -3532,31 +3532,31 @@ CREATE TABLE kepegawaian.tte_master_proses (
     keterangan_proses text
 );
 
-CREATE SEQUENCE kepegawaian.tte_master_proses_id_seq
+CREATE SEQUENCE tte_master_proses_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.tte_master_proses_id_seq OWNED BY kepegawaian.tte_master_proses.id;
+ALTER SEQUENCE tte_master_proses_id_seq OWNED BY tte_master_proses.id;
 
-CREATE TABLE kepegawaian.tte_master_proses_variable (
+CREATE TABLE tte_master_proses_variable (
     id smallint NOT NULL,
     id_proses smallint,
     id_variable smallint
 );
 
-CREATE SEQUENCE kepegawaian.tte_master_proses_variable_id_seq
+CREATE SEQUENCE tte_master_proses_variable_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.tte_master_proses_variable_id_seq OWNED BY kepegawaian.tte_master_proses_variable.id;
+ALTER SEQUENCE tte_master_proses_variable_id_seq OWNED BY tte_master_proses_variable.id;
 
-CREATE TABLE kepegawaian.tte_trx_draft_sk (
+CREATE TABLE tte_trx_draft_sk (
     id bigint NOT NULL,
     id_master_proses smallint,
     nip_sk character varying(32),
@@ -3577,64 +3577,64 @@ CREATE TABLE kepegawaian.tte_trx_draft_sk (
     letak_ttd smallint DEFAULT 0
 );
 
-COMMENT ON COLUMN kepegawaian.tte_trx_draft_sk.nama_pemilik_sk IS 'nama pemilik sk';
+COMMENT ON COLUMN tte_trx_draft_sk.nama_pemilik_sk IS 'nama pemilik sk';
 
-CREATE TABLE kepegawaian.tte_trx_draft_sk_detil (
+CREATE TABLE tte_trx_draft_sk_detil (
     id integer NOT NULL,
     id_tte_trx_draft_sk bigint,
     id_variable smallint,
     isi character varying(255)
 );
 
-CREATE SEQUENCE kepegawaian.tte_trx_draft_sk_detil_id_seq
+CREATE SEQUENCE tte_trx_draft_sk_detil_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.tte_trx_draft_sk_detil_id_seq OWNED BY kepegawaian.tte_trx_draft_sk_detil.id;
+ALTER SEQUENCE tte_trx_draft_sk_detil_id_seq OWNED BY tte_trx_draft_sk_detil.id;
 
-CREATE SEQUENCE kepegawaian.tte_trx_draft_sk_id_seq
+CREATE SEQUENCE tte_trx_draft_sk_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.tte_trx_draft_sk_id_seq OWNED BY kepegawaian.tte_trx_draft_sk.id;
+ALTER SEQUENCE tte_trx_draft_sk_id_seq OWNED BY tte_trx_draft_sk.id;
 
-CREATE TABLE kepegawaian.tte_trx_korektor_draft (
+CREATE TABLE tte_trx_korektor_draft (
     id integer NOT NULL,
     id_tte_trx_draft_sk bigint,
     id_pegawai_korektor character varying(32),
     korektor_ke smallint
 );
 
-CREATE SEQUENCE kepegawaian.tte_trx_korektor_draft_id_seq
+CREATE SEQUENCE tte_trx_korektor_draft_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.tte_trx_korektor_draft_id_seq OWNED BY kepegawaian.tte_trx_korektor_draft.id;
+ALTER SEQUENCE tte_trx_korektor_draft_id_seq OWNED BY tte_trx_korektor_draft.id;
 
-CREATE SEQUENCE kepegawaian.unitkerja_id_seq
+CREATE SEQUENCE unitkerja_id_seq
     START WITH 1245
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-CREATE SEQUENCE kepegawaian.unitkerja_old_id_seq
+CREATE SEQUENCE unitkerja_old_id_seq
     START WITH 1243
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-CREATE TABLE kepegawaian.update_mandiri (
+CREATE TABLE update_mandiri (
     "ID" integer NOT NULL,
     "PNS_ID" character(32),
     "KOLOM" character(70),
@@ -3650,31 +3650,31 @@ CREATE TABLE kepegawaian.update_mandiri (
     "UPDATED_BY" integer
 );
 
-CREATE SEQUENCE kepegawaian."update_mandiri_ID_seq"
+CREATE SEQUENCE "update_mandiri_ID_seq"
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian."update_mandiri_ID_seq" OWNED BY kepegawaian.update_mandiri."ID";
+ALTER SEQUENCE "update_mandiri_ID_seq" OWNED BY update_mandiri."ID";
 
-CREATE SEQUENCE kepegawaian.user_id_seq
+CREATE SEQUENCE user_id_seq
     START WITH 32952
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-CREATE SEQUENCE kepegawaian.user_meta_meta_id_seq
+CREATE SEQUENCE user_meta_meta_id_seq
     START WITH 414
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-CREATE TABLE kepegawaian.users (
-    id bigint DEFAULT nextval('kepegawaian.user_id_seq'::regclass) NOT NULL,
+CREATE TABLE users (
+    id bigint DEFAULT nextval('user_id_seq'::regclass) NOT NULL,
     role_id bigint DEFAULT (4)::bigint NOT NULL,
     email character varying(255) NOT NULL,
     username character varying(255) DEFAULT ''::bpchar NOT NULL,
@@ -3705,7 +3705,7 @@ CREATE TABLE kepegawaian.users (
     banned_asigo integer DEFAULT 0
 );
 
-CREATE TABLE kepegawaian.usulan_dokumen (
+CREATE TABLE usulan_dokumen (
     id bigint NOT NULL,
     perkiraan_id bigint,
     title character varying(255),
@@ -3715,21 +3715,21 @@ CREATE TABLE kepegawaian.usulan_dokumen (
     tipe character varying(255)
 );
 
-CREATE SEQUENCE kepegawaian.usulan_documents_id_seq
+CREATE SEQUENCE usulan_documents_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE kepegawaian.usulan_documents_id_seq OWNED BY kepegawaian.usulan_dokumen.id;
+ALTER SEQUENCE usulan_documents_id_seq OWNED BY usulan_dokumen.id;
 
-CREATE VIEW kepegawaian.v_kategori_ds AS
+CREATE VIEW v_kategori_ds AS
  SELECT DISTINCT kategori AS kategori_ds
-   FROM kepegawaian.tbl_file_ds
+   FROM tbl_file_ds
   ORDER BY kategori;
 
-CREATE VIEW kepegawaian.vw_unor_satker AS
+CREATE VIEW vw_unor_satker AS
  SELECT a."ID" AS "ID_UNOR",
     a."UNOR_INDUK" AS "ID_SATKER",
     a."NAMA_UNOR",
@@ -3737,19 +3737,19 @@ CREATE VIEW kepegawaian.vw_unor_satker AS
     c."NAMA_UNOR_ESELON_1",
     a."EXPIRED_DATE",
     c.id_eselon_1 AS "ID_ESELON_1"
-   FROM ((kepegawaian.unitkerja a
-     JOIN kepegawaian.unitkerja b ON (((a."UNOR_INDUK")::text = (b."ID")::text)))
+   FROM ((unitkerja a
+     JOIN unitkerja b ON (((a."UNOR_INDUK")::text = (b."ID")::text)))
      JOIN ( WITH RECURSIVE r AS (
                  SELECT unitkerja."ID",
                     unitkerja."ID" AS id_eselon_1,
                     unitkerja."NAMA_UNOR" AS "NAMA_UNOR_ESELON_1"
-                   FROM kepegawaian.unitkerja
+                   FROM unitkerja
                   WHERE ((unitkerja."DIATASAN_ID")::text = 'A8ACA7397AEB3912E040640A040269BB'::text)
                 UNION ALL
                  SELECT a_1."ID",
                     r_1.id_eselon_1,
                     r_1."NAMA_UNOR_ESELON_1"
-                   FROM (kepegawaian.unitkerja a_1
+                   FROM (unitkerja a_1
                      JOIN r r_1 ON (((a_1."DIATASAN_ID")::text = (r_1."ID")::text)))
                 )
          SELECT r."ID",
@@ -3757,9 +3757,9 @@ CREATE VIEW kepegawaian.vw_unor_satker AS
             r."NAMA_UNOR_ESELON_1"
            FROM r) c ON (((a."ID")::text = (c."ID")::text)));
 
-COMMENT ON VIEW kepegawaian.vw_unor_satker IS 'Untuk Melihat Daftar Unit Kerja Berdasarkan Satkernya';
+COMMENT ON VIEW vw_unor_satker IS 'Untuk Melihat Daftar Unit Kerja Berdasarkan Satkernya';
 
-CREATE VIEW kepegawaian.vw_rekap_input_diklat AS
+CREATE VIEW vw_rekap_input_diklat AS
  SELECT 'Diklat Fungsional'::text AS tipe,
     pegawai."NIP_BARU",
         CASE
@@ -3773,9 +3773,9 @@ CREATE VIEW kepegawaian.vw_rekap_input_diklat AS
     vw."NAMA_SATKER",
     pegawai."IS_DOSEN",
     vw."ID_SATKER"
-   FROM ((kepegawaian.rwt_diklat_fungsional r_dik_fung
-     JOIN kepegawaian.pegawai pegawai ON (((pegawai."NIP_BARU")::text = (r_dik_fung."NIP_BARU")::text)))
-     JOIN kepegawaian.vw_unor_satker vw ON (((pegawai."UNOR_ID")::text = (vw."ID_UNOR")::text)))
+   FROM ((rwt_diklat_fungsional r_dik_fung
+     JOIN pegawai pegawai ON (((pegawai."NIP_BARU")::text = (r_dik_fung."NIP_BARU")::text)))
+     JOIN vw_unor_satker vw ON (((pegawai."UNOR_ID")::text = (vw."ID_UNOR")::text)))
 UNION ALL
  SELECT 'Diklat Struktural'::text AS tipe,
     pegawai."NIP_BARU",
@@ -3784,9 +3784,9 @@ UNION ALL
     vw."NAMA_SATKER",
     pegawai."IS_DOSEN",
     vw."ID_SATKER"
-   FROM ((kepegawaian.rwt_diklat_struktural r_dik_struk
-     JOIN kepegawaian.pegawai pegawai ON (((pegawai."NIP_BARU")::text = (r_dik_struk."PNS_NIP")::text)))
-     JOIN kepegawaian.vw_unor_satker vw ON (((pegawai."UNOR_ID")::text = (vw."ID_UNOR")::text)))
+   FROM ((rwt_diklat_struktural r_dik_struk
+     JOIN pegawai pegawai ON (((pegawai."NIP_BARU")::text = (r_dik_struk."PNS_NIP")::text)))
+     JOIN vw_unor_satker vw ON (((pegawai."UNOR_ID")::text = (vw."ID_UNOR")::text)))
 UNION ALL
  SELECT 'Riwayat Kursus'::text AS tipe,
     pegawai."NIP_BARU",
@@ -3795,9 +3795,9 @@ UNION ALL
     vw."NAMA_SATKER",
     pegawai."IS_DOSEN",
     vw."ID_SATKER"
-   FROM ((kepegawaian.rwt_kursus r_kurs
-     JOIN kepegawaian.pegawai pegawai ON (((pegawai."NIP_BARU")::bpchar = r_kurs."PNS_NIP")))
-     JOIN kepegawaian.vw_unor_satker vw ON (((pegawai."UNOR_ID")::text = (vw."ID_UNOR")::text)))
+   FROM ((rwt_kursus r_kurs
+     JOIN pegawai pegawai ON (((pegawai."NIP_BARU")::bpchar = r_kurs."PNS_NIP")))
+     JOIN vw_unor_satker vw ON (((pegawai."UNOR_ID")::text = (vw."ID_UNOR")::text)))
 UNION ALL
  SELECT jd.jenis_diklat AS tipe,
     (r_dik.nip_baru)::character varying(18) AS "NIP_BARU",
@@ -3806,45 +3806,45 @@ UNION ALL
     vw."NAMA_SATKER",
     pegawai."IS_DOSEN",
     vw."ID_SATKER"
-   FROM (((kepegawaian.rwt_diklat r_dik
-     JOIN kepegawaian.pegawai pegawai ON (((pegawai."NIP_BARU")::text = (r_dik.nip_baru)::text)))
-     JOIN kepegawaian.vw_unor_satker vw ON (((pegawai."UNOR_ID")::text = (vw."ID_UNOR")::text)))
-     JOIN kepegawaian.jenis_diklat jd ON (((r_dik.jenis_diklat_id)::integer = jd.id)));
+   FROM (((rwt_diklat r_dik
+     JOIN pegawai pegawai ON (((pegawai."NIP_BARU")::text = (r_dik.nip_baru)::text)))
+     JOIN vw_unor_satker vw ON (((pegawai."UNOR_ID")::text = (vw."ID_UNOR")::text)))
+     JOIN jenis_diklat jd ON (((r_dik.jenis_diklat_id)::integer = jd.id)));
 
-CREATE VIEW kepegawaian.vw_rekap_pegawai_per_satker AS
+CREATE VIEW vw_rekap_pegawai_per_satker AS
  SELECT satker."ID_SATKER",
     satker."NAMA_SATKER",
     count(p."ID") AS total_pegawai
-   FROM ((kepegawaian.vw_unor_satker satker
-     LEFT JOIN kepegawaian.pegawai p ON (((satker."ID_UNOR")::text = (p."UNOR_ID")::text)))
-     LEFT JOIN kepegawaian.pns_aktif pa ON ((pa."ID" = p."ID")))
+   FROM ((vw_unor_satker satker
+     LEFT JOIN pegawai p ON (((satker."ID_UNOR")::text = (p."UNOR_ID")::text)))
+     LEFT JOIN pns_aktif pa ON ((pa."ID" = p."ID")))
   WHERE (pa."ID" IS NOT NULL)
   GROUP BY satker."ID_SATKER", satker."NAMA_SATKER"
   ORDER BY satker."NAMA_SATKER" DESC;
 
-COMMENT ON VIEW kepegawaian.vw_rekap_pegawai_per_satker IS 'rekap pegawai aktif per satker';
+COMMENT ON VIEW vw_rekap_pegawai_per_satker IS 'rekap pegawai aktif per satker';
 
-CREATE VIEW kepegawaian.vw_biro_sdm_award AS
+CREATE VIEW vw_biro_sdm_award AS
  SELECT count(DISTINCT vw_diklat."NIP_BARU") AS total_pegawai_ngisi_diklat,
     vw_diklat."NAMA_SATKER",
     max(vw_rekap.total_pegawai) AS jumlah_pegawai_satker,
     round((((count(DISTINCT vw_diklat."NIP_BARU"))::numeric / max((vw_rekap.total_pegawai)::numeric)) * (100)::numeric)) AS percentage
-   FROM (kepegawaian.vw_rekap_pegawai_per_satker vw_rekap
-     LEFT JOIN kepegawaian.vw_rekap_input_diklat vw_diklat ON (((vw_rekap."ID_SATKER")::text = (vw_diklat."ID_SATKER")::text)))
+   FROM (vw_rekap_pegawai_per_satker vw_rekap
+     LEFT JOIN vw_rekap_input_diklat vw_diklat ON (((vw_rekap."ID_SATKER")::text = (vw_diklat."ID_SATKER")::text)))
   WHERE (vw_diklat.tahun = 2022)
   GROUP BY vw_diklat."NAMA_SATKER"
   ORDER BY vw_diklat."NAMA_SATKER";
 
-CREATE VIEW kepegawaian.vw_cuti_tahunan AS
+CREATE VIEW vw_cuti_tahunan AS
  SELECT i."NIP_PNS",
     i."TAHUN",
     sum(i."JUMLAH") AS jumlah_hari
-   FROM (kepegawaian.izin i
-     LEFT JOIN kepegawaian.jenis_izin j ON ((i."KODE_IZIN" = j."ID")))
+   FROM (izin i
+     LEFT JOIN jenis_izin j ON ((i."KODE_IZIN" = j."ID")))
   WHERE ((i."KODE_IZIN" = 1) AND (i."STATUS_PENGAJUAN" = 3))
   GROUP BY i."KODE_IZIN", i."NIP_PNS", i."TAHUN";
 
-CREATE VIEW kepegawaian.vw_daftar_riwayat_jabatan AS
+CREATE VIEW vw_daftar_riwayat_jabatan AS
  SELECT row_number() OVER (PARTITION BY "PNS_ID" ORDER BY "TMT_JABATAN" DESC) AS _order,
     "ID_BKN",
     "PNS_ID",
@@ -3877,10 +3877,10 @@ CREATE VIEW kepegawaian.vw_daftar_riwayat_jabatan AS
     "ID_JABATAN_BKN",
     "ID_UNOR_BKN",
     "JABATAN_TERAKHIR"
-   FROM kepegawaian.rwt_jabatan_empty rjab
+   FROM rwt_jabatan_empty rjab
   WHERE ("TMT_JABATAN" IS NOT NULL);
 
-CREATE VIEW kepegawaian.vw_drh AS
+CREATE VIEW vw_drh AS
  SELECT pegawai."PNS_ID",
     pegawai."NIP_BARU",
     pegawai."NAMA",
@@ -3939,161 +3939,161 @@ CREATE VIEW kepegawaian.vw_drh AS
     golongan."NAMA_PANGKAT" AS "PANGKAT_TEXT",
     agama."NAMA" AS "AGAMA_TEXT",
     jenis_kawin."NAMA" AS "KAWIN_TEXT"
-   FROM (((kepegawaian.pegawai pegawai
-     LEFT JOIN kepegawaian.golongan ON ((golongan."ID" = pegawai."GOL_ID")))
-     LEFT JOIN kepegawaian.agama ON ((agama."ID" = pegawai."AGAMA_ID")))
-     LEFT JOIN kepegawaian.jenis_kawin ON (((jenis_kawin."ID")::text = (pegawai."JENIS_KAWIN_ID")::text)));
+   FROM (((pegawai pegawai
+     LEFT JOIN golongan ON ((golongan."ID" = pegawai."GOL_ID")))
+     LEFT JOIN agama ON ((agama."ID" = pegawai."AGAMA_ID")))
+     LEFT JOIN jenis_kawin ON (((jenis_kawin."ID")::text = (pegawai."JENIS_KAWIN_ID")::text)));
 
-CREATE VIEW kepegawaian.vw_ds_korektor AS
+CREATE VIEW vw_ds_korektor AS
  SELECT d.id_file,
     k.id_pegawai_korektor,
     k.is_corrected,
     d.nomor_sk
-   FROM (kepegawaian.tbl_file_ds d
-     JOIN kepegawaian.tbl_file_ds_corrector k ON (((d.id_file)::text = (k.id_file)::text)))
+   FROM (tbl_file_ds d
+     JOIN tbl_file_ds_corrector k ON (((d.id_file)::text = (k.id_file)::text)))
   WHERE ((d.is_signed <> (1)::smallint) AND (d.ds_ok = 1) AND ((d.kategori)::text <> '< Semua >'::text) AND (k.is_corrected <> (1)::smallint));
 
-CREATE VIEW kepegawaian.vw_ds_antrian_korektor AS
+CREATE VIEW vw_ds_antrian_korektor AS
  SELECT d.kategori,
     k.id_pegawai_korektor,
     count(*) AS jumlah
-   FROM (kepegawaian.tbl_file_ds d
-     JOIN kepegawaian.vw_ds_korektor k ON (((d.id_file)::text = (k.id_file)::text)))
+   FROM (tbl_file_ds d
+     JOIN vw_ds_korektor k ON (((d.id_file)::text = (k.id_file)::text)))
   WHERE ((d.is_signed <> (1)::smallint) AND (d.ds_ok = 1) AND ((d.kategori)::text <> '< Semua >'::text))
   GROUP BY d.kategori, k.id_pegawai_korektor;
 
-CREATE VIEW kepegawaian.vw_ds_jml_korektor_new_1 AS
+CREATE VIEW vw_ds_jml_korektor_new_1 AS
  SELECT d.id_file,
     count(k.id) AS jumlah_korektor
-   FROM (kepegawaian.tbl_file_ds d
-     JOIN kepegawaian.tbl_file_ds_corrector k ON (((d.id_file)::text = (k.id_file)::text)))
+   FROM (tbl_file_ds d
+     JOIN tbl_file_ds_corrector k ON (((d.id_file)::text = (k.id_file)::text)))
   WHERE ((d.is_signed <> (1)::smallint) AND (d.ds_ok = 1))
   GROUP BY d.id_file;
 
-CREATE VIEW kepegawaian.vw_ds_antrian_ttd AS
+CREATE VIEW vw_ds_antrian_ttd AS
  SELECT d.kategori,
     d.id_pegawai_ttd,
     d.is_signed,
     count(*) AS jumlah
-   FROM (kepegawaian.tbl_file_ds d
-     JOIN kepegawaian.vw_ds_jml_korektor_new_1 k ON (((d.id_file)::text = (k.id_file)::text)))
+   FROM (tbl_file_ds d
+     JOIN vw_ds_jml_korektor_new_1 k ON (((d.id_file)::text = (k.id_file)::text)))
   WHERE ((d.is_signed <> (1)::smallint) AND (d.ds_ok = 1) AND ((d.kategori)::text <> '< Semua >'::text) AND ((d.kategori)::text <> '< Pilih >'::text) AND (k.jumlah_korektor > 0))
   GROUP BY d.kategori, d.is_signed, d.id_pegawai_ttd;
 
-CREATE VIEW kepegawaian.vw_ds_antrian_ttd_copy1 AS
+CREATE VIEW vw_ds_antrian_ttd_copy1 AS
  SELECT d.kategori,
     d.id_pegawai_ttd,
     d.is_signed,
     count(*) AS jumlah
-   FROM (kepegawaian.tbl_file_ds d
-     JOIN kepegawaian.vw_ds_jml_korektor_new_1 k ON (((d.id_file)::text = (k.id_file)::text)))
+   FROM (tbl_file_ds d
+     JOIN vw_ds_jml_korektor_new_1 k ON (((d.id_file)::text = (k.id_file)::text)))
   WHERE ((d.is_signed <> (1)::smallint) AND (d.ds_ok = 1) AND ((d.kategori)::text <> '< Semua >'::text) AND ((d.kategori)::text <> '< Pilih >'::text) AND (k.jumlah_korektor > 0))
   GROUP BY d.kategori, d.is_signed, d.id_pegawai_ttd;
 
-CREATE VIEW kepegawaian.vw_ds_jml_korektor AS
+CREATE VIEW vw_ds_jml_korektor AS
  SELECT d.id_file,
     count(k.id) AS jumlah_korektor
-   FROM (kepegawaian.tbl_file_ds d
-     JOIN kepegawaian.tbl_file_ds_corrector k ON (((d.id_file)::text = (k.id_file)::text)))
+   FROM (tbl_file_ds d
+     JOIN tbl_file_ds_corrector k ON (((d.id_file)::text = (k.id_file)::text)))
   WHERE ((d.is_signed <> (1)::smallint) AND (d.ds_ok = 1) AND (d.is_signed <> (3)::smallint))
   GROUP BY d.id_file;
 
-CREATE VIEW kepegawaian.vw_ds_jml_korektor_new AS
+CREATE VIEW vw_ds_jml_korektor_new AS
  SELECT d.id_file,
     count(k.id) AS jumlah_korektor
-   FROM (kepegawaian.tbl_file_ds d
-     JOIN kepegawaian.tbl_file_ds_corrector k ON (((d.id_file)::text = (k.id_file)::text)))
+   FROM (tbl_file_ds d
+     JOIN tbl_file_ds_corrector k ON (((d.id_file)::text = (k.id_file)::text)))
   WHERE (d.ds_ok = 1)
   GROUP BY d.id_file;
 
-CREATE VIEW kepegawaian.vw_ds_jumlah_pernip AS
+CREATE VIEW vw_ds_jumlah_pernip AS
  SELECT d.nip_sk,
     d.is_signed,
     count(*) AS jumlah
-   FROM (kepegawaian.tbl_file_ds d
-     JOIN kepegawaian.vw_ds_jml_korektor_new k ON (((d.id_file)::text = (k.id_file)::text)))
+   FROM (tbl_file_ds d
+     JOIN vw_ds_jml_korektor_new k ON (((d.id_file)::text = (k.id_file)::text)))
   WHERE ((d.ds_ok = 1) AND ((d.kategori)::text <> '< Semua >'::text) AND (k.jumlah_korektor > 0))
   GROUP BY d.is_signed, d.nip_sk;
 
-CREATE VIEW kepegawaian.vw_ds_pejabat_ttd_dan_korektor AS
+CREATE VIEW vw_ds_pejabat_ttd_dan_korektor AS
  SELECT "PNS_ID",
     "NAMA"
-   FROM kepegawaian.pegawai d
+   FROM pegawai d
   WHERE ((("PNS_ID")::text IN ( SELECT tbl_file_ds.id_pegawai_ttd
-           FROM kepegawaian.tbl_file_ds
+           FROM tbl_file_ds
           WHERE ((tbl_file_ds.ds_ok = '1'::smallint) AND (tbl_file_ds.is_signed <> '1'::smallint) AND (tbl_file_ds.is_signed <> '3'::smallint)))) OR (("PNS_ID")::text IN ( SELECT tbl_file_ds_corrector.id_pegawai_korektor
-           FROM kepegawaian.tbl_file_ds_corrector
+           FROM tbl_file_ds_corrector
           WHERE ((tbl_file_ds_corrector.is_corrected = '2'::smallint) AND ((tbl_file_ds_corrector.id_file)::text IN ( SELECT tbl_file_ds.id_file
-                   FROM kepegawaian.tbl_file_ds
+                   FROM tbl_file_ds
                   WHERE ((tbl_file_ds.ds_ok = '1'::smallint) AND (tbl_file_ds.is_signed <> '1'::smallint) AND (tbl_file_ds.is_signed <> '3'::smallint))))))));
 
-CREATE VIEW kepegawaian.vw_ds_siap_koreksi AS
+CREATE VIEW vw_ds_siap_koreksi AS
  SELECT k.id_pegawai_korektor,
     p."NAMA" AS nama_korektor,
     count(*) AS jumlah
-   FROM ((kepegawaian.tbl_file_ds d
-     JOIN kepegawaian.tbl_file_ds_corrector k ON (((d.id_file)::text = (k.id_file)::text)))
-     JOIN kepegawaian.pegawai p ON (((p."PNS_ID")::text = (k.id_pegawai_korektor)::text)))
+   FROM ((tbl_file_ds d
+     JOIN tbl_file_ds_corrector k ON (((d.id_file)::text = (k.id_file)::text)))
+     JOIN pegawai p ON (((p."PNS_ID")::text = (k.id_pegawai_korektor)::text)))
   WHERE ((d.is_signed = (0)::smallint) AND (d.ds_ok = 1) AND ((d.kategori)::text <> '< Semua >'::text) AND (k.is_corrected = 2))
   GROUP BY k.id_pegawai_korektor, p."NAMA";
 
-CREATE VIEW kepegawaian.vw_ds_siap_ttd AS
+CREATE VIEW vw_ds_siap_ttd AS
  SELECT d.id_pegawai_ttd,
     p."NAMA" AS nama_penandatangan,
     count(*) AS jumlah
-   FROM (kepegawaian.tbl_file_ds d
-     JOIN kepegawaian.pegawai p ON (((p."PNS_ID")::text = (d.id_pegawai_ttd)::text)))
+   FROM (tbl_file_ds d
+     JOIN pegawai p ON (((p."PNS_ID")::text = (d.id_pegawai_ttd)::text)))
   WHERE ((d.is_signed = (0)::smallint) AND (d.ds_ok = 1) AND ((d.kategori)::text <> '< Semua >'::text) AND (d.is_corrected = 1))
   GROUP BY d.id_pegawai_ttd, p."NAMA";
 
-CREATE VIEW kepegawaian.vw_ds_resume_ttd AS
+CREATE VIEW vw_ds_resume_ttd AS
  SELECT d.id_pegawai_ttd,
     p."NAMA" AS nama_penandatangan,
     COALESCE(( SELECT (sk.jumlah)::text AS jumlah
-           FROM kepegawaian.vw_ds_siap_koreksi sk
+           FROM vw_ds_siap_koreksi sk
           WHERE ((sk.id_pegawai_korektor)::text = (d.id_pegawai_ttd)::text)), '-'::text) AS jml_siap_koreksi,
     COALESCE(( SELECT (s.jumlah)::text AS jumlah
-           FROM kepegawaian.vw_ds_siap_ttd s
+           FROM vw_ds_siap_ttd s
           WHERE ((s.id_pegawai_ttd)::text = (d.id_pegawai_ttd)::text)), '-'::text) AS jml_siap_ttd,
     (COALESCE(( SELECT sk.jumlah
-           FROM kepegawaian.vw_ds_siap_koreksi sk
+           FROM vw_ds_siap_koreksi sk
           WHERE ((sk.id_pegawai_korektor)::text = (d.id_pegawai_ttd)::text)), (0)::bigint) + COALESCE(( SELECT s.jumlah
-           FROM kepegawaian.vw_ds_siap_ttd s
+           FROM vw_ds_siap_ttd s
           WHERE ((s.id_pegawai_ttd)::text = (d.id_pegawai_ttd)::text)), (0)::bigint)) AS jumlah
-   FROM (kepegawaian.tbl_file_ds d
-     JOIN kepegawaian.pegawai p ON (((p."PNS_ID")::text = (d.id_pegawai_ttd)::text)))
+   FROM (tbl_file_ds d
+     JOIN pegawai p ON (((p."PNS_ID")::text = (d.id_pegawai_ttd)::text)))
   WHERE ((d.is_signed <> (1)::smallint) AND (d.ds_ok = 1) AND ((d.kategori)::text <> '< Semua >'::text))
   GROUP BY d.id_pegawai_ttd, p."NAMA";
 
-CREATE VIEW kepegawaian.vw_ds_resume_ttd_copy1 AS
+CREATE VIEW vw_ds_resume_ttd_copy1 AS
  SELECT d.id_pegawai_ttd,
     p."NAMA" AS nama_penandatangan,
     count(*) AS jumlah,
     ( SELECT s.jumlah
-           FROM kepegawaian.vw_ds_siap_ttd s
+           FROM vw_ds_siap_ttd s
           WHERE ((s.id_pegawai_ttd)::text = (d.id_pegawai_ttd)::text)) AS jml_siap_ttd,
     ( SELECT sk.jumlah
-           FROM kepegawaian.vw_ds_siap_koreksi sk
+           FROM vw_ds_siap_koreksi sk
           WHERE ((sk.id_pegawai_korektor)::text = (d.id_pegawai_ttd)::text)) AS jml_siap_koreksi
-   FROM ((kepegawaian.tbl_file_ds d
-     JOIN kepegawaian.vw_ds_jml_korektor k ON (((d.id_file)::text = (k.id_file)::text)))
-     JOIN kepegawaian.pegawai p ON (((p."PNS_ID")::text = (d.id_pegawai_ttd)::text)))
+   FROM ((tbl_file_ds d
+     JOIN vw_ds_jml_korektor k ON (((d.id_file)::text = (k.id_file)::text)))
+     JOIN pegawai p ON (((p."PNS_ID")::text = (d.id_pegawai_ttd)::text)))
   WHERE ((d.is_signed <> (1)::smallint) AND (d.ds_ok = 1) AND ((d.kategori)::text <> '< Semua >'::text))
   GROUP BY d.id_pegawai_ttd, p."NAMA";
 
-CREATE VIEW kepegawaian.vw_ds_resume_ttd_copy3 AS
+CREATE VIEW vw_ds_resume_ttd_copy3 AS
  SELECT "PNS_ID" AS id_pegawai_ttd,
     "NAMA" AS nama_penandatangan,
     COALESCE(( SELECT (sk.jumlah)::text AS jumlah
-           FROM kepegawaian.vw_ds_siap_koreksi sk
+           FROM vw_ds_siap_koreksi sk
           WHERE ((sk.id_pegawai_korektor)::text = (d."PNS_ID")::text)), '-'::text) AS jml_siap_koreksi,
     COALESCE(( SELECT (s.jumlah)::text AS jumlah
-           FROM kepegawaian.vw_ds_siap_ttd s
+           FROM vw_ds_siap_ttd s
           WHERE ((s.id_pegawai_ttd)::text = (d."PNS_ID")::text)), '-'::text) AS jml_siap_ttd,
     '-'::text AS jumlah
-   FROM kepegawaian.vw_ds_pejabat_ttd_dan_korektor d;
+   FROM vw_ds_pejabat_ttd_dan_korektor d;
 
-CREATE VIEW kepegawaian.vw_duk AS
+CREATE VIEW vw_duk AS
  SELECT vw."NAMA_UNOR",
     pegawai."JENIS_JABATAN_ID",
     pegawai."JABATAN_ID",
@@ -4161,17 +4161,17 @@ CREATE VIEW kepegawaian.vw_duk AS
     jabatan."KELAS",
     jabatan."PENSIUN",
     kedudukan_hukum."NAMA" AS "KEDUDUKAN_HUKUM_NAMA"
-   FROM (((((((kepegawaian.pns_aktif pa
-     LEFT JOIN kepegawaian.pegawai pegawai ON ((pa."ID" = pegawai."ID")))
-     LEFT JOIN kepegawaian.golongan ON (((pegawai."GOL_ID")::text = (golongan."ID")::text)))
-     LEFT JOIN kepegawaian.vw_unit_list vw ON (((vw."ID")::text = (pegawai."UNOR_ID")::text)))
-     LEFT JOIN kepegawaian.pendidikan ON (((pendidikan."ID")::text = (pegawai."PENDIDIKAN_ID")::text)))
-     LEFT JOIN kepegawaian.tkpendidikan ON (((tkpendidikan."ID")::text = (pendidikan."TINGKAT_PENDIDIKAN_ID")::text)))
-     LEFT JOIN kepegawaian.jabatan ON (((jabatan."KODE_JABATAN")::text = (pegawai."JABATAN_INSTANSI_ID")::text)))
-     LEFT JOIN kepegawaian.kedudukan_hukum ON (((kedudukan_hukum."ID")::text = (pegawai."KEDUDUKAN_HUKUM_ID")::text)))
+   FROM (((((((pns_aktif pa
+     LEFT JOIN pegawai pegawai ON ((pa."ID" = pegawai."ID")))
+     LEFT JOIN golongan ON (((pegawai."GOL_ID")::text = (golongan."ID")::text)))
+     LEFT JOIN vw_unit_list vw ON (((vw."ID")::text = (pegawai."UNOR_ID")::text)))
+     LEFT JOIN pendidikan ON (((pendidikan."ID")::text = (pegawai."PENDIDIKAN_ID")::text)))
+     LEFT JOIN tkpendidikan ON (((tkpendidikan."ID")::text = (pendidikan."TINGKAT_PENDIDIKAN_ID")::text)))
+     LEFT JOIN jabatan ON (((jabatan."KODE_JABATAN")::text = (pegawai."JABATAN_INSTANSI_ID")::text)))
+     LEFT JOIN kedudukan_hukum ON (((kedudukan_hukum."ID")::text = (pegawai."KEDUDUKAN_HUKUM_ID")::text)))
   ORDER BY pegawai."JENIS_JABATAN_ID", vw."ESELON_ID", vw."ESELON_1", vw."ESELON_2", vw."ESELON_3", vw."ESELON_4", pegawai."JABATAN_ID", vw."NAMA_UNOR_FULL", pegawai."GOL_ID" DESC, pegawai."TMT_GOLONGAN", pegawai."TMT_JABATAN", pegawai."TMT_CPNS", pegawai."TGL_LAHIR";
 
-CREATE VIEW kepegawaian.vw_duk_list AS
+CREATE VIEW vw_duk_list AS
  SELECT vw."NAMA_UNOR_FULL",
     pejabat."ESELON_ID",
     vw."ESELON_ID" AS vw_eselon_id,
@@ -4235,15 +4235,15 @@ CREATE VIEW kepegawaian.vw_duk_list AS
     vw."ESELON_2",
     vw."ESELON_3",
     vw."ESELON_4"
-   FROM ((((kepegawaian.pns_aktif_old pa
-     LEFT JOIN kepegawaian.pegawai pegawai ON ((pa."ID" = pegawai."ID")))
-     LEFT JOIN kepegawaian.golongan ON (((pegawai."GOL_ID")::text = (golongan."ID")::text)))
-     LEFT JOIN kepegawaian.vw_unit_list vw ON (((vw."ID")::text = (pegawai."UNOR_ID")::text)))
-     LEFT JOIN kepegawaian.unitkerja pejabat ON (((pejabat."PEMIMPIN_PNS_ID")::text = (pegawai."PNS_ID")::text)))
+   FROM ((((pns_aktif_old pa
+     LEFT JOIN pegawai pegawai ON ((pa."ID" = pegawai."ID")))
+     LEFT JOIN golongan ON (((pegawai."GOL_ID")::text = (golongan."ID")::text)))
+     LEFT JOIN vw_unit_list vw ON (((vw."ID")::text = (pegawai."UNOR_ID")::text)))
+     LEFT JOIN unitkerja pejabat ON (((pejabat."PEMIMPIN_PNS_ID")::text = (pegawai."PNS_ID")::text)))
   ORDER BY vw."NAMA_UNOR_FULL", pejabat."ESELON_ID", pegawai."GOL_ID" DESC, pegawai."TMT_GOLONGAN", pegawai."TMT_JABATAN", pegawai."TMT_CPNS", pegawai."TGL_LAHIR";
 
-CREATE VIEW kepegawaian.vw_kgb AS
- SELECT kepegawaian.get_masa_kerja_arr("TMT_CPNS", get_kgb_yad) AS get_masa_kerja_arr,
+CREATE VIEW vw_kgb AS
+ SELECT get_masa_kerja_arr("TMT_CPNS", get_kgb_yad) AS get_masa_kerja_arr,
     get_kgb_yad,
     "ID",
     "PNS_ID",
@@ -4326,7 +4326,7 @@ CREATE VIEW kepegawaian.vw_kgb AS
     "JENIS_JABATAN_ID",
     terminated_date,
     status_pegawai
-   FROM ( SELECT kepegawaian.get_kgb_yad(p."TMT_CPNS") AS get_kgb_yad,
+   FROM ( SELECT get_kgb_yad(p."TMT_CPNS") AS get_kgb_yad,
             p."ID",
             p."ID" AS pegawai_id,
             p."PNS_ID",
@@ -4409,10 +4409,10 @@ CREATE VIEW kepegawaian.vw_kgb AS
             p."JENIS_JABATAN_ID",
             p.terminated_date,
             p.status_pegawai
-           FROM (kepegawaian.pns_aktif_old pa
-             JOIN kepegawaian.pegawai p ON ((pa."ID" = p."ID")))) temp;
+           FROM (pns_aktif_old pa
+             JOIN pegawai p ON ((pa."ID" = p."ID")))) temp;
 
-CREATE VIEW kepegawaian.vw_list_eselon1 AS
+CREATE VIEW vw_list_eselon1 AS
  SELECT DISTINCT "NO",
     "KODE_INTERNAL",
     "ID",
@@ -4438,11 +4438,11 @@ CREATE VIEW kepegawaian.vw_list_eselon1 AS
     "EXPIRED_DATE",
     "KETERANGAN",
     "ABBREVIATION"
-   FROM kepegawaian.unitkerja es1
+   FROM unitkerja es1
   WHERE (("ID" IS NOT NULL) AND (("DIATASAN_ID")::text = 'A8ACA7397AEB3912E040640A040269BB'::text) AND ("EXPIRED_DATE" IS NULL))
   ORDER BY "NAMA_UNOR";
 
-CREATE VIEW kepegawaian.vw_list_eselon2 AS
+CREATE VIEW vw_list_eselon2 AS
  SELECT DISTINCT es2."NO",
     es2."KODE_INTERNAL",
     es2."ID",
@@ -4468,12 +4468,12 @@ CREATE VIEW kepegawaian.vw_list_eselon2 AS
     es2."EXPIRED_DATE",
     es2."KETERANGAN",
     es2."ABBREVIATION"
-   FROM (kepegawaian.unitkerja uk
-     LEFT JOIN kepegawaian.unitkerja es2 ON (((uk."ESELON_2")::text = (es2."ID")::text)))
+   FROM (unitkerja uk
+     LEFT JOIN unitkerja es2 ON (((uk."ESELON_2")::text = (es2."ID")::text)))
   WHERE (es2."ID" IS NOT NULL)
   ORDER BY es2."NAMA_UNOR";
 
-CREATE VIEW kepegawaian.vw_pegawai_berpotensi_jpt AS
+CREATE VIEW vw_pegawai_berpotensi_jpt AS
  SELECT apbt.id,
     apbt.nip,
     apbt.usia,
@@ -4500,13 +4500,13 @@ CREATE VIEW kepegawaian.vw_pegawai_berpotensi_jpt AS
     pd."NAMA" AS nama_pendidikan,
     aha.tanggal_asesmen,
     aha.jpm
-   FROM ((((kepegawaian.asesmen_pegawai_berpotensi_jpt apbt
-     LEFT JOIN kepegawaian.asesmen_hasil_asesmen aha ON ((btrim((apbt.nip)::text) = btrim((aha.nip)::text))))
-     LEFT JOIN kepegawaian.pegawai p ON (((p."NIP_BARU")::text = (apbt.nip)::text)))
-     LEFT JOIN kepegawaian.pendidikan pd ON (((p."PENDIDIKAN_ID")::text = (pd."ID")::text)))
-     LEFT JOIN kepegawaian.tkpendidikan tp ON (((tp."ID")::text = (pd."TINGKAT_PENDIDIKAN_ID")::text)));
+   FROM ((((asesmen_pegawai_berpotensi_jpt apbt
+     LEFT JOIN asesmen_hasil_asesmen aha ON ((btrim((apbt.nip)::text) = btrim((aha.nip)::text))))
+     LEFT JOIN pegawai p ON (((p."NIP_BARU")::text = (apbt.nip)::text)))
+     LEFT JOIN pendidikan pd ON (((p."PENDIDIKAN_ID")::text = (pd."ID")::text)))
+     LEFT JOIN tkpendidikan tp ON (((tp."ID")::text = (pd."TINGKAT_PENDIDIKAN_ID")::text)));
 
-CREATE VIEW kepegawaian.vw_pegawai_bpk AS
+CREATE VIEW vw_pegawai_bpk AS
  SELECT pegawai."NAMA" AS "NAMA_PEGAWAI",
     (''''::text || (pegawai."NIP_BARU")::text) AS "NIP_BARU",
     (''''::text || (pegawai."NIK")::text) AS "NIK",
@@ -4532,20 +4532,20 @@ CREATE VIEW kepegawaian.vw_pegawai_bpk AS
     jabatan."KATEGORI_JABATAN",
     vw."NAMA_UNOR",
     vw."NAMA_UNOR_FULL"
-   FROM ((((((((((kepegawaian.pegawai pegawai
-     LEFT JOIN kepegawaian.vw_unit_list vw ON (((pegawai."UNOR_ID")::text = (vw."ID")::text)))
-     LEFT JOIN kepegawaian.pns_aktif pa ON ((pegawai."ID" = pa."ID")))
-     LEFT JOIN kepegawaian.jabatan ON ((pegawai."JABATAN_INSTANSI_ID" = (jabatan."KODE_JABATAN")::bpchar)))
-     LEFT JOIN kepegawaian.lokasi ON (((pegawai."TEMPAT_LAHIR_ID")::text = (lokasi."ID")::text)))
-     LEFT JOIN kepegawaian.agama ON ((pegawai."AGAMA_ID" = agama."ID")))
-     LEFT JOIN kepegawaian.tkpendidikan ON ((pegawai."TK_PENDIDIKAN" = (tkpendidikan."ID")::bpchar)))
-     LEFT JOIN kepegawaian.pendidikan ON (((pegawai."PENDIDIKAN_ID")::text = (pendidikan."ID")::text)))
-     LEFT JOIN kepegawaian.golongan ON ((pegawai."GOL_ID" = golongan."ID")))
-     LEFT JOIN kepegawaian.golongan golongan_awal ON (((pegawai."GOL_AWAL_ID")::text = (golongan_awal."ID")::text)))
-     LEFT JOIN kepegawaian.jenis_kawin ON (((jenis_kawin."ID")::text = (pegawai."JENIS_KAWIN_ID")::text)))
+   FROM ((((((((((pegawai pegawai
+     LEFT JOIN vw_unit_list vw ON (((pegawai."UNOR_ID")::text = (vw."ID")::text)))
+     LEFT JOIN pns_aktif pa ON ((pegawai."ID" = pa."ID")))
+     LEFT JOIN jabatan ON ((pegawai."JABATAN_INSTANSI_ID" = (jabatan."KODE_JABATAN")::bpchar)))
+     LEFT JOIN lokasi ON (((pegawai."TEMPAT_LAHIR_ID")::text = (lokasi."ID")::text)))
+     LEFT JOIN agama ON ((pegawai."AGAMA_ID" = agama."ID")))
+     LEFT JOIN tkpendidikan ON ((pegawai."TK_PENDIDIKAN" = (tkpendidikan."ID")::bpchar)))
+     LEFT JOIN pendidikan ON (((pegawai."PENDIDIKAN_ID")::text = (pendidikan."ID")::text)))
+     LEFT JOIN golongan ON ((pegawai."GOL_ID" = golongan."ID")))
+     LEFT JOIN golongan golongan_awal ON (((pegawai."GOL_AWAL_ID")::text = (golongan_awal."ID")::text)))
+     LEFT JOIN jenis_kawin ON (((jenis_kawin."ID")::text = (pegawai."JENIS_KAWIN_ID")::text)))
   WHERE ((pa."ID" IS NOT NULL) AND ((pegawai."KEDUDUKAN_HUKUM_ID")::text <> ALL (ARRAY[('14'::character varying)::text, ('52'::character varying)::text, ('66'::character varying)::text, ('67'::character varying)::text, ('77'::character varying)::text, ('88'::character varying)::text, ('98'::character varying)::text, ('99'::character varying)::text, ('100'::character varying)::text])) AND ((pegawai.status_pegawai <> 3) OR (pegawai.status_pegawai IS NULL)));
 
-CREATE VIEW kepegawaian.vw_pegawai_for_bpjstk AS
+CREATE VIEW vw_pegawai_for_bpjstk AS
  SELECT mvp."NIK",
     mvp."NAMA" AS nama_pegawai,
     (((l."NAMA")::text || ' / '::text) || mvp."TGL_LAHIR") AS tempat_tanggal_lahir,
@@ -4561,10 +4561,10 @@ CREATE VIEW kepegawaian.vw_pegawai_for_bpjstk AS
         END AS status_kepegawaian,
     mvp."UNOR_ID",
     mvp."UNOR_INDUK_ID"
-   FROM (kepegawaian.mv_pegawai mvp
-     LEFT JOIN kepegawaian.lokasi l ON ((mvp."TEMPAT_LAHIR_ID" = (l."ID")::text)));
+   FROM (mv_pegawai mvp
+     LEFT JOIN lokasi l ON ((mvp."TEMPAT_LAHIR_ID" = (l."ID")::text)));
 
-CREATE VIEW kepegawaian.vw_pegawai_simple AS
+CREATE VIEW vw_pegawai_simple AS
  SELECT pegawai."ID",
     pegawai."NIP_BARU",
     btrim((pegawai."NAMA")::text) AS "NAMA",
@@ -4574,27 +4574,27 @@ CREATE VIEW kepegawaian.vw_pegawai_simple AS
     vw."ESELON_2" AS "VW_ESELON_2",
     vw."ESELON_3" AS "VW_ESELON_3",
     vw."UNOR_INDUK" AS "VW_UNOR_INDUK"
-   FROM ((kepegawaian.pegawai pegawai
-     LEFT JOIN kepegawaian.vw_unit_list vw ON (((pegawai."UNOR_ID")::text = (vw."ID")::text)))
-     LEFT JOIN kepegawaian.pns_aktif pa ON ((pegawai."ID" = pa."ID")))
+   FROM ((pegawai pegawai
+     LEFT JOIN vw_unit_list vw ON (((pegawai."UNOR_ID")::text = (vw."ID")::text)))
+     LEFT JOIN pns_aktif pa ON ((pegawai."ID" = pa."ID")))
   WHERE ((pa."ID" IS NOT NULL) AND ((pegawai."KEDUDUKAN_HUKUM_ID")::text <> '99'::text) AND ((pegawai."KEDUDUKAN_HUKUM_ID")::text <> '66'::text) AND ((pegawai."KEDUDUKAN_HUKUM_ID")::text <> '52'::text) AND ((pegawai."KEDUDUKAN_HUKUM_ID")::text <> '20'::text) AND ((pegawai."KEDUDUKAN_HUKUM_ID")::text <> '04'::text) AND ((pegawai.status_pegawai <> 3) OR (pegawai.status_pegawai IS NULL)));
 
-CREATE VIEW kepegawaian.vw_pegawai_tanpa_akun AS
+CREATE VIEW vw_pegawai_tanpa_akun AS
  SELECT pegawai."NIP_BARU"
-   FROM (((kepegawaian.pegawai pegawai
-     LEFT JOIN kepegawaian.vw_unit_list vw ON (((pegawai."UNOR_ID")::text = (vw."ID")::text)))
-     LEFT JOIN kepegawaian.pns_aktif pa ON ((pegawai."ID" = pa."ID")))
-     LEFT JOIN kepegawaian.jabatan ON ((pegawai."JABATAN_INSTANSI_ID" = (jabatan."KODE_JABATAN")::bpchar)))
+   FROM (((pegawai pegawai
+     LEFT JOIN vw_unit_list vw ON (((pegawai."UNOR_ID")::text = (vw."ID")::text)))
+     LEFT JOIN pns_aktif pa ON ((pegawai."ID" = pa."ID")))
+     LEFT JOIN jabatan ON ((pegawai."JABATAN_INSTANSI_ID" = (jabatan."KODE_JABATAN")::bpchar)))
   WHERE ((pa."ID" IS NOT NULL) AND ((pegawai."KEDUDUKAN_HUKUM_ID")::text <> ALL (ARRAY[('14'::character varying)::text, ('52'::character varying)::text, ('66'::character varying)::text, ('67'::character varying)::text, ('77'::character varying)::text, ('78'::character varying)::text, ('98'::character varying)::text, ('99'::character varying)::text])) AND ((pegawai.status_pegawai <> 3) OR (pegawai.status_pegawai IS NULL)) AND (NOT ((pegawai."NIP_BARU")::text IN ( SELECT users.username
-           FROM kepegawaian.users))));
+           FROM users))));
 
-CREATE VIEW kepegawaian.vw_pejabat_cuti AS
+CREATE VIEW vw_pejabat_cuti AS
  SELECT "NIP_ATASAN",
     count(*) AS jumlah
-   FROM kepegawaian.line_approval_izin
+   FROM line_approval_izin
   GROUP BY "NIP_ATASAN";
 
-CREATE VIEW kepegawaian.vw_rwt_asesmen_terakhir AS
+CREATE VIEW vw_rwt_asesmen_terakhir AS
  SELECT concat('|', pegawai."NIP_BARU") AS "NIP_BARU",
     pegawai."NAMA",
     pegawai."JENIS_KELAMIN",
@@ -4609,15 +4609,15 @@ CREATE VIEW kepegawaian.vw_rwt_asesmen_terakhir AS
     rwt_assesmen."ID",
     rwt_assesmen."PNS_NIP",
     max((rwt_assesmen."TAHUN")::integer) AS last_asesmen
-   FROM ((((kepegawaian.pegawai pegawai
-     LEFT JOIN kepegawaian.golongan ON ((pegawai."GOL_ID" = golongan."ID")))
-     LEFT JOIN kepegawaian.rwt_assesmen ON (((pegawai."NIP_BARU")::bpchar = rwt_assesmen."PNS_NIP")))
-     LEFT JOIN kepegawaian.vw_unor_satker ON (((pegawai."UNOR_ID")::text = (vw_unor_satker."ID_UNOR")::text)))
-     LEFT JOIN kepegawaian.pns_aktif pa ON ((pegawai."ID" = pa."ID")))
+   FROM ((((pegawai pegawai
+     LEFT JOIN golongan ON ((pegawai."GOL_ID" = golongan."ID")))
+     LEFT JOIN rwt_assesmen ON (((pegawai."NIP_BARU")::bpchar = rwt_assesmen."PNS_NIP")))
+     LEFT JOIN vw_unor_satker ON (((pegawai."UNOR_ID")::text = (vw_unor_satker."ID_UNOR")::text)))
+     LEFT JOIN pns_aktif pa ON ((pegawai."ID" = pa."ID")))
   WHERE ((pegawai.status_pegawai = 1) AND ((pegawai.terminated_date IS NULL) OR ((pegawai.terminated_date IS NOT NULL) AND (pegawai.terminated_date > ('now'::text)::date))) AND (pa."ID" IS NOT NULL) AND ((pegawai."KEDUDUKAN_HUKUM_ID")::text <> '99'::text) AND ((pegawai."KEDUDUKAN_HUKUM_ID")::text <> '66'::text) AND ((pegawai."KEDUDUKAN_HUKUM_ID")::text <> '52'::text) AND ((pegawai."KEDUDUKAN_HUKUM_ID")::text <> '20'::text) AND ((pegawai."KEDUDUKAN_HUKUM_ID")::text <> '04'::text) AND ((pegawai.status_pegawai <> 3) OR (pegawai.status_pegawai IS NULL)))
   GROUP BY pegawai."NIP_BARU", pegawai."NAMA", pegawai."JENIS_KELAMIN", golongan."NAMA", pegawai."UNOR_ID", pegawai."SATUAN_KERJA_INDUK_ID", pegawai."JABATAN_NAMA", pegawai."JENIS_JABATAN_NAMA", vw_unor_satker."NAMA_UNOR", vw_unor_satker."NAMA_SATKER", vw_unor_satker."NAMA_UNOR_ESELON_1", rwt_assesmen."ID", rwt_assesmen."PNS_ID", rwt_assesmen."PNS_NIP";
 
-CREATE VIEW kepegawaian.vw_rwt_assesmen_pegawai AS
+CREATE VIEW vw_rwt_assesmen_pegawai AS
  SELECT pegawai."NIP_BARU",
     pegawai."NAMA",
     pegawai."UNOR_ID" AS "UNOR_PEGAWAI",
@@ -4643,12 +4643,12 @@ CREATE VIEW kepegawaian.vw_rwt_assesmen_pegawai AS
     rwt_assesmen."FILE_UPLOAD_EXISTS",
     rwt_assesmen."SATKER_ID",
     vw_unor_satker."NAMA_UNOR" AS "NAMA_UNOR_PEGAWAI"
-   FROM ((kepegawaian.pegawai pegawai
-     LEFT JOIN kepegawaian.rwt_assesmen ON (((pegawai."NIP_BARU")::bpchar = rwt_assesmen."PNS_NIP")))
-     LEFT JOIN kepegawaian.vw_unor_satker ON (((pegawai."UNOR_ID")::text = (vw_unor_satker."ID_UNOR")::text)))
+   FROM ((pegawai pegawai
+     LEFT JOIN rwt_assesmen ON (((pegawai."NIP_BARU")::bpchar = rwt_assesmen."PNS_NIP")))
+     LEFT JOIN vw_unor_satker ON (((pegawai."UNOR_ID")::text = (vw_unor_satker."ID_UNOR")::text)))
   WHERE ((rwt_assesmen."ID" IS NOT NULL) AND (pegawai.status_pegawai = 1) AND ((pegawai.terminated_date IS NULL) OR ((pegawai.terminated_date IS NOT NULL) AND (pegawai.terminated_date > ('now'::text)::date))));
 
-CREATE VIEW kepegawaian.vw_rwt_diklat AS
+CREATE VIEW vw_rwt_diklat AS
  SELECT rwt_diklat.id,
     jenis_diklat_siasn.jenis_diklat,
     jenis_diklat_siasn.id AS jenis_diklat_id,
@@ -4667,12 +4667,12 @@ CREATE VIEW kepegawaian.vw_rwt_diklat AS
     pegawai."PNS_ID" AS pns_orang_id,
     rwt_diklat.siasn_id,
     rwt_diklat.diklat_struktural_id
-   FROM (((kepegawaian.rwt_diklat
-     LEFT JOIN kepegawaian.jenis_diklat_siasn ON (((rwt_diklat.jenis_diklat_id)::text = (jenis_diklat_siasn.id)::text)))
-     LEFT JOIN kepegawaian.jenis_rumpun_diklat_siasn ON (((jenis_rumpun_diklat_siasn.id)::text = (rwt_diklat.rumpun_diklat_id)::text)))
-     LEFT JOIN kepegawaian.pegawai ON (((pegawai."NIP_BARU")::text = (rwt_diklat.nip_baru)::text)));
+   FROM (((rwt_diklat
+     LEFT JOIN jenis_diklat_siasn ON (((rwt_diklat.jenis_diklat_id)::text = (jenis_diklat_siasn.id)::text)))
+     LEFT JOIN jenis_rumpun_diklat_siasn ON (((jenis_rumpun_diklat_siasn.id)::text = (rwt_diklat.rumpun_diklat_id)::text)))
+     LEFT JOIN pegawai ON (((pegawai."NIP_BARU")::text = (rwt_diklat.nip_baru)::text)));
 
-CREATE VIEW kepegawaian.vw_skp AS
+CREATE VIEW vw_skp AS
  SELECT s."ID",
     s."PNS_NIP",
     s."PNS_NAMA",
@@ -4730,16 +4730,16 @@ CREATE VIEW kepegawaian.vw_skp AS
     p."JENIS_JABATAN_ID",
     au."NAMA_UNOR" AS nama_unor_atasan,
     aau."NAMA_UNOR" AS nama_unor_atasan_atasan
-   FROM (((((((kepegawaian.rwt_prestasi_kerja s
-     LEFT JOIN kepegawaian.pegawai p ON (((s."PNS_NIP")::text = (p."NIP_BARU")::text)))
-     LEFT JOIN kepegawaian.pegawai a ON (((s."ATASAN_LANGSUNG_PNS_NIP")::text = (a."NIP_BARU")::text)))
-     LEFT JOIN kepegawaian.pegawai aa ON (((s."ATASAN_ATASAN_LANGSUNG_PNS_NIP")::text = (aa."NIP_BARU")::text)))
-     LEFT JOIN kepegawaian.golongan ag ON (((a."GOL_ID")::text = (ag."ID")::text)))
-     LEFT JOIN kepegawaian.golongan aag ON (((aa."GOL_ID")::text = (aag."ID")::text)))
-     LEFT JOIN kepegawaian.vw_unit_list au ON (((a."UNOR_ID")::text = (au."ID")::text)))
-     LEFT JOIN kepegawaian.vw_unit_list aau ON (((aa."UNOR_ID")::text = (aau."ID")::text)));
+   FROM (((((((rwt_prestasi_kerja s
+     LEFT JOIN pegawai p ON (((s."PNS_NIP")::text = (p."NIP_BARU")::text)))
+     LEFT JOIN pegawai a ON (((s."ATASAN_LANGSUNG_PNS_NIP")::text = (a."NIP_BARU")::text)))
+     LEFT JOIN pegawai aa ON (((s."ATASAN_ATASAN_LANGSUNG_PNS_NIP")::text = (aa."NIP_BARU")::text)))
+     LEFT JOIN golongan ag ON (((a."GOL_ID")::text = (ag."ID")::text)))
+     LEFT JOIN golongan aag ON (((aa."GOL_ID")::text = (aag."ID")::text)))
+     LEFT JOIN vw_unit_list au ON (((a."UNOR_ID")::text = (au."ID")::text)))
+     LEFT JOIN vw_unit_list aau ON (((aa."UNOR_ID")::text = (aau."ID")::text)));
 
-CREATE VIEW kepegawaian.vw_sync_ds AS
+CREATE VIEW vw_sync_ds AS
  SELECT ld."ID",
     ld."NIK",
     ld."ID_FILE",
@@ -4749,11 +4749,11 @@ CREATE VIEW kepegawaian.vw_sync_ds AS
     btrim((ds.kategori)::text) AS kategori,
     btrim((ds.nip_sk)::text) AS nip_sk,
     ds.nama_pemilik_sk
-   FROM (kepegawaian.log_ds ld
-     LEFT JOIN kepegawaian.tbl_file_ds ds ON (((ld."ID_FILE")::text = (ds.id_file)::text)))
+   FROM (log_ds ld
+     LEFT JOIN tbl_file_ds ds ON (((ld."ID_FILE")::text = (ds.id_file)::text)))
   WHERE ((ld."STATUS" = 2) AND (ds.nip_sk IS NOT NULL) AND (ds.telah_kirim = 1) AND (ds.ds_ok = 1) AND (ld."PROSES_CRON" = 0) AND (ds.is_signed = 1));
 
-CREATE VIEW kepegawaian.vw_tte_trx_draft_sk_to_sk AS
+CREATE VIEW vw_tte_trx_draft_sk_to_sk AS
  SELECT ttdsk.id,
     ttdsk.id_master_proses,
     ttdsk.nip_sk,
@@ -4773,10 +4773,10 @@ CREATE VIEW kepegawaian.vw_tte_trx_draft_sk_to_sk AS
     ttdsk.show_qrcode,
     ttdsk.letak_ttd,
     tfd.is_signed
-   FROM (kepegawaian.tte_trx_draft_sk ttdsk
-     JOIN kepegawaian.tbl_file_ds tfd ON (((ttdsk.id_file)::text = (tfd.id_file)::text)));
+   FROM (tte_trx_draft_sk ttdsk
+     JOIN tbl_file_ds tfd ON (((ttdsk.id_file)::text = (tfd.id_file)::text)));
 
-CREATE VIEW kepegawaian.vw_unit_list_asli AS
+CREATE VIEW vw_unit_list_asli AS
  SELECT uk."NO",
     uk."KODE_INTERNAL",
     uk."ID",
@@ -4805,13 +4805,13 @@ CREATE VIEW kepegawaian.vw_unit_list_asli AS
     es3."NAMA_UNOR" AS "NAMA_UNOR_ESELON_3",
     es4."NAMA_UNOR" AS "NAMA_UNOR_ESELON_4",
     btrim(concat(es1."NAMA_UNOR", '-', es2."NAMA_UNOR", '-', es3."NAMA_UNOR", '-', es4."NAMA_UNOR"), '-'::text) AS "NAMA_UNOR_FULL"
-   FROM ((((kepegawaian.unitkerja uk
-     LEFT JOIN kepegawaian.unitkerja es1 ON (((es1."ID")::text = (uk."ESELON_1")::text)))
-     LEFT JOIN kepegawaian.unitkerja es2 ON (((es2."ID")::text = (uk."ESELON_2")::text)))
-     LEFT JOIN kepegawaian.unitkerja es3 ON (((es3."ID")::text = (uk."ESELON_3")::text)))
-     LEFT JOIN kepegawaian.unitkerja es4 ON (((es4."ID")::text = (uk."ESELON_4")::text)));
+   FROM ((((unitkerja uk
+     LEFT JOIN unitkerja es1 ON (((es1."ID")::text = (uk."ESELON_1")::text)))
+     LEFT JOIN unitkerja es2 ON (((es2."ID")::text = (uk."ESELON_2")::text)))
+     LEFT JOIN unitkerja es3 ON (((es3."ID")::text = (uk."ESELON_3")::text)))
+     LEFT JOIN unitkerja es4 ON (((es4."ID")::text = (uk."ESELON_4")::text)));
 
-CREATE MATERIALIZED VIEW kepegawaian.vw_unit_list_bak AS
+CREATE MATERIALIZED VIEW vw_unit_list_bak AS
  SELECT uk."NO",
     uk."KODE_INTERNAL",
     uk."ID",
@@ -4842,22 +4842,22 @@ CREATE MATERIALIZED VIEW kepegawaian.vw_unit_list_bak AS
     es4."NAMA_UNOR" AS "NAMA_UNOR_ESELON_4",
     x."NAMA_UNOR" AS "NAMA_UNOR_FULL",
     uk."UNOR_INDUK_PENYETARAAN"
-   FROM (((((kepegawaian.unitkerja uk
-     LEFT JOIN kepegawaian.unitkerja es1 ON (((es1."ID")::text = (uk."ESELON_1")::text)))
-     LEFT JOIN kepegawaian.unitkerja es2 ON (((es2."ID")::text = (uk."ESELON_2")::text)))
-     LEFT JOIN kepegawaian.unitkerja es3 ON (((es3."ID")::text = (uk."ESELON_3")::text)))
-     LEFT JOIN kepegawaian.unitkerja es4 ON (((es4."ID")::text = (uk."ESELON_4")::text)))
+   FROM (((((unitkerja uk
+     LEFT JOIN unitkerja es1 ON (((es1."ID")::text = (uk."ESELON_1")::text)))
+     LEFT JOIN unitkerja es2 ON (((es2."ID")::text = (uk."ESELON_2")::text)))
+     LEFT JOIN unitkerja es3 ON (((es3."ID")::text = (uk."ESELON_3")::text)))
+     LEFT JOIN unitkerja es4 ON (((es4."ID")::text = (uk."ESELON_4")::text)))
      LEFT JOIN ( WITH RECURSIVE r AS (
                  SELECT unitkerja."ID",
                     (unitkerja."NAMA_UNOR")::text AS "NAMA_UNOR",
                     (unitkerja."ID")::text AS arr_id
-                   FROM kepegawaian.unitkerja
+                   FROM unitkerja
                   WHERE ((unitkerja."DIATASAN_ID")::text = 'A8ACA7397AEB3912E040640A040269BB'::text)
                 UNION ALL
                  SELECT a."ID",
                     (((a."NAMA_UNOR")::text || ' - '::text) || r_1."NAMA_UNOR"),
                     ((r_1.arr_id || '#'::text) || (a."ID")::text)
-                   FROM (kepegawaian.unitkerja a
+                   FROM (unitkerja a
                      JOIN r r_1 ON (((r_1."ID")::text = (a."DIATASAN_ID")::text)))
                 )
          SELECT r."ID",
@@ -4867,7 +4867,7 @@ CREATE MATERIALIZED VIEW kepegawaian.vw_unit_list_bak AS
   WHERE (uk."EXPIRED_DATE" IS NULL)
   WITH NO DATA;
 
-CREATE MATERIALIZED VIEW kepegawaian.vw_unit_list_bak2 AS
+CREATE MATERIALIZED VIEW vw_unit_list_bak2 AS
  SELECT uk."NO",
     uk."KODE_INTERNAL",
     uk."ID",
@@ -4898,22 +4898,22 @@ CREATE MATERIALIZED VIEW kepegawaian.vw_unit_list_bak2 AS
     es4."NAMA_UNOR" AS "NAMA_UNOR_ESELON_4",
     x."NAMA_UNOR" AS "NAMA_UNOR_FULL",
     uk."UNOR_INDUK_PENYETARAAN"
-   FROM (((((kepegawaian.unitkerja uk
-     LEFT JOIN kepegawaian.unitkerja es1 ON (((es1."ID")::text = (uk."ESELON_1")::text)))
-     LEFT JOIN kepegawaian.unitkerja es2 ON (((es2."ID")::text = (uk."ESELON_2")::text)))
-     LEFT JOIN kepegawaian.unitkerja es3 ON (((es3."ID")::text = (uk."ESELON_3")::text)))
-     LEFT JOIN kepegawaian.unitkerja es4 ON (((es4."ID")::text = (uk."ESELON_4")::text)))
+   FROM (((((unitkerja uk
+     LEFT JOIN unitkerja es1 ON (((es1."ID")::text = (uk."ESELON_1")::text)))
+     LEFT JOIN unitkerja es2 ON (((es2."ID")::text = (uk."ESELON_2")::text)))
+     LEFT JOIN unitkerja es3 ON (((es3."ID")::text = (uk."ESELON_3")::text)))
+     LEFT JOIN unitkerja es4 ON (((es4."ID")::text = (uk."ESELON_4")::text)))
      LEFT JOIN ( WITH RECURSIVE r AS (
                  SELECT unitkerja."ID",
                     (unitkerja."NAMA_UNOR")::text AS "NAMA_UNOR",
                     (unitkerja."ID")::text AS arr_id
-                   FROM kepegawaian.unitkerja
+                   FROM unitkerja
                   WHERE ((unitkerja."DIATASAN_ID")::text = 'A8ACA7397AEB3912E040640A040269BB'::text)
                 UNION ALL
                  SELECT a."ID",
                     (((a."NAMA_UNOR")::text || ' - '::text) || r_1."NAMA_UNOR"),
                     ((r_1.arr_id || '#'::text) || (a."ID")::text)
-                   FROM (kepegawaian.unitkerja a
+                   FROM (unitkerja a
                      JOIN r r_1 ON (((r_1."ID")::text = (a."DIATASAN_ID")::text)))
                 )
          SELECT r."ID",
@@ -4923,7 +4923,7 @@ CREATE MATERIALIZED VIEW kepegawaian.vw_unit_list_bak2 AS
   WHERE (uk."EXPIRED_DATE" IS NULL)
   WITH NO DATA;
 
-CREATE VIEW kepegawaian.vw_unit_list_new AS
+CREATE VIEW vw_unit_list_new AS
  SELECT uk."NO",
     uk."KODE_INTERNAL",
     uk."ID",
@@ -4954,22 +4954,22 @@ CREATE VIEW kepegawaian.vw_unit_list_new AS
     es4."NAMA_UNOR" AS "NAMA_UNOR_ESELON_4",
     x."NAMA_UNOR" AS "NAMA_UNOR_FULL",
     uk."UNOR_INDUK_PENYETARAAN"
-   FROM (((((kepegawaian.unitkerja uk
-     LEFT JOIN kepegawaian.unitkerja es1 ON (((es1."ID")::text = (uk."ESELON_1")::text)))
-     LEFT JOIN kepegawaian.unitkerja es2 ON (((es2."ID")::text = (uk."ESELON_2")::text)))
-     LEFT JOIN kepegawaian.unitkerja es3 ON (((es3."ID")::text = (uk."ESELON_3")::text)))
-     LEFT JOIN kepegawaian.unitkerja es4 ON (((es4."ID")::text = (uk."ESELON_4")::text)))
+   FROM (((((unitkerja uk
+     LEFT JOIN unitkerja es1 ON (((es1."ID")::text = (uk."ESELON_1")::text)))
+     LEFT JOIN unitkerja es2 ON (((es2."ID")::text = (uk."ESELON_2")::text)))
+     LEFT JOIN unitkerja es3 ON (((es3."ID")::text = (uk."ESELON_3")::text)))
+     LEFT JOIN unitkerja es4 ON (((es4."ID")::text = (uk."ESELON_4")::text)))
      LEFT JOIN ( WITH RECURSIVE r AS (
                  SELECT unitkerja."ID",
                     (unitkerja."NAMA_UNOR")::text AS "NAMA_UNOR",
                     (unitkerja."ID")::text AS arr_id
-                   FROM kepegawaian.unitkerja
+                   FROM unitkerja
                   WHERE ((unitkerja."DIATASAN_ID")::text = 'A8ACA7397AEB3912E040640A040269BB'::text)
                 UNION ALL
                  SELECT a."ID",
                     (((a."NAMA_UNOR")::text || ' - '::text) || r_1."NAMA_UNOR"),
                     ((r_1.arr_id || '#'::text) || (a."ID")::text)
-                   FROM (kepegawaian.unitkerja a
+                   FROM (unitkerja a
                      JOIN r r_1 ON (((r_1."ID")::text = (a."DIATASAN_ID")::text)))
                 )
          SELECT r."ID",
@@ -4978,7 +4978,7 @@ CREATE VIEW kepegawaian.vw_unit_list_new AS
            FROM r) x ON (((uk."ID")::text = (x."ID")::text)))
   WHERE (uk."EXPIRED_DATE" IS NULL);
 
-CREATE VIEW kepegawaian.vw_unit_list_pejabat AS
+CREATE VIEW vw_unit_list_pejabat AS
  SELECT uk."NO",
     uk."KODE_INTERNAL",
     uk."ID",
@@ -5010,19 +5010,19 @@ CREATE VIEW kepegawaian.vw_unit_list_pejabat AS
     p."GELAR_DEPAN",
     p."NAMA" AS "PEJABAT_NAMA",
     p."GELAR_BELAKANG"
-   FROM ((kepegawaian.unitkerja uk
-     LEFT JOIN kepegawaian.pegawai p ON (((p."PNS_ID")::text = (uk."PEMIMPIN_PNS_ID")::text)))
+   FROM ((unitkerja uk
+     LEFT JOIN pegawai p ON (((p."PNS_ID")::text = (uk."PEMIMPIN_PNS_ID")::text)))
      LEFT JOIN ( WITH RECURSIVE r AS (
                  SELECT unitkerja."ID",
                     (unitkerja."NAMA_UNOR")::text AS "NAMA_UNOR",
                     (unitkerja."ID")::text AS arr_id
-                   FROM kepegawaian.unitkerja
+                   FROM unitkerja
                   WHERE ((unitkerja."DIATASAN_ID")::text = 'A8ACA7397AEB3912E040640A040269BB'::text)
                 UNION ALL
                  SELECT a."ID",
                     (((a."NAMA_UNOR")::text || ' - '::text) || r_1."NAMA_UNOR"),
                     ((r_1.arr_id || '#'::text) || (a."ID")::text)
-                   FROM (kepegawaian.unitkerja a
+                   FROM (unitkerja a
                      JOIN r r_1 ON (((r_1."ID")::text = (a."DIATASAN_ID")::text)))
                 )
          SELECT r."ID",
@@ -5030,7 +5030,7 @@ CREATE VIEW kepegawaian.vw_unit_list_pejabat AS
             string_to_array(r.arr_id, '#'::text) AS eselon
            FROM r) x ON (((uk."ID")::text = (x."ID")::text)));
 
-CREATE MATERIALIZED VIEW kepegawaian.vw_unit_list_penyajian_data AS
+CREATE MATERIALIZED VIEW vw_unit_list_penyajian_data AS
  SELECT uk."NO",
     uk."KODE_INTERNAL",
     uk."ID",
@@ -5062,22 +5062,22 @@ CREATE MATERIALIZED VIEW kepegawaian.vw_unit_list_penyajian_data AS
     uk."NAMA_UNOR" AS "NAMA_UNOR_FULL",
     uk."UNOR_INDUK_PENYETARAAN",
     uk."ABBREVIATION"
-   FROM (((((kepegawaian.unitkerja uk
-     LEFT JOIN kepegawaian.unitkerja es1 ON (((es1."ID")::text = (uk."ESELON_1")::text)))
-     LEFT JOIN kepegawaian.unitkerja es2 ON (((es2."ID")::text = (uk."ESELON_2")::text)))
-     LEFT JOIN kepegawaian.unitkerja es3 ON (((es3."ID")::text = (uk."ESELON_3")::text)))
-     LEFT JOIN kepegawaian.unitkerja es4 ON (((es4."ID")::text = (uk."ESELON_4")::text)))
+   FROM (((((unitkerja uk
+     LEFT JOIN unitkerja es1 ON (((es1."ID")::text = (uk."ESELON_1")::text)))
+     LEFT JOIN unitkerja es2 ON (((es2."ID")::text = (uk."ESELON_2")::text)))
+     LEFT JOIN unitkerja es3 ON (((es3."ID")::text = (uk."ESELON_3")::text)))
+     LEFT JOIN unitkerja es4 ON (((es4."ID")::text = (uk."ESELON_4")::text)))
      LEFT JOIN ( WITH RECURSIVE r AS (
                  SELECT unitkerja."ID",
                     (unitkerja."NAMA_UNOR")::text AS "NAMA_UNOR",
                     (unitkerja."ID")::text AS arr_id
-                   FROM kepegawaian.unitkerja
+                   FROM unitkerja
                   WHERE ((unitkerja."DIATASAN_ID")::text = 'A8ACA7397AEB3912E040640A040269BB'::text)
                 UNION ALL
                  SELECT a."ID",
                     ((r_1."NAMA_UNOR" || '#'::text) || (a."NAMA_UNOR")::text),
                     ((r_1.arr_id || '#'::text) || (a."ID")::text)
-                   FROM (kepegawaian.unitkerja a
+                   FROM (unitkerja a
                      JOIN r r_1 ON (((r_1."ID")::text = (a."DIATASAN_ID")::text)))
                 )
          SELECT r."ID",
@@ -5087,17 +5087,17 @@ CREATE MATERIALIZED VIEW kepegawaian.vw_unit_list_penyajian_data AS
   WHERE (uk."EXPIRED_DATE" IS NULL)
   WITH NO DATA;
 
-CREATE VIEW kepegawaian.vw_unor_satker_copy1 AS
+CREATE VIEW vw_unor_satker_copy1 AS
  SELECT a."ID" AS "ID_UNOR",
     b."ID" AS "ID_SATKER",
     a."NAMA_UNOR",
     b."NAMA_UNOR" AS "NAMA_SATKER",
     c."NAMA_UNOR" AS "NAMA_UNOR_ESELON_1"
-   FROM ((kepegawaian.unitkerja a
-     JOIN kepegawaian.unitkerja b ON (((b."ID")::text = (a."UNOR_INDUK")::text)))
-     JOIN kepegawaian.unitkerja c ON (((a."ESELON_1")::text = (c."ID")::text)))
+   FROM ((unitkerja a
+     JOIN unitkerja b ON (((b."ID")::text = (a."UNOR_INDUK")::text)))
+     JOIN unitkerja c ON (((a."ESELON_1")::text = (c."ID")::text)))
   WHERE ((a."UNOR_INDUK")::text IN ( SELECT unitkerja."ID"
-           FROM kepegawaian.unitkerja unitkerja
+           FROM unitkerja unitkerja
           WHERE (unitkerja."IS_SATKER" = (1)::smallint)))
 UNION ALL
  SELECT a."ID" AS "ID_UNOR",
@@ -5105,13 +5105,13 @@ UNION ALL
     a."NAMA_UNOR",
     a."NAMA_UNOR" AS "NAMA_SATKER",
     b."NAMA_UNOR" AS "NAMA_UNOR_ESELON_1"
-   FROM (kepegawaian.unitkerja a
-     JOIN kepegawaian.unitkerja b ON (((b."ID")::text = (a."UNOR_INDUK")::text)))
+   FROM (unitkerja a
+     JOIN unitkerja b ON (((b."ID")::text = (a."UNOR_INDUK")::text)))
   WHERE (a."IS_SATKER" = (1)::smallint);
 
-COMMENT ON VIEW kepegawaian.vw_unor_satker_copy1 IS 'Untuk Melihat Daftar Unit Kerja Berdasarkan Satkernya';
+COMMENT ON VIEW vw_unor_satker_copy1 IS 'Untuk Melihat Daftar Unit Kerja Berdasarkan Satkernya';
 
-CREATE VIEW kepegawaian.vw_unor_satker_only_satker AS
+CREATE VIEW vw_unor_satker_only_satker AS
  SELECT a."ID" AS "ID_UNOR",
     a."UNOR_INDUK" AS "ID_SATKER",
     a."NAMA_UNOR",
@@ -5119,19 +5119,19 @@ CREATE VIEW kepegawaian.vw_unor_satker_only_satker AS
     c."NAMA_UNOR_ESELON_1",
     a."EXPIRED_DATE",
     c.id_eselon_1 AS "ID_ESELON_1"
-   FROM ((kepegawaian.unitkerja a
-     JOIN kepegawaian.unitkerja b ON (((a."UNOR_INDUK")::text = (b."ID")::text)))
+   FROM ((unitkerja a
+     JOIN unitkerja b ON (((a."UNOR_INDUK")::text = (b."ID")::text)))
      JOIN ( WITH RECURSIVE r AS (
                  SELECT unitkerja."ID",
                     unitkerja."ID" AS id_eselon_1,
                     unitkerja."NAMA_UNOR" AS "NAMA_UNOR_ESELON_1"
-                   FROM kepegawaian.unitkerja
+                   FROM unitkerja
                   WHERE ((unitkerja."DIATASAN_ID")::text = 'A8ACA7397AEB3912E040640A040269BB'::text)
                 UNION ALL
                  SELECT a_1."ID",
                     r_1.id_eselon_1,
                     r_1."NAMA_UNOR_ESELON_1"
-                   FROM (kepegawaian.unitkerja a_1
+                   FROM (unitkerja a_1
                      JOIN r r_1 ON (((a_1."DIATASAN_ID")::text = (r_1."ID")::text)))
                 )
          SELECT r."ID",
@@ -5140,7 +5140,7 @@ CREATE VIEW kepegawaian.vw_unor_satker_only_satker AS
            FROM r) c ON (((a."ID")::text = (c."ID")::text)))
   WHERE ((a."IS_SATKER" = 1) AND (a."EXPIRED_DATE" IS NULL));
 
-CREATE VIEW kepegawaian.vw_unor_satker_satyalencana AS
+CREATE VIEW vw_unor_satker_satyalencana AS
  SELECT a."ID" AS "ID_UNOR",
     a."UNOR_INDUK" AS "ID_SATKER",
     a."NAMA_UNOR",
@@ -5148,19 +5148,19 @@ CREATE VIEW kepegawaian.vw_unor_satker_satyalencana AS
     c."NAMA_UNOR_ESELON_1",
     a."EXPIRED_DATE",
     c.id_eselon_1 AS "ID_ESELON_1"
-   FROM ((kepegawaian.unitkerja a
-     JOIN kepegawaian.unitkerja b ON (((a."UNOR_INDUK")::text = (b."ID")::text)))
+   FROM ((unitkerja a
+     JOIN unitkerja b ON (((a."UNOR_INDUK")::text = (b."ID")::text)))
      JOIN ( WITH RECURSIVE r AS (
                  SELECT unitkerja."ID",
                     unitkerja."ID" AS id_eselon_1,
                     unitkerja."NAMA_UNOR" AS "NAMA_UNOR_ESELON_1"
-                   FROM kepegawaian.unitkerja
+                   FROM unitkerja
                   WHERE ((unitkerja."DIATASAN_ID")::text = 'A8ACA7397AEB3912E040640A040269BB'::text)
                 UNION ALL
                  SELECT a_1."ID",
                     r_1.id_eselon_1,
                     r_1."NAMA_UNOR_ESELON_1"
-                   FROM (kepegawaian.unitkerja a_1
+                   FROM (unitkerja a_1
                      JOIN r r_1 ON (((a_1."DIATASAN_ID")::text = (r_1."ID")::text)))
                 )
          SELECT r."ID",
@@ -5168,7 +5168,7 @@ CREATE VIEW kepegawaian.vw_unor_satker_satyalencana AS
             r."NAMA_UNOR_ESELON_1"
            FROM r) c ON (((a."ID")::text = (c."ID")::text)));
 
-CREATE VIEW kepegawaian.vw_unor_satker_w_eselonid AS
+CREATE VIEW vw_unor_satker_w_eselonid AS
  SELECT a."ID" AS "ID_UNOR",
     a."UNOR_INDUK" AS "ID_SATKER",
     a."NAMA_UNOR",
@@ -5178,19 +5178,19 @@ CREATE VIEW kepegawaian.vw_unor_satker_w_eselonid AS
     btrim((a."NAMA_JABATAN")::text) AS "NAMA_JABATAN",
     a."DIATASAN_ID",
     c."ID" AS "ESELON_1_ID"
-   FROM ((kepegawaian.unitkerja a
-     JOIN kepegawaian.unitkerja b ON (((a."UNOR_INDUK")::text = (b."ID")::text)))
+   FROM ((unitkerja a
+     JOIN unitkerja b ON (((a."UNOR_INDUK")::text = (b."ID")::text)))
      JOIN ( WITH RECURSIVE r AS (
                  SELECT unitkerja."ID",
                     unitkerja."ID" AS id_eselon_1,
                     unitkerja."NAMA_UNOR" AS "NAMA_UNOR_ESELON_1"
-                   FROM kepegawaian.unitkerja
+                   FROM unitkerja
                   WHERE ((unitkerja."DIATASAN_ID")::text = 'A8ACA7397AEB3912E040640A040269BB'::text)
                 UNION ALL
                  SELECT a_1."ID",
                     r_1.id_eselon_1,
                     r_1."NAMA_UNOR_ESELON_1"
-                   FROM (kepegawaian.unitkerja a_1
+                   FROM (unitkerja a_1
                      JOIN r r_1 ON (((a_1."DIATASAN_ID")::text = (r_1."ID")::text)))
                 )
          SELECT r."ID",
@@ -5198,7 +5198,7 @@ CREATE VIEW kepegawaian.vw_unor_satker_w_eselonid AS
             r."NAMA_UNOR_ESELON_1"
            FROM r) c ON (((a."ID")::text = (c."ID")::text)));
 
-CREATE VIEW kepegawaian.vw_unor_satker_w_id_eselon1 AS
+CREATE VIEW vw_unor_satker_w_id_eselon1 AS
  SELECT "ID" AS "ID_UNOR",
     "NAMA_UNOR",
     "ABBREVIATION",
@@ -5231,9 +5231,9 @@ CREATE VIEW kepegawaian.vw_unor_satker_w_id_eselon1 AS
             WHEN (btrim(("NAMA_UNOR")::text) = 'KEMENTERIAN PENDIDIKAN dan KEBUDAYAAN'::text) THEN "NAMA_UNOR"
             ELSE "NAMA_UNOR_ESELON_1"
         END AS "NAMA_UNOR_ESELON_1"
-   FROM kepegawaian.vw_unit_list_penyajian_data t;
+   FROM vw_unit_list_penyajian_data t;
 
-CREATE TABLE kepegawaian.wage (
+CREATE TABLE wage (
     "GOLONGAN" character varying(2) NOT NULL,
     "WORKING_PERIOD" smallint NOT NULL,
     "BASIC" integer,
@@ -5241,505 +5241,505 @@ CREATE TABLE kepegawaian.wage (
     "ETC" integer
 );
 
-ALTER TABLE ONLY kepegawaian.absen ALTER COLUMN "ID" SET DEFAULT nextval('kepegawaian."absen_ID_seq"'::regclass);
+ALTER TABLE ONLY absen ALTER COLUMN "ID" SET DEFAULT nextval('"absen_ID_seq"'::regclass);
 
-ALTER TABLE ONLY kepegawaian.anak ALTER COLUMN "ID" SET DEFAULT nextval('kepegawaian."anak_ID_seq"'::regclass);
+ALTER TABLE ONLY anak ALTER COLUMN "ID" SET DEFAULT nextval('"anak_ID_seq"'::regclass);
 
-ALTER TABLE ONLY kepegawaian.arsip ALTER COLUMN "ID" SET DEFAULT nextval('kepegawaian."arsip_ID_seq"'::regclass);
+ALTER TABLE ONLY arsip ALTER COLUMN "ID" SET DEFAULT nextval('"arsip_ID_seq"'::regclass);
 
-ALTER TABLE ONLY kepegawaian.asesmen_hasil_asesmen ALTER COLUMN id SET DEFAULT nextval('kepegawaian.asesmen_hasil_asesmen_id_seq'::regclass);
+ALTER TABLE ONLY asesmen_hasil_asesmen ALTER COLUMN id SET DEFAULT nextval('asesmen_hasil_asesmen_id_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.asesmen_pegawai_berpotensi_jpt ALTER COLUMN id SET DEFAULT nextval('kepegawaian.asesmen_pegawai_berpotensi_jpt_id_seq'::regclass);
+ALTER TABLE ONLY asesmen_pegawai_berpotensi_jpt ALTER COLUMN id SET DEFAULT nextval('asesmen_pegawai_berpotensi_jpt_id_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.asesmen_riwayat_hukuman_disiplin ALTER COLUMN id SET DEFAULT nextval('kepegawaian.asesmen_riwayat_hukuman_disiplin_id_seq'::regclass);
+ALTER TABLE ONLY asesmen_riwayat_hukuman_disiplin ALTER COLUMN id SET DEFAULT nextval('asesmen_riwayat_hukuman_disiplin_id_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.baperjakat ALTER COLUMN "ID" SET DEFAULT nextval('kepegawaian."baperjakat_ID_seq"'::regclass);
+ALTER TABLE ONLY baperjakat ALTER COLUMN "ID" SET DEFAULT nextval('"baperjakat_ID_seq"'::regclass);
 
-ALTER TABLE ONLY kepegawaian.daftar_rohaniawan ALTER COLUMN id SET DEFAULT nextval('kepegawaian.daftar_rohaniawan_id_seq'::regclass);
+ALTER TABLE ONLY daftar_rohaniawan ALTER COLUMN id SET DEFAULT nextval('daftar_rohaniawan_id_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.hari_libur ALTER COLUMN "ID" SET DEFAULT nextval('kepegawaian."hari_libur_ID_seq"'::regclass);
+ALTER TABLE ONLY hari_libur ALTER COLUMN "ID" SET DEFAULT nextval('"hari_libur_ID_seq"'::regclass);
 
-ALTER TABLE ONLY kepegawaian.istri ALTER COLUMN "ID" SET DEFAULT nextval('kepegawaian."istri_ID_seq"'::regclass);
+ALTER TABLE ONLY istri ALTER COLUMN "ID" SET DEFAULT nextval('"istri_ID_seq"'::regclass);
 
-ALTER TABLE ONLY kepegawaian.izin ALTER COLUMN "ID" SET DEFAULT nextval('kepegawaian."izin_ID_seq"'::regclass);
+ALTER TABLE ONLY izin ALTER COLUMN "ID" SET DEFAULT nextval('"izin_ID_seq"'::regclass);
 
-ALTER TABLE ONLY kepegawaian.izin_alasan ALTER COLUMN "ID" SET DEFAULT nextval('kepegawaian."izin_alasan_ID_seq"'::regclass);
+ALTER TABLE ONLY izin_alasan ALTER COLUMN "ID" SET DEFAULT nextval('"izin_alasan_ID_seq"'::regclass);
 
-ALTER TABLE ONLY kepegawaian.izin_verifikasi ALTER COLUMN "ID" SET DEFAULT nextval('kepegawaian."izin_verifikasi_ID_seq"'::regclass);
+ALTER TABLE ONLY izin_verifikasi ALTER COLUMN "ID" SET DEFAULT nextval('"izin_verifikasi_ID_seq"'::regclass);
 
-ALTER TABLE ONLY kepegawaian.jabatan ALTER COLUMN id SET DEFAULT nextval('kepegawaian.jabatan_id_seq'::regclass);
+ALTER TABLE ONLY jabatan ALTER COLUMN id SET DEFAULT nextval('jabatan_id_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.jenis_arsip ALTER COLUMN "ID" SET DEFAULT nextval('kepegawaian.jenis_arsip_id_seq'::regclass);
+ALTER TABLE ONLY jenis_arsip ALTER COLUMN "ID" SET DEFAULT nextval('jenis_arsip_id_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.jenis_diklat ALTER COLUMN id SET DEFAULT nextval('kepegawaian.jenis_diklat_id_seq'::regclass);
+ALTER TABLE ONLY jenis_diklat ALTER COLUMN id SET DEFAULT nextval('jenis_diklat_id_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.jenis_izin ALTER COLUMN "ID" SET DEFAULT nextval('kepegawaian."jenis_izin_ID_seq"'::regclass);
+ALTER TABLE ONLY jenis_izin ALTER COLUMN "ID" SET DEFAULT nextval('"jenis_izin_ID_seq"'::regclass);
 
-ALTER TABLE ONLY kepegawaian.jenis_kursus ALTER COLUMN id SET DEFAULT nextval('kepegawaian.jenis_kursus_id_seq'::regclass);
+ALTER TABLE ONLY jenis_kursus ALTER COLUMN id SET DEFAULT nextval('jenis_kursus_id_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.kandidat_baperjakat ALTER COLUMN "ID" SET DEFAULT nextval('kepegawaian."kandidat_baperjakat_ID_seq"'::regclass);
+ALTER TABLE ONLY kandidat_baperjakat ALTER COLUMN "ID" SET DEFAULT nextval('"kandidat_baperjakat_ID_seq"'::regclass);
 
-ALTER TABLE ONLY kepegawaian.kategori_ds ALTER COLUMN id SET DEFAULT nextval('kepegawaian.kategori_ds_id_seq'::regclass);
+ALTER TABLE ONLY kategori_ds ALTER COLUMN id SET DEFAULT nextval('kategori_ds_id_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.kategori_jenis_arsip ALTER COLUMN "ID" SET DEFAULT nextval('kepegawaian."kategori_jenis_arsip_ID_seq"'::regclass);
+ALTER TABLE ONLY kategori_jenis_arsip ALTER COLUMN "ID" SET DEFAULT nextval('"kategori_jenis_arsip_ID_seq"'::regclass);
 
-ALTER TABLE ONLY kepegawaian.layanan ALTER COLUMN id SET DEFAULT nextval('kepegawaian.layanan_id_seq1'::regclass);
+ALTER TABLE ONLY layanan ALTER COLUMN id SET DEFAULT nextval('layanan_id_seq1'::regclass);
 
-ALTER TABLE ONLY kepegawaian.layanan_tipe ALTER COLUMN id SET DEFAULT nextval('kepegawaian.layanan_id_seq'::regclass);
+ALTER TABLE ONLY layanan_tipe ALTER COLUMN id SET DEFAULT nextval('layanan_id_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.layanan_usulan ALTER COLUMN id SET DEFAULT nextval('kepegawaian.layanan_usulan_id_seq'::regclass);
+ALTER TABLE ONLY layanan_usulan ALTER COLUMN id SET DEFAULT nextval('layanan_usulan_id_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.line_approval_izin ALTER COLUMN "ID" SET DEFAULT nextval('kepegawaian."line_approval_izin_ID_seq"'::regclass);
+ALTER TABLE ONLY line_approval_izin ALTER COLUMN "ID" SET DEFAULT nextval('"line_approval_izin_ID_seq"'::regclass);
 
-ALTER TABLE ONLY kepegawaian.log_ds ALTER COLUMN "ID" SET DEFAULT nextval('kepegawaian."log_ds_ID_seq"'::regclass);
+ALTER TABLE ONLY log_ds ALTER COLUMN "ID" SET DEFAULT nextval('"log_ds_ID_seq"'::regclass);
 
-ALTER TABLE ONLY kepegawaian.log_request ALTER COLUMN id SET DEFAULT nextval('kepegawaian.log_request_id_seq'::regclass);
+ALTER TABLE ONLY log_request ALTER COLUMN id SET DEFAULT nextval('log_request_id_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.log_transaksi ALTER COLUMN "ID" SET DEFAULT nextval('kepegawaian."log_transaksi_ID_seq"'::regclass);
+ALTER TABLE ONLY log_transaksi ALTER COLUMN "ID" SET DEFAULT nextval('"log_transaksi_ID_seq"'::regclass);
 
-ALTER TABLE ONLY kepegawaian.mst_jenis_satker ALTER COLUMN id_jenis SET DEFAULT nextval('kepegawaian.jenis_satker_id_jenis_seq'::regclass);
+ALTER TABLE ONLY mst_jenis_satker ALTER COLUMN id_jenis SET DEFAULT nextval('jenis_satker_id_jenis_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.mst_peraturan_otk ALTER COLUMN id_peraturan SET DEFAULT nextval('kepegawaian.peraturan_otk_id_peraturan_seq'::regclass);
+ALTER TABLE ONLY mst_peraturan_otk ALTER COLUMN id_peraturan SET DEFAULT nextval('peraturan_otk_id_peraturan_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.mst_templates ALTER COLUMN id SET DEFAULT nextval('kepegawaian.mst_templates_id_seq'::regclass);
+ALTER TABLE ONLY mst_templates ALTER COLUMN id SET DEFAULT nextval('mst_templates_id_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.nip_pejabat ALTER COLUMN id SET DEFAULT nextval('kepegawaian.nip_pejabat_id_seq'::regclass);
+ALTER TABLE ONLY nip_pejabat ALTER COLUMN id SET DEFAULT nextval('nip_pejabat_id_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.orang_tua ALTER COLUMN "ID" SET DEFAULT nextval('kepegawaian."orang_tua_ID_seq"'::regclass);
+ALTER TABLE ONLY orang_tua ALTER COLUMN "ID" SET DEFAULT nextval('"orang_tua_ID_seq"'::regclass);
 
-ALTER TABLE ONLY kepegawaian.pegawai_atasan ALTER COLUMN "ID" SET DEFAULT nextval('kepegawaian."pegawai_atasan_ID_seq"'::regclass);
+ALTER TABLE ONLY pegawai_atasan ALTER COLUMN "ID" SET DEFAULT nextval('"pegawai_atasan_ID_seq"'::regclass);
 
-ALTER TABLE ONLY kepegawaian.pengajuan_tubel ALTER COLUMN "ID" SET DEFAULT nextval('kepegawaian."pengajuan_tubel_ID_seq"'::regclass);
+ALTER TABLE ONLY pengajuan_tubel ALTER COLUMN "ID" SET DEFAULT nextval('"pengajuan_tubel_ID_seq"'::regclass);
 
-ALTER TABLE ONLY kepegawaian.perkiraan_kpo ALTER COLUMN id SET DEFAULT nextval('kepegawaian.perkiraan_kpo_id_seq'::regclass);
+ALTER TABLE ONLY perkiraan_kpo ALTER COLUMN id SET DEFAULT nextval('perkiraan_kpo_id_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.perkiraan_usulan_log ALTER COLUMN id SET DEFAULT nextval('kepegawaian.perkiraan_usulan_log_id_seq'::regclass);
+ALTER TABLE ONLY perkiraan_usulan_log ALTER COLUMN id SET DEFAULT nextval('perkiraan_usulan_log_id_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.peta_jabatan_permen ALTER COLUMN id SET DEFAULT nextval('kepegawaian.peta_jabatan_permen_id_seq'::regclass);
+ALTER TABLE ONLY peta_jabatan_permen ALTER COLUMN id SET DEFAULT nextval('peta_jabatan_permen_id_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.pindah_unit ALTER COLUMN "ID" SET DEFAULT nextval('kepegawaian."pindah_unit_ID_seq"'::regclass);
+ALTER TABLE ONLY pindah_unit ALTER COLUMN "ID" SET DEFAULT nextval('"pindah_unit_ID_seq"'::regclass);
 
-ALTER TABLE ONLY kepegawaian.ref_tunjangan_kinerja ALTER COLUMN "ID" SET DEFAULT nextval('kepegawaian."ref_tunjangan_kinerja_ID_seq"'::regclass);
+ALTER TABLE ONLY ref_tunjangan_kinerja ALTER COLUMN "ID" SET DEFAULT nextval('"ref_tunjangan_kinerja_ID_seq"'::regclass);
 
-ALTER TABLE ONLY kepegawaian.request_formasi ALTER COLUMN id SET DEFAULT nextval('kepegawaian.request_formasi_id_seq'::regclass);
+ALTER TABLE ONLY request_formasi ALTER COLUMN id SET DEFAULT nextval('request_formasi_id_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.role_permissions ALTER COLUMN id SET DEFAULT nextval('kepegawaian.role_permissions_id_seq'::regclass);
+ALTER TABLE ONLY role_permissions ALTER COLUMN id SET DEFAULT nextval('role_permissions_id_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.roles_users ALTER COLUMN role_user_id SET DEFAULT nextval('kepegawaian.roles_users_role_user_id_seq'::regclass);
+ALTER TABLE ONLY roles_users ALTER COLUMN role_user_id SET DEFAULT nextval('roles_users_role_user_id_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.rpt_golongan_bulan ALTER COLUMN "ID" SET DEFAULT nextval('kepegawaian."rpt_golongan_bulan_ID_seq"'::regclass);
+ALTER TABLE ONLY rpt_golongan_bulan ALTER COLUMN "ID" SET DEFAULT nextval('"rpt_golongan_bulan_ID_seq"'::regclass);
 
-ALTER TABLE ONLY kepegawaian.rpt_jumlah_asn ALTER COLUMN "ID" SET DEFAULT nextval('kepegawaian."rpt_jumlah_asn_ID_seq"'::regclass);
+ALTER TABLE ONLY rpt_jumlah_asn ALTER COLUMN "ID" SET DEFAULT nextval('"rpt_jumlah_asn_ID_seq"'::regclass);
 
-ALTER TABLE ONLY kepegawaian.rpt_pendidikan_bulan ALTER COLUMN "ID" SET DEFAULT nextval('kepegawaian."rpt_pendidikan_bulan_ID_seq"'::regclass);
+ALTER TABLE ONLY rpt_pendidikan_bulan ALTER COLUMN "ID" SET DEFAULT nextval('"rpt_pendidikan_bulan_ID_seq"'::regclass);
 
-ALTER TABLE ONLY kepegawaian.rwt_assesmen ALTER COLUMN "ID" SET DEFAULT nextval('kepegawaian."rwt_assesmen_ID_seq"'::regclass);
+ALTER TABLE ONLY rwt_assesmen ALTER COLUMN "ID" SET DEFAULT nextval('"rwt_assesmen_ID_seq"'::regclass);
 
-ALTER TABLE ONLY kepegawaian.rwt_diklat ALTER COLUMN id SET DEFAULT nextval('kepegawaian.rwt_diklat_id_seq'::regclass);
+ALTER TABLE ONLY rwt_diklat ALTER COLUMN id SET DEFAULT nextval('rwt_diklat_id_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.rwt_hukdis ALTER COLUMN "ID" SET DEFAULT nextval('kepegawaian."rwt_hukdis_ID_seq"'::regclass);
+ALTER TABLE ONLY rwt_hukdis ALTER COLUMN "ID" SET DEFAULT nextval('"rwt_hukdis_ID_seq"'::regclass);
 
-ALTER TABLE ONLY kepegawaian.rwt_kgb ALTER COLUMN id SET DEFAULT nextval('kepegawaian.rwt_kgb_id_seq'::regclass);
+ALTER TABLE ONLY rwt_kgb ALTER COLUMN id SET DEFAULT nextval('rwt_kgb_id_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.rwt_kinerja ALTER COLUMN id SET DEFAULT nextval('kepegawaian.rwt_kinerja_id_seq'::regclass);
+ALTER TABLE ONLY rwt_kinerja ALTER COLUMN id SET DEFAULT nextval('rwt_kinerja_id_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.rwt_kursus ALTER COLUMN "ID" SET DEFAULT nextval('kepegawaian."rwt_kursus_ID_seq"'::regclass);
+ALTER TABLE ONLY rwt_kursus ALTER COLUMN "ID" SET DEFAULT nextval('"rwt_kursus_ID_seq"'::regclass);
 
-ALTER TABLE ONLY kepegawaian.rwt_nine_box ALTER COLUMN "ID" SET DEFAULT nextval('kepegawaian."NINE_BOX_ID_seq"'::regclass);
+ALTER TABLE ONLY rwt_nine_box ALTER COLUMN "ID" SET DEFAULT nextval('"NINE_BOX_ID_seq"'::regclass);
 
-ALTER TABLE ONLY kepegawaian.rwt_penghargaan_umum ALTER COLUMN id SET DEFAULT nextval('kepegawaian.rwt_penghargaan_umum_id_seq'::regclass);
+ALTER TABLE ONLY rwt_penghargaan_umum ALTER COLUMN id SET DEFAULT nextval('rwt_penghargaan_umum_id_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.rwt_penugasan ALTER COLUMN id SET DEFAULT nextval('kepegawaian.rwt_penugasan_id_seq'::regclass);
+ALTER TABLE ONLY rwt_penugasan ALTER COLUMN id SET DEFAULT nextval('rwt_penugasan_id_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.rwt_pns_cpns ALTER COLUMN "ID" SET DEFAULT nextval('kepegawaian."rwt_pns_cpns_ID_seq"'::regclass);
+ALTER TABLE ONLY rwt_pns_cpns ALTER COLUMN "ID" SET DEFAULT nextval('"rwt_pns_cpns_ID_seq"'::regclass);
 
-ALTER TABLE ONLY kepegawaian.rwt_tugas_belajar ALTER COLUMN "ID" SET DEFAULT nextval('kepegawaian."rwt_tugas_belajar_ID_seq"'::regclass);
+ALTER TABLE ONLY rwt_tugas_belajar ALTER COLUMN "ID" SET DEFAULT nextval('"rwt_tugas_belajar_ID_seq"'::regclass);
 
-ALTER TABLE ONLY kepegawaian.rwt_ujikom ALTER COLUMN id SET DEFAULT nextval('kepegawaian.rwt_ujikom_id_seq'::regclass);
+ALTER TABLE ONLY rwt_ujikom ALTER COLUMN id SET DEFAULT nextval('rwt_ujikom_id_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.settings ALTER COLUMN id SET DEFAULT nextval('kepegawaian.settings_id_seq'::regclass);
+ALTER TABLE ONLY settings ALTER COLUMN id SET DEFAULT nextval('settings_id_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.sisa_cuti ALTER COLUMN "ID" SET DEFAULT nextval('kepegawaian."sisa_cuti_ID_seq"'::regclass);
+ALTER TABLE ONLY sisa_cuti ALTER COLUMN "ID" SET DEFAULT nextval('"sisa_cuti_ID_seq"'::regclass);
 
-ALTER TABLE ONLY kepegawaian.synch_jumlah_pegawai ALTER COLUMN id SET DEFAULT nextval('kepegawaian.synch_jumlah_pegawai_id_seq'::regclass);
+ALTER TABLE ONLY synch_jumlah_pegawai ALTER COLUMN id SET DEFAULT nextval('synch_jumlah_pegawai_id_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.tbl_file_ds ALTER COLUMN id SET DEFAULT nextval('kepegawaian.tbl_file_ds_id_seq'::regclass);
+ALTER TABLE ONLY tbl_file_ds ALTER COLUMN id SET DEFAULT nextval('tbl_file_ds_id_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.tbl_file_ds_corrector ALTER COLUMN id SET DEFAULT nextval('kepegawaian.tbl_file_ds_corrector_id_seq'::regclass);
+ALTER TABLE ONLY tbl_file_ds_corrector ALTER COLUMN id SET DEFAULT nextval('tbl_file_ds_corrector_id_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.tbl_file_ds_riwayat ALTER COLUMN id_riwayat SET DEFAULT nextval('kepegawaian.tbl_file_ds_riwayat_id_riwayat_seq'::regclass);
+ALTER TABLE ONLY tbl_file_ds_riwayat ALTER COLUMN id_riwayat SET DEFAULT nextval('tbl_file_ds_riwayat_id_riwayat_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.tte_master_korektor ALTER COLUMN id SET DEFAULT nextval('kepegawaian.tte_master_korektor_id_seq'::regclass);
+ALTER TABLE ONLY tte_master_korektor ALTER COLUMN id SET DEFAULT nextval('tte_master_korektor_id_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.tte_master_proses ALTER COLUMN id SET DEFAULT nextval('kepegawaian.tte_master_proses_id_seq'::regclass);
+ALTER TABLE ONLY tte_master_proses ALTER COLUMN id SET DEFAULT nextval('tte_master_proses_id_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.tte_master_proses_variable ALTER COLUMN id SET DEFAULT nextval('kepegawaian.tte_master_proses_variable_id_seq'::regclass);
+ALTER TABLE ONLY tte_master_proses_variable ALTER COLUMN id SET DEFAULT nextval('tte_master_proses_variable_id_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.tte_master_variable ALTER COLUMN id SET DEFAULT nextval('kepegawaian."tte_ master_variable_id_seq"'::regclass);
+ALTER TABLE ONLY tte_master_variable ALTER COLUMN id SET DEFAULT nextval('"tte_ master_variable_id_seq"'::regclass);
 
-ALTER TABLE ONLY kepegawaian.tte_trx_draft_sk ALTER COLUMN id SET DEFAULT nextval('kepegawaian.tte_trx_draft_sk_id_seq'::regclass);
+ALTER TABLE ONLY tte_trx_draft_sk ALTER COLUMN id SET DEFAULT nextval('tte_trx_draft_sk_id_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.tte_trx_draft_sk_detil ALTER COLUMN id SET DEFAULT nextval('kepegawaian.tte_trx_draft_sk_detil_id_seq'::regclass);
+ALTER TABLE ONLY tte_trx_draft_sk_detil ALTER COLUMN id SET DEFAULT nextval('tte_trx_draft_sk_detil_id_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.tte_trx_korektor_draft ALTER COLUMN id SET DEFAULT nextval('kepegawaian.tte_trx_korektor_draft_id_seq'::regclass);
+ALTER TABLE ONLY tte_trx_korektor_draft ALTER COLUMN id SET DEFAULT nextval('tte_trx_korektor_draft_id_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.update_mandiri ALTER COLUMN "ID" SET DEFAULT nextval('kepegawaian."update_mandiri_ID_seq"'::regclass);
+ALTER TABLE ONLY update_mandiri ALTER COLUMN "ID" SET DEFAULT nextval('"update_mandiri_ID_seq"'::regclass);
 
-ALTER TABLE ONLY kepegawaian.usulan_dokumen ALTER COLUMN id SET DEFAULT nextval('kepegawaian.usulan_documents_id_seq'::regclass);
+ALTER TABLE ONLY usulan_dokumen ALTER COLUMN id SET DEFAULT nextval('usulan_documents_id_seq'::regclass);
 
-ALTER TABLE ONLY kepegawaian.rwt_nine_box
+ALTER TABLE ONLY rwt_nine_box
     ADD CONSTRAINT "NINE_BOX_pkey" PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.absen
+ALTER TABLE ONLY absen
     ADD CONSTRAINT absen_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.activities
+ALTER TABLE ONLY activities
     ADD CONSTRAINT activities_pkey PRIMARY KEY (activity_id);
 
-ALTER TABLE ONLY kepegawaian.agama
+ALTER TABLE ONLY agama
     ADD CONSTRAINT agama_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.anak
+ALTER TABLE ONLY anak
     ADD CONSTRAINT anak_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.arsip
+ALTER TABLE ONLY arsip
     ADD CONSTRAINT arsip_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.asesmen_hasil_asesmen
+ALTER TABLE ONLY asesmen_hasil_asesmen
     ADD CONSTRAINT asesmen_hasil_asesmen_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY kepegawaian.asesmen_pegawai_berpotensi_jpt
+ALTER TABLE ONLY asesmen_pegawai_berpotensi_jpt
     ADD CONSTRAINT asesmen_pegawai_berpotensi_jpt_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY kepegawaian.asesmen_riwayat_hukuman_disiplin
+ALTER TABLE ONLY asesmen_riwayat_hukuman_disiplin
     ADD CONSTRAINT asesmen_riwayat_hukuman_disiplin_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY kepegawaian.ref_tunjangan_jabatan
+ALTER TABLE ONLY ref_tunjangan_jabatan
     ADD CONSTRAINT data_jabatan_tunjab_pkey PRIMARY KEY ("ID_TUNJAB");
 
-ALTER TABLE ONLY kepegawaian.golongan
+ALTER TABLE ONLY golongan
     ADD CONSTRAINT golongan_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.hari_libur
+ALTER TABLE ONLY hari_libur
     ADD CONSTRAINT hari_libur_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.instansi
+ALTER TABLE ONLY instansi
     ADD CONSTRAINT instansi_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.istri
+ALTER TABLE ONLY istri
     ADD CONSTRAINT istri_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.izin_alasan
+ALTER TABLE ONLY izin_alasan
     ADD CONSTRAINT izin_alasan_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.izin_verifikasi
+ALTER TABLE ONLY izin_verifikasi
     ADD CONSTRAINT izin_verifikasi_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.jabatan
+ALTER TABLE ONLY jabatan
     ADD CONSTRAINT jabatan_pkey PRIMARY KEY ("KODE_JABATAN");
 
-ALTER TABLE ONLY kepegawaian.jenis_arsip
+ALTER TABLE ONLY jenis_arsip
     ADD CONSTRAINT jenis_arsip_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.jenis_diklat_fungsional
+ALTER TABLE ONLY jenis_diklat_fungsional
     ADD CONSTRAINT jenis_diklat_fungsional_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.jenis_diklat
+ALTER TABLE ONLY jenis_diklat
     ADD CONSTRAINT jenis_diklat_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY kepegawaian.jenis_diklat_siasn
+ALTER TABLE ONLY jenis_diklat_siasn
     ADD CONSTRAINT jenis_diklat_siasn_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY kepegawaian.jenis_diklat_struktural
+ALTER TABLE ONLY jenis_diklat_struktural
     ADD CONSTRAINT jenis_diklat_struktural_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.jenis_jabatan
+ALTER TABLE ONLY jenis_jabatan
     ADD CONSTRAINT jenis_jabatan_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.jenis_kawin
+ALTER TABLE ONLY jenis_kawin
     ADD CONSTRAINT jenis_kawin_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.jenis_kp
+ALTER TABLE ONLY jenis_kp
     ADD CONSTRAINT jenis_kp_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.jenis_kursus
+ALTER TABLE ONLY jenis_kursus
     ADD CONSTRAINT jenis_kursus_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY kepegawaian.jenis_pegawai
+ALTER TABLE ONLY jenis_pegawai
     ADD CONSTRAINT jenis_pegawai_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.jenis_penghargaan
+ALTER TABLE ONLY jenis_penghargaan
     ADD CONSTRAINT "jenis_penghargaan_ID" PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.jenis_penghargaan
+ALTER TABLE ONLY jenis_penghargaan
     ADD CONSTRAINT "jenis_penghargaan_NAMA" UNIQUE ("NAMA");
 
-ALTER TABLE ONLY kepegawaian.jenis_rumpun_diklat_siasn
+ALTER TABLE ONLY jenis_rumpun_diklat_siasn
     ADD CONSTRAINT jenis_rumpun_diklat_siasn_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY kepegawaian.mst_jenis_satker
+ALTER TABLE ONLY mst_jenis_satker
     ADD CONSTRAINT jenis_satker_pkey PRIMARY KEY (id_jenis);
 
-ALTER TABLE ONLY kepegawaian.kandidat_baperjakat
+ALTER TABLE ONLY kandidat_baperjakat
     ADD CONSTRAINT kandidat_baperjakat_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.kategori_ds
+ALTER TABLE ONLY kategori_ds
     ADD CONSTRAINT kategori_ds_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY kepegawaian.kategori_jenis_arsip
+ALTER TABLE ONLY kategori_jenis_arsip
     ADD CONSTRAINT kategori_jenis_arsip_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.kedudukan_hukum
+ALTER TABLE ONLY kedudukan_hukum
     ADD CONSTRAINT kedudukan_hukum_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.kpkn
+ALTER TABLE ONLY kpkn
     ADD CONSTRAINT kpkn_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.layanan_tipe
+ALTER TABLE ONLY layanan_tipe
     ADD CONSTRAINT layanan_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY kepegawaian.layanan
+ALTER TABLE ONLY layanan
     ADD CONSTRAINT layanan_pkey1 PRIMARY KEY (id);
 
-ALTER TABLE ONLY kepegawaian.layanan_usulan
+ALTER TABLE ONLY layanan_usulan
     ADD CONSTRAINT layanan_usulan_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY kepegawaian.line_approval_izin
+ALTER TABLE ONLY line_approval_izin
     ADD CONSTRAINT line_approval_izin_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.log_ds
+ALTER TABLE ONLY log_ds
     ADD CONSTRAINT log_ds_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.log_transaksi
+ALTER TABLE ONLY log_transaksi
     ADD CONSTRAINT log_transaksi_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.login_attempts
+ALTER TABLE ONLY login_attempts
     ADD CONSTRAINT login_attempts_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY kepegawaian.lokasi
+ALTER TABLE ONLY lokasi
     ADD CONSTRAINT lokasi_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.mst_templates
+ALTER TABLE ONLY mst_templates
     ADD CONSTRAINT mst_templates_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY kepegawaian.orang_tua
+ALTER TABLE ONLY orang_tua
     ADD CONSTRAINT orang_tua_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.pegawai_atasan
+ALTER TABLE ONLY pegawai_atasan
     ADD CONSTRAINT pegawai_atasan_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.pegawai_bkn
+ALTER TABLE ONLY pegawai_bkn
     ADD CONSTRAINT pegawai_bkn_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.pegawai
+ALTER TABLE ONLY pegawai
     ADD CONSTRAINT pegawai_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.pendidikan
+ALTER TABLE ONLY pendidikan
     ADD CONSTRAINT pendidikan_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.mst_peraturan_otk
+ALTER TABLE ONLY mst_peraturan_otk
     ADD CONSTRAINT peraturan_otk_pkey PRIMARY KEY (id_peraturan);
 
-ALTER TABLE ONLY kepegawaian.perkiraan_ppo
+ALTER TABLE ONLY perkiraan_ppo
     ADD CONSTRAINT perkiraan_kpo_copy1_pkey1 PRIMARY KEY (id);
 
-ALTER TABLE ONLY kepegawaian.usulan_dokumen
+ALTER TABLE ONLY usulan_dokumen
     ADD CONSTRAINT perkiraan_kpo_documents_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY kepegawaian.perkiraan_kpo
+ALTER TABLE ONLY perkiraan_kpo
     ADD CONSTRAINT perkiraan_kpo_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY kepegawaian.permissions
+ALTER TABLE ONLY permissions
     ADD CONSTRAINT permissions_pkey PRIMARY KEY (permission_id);
 
-ALTER TABLE ONLY kepegawaian.peta_jabatan_permen
+ALTER TABLE ONLY peta_jabatan_permen
     ADD CONSTRAINT peta_jabatan_permen_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY kepegawaian.baperjakat
+ALTER TABLE ONLY baperjakat
     ADD CONSTRAINT pk_baperjakat PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.daftar_rohaniawan
+ALTER TABLE ONLY daftar_rohaniawan
     ADD CONSTRAINT pk_daftar_rohaniawan PRIMARY KEY (id);
 
-ALTER TABLE ONLY kepegawaian.izin
+ALTER TABLE ONLY izin
     ADD CONSTRAINT pk_izin PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.jenis_izin
+ALTER TABLE ONLY jenis_izin
     ADD CONSTRAINT pk_jenis_izin PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.pengajuan_tubel
+ALTER TABLE ONLY pengajuan_tubel
     ADD CONSTRAINT pk_pengajuan_tubel PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.pindah_unit
+ALTER TABLE ONLY pindah_unit
     ADD CONSTRAINT pk_pindah_unit PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.sisa_cuti
+ALTER TABLE ONLY sisa_cuti
     ADD CONSTRAINT pk_sisa_cuti PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.tte_master_proses
+ALTER TABLE ONLY tte_master_proses
     ADD CONSTRAINT pk_tte_master_proses PRIMARY KEY (id);
 
-ALTER TABLE ONLY kepegawaian.ref_jabatan
+ALTER TABLE ONLY ref_jabatan
     ADD CONSTRAINT ref_jabatan_pkey PRIMARY KEY ("ID_JABATAN");
 
-ALTER TABLE ONLY kepegawaian.request_formasi
+ALTER TABLE ONLY request_formasi
     ADD CONSTRAINT request_formasi_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY kepegawaian.role_permissions
+ALTER TABLE ONLY role_permissions
     ADD CONSTRAINT role_permissions_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY kepegawaian.roles
+ALTER TABLE ONLY roles
     ADD CONSTRAINT roles_pkey PRIMARY KEY (role_id);
 
-ALTER TABLE ONLY kepegawaian.rpt_golongan_bulan
+ALTER TABLE ONLY rpt_golongan_bulan
     ADD CONSTRAINT rpt_golongan_bulan_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.rpt_jumlah_asn
+ALTER TABLE ONLY rpt_jumlah_asn
     ADD CONSTRAINT rpt_jumlah_asn_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.rpt_pendidikan_bulan
+ALTER TABLE ONLY rpt_pendidikan_bulan
     ADD CONSTRAINT rpt_pendidikan_bulan_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.rwt_assesmen
+ALTER TABLE ONLY rwt_assesmen
     ADD CONSTRAINT rwt_assesmen_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.rwt_diklat_fungsional
+ALTER TABLE ONLY rwt_diklat_fungsional
     ADD CONSTRAINT rwt_diklat_fungsional_pkey PRIMARY KEY ("DIKLAT_FUNGSIONAL_ID");
 
-ALTER TABLE ONLY kepegawaian.rwt_diklat
+ALTER TABLE ONLY rwt_diklat
     ADD CONSTRAINT rwt_diklat_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY kepegawaian.rwt_diklat_struktural
+ALTER TABLE ONLY rwt_diklat_struktural
     ADD CONSTRAINT rwt_diklat_struktural_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.rwt_golongan
+ALTER TABLE ONLY rwt_golongan
     ADD CONSTRAINT rwt_golongan_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.rwt_jabatan_empty
+ALTER TABLE ONLY rwt_jabatan_empty
     ADD CONSTRAINT rwt_jabatan_copy1_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.rwt_jabatan
+ALTER TABLE ONLY rwt_jabatan
     ADD CONSTRAINT rwt_jabatan_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.rwt_pekerjaan
+ALTER TABLE ONLY rwt_pekerjaan
     ADD CONSTRAINT rwt_pekerjaan_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.rwt_pendidikan
+ALTER TABLE ONLY rwt_pendidikan
     ADD CONSTRAINT rwt_pendidikan_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.rwt_penghargaan
+ALTER TABLE ONLY rwt_penghargaan
     ADD CONSTRAINT "rwt_penghargaan_ID" PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.rwt_penghargaan_umum
+ALTER TABLE ONLY rwt_penghargaan_umum
     ADD CONSTRAINT rwt_penghargaan_umum_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY kepegawaian.rwt_penugasan
+ALTER TABLE ONLY rwt_penugasan
     ADD CONSTRAINT rwt_penugasan_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY kepegawaian.rwt_pindah_unit_kerja
+ALTER TABLE ONLY rwt_pindah_unit_kerja
     ADD CONSTRAINT rwt_pindah_unit_kerja_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.rwt_pns_cpns
+ALTER TABLE ONLY rwt_pns_cpns
     ADD CONSTRAINT rwt_pns_cpns_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.rwt_prestasi_kerja
+ALTER TABLE ONLY rwt_prestasi_kerja
     ADD CONSTRAINT rwt_prestasi_kerja_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.rwt_tugas_belajar
+ALTER TABLE ONLY rwt_tugas_belajar
     ADD CONSTRAINT rwt_tugas_belajar_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.rwt_ujikom
+ALTER TABLE ONLY rwt_ujikom
     ADD CONSTRAINT rwt_ujikom_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY kepegawaian.settings
+ALTER TABLE ONLY settings
     ADD CONSTRAINT settings_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY kepegawaian.synch_jumlah_pegawai
+ALTER TABLE ONLY synch_jumlah_pegawai
     ADD CONSTRAINT synch_jumlah_pegawai_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY kepegawaian.tb_nomor_surat
+ALTER TABLE ONLY tb_nomor_surat
     ADD CONSTRAINT tb_nomor_surat_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY kepegawaian.tbl_file_ds_corrector
+ALTER TABLE ONLY tbl_file_ds_corrector
     ADD CONSTRAINT tbl_file_ds_corrector_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY kepegawaian.tbl_file_ds_khusus_login
+ALTER TABLE ONLY tbl_file_ds_khusus_login
     ADD CONSTRAINT tbl_file_ds_khusus_login_pkey PRIMARY KEY ("ID_FILE");
 
-ALTER TABLE ONLY kepegawaian.tbl_file_ds
+ALTER TABLE ONLY tbl_file_ds
     ADD CONSTRAINT tbl_file_ds_pkey PRIMARY KEY (id_file);
 
-ALTER TABLE ONLY kepegawaian.tbl_file_ttd
+ALTER TABLE ONLY tbl_file_ttd
     ADD CONSTRAINT tbl_file_ttd_pkey PRIMARY KEY (id_pns_bkn);
 
-ALTER TABLE ONLY kepegawaian.tbl_kategori_dokumen_penandatangan
+ALTER TABLE ONLY tbl_kategori_dokumen_penandatangan
     ADD CONSTRAINT tbl_kategori_dokumen_penandatangan_pkey PRIMARY KEY ("ID_URUT");
 
-ALTER TABLE ONLY kepegawaian.tbl_kategori_dokumen
+ALTER TABLE ONLY tbl_kategori_dokumen
     ADD CONSTRAINT tbl_kategori_dokumen_pkey PRIMARY KEY (id_kategori);
 
-ALTER TABLE ONLY kepegawaian.tbl_pengantar_dokumen
+ALTER TABLE ONLY tbl_pengantar_dokumen
     ADD CONSTRAINT tbl_pengantar_dokumen_pkey PRIMARY KEY (id_pengantar);
 
-ALTER TABLE ONLY kepegawaian.tkpendidikan
+ALTER TABLE ONLY tkpendidikan
     ADD CONSTRAINT tkpendidikan_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.tte_master_variable
+ALTER TABLE ONLY tte_master_variable
     ADD CONSTRAINT "tte_ master_variable_pkey" PRIMARY KEY (id);
 
-ALTER TABLE ONLY kepegawaian.tte_master_korektor
+ALTER TABLE ONLY tte_master_korektor
     ADD CONSTRAINT tte_master_korektor_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY kepegawaian.tte_master_proses_variable
+ALTER TABLE ONLY tte_master_proses_variable
     ADD CONSTRAINT tte_master_proses_variable_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY kepegawaian.tte_trx_draft_sk_detil
+ALTER TABLE ONLY tte_trx_draft_sk_detil
     ADD CONSTRAINT tte_trx_draft_sk_detil_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY kepegawaian.tte_trx_draft_sk
+ALTER TABLE ONLY tte_trx_draft_sk
     ADD CONSTRAINT tte_trx_draft_sk_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY kepegawaian.tte_trx_korektor_draft
+ALTER TABLE ONLY tte_trx_korektor_draft
     ADD CONSTRAINT tte_trx_korektor_draft_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY kepegawaian.unitkerja
+ALTER TABLE ONLY unitkerja
     ADD CONSTRAINT unitkerja_pkey1 PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.update_mandiri
+ALTER TABLE ONLY update_mandiri
     ADD CONSTRAINT update_mandiri_pkey PRIMARY KEY ("ID");
 
-ALTER TABLE ONLY kepegawaian.users
+ALTER TABLE ONLY users
     ADD CONSTRAINT users_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY kepegawaian.wage
+ALTER TABLE ONLY wage
     ADD CONSTRAINT wage_pkey PRIMARY KEY ("GOLONGAN", "WORKING_PERIOD");
 
-CREATE INDEX "pegawai_GOL_ID" ON kepegawaian.pegawai USING btree ("GOL_ID");
+CREATE INDEX "pegawai_GOL_ID" ON pegawai USING btree ("GOL_ID");
 
-CREATE UNIQUE INDEX "pegawai_NIP_BARU" ON kepegawaian.pegawai USING btree ("NIP_BARU");
+CREATE UNIQUE INDEX "pegawai_NIP_BARU" ON pegawai USING btree ("NIP_BARU");
 
-CREATE UNIQUE INDEX "pegawai_PNS_ID_idx" ON kepegawaian.pegawai USING btree ("PNS_ID");
+CREATE UNIQUE INDEX "pegawai_PNS_ID_idx" ON pegawai USING btree ("PNS_ID");
 
-CREATE INDEX pegawai_unor_id ON kepegawaian.pegawai USING btree ("UNOR_ID");
+CREATE INDEX pegawai_unor_id ON pegawai USING btree ("UNOR_ID");
 
-CREATE INDEX rwt_assesmen_nip ON kepegawaian.rwt_assesmen USING btree ("PNS_NIP");
+CREATE INDEX rwt_assesmen_nip ON rwt_assesmen USING btree ("PNS_NIP");
 
-CREATE INDEX rwt_assesmen_pns_id ON kepegawaian.rwt_assesmen USING btree ("PNS_ID");
+CREATE INDEX rwt_assesmen_pns_id ON rwt_assesmen USING btree ("PNS_ID");
 
-CREATE INDEX "rwt_diklat_fungsional_NIP" ON kepegawaian.rwt_diklat_fungsional USING btree ("NIP_BARU");
+CREATE INDEX "rwt_diklat_fungsional_NIP" ON rwt_diklat_fungsional USING btree ("NIP_BARU");
 
-CREATE INDEX "rwt_diklat_struktural_NIP" ON kepegawaian.rwt_diklat_struktural USING btree ("PNS_NIP");
+CREATE INDEX "rwt_diklat_struktural_NIP" ON rwt_diklat_struktural USING btree ("PNS_NIP");
 
-CREATE INDEX rwt_diklat_struktural_pns_id ON kepegawaian.rwt_diklat_struktural USING btree ("PNS_ID");
+CREATE INDEX rwt_diklat_struktural_pns_id ON rwt_diklat_struktural USING btree ("PNS_ID");
 
-CREATE INDEX "rwt_penghargaan_ID_GOLONGAN" ON kepegawaian.rwt_penghargaan USING btree ("ID_GOLONGAN");
+CREATE INDEX "rwt_penghargaan_ID_GOLONGAN" ON rwt_penghargaan USING btree ("ID_GOLONGAN");
 
-CREATE INDEX "rwt_penghargaan_ID_PENGHARGAAN" ON kepegawaian.rwt_penghargaan USING btree ("ID_JENIS_PENGHARGAAN");
+CREATE INDEX "rwt_penghargaan_ID_PENGHARGAAN" ON rwt_penghargaan USING btree ("ID_JENIS_PENGHARGAAN");
 
-CREATE INDEX "rwt_penghargaan_PNS_ID" ON kepegawaian.rwt_penghargaan USING btree ("PNS_ID");
+CREATE INDEX "rwt_penghargaan_PNS_ID" ON rwt_penghargaan USING btree ("PNS_ID");
 
-CREATE INDEX "rwt_penghargaan_PNS_NIP" ON kepegawaian.rwt_penghargaan USING btree ("PNS_NIP");
+CREATE INDEX "rwt_penghargaan_PNS_NIP" ON rwt_penghargaan USING btree ("PNS_NIP");
 
-CREATE UNIQUE INDEX settings_name_idx ON kepegawaian.settings USING btree (name);
+CREATE UNIQUE INDEX settings_name_idx ON settings USING btree (name);
 
-CREATE INDEX username_index ON kepegawaian.users USING btree (username);
+CREATE INDEX username_index ON users USING btree (username);

@@ -20,15 +20,15 @@ func Test_handler_list(t *testing.T) {
 	t.Parallel()
 
 	dbData := `
-		insert into kepegawaian.golongan
+		insert into golongan
 			("ID", "NAMA", "NAMA_PANGKAT", "NAMA2", "GOL", "GOL_PPPK") values
 			(11,   '11a',  '11b',          '11c',   11,    '11d'),
 			(12,   '12a',  '12b',          '12c',   12,    '12d');
-		insert into kepegawaian.unitkerja
+		insert into unitkerja
 			("ID", "NO",  "KODE_INTERNAL", "NAMA_UNOR", "ESELON_ID", "CEPAT_KODE", "NAMA_JABATAN", "NAMA_PEJABAT", "DIATASAN_ID", "INSTANSI_ID", "PEMIMPIN_NON_PNS_ID", "PEMIMPIN_PNS_ID", "JENIS_UNOR_ID", "UNOR_INDUK", "JUMLAH_IDEAL_STAFF", "ORDER", "deleted", "IS_SATKER", "ESELON_1", "ESELON_2", "ESELON_3", "ESELON_4", "EXPIRED_DATE", "KETERANGAN", "JENIS_SATKER", "ABBREVIATION", "UNOR_INDUK_PENYETARAAN", "JABATAN_ID", "WAKTU", "PERATURAN") values
 			('31', '31a', '31b',           '31c',       '31d',       '31e',        '31f',          '31g',          '31h',         '31i',         '31j',                 '31k',             '31l',           '31m',        '31n',                31,      31,        31,          '31o',      '31p',      '31q',      '31r',      '2000-01-01',   '31s',        '31t',          '31u',          '31v',                    '31w',        '31x',   '31y'),
 			('32', '32a', '32b',           '32c',       '32d',       '32e',        '32f',          '32g',          '32h',         '32i',         '32j',                 '32k',             '32l',           '32m',        '32n',                32,      32,        32,          '32o',      '32p',      '32q',      '32r',      '2000-01-01',   '32s',        '32t',          '32u',          '32v',                    '32w',        '32x',   '32y');
-		insert into kepegawaian.pegawai
+		insert into pegawai
 			("ID", "PNS_ID", "NIP_LAMA", "NIP_BARU", "NAMA", "GELAR_DEPAN", "GELAR_BELAKANG", "TEMPAT_LAHIR_ID", "TGL_LAHIR",  "JENIS_KELAMIN", "AGAMA_ID", "JENIS_KAWIN_ID", "NIK", "NOMOR_DARURAT", "NOMOR_HP", "EMAIL", "ALAMAT", "NPWP", "BPJS", "JENIS_PEGAWAI_ID", "KEDUDUKAN_HUKUM_ID", "STATUS_CPNS_PNS", "KARTU_PEGAWAI", "NOMOR_SK_CPNS", "TGL_SK_CPNS", "TMT_CPNS",   "TMT_PNS",    "GOL_AWAL_ID", "GOL_ID", "TMT_GOLONGAN", "MK_TAHUN", "MK_BULAN", "JENIS_JABATAN_IDx", "JABATAN_ID", "TMT_JABATAN", "PENDIDIKAN_ID", "TAHUN_LULUS", "KPKN_ID", "LOKASI_KERJA_ID", "UNOR_ID", "UNOR_INDUK_ID", "INSTANSI_INDUK_ID", "INSTANSI_KERJA_ID", "SATUAN_KERJA_INDUK_ID", "SATUAN_KERJA_KERJA_ID", "GOLONGAN_DARAH", "PHOTO", "TMT_PENSIUN", "LOKASI_KERJA", "JML_ISTRI", "JML_ANAK", "NO_SURAT_DOKTER", "TGL_SURAT_DOKTER", "NO_BEBAS_NARKOBA", "TGL_BEBAS_NARKOBA", "NO_CATATAN_POLISI", "TGL_CATATAN_POLISI", "AKTE_KELAHIRAN", "STATUS_HIDUP", "AKTE_MENINGGAL", "TGL_MENINGGAL", "NO_ASKES", "NO_TASPEN", "TGL_NPWP",   "TEMPAT_LAHIR", "PENDIDIKAN", "TK_PENDIDIKAN", "TEMPAT_LAHIR_NAMA", "JENIS_JABATAN_NAMA", "JABATAN_NAMA", "KPKN_NAMA", "INSTANSI_INDUK_NAMA", "INSTANSI_KERJA_NAMA", "SATUAN_KERJA_INDUK_NAMA", "SATUAN_KERJA_NAMA", "JABATAN_INSTANSI_ID", "BUP",  "JABATAN_INSTANSI_NAMA", "JENIS_JABATAN_ID", terminated_date, status_pegawai, "JABATAN_PPNPN", "JABATAN_INSTANSI_REAL_ID", "CREATED_DATE", "CREATED_BY", "UPDATED_DATE", "UPDATED_BY", "EMAIL_DIKBUD_BAK", "EMAIL_DIKBUD", "KODECEPAT", "IS_DOSEN", "MK_TAHUN_SWASTA", "MK_BULAN_SWASTA", "KK",   "NIDN", "KET",  "NO_SK_PEMBERHENTIAN", "status_pegawai_backup", "MASA_KERJA", "KARTU_ASN") values
 			(41,   '41a',    '41b',      '41c',      '41d',  '41e',         '41f',            '41g',             '2000-01-01', '41h',           41,         '41i',            '41j', '41k',           '41l',      '41m',   '41n',    '41o',  '41p',  '41q',              '41r',                'PNS',             '41t',           '41u',           '2000-01-02',  '2000-01-03', '2000-01-04', '41v',         11,       '2000-01-05',   '41w',      '41x',      '41y',               '21',         '2000-01-06',  '41aa',          '41ab',        '41ac',    '41ad',            '31',      '41af',          '41ag',              '41ah',              '41ai',                  '41aj',                  '41ak',           '41al',  null,          '41am',         '1',         '1',        '41an',            '2000-01-08',       '41ao',             '2000-01-09',        '41ap',              '2000-01-10',         '41aq',           '41ar',         '41as',           null,            '41at',     '41au',      '2000-01-12', '41av',         '41aw',       '41',            '41ax',              '41ay',               '41az',         '41ba',      '41bb',                '41bc',                '41bd',                    '41be',              '41bf',                41,     '41bh',                  41,                 '2000-01-13',    41,             '41bi',          '41bj',                     '2000-01-14',   41,           '2000-01-15',   41,           '41bm',             '41bn',         '41bo',      41,         41,                41,                '41bp', '41bq', '41br', null,                  41,                      '41bu',       '41bv'),
 			(42,   '42a',    '42b',      '42c',      '42d',  '42e',         '42f',            '42g',             '2001-01-01', '42h',           42,         '42i',            '42j', '42k',           '42l',      '42m',   '42n',    '42o',  '42p',  '42q',              '42r',                'CPNS',             '42t',           '42u',           '2001-01-02',  '2001-01-03', '2001-01-04', '42v',         12,       '2001-01-05',   '42w',      '42x',      '42y',               '22',         '2001-01-06',  '42aa',          '42ab',        '42ac',    '42ad',            '32',      '42af',          '42ag',              '42ah',              '42ai',                  '42aj',                  '42ak',           '42al',  null,          '42am',         '2',         '2',        '42an',            '2001-01-08',       '42ao',             '2001-01-09',        '42ap',              '2001-01-10',         '42aq',           '42ar',         '42as',           null,            '42at',     '42au',      '2001-01-12', '42av',         '42aw',       '42',            '42ax',              '42ay',               '42az',         '42ba',      '42bb',                '42bc',                '42bd',                    '42be',              '42bf',                42,     '42bh',                  42,                 '2001-01-13',    42,             '42bi',          '42bj',                     '2001-01-14',   42,           '2001-01-15',   42,           '42bm',             '42bn',         '42bo',      42,         42,                42,                '42bp', '42bq', '42br', null,                  42,                      '42bu',       '42bv'),
@@ -366,7 +366,7 @@ func Test_handler_list(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			db := dbtest.New(t, "kepegawaian", dbmigrations.FS)
+			db := dbtest.New(t, dbmigrations.FS)
 			_, err := db.Exec(tt.dbData)
 			require.NoError(t, err)
 
@@ -391,7 +391,7 @@ func Test_handler_listStatusPegawai(t *testing.T) {
 	t.Parallel()
 
 	dbData := `
-		insert into kepegawaian.jenis_pegawai
+		insert into jenis_pegawai
 			("ID", "NAMA") values
 			('1',  'a'),
 			('2',  'c'),
@@ -432,7 +432,7 @@ func Test_handler_listStatusPegawai(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			db := dbtest.New(t, "kepegawaian", dbmigrations.FS)
+			db := dbtest.New(t, dbmigrations.FS)
 			_, err := db.Exec(tt.dbData)
 			require.NoError(t, err)
 

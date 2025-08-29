@@ -22,7 +22,7 @@ func (r *repository) list(ctx context.Context, limit, offset uint) ([]penugasan,
 			rp.deskripsi_jabatan,
 			rp.tanggal_mulai,
 			rp.tanggal_selesai
-		from kepegawaian.rwt_penugasan rp
+		from rwt_penugasan rp
 		order by rp.tanggal_mulai desc
 		limit $1 offset $2
 		`, limit, offset,
@@ -60,7 +60,7 @@ func (r *repository) count(ctx context.Context) (uint, error) {
 	var result uint
 	err := r.db.QueryRowContext(ctx, `
 		select count(1)
-		from kepegawaian.rwt_penugasan rp
+		from rwt_penugasan rp
 		`).Scan(&result)
 
 	return result, err

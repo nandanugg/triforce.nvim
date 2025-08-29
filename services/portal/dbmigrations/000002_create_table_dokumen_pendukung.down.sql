@@ -1,1 +1,1 @@
-drop table portal.dokumen_pendukung;
+drop table dokumen_pendukung;

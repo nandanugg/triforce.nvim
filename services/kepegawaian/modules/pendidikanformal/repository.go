@@ -24,10 +24,10 @@ func (r *repository) list(ctx context.Context, userID int64, limit, offset uint)
 			rp."KETERANGAN_BERKAS",
 			rp."TAHUN_LULUS",
 			rp."NOMOR_IJASAH"
-		from kepegawaian.rwt_pendidikan rp
-		join kepegawaian.tkpendidikan tp on rp."TINGKAT_PENDIDIKAN_ID" = tp."ID"
-		join kepegawaian.pegawai p on rp."PNS_ID" = p."PNS_ID"
-		join kepegawaian.users u on p."NIP_BARU" = u.nip
+		from rwt_pendidikan rp
+		join tkpendidikan tp on rp."TINGKAT_PENDIDIKAN_ID" = tp."ID"
+		join pegawai p on rp."PNS_ID" = p."PNS_ID"
+		join users u on p."NIP_BARU" = u.nip
 		where u.id = $1
 		order by rp."TAHUN_LULUS" asc
 		limit $2 offset $3
@@ -68,10 +68,10 @@ func (r *repository) count(ctx context.Context, userID int64) (uint, error) {
 	var result uint
 	err := r.db.QueryRowContext(ctx, `
 		select count(1)
-		from kepegawaian.rwt_pendidikan rp
-		join kepegawaian.tkpendidikan tp on rp."TINGKAT_PENDIDIKAN_ID" = tp."ID"
-		join kepegawaian.pegawai p on rp."PNS_ID" = p."PNS_ID"
-		join kepegawaian.users u on p."NIP_BARU" = u.nip
+		from rwt_pendidikan rp
+		join tkpendidikan tp on rp."TINGKAT_PENDIDIKAN_ID" = tp."ID"
+		join pegawai p on rp."PNS_ID" = p."PNS_ID"
+		join users u on p."NIP_BARU" = u.nip
 		where u.id = $1
 		`, userID,
 	).Scan(&result)

@@ -1,4 +1,4 @@
-create table portal.dokumen_pendukung(
+create table dokumen_pendukung(
     id bigserial primary key,
     nama_tombol text not null,
     nama_halaman text not null,

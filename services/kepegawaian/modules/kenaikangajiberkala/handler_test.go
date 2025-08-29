@@ -20,10 +20,10 @@ func Test_handler_list(t *testing.T) {
 	t.Parallel()
 
 	dbData := `
-		insert into kepegawaian.users
+		insert into users
 			(id, role_id, email, username, password_hash, reset_hash, last_login,  last_ip, created_on,  deleted, reset_by, banned, ban_message, display_name, display_name_changed, timezone, language, active, activate_hash, password_iterations, force_password_reset, nip,  satkers, admin_nomor, imei, token, real_imei, fcm,  banned_asigo) values
 			(41, 41,      '41a', '41b',    '41c',         '41d',      '2001-01-02','41f',   '2001-01-03',1,       1,        1,      '41k',       '41l',        '2001-01-04',         '41n',    '41o',    1,      '41q',         1,                   1,                    '1c', '41u',   1,           '41w','41x', '41y',     '41z',1);
-		insert into kepegawaian.rwt_kgb
+		insert into rwt_kgb
 			(pegawai_id, tmt_sk,       alasan, mv_kgb_id, no_sk, pejabat, id, ref,   tgl_sk,       pegawai_nama, pegawai_nip, birth_place, birth_date,   o_gol_ruang, o_gol_tmt, o_masakerja_thn, o_masakerja_bln, o_gapok, o_jabatan_text, o_tmt_jabatan, n_gol_ruang, n_gol_tmt, n_masakerja_thn, n_masakerja_bln, n_gapok, n_jabatan_text, n_tmt_jabatan, n_golongan_id, unit_kerja_text, unit_kerja_induk_text, unit_kerja_induk_id, kantor_pembayaran, last_education, last_education_date, nama_pejabat, "FILE_BASE64", "KETERANGAN_BERKAS") values
 			(1,          '2000-01-01', '11a',  '1',       '11b', '11c',   11, '11d', '2000-01-02', '11e',        '1c',        '11g',       '2000-01-03', '11h',       '11i',     1,               1,               '11j',   '11k',          '2000-01-04',  '11l',       '11m',     1,               1,               '11n',   '11o',          '2000-01-05',  1,             '11q',           '11r',                 '11s',               '11t',             '11u',          '2000-01-06',        '11v',        '11w',         '11x'),
 			(3,          '2001-01-01', '12a',  '2',       '12b', '12c',   12, '12d', '2001-01-02', '12e',        '1c',        '12g',       '2001-01-03', '12h',       '12i',     2,               2,               '12j',   '12k',          '2001-01-04',  '12l',       '12m',     2,               2,               '12n',   '12o',          '2001-01-05',  2,             '12q',           '12r',                 '12s',               '12t',             '12u',          '2001-01-06',        '12v',        '12w',         '12x'),
@@ -114,7 +114,7 @@ func Test_handler_list(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			db := dbtest.New(t, "kepegawaian", dbmigrations.FS)
+			db := dbtest.New(t, dbmigrations.FS)
 			_, err := db.Exec(tt.dbData)
 			require.NoError(t, err)
 

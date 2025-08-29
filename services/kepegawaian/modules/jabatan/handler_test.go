@@ -20,10 +20,10 @@ func Test_handler_list(t *testing.T) {
 	t.Parallel()
 
 	dbData := `
-		insert into kepegawaian.users
+		insert into users
 			(id, role_id, email, username, password_hash, reset_hash, last_login,  last_ip, created_on,  deleted, reset_by, banned, ban_message, display_name, display_name_changed, timezone, language, active, activate_hash, password_iterations, force_password_reset, nip,  satkers, admin_nomor, imei, token, real_imei, fcm,  banned_asigo) values
 			(41, 41,      '41a', '41b',    '41c',         '41d',      '2001-01-02','41f',   '2001-01-03',1,       1,        1,      '41k',       '41l',        '2001-01-04',         '41n',    '41o',    1,      '41q',         1,                   1,                    '1c', '41u',   1,           '41w','41x', '41y',     '41z',1);
-		insert into kepegawaian.rwt_jabatan
+		insert into rwt_jabatan
 			("ID_BKN", "PNS_ID", "PNS_NIP", "PNS_NAMA", "ID_UNOR", "UNOR", "ID_JENIS_JABATAN", "JENIS_JABATAN", "ID_JABATAN", "NAMA_JABATAN", "ID_ESELON", "ESELON", "TMT_JABATAN", "NOMOR_SK", "TANGGAL_SK", "ID_SATUAN_KERJA", "TMT_PELANTIKAN", "IS_ACTIVE", "ESELON1", "ESELON2", "ESELON3", "ESELON4", "ID", "CATATAN", "JENIS_SK", "LAST_UPDATED", "STATUS_SATKER", "STATUS_BIRO", "ID_JABATAN_BKN", "ID_UNOR_BKN", "JABATAN_TERAKHIR", "FILE_BASE64", "KETERANGAN_BERKAS", "ID_TABEL_MUTASI", "TERMINATED_DATE") values
 			('11',     '11a',    '1c',      '11b',      '11c',     '11d',  '11e',              '11f',           '11g',        '11h',          '11i',       '11j',    '2000-01-01',  '11l',      '2000-01-02', '11n',             '2000-01-03',     '1',         '11q',     '11r',     '11s',     '11t',     11,   '11u',     '11v',      '2000-01-04',   1,               1,             '11z',            '11aa',        1,                  '11ac',        '11ad',              1,                 '2000-01-05'),
 			('12',     '12a',    '1c',      '12b',      '12c',     '12d',  '12e',              '12f',           '12g',        '12h',          '12i',       '12j',    '2001-01-01',  '12l',      '2001-01-02', '12n',             '2001-01-03',     '2',         '12q',     '12r',     '12s',     '12t',     12,   '12u',     '12v',      '2001-01-04',   2,               2,             '12z',            '12aa',        2,                  '12ac',        '12ad',              2,                 '2001-01-05'),
@@ -106,7 +106,7 @@ func Test_handler_list(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			db := dbtest.New(t, "kepegawaian", dbmigrations.FS)
+			db := dbtest.New(t, dbmigrations.FS)
 			_, err := db.Exec(tt.dbData)
 			require.NoError(t, err)
 
@@ -131,7 +131,7 @@ func Test_handler_listJenis(t *testing.T) {
 	t.Parallel()
 
 	dbData := `
-		insert into kepegawaian.jenis_jabatan
+		insert into jenis_jabatan
 			("ID", "NAMA") values
 			('1',  'a'),
 			('2',  'c'),
@@ -172,7 +172,7 @@ func Test_handler_listJenis(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			db := dbtest.New(t, "kepegawaian", dbmigrations.FS)
+			db := dbtest.New(t, dbmigrations.FS)
 			_, err := db.Exec(tt.dbData)
 			require.NoError(t, err)
 

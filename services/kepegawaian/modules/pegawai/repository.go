@@ -30,9 +30,9 @@ func (r *repository) list(ctx context.Context, limit, offset uint64, opts listOp
 			`uk."NAMA_UNOR"`,
 			`p."STATUS_CPNS_PNS"`,
 		).
-		From("kepegawaian.pegawai p").
-		Join(`kepegawaian.golongan g on g."ID" = p."GOL_ID"`).
-		Join(`kepegawaian.unitkerja uk on uk."ID" = p."UNOR_ID"`).
+		From("pegawai p").
+		Join(`golongan g on g."ID" = p."GOL_ID"`).
+		Join(`unitkerja uk on uk."ID" = p."UNOR_ID"`).
 		Where(`p."TMT_PENSIUN" is null`).
 		Where(`p."NO_SK_PEMBERHENTIAN" is null`).
 		Where(`p."TGL_MENINGGAL" is null`).
@@ -97,7 +97,7 @@ func (r *repository) list(ctx context.Context, limit, offset uint64, opts listOp
 func (r *repository) count(ctx context.Context, opts listOptions) (uint, error) {
 	qb := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).
 		Select("count(1)").
-		From("kepegawaian.pegawai p").
+		From("pegawai p").
 		Where(`p."TMT_PENSIUN" is null`).
 		Where(`p."NO_SK_PEMBERHENTIAN" is null`).
 		Where(`p."TGL_MENINGGAL" is null`)
@@ -127,7 +127,7 @@ func (r *repository) count(ctx context.Context, opts listOptions) (uint, error) 
 }
 
 func (r *repository) listStatusPegawai(ctx context.Context) ([]statusPegawai, error) {
-	rows, err := r.db.QueryContext(ctx, `select "ID", "NAMA" from kepegawaian.jenis_pegawai order by 2 asc`)
+	rows, err := r.db.QueryContext(ctx, `select "ID", "NAMA" from jenis_pegawai order by 2 asc`)
 	if err != nil {
 		return nil, fmt.Errorf("sql select: %w", err)
 	}

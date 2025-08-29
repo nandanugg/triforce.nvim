@@ -30,8 +30,8 @@ func (r *repository) listOrangTua(ctx context.Context, userID int64) ([]keluarga
 			ot."KODE",
 			ot."NAMA",
 			ot."TANGGAL_LAHIR"
-		from kepegawaian.orang_tua ot
-		join kepegawaian.users u on ot."NIP" = u.nip
+		from orang_tua ot
+		join users u on ot."NIP" = u.nip
 		where u.id = $1
 		`, userID,
 	)
@@ -77,8 +77,8 @@ func (r *repository) listPasangan(ctx context.Context, userID int64) ([]keluarga
 			i."ID",
 			i."HUBUNGAN",
 			i."NAMA"
-		from kepegawaian.istri i
-		join kepegawaian.users u on i."NIP" = u.nip
+		from istri i
+		join users u on i."NIP" = u.nip
 		where u.id = $1
 		`, userID,
 	)
@@ -123,8 +123,8 @@ func (r *repository) listAnak(ctx context.Context, userID int64) ([]keluarga, er
 			a."ID",
 			a."NAMA",
 			a."TANGGAL_LAHIR"
-		from kepegawaian.anak a
-		join kepegawaian.users u on a."NIP" = u.nip
+		from anak a
+		join users u on a."NIP" = u.nip
 		where u.id = $1
 		`, userID,
 	)

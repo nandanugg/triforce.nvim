@@ -12,6 +12,8 @@ func TestLoad(t *testing.T) {
 	for k, v := range map[string]string{
 		"NEXUS_PORTAL_SERVER_PORT":                "8000",
 		"NEXUS_PORTAL_DB_HOST":                    "some-db-host",
+		"NEXUS_PORTAL_DB_PORT":                    "5432",
+		"NEXUS_PORTAL_DB_SCHEMA":                  "portal",
 		"NEXUS_PORTAL_DB_NAME":                    "some-db-name",
 		"NEXUS_PORTAL_DB_USER":                    "some-db-user",
 		"NEXUS_PORTAL_DB_PASSWORD":                "some-db-password",
@@ -36,6 +38,8 @@ func TestLoad(t *testing.T) {
 		},
 		DB: Database{
 			Host:     "some-db-host",
+			Port:     5432,
+			Schema:   "portal",
 			Name:     "some-db-name",
 			User:     "some-db-user",
 			Password: "some-db-password",

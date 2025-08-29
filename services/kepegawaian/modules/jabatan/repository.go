@@ -21,8 +21,8 @@ func (r *repository) list(ctx context.Context, userID int64, limit, offset uint)
 			rj."NAMA_JABATAN",
 			'TODO: Unit Kerja',
 			rj."TMT_JABATAN"
-		from kepegawaian.rwt_jabatan rj
-		join kepegawaian.users u on rj."PNS_NIP" = u.nip
+		from rwt_jabatan rj
+		join users u on rj."PNS_NIP" = u.nip
 		where u.id = $1
 		order by rj."TMT_JABATAN" asc
 		limit $2 offset $3
@@ -57,7 +57,7 @@ func (r *repository) list(ctx context.Context, userID int64, limit, offset uint)
 }
 
 func (r *repository) listJenis(ctx context.Context) ([]jenisJabatan, error) {
-	rows, err := r.db.QueryContext(ctx, `select "ID", "NAMA" from kepegawaian.jenis_jabatan order by 2 asc`)
+	rows, err := r.db.QueryContext(ctx, `select "ID", "NAMA" from jenis_jabatan order by 2 asc`)
 	if err != nil {
 		return nil, fmt.Errorf("sql select: %w", err)
 	}
@@ -85,8 +85,8 @@ func (r *repository) count(ctx context.Context, userID int64) (uint, error) {
 	var result uint
 	err := r.db.QueryRowContext(ctx, `
 		select count(1)
-		from kepegawaian.rwt_jabatan rj
-		join kepegawaian.users u on rj."PNS_NIP" = u.nip
+		from rwt_jabatan rj
+		join users u on rj."PNS_NIP" = u.nip
 		where u.id = $1
 		`, userID,
 	).Scan(&result)

@@ -13,6 +13,8 @@ func TestLoad(t *testing.T) {
 		"NEXUS_KEPEGAWAIAN_SERVER_PORT":            "8000",
 		"NEXUS_KEPEGAWAIAN_SERVER_AUTH_PUBLIC_KEY": "some-key",
 		"NEXUS_KEPEGAWAIAN_DB_HOST":                "some-db-host",
+		"NEXUS_KEPEGAWAIAN_DB_PORT":                "5432",
+		"NEXUS_KEPEGAWAIAN_DB_SCHEMA":              "kepegawaian",
 		"NEXUS_KEPEGAWAIAN_DB_NAME":                "some-db-name",
 		"NEXUS_KEPEGAWAIAN_DB_USER":                "some-db-user",
 		"NEXUS_KEPEGAWAIAN_DB_PASSWORD":            "some-db-password",
@@ -34,6 +36,8 @@ func TestLoad(t *testing.T) {
 		},
 		DB: Database{
 			Host:     "some-db-host",
+			Port:     5432,
+			Schema:   "kepegawaian",
 			Name:     "some-db-name",
 			User:     "some-db-user",
 			Password: "some-db-password",

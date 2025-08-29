@@ -20,10 +20,10 @@ func Test_handler_list(t *testing.T) {
 	t.Parallel()
 
 	dbData := `
-		insert into kepegawaian.users
+		insert into users
 			(id, role_id, email, username, password_hash, reset_hash, last_login,  last_ip, created_on,  deleted, reset_by, banned, ban_message, display_name, display_name_changed, timezone, language, active, activate_hash, password_iterations, force_password_reset, nip,  satkers, admin_nomor, imei, token, real_imei, fcm,  banned_asigo) values
 			(41, 41,      '41a', '41b',    '41c',         '41d',      '2001-01-02','41f',   '2001-01-03',1,       1,        1,      '41k',       '41l',        '2001-01-04',         '41n',    '41o',    1,      '41q',         1,                   1,                    '1c', '41u',   1,           '41w','41x', '41y',     '41z',1);
-		insert into kepegawaian.rwt_penugasan
+		insert into rwt_penugasan
 			(id, tipe_jabatan, deskripsi_jabatan, tanggal_mulai, tanggal_selesai, createddate, exist) values
 			(1,  'Struktural', 'Kepala Bagian',   '2023-01-01',   '2023-12-31',    now(),       true),
 			(2,  'Fungsional', 'Analis Kepegawaian', '2023-06-01', '2024-05-31',   now(),       true),
@@ -109,7 +109,7 @@ func Test_handler_list(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			db := dbtest.New(t, "kepegawaian", dbmigrations.FS)
+			db := dbtest.New(t, dbmigrations.FS)
 			if tt.dbData != "" {
 				_, err := db.Exec(tt.dbData)
 				require.NoError(t, err)

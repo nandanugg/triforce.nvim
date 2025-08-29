@@ -20,22 +20,26 @@ import (
 var (
 	adminDB         *sql.DB
 	testDBHost      string
+	testDBName      string
+	testDBSchema    string
 	testDBSuperuser string
 	testDBPassword  string
 )
 
 func init() {
+	testDBHost = os.Getenv("NEXUS_TEST_DB_HOST")
+	testDBName = os.Getenv("NEXUS_TEST_DB_NAME")
+	testDBSchema = os.Getenv("NEXUS_TEST_DB_SCHEMA")
 	testDBSuperuser = os.Getenv("NEXUS_TEST_DB_SUPERUSER")
 	testDBPassword = os.Getenv("NEXUS_TEST_DB_PASSWORD")
-	testDBHost = os.Getenv("NEXUS_TEST_DB_HOST")
 
 	var err error
 	adminDB, err = db.New(
 		testDBHost,
 		testDBSuperuser,
 		testDBPassword,
-		os.Getenv("NEXUS_TEST_DB_NAME"),
-	)
+		testDBName,
+		testDBSchema)
 	if err != nil {
 		fmt.Println("Error connecting to database: " + err.Error())
 		os.Exit(1)
@@ -44,24 +48,25 @@ func init() {
 
 // New creates an isolated database for t, using application config values only
 // as initial connection parameters.
-func New(t *testing.T, schema string, migrationsFS embed.FS) *sql.DB {
+func New(t *testing.T, migrationsFS embed.FS) *sql.DB {
 	t.Helper()
 
 	testID := randomString()
 	var (
 		dbname   = "nexus_test_db_" + testID
 		user     = "nexus_test_user_" + testID
+		schema   = "nexus_test_schema_" + testID
 		password = "any"
 	)
 
 	// Using superuser, create new DB and app user:
-	createTestDBAndRole(t, dbname, user, password)
+	createTestDBAndRole(t, user, password, dbname)
 
 	// Do necessary preparation in new DB before applying migration files:
 	prepareTestDB(t, user, password, dbname, schema)
 
 	// Apply migration files:
-	return applyMigrations(t, user, password, dbname, migrationsFS)
+	return applyMigrations(t, user, password, dbname, schema, migrationsFS)
 }
 
 func randomString() string {
@@ -69,7 +74,7 @@ func randomString() string {
 	return hex.EncodeToString(sum[:4])
 }
 
-func createTestDBAndRole(t *testing.T, dbname, user, password string) {
+func createTestDBAndRole(t *testing.T, user, password, dbname string) {
 	_, err := adminDB.Exec("create database " + dbname)
 	require.NoError(t, err)
 
@@ -89,7 +94,7 @@ func createTestDBAndRole(t *testing.T, dbname, user, password string) {
 }
 
 func prepareTestDB(t *testing.T, user, password, dbname, schema string) {
-	d, err := db.New(testDBHost, testDBSuperuser, testDBPassword, dbname)
+	d, err := db.New(testDBHost, testDBSuperuser, testDBPassword, dbname, schema)
 	require.NoError(t, err)
 	defer d.Close()
 
@@ -98,7 +103,7 @@ func prepareTestDB(t *testing.T, user, password, dbname, schema string) {
 	_, err = d.Exec("update pg_language set lanpltrusted = true where lanname = 'c'")
 	require.NoError(t, err)
 
-	d2, err := db.New(testDBHost, user, password, dbname)
+	d2, err := db.New(testDBHost, user, password, dbname, schema)
 	require.NoError(t, err)
 	defer d2.Close()
 
@@ -106,8 +111,8 @@ func prepareTestDB(t *testing.T, user, password, dbname, schema string) {
 	require.NoError(t, err)
 }
 
-func applyMigrations(t *testing.T, user, password, dbname string, migrationsFS embed.FS) *sql.DB {
-	db, err := db.New(testDBHost, user, password, dbname)
+func applyMigrations(t *testing.T, user, password, dbname, schema string, migrationsFS embed.FS) *sql.DB {
+	db, err := db.New(testDBHost, user, password, dbname, schema)
 	require.NoError(t, err)
 	t.Cleanup(func() { db.Close() })
 

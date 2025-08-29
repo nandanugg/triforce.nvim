@@ -20,7 +20,7 @@ func Test_handler_list(t *testing.T) {
 	t.Parallel()
 
 	dbData := `
-		insert into portal.pemberitahuan
+		insert into pemberitahuan
 			(id, judul_berita, deskripsi_berita, status,                 updated_by, updated_at) values
 			(11, '11a',        '11b',            'Aktif',                '11c',      '2000-01-02'),
 			(12, '12a',        '12b',            'Menunggu Diberitakan', '12c',      '2000-01-02'),
@@ -151,7 +151,7 @@ func Test_handler_list(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			db := dbtest.New(t, "portal", dbmigrations.FS)
+			db := dbtest.New(t, dbmigrations.FS)
 			_, err := db.Exec(tt.dbData)
 			require.NoError(t, err)
 

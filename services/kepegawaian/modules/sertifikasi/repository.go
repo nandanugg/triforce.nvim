@@ -21,8 +21,8 @@ func (r *repository) list(ctx context.Context, userID int64, limit, offset uint)
 			rs.nama_sertifikasi,
 			rs.tahun,
 			rs.createddate
-		from kepegawaian.rwt_sertifikasi rs
-		join kepegawaian.users u on rs.nip = u.nip
+		from rwt_sertifikasi rs
+		join users u on rs.nip = u.nip
 		where u.id = $1
 		order by rs.tahun asc
 		limit $2 offset $3
@@ -60,8 +60,8 @@ func (r *repository) count(ctx context.Context, userID int64) (uint, error) {
 	var result uint
 	err := r.db.QueryRowContext(ctx, `
 		select count(1)
-		from kepegawaian.rwt_sertifikasi rs
-		join kepegawaian.users u on rs.nip = u.nip
+		from rwt_sertifikasi rs
+		join users u on rs.nip = u.nip
 		where u.id = $1
 		`, userID,
 	).Scan(&result)

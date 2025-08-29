@@ -21,6 +21,8 @@ type Server struct {
 
 type Database struct {
 	Host     string `env:"HOST"`
+	Port     uint   `env:"PORT"`
+	Schema   string `env:"SCHEMA"`
 	Name     string `env:"NAME"`
 	User     string `env:"USER"`
 	Password string `env:"PASSWORD"`

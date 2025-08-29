@@ -1,1 +1,1 @@
-drop table portal.pemberitahuan;
+drop table pemberitahuan;

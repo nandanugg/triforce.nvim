@@ -1,4 +1,4 @@
-create table portal.pemberitahuan(
+create table pemberitahuan(
     id bigserial primary key,
     judul_berita text not null,
     deskripsi_berita text not null,
@@ -7,6 +7,6 @@ create table portal.pemberitahuan(
     updated_at date not null
 );
 
-create index pemberitahuan_judul_idx on portal.pemberitahuan(judul_berita);
+create index pemberitahuan_judul_idx on pemberitahuan(judul_berita);
 
-create index pemberitahuan_deskripsi_idx on portal.pemberitahuan(deskripsi_berita);
+create index pemberitahuan_deskripsi_idx on pemberitahuan(deskripsi_berita);

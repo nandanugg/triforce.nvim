@@ -29,17 +29,17 @@ func Test_handler_login(t *testing.T) {
 		require.NoError(t, err)
 
 		keycloak := config.Keycloak{
-			Host:        "https://auth.portal.local",
+			Host:        "https://auth.local",
 			Realm:       "nexus",
 			ClientID:    "my-portal",
-			RedirectURI: "https://portal.local/callback",
+			RedirectURI: "https://local/callback",
 		}
 		RegisterRoutes(e, keycloak, nil)
 		e.ServeHTTP(rec, req)
 
 		assert.Equal(t, 302, rec.Code)
 		assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
-		assert.Equal(t, "https://auth.portal.local/realms/nexus/protocol/openid-connect/auth?client_id=my-portal&prompt=login&redirect_uri=https%3A%2F%2Fportal.local%2Fcallback&response_type=code&scope=openid", rec.Header().Get("Location"))
+		assert.Equal(t, "https://auth.local/realms/nexus/protocol/openid-connect/auth?client_id=my-portal&prompt=login&redirect_uri=https%3A%2F%2Flocal%2Fcallback&response_type=code&scope=openid", rec.Header().Get("Location"))
 		assert.Empty(t, rec.Body)
 	})
 }
@@ -65,7 +65,7 @@ func Test_handler_logout(t *testing.T) {
 				"id_token_hint": []string{"e9d74da4-a4e7-4865-8a4b-601ad1bca900"},
 			},
 			wantResponseCode: 302,
-			wantRedirect:     `https://auth.portal.local/realms/nexus/protocol/openid-connect/logout?id_token_hint=e9d74da4-a4e7-4865-8a4b-601ad1bca900&post_logout_redirect_uri=https%3A%2F%2Fportal.local%2F`,
+			wantRedirect:     `https://auth.local/realms/nexus/protocol/openid-connect/logout?id_token_hint=e9d74da4-a4e7-4865-8a4b-601ad1bca900&post_logout_redirect_uri=https%3A%2F%2Flocal%2F`,
 		},
 	}
 	for _, tt := range tests {
@@ -80,9 +80,9 @@ func Test_handler_logout(t *testing.T) {
 			require.NoError(t, err)
 
 			keycloak := config.Keycloak{
-				Host:                  "https://auth.portal.local",
+				Host:                  "https://auth.local",
 				Realm:                 "nexus",
-				PostLogoutRedirectURI: "https://portal.local/",
+				PostLogoutRedirectURI: "https://local/",
 			}
 			RegisterRoutes(e, keycloak, nil)
 			e.ServeHTTP(rec, req)
@@ -185,7 +185,7 @@ func Test_handler_exchangeToken(t *testing.T) {
 						url.Values{
 							"grant_type":    []string{"authorization_code"},
 							"code":          []string{"my-code"},
-							"redirect_uri":  []string{"https://portal.local/callback"},
+							"redirect_uri":  []string{"https://local/callback"},
 							"client_id":     []string{"my-portal"},
 							"client_secret": []string{"my-secret"},
 						}, r.PostForm)
@@ -210,7 +210,7 @@ func Test_handler_exchangeToken(t *testing.T) {
 			keycloak := config.Keycloak{
 				Host:         keycloakHost,
 				Realm:        "nexus",
-				RedirectURI:  "https://portal.local/callback",
+				RedirectURI:  "https://local/callback",
 				ClientID:     "my-portal",
 				ClientSecret: "my-secret",
 			}

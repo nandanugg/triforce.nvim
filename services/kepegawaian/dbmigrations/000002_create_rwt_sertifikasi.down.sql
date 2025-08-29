@@ -1,1 +1,1 @@
-drop table kepegawaian.rwt_sertifikasi;
+drop table rwt_sertifikasi;

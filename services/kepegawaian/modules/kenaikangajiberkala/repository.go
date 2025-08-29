@@ -23,8 +23,8 @@ func (r *repository) list(ctx context.Context, userID int64, limit, offset uint)
 			rk.tgl_sk,
 			rk.n_gol_ruang,
 			rk.n_gapok
-		from kepegawaian.rwt_kgb rk
-		join kepegawaian.users u on rk.pegawai_nip = u.nip
+		from rwt_kgb rk
+		join users u on rk.pegawai_nip = u.nip
 		where u.id = $1
 		order by rk.tmt_sk
 		limit $2 offset $3
@@ -64,8 +64,8 @@ func (r *repository) count(ctx context.Context, userID int64) (uint, error) {
 	var result uint
 	err := r.db.QueryRowContext(ctx, `
 		select count(1)
-		from kepegawaian.rwt_kgb rk
-		join kepegawaian.users u on rk.pegawai_nip = u.nip
+		from rwt_kgb rk
+		join users u on rk.pegawai_nip = u.nip
 		where u.id = $1
 		`, userID,
 	).Scan(&result)

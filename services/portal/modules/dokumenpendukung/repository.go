@@ -23,7 +23,7 @@ func (r *repository) list(ctx context.Context) ([]dokumenPendukung, error) {
 			dp.updated_by,
 			dp.updated_at,
 			case when dp.file is null then 'Belum Upload' else 'Sudah Upload' end as status
-		from portal.dokumen_pendukung dp
+		from dokumen_pendukung dp
 	`)
 	if err != nil {
 		return nil, fmt.Errorf("sql select: %w", err)

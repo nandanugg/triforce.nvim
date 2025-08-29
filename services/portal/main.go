@@ -21,7 +21,7 @@ func main() {
 
 	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: c.LogLevel})))
 
-	db, err := db.New(c.DB.Host, c.DB.User, c.DB.Password, c.DB.Name)
+	db, err := db.New(c.DB.Host, c.DB.User, c.DB.Password, c.DB.Name, c.DB.Schema)
 	exitIfError("Error connecting to database.", err)
 
 	e, err := api.NewEchoServer(docs.OpenAPIBytes)
@@ -37,7 +37,9 @@ func main() {
 	pemberitahuan.RegisterRoutes(e, db, mwAuth)
 	auth.RegisterRoutes(e, c.Keycloak, client)
 
-	err = api.StartEchoServer(e, c.Server.Port)
+	port := uint(c.Server.Port)
+	exitIfError("Error parsing server port.", err)
+	err = api.StartEchoServer(e, uint(port))
 	exitIfError("Error starting server.", err)
 }
 

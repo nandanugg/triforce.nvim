@@ -26,7 +26,7 @@ func (r *repository) list(ctx context.Context, limit, offset uint, cari string) 
 			"p.updated_by",
 			"p.updated_at",
 		).
-		From("portal.pemberitahuan p").
+		From("pemberitahuan p").
 		Limit(uint64(limit)).
 		Offset(uint64(offset))
 
@@ -70,7 +70,7 @@ func (r *repository) list(ctx context.Context, limit, offset uint, cari string) 
 func (r *repository) count(ctx context.Context, cari string) (uint, error) {
 	qb := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).
 		Select("count(1)").
-		From("portal.pemberitahuan p")
+		From("pemberitahuan p")
 
 	if cari != "" {
 		cari = cari + "%"

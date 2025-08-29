@@ -1,4 +1,4 @@
-create table kepegawaian.rwt_sertifikasi(
+create table rwt_sertifikasi(
     id bigserial not null,
     nip varchar null,
     tahun int8 null,

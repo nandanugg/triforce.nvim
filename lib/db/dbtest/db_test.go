@@ -17,11 +17,11 @@ func TestNew(t *testing.T) {
 		t.Run(fmt.Sprintf("safe to execute in parallel - %d", i), func(t *testing.T) {
 			t.Parallel()
 
-			db := New(t, "test", testmigrations.FS)
-			_, err := db.Exec(fmt.Sprintf("insert into test.foo values (1, %d)", i))
+			db := New(t, testmigrations.FS)
+			_, err := db.Exec(fmt.Sprintf("insert into foo values (1, %d)", i))
 			require.NoError(t, err)
 
-			data, err := QueryAll(db, "test.foo", "foo")
+			data, err := QueryAll(db, "foo", "foo")
 			require.NoError(t, err)
 			assert.Equal(t, Rows{{"foo": int64(1), "bar": int64(i)}}, data)
 		})

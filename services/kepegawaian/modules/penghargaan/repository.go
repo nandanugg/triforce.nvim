@@ -23,8 +23,8 @@ func (r *repository) list(ctx context.Context, userID int64, limit, offset uint)
 			rp."NAMA",
 			rp."KETERANGAN",
 			rp."SK_TANGGAL"
-		from kepegawaian.rwt_penghargaan rp
-		join kepegawaian.users u on rp."PNS_NIP" = u.nip
+		from rwt_penghargaan rp
+		join users u on rp."PNS_NIP" = u.nip
 		where u.id = $1
 		order by rp."SK_TANGGAL" asc
 		limit $2 offset $3
@@ -70,8 +70,8 @@ func (r *repository) count(ctx context.Context, userID int64) (uint, error) {
 	var result uint
 	err := r.db.QueryRowContext(ctx, `
 		select count(1)
-		from kepegawaian.rwt_penghargaan rp
-		join kepegawaian.users u on rp."PNS_NIP" = u.nip
+		from rwt_penghargaan rp
+		join users u on rp."PNS_NIP" = u.nip
 		where u.id = $1
 		`, userID,
 	).Scan(&result)

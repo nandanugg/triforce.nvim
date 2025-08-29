@@ -23,9 +23,9 @@ func (r *repository) list(ctx context.Context, userID int64, limit, offset uint)
 			rg."TMT_GOLONGAN",
 			rg."MK_GOLONGAN_TAHUN",
 			rg."MK_GOLONGAN_BULAN"
-		from kepegawaian.rwt_golongan rg
-		join kepegawaian.pegawai p on rg."PNS_NIP" = p."NIP_BARU"
-		join kepegawaian.users u on p."NIP_BARU" = u.nip
+		from rwt_golongan rg
+		join pegawai p on rg."PNS_NIP" = p."NIP_BARU"
+		join users u on p."NIP_BARU" = u.nip
 		where u.id = $1
 		order by rg."TMT_GOLONGAN" asc
 		limit $2 offset $3
@@ -65,9 +65,9 @@ func (r *repository) count(ctx context.Context, userID int64) (uint, error) {
 	var result uint
 	err := r.db.QueryRowContext(ctx, `
 		select count(1)
-		from kepegawaian.rwt_golongan rg
-		join kepegawaian.pegawai p on rg."PNS_NIP" = p."NIP_BARU"
-		join kepegawaian.users u on p."NIP_BARU" = u.nip
+		from rwt_golongan rg
+		join pegawai p on rg."PNS_NIP" = p."NIP_BARU"
+		join users u on p."NIP_BARU" = u.nip
 		where u.id = $1
 		`, userID,
 	).Scan(&result)
