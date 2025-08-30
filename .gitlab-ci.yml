@@ -8,13 +8,23 @@ default:
 
 test:
   stage: test
-  image: golang:1.25.0-alpine3.22
+  image: $CI_REGISTRY_DOCKER/golang:1.25.0-alpine3.22
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   services:
-    - name: postgres:17-alpine
+    - name: $CI_REGISTRY_DOCKER/postgres:17-alpine
       alias: postgres
-      command: ["-c", "fsync=off", "-c", "synchronous_commit=off", "-c", "full_page_writes=off", "-c", "max_connections=1000"]
+      command:
+        [
+          "-c",
+          "fsync=off",
+          "-c",
+          "synchronous_commit=off",
+          "-c",
+          "full_page_writes=off",
+          "-c",
+          "max_connections=1000",
+        ]
       variables:
         POSTGRES_PASSWORD: postgres
   variables:
@@ -36,17 +46,44 @@ test:
   # TODO: hapus setelah integrasi auth selesai dibuat.
   allow_failure: true
 
-# Reference: https://docs.gitlab.com/ci/docker/buildah_rootless_multi_arch/
-build api image:
+.build-image:
+  image:
+    name: $CI_REGISTRY_DOCKER/moby/buildkit:rootless
+    entrypoint: [""]
   stage: build
-  image: quay.io/buildah/stable
-  rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
   variables:
-    IMAGE: docker.io/unggulrespationo/nexus:be-$CI_COMMIT_SHORT_SHA
-    STORAGE_DRIVER: vfs
-    BUILDAH_FORMAT: docker
+    BUILDKITD_FLAGS: --oci-worker-no-process-sandbox
+  before_script:
+    - export CONF_DIR=~/.docker
+    - export CERT_DIR=$CONF_DIR/certs
+    - export SSL_CERT_DIR=$CERT_DIR:/etc/ssl/certs
+    - mkdir -p $CERT_DIR
+    - echo $CA_DIGI_CERT | base64 -d > $CERT_DIR/ca.crt
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > $CONF_DIR/config.json
   script:
-    - echo "$CONTAINER_REGISTRY_PASSWORD" | buildah login -u "$CONTAINER_REGISTRY_USERNAME" --password-stdin docker.io
-    - buildah build -t $IMAGE .
-    - buildah push $IMAGE
+    - |
+      buildctl-daemonless.sh build \
+        --frontend dockerfile.v0 \
+        --local context=. \
+        --local dockerfile=. \
+        --opt build-arg:CI_REGISTRY=$CI_REGISTRY_DOCKER \
+        --output type=image,name=$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA,push=true
+    # Masih ada kendala untuk penggunaan cache, jadi opsi cache di-comment dulu.
+    # ERROR: failed to configure registry cache importer: unexpected status from
+    # HEAD request to https://harbor-staging-portal.kemendikdasmen.go.id/v2/ministry-portal/portal-be/manifests/cache: 412 Precondition Failed
+    # --export-cache type=registry,ref=$CI_REGISTRY_CACHE_IMAGE \
+    # --import-cache type=registry,ref=$CI_REGISTRY_CACHE_IMAGE \
+  tags:
+    - nexus-staging-1-build
+
+build-image-test:
+  extends: .build-image
+  rules:
+    - if: "$CI_MERGE_REQUEST_ID"
+      changes:
+        - Dockerfile
+
+build-image:
+  extends: .build-image
+  rules:
+    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
