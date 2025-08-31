@@ -1,89 +1,10 @@
-stages:
-  - test
-  - build
-
-default:
-  tags:
-    - nexus-staging-1
-
-test:
-  stage: test
-  image: $CI_REGISTRY_DOCKER/golang:1.25.0-alpine3.22
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-  services:
-    - name: $CI_REGISTRY_DOCKER/postgres:17-alpine
-      alias: postgres
-      command:
-        [
-          "-c",
-          "fsync=off",
-          "-c",
-          "synchronous_commit=off",
-          "-c",
-          "full_page_writes=off",
-          "-c",
-          "max_connections=1000",
-        ]
-      variables:
-        POSTGRES_PASSWORD: postgres
-  variables:
-    GOPATH: $CI_PROJECT_DIR/.go
-    NEXUS_TEST_DB_HOST: postgres
-    NEXUS_TEST_DB_NAME: postgres
-    NEXUS_TEST_DB_PASSWORD: postgres
-    NEXUS_TEST_DB_SUPERUSER: postgres
-  script:
-    - mkdir -p .go
-    - go test ./...
-  cache:
-    when: always
-    key:
-      files:
-        - go.sum
-    paths:
-      - .go
-  # TODO: hapus setelah integrasi auth selesai dibuat.
-  allow_failure: true
-
-.build-image:
-  image:
-    name: $CI_REGISTRY_DOCKER/moby/buildkit:rootless
-    entrypoint: [""]
-  stage: build
-  variables:
-    BUILDKITD_FLAGS: --oci-worker-no-process-sandbox
-  before_script:
-    - export CONF_DIR=~/.docker
-    - export CERT_DIR=$CONF_DIR/certs
-    - export SSL_CERT_DIR=$CERT_DIR:/etc/ssl/certs
-    - mkdir -p $CERT_DIR
-    - echo $CA_DIGI_CERT | base64 -d > $CERT_DIR/ca.crt
-    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > $CONF_DIR/config.json
-  script:
-    - |
-      buildctl-daemonless.sh build \
-        --frontend dockerfile.v0 \
-        --local context=. \
-        --local dockerfile=. \
-        --opt build-arg:CI_REGISTRY=$CI_REGISTRY_DOCKER \
-        --output type=image,name=$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA,push=true
-    # Masih ada kendala untuk penggunaan cache, jadi opsi cache di-comment dulu.
-    # ERROR: failed to configure registry cache importer: unexpected status from
-    # HEAD request to https://harbor-staging-portal.kemendikdasmen.go.id/v2/ministry-portal/portal-be/manifests/cache: 412 Precondition Failed
-    # --export-cache type=registry,ref=$CI_REGISTRY_CACHE_IMAGE \
-    # --import-cache type=registry,ref=$CI_REGISTRY_CACHE_IMAGE \
-  tags:
-    - nexus-staging-1-build
-
-build-image-test:
-  extends: .build-image
-  rules:
-    - if: "$CI_MERGE_REQUEST_ID"
-      changes:
-        - Dockerfile
-
-build-image:
-  extends: .build-image
-  rules:
-    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
+include:
+  - project: wartek-id/matk/nexus/tooling/cicd-template
+    file: stages.gitlab-ci.yml
+    ref: main
+  - project: wartek-id/matk/nexus/tooling/cicd-template
+    file: job-template.gitlab-ci.yml
+    ref: main
+  - local: .gitlab/build.gitlab-ci.yml
+  - local: .gitlab/deploy.gitlab-ci.yml
+  - local: .gitlab/test.gitlab-ci.yml

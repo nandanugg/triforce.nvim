@@ -1,0 +1,4 @@
+.placeholder:
+  stage: deployment-staging
+  script:
+    - echo "This is a placeholder job for the deployment-staging stage."

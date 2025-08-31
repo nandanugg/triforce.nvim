@@ -1,0 +1,9 @@
+build-image-test:
+  extends:
+    - .build-image
+    - .rules-image-test
+
+build-image:
+  extends:
+    - .build-image
+    - .rules-staging
