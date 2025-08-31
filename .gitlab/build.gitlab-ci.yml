@@ -2,6 +2,8 @@ build-image-test:
   extends:
     - .build-image
     - .rules-image-test
+  variables:
+    AUTO_PUSH: false
 
 build-image:
   extends:
