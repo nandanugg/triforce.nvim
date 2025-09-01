@@ -1,0 +1,28 @@
+dn: ou=people,dc=kemdikbud,dc=go,dc=ID
+changetype: add
+objectClass: organizationalUnit
+ou: people
+
+dn: uid=john.doe,ou=people,dc=kemdikbud,dc=go,dc=id
+changetype: add
+uid: john.doe
+zimbraId: 11006514-cd41-427c-9e32-2c15ff5a36ce
+cn: John
+sn: Doe
+mail: john.doe@kemdikbud.go.id
+mail: john.doe@dikdasmen.go.id
+mail: john.doe@kemendikdasmen.go.id
+objectClass: inetOrgPerson
+objectClass: zimbraAccount
+userPassword: password123
+
+dn: uid=jane.doe,ou=people,dc=kemdikbud,dc=go,dc=id
+changetype: add
+uid: jane.doe
+zimbraId: 38d50f58-68b2-4676-a7ae-d4b198898f3d
+cn: Jane
+sn: Doe
+mail: jane.doe@kemdikbud.go.id
+objectClass: inetOrgPerson
+objectClass: zimbraAccount
+userPassword: password123

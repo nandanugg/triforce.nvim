@@ -33,8 +33,11 @@ services:
       - keycloak_postgres
     networks:
       - keycloak-network
+    volumes:
+      - ./docker/realm-nexus.json:/opt/keycloak/data/import/realm-export.json
     command:
       - 'start-dev'
+      - '--import-realm'
 
   keycloak_postgres:
     container_name: keycloak_postgres
@@ -58,12 +61,16 @@ services:
     ports:
       - "389:389"
     environment:
-      LDAP_ORGANISATION: Example
-      LDAP_DOMAIN: example.com
+      LDAP_ORGANISATION: Kemdikbud
+      LDAP_DOMAIN: kemdikbud.go.id
       LDAP_ADMIN_PASSWORD: admin
+      LDAP_ENABLE_LDAPI: true
+      LDAP_TLS: false
     volumes:
+      - ./docker/ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/
       - openldap_data:/var/lib/ldap
       - openldap_config:/etc/ldap/slapd.d
+    command: --copy-service
     networks:
       - keycloak-network
 

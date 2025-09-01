@@ -1,0 +1,14 @@
+dn: cn=zimbra,cn=schema,cn=config
+objectClass: olcSchemaConfig
+cn: zimbra
+olcAttributeTypes: ( 1.3.6.1.4.1.55555.1.1
+  NAME 'zimbraId'
+  DESC 'Zimbra Systems Unique ID'
+  EQUALITY UUIDMatch
+  SYNTAX 1.3.6.1.1.16.1
+  SINGLE-VALUE )
+olcObjectClasses: ( 1.3.6.1.4.1.55555.2.1
+  NAME 'zimbraAccount'
+  DESC 'Zimbra Account object extending inetOrgPerson'
+  SUP top AUXILIARY
+  MUST ( uid $ zimbraId ) )
