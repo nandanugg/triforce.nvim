@@ -6,34 +6,76 @@
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| ID | varchar(255) |  | false |  |  |  |
-| TINGKAT_PENDIDIKAN_ID | varchar(255) |  | true |  |  |  |
-| NAMA | varchar(255) |  | true |  |  |  |
-| CEPAT_KODE | varchar(255) |  | true |  |  |  |
+| id | varchar(36) |  | false | [kepegawaian.riwayat_pendidikan](kepegawaian.riwayat_pendidikan.md) |  |  |
+| tingkat_pendidikan_id | smallint |  | true |  | [kepegawaian.tingkat_pendidikan](kepegawaian.tingkat_pendidikan.md) |  |
+| nama | varchar(200) |  | true |  |  |  |
+| created_at | timestamp with time zone | now() | true |  |  |  |
+| updated_at | timestamp with time zone | now() | true |  |  |  |
+| deleted_at | timestamp with time zone |  | true |  |  |  |
 
 ## Constraints
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| pendidikan_pkey | PRIMARY KEY | PRIMARY KEY ("ID") |
+| pendidikan_pkey | PRIMARY KEY | PRIMARY KEY (id) |
+| fk_pendidikan_tingkat | FOREIGN KEY | FOREIGN KEY (tingkat_pendidikan_id) REFERENCES tingkat_pendidikan(id) |
 
 ## Indexes
 
 | Name | Definition |
 | ---- | ---------- |
-| pendidikan_pkey | CREATE UNIQUE INDEX pendidikan_pkey ON kepegawaian.pendidikan USING btree ("ID") |
+| pendidikan_pkey | CREATE UNIQUE INDEX pendidikan_pkey ON kepegawaian.pendidikan USING btree (id) |
 
 ## Relations
 
 ```mermaid
 erDiagram
 
+"kepegawaian.riwayat_pendidikan" }o--o| "kepegawaian.pendidikan" : "FOREIGN KEY (pendidikan_id) REFERENCES pendidikan(id)"
+"kepegawaian.pendidikan" }o--o| "kepegawaian.tingkat_pendidikan" : "FOREIGN KEY (tingkat_pendidikan_id) REFERENCES tingkat_pendidikan(id)"
 
 "kepegawaian.pendidikan" {
-  varchar_255_ ID
-  varchar_255_ TINGKAT_PENDIDIKAN_ID
-  varchar_255_ NAMA
-  varchar_255_ CEPAT_KODE
+  varchar_36_ id
+  smallint tingkat_pendidikan_id FK
+  varchar_200_ nama
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
+}
+"kepegawaian.riwayat_pendidikan" {
+  integer id
+  varchar_32_ pns_id_3
+  smallint tingkat_pendidikan_id FK
+  varchar_32_ pendidikan_id_3
+  date tanggal_lulus
+  varchar_100_ no_ijazah
+  varchar_200_ nama_sekolah
+  varchar_50_ gelar_depan
+  varchar_60_ gelar_belakang
+  varchar_1_ pendidikan_pertama
+  varchar_255_ negara_sekolah
+  varchar_4_ tahun_lulus
+  varchar_20_ nip
+  integer diakui_bkn
+  integer status_satker
+  integer status_biro
+  integer pendidikan_terakhir
+  varchar_36_ pns_id FK
+  varchar_36_ pendidikan_id FK
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
+}
+"kepegawaian.tingkat_pendidikan" {
+  integer id
+  integer golongan_id
+  varchar_200_ nama
+  integer golongan_awal_id
+  varchar_200_ abbreviation
+  smallint tingkat
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
 }
 ```
 

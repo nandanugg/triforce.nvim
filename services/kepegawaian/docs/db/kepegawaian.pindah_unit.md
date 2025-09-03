@@ -6,68 +6,112 @@
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| ID | integer | nextval('kepegawaian."pindah_unit_ID_seq"'::regclass) | false |  |  |  |
-| NIP | varchar(32) |  | false |  |  |  |
-| SURAT_PERMOHONAN_PINDAH | varchar(100) |  | true |  |  |  |
-| UNIT_ASAL | varchar(32) |  | true |  |  |  |
-| UNIT_TUJUAN | varchar(32) |  | true |  |  |  |
-| SURAT_PERNYATAAN_MELEPAS | varchar(100) |  | true |  |  |  |
-| SK_KP_TERAKHIR | varchar(100) |  | true |  |  |  |
-| SK_JABATAN | varchar(100) |  | true |  |  |  |
-| SKP | varchar(10) |  | true |  |  |  |
-| SK_TUNKIN | varchar(100) |  | true |  |  |  |
-| SURAT_PERNYATAAN_MENERIMA | varchar(100) |  | true |  |  |  |
-| NO_SK_PINDAH | varchar(100) |  | true |  |  |  |
-| TANGGAL_SK_PINDAH | varchar(10) |  | true |  |  |  |
-| FILE_SK | varchar(100) |  | true |  |  |  |
-| STATUS_SATKER | integer |  | true |  |  |  |
-| STATUS_BIRO | integer |  | true |  |  |  |
-| JABATAN_ID | numeric |  | true |  |  |  |
-| KETERANGAN | character(255) |  | true |  |  |  |
-| TANGGAL_TMT_PINDAH | date |  | true |  |  |  |
-| CREATED_DATE | date |  | true |  |  |  |
-| CREATED_BY | integer |  | true |  |  |  |
+| id | integer | nextval('pindah_unit_id_seq'::regclass) | false |  |  |  |
+| nip | varchar(20) |  | false |  |  |  |
+| surat_permohonan_pindah | varchar(200) |  | true |  |  |  |
+| unit_asal | varchar(36) |  | true |  | [kepegawaian.unit_kerja](kepegawaian.unit_kerja.md) |  |
+| unit_tujuan | varchar(36) |  | true |  | [kepegawaian.unit_kerja](kepegawaian.unit_kerja.md) |  |
+| surat_pernyataan_melepas | varchar(200) |  | true |  |  |  |
+| sk_kp_terakhir | varchar(100) |  | true |  |  |  |
+| sk_jabatan | varchar(100) |  | true |  |  |  |
+| skp | varchar(10) |  | true |  |  |  |
+| sk_tunkin | varchar(100) |  | true |  |  |  |
+| surat_pernyataan_menerima | varchar(200) |  | true |  |  |  |
+| no_sk_pindah | varchar(100) |  | true |  |  |  |
+| tanggal_sk_pindah | date |  | true |  |  |  |
+| file_sk | varchar(200) |  | true |  |  |  |
+| status_satker | smallint |  | true |  |  |  |
+| status_biro | smallint |  | true |  |  |  |
+| jabatan_id | smallint |  | true |  |  |  |
+| keterangan | varchar(200) |  | true |  |  |  |
+| tanggal_tmt_pindah | date |  | true |  |  |  |
+| created_by | integer |  | true |  |  |  |
+| created_at | timestamp with time zone | now() | true |  |  |  |
+| updated_at | timestamp with time zone | now() | true |  |  |  |
+| deleted_at | timestamp with time zone |  | true |  |  |  |
 
 ## Constraints
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| pk_pindah_unit | PRIMARY KEY | PRIMARY KEY ("ID") |
+| pindah_unit_pkey | PRIMARY KEY | PRIMARY KEY (id) |
+| fk_pindah_unit_unit_asal | FOREIGN KEY | FOREIGN KEY (unit_asal) REFERENCES unit_kerja(id) |
+| fk_pindah_unit_unit_tujuan | FOREIGN KEY | FOREIGN KEY (unit_tujuan) REFERENCES unit_kerja(id) |
 
 ## Indexes
 
 | Name | Definition |
 | ---- | ---------- |
-| pk_pindah_unit | CREATE UNIQUE INDEX pk_pindah_unit ON kepegawaian.pindah_unit USING btree ("ID") |
+| pindah_unit_pkey | CREATE UNIQUE INDEX pindah_unit_pkey ON kepegawaian.pindah_unit USING btree (id) |
 
 ## Relations
 
 ```mermaid
 erDiagram
 
+"kepegawaian.pindah_unit" }o--o| "kepegawaian.unit_kerja" : "FOREIGN KEY (unit_asal) REFERENCES unit_kerja(id)"
+"kepegawaian.pindah_unit" }o--o| "kepegawaian.unit_kerja" : "FOREIGN KEY (unit_tujuan) REFERENCES unit_kerja(id)"
 
 "kepegawaian.pindah_unit" {
-  integer ID
-  varchar_32_ NIP
-  varchar_100_ SURAT_PERMOHONAN_PINDAH
-  varchar_32_ UNIT_ASAL
-  varchar_32_ UNIT_TUJUAN
-  varchar_100_ SURAT_PERNYATAAN_MELEPAS
-  varchar_100_ SK_KP_TERAKHIR
-  varchar_100_ SK_JABATAN
-  varchar_10_ SKP
-  varchar_100_ SK_TUNKIN
-  varchar_100_ SURAT_PERNYATAAN_MENERIMA
-  varchar_100_ NO_SK_PINDAH
-  varchar_10_ TANGGAL_SK_PINDAH
-  varchar_100_ FILE_SK
-  integer STATUS_SATKER
-  integer STATUS_BIRO
-  numeric JABATAN_ID
-  character_255_ KETERANGAN
-  date TANGGAL_TMT_PINDAH
-  date CREATED_DATE
-  integer CREATED_BY
+  integer id
+  varchar_20_ nip
+  varchar_200_ surat_permohonan_pindah
+  varchar_36_ unit_asal FK
+  varchar_36_ unit_tujuan FK
+  varchar_200_ surat_pernyataan_melepas
+  varchar_100_ sk_kp_terakhir
+  varchar_100_ sk_jabatan
+  varchar_10_ skp
+  varchar_100_ sk_tunkin
+  varchar_200_ surat_pernyataan_menerima
+  varchar_100_ no_sk_pindah
+  date tanggal_sk_pindah
+  varchar_200_ file_sk
+  smallint status_satker
+  smallint status_biro
+  smallint jabatan_id
+  varchar_200_ keterangan
+  date tanggal_tmt_pindah
+  integer created_by
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
+}
+"kepegawaian.unit_kerja" {
+  varchar_36_ id
+  integer no
+  varchar_36_ kode_internal
+  varchar_200_ nama_unor
+  varchar_36_ eselon_id
+  varchar_36_ cepat_kode
+  varchar_200_ nama_jabatan
+  varchar_200_ nama_pejabat
+  varchar_36_ diatasan_id FK
+  varchar_36_ instansi_id FK
+  varchar_36_ pemimpin_pns_id FK
+  varchar_36_ jenis_unor_id
+  varchar_36_ unor_induk
+  smallint jumlah_ideal_staff
+  integer order
+  smallint is_satker
+  varchar_36_ eselon_1
+  varchar_36_ eselon_2
+  varchar_36_ eselon_3
+  varchar_36_ eselon_4
+  date expired_date
+  varchar_200_ keterangan
+  varchar_200_ jenis_satker
+  varchar_200_ abbreviation
+  varchar_200_ unor_induk_penyetaraan
+  varchar_32_ jabatan_id
+  varchar_4_ waktu
+  varchar_100_ peraturan
+  varchar_50_ remark
+  boolean aktif
+  varchar_50_ eselon_nama
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
 }
 ```
 

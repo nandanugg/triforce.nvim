@@ -1,4 +1,4 @@
-# kepegawaian.ref_jabatan
+# kepegawaian.ref_golongan
 
 ## Description
 
@@ -6,18 +6,12 @@
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| kode_jabatan | varchar(36) |  | false | [kepegawaian.pegawai](kepegawaian.pegawai.md) |  |  |
-| id | integer |  | false |  |  |  |
-| no | integer |  | false |  |  |  |
-| nama_jabatan | varchar(200) |  | true |  |  |  |
-| nama_jabatan_full | varchar(200) |  | true |  |  |  |
-| jenis_jabatan | smallint |  | true |  |  |  |
-| kelas | smallint |  | true |  |  |  |
-| pensiun | smallint |  | true |  |  |  |
-| kode_bkn | varchar(36) |  | true |  |  |  |
-| nama_jabatan_bkn | varchar(200) |  | true |  |  |  |
-| kategori_jabatan | varchar(100) |  | true |  |  |  |
-| bkn_id | varchar(36) |  | true |  |  |  |
+| id | integer | nextval('ref_golongan_id_seq'::regclass) | false | [kepegawaian.pegawai](kepegawaian.pegawai.md) [kepegawaian.riwayat_golongan](kepegawaian.riwayat_golongan.md) |  |  |
+| nama | varchar(10) |  | true |  |  |  |
+| nama_pangkat | varchar(50) |  | true |  |  |  |
+| nama_2 | varchar(10) |  | true |  |  |  |
+| gol | smallint |  | true |  |  |  |
+| gol_pppk | varchar(10) |  | true |  |  |  |
 | created_at | timestamp with time zone | now() | true |  |  |  |
 | updated_at | timestamp with time zone | now() | true |  |  |  |
 | deleted_at | timestamp with time zone |  | true |  |  |  |
@@ -26,34 +20,30 @@
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| ref_jabatan_pkey | PRIMARY KEY | PRIMARY KEY (kode_jabatan) |
+| ref_golongan_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 
 ## Indexes
 
 | Name | Definition |
 | ---- | ---------- |
-| ref_jabatan_pkey | CREATE UNIQUE INDEX ref_jabatan_pkey ON kepegawaian.ref_jabatan USING btree (kode_jabatan) |
+| ref_golongan_pkey | CREATE UNIQUE INDEX ref_golongan_pkey ON kepegawaian.ref_golongan USING btree (id) |
 
 ## Relations
 
 ```mermaid
 erDiagram
 
-"kepegawaian.pegawai" }o--o| "kepegawaian.ref_jabatan" : "FOREIGN KEY (jabatan_id) REFERENCES ref_jabatan(kode_jabatan)"
+"kepegawaian.pegawai" }o--o| "kepegawaian.ref_golongan" : "FOREIGN KEY (gol_id) REFERENCES ref_golongan(id)"
+"kepegawaian.pegawai" }o--o| "kepegawaian.ref_golongan" : "FOREIGN KEY (gol_awal_id) REFERENCES ref_golongan(id)"
+"kepegawaian.riwayat_golongan" }o--o| "kepegawaian.ref_golongan" : "FOREIGN KEY (golongan_id) REFERENCES ref_golongan(id)"
 
-"kepegawaian.ref_jabatan" {
-  varchar_36_ kode_jabatan
+"kepegawaian.ref_golongan" {
   integer id
-  integer no
-  varchar_200_ nama_jabatan
-  varchar_200_ nama_jabatan_full
-  smallint jenis_jabatan
-  smallint kelas
-  smallint pensiun
-  varchar_36_ kode_bkn
-  varchar_200_ nama_jabatan_bkn
-  varchar_100_ kategori_jabatan
-  varchar_36_ bkn_id
+  varchar_10_ nama
+  varchar_50_ nama_pangkat
+  varchar_10_ nama_2
+  smallint gol
+  varchar_10_ gol_pppk
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
@@ -155,6 +145,44 @@ erDiagram
   smallint status_pegawai_backup
   varchar_50_ masa_kerja
   varchar_50_ kartu_asn
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
+}
+"kepegawaian.riwayat_golongan" {
+  integer id
+  varchar_36_ pns_id FK
+  varchar_20_ pns_nip
+  varchar_100_ pns_nama
+  varchar_4_ kode_jenis_kp
+  varchar_50_ jenis_kp
+  smallint golongan_id FK
+  varchar_10_ golongan_nama
+  varchar_50_ pangkat_nama
+  varchar_50_ sk_nomor
+  varchar_100_ no_bkn
+  smallint jumlah_angka_kredit_utama
+  smallint jumlah_angka_kredit_tambahan
+  smallint mk_golongan_tahun
+  smallint mk_golongan_bulan
+  date sk_tanggal
+  date tanggal_bkn
+  date tmt_golongan
+  integer status_satker
+  integer status_biro
+  integer pangkat_terakhir
+  varchar_36_ bkn_id
+  text file_base64
+  varchar_200_ keterangan_berkas
+  bigint arsip_id
+  varchar_2_ golongan_asal
+  varchar_15_ basic
+  smallint sk_type
+  varchar_5_ kanreg
+  varchar_50_ kpkn
+  varchar_200_ keterangan
+  varchar_10_ lpnk
+  varchar_50_ jenis_riwayat
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at

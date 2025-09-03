@@ -1,4 +1,4 @@
-# kepegawaian.ref_jabatan
+# kepegawaian.riwayat_diklat_struktural
 
 ## Description
 
@@ -6,18 +6,20 @@
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| kode_jabatan | varchar(36) |  | false | [kepegawaian.pegawai](kepegawaian.pegawai.md) |  |  |
-| id | integer |  | false |  |  |  |
-| no | integer |  | false |  |  |  |
-| nama_jabatan | varchar(200) |  | true |  |  |  |
-| nama_jabatan_full | varchar(200) |  | true |  |  |  |
-| jenis_jabatan | smallint |  | true |  |  |  |
-| kelas | smallint |  | true |  |  |  |
-| pensiun | smallint |  | true |  |  |  |
-| kode_bkn | varchar(36) |  | true |  |  |  |
-| nama_jabatan_bkn | varchar(200) |  | true |  |  |  |
-| kategori_jabatan | varchar(100) |  | true |  |  |  |
-| bkn_id | varchar(36) |  | true |  |  |  |
+| id | varchar(36) |  | false |  |  |  |
+| pns_id | varchar(36) |  | true |  | [kepegawaian.pegawai](kepegawaian.pegawai.md) |  |
+| pns_nip | varchar(20) |  | true |  |  |  |
+| pns_nama | varchar(100) |  | true |  |  |  |
+| jenis_diklat_id | integer |  | true |  | [kepegawaian.ref_jenis_diklat_struktural](kepegawaian.ref_jenis_diklat_struktural.md) |  |
+| nama_diklat | varchar(200) |  | true |  |  |  |
+| nomor | varchar(100) |  | true |  |  |  |
+| tanggal | date |  | true |  |  |  |
+| tahun | smallint |  | true |  |  |  |
+| status_data | varchar(10) |  | true |  |  |  |
+| file_base64 | text |  | true |  |  |  |
+| keterangan_berkas | varchar(200) |  | true |  |  |  |
+| lama | real |  | true |  |  |  |
+| siasn_id | varchar(36) |  | true |  |  |  |
 | created_at | timestamp with time zone | now() | true |  |  |  |
 | updated_at | timestamp with time zone | now() | true |  |  |  |
 | deleted_at | timestamp with time zone |  | true |  |  |  |
@@ -26,34 +28,39 @@
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| ref_jabatan_pkey | PRIMARY KEY | PRIMARY KEY (kode_jabatan) |
+| fk_riwayat_diklat_struktural_jenis | FOREIGN KEY | FOREIGN KEY (jenis_diklat_id) REFERENCES ref_jenis_diklat_struktural(id) |
+| fk_riwayat_diklat_struktural_pns_id | FOREIGN KEY | FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id) |
+| riwayat_diklat_struktural_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 
 ## Indexes
 
 | Name | Definition |
 | ---- | ---------- |
-| ref_jabatan_pkey | CREATE UNIQUE INDEX ref_jabatan_pkey ON kepegawaian.ref_jabatan USING btree (kode_jabatan) |
+| riwayat_diklat_struktural_pkey | CREATE UNIQUE INDEX riwayat_diklat_struktural_pkey ON kepegawaian.riwayat_diklat_struktural USING btree (id) |
 
 ## Relations
 
 ```mermaid
 erDiagram
 
-"kepegawaian.pegawai" }o--o| "kepegawaian.ref_jabatan" : "FOREIGN KEY (jabatan_id) REFERENCES ref_jabatan(kode_jabatan)"
+"kepegawaian.riwayat_diklat_struktural" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
+"kepegawaian.riwayat_diklat_struktural" }o--o| "kepegawaian.ref_jenis_diklat_struktural" : "FOREIGN KEY (jenis_diklat_id) REFERENCES ref_jenis_diklat_struktural(id)"
 
-"kepegawaian.ref_jabatan" {
-  varchar_36_ kode_jabatan
-  integer id
-  integer no
-  varchar_200_ nama_jabatan
-  varchar_200_ nama_jabatan_full
-  smallint jenis_jabatan
-  smallint kelas
-  smallint pensiun
-  varchar_36_ kode_bkn
-  varchar_200_ nama_jabatan_bkn
-  varchar_100_ kategori_jabatan
-  varchar_36_ bkn_id
+"kepegawaian.riwayat_diklat_struktural" {
+  varchar_36_ id
+  varchar_36_ pns_id FK
+  varchar_20_ pns_nip
+  varchar_100_ pns_nama
+  integer jenis_diklat_id FK
+  varchar_200_ nama_diklat
+  varchar_100_ nomor
+  date tanggal
+  smallint tahun
+  varchar_10_ status_data
+  text file_base64
+  varchar_200_ keterangan_berkas
+  real lama
+  varchar_36_ siasn_id
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
@@ -155,6 +162,13 @@ erDiagram
   smallint status_pegawai_backup
   varchar_50_ masa_kerja
   varchar_50_ kartu_asn
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
+}
+"kepegawaian.ref_jenis_diklat_struktural" {
+  integer id
+  varchar_100_ nama
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at

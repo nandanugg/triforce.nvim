@@ -1,4 +1,4 @@
-# kepegawaian.ref_jabatan
+# kepegawaian.riwayat_kursus
 
 ## Description
 
@@ -6,18 +6,18 @@
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| kode_jabatan | varchar(36) |  | false | [kepegawaian.pegawai](kepegawaian.pegawai.md) |  |  |
-| id | integer |  | false |  |  |  |
-| no | integer |  | false |  |  |  |
-| nama_jabatan | varchar(200) |  | true |  |  |  |
-| nama_jabatan_full | varchar(200) |  | true |  |  |  |
-| jenis_jabatan | smallint |  | true |  |  |  |
-| kelas | smallint |  | true |  |  |  |
-| pensiun | smallint |  | true |  |  |  |
-| kode_bkn | varchar(36) |  | true |  |  |  |
-| nama_jabatan_bkn | varchar(200) |  | true |  |  |  |
-| kategori_jabatan | varchar(100) |  | true |  |  |  |
-| bkn_id | varchar(36) |  | true |  |  |  |
+| id | integer | nextval('riwayat_kursus_id_seq'::regclass) | false |  |  |  |
+| pns_nip | varchar(20) |  | true |  |  |  |
+| tipe_kursus | varchar(10) |  | true |  |  |  |
+| jenis_kursus | varchar(30) |  | true |  |  |  |
+| nama_kursus | varchar(200) |  | true |  |  |  |
+| lama_kursus | double precision |  | true |  |  |  |
+| tanggal_kursus | date |  | true |  |  |  |
+| no_sertifikat | varchar(100) |  | true |  |  |  |
+| instansi | varchar(200) |  | true |  |  |  |
+| institusi_penyelenggara | varchar(200) |  | true |  |  |  |
+| siasn_id | varchar(36) |  | true |  |  |  |
+| pns_id | varchar(36) |  | true |  | [kepegawaian.pegawai](kepegawaian.pegawai.md) |  |
 | created_at | timestamp with time zone | now() | true |  |  |  |
 | updated_at | timestamp with time zone | now() | true |  |  |  |
 | deleted_at | timestamp with time zone |  | true |  |  |  |
@@ -26,34 +26,35 @@
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| ref_jabatan_pkey | PRIMARY KEY | PRIMARY KEY (kode_jabatan) |
+| fk_riwayat_kursus_pns_id | FOREIGN KEY | FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id) |
+| riwayat_kursus_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 
 ## Indexes
 
 | Name | Definition |
 | ---- | ---------- |
-| ref_jabatan_pkey | CREATE UNIQUE INDEX ref_jabatan_pkey ON kepegawaian.ref_jabatan USING btree (kode_jabatan) |
+| riwayat_kursus_pkey | CREATE UNIQUE INDEX riwayat_kursus_pkey ON kepegawaian.riwayat_kursus USING btree (id) |
 
 ## Relations
 
 ```mermaid
 erDiagram
 
-"kepegawaian.pegawai" }o--o| "kepegawaian.ref_jabatan" : "FOREIGN KEY (jabatan_id) REFERENCES ref_jabatan(kode_jabatan)"
+"kepegawaian.riwayat_kursus" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
 
-"kepegawaian.ref_jabatan" {
-  varchar_36_ kode_jabatan
+"kepegawaian.riwayat_kursus" {
   integer id
-  integer no
-  varchar_200_ nama_jabatan
-  varchar_200_ nama_jabatan_full
-  smallint jenis_jabatan
-  smallint kelas
-  smallint pensiun
-  varchar_36_ kode_bkn
-  varchar_200_ nama_jabatan_bkn
-  varchar_100_ kategori_jabatan
-  varchar_36_ bkn_id
+  varchar_20_ pns_nip
+  varchar_10_ tipe_kursus
+  varchar_30_ jenis_kursus
+  varchar_200_ nama_kursus
+  double_precision lama_kursus
+  date tanggal_kursus
+  varchar_100_ no_sertifikat
+  varchar_200_ instansi
+  varchar_200_ institusi_penyelenggara
+  varchar_36_ siasn_id
+  varchar_36_ pns_id FK
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at

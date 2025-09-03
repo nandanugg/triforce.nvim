@@ -1,4 +1,4 @@
-# kepegawaian.ref_jabatan
+# kepegawaian.riwayat_assesmen
 
 ## Description
 
@@ -6,18 +6,25 @@
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| kode_jabatan | varchar(36) |  | false | [kepegawaian.pegawai](kepegawaian.pegawai.md) |  |  |
-| id | integer |  | false |  |  |  |
-| no | integer |  | false |  |  |  |
-| nama_jabatan | varchar(200) |  | true |  |  |  |
-| nama_jabatan_full | varchar(200) |  | true |  |  |  |
-| jenis_jabatan | smallint |  | true |  |  |  |
-| kelas | smallint |  | true |  |  |  |
-| pensiun | smallint |  | true |  |  |  |
-| kode_bkn | varchar(36) |  | true |  |  |  |
-| nama_jabatan_bkn | varchar(200) |  | true |  |  |  |
-| kategori_jabatan | varchar(100) |  | true |  |  |  |
-| bkn_id | varchar(36) |  | true |  |  |  |
+| id | integer | nextval('riwayat_assesmen_id_seq'::regclass) | false |  |  |  |
+| pns_id | varchar(36) |  | true |  | [kepegawaian.pegawai](kepegawaian.pegawai.md) |  |
+| pns_nip | varchar(20) |  | true |  |  |  |
+| tahun | smallint |  | true |  |  |  |
+| file_upload | varchar(200) |  | true |  |  |  |
+| nilai | real |  | true |  |  |  |
+| nilai_kinerja | real |  | true |  |  |  |
+| tahun_penilaian_id | smallint |  | true |  |  |  |
+| tahun_penilaian_title | varchar(50) |  | true |  |  |  |
+| nama_lengkap | varchar(100) |  | true |  |  |  |
+| posisi_id | varchar(20) |  | true |  |  |  |
+| unit_org_id | varchar(36) |  | true |  | [kepegawaian.unit_kerja](kepegawaian.unit_kerja.md) |  |
+| nama_unor | varchar(200) |  | true |  |  |  |
+| saran_pengembangan | text |  | true |  |  |  |
+| file_upload_fb_potensi | varchar(200) |  | true |  |  |  |
+| file_upload_lengkap_pt | varchar(200) |  | true |  |  |  |
+| file_upload_fb_pt | varchar(200) |  | true |  |  |  |
+| file_upload_exists | smallint | 0 | true |  |  |  |
+| satker_id | varchar(36) |  | true |  |  |  |
 | created_at | timestamp with time zone | now() | true |  |  |  |
 | updated_at | timestamp with time zone | now() | true |  |  |  |
 | deleted_at | timestamp with time zone |  | true |  |  |  |
@@ -26,34 +33,44 @@
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| ref_jabatan_pkey | PRIMARY KEY | PRIMARY KEY (kode_jabatan) |
+| fk_riwayat_assesmen_pns_id | FOREIGN KEY | FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id) |
+| riwayat_assesmen_pkey | PRIMARY KEY | PRIMARY KEY (id) |
+| fk_riwayat_assesmen_unit_org | FOREIGN KEY | FOREIGN KEY (unit_org_id) REFERENCES unit_kerja(id) |
 
 ## Indexes
 
 | Name | Definition |
 | ---- | ---------- |
-| ref_jabatan_pkey | CREATE UNIQUE INDEX ref_jabatan_pkey ON kepegawaian.ref_jabatan USING btree (kode_jabatan) |
+| riwayat_assesmen_pkey | CREATE UNIQUE INDEX riwayat_assesmen_pkey ON kepegawaian.riwayat_assesmen USING btree (id) |
 
 ## Relations
 
 ```mermaid
 erDiagram
 
-"kepegawaian.pegawai" }o--o| "kepegawaian.ref_jabatan" : "FOREIGN KEY (jabatan_id) REFERENCES ref_jabatan(kode_jabatan)"
+"kepegawaian.riwayat_assesmen" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
+"kepegawaian.riwayat_assesmen" }o--o| "kepegawaian.unit_kerja" : "FOREIGN KEY (unit_org_id) REFERENCES unit_kerja(id)"
 
-"kepegawaian.ref_jabatan" {
-  varchar_36_ kode_jabatan
+"kepegawaian.riwayat_assesmen" {
   integer id
-  integer no
-  varchar_200_ nama_jabatan
-  varchar_200_ nama_jabatan_full
-  smallint jenis_jabatan
-  smallint kelas
-  smallint pensiun
-  varchar_36_ kode_bkn
-  varchar_200_ nama_jabatan_bkn
-  varchar_100_ kategori_jabatan
-  varchar_36_ bkn_id
+  varchar_36_ pns_id FK
+  varchar_20_ pns_nip
+  smallint tahun
+  varchar_200_ file_upload
+  real nilai
+  real nilai_kinerja
+  smallint tahun_penilaian_id
+  varchar_50_ tahun_penilaian_title
+  varchar_100_ nama_lengkap
+  varchar_20_ posisi_id
+  varchar_36_ unit_org_id FK
+  varchar_200_ nama_unor
+  text saran_pengembangan
+  varchar_200_ file_upload_fb_potensi
+  varchar_200_ file_upload_lengkap_pt
+  varchar_200_ file_upload_fb_pt
+  smallint file_upload_exists
+  varchar_36_ satker_id
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
@@ -155,6 +172,42 @@ erDiagram
   smallint status_pegawai_backup
   varchar_50_ masa_kerja
   varchar_50_ kartu_asn
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
+}
+"kepegawaian.unit_kerja" {
+  varchar_36_ id
+  integer no
+  varchar_36_ kode_internal
+  varchar_200_ nama_unor
+  varchar_36_ eselon_id
+  varchar_36_ cepat_kode
+  varchar_200_ nama_jabatan
+  varchar_200_ nama_pejabat
+  varchar_36_ diatasan_id FK
+  varchar_36_ instansi_id FK
+  varchar_36_ pemimpin_pns_id FK
+  varchar_36_ jenis_unor_id
+  varchar_36_ unor_induk
+  smallint jumlah_ideal_staff
+  integer order
+  smallint is_satker
+  varchar_36_ eselon_1
+  varchar_36_ eselon_2
+  varchar_36_ eselon_3
+  varchar_36_ eselon_4
+  date expired_date
+  varchar_200_ keterangan
+  varchar_200_ jenis_satker
+  varchar_200_ abbreviation
+  varchar_200_ unor_induk_penyetaraan
+  varchar_32_ jabatan_id
+  varchar_4_ waktu
+  varchar_100_ peraturan
+  varchar_50_ remark
+  boolean aktif
+  varchar_50_ eselon_nama
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at

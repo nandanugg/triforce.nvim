@@ -1,4 +1,4 @@
-# kepegawaian.ref_jabatan
+# kepegawaian.riwayat_pindah_unit_kerja
 
 ## Description
 
@@ -6,18 +6,22 @@
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| kode_jabatan | varchar(36) |  | false | [kepegawaian.pegawai](kepegawaian.pegawai.md) |  |  |
-| id | integer |  | false |  |  |  |
-| no | integer |  | false |  |  |  |
-| nama_jabatan | varchar(200) |  | true |  |  |  |
-| nama_jabatan_full | varchar(200) |  | true |  |  |  |
-| jenis_jabatan | smallint |  | true |  |  |  |
-| kelas | smallint |  | true |  |  |  |
-| pensiun | smallint |  | true |  |  |  |
-| kode_bkn | varchar(36) |  | true |  |  |  |
-| nama_jabatan_bkn | varchar(200) |  | true |  |  |  |
-| kategori_jabatan | varchar(100) |  | true |  |  |  |
-| bkn_id | varchar(36) |  | true |  |  |  |
+| id | bigint | nextval('riwayat_pindah_unit_kerja_id_seq'::regclass) | false |  |  |  |
+| pns_id | varchar(36) |  | true |  | [kepegawaian.pegawai](kepegawaian.pegawai.md) |  |
+| pns_nip | varchar(20) |  | true |  |  |  |
+| pns_nama | varchar(100) |  | true |  |  |  |
+| sk_nomor | varchar(100) |  | true |  |  |  |
+| asal_id | varchar(100) |  | true |  |  |  |
+| asal_nama | varchar(100) |  | true |  |  |  |
+| unor_id_baru | varchar(36) |  | true |  |  |  |
+| nama_unor_baru | varchar(200) |  | true |  |  |  |
+| instansi_id | varchar(36) |  | true |  |  |  |
+| nama_instansi | varchar(200) |  | true |  |  |  |
+| sk_tanggal | date |  | true |  |  |  |
+| satuan_kerja_id | varchar(36) |  | true |  |  |  |
+| nama_satuan_kerja | varchar(200) |  | true |  |  |  |
+| file_base64 | text |  | true |  |  |  |
+| keterangan_berkas | varchar(200) |  | true |  |  |  |
 | created_at | timestamp with time zone | now() | true |  |  |  |
 | updated_at | timestamp with time zone | now() | true |  |  |  |
 | deleted_at | timestamp with time zone |  | true |  |  |  |
@@ -26,34 +30,39 @@
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| ref_jabatan_pkey | PRIMARY KEY | PRIMARY KEY (kode_jabatan) |
+| fk_riwayat_pindah_unit_kerja_pns_id | FOREIGN KEY | FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id) |
+| riwayat_pindah_unit_kerja_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 
 ## Indexes
 
 | Name | Definition |
 | ---- | ---------- |
-| ref_jabatan_pkey | CREATE UNIQUE INDEX ref_jabatan_pkey ON kepegawaian.ref_jabatan USING btree (kode_jabatan) |
+| riwayat_pindah_unit_kerja_pkey | CREATE UNIQUE INDEX riwayat_pindah_unit_kerja_pkey ON kepegawaian.riwayat_pindah_unit_kerja USING btree (id) |
 
 ## Relations
 
 ```mermaid
 erDiagram
 
-"kepegawaian.pegawai" }o--o| "kepegawaian.ref_jabatan" : "FOREIGN KEY (jabatan_id) REFERENCES ref_jabatan(kode_jabatan)"
+"kepegawaian.riwayat_pindah_unit_kerja" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
 
-"kepegawaian.ref_jabatan" {
-  varchar_36_ kode_jabatan
-  integer id
-  integer no
-  varchar_200_ nama_jabatan
-  varchar_200_ nama_jabatan_full
-  smallint jenis_jabatan
-  smallint kelas
-  smallint pensiun
-  varchar_36_ kode_bkn
-  varchar_200_ nama_jabatan_bkn
-  varchar_100_ kategori_jabatan
-  varchar_36_ bkn_id
+"kepegawaian.riwayat_pindah_unit_kerja" {
+  bigint id
+  varchar_36_ pns_id FK
+  varchar_20_ pns_nip
+  varchar_100_ pns_nama
+  varchar_100_ sk_nomor
+  varchar_100_ asal_id
+  varchar_100_ asal_nama
+  varchar_36_ unor_id_baru
+  varchar_200_ nama_unor_baru
+  varchar_36_ instansi_id
+  varchar_200_ nama_instansi
+  date sk_tanggal
+  varchar_36_ satuan_kerja_id
+  varchar_200_ nama_satuan_kerja
+  text file_base64
+  varchar_200_ keterangan_berkas
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at

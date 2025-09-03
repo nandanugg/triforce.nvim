@@ -1,4 +1,4 @@
-# kepegawaian.ref_jabatan
+# kepegawaian.ref_lokasi
 
 ## Description
 
@@ -6,18 +6,14 @@
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| kode_jabatan | varchar(36) |  | false | [kepegawaian.pegawai](kepegawaian.pegawai.md) |  |  |
-| id | integer |  | false |  |  |  |
-| no | integer |  | false |  |  |  |
-| nama_jabatan | varchar(200) |  | true |  |  |  |
-| nama_jabatan_full | varchar(200) |  | true |  |  |  |
-| jenis_jabatan | smallint |  | true |  |  |  |
-| kelas | smallint |  | true |  |  |  |
-| pensiun | smallint |  | true |  |  |  |
-| kode_bkn | varchar(36) |  | true |  |  |  |
-| nama_jabatan_bkn | varchar(200) |  | true |  |  |  |
-| kategori_jabatan | varchar(100) |  | true |  |  |  |
-| bkn_id | varchar(36) |  | true |  |  |  |
+| id | varchar(36) |  | false | [kepegawaian.pegawai](kepegawaian.pegawai.md) |  |  |
+| kanreg_id | varchar(2) |  | true |  |  |  |
+| lokasi_id | varchar(36) |  | true |  |  |  |
+| nama | varchar(100) |  | true |  |  |  |
+| jenis | varchar(2) |  | true |  |  |  |
+| jenis_kabupaten | varchar(3) |  | true |  |  |  |
+| jenis_desa | varchar(1) |  | true |  |  |  |
+| ibukota | varchar(100) |  | true |  |  |  |
 | created_at | timestamp with time zone | now() | true |  |  |  |
 | updated_at | timestamp with time zone | now() | true |  |  |  |
 | deleted_at | timestamp with time zone |  | true |  |  |  |
@@ -26,34 +22,30 @@
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| ref_jabatan_pkey | PRIMARY KEY | PRIMARY KEY (kode_jabatan) |
+| ref_lokasi_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 
 ## Indexes
 
 | Name | Definition |
 | ---- | ---------- |
-| ref_jabatan_pkey | CREATE UNIQUE INDEX ref_jabatan_pkey ON kepegawaian.ref_jabatan USING btree (kode_jabatan) |
+| ref_lokasi_pkey | CREATE UNIQUE INDEX ref_lokasi_pkey ON kepegawaian.ref_lokasi USING btree (id) |
 
 ## Relations
 
 ```mermaid
 erDiagram
 
-"kepegawaian.pegawai" }o--o| "kepegawaian.ref_jabatan" : "FOREIGN KEY (jabatan_id) REFERENCES ref_jabatan(kode_jabatan)"
+"kepegawaian.pegawai" }o--o| "kepegawaian.ref_lokasi" : "FOREIGN KEY (lokasi_kerja_id) REFERENCES ref_lokasi(id)"
 
-"kepegawaian.ref_jabatan" {
-  varchar_36_ kode_jabatan
-  integer id
-  integer no
-  varchar_200_ nama_jabatan
-  varchar_200_ nama_jabatan_full
-  smallint jenis_jabatan
-  smallint kelas
-  smallint pensiun
-  varchar_36_ kode_bkn
-  varchar_200_ nama_jabatan_bkn
-  varchar_100_ kategori_jabatan
-  varchar_36_ bkn_id
+"kepegawaian.ref_lokasi" {
+  varchar_36_ id
+  varchar_2_ kanreg_id
+  varchar_36_ lokasi_id
+  varchar_100_ nama
+  varchar_2_ jenis
+  varchar_3_ jenis_kabupaten
+  varchar_1_ jenis_desa
+  varchar_100_ ibukota
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at

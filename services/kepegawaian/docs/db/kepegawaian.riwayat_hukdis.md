@@ -1,4 +1,4 @@
-# kepegawaian.ref_jabatan
+# kepegawaian.riwayat_hukdis
 
 ## Description
 
@@ -6,18 +6,26 @@
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| kode_jabatan | varchar(36) |  | false | [kepegawaian.pegawai](kepegawaian.pegawai.md) |  |  |
-| id | integer |  | false |  |  |  |
-| no | integer |  | false |  |  |  |
-| nama_jabatan | varchar(200) |  | true |  |  |  |
-| nama_jabatan_full | varchar(200) |  | true |  |  |  |
-| jenis_jabatan | smallint |  | true |  |  |  |
-| kelas | smallint |  | true |  |  |  |
-| pensiun | smallint |  | true |  |  |  |
-| kode_bkn | varchar(36) |  | true |  |  |  |
-| nama_jabatan_bkn | varchar(200) |  | true |  |  |  |
-| kategori_jabatan | varchar(100) |  | true |  |  |  |
-| bkn_id | varchar(36) |  | true |  |  |  |
+| id | bigint | nextval('riwayat_hukdis_id_seq'::regclass) | false |  |  |  |
+| pns_id | varchar(36) |  | true |  | [kepegawaian.pegawai](kepegawaian.pegawai.md) |  |
+| pns_nip | varchar(20) |  | true |  |  |  |
+| nama | varchar(200) |  | true |  |  |  |
+| golongan_id | smallint |  | true |  |  |  |
+| nama_golongan | varchar(20) |  | true |  |  |  |
+| jenis_hukuman_id | smallint |  | true |  | [kepegawaian.ref_jenis_hukuman](kepegawaian.ref_jenis_hukuman.md) |  |
+| nama_jenis_hukuman | varchar(100) |  | true |  |  |  |
+| sk_nomor | varchar(30) |  | true |  |  |  |
+| sk_tanggal | date |  | true |  |  |  |
+| tanggal_mulai_hukuman | date |  | true |  |  |  |
+| masa_tahun | smallint |  | true |  |  |  |
+| masa_bulan | smallint |  | true |  |  |  |
+| tanggal_akhir_hukuman | date |  | true |  |  |  |
+| no_pp | varchar(100) |  | true |  |  |  |
+| no_sk_pembatalan | varchar(100) |  | true |  |  |  |
+| tanggal_sk_pembatalan | date |  | true |  |  |  |
+| bkn_id | varchar(255) |  | true |  |  |  |
+| file_base64 | text |  | true |  |  |  |
+| keterangan_berkas | varchar(200) |  | true |  |  |  |
 | created_at | timestamp with time zone | now() | true |  |  |  |
 | updated_at | timestamp with time zone | now() | true |  |  |  |
 | deleted_at | timestamp with time zone |  | true |  |  |  |
@@ -26,34 +34,45 @@
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| ref_jabatan_pkey | PRIMARY KEY | PRIMARY KEY (kode_jabatan) |
+| fk_riwayat_hukdis_jenis_hukuman | FOREIGN KEY | FOREIGN KEY (jenis_hukuman_id) REFERENCES ref_jenis_hukuman(id) |
+| fk_riwayat_hukdis_pns_id | FOREIGN KEY | FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id) |
+| riwayat_hukdis_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 
 ## Indexes
 
 | Name | Definition |
 | ---- | ---------- |
-| ref_jabatan_pkey | CREATE UNIQUE INDEX ref_jabatan_pkey ON kepegawaian.ref_jabatan USING btree (kode_jabatan) |
+| riwayat_hukdis_pkey | CREATE UNIQUE INDEX riwayat_hukdis_pkey ON kepegawaian.riwayat_hukdis USING btree (id) |
 
 ## Relations
 
 ```mermaid
 erDiagram
 
-"kepegawaian.pegawai" }o--o| "kepegawaian.ref_jabatan" : "FOREIGN KEY (jabatan_id) REFERENCES ref_jabatan(kode_jabatan)"
+"kepegawaian.riwayat_hukdis" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
+"kepegawaian.riwayat_hukdis" }o--o| "kepegawaian.ref_jenis_hukuman" : "FOREIGN KEY (jenis_hukuman_id) REFERENCES ref_jenis_hukuman(id)"
 
-"kepegawaian.ref_jabatan" {
-  varchar_36_ kode_jabatan
-  integer id
-  integer no
-  varchar_200_ nama_jabatan
-  varchar_200_ nama_jabatan_full
-  smallint jenis_jabatan
-  smallint kelas
-  smallint pensiun
-  varchar_36_ kode_bkn
-  varchar_200_ nama_jabatan_bkn
-  varchar_100_ kategori_jabatan
-  varchar_36_ bkn_id
+"kepegawaian.riwayat_hukdis" {
+  bigint id
+  varchar_36_ pns_id FK
+  varchar_20_ pns_nip
+  varchar_200_ nama
+  smallint golongan_id
+  varchar_20_ nama_golongan
+  smallint jenis_hukuman_id FK
+  varchar_100_ nama_jenis_hukuman
+  varchar_30_ sk_nomor
+  date sk_tanggal
+  date tanggal_mulai_hukuman
+  smallint masa_tahun
+  smallint masa_bulan
+  date tanggal_akhir_hukuman
+  varchar_100_ no_pp
+  varchar_100_ no_sk_pembatalan
+  date tanggal_sk_pembatalan
+  varchar_255_ bkn_id
+  text file_base64
+  varchar_200_ keterangan_berkas
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
@@ -155,6 +174,16 @@ erDiagram
   smallint status_pegawai_backup
   varchar_50_ masa_kerja
   varchar_50_ kartu_asn
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
+}
+"kepegawaian.ref_jenis_hukuman" {
+  integer id
+  varchar_2_ dikbud_hr_id
+  varchar_100_ nama
+  varchar_1_ tingkat_hukuman
+  varchar_10_ nama_tingkat_hukuman
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at

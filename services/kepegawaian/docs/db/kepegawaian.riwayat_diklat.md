@@ -1,4 +1,4 @@
-# kepegawaian.ref_jabatan
+# kepegawaian.riwayat_diklat
 
 ## Description
 
@@ -6,18 +6,24 @@
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| kode_jabatan | varchar(36) |  | false | [kepegawaian.pegawai](kepegawaian.pegawai.md) |  |  |
-| id | integer |  | false |  |  |  |
-| no | integer |  | false |  |  |  |
-| nama_jabatan | varchar(200) |  | true |  |  |  |
-| nama_jabatan_full | varchar(200) |  | true |  |  |  |
-| jenis_jabatan | smallint |  | true |  |  |  |
-| kelas | smallint |  | true |  |  |  |
-| pensiun | smallint |  | true |  |  |  |
-| kode_bkn | varchar(36) |  | true |  |  |  |
-| nama_jabatan_bkn | varchar(200) |  | true |  |  |  |
-| kategori_jabatan | varchar(100) |  | true |  |  |  |
-| bkn_id | varchar(36) |  | true |  |  |  |
+| id | bigint | nextval('riwayat_diklat_id_seq'::regclass) | false |  |  |  |
+| jenis_diklat | varchar(200) |  | true |  |  |  |
+| jenis_diklat_id | smallint |  | true |  | [kepegawaian.ref_jenis_diklat](kepegawaian.ref_jenis_diklat.md) |  |
+| institusi_penyelenggara | varchar(200) |  | true |  |  |  |
+| no_sertifikat | varchar(100) |  | true |  |  |  |
+| tanggal_mulai | date |  | true |  |  |  |
+| tanggal_selesai | date |  | true |  |  |  |
+| tahun_diklat | smallint |  | true |  |  |  |
+| durasi_jam | smallint |  | true |  |  |  |
+| pns_orang_id | varchar(36) |  | true |  | [kepegawaian.pegawai](kepegawaian.pegawai.md) |  |
+| nip_baru | varchar(20) |  | true |  |  |  |
+| diklat_struktural_id | varchar(36) |  | true |  |  |  |
+| nama_diklat | varchar(200) |  | true |  |  |  |
+| file_base64 | text |  | true |  |  |  |
+| rumpun_diklat_nama | varchar(200) |  | true |  |  |  |
+| rumpun_diklat_id | varchar(36) |  | true |  |  |  |
+| sudah_kirim_siasn | varchar(10) | 'belum'::character varying | true |  |  |  |
+| siasn_id | varchar(36) |  | true |  |  |  |
 | created_at | timestamp with time zone | now() | true |  |  |  |
 | updated_at | timestamp with time zone | now() | true |  |  |  |
 | deleted_at | timestamp with time zone |  | true |  |  |  |
@@ -26,34 +32,53 @@
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| ref_jabatan_pkey | PRIMARY KEY | PRIMARY KEY (kode_jabatan) |
+| fk_riwayat_diklat_jenis | FOREIGN KEY | FOREIGN KEY (jenis_diklat_id) REFERENCES ref_jenis_diklat(id) |
+| fk_riwayat_diklat_pns_id | FOREIGN KEY | FOREIGN KEY (pns_orang_id) REFERENCES pegawai(pns_id) |
+| riwayat_diklat_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 
 ## Indexes
 
 | Name | Definition |
 | ---- | ---------- |
-| ref_jabatan_pkey | CREATE UNIQUE INDEX ref_jabatan_pkey ON kepegawaian.ref_jabatan USING btree (kode_jabatan) |
+| riwayat_diklat_pkey | CREATE UNIQUE INDEX riwayat_diklat_pkey ON kepegawaian.riwayat_diklat USING btree (id) |
 
 ## Relations
 
 ```mermaid
 erDiagram
 
-"kepegawaian.pegawai" }o--o| "kepegawaian.ref_jabatan" : "FOREIGN KEY (jabatan_id) REFERENCES ref_jabatan(kode_jabatan)"
+"kepegawaian.riwayat_diklat" }o--o| "kepegawaian.ref_jenis_diklat" : "FOREIGN KEY (jenis_diklat_id) REFERENCES ref_jenis_diklat(id)"
+"kepegawaian.riwayat_diklat" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_orang_id) REFERENCES pegawai(pns_id)"
 
-"kepegawaian.ref_jabatan" {
-  varchar_36_ kode_jabatan
+"kepegawaian.riwayat_diklat" {
+  bigint id
+  varchar_200_ jenis_diklat
+  smallint jenis_diklat_id FK
+  varchar_200_ institusi_penyelenggara
+  varchar_100_ no_sertifikat
+  date tanggal_mulai
+  date tanggal_selesai
+  smallint tahun_diklat
+  smallint durasi_jam
+  varchar_36_ pns_orang_id FK
+  varchar_20_ nip_baru
+  varchar_36_ diklat_struktural_id
+  varchar_200_ nama_diklat
+  text file_base64
+  varchar_200_ rumpun_diklat_nama
+  varchar_36_ rumpun_diklat_id
+  varchar_10_ sudah_kirim_siasn
+  varchar_36_ siasn_id
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
+}
+"kepegawaian.ref_jenis_diklat" {
   integer id
-  integer no
-  varchar_200_ nama_jabatan
-  varchar_200_ nama_jabatan_full
-  smallint jenis_jabatan
-  smallint kelas
-  smallint pensiun
-  varchar_36_ kode_bkn
-  varchar_200_ nama_jabatan_bkn
-  varchar_100_ kategori_jabatan
-  varchar_36_ bkn_id
+  smallint bkn_id
+  varchar_50_ jenis_diklat
+  varchar_2_ kode
+  smallint status
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at

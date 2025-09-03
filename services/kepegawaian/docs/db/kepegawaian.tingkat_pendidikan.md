@@ -1,4 +1,4 @@
-# kepegawaian.ref_jabatan
+# kepegawaian.tingkat_pendidikan
 
 ## Description
 
@@ -6,18 +6,12 @@
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| kode_jabatan | varchar(36) |  | false | [kepegawaian.pegawai](kepegawaian.pegawai.md) |  |  |
-| id | integer |  | false |  |  |  |
-| no | integer |  | false |  |  |  |
-| nama_jabatan | varchar(200) |  | true |  |  |  |
-| nama_jabatan_full | varchar(200) |  | true |  |  |  |
-| jenis_jabatan | smallint |  | true |  |  |  |
-| kelas | smallint |  | true |  |  |  |
-| pensiun | smallint |  | true |  |  |  |
-| kode_bkn | varchar(36) |  | true |  |  |  |
-| nama_jabatan_bkn | varchar(200) |  | true |  |  |  |
-| kategori_jabatan | varchar(100) |  | true |  |  |  |
-| bkn_id | varchar(36) |  | true |  |  |  |
+| id | integer |  | false | [kepegawaian.pegawai](kepegawaian.pegawai.md) [kepegawaian.pendidikan](kepegawaian.pendidikan.md) [kepegawaian.riwayat_pendidikan](kepegawaian.riwayat_pendidikan.md) |  |  |
+| golongan_id | integer |  | true |  |  |  |
+| nama | varchar(200) |  | true |  |  |  |
+| golongan_awal_id | integer |  | true |  |  |  |
+| abbreviation | varchar(200) |  | true |  |  |  |
+| tingkat | smallint |  | true |  |  |  |
 | created_at | timestamp with time zone | now() | true |  |  |  |
 | updated_at | timestamp with time zone | now() | true |  |  |  |
 | deleted_at | timestamp with time zone |  | true |  |  |  |
@@ -26,34 +20,30 @@
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| ref_jabatan_pkey | PRIMARY KEY | PRIMARY KEY (kode_jabatan) |
+| tingkat_pendidikan_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 
 ## Indexes
 
 | Name | Definition |
 | ---- | ---------- |
-| ref_jabatan_pkey | CREATE UNIQUE INDEX ref_jabatan_pkey ON kepegawaian.ref_jabatan USING btree (kode_jabatan) |
+| tingkat_pendidikan_pkey | CREATE UNIQUE INDEX tingkat_pendidikan_pkey ON kepegawaian.tingkat_pendidikan USING btree (id) |
 
 ## Relations
 
 ```mermaid
 erDiagram
 
-"kepegawaian.pegawai" }o--o| "kepegawaian.ref_jabatan" : "FOREIGN KEY (jabatan_id) REFERENCES ref_jabatan(kode_jabatan)"
+"kepegawaian.pegawai" }o--o| "kepegawaian.tingkat_pendidikan" : "FOREIGN KEY (tingkat_pendidikan_id) REFERENCES tingkat_pendidikan(id)"
+"kepegawaian.pendidikan" }o--o| "kepegawaian.tingkat_pendidikan" : "FOREIGN KEY (tingkat_pendidikan_id) REFERENCES tingkat_pendidikan(id)"
+"kepegawaian.riwayat_pendidikan" }o--o| "kepegawaian.tingkat_pendidikan" : "FOREIGN KEY (tingkat_pendidikan_id) REFERENCES tingkat_pendidikan(id)"
 
-"kepegawaian.ref_jabatan" {
-  varchar_36_ kode_jabatan
+"kepegawaian.tingkat_pendidikan" {
   integer id
-  integer no
-  varchar_200_ nama_jabatan
-  varchar_200_ nama_jabatan_full
-  smallint jenis_jabatan
-  smallint kelas
-  smallint pensiun
-  varchar_36_ kode_bkn
-  varchar_200_ nama_jabatan_bkn
-  varchar_100_ kategori_jabatan
-  varchar_36_ bkn_id
+  integer golongan_id
+  varchar_200_ nama
+  integer golongan_awal_id
+  varchar_200_ abbreviation
+  smallint tingkat
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
@@ -155,6 +145,38 @@ erDiagram
   smallint status_pegawai_backup
   varchar_50_ masa_kerja
   varchar_50_ kartu_asn
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
+}
+"kepegawaian.pendidikan" {
+  varchar_36_ id
+  smallint tingkat_pendidikan_id FK
+  varchar_200_ nama
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
+}
+"kepegawaian.riwayat_pendidikan" {
+  integer id
+  varchar_32_ pns_id_3
+  smallint tingkat_pendidikan_id FK
+  varchar_32_ pendidikan_id_3
+  date tanggal_lulus
+  varchar_100_ no_ijazah
+  varchar_200_ nama_sekolah
+  varchar_50_ gelar_depan
+  varchar_60_ gelar_belakang
+  varchar_1_ pendidikan_pertama
+  varchar_255_ negara_sekolah
+  varchar_4_ tahun_lulus
+  varchar_20_ nip
+  integer diakui_bkn
+  integer status_satker
+  integer status_biro
+  integer pendidikan_terakhir
+  varchar_36_ pns_id FK
+  varchar_36_ pendidikan_id FK
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
