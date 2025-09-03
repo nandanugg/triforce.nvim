@@ -47,7 +47,9 @@
 | [kepegawaian.unit_kerja](kepegawaian.unit_kerja.md) | 34 |  | BASE TABLE |
 | [kepegawaian.update_mandiri](kepegawaian.update_mandiri.md) | 15 |  | BASE TABLE |
 | [kepegawaian.riwayat_sertifikasi](kepegawaian.riwayat_sertifikasi.md) | 9 |  | BASE TABLE |
-| [kepegawaian.user](kepegawaian.user.md) | 5 |  | BASE TABLE |
+| [kepegawaian.user](kepegawaian.user.md) | 6 |  | BASE TABLE |
+| [kepegawaian.role](kepegawaian.role.md) | 5 |  | BASE TABLE |
+| [kepegawaian.user_role](kepegawaian.user_role.md) | 6 |  | BASE TABLE |
 
 ## Stored procedures and functions
 
@@ -108,6 +110,7 @@ erDiagram
 "kepegawaian.unit_kerja" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pemimpin_pns_id) REFERENCES pegawai(pns_id)"
 "kepegawaian.unit_kerja" }o--o| "kepegawaian.unit_kerja" : "FOREIGN KEY (diatasan_id) REFERENCES unit_kerja(id)"
 "kepegawaian.update_mandiri" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
+"kepegawaian.user_role" }o--|| "kepegawaian.role" : "FOREIGN KEY (role_id) REFERENCES role(id)"
 
 "kepegawaian.schema_migrations" {
   bigint version
@@ -865,6 +868,22 @@ erDiagram
   varchar_20_ nip
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
+}
+"kepegawaian.role" {
+  integer id
+  varchar_100_ nama
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
+}
+"kepegawaian.user_role" {
+  integer id
+  varchar_20_ nip
+  integer role_id FK
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
 }
 ```
 

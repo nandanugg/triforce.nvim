@@ -791,13 +791,33 @@ CREATE TABLE riwayat_sertifikasi (
 );
 
 CREATE TABLE "user" (
-  id UUID NOT NULL,
-  source varchar(10) NOT NULL,
+  id uuid not null,
+  source varchar(10) not null,
   nip varchar(20),
-  created_at timestamptz DEFAULT now(),
-  updated_at timestamptz DEFAULT now(),
+  created_at timestamptz default now(),
+  updated_at timestamptz default now(),
+  deleted_at timestamptz,
   PRIMARY KEY (id, source)
 );
+
+CREATE TABLE role (
+  id serial PRIMARY KEY,
+  nama varchar(100) not null,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now(),
+  deleted_at timestamptz
+);
+
+CREATE TABLE user_role (
+  id serial PRIMARY KEY,
+  nip varchar(20) not null,
+  role_id int4 not null REFERENCES role (id),
+  created_at timestamptz default now(),
+  updated_at timestamptz default now(),
+  deleted_at timestamptz
+);
+
+CREATE UNIQUE INDEX user_role_nip_role_id_unique_idx ON user_role(nip, role_id) WHERE deleted_at IS NULL;
 
 -- Foreign key constraints for the kepegawaian database
 

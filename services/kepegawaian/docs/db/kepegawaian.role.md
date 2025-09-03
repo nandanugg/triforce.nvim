@@ -1,4 +1,4 @@
-# kepegawaian.user
+# kepegawaian.role
 
 ## Description
 
@@ -6,9 +6,8 @@
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| id | uuid |  | false |  |  |  |
-| source | varchar(10) |  | false |  |  |  |
-| nip | varchar(20) |  | true |  |  |  |
+| id | integer | nextval('role_id_seq'::regclass) | false | [kepegawaian.user_role](kepegawaian.user_role.md) |  |  |
+| nama | varchar(100) |  | false |  |  |  |
 | created_at | timestamp with time zone | now() | true |  |  |  |
 | updated_at | timestamp with time zone | now() | true |  |  |  |
 | deleted_at | timestamp with time zone |  | true |  |  |  |
@@ -17,24 +16,32 @@
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| user_pkey | PRIMARY KEY | PRIMARY KEY (id, source) |
+| role_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 
 ## Indexes
 
 | Name | Definition |
 | ---- | ---------- |
-| user_pkey | CREATE UNIQUE INDEX user_pkey ON kepegawaian."user" USING btree (id, source) |
+| role_pkey | CREATE UNIQUE INDEX role_pkey ON kepegawaian.role USING btree (id) |
 
 ## Relations
 
 ```mermaid
 erDiagram
 
+"kepegawaian.user_role" }o--|| "kepegawaian.role" : "FOREIGN KEY (role_id) REFERENCES role(id)"
 
-"kepegawaian.user" {
-  uuid id
-  varchar_10_ source
+"kepegawaian.role" {
+  integer id
+  varchar_100_ nama
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
+}
+"kepegawaian.user_role" {
+  integer id
   varchar_20_ nip
+  integer role_id FK
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
