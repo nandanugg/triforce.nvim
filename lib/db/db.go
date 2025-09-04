@@ -13,8 +13,8 @@ import (
 
 func New(host string, port uint, user, password, dbname, schema string) (*sql.DB, error) {
 	connConfig, err := pgxpool.ParseConfig(fmt.Sprintf(
-		"host=%s port=%d user=%s password=%s dbname=%s search_path=%s",
-		host, port, user, password, dbname, schema,
+		"host=%s port=%d user=%s password=%s dbname=%s",
+		host, port, user, password, dbname,
 	))
 	if err != nil {
 		return nil, fmt.Errorf("parse config: %w", err)
