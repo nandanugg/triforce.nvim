@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"strings"
 
-	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db"
+	dbRepo "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
 )
 
 type repository struct {
 	db   *sql.DB
-	sqlc *db.Queries
+	sqlc *dbRepo.Queries
 }
 
 func newRepository(db *sql.DB) *repository {
@@ -162,6 +162,6 @@ func (r *repository) listAnak(ctx context.Context, userID int64) ([]keluarga, er
 	return result, nil
 }
 
-func (r *repository) GetAnakByEmployeeID(ctx context.Context, pnsID sql.NullString) ([]db.GetAnakByEmployeeIDRow, error) {
-	return r.sqlc.GetAnakByEmployeeID(ctx, pnsID)
+func (r *repository) GetAnakByEmployeeID(ctx context.Context, pnsID sql.NullString) ([]dbRepo.GetChildrenByEmployeeIDRow, error) {
+	return r.sqlc.GetChildrenByEmployeeID(ctx, pnsID)
 }
