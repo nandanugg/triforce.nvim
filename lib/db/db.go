@@ -6,17 +6,31 @@ import (
 	"fmt"
 	"time"
 
-	_ "github.com/jackc/pgx/v5/stdlib" // "pgx" sql driver
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5/stdlib" // "pgx" sql driver
 )
 
-func New(host, user, password, dbname, schema string) (*sql.DB, error) {
-	db, err := sql.Open("pgx", fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s search_path=%s",
-		host, user, password, dbname, schema,
+func New(host string, port uint, user, password, dbname, schema string) (*sql.DB, error) {
+	connConfig, err := pgxpool.ParseConfig(fmt.Sprintf(
+		"host=%s port=%d user=%s password=%s dbname=%s search_path=%s",
+		host, port, user, password, dbname, schema,
 	))
 	if err != nil {
-		return nil, fmt.Errorf("sql open: %w", err)
+		return nil, fmt.Errorf("parse config: %w", err)
 	}
+
+	connConfig.AfterConnect = func(ctx context.Context, conn *pgx.Conn) error {
+		_, errExec := conn.Exec(ctx, fmt.Sprintf("SET search_path TO %s", schema))
+		return errExec
+	}
+
+	pool, err := pgxpool.NewWithConfig(context.Background(), connConfig)
+	if err != nil {
+		return nil, fmt.Errorf("create pool: %w", err)
+	}
+
+	db := stdlib.OpenDBFromPool(pool)
 
 	timeout, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()

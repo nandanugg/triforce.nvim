@@ -18,6 +18,8 @@ require (
 	github.com/stretchr/testify v1.10.0
 )
 
+require github.com/rogpeppe/go-internal v1.13.1 // indirect
+
 require (
 	github.com/MicahParks/jwkset v0.8.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect

@@ -7,11 +7,11 @@ import (
 	"encoding/hex"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
@@ -20,6 +20,7 @@ import (
 var (
 	adminDB         *sql.DB
 	testDBHost      string
+	testDBPort      uint
 	testDBName      string
 	testDBSchema    string
 	testDBSuperuser string
@@ -28,14 +29,20 @@ var (
 
 func init() {
 	testDBHost = os.Getenv("NEXUS_TEST_DB_HOST")
+	port, err := strconv.ParseUint(os.Getenv("NEXUS_TEST_DB_PORT"), 10, 32)
+	if err != nil {
+		fmt.Println("Error parsing port: " + err.Error())
+		os.Exit(1)
+	}
+	testDBPort = uint(port)
 	testDBName = os.Getenv("NEXUS_TEST_DB_NAME")
 	testDBSchema = os.Getenv("NEXUS_TEST_DB_SCHEMA")
 	testDBSuperuser = os.Getenv("NEXUS_TEST_DB_SUPERUSER")
 	testDBPassword = os.Getenv("NEXUS_TEST_DB_PASSWORD")
 
-	var err error
 	adminDB, err = db.New(
 		testDBHost,
+		testDBPort,
 		testDBSuperuser,
 		testDBPassword,
 		testDBName,
@@ -85,16 +92,20 @@ func createTestDBAndRole(t *testing.T, user, password, dbname string) {
 	))
 	require.NoError(t, err)
 
-	t.Cleanup(func() {
-		_, err := adminDB.Exec("drop database " + dbname)
-		assert.NoError(t, err)
-		_, err = adminDB.Exec("drop role " + user)
-		assert.NoError(t, err)
-	})
+	// t.Cleanup(func() {
+	// 	_, err = adminDB.Exec("drop database " + dbname)
+	// 	assert.NoError(t, err)
+	// 	_, err = adminDB.Exec("reassign owned by " + user + " to postgres")
+	// 	assert.NoError(t, err)
+	// 	_, err = adminDB.Exec("drop owned by " + user)
+	// 	assert.NoError(t, err)
+	// 	_, err = adminDB.Exec("drop role " + user)
+	// 	assert.NoError(t, err)
+	// })
 }
 
 func prepareTestDB(t *testing.T, user, password, dbname, schema string) {
-	d, err := db.New(testDBHost, testDBSuperuser, testDBPassword, dbname, schema)
+	d, err := db.New(testDBHost, testDBPort, testDBSuperuser, testDBPassword, dbname, schema)
 	require.NoError(t, err)
 	defer d.Close()
 
@@ -103,7 +114,7 @@ func prepareTestDB(t *testing.T, user, password, dbname, schema string) {
 	_, err = d.Exec("update pg_language set lanpltrusted = true where lanname = 'c'")
 	require.NoError(t, err)
 
-	d2, err := db.New(testDBHost, user, password, dbname, schema)
+	d2, err := db.New(testDBHost, testDBPort, user, password, dbname, schema)
 	require.NoError(t, err)
 	defer d2.Close()
 
@@ -112,7 +123,7 @@ func prepareTestDB(t *testing.T, user, password, dbname, schema string) {
 }
 
 func applyMigrations(t *testing.T, user, password, dbname, schema string, migrationsFS embed.FS) *sql.DB {
-	db, err := db.New(testDBHost, user, password, dbname, schema)
+	db, err := db.New(testDBHost, testDBPort, user, password, dbname, schema)
 	require.NoError(t, err)
 	t.Cleanup(func() { db.Close() })
 

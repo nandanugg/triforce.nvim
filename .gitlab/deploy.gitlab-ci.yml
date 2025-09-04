@@ -1,4 +1,43 @@
-.placeholder:
+# Available variables
+# DEBUG               If set to "true", this variable will make all helm job to echo the helm command that will be
+#                     executed instead of executing the actual helm command it. Used for debugging the helm command.
+# DISABLE_ENV_SUFFIX  By default helm release name is <service-name>-<env>, `service-name` is from deployment.yml -> <cluster>.<service-name>.
+#                     If this variable is set to any value, generated name for helm releases will be without <env>
+# HELM_DISABLE_ATOMIC By default helm deployment will use `atomic` method, if the rollout is failing because of pod crash,
+#                     pod fail to pull docker image, or anything that prevent pod to rollout completely, the release will
+#                     be automatically rolled back, and the job will be failed. If this variable is set to any value, atomic will be disabled.
+#                     Sometimes atomic make it harder to find the problem why pod is crashing, you can use `kubectl get events` in deployment
+#                     namespace to see what is the recent event in that namespace, including pod issue crashing issue.
+# HELM_FORCE_UPGRADE  Uses the --force flag during helm upgrade operation, which tells helm to force resource updates through a replacement strategy.
+#                     This can be used to revert resources back to its original state as rendered by helm.
+# HELM_TIMEOUT_SECOND This is refering to helm --timeout flag, default is 5 minutes (300), if atomic is enabled and deployment
+#                     rollout take longer than 5 minutes the deployment will be treated as failure. To prevent that
+#                     you can prolong the timeout by setting this variable higher than 300. If atomic is disabled, this variable will be ignored
+# DIFF                If set to true it is used to get the configuration/manifest changes compared to previous deployed
+#                     release (helm upgrade still executed).
+# DIFF_ONLY           Same as `DIFF` but helm upgrade won't be executed.
+
+.default:
+  variables:
+    DEBUG: false
+    DIFF: false
+    DIFF_ONLY: false
+    DISABLE_ENV_SUFFIX: true
+
+staging-1:
   stage: deployment-staging
-  script:
-    - echo "This is a placeholder job for the deployment-staging stage."
+  extends:
+    - .default
+    - .rules-staging
+  needs:
+    - setup-job-deployment
+    - build-image
+  # when: manual
+  allow_failure: false
+  trigger:
+    strategy: depend
+    include:
+      - artifact: artifacts/deployment.staging-1.yml
+        job: setup-job-deployment
+  # variables:
+  #   DEBUG: true

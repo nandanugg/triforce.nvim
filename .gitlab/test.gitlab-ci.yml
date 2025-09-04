@@ -1,6 +1,7 @@
 test:
   extends:
     - .rules-merge-request
+  needs: []
   stage: test
   image: $CI_REGISTRY_DOCKER/golang:1.25.0-alpine3.22
   services:
@@ -22,6 +23,8 @@ test:
   variables:
     GOPATH: $CI_PROJECT_DIR/.go
     NEXUS_TEST_DB_HOST: postgres
+    NEXUS_TEST_DB_PORT: 5432
+    NEXUS_TEST_DB_SCHEMA: public
     NEXUS_TEST_DB_NAME: postgres
     NEXUS_TEST_DB_PASSWORD: postgres
     NEXUS_TEST_DB_SUPERUSER: postgres

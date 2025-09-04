@@ -1,0 +1,52 @@
+.common: &common
+  chartName: $CI_REGISTRY_CHARTS/k8s-service
+  chartVersion: 0.0.2
+  namespace: ministry-portal
+  imageRepo: $CI_REGISTRY_IMAGE
+  imageTag: $CI_COMMIT_SHORT_SHA
+
+.hpa_config: &hpa_config
+  hpa:
+    min: 1
+    max: 5
+    targetCPUPercent: 70
+    # targetMemPercent: 80
+
+staging-1:
+  kepegawaian-be:
+    <<: *common
+    # deploymentDelay: 1 minutes
+    values:
+      - .deployment/kepegawaian-be/staging-1/values.yaml
+      - .deployment/kepegawaian-be/staging-1/env.yaml
+    canary:
+      enabled: false
+      configurations:
+        - percent: 1
+          delay: 0 minutes
+          <<: *hpa_config
+        - percent: 2
+          delay: 2 minutes
+          <<: *hpa_config
+        - delay: 2 minutes
+          percent: 10
+          <<: *hpa_config
+
+  portal-be:
+    <<: *common
+    # deploymentDelay: 1 minutes
+    values:
+      - .deployment/portal-be/staging-1/values.yaml
+      - .deployment/portal-be/staging-1/env.yaml
+    canary:
+      enabled: false
+      configurations:
+        - percent: 1
+          delay: 0 minutes
+          <<: *hpa_config
+        - percent: 2
+          delay: 2 minutes
+          <<: *hpa_config
+        - delay: 2 minutes
+          percent: 10
+          <<: *hpa_config
