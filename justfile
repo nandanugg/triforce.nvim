@@ -34,13 +34,13 @@ db-create-schema-kepegawaian:
 
 db-migrate-up-kepegawaian:
 	migrate \
-	-path services/kepegawaian/dbmigrations \
+	-path services/kepegawaian/db/migrations \
 	-database "pgx://$NEXUS_KEPEGAWAIAN_DB_USER:$NEXUS_KEPEGAWAIAN_DB_PASSWORD@$NEXUS_KEPEGAWAIAN_DB_HOST:$NEXUS_KEPEGAWAIAN_DB_PORT/$NEXUS_KEPEGAWAIAN_DB_NAME?search_path=$NEXUS_KEPEGAWAIAN_DB_SCHEMA" \
 	up
 
 db-migrate-down-kepegawaian:
 	migrate \
-	-path services/kepegawaian/dbmigrations \
+	-path services/kepegawaian/db/migrations \
 	-database "pgx://$NEXUS_KEPEGAWAIAN_DB_USER:$NEXUS_KEPEGAWAIAN_DB_PASSWORD@$NEXUS_KEPEGAWAIAN_DB_HOST:$NEXUS_KEPEGAWAIAN_DB_PORT/$NEXUS_KEPEGAWAIAN_DB_NAME?search_path=$NEXUS_KEPEGAWAIAN_DB_SCHEMA" \
 	down
 
