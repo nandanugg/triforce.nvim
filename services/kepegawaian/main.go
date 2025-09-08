@@ -42,7 +42,7 @@ func main() {
 	keyfunc, err := api.NewAuthKeyfunc(c.Keycloak.Host, c.Keycloak.Realm, c.Keycloak.Audience)
 	exitIfError("Error initializing auth keyfunc.", err)
 
-	mwAuth := api.NewAuthMiddleware(keyfunc)
+	mwAuth := api.NewAuthMiddleware(config.Service, keyfunc)
 
 	asesmenninebox.RegisterRoutes(e, db, mwAuth)
 	datapribadi.RegisterRoutes(e, db, mwAuth)

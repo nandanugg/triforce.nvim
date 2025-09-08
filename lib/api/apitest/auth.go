@@ -3,7 +3,6 @@ package apitest
 import (
 	"crypto/rand"
 	"crypto/rsa"
-	"strconv"
 
 	"github.com/golang-jwt/jwt/v5"
 
@@ -26,24 +25,15 @@ func init() {
 	}
 }
 
-// GenerateAuthHeader generates HTTP Authorization header for use in tests.
-func GenerateAuthHeader(userID int64, role ...string) string {
-	h := strconv.FormatInt(userID, 10)
+func GenerateAuthHeader(service, nip string, role ...string) string {
+	claims := jwt.MapClaims{"nip": nip, "aud": "testing"}
 	if len(role) > 0 {
-		h += ":" + role[0]
+		claims["roles"] = map[string]string{
+			service: role[0],
+		}
 	}
-	return api.TempAuthSecret + h
+
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	tokenString, _ := token.SignedString(JwtPrivateKey)
+	return "Bearer " + tokenString
 }
-
-// func GenerateAuthHeader(service, nip string, role ...string) string {
-// 	claims := jwt.MapClaims{"nip": nip, "aud": "testing"}
-// 	if len(role) > 0 {
-// 		claims["roles"] = map[string]string{
-// 			service: role[0],
-// 		}
-// 	}
-
-// 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
-// 	tokenString, _ := token.SignedString(JwtPrivateKey)
-// 	return "Bearer " + tokenString
-// }

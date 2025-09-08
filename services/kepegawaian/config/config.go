@@ -6,6 +6,8 @@ import (
 	"github.com/caarlos0/env/v11"
 )
 
+const Service = "kepegawaian"
+
 type Config struct {
 	Server   Server   `envPrefix:"NEXUS_KEPEGAWAIAN_SERVER_"`
 	DB       Database `envPrefix:"NEXUS_KEPEGAWAIAN_DB_"`

@@ -206,8 +206,7 @@ func TestNewAuthMiddleware(t *testing.T) {
 				actualUser = CurrentUser(c)
 				return nil
 			}
-			// middleware := NewAuthMiddleware(tt.service, keyfunc)
-			middleware := NewAuthMiddleware(keyfunc)
+			middleware := NewAuthMiddleware(tt.service, keyfunc)
 			e.Add(http.MethodGet, "/", handler, middleware)
 			e.ServeHTTP(rec, req)
 

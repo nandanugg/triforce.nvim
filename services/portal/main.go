@@ -28,7 +28,7 @@ func main() {
 	keyfunc, err := api.NewAuthKeyfunc(c.Keycloak.Host, c.Keycloak.Realm, c.Keycloak.Audience)
 	exitIfError("Error initializing auth keyfunc.", err)
 
-	mwAuth := api.NewAuthMiddleware(keyfunc)
+	mwAuth := api.NewAuthMiddleware(config.Service, keyfunc)
 
 	client := api.NewHTTPClient()
 	privateKey, err := api.LoadRSAPrivateKey(c.Keycloak.PrivateKey)

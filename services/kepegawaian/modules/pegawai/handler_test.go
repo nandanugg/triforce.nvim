@@ -12,6 +12,7 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api/apitest"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db/dbtest"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/config"
 	dbmigrations "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/migrations"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/docs"
 )
@@ -50,7 +51,7 @@ func Test_handler_list(t *testing.T) {
 		{
 			name:             "ok: tanpa parameter apapun",
 			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(1, "admin")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1", "admin")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -106,7 +107,7 @@ func Test_handler_list(t *testing.T) {
 			name:             "ok: dengan parameter pagination",
 			dbData:           dbData,
 			requestQuery:     url.Values{"limit": []string{"1"}, "offset": []string{"1"}},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(1, "admin")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1", "admin")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -129,7 +130,7 @@ func Test_handler_list(t *testing.T) {
 			name:             "ok: filter cari nama",
 			dbData:           dbData,
 			requestQuery:     url.Values{"cari": []string{"41d"}},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(1, "admin")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1", "admin")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -152,7 +153,7 @@ func Test_handler_list(t *testing.T) {
 			name:             "ok: filter cari nip",
 			dbData:           dbData,
 			requestQuery:     url.Values{"cari": []string{"42c"}},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(1, "admin")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1", "admin")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -175,7 +176,7 @@ func Test_handler_list(t *testing.T) {
 			name:             "ok: filter cari jabatan",
 			dbData:           dbData,
 			requestQuery:     url.Values{"cari": []string{"43az"}},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(1, "admin")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1", "admin")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -198,7 +199,7 @@ func Test_handler_list(t *testing.T) {
 			name:             "ok: filter unit",
 			dbData:           dbData,
 			requestQuery:     url.Values{"unit_id": []string{"31"}},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(1, "admin")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1", "admin")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -232,7 +233,7 @@ func Test_handler_list(t *testing.T) {
 			name:             "ok: filter golongan",
 			dbData:           dbData,
 			requestQuery:     url.Values{"golongan_id": []string{"11"}},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(1, "admin")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1", "admin")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -266,7 +267,7 @@ func Test_handler_list(t *testing.T) {
 			name:             "ok: filter jabatan",
 			dbData:           dbData,
 			requestQuery:     url.Values{"jabatan_id": []string{"21"}},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(1, "admin")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1", "admin")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -300,7 +301,7 @@ func Test_handler_list(t *testing.T) {
 			name:             "ok: filter status",
 			dbData:           dbData,
 			requestQuery:     url.Values{"status": []string{"CPNS"}},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(1, "admin")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1", "admin")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -334,7 +335,7 @@ func Test_handler_list(t *testing.T) {
 			name:             "ok: tidak ada data ditemukan",
 			dbData:           dbData,
 			requestQuery:     url.Values{"cari": []string{"1"}},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(1, "admin")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1", "admin")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{"data": [], "meta": {"limit": 10, "offset": 0, "total": 0}}`,
 		},
@@ -342,14 +343,14 @@ func Test_handler_list(t *testing.T) {
 			name:             "error: parameter 'status' invalid",
 			dbData:           dbData,
 			requestQuery:     url.Values{"status": []string{"KONTRAK"}},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(1, "admin")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1", "admin")}},
 			wantResponseCode: http.StatusBadRequest,
 			wantResponseBody: `{"message": "parameter \"status\" harus salah satu dari \"PNS\", \"CPNS\""}`,
 		},
 		{
 			name:             "error: role user bukan admin",
 			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(1, "bukan_admin")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1", "bukan_admin")}},
 			wantResponseCode: http.StatusForbidden,
 			wantResponseBody: `{"message": "Forbidden"}`,
 		},
@@ -377,7 +378,7 @@ func Test_handler_list(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
-			RegisterRoutes(e, db, api.NewAuthMiddleware(apitest.Keyfunc))
+			RegisterRoutes(e, db, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -409,7 +410,7 @@ func Test_handler_listStatusPegawai(t *testing.T) {
 		{
 			name:             "ok",
 			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(41)}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "41")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -443,7 +444,7 @@ func Test_handler_listStatusPegawai(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
-			RegisterRoutes(e, db, api.NewAuthMiddleware(apitest.Keyfunc))
+			RegisterRoutes(e, db, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
