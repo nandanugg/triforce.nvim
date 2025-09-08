@@ -44,12 +44,6 @@ DROP TABLE riwayat_sertifikasi;
 
 DROP TABLE unit_kerja CASCADE;
 
-DROP TABLE user_role;
-
-DROP TABLE role;
-
-DROP TABLE "user";
-
 DROP TABLE pendidikan;
 
 DROP TABLE pegawai;

@@ -26,28 +26,94 @@ func TestNewAuthMiddleware(t *testing.T) {
 		Audience: "testing",
 	}
 
+	generateHeader := func(claims jwt.MapClaims) string {
+		token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+		tokenString, _ := token.SignedString(privateKey)
+		return "Bearer " + tokenString
+	}
+
 	tests := []struct {
 		name             string
+		service          string
 		requestHeader    http.Header
 		wantResponseCode int
 		wantResponseBody string
 		wantUser         *User
 	}{
 		{
-			name: "ok: valid auth header with string audience",
+			name: "ok: valid auth header with string audience without role",
 			requestHeader: http.Header{
-				"Authorization": []string{generateHeader(100, privateKey, "testing")},
+				"Authorization": []string{generateHeader(jwt.MapClaims{
+					"nip": "100",
+					"aud": "testing",
+				})},
 			},
 			wantResponseCode: http.StatusOK,
-			wantUser:         &User{ID: int64(100)},
+			wantUser:         &User{NIP: "100"},
 		},
 		{
-			name: "ok: valid auth header with list audience",
+			name:    "ok: valid auth header with string audience with service role",
+			service: "portal",
 			requestHeader: http.Header{
-				"Authorization": []string{generateHeader(100, privateKey, []string{"nexus", "testing"})},
+				"Authorization": []string{generateHeader(jwt.MapClaims{
+					"nip":   "100",
+					"aud":   "testing",
+					"roles": map[string]any{"portal": "admin"},
+				})},
 			},
 			wantResponseCode: http.StatusOK,
-			wantUser:         &User{ID: int64(100)},
+			wantUser:         &User{NIP: "100", Role: "admin"},
+		},
+		{
+			name:    "ok: valid auth header with string audience with other service role",
+			service: "kepegawaian",
+			requestHeader: http.Header{
+				"Authorization": []string{generateHeader(jwt.MapClaims{
+					"nip":   "100",
+					"aud":   "testing",
+					"roles": map[string]any{"portal": "admin"},
+				})},
+			},
+			wantResponseCode: http.StatusOK,
+			wantUser:         &User{NIP: "100"},
+		},
+		{
+			name:    "ok: valid auth header with string audience with role is array (unsupported)",
+			service: "portal",
+			requestHeader: http.Header{
+				"Authorization": []string{generateHeader(jwt.MapClaims{
+					"nip":   "100",
+					"aud":   "testing",
+					"roles": map[string]any{"portal": []string{"admin", "pegawai"}},
+				})},
+			},
+			wantResponseCode: http.StatusOK,
+			wantUser:         &User{NIP: "100"},
+		},
+		{
+			name: "ok: valid auth header with list audience with empty role",
+			requestHeader: http.Header{
+				"Authorization": []string{generateHeader(jwt.MapClaims{
+					"nip":   "100",
+					"aud":   []string{"nexus", "testing"},
+					"roles": map[string]any{},
+				})},
+			},
+			wantResponseCode: http.StatusOK,
+			wantUser:         &User{NIP: "100"},
+		},
+		{
+			name:    "ok: valid auth header with list audience with multiple service role",
+			service: "portal",
+			requestHeader: http.Header{
+				"Authorization": []string{generateHeader(jwt.MapClaims{
+					"nip":   "100",
+					"aud":   []string{"nexus", "testing"},
+					"roles": map[string]any{"kepegawaian": "admin", "portal": "pegawai"}},
+				)},
+			},
+			wantResponseCode: http.StatusOK,
+			wantUser:         &User{NIP: "100", Role: "pegawai"},
 		},
 		{
 			name:             "error: missing auth header",
@@ -63,13 +129,7 @@ func TestNewAuthMiddleware(t *testing.T) {
 		{
 			name: "error: expired auth token",
 			requestHeader: http.Header{
-				"Authorization": []string{func() string {
-					token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{
-						"exp": jwt.NewNumericDate(time.Now().Add(-1 * time.Minute)),
-					})
-					tokenString, _ := token.SignedString(privateKey)
-					return "Bearer " + tokenString
-				}()},
+				"Authorization": []string{generateHeader(jwt.MapClaims{"exp": jwt.NewNumericDate(time.Now().Add(-1 * time.Minute))})},
 			},
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{ "message": "token otentikasi sudah kedaluwarsa" }`,
@@ -78,7 +138,7 @@ func TestNewAuthMiddleware(t *testing.T) {
 			name: "error: tampered jwt payload",
 			requestHeader: http.Header{
 				"Authorization": []string{func() string {
-					header := generateHeader(100, privateKey, "testing")
+					header := generateHeader(jwt.MapClaims{"nip": "100", "aud": "testing"})
 					encodedClaims := strings.Split(header, ".")[1]
 					claims, _ := base64.RawStdEncoding.DecodeString(encodedClaims)
 					claims = bytes.ReplaceAll(claims, []byte("100"), []byte("200"))
@@ -90,9 +150,25 @@ func TestNewAuthMiddleware(t *testing.T) {
 			wantResponseBody: `{ "message": "signature token otentikasi tidak valid" }`,
 		},
 		{
+			name: "error: missing nip",
+			requestHeader: http.Header{
+				"Authorization": []string{generateHeader(jwt.MapClaims{"aud": "testing"})},
+			},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{ "message": "nip tidak valid" }`,
+		},
+		{
+			name: "error: audience is nil",
+			requestHeader: http.Header{
+				"Authorization": []string{generateHeader(jwt.MapClaims{"nip": "100", "aud": nil})},
+			},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{ "message": "audience tidak valid" }`,
+		},
+		{
 			name: "error: missing audience",
 			requestHeader: http.Header{
-				"Authorization": []string{generateHeader(100, privateKey, nil)},
+				"Authorization": []string{generateHeader(jwt.MapClaims{"nip": "100"})},
 			},
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{ "message": "audience tidak valid" }`,
@@ -100,7 +176,7 @@ func TestNewAuthMiddleware(t *testing.T) {
 		{
 			name: "error: different string audience",
 			requestHeader: http.Header{
-				"Authorization": []string{generateHeader(100, privateKey, "nexus")},
+				"Authorization": []string{generateHeader(jwt.MapClaims{"nip": "100", "aud": "nexus"})},
 			},
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{ "message": "audience tidak valid" }`,
@@ -108,7 +184,7 @@ func TestNewAuthMiddleware(t *testing.T) {
 		{
 			name: "error: audience not in the array list",
 			requestHeader: http.Header{
-				"Authorization": []string{generateHeader(100, privateKey, []string{"nexus", "portal"})},
+				"Authorization": []string{generateHeader(jwt.MapClaims{"nip": "100", "aud": []string{"nexus", "portal"}})},
 			},
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{ "message": "audience tidak valid" }`,
@@ -130,6 +206,7 @@ func TestNewAuthMiddleware(t *testing.T) {
 				actualUser = CurrentUser(c)
 				return nil
 			}
+			// middleware := NewAuthMiddleware(tt.service, keyfunc)
 			middleware := NewAuthMiddleware(keyfunc)
 			e.Add(http.MethodGet, "/", handler, middleware)
 			e.ServeHTTP(rec, req)
@@ -144,10 +221,4 @@ func TestNewAuthMiddleware(t *testing.T) {
 			assert.Equal(t, tt.wantUser, actualUser)
 		})
 	}
-}
-
-func generateHeader(userID int64, signingKey *rsa.PrivateKey, audience any) string {
-	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{"user_id": userID, "aud": audience})
-	tokenString, _ := token.SignedString(signingKey)
-	return "Bearer " + tokenString
 }

@@ -35,6 +35,8 @@ type Keycloak struct {
 	ClientSecret          string `env:"CLIENT_SECRET"`
 	RedirectURI           string `env:"REDIRECT_URI"`
 	PostLogoutRedirectURI string `env:"POST_LOGOUT_REDIRECT_URI"`
+	PrivateKey            string `env:"PRIVATE_KEY"`
+	KID                   string `env:"KID"`
 }
 
 func Load() (Config, error) {

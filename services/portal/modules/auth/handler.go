@@ -59,8 +59,12 @@ func (h *handler) exchangeToken(c echo.Context) error {
 		return err
 	}
 
-	token, err := h.svc.exchangeToken(req.Code)
+	token, err := h.svc.exchangeToken(c.Request().Context(), req.Code)
 	if err != nil {
+		if errors.Is(err, errUserNotFound) {
+			return echo.NewHTTPError(http.StatusUnprocessableEntity, "user tidak ditemukan")
+		}
+
 		var httpErr *httpStatusError
 		if errors.As(err, &httpErr) && httpErr.code < 500 {
 			return c.JSONBlob(httpErr.code, httpErr.message)
@@ -89,8 +93,12 @@ func (h *handler) refreshToken(c echo.Context) error {
 		return err
 	}
 
-	token, err := h.svc.refreshToken(req.RefreshToken)
+	token, err := h.svc.refreshToken(c.Request().Context(), req.RefreshToken)
 	if err != nil {
+		if errors.Is(err, errUserNotFound) {
+			return echo.NewHTTPError(http.StatusUnprocessableEntity, "user tidak ditemukan")
+		}
+
 		var httpErr *httpStatusError
 		if errors.As(err, &httpErr) && httpErr.code < 500 {
 			return c.JSONBlob(httpErr.code, httpErr.message)

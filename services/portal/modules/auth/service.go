@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"context"
+	"crypto/rsa"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -8,16 +10,27 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/config"
 )
 
 type service struct {
-	keycloak config.Keycloak
-	client   *http.Client
+	repo       *repository
+	keycloak   config.Keycloak
+	client     *http.Client
+	privateKey *rsa.PrivateKey
+	keyfunc    jwt.Keyfunc
 }
 
-func newService(keycloak config.Keycloak, client *http.Client) *service {
-	return &service{keycloak: keycloak, client: client}
+func newService(repo *repository, keycloak config.Keycloak, client *http.Client, privateKey *rsa.PrivateKey, keyfunc jwt.Keyfunc) *service {
+	return &service{
+		repo:       repo,
+		keycloak:   keycloak,
+		client:     client,
+		privateKey: privateKey,
+		keyfunc:    keyfunc,
+	}
 }
 
 func (s *service) generateAuthURL() (string, error) {
@@ -51,7 +64,7 @@ func (s *service) generateLogoutURL(idTokenHint string) (string, error) {
 	return logoutURL.String(), nil
 }
 
-func (s *service) exchangeToken(code string) (*token, error) {
+func (s *service) exchangeToken(ctx context.Context, code string) (*token, error) {
 	tokenURL := fmt.Sprintf("%s/realms/%s/protocol/openid-connect/token", s.keycloak.Host, s.keycloak.Realm)
 	data := url.Values{}
 	data.Set("grant_type", "authorization_code")
@@ -82,10 +95,14 @@ func (s *service) exchangeToken(code string) (*token, error) {
 		return nil, fmt.Errorf("json decode: %w", err)
 	}
 
+	if token.AccessToken, err = s.enrichTokenWithAdditionalUserData(ctx, token.AccessToken); err != nil {
+		return nil, fmt.Errorf("enrich token: %w", err)
+	}
+
 	return token, nil
 }
 
-func (s *service) refreshToken(refreshToken string) (*token, error) {
+func (s *service) refreshToken(ctx context.Context, refreshToken string) (*token, error) {
 	tokenURL := fmt.Sprintf("%s/realms/%s/protocol/openid-connect/token", s.keycloak.Host, s.keycloak.Realm)
 	data := url.Values{}
 	data.Set("grant_type", "refresh_token")
@@ -115,5 +132,53 @@ func (s *service) refreshToken(refreshToken string) (*token, error) {
 		return nil, fmt.Errorf("json decode: %w", err)
 	}
 
+	if token.AccessToken, err = s.enrichTokenWithAdditionalUserData(ctx, token.AccessToken); err != nil {
+		return nil, fmt.Errorf("enrich token: %w", err)
+	}
+
 	return token, nil
+}
+
+func (s *service) enrichTokenWithAdditionalUserData(ctx context.Context, accessToken string) (string, error) {
+	claims := jwt.MapClaims{}
+	if _, err := jwt.ParseWithClaims(accessToken, &claims, s.keyfunc); err != nil {
+		return "", fmt.Errorf("parse jwt: %w", err)
+	}
+
+	var user *user
+	if zimbraID, ok := claims["zimbra_id"].(string); ok {
+		if id, err := uuid.Parse(zimbraID); err == nil {
+			if user, err = s.repo.getUser(ctx, id, sourceZimbra); err != nil {
+				return "", fmt.Errorf("get user zimbra: %w", err)
+			}
+		}
+	}
+
+	// fallback using keycloak_id
+	if user == nil {
+		if keycloakID, err := claims.GetSubject(); err == nil {
+			if id, err := uuid.Parse(keycloakID); err == nil {
+				if user, err = s.repo.getUser(ctx, id, sourceKeycloak); err != nil {
+					return "", fmt.Errorf("get user keycloak: %w", err)
+				}
+			}
+		}
+	}
+
+	if user == nil {
+		return "", errUserNotFound
+	}
+
+	claims["nip"] = user.nip
+	if len(user.roles) > 0 {
+		claims["roles"] = user.roles
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	token.Header["kid"] = s.keycloak.KID
+
+	signed, err := token.SignedString(s.privateKey)
+	if err != nil {
+		return "", fmt.Errorf("sign token: %w", err)
+	}
+	return signed, nil
 }

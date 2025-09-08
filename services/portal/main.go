@@ -2,9 +2,7 @@ package main
 
 import (
 	"log/slog"
-	"net/http"
 	"os"
-	"time"
 
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
@@ -31,11 +29,14 @@ func main() {
 	exitIfError("Error initializing auth keyfunc.", err)
 
 	mwAuth := api.NewAuthMiddleware(keyfunc)
-	client := newHTTPClient()
 
+	client := api.NewHTTPClient()
+	privateKey, err := api.LoadRSAPrivateKey(c.Keycloak.PrivateKey)
+	exitIfError("Error loading rsa private key.", err)
+
+	auth.RegisterRoutes(e, db, c.Keycloak, client, privateKey, keyfunc.Keyfunc)
 	dokumenpendukung.RegisterRoutes(e, db, mwAuth)
 	pemberitahuan.RegisterRoutes(e, db, mwAuth)
-	auth.RegisterRoutes(e, c.Keycloak, client)
 
 	port := uint(c.Server.Port)
 	exitIfError("Error parsing server port.", err)
@@ -47,16 +48,5 @@ func exitIfError(msg string, err error) {
 	if err != nil {
 		slog.Error(msg, "error", err)
 		os.Exit(1)
-	}
-}
-
-func newHTTPClient() *http.Client {
-	t := http.DefaultTransport.(*http.Transport).Clone()
-	t.MaxIdleConns = 100
-	t.MaxIdleConnsPerHost = 100
-
-	return &http.Client{
-		Timeout:   10 * time.Second,
-		Transport: t,
 	}
 }

@@ -7,12 +7,15 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api/apitest"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db/dbtest"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/config"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/dbmigrations"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/docs"
 )
 
@@ -34,7 +37,7 @@ func Test_handler_login(t *testing.T) {
 			ClientID:    "my-portal",
 			RedirectURI: "https://local/callback",
 		}
-		RegisterRoutes(e, keycloak, nil)
+		RegisterRoutes(e, nil, keycloak, nil, nil, nil)
 		e.ServeHTTP(rec, req)
 
 		assert.Equal(t, 302, rec.Code)
@@ -84,7 +87,7 @@ func Test_handler_logout(t *testing.T) {
 				Realm:                 "nexus",
 				PostLogoutRedirectURI: "https://local/",
 			}
-			RegisterRoutes(e, keycloak, nil)
+			RegisterRoutes(e, nil, keycloak, nil, nil, nil)
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -102,8 +105,22 @@ func Test_handler_logout(t *testing.T) {
 func Test_handler_exchangeToken(t *testing.T) {
 	t.Parallel()
 
+	generateToken := func(claims jwt.MapClaims) string {
+		token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+		tokenString, _ := token.SignedString(apitest.JwtPrivateKey)
+		return tokenString
+	}
+
+	generateTokenWithKID := func(claims jwt.MapClaims) string {
+		token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+		token.Header["kid"] = "my-kid"
+		tokenString, _ := token.SignedString(apitest.JwtPrivateKey)
+		return tokenString
+	}
+
 	tests := []struct {
 		name             string
+		dbData           string
 		requestBody      string
 		keycloakRespCode int
 		keycloakRespBody []byte
@@ -111,7 +128,160 @@ func Test_handler_exchangeToken(t *testing.T) {
 		wantResponseBody string
 	}{
 		{
-			name:             "success exchange token",
+			name: "success exchange token user without roles using keycloak_id",
+			dbData: `
+				insert into "user" (id, source, nip) values
+					('00000000-0000-0000-0000-000000000001', 'keycloak', '1c');
+			`,
+			requestBody:      `{"code": "my-code"}`,
+			keycloakRespCode: 200,
+			keycloakRespBody: []byte(`{
+					"access_token": "` + generateToken(jwt.MapClaims{"sub": "00000000-0000-0000-0000-000000000001"}) + `",
+					"expires_in": 60,
+					"id_token": "bar",
+					"not-before-policy": 0,
+					"refresh_expires_in": 300,
+					"refresh_token": "baz",
+					"scope": "openid",
+					"session_state": "state",
+					"token_type": "Bearer"
+				}`),
+			wantResponseCode: 200,
+			wantResponseBody: `{
+				"data": {
+					"access_token": "` + generateTokenWithKID(jwt.MapClaims{"sub": "00000000-0000-0000-0000-000000000001", "nip": "1c"}) + `",
+					"expires_in": 60,
+					"id_token": "bar",
+					"refresh_token": "baz",
+					"refresh_expires_in": 300
+				}
+			}`,
+		},
+		{
+			name: "success exchange token user without deleted roles using zimbra_id as priority",
+			dbData: `
+				insert into "user" (id, source, nip) values
+					('00000000-0000-0000-0000-000000000001', 'keycloak', '1c'),
+					('00000000-0000-0000-0000-000000000002', 'zimbra', '1b');
+				insert into role (id, service, nama, deleted_at) values
+					(1, 'portal', 'admin', '2000-01-01'),
+					(2, 'portal', 'admin', null);
+				insert into user_role (nip, role_id, deleted_at) values
+					('1c', 2, null),
+					('1b', 1, null),
+					('1b', 2, '2000-01-01');
+			`,
+			requestBody:      `{"code": "my-code"}`,
+			keycloakRespCode: 200,
+			keycloakRespBody: []byte(`{
+					"access_token": "` + generateToken(jwt.MapClaims{"sub": "00000000-0000-0000-0000-000000000001", "zimbra_id": "00000000-0000-0000-0000-000000000002"}) + `",
+					"expires_in": 60,
+					"id_token": "bar",
+					"not-before-policy": 0,
+					"refresh_expires_in": 300,
+					"refresh_token": "baz",
+					"scope": "openid",
+					"session_state": "state",
+					"token_type": "Bearer"
+				}`),
+			wantResponseCode: 200,
+			wantResponseBody: `{
+				"data": {
+					"access_token": "` + generateTokenWithKID(jwt.MapClaims{"sub": "00000000-0000-0000-0000-000000000001", "zimbra_id": "00000000-0000-0000-0000-000000000002", "nip": "1b"}) + `",
+					"expires_in": 60,
+					"id_token": "bar",
+					"refresh_token": "baz",
+					"refresh_expires_in": 300
+				}
+			}`,
+		},
+		{
+			name: "success exchange token user with multiple roles order by updated_at fallback using keycloak_id when user zimbra is not found",
+			dbData: `
+				insert into "user" (id, source, nip) values
+					('00000000-0000-0000-0000-000000000001', 'keycloak', '1c');
+				insert into role (id, service, nama) values
+					(1, 'portal', 'admin'),
+					(2, 'portal', 'pegawai'),
+					(3, 'kepegawaian', 'admin'),
+					(4, 'kepegawaian', 'pegawai'),
+					(5, 'kepegawaian', 'guest');
+				insert into user_role (nip, role_id, updated_at, deleted_at) values
+					('1c', 1, '2000-01-02', null),
+					('1c', 2, '2000-01-01', null),
+					('1c', 3, '2000-01-01', null),
+					('1c', 4, '2000-01-02', null),
+					('1c', 5, '2000-01-03', '2000-01-03');
+			`,
+			requestBody:      `{"code": "my-code"}`,
+			keycloakRespCode: 200,
+			keycloakRespBody: []byte(`{
+					"access_token": "` + generateToken(jwt.MapClaims{"sub": "00000000-0000-0000-0000-000000000001", "zimbra_id": "00000000-0000-0000-0000-000000000002"}) + `",
+					"expires_in": 60,
+					"id_token": "bar",
+					"not-before-policy": 0,
+					"refresh_expires_in": 300,
+					"refresh_token": "baz",
+					"scope": "openid",
+					"session_state": "state",
+					"token_type": "Bearer"
+				}`),
+			wantResponseCode: 200,
+			wantResponseBody: `{
+				"data": {
+					"access_token": "` + generateTokenWithKID(jwt.MapClaims{"sub": "00000000-0000-0000-0000-000000000001", "zimbra_id": "00000000-0000-0000-0000-000000000002", "nip": "1c", "roles": map[string]string{"portal": "admin", "kepegawaian": "pegawai"}}) + `",
+					"expires_in": 60,
+					"id_token": "bar",
+					"refresh_token": "baz",
+					"refresh_expires_in": 300
+				}
+			}`,
+		},
+		{
+			name: "error exchange token, user keycloak or zimbra not found",
+			dbData: `
+				insert into "user" (id, source, nip, deleted_at) values
+					('00000000-0000-0000-0000-000000000001', 'keycloak', '1a', '2000-02-02'),
+					('00000000-0000-0000-0000-000000000002', 'zimbra', '1b', '2000-01-01'),
+					('00000000-0000-0000-0000-000000000002', 'keycloak', '1a', null),
+					('00000000-0000-0000-0000-000000000001', 'zimbra', '1b', null);
+			`,
+			requestBody:      `{"code": "my-code"}`,
+			keycloakRespCode: 200,
+			keycloakRespBody: []byte(`{
+					"access_token": "` + generateToken(jwt.MapClaims{"sub": "00000000-0000-0000-0000-000000000001", "zimbra_id": "00000000-0000-0000-0000-000000000002"}) + `",
+					"expires_in": 60,
+					"id_token": "bar",
+					"not-before-policy": 0,
+					"refresh_expires_in": 300,
+					"refresh_token": "baz",
+					"scope": "openid",
+					"session_state": "state",
+					"token_type": "Bearer"
+				}`),
+			wantResponseCode: 422,
+			wantResponseBody: `{"message": "user tidak ditemukan"}`,
+		},
+		{
+			name:             "error exchange token, user keycloak or zimbra is not uuid",
+			requestBody:      `{"code": "my-code"}`,
+			keycloakRespCode: 200,
+			keycloakRespBody: []byte(`{
+					"access_token": "` + generateToken(jwt.MapClaims{"sub": "1", "zimbra_id": "2"}) + `",
+					"expires_in": 60,
+					"id_token": "bar",
+					"not-before-policy": 0,
+					"refresh_expires_in": 300,
+					"refresh_token": "baz",
+					"scope": "openid",
+					"session_state": "state",
+					"token_type": "Bearer"
+				}`),
+			wantResponseCode: 422,
+			wantResponseBody: `{"message": "user tidak ditemukan"}`,
+		},
+		{
+			name:             "error exchange token, invalid access_token from keycloak",
 			requestBody:      `{"code": "my-code"}`,
 			keycloakRespCode: 200,
 			keycloakRespBody: []byte(`{
@@ -125,16 +295,8 @@ func Test_handler_exchangeToken(t *testing.T) {
 					"session_state": "state",
 					"token_type": "Bearer"
 				}`),
-			wantResponseCode: 200,
-			wantResponseBody: `{
-				"data": {
-					"access_token": "foo",
-					"expires_in": 60,
-					"id_token": "bar",
-					"refresh_token": "baz",
-					"refresh_expires_in": 300
-				}
-			}`,
+			wantResponseCode: 500,
+			wantResponseBody: `{"message": "Internal Server Error"}`,
 		},
 		{
 			name:             "error exchange token, keycloak return status 4xx",
@@ -207,14 +369,19 @@ func Test_handler_exchangeToken(t *testing.T) {
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
 
+			db := dbtest.New(t, dbmigrations.FS)
+			_, err = db.Exec(tt.dbData)
+			require.NoError(t, err)
+
 			keycloak := config.Keycloak{
 				Host:         keycloakHost,
 				Realm:        "nexus",
 				RedirectURI:  "https://local/callback",
 				ClientID:     "my-portal",
 				ClientSecret: "my-secret",
+				KID:          "my-kid",
 			}
-			RegisterRoutes(e, keycloak, &http.Client{})
+			RegisterRoutes(e, db, keycloak, &http.Client{}, apitest.JwtPrivateKey, apitest.Keyfunc.Keyfunc)
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -227,8 +394,22 @@ func Test_handler_exchangeToken(t *testing.T) {
 func Test_handler_refreshToken(t *testing.T) {
 	t.Parallel()
 
+	generateToken := func(claims jwt.MapClaims) string {
+		token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+		tokenString, _ := token.SignedString(apitest.JwtPrivateKey)
+		return tokenString
+	}
+
+	generateTokenWithKID := func(claims jwt.MapClaims) string {
+		token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+		token.Header["kid"] = "my-kid"
+		tokenString, _ := token.SignedString(apitest.JwtPrivateKey)
+		return tokenString
+	}
+
 	tests := []struct {
 		name             string
+		dbData           string
 		requestBody      string
 		keycloakRespCode int
 		keycloakRespBody []byte
@@ -236,7 +417,160 @@ func Test_handler_refreshToken(t *testing.T) {
 		wantResponseBody string
 	}{
 		{
-			name:             "success refresh token",
+			name: "success refresh token user without roles using keycloak_id",
+			dbData: `
+				insert into "user" (id, source, nip) values
+					('00000000-0000-0000-0000-000000000001', 'keycloak', '1c');
+			`,
+			requestBody:      `{"refresh_token": "my-code"}`,
+			keycloakRespCode: 200,
+			keycloakRespBody: []byte(`{
+					"access_token": "` + generateToken(jwt.MapClaims{"sub": "00000000-0000-0000-0000-000000000001"}) + `",
+					"expires_in": 60,
+					"id_token": "bar",
+					"not-before-policy": 0,
+					"refresh_expires_in": 300,
+					"refresh_token": "baz",
+					"scope": "openid",
+					"session_state": "state",
+					"token_type": "Bearer"
+				}`),
+			wantResponseCode: 200,
+			wantResponseBody: `{
+				"data": {
+					"access_token": "` + generateTokenWithKID(jwt.MapClaims{"sub": "00000000-0000-0000-0000-000000000001", "nip": "1c"}) + `",
+					"expires_in": 60,
+					"id_token": "bar",
+					"refresh_token": "baz",
+					"refresh_expires_in": 300
+				}
+			}`,
+		},
+		{
+			name: "success refresh token user without deleted roles using zimbra_id as priority",
+			dbData: `
+				insert into "user" (id, source, nip) values
+					('00000000-0000-0000-0000-000000000001', 'keycloak', '1c'),
+					('00000000-0000-0000-0000-000000000002', 'zimbra', '1b');
+				insert into role (id, service, nama, deleted_at) values
+					(1, 'portal', 'admin', '2000-01-01'),
+					(2, 'portal', 'admin', null);
+				insert into user_role (nip, role_id, deleted_at) values
+					('1c', 2, null),
+					('1b', 1, null),
+					('1b', 2, '2000-01-01');
+			`,
+			requestBody:      `{"refresh_token": "my-code"}`,
+			keycloakRespCode: 200,
+			keycloakRespBody: []byte(`{
+					"access_token": "` + generateToken(jwt.MapClaims{"sub": "00000000-0000-0000-0000-000000000001", "zimbra_id": "00000000-0000-0000-0000-000000000002"}) + `",
+					"expires_in": 60,
+					"id_token": "bar",
+					"not-before-policy": 0,
+					"refresh_expires_in": 300,
+					"refresh_token": "baz",
+					"scope": "openid",
+					"session_state": "state",
+					"token_type": "Bearer"
+				}`),
+			wantResponseCode: 200,
+			wantResponseBody: `{
+				"data": {
+					"access_token": "` + generateTokenWithKID(jwt.MapClaims{"sub": "00000000-0000-0000-0000-000000000001", "zimbra_id": "00000000-0000-0000-0000-000000000002", "nip": "1b"}) + `",
+					"expires_in": 60,
+					"id_token": "bar",
+					"refresh_token": "baz",
+					"refresh_expires_in": 300
+				}
+			}`,
+		},
+		{
+			name: "success refresh token user with multiple roles order by updated_at fallback using keycloak_id when user zimbra is not found",
+			dbData: `
+				insert into "user" (id, source, nip) values
+					('00000000-0000-0000-0000-000000000001', 'keycloak', '1c');
+				insert into role (id, service, nama) values
+					(1, 'portal', 'admin'),
+					(2, 'portal', 'pegawai'),
+					(3, 'kepegawaian', 'admin'),
+					(4, 'kepegawaian', 'pegawai'),
+					(5, 'kepegawaian', 'guest');
+				insert into user_role (nip, role_id, updated_at, deleted_at) values
+					('1c', 1, '2000-01-02', null),
+					('1c', 2, '2000-01-01', null),
+					('1c', 3, '2000-01-01', null),
+					('1c', 4, '2000-01-02', null),
+					('1c', 5, '2000-01-03', '2000-01-03');
+			`,
+			requestBody:      `{"refresh_token": "my-code"}`,
+			keycloakRespCode: 200,
+			keycloakRespBody: []byte(`{
+					"access_token": "` + generateToken(jwt.MapClaims{"sub": "00000000-0000-0000-0000-000000000001", "zimbra_id": "00000000-0000-0000-0000-000000000002"}) + `",
+					"expires_in": 60,
+					"id_token": "bar",
+					"not-before-policy": 0,
+					"refresh_expires_in": 300,
+					"refresh_token": "baz",
+					"scope": "openid",
+					"session_state": "state",
+					"token_type": "Bearer"
+				}`),
+			wantResponseCode: 200,
+			wantResponseBody: `{
+				"data": {
+					"access_token": "` + generateTokenWithKID(jwt.MapClaims{"sub": "00000000-0000-0000-0000-000000000001", "zimbra_id": "00000000-0000-0000-0000-000000000002", "nip": "1c", "roles": map[string]string{"portal": "admin", "kepegawaian": "pegawai"}}) + `",
+					"expires_in": 60,
+					"id_token": "bar",
+					"refresh_token": "baz",
+					"refresh_expires_in": 300
+				}
+			}`,
+		},
+		{
+			name: "error refresh token, user keycloak or zimbra not found",
+			dbData: `
+				insert into "user" (id, source, nip, deleted_at) values
+					('00000000-0000-0000-0000-000000000001', 'keycloak', '1a', '2000-02-02'),
+					('00000000-0000-0000-0000-000000000002', 'zimbra', '1b', '2000-01-01'),
+					('00000000-0000-0000-0000-000000000002', 'keycloak', '1a', null),
+					('00000000-0000-0000-0000-000000000001', 'zimbra', '1b', null);
+			`,
+			requestBody:      `{"refresh_token": "my-code"}`,
+			keycloakRespCode: 200,
+			keycloakRespBody: []byte(`{
+					"access_token": "` + generateToken(jwt.MapClaims{"sub": "00000000-0000-0000-0000-000000000001", "zimbra_id": "00000000-0000-0000-0000-000000000002"}) + `",
+					"expires_in": 60,
+					"id_token": "bar",
+					"not-before-policy": 0,
+					"refresh_expires_in": 300,
+					"refresh_token": "baz",
+					"scope": "openid",
+					"session_state": "state",
+					"token_type": "Bearer"
+				}`),
+			wantResponseCode: 422,
+			wantResponseBody: `{"message": "user tidak ditemukan"}`,
+		},
+		{
+			name:             "error refresh token, user keycloak or zimbra is not uuid",
+			requestBody:      `{"refresh_token": "my-code"}`,
+			keycloakRespCode: 200,
+			keycloakRespBody: []byte(`{
+					"access_token": "` + generateToken(jwt.MapClaims{"sub": "1", "zimbra_id": "2"}) + `",
+					"expires_in": 60,
+					"id_token": "bar",
+					"not-before-policy": 0,
+					"refresh_expires_in": 300,
+					"refresh_token": "baz",
+					"scope": "openid",
+					"session_state": "state",
+					"token_type": "Bearer"
+				}`),
+			wantResponseCode: 422,
+			wantResponseBody: `{"message": "user tidak ditemukan"}`,
+		},
+		{
+			name:             "error refresh token, invalid access_token from keycloak",
 			requestBody:      `{"refresh_token": "my-code"}`,
 			keycloakRespCode: 200,
 			keycloakRespBody: []byte(`{
@@ -250,16 +584,8 @@ func Test_handler_refreshToken(t *testing.T) {
 					"session_state": "state",
 					"token_type": "Bearer"
 				}`),
-			wantResponseCode: 200,
-			wantResponseBody: `{
-				"data": {
-					"access_token": "foo",
-					"expires_in": 60,
-					"id_token": "bar",
-					"refresh_token": "baz",
-					"refresh_expires_in": 300
-				}
-			}`,
+			wantResponseCode: 500,
+			wantResponseBody: `{"message": "Internal Server Error"}`,
 		},
 		{
 			name:             "error refresh token, keycloak return status 4xx",
@@ -331,13 +657,18 @@ func Test_handler_refreshToken(t *testing.T) {
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
 
+			db := dbtest.New(t, dbmigrations.FS)
+			_, err = db.Exec(tt.dbData)
+			require.NoError(t, err)
+
 			keycloak := config.Keycloak{
 				Host:         keycloakHost,
 				Realm:        "nexus",
 				ClientID:     "my-portal",
 				ClientSecret: "my-secret",
+				KID:          "my-kid",
 			}
-			RegisterRoutes(e, keycloak, &http.Client{})
+			RegisterRoutes(e, db, keycloak, &http.Client{}, apitest.JwtPrivateKey, apitest.Keyfunc.Keyfunc)
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)

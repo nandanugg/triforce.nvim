@@ -9,7 +9,7 @@
 | id | bigint | nextval('dokumen_pendukung_id_seq'::regclass) | false |  |  |  |
 | nama_tombol | text |  | false |  |  |  |
 | nama_halaman | text |  | false |  |  |  |
-| dokumen | bytea |  | true |  |  |  |
+| file | bytea |  | true |  |  |  |
 | updated_by | text |  | true |  |  |  |
 | updated_at | date |  | true |  |  |  |
 
@@ -35,7 +35,7 @@ erDiagram
   bigint id
   text nama_tombol
   text nama_halaman
-  bytea dokumen
+  bytea file
   text updated_by
   date updated_at
 }

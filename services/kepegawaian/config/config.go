@@ -15,8 +15,7 @@ type Config struct {
 }
 
 type Server struct {
-	Port          uint   `env:"PORT"`
-	AuthPublicKey string `env:"AUTH_PUBLIC_KEY"`
+	Port uint `env:"PORT"`
 }
 
 type Database struct {

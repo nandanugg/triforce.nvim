@@ -1,4 +1,4 @@
-# kepegawaian.user
+# portal.user
 
 ## Description
 
@@ -8,7 +8,7 @@
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
 | id | uuid |  | false |  |  |  |
 | source | varchar(10) |  | false |  |  |  |
-| nip | varchar(20) |  | true |  |  |  |
+| nip | varchar(20) |  | false |  |  |  |
 | created_at | timestamp with time zone | now() | true |  |  |  |
 | updated_at | timestamp with time zone | now() | true |  |  |  |
 | deleted_at | timestamp with time zone |  | true |  |  |  |
@@ -23,7 +23,7 @@
 
 | Name | Definition |
 | ---- | ---------- |
-| user_pkey | CREATE UNIQUE INDEX user_pkey ON kepegawaian."user" USING btree (id, source) |
+| user_pkey | CREATE UNIQUE INDEX user_pkey ON portal."user" USING btree (id, source) |
 
 ## Relations
 
@@ -31,7 +31,7 @@
 erDiagram
 
 
-"kepegawaian.user" {
+"portal.user" {
   uuid id
   varchar_10_ source
   varchar_20_ nip

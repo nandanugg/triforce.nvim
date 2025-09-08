@@ -1,6 +1,9 @@
 package auth
 
-import "fmt"
+const (
+	sourceZimbra   = "zimbra"
+	sourceKeycloak = "keycloak"
+)
 
 type token struct {
 	AccessToken      string `json:"access_token"`
@@ -10,11 +13,7 @@ type token struct {
 	IDToken          string `json:"id_token"`
 }
 
-type httpStatusError struct {
-	code    int
-	message []byte
-}
-
-func (e *httpStatusError) Error() string {
-	return fmt.Sprintf("status=%d: %s", e.code, e.message)
+type user struct {
+	nip   string
+	roles map[string]string
 }

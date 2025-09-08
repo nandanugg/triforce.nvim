@@ -1,4 +1,4 @@
-# kepegawaian.user_role
+# portal.role
 
 ## Description
 
@@ -6,9 +6,9 @@
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| id | integer | nextval('user_role_id_seq'::regclass) | false |  |  |  |
-| nip | varchar(20) |  | false |  |  |  |
-| role_id | integer |  | false |  | [kepegawaian.role](kepegawaian.role.md) |  |
+| id | integer | nextval('role_id_seq'::regclass) | false | [portal.user_role](portal.user_role.md) |  |  |
+| service | varchar(50) |  | false |  |  |  |
+| nama | varchar(100) |  | false |  |  |  |
 | created_at | timestamp with time zone | now() | true |  |  |  |
 | updated_at | timestamp with time zone | now() | true |  |  |  |
 | deleted_at | timestamp with time zone |  | true |  |  |  |
@@ -17,34 +17,33 @@
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| user_role_role_id_fkey | FOREIGN KEY | FOREIGN KEY (role_id) REFERENCES role(id) |
-| user_role_pkey | PRIMARY KEY | PRIMARY KEY (id) |
+| role_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 
 ## Indexes
 
 | Name | Definition |
 | ---- | ---------- |
-| user_role_pkey | CREATE UNIQUE INDEX user_role_pkey ON kepegawaian.user_role USING btree (id) |
-| user_role_nip_role_id_unique_idx | CREATE UNIQUE INDEX user_role_nip_role_id_unique_idx ON kepegawaian.user_role USING btree (nip, role_id) WHERE (deleted_at IS NULL) |
+| role_pkey | CREATE UNIQUE INDEX role_pkey ON portal.role USING btree (id) |
 
 ## Relations
 
 ```mermaid
 erDiagram
 
-"kepegawaian.user_role" }o--|| "kepegawaian.role" : "FOREIGN KEY (role_id) REFERENCES role(id)"
+"portal.user_role" }o--|| "portal.role" : "FOREIGN KEY (role_id) REFERENCES role(id)"
 
-"kepegawaian.user_role" {
+"portal.role" {
   integer id
-  varchar_20_ nip
-  integer role_id FK
+  varchar_50_ service
+  varchar_100_ nama
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
 }
-"kepegawaian.role" {
+"portal.user_role" {
   integer id
-  varchar_100_ nama
+  varchar_20_ nip
+  integer role_id FK
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at

@@ -1,4 +1,4 @@
-# kepegawaian.role
+# portal.user_role
 
 ## Description
 
@@ -6,8 +6,9 @@
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| id | integer | nextval('role_id_seq'::regclass) | false | [kepegawaian.user_role](kepegawaian.user_role.md) |  |  |
-| nama | varchar(100) |  | false |  |  |  |
+| id | integer | nextval('user_role_id_seq'::regclass) | false |  |  |  |
+| nip | varchar(20) |  | false |  |  |  |
+| role_id | integer |  | false |  | [portal.role](portal.role.md) |  |
 | created_at | timestamp with time zone | now() | true |  |  |  |
 | updated_at | timestamp with time zone | now() | true |  |  |  |
 | deleted_at | timestamp with time zone |  | true |  |  |  |
@@ -16,32 +17,35 @@
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| role_pkey | PRIMARY KEY | PRIMARY KEY (id) |
+| user_role_role_id_fkey | FOREIGN KEY | FOREIGN KEY (role_id) REFERENCES role(id) |
+| user_role_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 
 ## Indexes
 
 | Name | Definition |
 | ---- | ---------- |
-| role_pkey | CREATE UNIQUE INDEX role_pkey ON kepegawaian.role USING btree (id) |
+| user_role_pkey | CREATE UNIQUE INDEX user_role_pkey ON portal.user_role USING btree (id) |
+| user_role_nip_role_id_unique_idx | CREATE UNIQUE INDEX user_role_nip_role_id_unique_idx ON portal.user_role USING btree (nip, role_id) WHERE (deleted_at IS NULL) |
 
 ## Relations
 
 ```mermaid
 erDiagram
 
-"kepegawaian.user_role" }o--|| "kepegawaian.role" : "FOREIGN KEY (role_id) REFERENCES role(id)"
+"portal.user_role" }o--|| "portal.role" : "FOREIGN KEY (role_id) REFERENCES role(id)"
 
-"kepegawaian.role" {
+"portal.user_role" {
   integer id
-  varchar_100_ nama
+  varchar_20_ nip
+  integer role_id FK
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
 }
-"kepegawaian.user_role" {
+"portal.role" {
   integer id
-  varchar_20_ nip
-  integer role_id FK
+  varchar_50_ service
+  varchar_100_ nama
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at

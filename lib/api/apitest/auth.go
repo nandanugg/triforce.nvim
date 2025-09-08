@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	jwtPrivateKey *rsa.PrivateKey
+	JwtPrivateKey *rsa.PrivateKey
 
 	// Keyfunc encapsulate jwt.Keyfunc, used for verifying HTTP
 	// Authorization header in tests.
@@ -19,9 +19,9 @@ var (
 )
 
 func init() {
-	jwtPrivateKey, _ = rsa.GenerateKey(rand.Reader, 2048)
+	JwtPrivateKey, _ = rsa.GenerateKey(rand.Reader, 2048)
 	Keyfunc = &api.Keyfunc{
-		Keyfunc:  func(*jwt.Token) (any, error) { return &jwtPrivateKey.PublicKey, nil },
+		Keyfunc:  func(*jwt.Token) (any, error) { return &JwtPrivateKey.PublicKey, nil },
 		Audience: "testing",
 	}
 }
@@ -33,13 +33,17 @@ func GenerateAuthHeader(userID int64, role ...string) string {
 		h += ":" + role[0]
 	}
 	return api.TempAuthSecret + h
-
-	// claims := jwt.MapClaims{"user_id": userID, "aud": "testing"}
-	// if len(role) > 0 {
-	// 	claims["role"] = role[0]
-	// }
-	//
-	// token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
-	// tokenString, _ := token.SignedString(jwtPrivateKey)
-	// return "Bearer " + tokenString
 }
+
+// func GenerateAuthHeader(service, nip string, role ...string) string {
+// 	claims := jwt.MapClaims{"nip": nip, "aud": "testing"}
+// 	if len(role) > 0 {
+// 		claims["roles"] = map[string]string{
+// 			service: role[0],
+// 		}
+// 	}
+
+// 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+// 	tokenString, _ := token.SignedString(JwtPrivateKey)
+// 	return "Bearer " + tokenString
+// }
