@@ -9,43 +9,43 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const countJenisJabatan = `-- name: CountJenisJabatan :one
+const countRefJenisJabatan = `-- name: CountRefJenisJabatan :one
 SELECT COUNT(1) FROM ref_jenis_jabatan
 WHERE deleted_at IS NULL
 `
 
-func (q *Queries) CountJenisJabatan(ctx context.Context) (int64, error) {
-	row := q.db.QueryRow(ctx, countJenisJabatan)
+func (q *Queries) CountRefJenisJabatan(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, countRefJenisJabatan)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
 }
 
-const getRefJenisJabatan = `-- name: GetRefJenisJabatan :many
+const listRefJenisJabatan = `-- name: ListRefJenisJabatan :many
 SELECT id, nama FROM ref_jenis_jabatan
 WHERE deleted_at IS NULL
 LIMIT $1 OFFSET $2
 `
 
-type GetRefJenisJabatanParams struct {
+type ListRefJenisJabatanParams struct {
 	Limit  int32 `db:"limit"`
 	Offset int32 `db:"offset"`
 }
 
-type GetRefJenisJabatanRow struct {
+type ListRefJenisJabatanRow struct {
 	ID   int32       `db:"id"`
 	Nama pgtype.Text `db:"nama"`
 }
 
-func (q *Queries) GetRefJenisJabatan(ctx context.Context, arg GetRefJenisJabatanParams) ([]GetRefJenisJabatanRow, error) {
-	rows, err := q.db.Query(ctx, getRefJenisJabatan, arg.Limit, arg.Offset)
+func (q *Queries) ListRefJenisJabatan(ctx context.Context, arg ListRefJenisJabatanParams) ([]ListRefJenisJabatanRow, error) {
+	rows, err := q.db.Query(ctx, listRefJenisJabatan, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetRefJenisJabatanRow
+	var items []ListRefJenisJabatanRow
 	for rows.Next() {
-		var i GetRefJenisJabatanRow
+		var i ListRefJenisJabatanRow
 		if err := rows.Scan(&i.ID, &i.Nama); err != nil {
 			return nil, err
 		}

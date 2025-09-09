@@ -9,10 +9,10 @@ import (
 )
 
 type Querier interface {
-	CountJenisJabatan(ctx context.Context) (int64, error)
 	CountJenisKP(ctx context.Context) (int64, error)
 	CountRefGolongan(ctx context.Context) (int64, error)
 	CountRefJabatan(ctx context.Context) (int64, error)
+	CountRefJenisJabatan(ctx context.Context) (int64, error)
 	CountRiwayatSertifikasi(ctx context.Context, nip pgtype.Text) (int64, error)
 	CountUnitKerja(ctx context.Context, arg CountUnitKerjaParams) (int64, error)
 	GetBerkasRiwayatSertifikasi(ctx context.Context, arg GetBerkasRiwayatSertifikasiParams) (pgtype.Text, error)
@@ -21,10 +21,10 @@ type Querier interface {
 	GetJenisKP(ctx context.Context, arg GetJenisKPParams) ([]GetJenisKPRow, error)
 	GetParentsByEmployeeID(ctx context.Context, pnsID pgtype.Text) ([]GetParentsByEmployeeIDRow, error)
 	GetRefGolongan(ctx context.Context, arg GetRefGolonganParams) ([]GetRefGolonganRow, error)
-	GetRefJabatan(ctx context.Context, arg GetRefJabatanParams) ([]GetRefJabatanRow, error)
-	GetRefJenisJabatan(ctx context.Context, arg GetRefJenisJabatanParams) ([]GetRefJenisJabatanRow, error)
 	GetSpouseByEmployeeID(ctx context.Context, pnsID pgtype.Text) (GetSpouseByEmployeeIDRow, error)
 	GetUnitKerjaByNamaOrInduk(ctx context.Context, arg GetUnitKerjaByNamaOrIndukParams) ([]GetUnitKerjaByNamaOrIndukRow, error)
+	ListRefJabatan(ctx context.Context, arg ListRefJabatanParams) ([]ListRefJabatanRow, error)
+	ListRefJenisJabatan(ctx context.Context, arg ListRefJenisJabatanParams) ([]ListRefJenisJabatanRow, error)
 	ListRiwayatSertifikasi(ctx context.Context, arg ListRiwayatSertifikasiParams) ([]ListRiwayatSertifikasiRow, error)
 }
 

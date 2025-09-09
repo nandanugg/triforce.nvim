@@ -1,4 +1,4 @@
-package jabatan
+package jenisjabatan_test
 
 import (
 	"context"
@@ -9,7 +9,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api/apitest"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db/dbtest"
@@ -17,16 +16,18 @@ import (
 	dbmigrations "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/migrations"
 	dbrepository "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/docs"
+	jenisjabatan "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/jenisjabatan"
 )
 
-func Test_handler_list(t *testing.T) {
+func Test_handler_listJenis(t *testing.T) {
 	t.Parallel()
 
 	dbData := `
-		insert into ref_jabatan(id, no, nama_jabatan, kode_jabatan) values
-		(11, 1, '11h', '11h'),
-		(12, 2, '12h', '12h'),
-		(13, 3, '13h', '13h');
+		insert into ref_jenis_jabatan
+			("id", "nama") values
+			(1,  'a'),
+			(2,  'c'),
+			(3,  'b');
 	`
 
 	tests := []struct {
@@ -38,54 +39,56 @@ func Test_handler_list(t *testing.T) {
 		wantResponseBody string
 	}{
 		{
-			name:             "ok: tanpa parameter apapun",
+			name:             "ok",
 			dbData:           dbData,
 			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "41")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
-					{
-						"id":         11,
-						"kode_jabatan": "11h",
-						"nama_jabatan": "11h"
-					},
-					{
-						"id":         12,
-						"kode_jabatan": "12h",
-						"nama_jabatan": "12h"
-					},
-					{
-						"id":         13,
-						"kode_jabatan": "13h",
-						"nama_jabatan": "13h"
-					}
+					{"id": 1, "nama": "a"},
+					{"id": 2, "nama": "c"},
+					{"id": 3, "nama": "b"}
 				],
 				"meta": {"limit": 10, "offset": 0, "total": 3}
 			}`,
 		},
 		{
-			name:             "ok: dengan parameter pagination",
+			name:             "ok with limit 2",
 			dbData:           dbData,
-			requestQuery:     url.Values{"limit": []string{"1"}, "offset": []string{"1"}},
+			requestQuery:     url.Values{"limit": []string{"2"}},
 			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "41")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
-					{
-						"id":         12,
-						"kode_jabatan": "12h",
-						"nama_jabatan": "12h"
-					}
+					{"id": 1, "nama": "a"},
+					{"id": 2, "nama": "c"}
 				],
-				"meta": {"limit": 1, "offset": 1, "total": 3}
+				"meta": {"limit": 2, "offset": 0, "total": 3}
 			}`,
 		},
 		{
-			name:             "ok: tidak ada data jabatan",
-			dbData:           ``,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "200")}},
+			name:             "ok with limit 2 and offset 1",
+			dbData:           dbData,
+			requestQuery:     url.Values{"limit": []string{"2"}, "offset": []string{"1"}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "41")}},
 			wantResponseCode: http.StatusOK,
-			wantResponseBody: `{"data": [], "meta": {"limit": 10, "offset": 0, "total": 0}}`,
+			wantResponseBody: `{
+				"data": [
+					{"id": 2, "nama": "c"},
+					{"id": 3, "nama": "b"}
+				],
+				"meta": {"limit": 2, "offset": 1, "total": 3}
+			}`,
+		},
+		{
+			name:             "ok with empty data",
+			dbData:           ``,
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "41")}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [],
+				"meta": {"limit": 10, "offset": 0, "total": 0}
+			}`,
 		},
 		{
 			name:             "error: auth header tidak valid",
@@ -104,7 +107,7 @@ func Test_handler_list(t *testing.T) {
 			_, err := db.Exec(context.Background(), tt.dbData)
 			require.NoError(t, err)
 
-			req := httptest.NewRequest(http.MethodGet, "/v1/jabatan", nil)
+			req := httptest.NewRequest(http.MethodGet, "/v1/jenis-jabatan", nil)
 			req.URL.RawQuery = tt.requestQuery.Encode()
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
@@ -112,7 +115,7 @@ func Test_handler_list(t *testing.T) {
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
 			repo := dbrepository.New(db)
-			RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			jenisjabatan.RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)

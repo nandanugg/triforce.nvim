@@ -14,6 +14,7 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/golongan"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/hukumandisiplin"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/jabatan"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/jenisjabatan"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/jeniskenaikanpangkat"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/keluarga"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/kenaikangajiberkala"
@@ -57,7 +58,8 @@ func main() {
 	golongan.RegisterRoutes(e, dbRepository, mwAuth)
 	datapribadi.RegisterRoutes(e, db, mwAuth)
 	hukumandisiplin.RegisterRoutes(e, db, mwAuth)
-	jabatan.RegisterRoutes(e, db, mwAuth)
+	jabatan.RegisterRoutes(e, dbRepository, mwAuth)
+	jenisjabatan.RegisterRoutes(e, dbRepository, mwAuth)
 	jeniskenaikanpangkat.RegisterRoutes(e, dbRepository, mwAuth)
 	keluarga.RegisterRoutes(e, db, mwAuth)
 	kenaikangajiberkala.RegisterRoutes(e, db, mwAuth)

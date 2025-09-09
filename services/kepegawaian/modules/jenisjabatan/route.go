@@ -1,4 +1,4 @@
-package jabatan
+package jenisjabatan
 
 import (
 	"net/http"
@@ -10,5 +10,5 @@ func RegisterRoutes(e *echo.Echo, repo repository, mwAuth echo.MiddlewareFunc) {
 	s := newService(repo)
 	h := newHandler(s)
 
-	e.Add(http.MethodGet, "/v1/jabatan", h.listJabatan, mwAuth)
+	e.Add(http.MethodGet, "/v1/jenis-jabatan", h.listJenisJabatan, mwAuth)
 }

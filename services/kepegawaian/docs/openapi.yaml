@@ -354,14 +354,11 @@ paths:
                       additionalProperties: false
                       properties:
                         id:
+                          type: integer
+                        kode_jabatan:
                           type: string
-                        jabatan:
+                        nama_jabatan:
                           type: string
-                        unit_kerja:
-                          type: string
-                        tmt:
-                          type: string
-                          format: date
                   meta:
                     $ref: "#/components/schemas/metaPagination"
   /v1/jenis-jabatan:
@@ -373,6 +370,8 @@ paths:
       operationId: listJenisJabatan
       parameters:
         - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
       responses:
         "200":
           description: Sukses.
@@ -388,9 +387,11 @@ paths:
                       additionalProperties: false
                       properties:
                         id:
-                          type: string
+                          type: integer
                         nama:
                           type: string
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
   /v1/keluarga:
     get:
       tags:

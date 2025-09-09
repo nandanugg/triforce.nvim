@@ -1,4 +1,4 @@
-package jabatan
+package jenisjabatan
 
 import (
 	"context"
@@ -8,8 +8,8 @@ import (
 )
 
 type repository interface {
-	ListRefJabatan(ctx context.Context, arg repo.ListRefJabatanParams) ([]repo.ListRefJabatanRow, error)
-	CountRefJabatan(ctx context.Context) (int64, error)
+	ListRefJenisJabatan(ctx context.Context, arg repo.ListRefJenisJabatanParams) ([]repo.ListRefJenisJabatanRow, error)
+	CountRefJenisJabatan(ctx context.Context) (int64, error)
 }
 
 type service struct {
@@ -25,8 +25,8 @@ type listParams struct {
 	Offset uint
 }
 
-func (s *service) listJabatan(ctx context.Context, arg listParams) ([]jabatan, int64, error) {
-	data, err := s.repo.ListRefJabatan(ctx, repo.ListRefJabatanParams{
+func (s *service) listJenisJabatan(ctx context.Context, arg listParams) ([]jenisJabatan, int64, error) {
+	data, err := s.repo.ListRefJenisJabatan(ctx, repo.ListRefJenisJabatanParams{
 		Limit:  int32(arg.Limit),
 		Offset: int32(arg.Offset),
 	})
@@ -34,18 +34,17 @@ func (s *service) listJabatan(ctx context.Context, arg listParams) ([]jabatan, i
 		return nil, 0, fmt.Errorf("repo list: %w", err)
 	}
 
-	count, err := s.repo.CountRefJabatan(ctx)
+	count, err := s.repo.CountRefJenisJabatan(ctx)
 	if err != nil {
 		return nil, 0, fmt.Errorf("repo count: %w", err)
 	}
 
-	result := []jabatan{}
+	result := []jenisJabatan{}
 
 	for _, row := range data {
-		result = append(result, jabatan{
-			ID:          row.ID,
-			NamaJabatan: row.NamaJabatan.String,
-			KodeJabatan: row.KodeJabatan,
+		result = append(result, jenisJabatan{
+			ID:   row.ID,
+			Nama: row.Nama.String,
 		})
 	}
 

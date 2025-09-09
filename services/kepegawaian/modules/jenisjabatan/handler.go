@@ -1,4 +1,4 @@
-package jabatan
+package jenisjabatan
 
 import (
 	"log/slog"
@@ -23,23 +23,23 @@ type listRequest struct {
 }
 
 type listResponse struct {
-	Data []jabatan          `json:"data"`
+	Data []jenisJabatan     `json:"data"`
 	Meta api.MetaPagination `json:"meta"`
 }
 
-func (h *handler) listJabatan(c echo.Context) error {
+func (h *handler) listJenisJabatan(c echo.Context) error {
 	var req listRequest
 	if err := c.Bind(&req); err != nil {
 		return err
 	}
 
 	ctx := c.Request().Context()
-	data, total, err := h.service.listJabatan(ctx, listParams{
+	data, total, err := h.service.listJenisJabatan(ctx, listParams{
 		Limit:  req.Limit,
 		Offset: req.Offset,
 	})
 	if err != nil {
-		slog.ErrorContext(ctx, "Error getting list jabatan.", "error", err)
+		slog.ErrorContext(ctx, "Error getting list jenis jabatan.", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 

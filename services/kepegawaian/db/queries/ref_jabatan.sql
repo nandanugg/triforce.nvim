@@ -1,4 +1,4 @@
--- name: GetRefJabatan :many
+-- name: ListRefJabatan :many
 select id, kode_jabatan, nama_jabatan from ref_jabatan
 WHERE deleted_at IS NULL
 LIMIT $1 OFFSET $2;

@@ -21,32 +21,32 @@ func (q *Queries) CountRefJabatan(ctx context.Context) (int64, error) {
 	return count, err
 }
 
-const getRefJabatan = `-- name: GetRefJabatan :many
+const listRefJabatan = `-- name: ListRefJabatan :many
 select id, kode_jabatan, nama_jabatan from ref_jabatan
 WHERE deleted_at IS NULL
 LIMIT $1 OFFSET $2
 `
 
-type GetRefJabatanParams struct {
+type ListRefJabatanParams struct {
 	Limit  int32 `db:"limit"`
 	Offset int32 `db:"offset"`
 }
 
-type GetRefJabatanRow struct {
+type ListRefJabatanRow struct {
 	ID          int32       `db:"id"`
 	KodeJabatan string      `db:"kode_jabatan"`
 	NamaJabatan pgtype.Text `db:"nama_jabatan"`
 }
 
-func (q *Queries) GetRefJabatan(ctx context.Context, arg GetRefJabatanParams) ([]GetRefJabatanRow, error) {
-	rows, err := q.db.Query(ctx, getRefJabatan, arg.Limit, arg.Offset)
+func (q *Queries) ListRefJabatan(ctx context.Context, arg ListRefJabatanParams) ([]ListRefJabatanRow, error) {
+	rows, err := q.db.Query(ctx, listRefJabatan, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetRefJabatanRow
+	var items []ListRefJabatanRow
 	for rows.Next() {
-		var i GetRefJabatanRow
+		var i ListRefJabatanRow
 		if err := rows.Scan(&i.ID, &i.KodeJabatan, &i.NamaJabatan); err != nil {
 			return nil, err
 		}
