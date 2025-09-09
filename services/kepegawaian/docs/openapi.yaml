@@ -1030,7 +1030,7 @@ paths:
         - Sertifikasi
       summary: Lihat riwayat sertifikasi.
       description: >-
-        Lihat riwayat sertifikasi dari user yang login, urut berdasarkan tahun.
+        Lihat riwayat sertifikasi dari user yang login, urut berdasarkan tahun desc.
       operationId: listSertifikasi
       parameters:
         - $ref: "#/components/parameters/authRequired"
@@ -1056,11 +1056,35 @@ paths:
                           type: string
                         tahun:
                           type: integer
-                        tanggal_upload:
+                        deskripsi:
                           type: string
-                          format: date
                   meta:
                     $ref: "#/components/schemas/metaPagination"
+  /v1/sertifikasi/{id}/berkas:
+    get:
+      tags:
+        - Sertifikasi
+      summary: Lihat berkas riwayat sertifikasi.
+      description: >-
+        Lihat berkas riwayat sertifikasi berdasarkan id sertifikasi.
+      operationId: getBerkasSertifikasi
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Sertifikasi tidak ditemukan atau User tidak mempunyai akses.
   /v1/status-pegawai:
     get:
       tags:

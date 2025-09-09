@@ -13,7 +13,9 @@ type Querier interface {
 	CountJenisKP(ctx context.Context) (int64, error)
 	CountRefGolongan(ctx context.Context) (int64, error)
 	CountRefJabatan(ctx context.Context) (int64, error)
+	CountRiwayatSertifikasi(ctx context.Context, nip pgtype.Text) (int64, error)
 	CountUnitKerja(ctx context.Context, arg CountUnitKerjaParams) (int64, error)
+	GetBerkasRiwayatSertifikasi(ctx context.Context, arg GetBerkasRiwayatSertifikasiParams) (pgtype.Text, error)
 	GetChildrenByEmployeeID(ctx context.Context, pnsID pgtype.Text) ([]GetChildrenByEmployeeIDRow, error)
 	GetEmployeeFamilyData(ctx context.Context, id int32) (GetEmployeeFamilyDataRow, error)
 	GetJenisKP(ctx context.Context, arg GetJenisKPParams) ([]GetJenisKPRow, error)
@@ -23,6 +25,7 @@ type Querier interface {
 	GetRefJenisJabatan(ctx context.Context, arg GetRefJenisJabatanParams) ([]GetRefJenisJabatanRow, error)
 	GetSpouseByEmployeeID(ctx context.Context, pnsID pgtype.Text) (GetSpouseByEmployeeIDRow, error)
 	GetUnitKerjaByNamaOrInduk(ctx context.Context, arg GetUnitKerjaByNamaOrIndukParams) ([]GetUnitKerjaByNamaOrIndukRow, error)
+	ListRiwayatSertifikasi(ctx context.Context, arg ListRiwayatSertifikasiParams) ([]ListRiwayatSertifikasiRow, error)
 }
 
 var _ Querier = (*Queries)(nil)
