@@ -5,11 +5,25 @@ package repository
 
 import (
 	"context"
-	"database/sql"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
+
+const countRefJabatan = `-- name: CountRefJabatan :one
+SELECT COUNT(1) FROM ref_jabatan
+WHERE deleted_at IS NULL
+`
+
+func (q *Queries) CountRefJabatan(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, countRefJabatan)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
 
 const getRefJabatan = `-- name: GetRefJabatan :many
 select id, kode_jabatan, nama_jabatan from ref_jabatan
+WHERE deleted_at IS NULL
 LIMIT $1 OFFSET $2
 `
 
@@ -19,9 +33,9 @@ type GetRefJabatanParams struct {
 }
 
 type GetRefJabatanRow struct {
-	ID          int32          `db:"id"`
-	KodeJabatan string         `db:"kode_jabatan"`
-	NamaJabatan sql.NullString `db:"nama_jabatan"`
+	ID          int32       `db:"id"`
+	KodeJabatan string      `db:"kode_jabatan"`
+	NamaJabatan pgtype.Text `db:"nama_jabatan"`
 }
 
 func (q *Queries) GetRefJabatan(ctx context.Context, arg GetRefJabatanParams) ([]GetRefJabatanRow, error) {

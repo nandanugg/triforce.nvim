@@ -5,44 +5,66 @@ package repository
 
 import (
 	"context"
-	"database/sql"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const listUnitKerjaByNamaOrInduk = `-- name: ListUnitKerjaByNamaOrInduk :many
+const countUnitKerja = `-- name: CountUnitKerja :one
+SELECT COUNT(1) FROM unit_kerja
+WHERE 
+    (CASE WHEN $1::varchar = '' THEN true ELSE nama_unor ilike $1::varchar || '%' END)
+    AND (CASE WHEN $2::varchar = '' THEN true ELSE unor_induk = $2::varchar END)
+    AND deleted_at IS NULL
+`
+
+type CountUnitKerjaParams struct {
+	Nama      string `db:"nama"`
+	UnorInduk string `db:"unor_induk"`
+}
+
+func (q *Queries) CountUnitKerja(ctx context.Context, arg CountUnitKerjaParams) (int64, error) {
+	row := q.db.QueryRow(ctx, countUnitKerja, arg.Nama, arg.UnorInduk)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const getUnitKerjaByNamaOrInduk = `-- name: GetUnitKerjaByNamaOrInduk :many
 SELECT id, nama_unor 
 from unit_kerja
 WHERE 
     (CASE WHEN $3::varchar = '' THEN true ELSE nama_unor ilike $3::varchar || '%' END)
     AND (CASE WHEN $4::varchar = '' THEN true ELSE unor_induk = $4::varchar END)
+    AND deleted_at IS NULL
 LIMIT $1 OFFSET $2
 `
 
-type ListUnitKerjaByNamaOrIndukParams struct {
+type GetUnitKerjaByNamaOrIndukParams struct {
 	Limit     int32  `db:"limit"`
 	Offset    int32  `db:"offset"`
-	Search    string `db:"search"`
+	Nama      string `db:"nama"`
 	UnorInduk string `db:"unor_induk"`
 }
 
-type ListUnitKerjaByNamaOrIndukRow struct {
-	ID       string         `db:"id"`
-	NamaUnor sql.NullString `db:"nama_unor"`
+type GetUnitKerjaByNamaOrIndukRow struct {
+	ID       string      `db:"id"`
+	NamaUnor pgtype.Text `db:"nama_unor"`
 }
 
-func (q *Queries) ListUnitKerjaByNamaOrInduk(ctx context.Context, arg ListUnitKerjaByNamaOrIndukParams) ([]ListUnitKerjaByNamaOrIndukRow, error) {
-	rows, err := q.db.Query(ctx, listUnitKerjaByNamaOrInduk,
+func (q *Queries) GetUnitKerjaByNamaOrInduk(ctx context.Context, arg GetUnitKerjaByNamaOrIndukParams) ([]GetUnitKerjaByNamaOrIndukRow, error) {
+	rows, err := q.db.Query(ctx, getUnitKerjaByNamaOrInduk,
 		arg.Limit,
 		arg.Offset,
-		arg.Search,
+		arg.Nama,
 		arg.UnorInduk,
 	)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []ListUnitKerjaByNamaOrIndukRow
+	var items []GetUnitKerjaByNamaOrIndukRow
 	for rows.Next() {
-		var i ListUnitKerjaByNamaOrIndukRow
+		var i GetUnitKerjaByNamaOrIndukRow
 		if err := rows.Scan(&i.ID, &i.NamaUnor); err != nil {
 			return nil, err
 		}

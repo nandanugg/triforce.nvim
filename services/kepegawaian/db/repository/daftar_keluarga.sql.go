@@ -5,7 +5,8 @@ package repository
 
 import (
 	"context"
-	"database/sql"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const getChildrenByEmployeeID = `-- name: GetChildrenByEmployeeID :many
@@ -25,15 +26,15 @@ WHERE
 `
 
 type GetChildrenByEmployeeIDRow struct {
-	Nama         sql.NullString `db:"nama"`
-	JenisKelamin sql.NullString `db:"jenis_kelamin"`
-	TanggalLahir sql.NullTime   `db:"tanggal_lahir"`
-	NamaPasangan sql.NullString `db:"nama_pasangan"`
-	StatusAnak   sql.NullString `db:"status_anak"`
-	PnsID        sql.NullString `db:"pns_id"`
+	Nama         pgtype.Text `db:"nama"`
+	JenisKelamin pgtype.Text `db:"jenis_kelamin"`
+	TanggalLahir pgtype.Date `db:"tanggal_lahir"`
+	NamaPasangan pgtype.Text `db:"nama_pasangan"`
+	StatusAnak   pgtype.Text `db:"status_anak"`
+	PnsID        pgtype.Text `db:"pns_id"`
 }
 
-func (q *Queries) GetChildrenByEmployeeID(ctx context.Context, pnsID sql.NullString) ([]GetChildrenByEmployeeIDRow, error) {
+func (q *Queries) GetChildrenByEmployeeID(ctx context.Context, pnsID pgtype.Text) ([]GetChildrenByEmployeeIDRow, error) {
 	rows, err := q.db.Query(ctx, getChildrenByEmployeeID, pnsID)
 	if err != nil {
 		return nil, err
@@ -71,8 +72,8 @@ WHERE
 `
 
 type GetEmployeeFamilyDataRow struct {
-	NamaPegawai sql.NullString `db:"nama_pegawai"`
-	PnsID       int32          `db:"pns_id"`
+	NamaPegawai pgtype.Text `db:"nama_pegawai"`
+	PnsID       int32       `db:"pns_id"`
 }
 
 func (q *Queries) GetEmployeeFamilyData(ctx context.Context, id int32) (GetEmployeeFamilyDataRow, error) {
@@ -99,15 +100,15 @@ WHERE
 `
 
 type GetParentsByEmployeeIDRow struct {
-	Nama         sql.NullString `db:"nama"`
-	TglMeninggal sql.NullTime   `db:"tgl_meninggal"`
-	Nik          sql.NullString `db:"nik"`
-	Agama        sql.NullString `db:"agama"`
-	Hubungan     sql.NullInt16  `db:"hubungan"`
-	PnsID        sql.NullString `db:"pns_id"`
+	Nama         pgtype.Text `db:"nama"`
+	TglMeninggal pgtype.Date `db:"tgl_meninggal"`
+	Nik          pgtype.Text `db:"nik"`
+	Agama        pgtype.Text `db:"agama"`
+	Hubungan     pgtype.Int2 `db:"hubungan"`
+	PnsID        pgtype.Text `db:"pns_id"`
 }
 
-func (q *Queries) GetParentsByEmployeeID(ctx context.Context, pnsID sql.NullString) ([]GetParentsByEmployeeIDRow, error) {
+func (q *Queries) GetParentsByEmployeeID(ctx context.Context, pnsID pgtype.Text) ([]GetParentsByEmployeeIDRow, error) {
 	rows, err := q.db.Query(ctx, getParentsByEmployeeID, pnsID)
 	if err != nil {
 		return nil, err
@@ -148,14 +149,14 @@ WHERE
 `
 
 type GetSpouseByEmployeeIDRow struct {
-	Nama       sql.NullString `db:"nama"`
-	Pns        sql.NullInt16  `db:"pns"`
-	NomorKaris sql.NullString `db:"nomor_karis"`
-	Status     sql.NullInt16  `db:"status"`
-	PnsID      sql.NullString `db:"pns_id"`
+	Nama       pgtype.Text `db:"nama"`
+	Pns        pgtype.Int2 `db:"pns"`
+	NomorKaris pgtype.Text `db:"nomor_karis"`
+	Status     pgtype.Int2 `db:"status"`
+	PnsID      pgtype.Text `db:"pns_id"`
 }
 
-func (q *Queries) GetSpouseByEmployeeID(ctx context.Context, pnsID sql.NullString) (GetSpouseByEmployeeIDRow, error) {
+func (q *Queries) GetSpouseByEmployeeID(ctx context.Context, pnsID pgtype.Text) (GetSpouseByEmployeeIDRow, error) {
 	row := q.db.QueryRow(ctx, getSpouseByEmployeeID, pnsID)
 	var i GetSpouseByEmployeeIDRow
 	err := row.Scan(

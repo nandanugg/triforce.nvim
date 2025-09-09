@@ -1,6 +1,7 @@
 package dbtest
 
 import (
+	"context"
 	"crypto/sha1"
 	"database/sql"
 	"embed"
@@ -12,6 +13,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/stretchr/testify/require"
 
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
@@ -76,6 +78,31 @@ func New(t *testing.T, migrationsFS embed.FS) *sql.DB {
 	return applyMigrations(t, user, password, dbname, schema, migrationsFS)
 }
 
+// NewPgxPool creates an isolated database for t, using application config values only
+// as initial connection parameters.
+func NewPgxPool(t *testing.T, migrationsFS embed.FS) *pgxpool.Pool {
+	t.Helper()
+
+	testID := randomString()
+	var (
+		dbname   = "nexus_test_db_" + testID
+		user     = "nexus_test_user_" + testID
+		schema   = "nexus_test_schema_" + testID
+		password = "any"
+	)
+	createTestDBAndRole(t, user, password, dbname)
+
+	// Do necessary preparation in new DB before applying migration files:
+	prepareTestDB(t, user, password, dbname, schema)
+
+	// Apply migration files:
+	applyMigrations(t, user, password, dbname, schema, migrationsFS)
+	pgxPool, err := pgxpool.New(context.Background(), fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s", testDBHost, testDBPort, user, password, dbname))
+	_, err = pgxPool.Exec(context.Background(), fmt.Sprintf("set search_path to %s", schema))
+	require.NoError(t, err)
+	return pgxPool
+}
+
 func randomString() string {
 	sum := sha1.Sum([]byte(uuid.New().String()))
 	return hex.EncodeToString(sum[:4])
@@ -137,6 +164,7 @@ func applyMigrations(t *testing.T, user, password, dbname, schema string, migrat
 }
 
 func getMigrationUpSQLs(fs embed.FS) ([]string, error) {
+
 	dir, err := fs.ReadDir(".")
 	if err != nil {
 		return nil, fmt.Errorf("read migrations dir: %w", err)
@@ -153,7 +181,6 @@ func getMigrationUpSQLs(fs embed.FS) ([]string, error) {
 			result = append(result, string(b))
 		}
 	}
-
 	return result, nil
 }
 

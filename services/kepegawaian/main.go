@@ -5,13 +5,16 @@ import (
 	"os"
 
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
-	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
+	dblib "gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/config"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/docs"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/asesmenninebox"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/datapribadi"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/golongan"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/hukumandisiplin"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/jabatan"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/jeniskenaikanpangkat"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/keluarga"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/kenaikangajiberkala"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/kepangkatan"
@@ -25,6 +28,7 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/penghargaan"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/penugasan"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/sertifikasi"
+	unitkerja "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/unit_kerja"
 )
 
 func main() {
@@ -33,7 +37,7 @@ func main() {
 
 	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: c.LogLevel})))
 
-	db, err := db.New(c.DB.Host, c.DB.Port, c.DB.User, c.DB.Password, c.DB.Name, c.DB.Schema)
+	db, err := dblib.New(c.DB.Host, c.DB.Port, c.DB.User, c.DB.Password, c.DB.Name, c.DB.Schema)
 	exitIfError("Error connecting to database.", err)
 
 	e, err := api.NewEchoServer(docs.OpenAPIBytes)
@@ -42,12 +46,19 @@ func main() {
 	keyfunc, err := api.NewAuthKeyfunc(c.Keycloak.Host, c.Keycloak.Realm, c.Keycloak.Audience)
 	exitIfError("Error initializing auth keyfunc.", err)
 
+	pgxConn, err := dblib.NewPgxPool(c.DB.Host, c.DB.Port, c.DB.User, c.DB.Password, c.DB.Name, c.DB.Schema)
+	exitIfError("Error connecting to database with pgx.", err)
+
+	dbRepository := repository.New(pgxConn)
+
 	mwAuth := api.NewAuthMiddleware(config.Service, keyfunc)
 
 	asesmenninebox.RegisterRoutes(e, db, mwAuth)
+	golongan.RegisterRoutes(e, dbRepository, mwAuth)
 	datapribadi.RegisterRoutes(e, db, mwAuth)
 	hukumandisiplin.RegisterRoutes(e, db, mwAuth)
 	jabatan.RegisterRoutes(e, db, mwAuth)
+	jeniskenaikanpangkat.RegisterRoutes(e, dbRepository, mwAuth)
 	keluarga.RegisterRoutes(e, db, mwAuth)
 	kenaikangajiberkala.RegisterRoutes(e, db, mwAuth)
 	kepangkatan.RegisterRoutes(e, db, mwAuth)
@@ -61,7 +72,7 @@ func main() {
 	penghargaan.RegisterRoutes(e, db, mwAuth)
 	penugasan.RegisterRoutes(e, db, mwAuth)
 	sertifikasi.RegisterRoutes(e, db, mwAuth)
-
+	unitkerja.RegisterRoutes(e, dbRepository, mwAuth)
 	err = api.StartEchoServer(e, c.Server.Port)
 	exitIfError("Error starting server.", err)
 }

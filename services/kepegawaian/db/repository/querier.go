@@ -4,19 +4,25 @@ package repository
 
 import (
 	"context"
-	"database/sql"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Querier interface {
-	GetChildrenByEmployeeID(ctx context.Context, pnsID sql.NullString) ([]GetChildrenByEmployeeIDRow, error)
+	CountJenisJabatan(ctx context.Context) (int64, error)
+	CountJenisKP(ctx context.Context) (int64, error)
+	CountRefGolongan(ctx context.Context) (int64, error)
+	CountRefJabatan(ctx context.Context) (int64, error)
+	CountUnitKerja(ctx context.Context, arg CountUnitKerjaParams) (int64, error)
+	GetChildrenByEmployeeID(ctx context.Context, pnsID pgtype.Text) ([]GetChildrenByEmployeeIDRow, error)
 	GetEmployeeFamilyData(ctx context.Context, id int32) (GetEmployeeFamilyDataRow, error)
 	GetJenisKP(ctx context.Context, arg GetJenisKPParams) ([]GetJenisKPRow, error)
-	GetParentsByEmployeeID(ctx context.Context, pnsID sql.NullString) ([]GetParentsByEmployeeIDRow, error)
+	GetParentsByEmployeeID(ctx context.Context, pnsID pgtype.Text) ([]GetParentsByEmployeeIDRow, error)
 	GetRefGolongan(ctx context.Context, arg GetRefGolonganParams) ([]GetRefGolonganRow, error)
 	GetRefJabatan(ctx context.Context, arg GetRefJabatanParams) ([]GetRefJabatanRow, error)
 	GetRefJenisJabatan(ctx context.Context, arg GetRefJenisJabatanParams) ([]GetRefJenisJabatanRow, error)
-	GetSpouseByEmployeeID(ctx context.Context, pnsID sql.NullString) (GetSpouseByEmployeeIDRow, error)
-	ListUnitKerjaByNamaOrInduk(ctx context.Context, arg ListUnitKerjaByNamaOrIndukParams) ([]ListUnitKerjaByNamaOrIndukRow, error)
+	GetSpouseByEmployeeID(ctx context.Context, pnsID pgtype.Text) (GetSpouseByEmployeeIDRow, error)
+	GetUnitKerjaByNamaOrInduk(ctx context.Context, arg GetUnitKerjaByNamaOrIndukParams) ([]GetUnitKerjaByNamaOrIndukRow, error)
 }
 
 var _ Querier = (*Queries)(nil)

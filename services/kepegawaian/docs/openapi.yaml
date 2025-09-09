@@ -23,7 +23,115 @@ tags:
   - name: Penghargaan
   - name: Sertifikasi
   - name: Penugasan
+  - name: Golongan
+  - name: Unit Kerja
+  - name: Jenis Kenaikan Pangkat
 paths:
+  /v1/golongan:
+    get:
+      tags:
+        - Golongan
+      summary: List Golongan.
+      description: List golongan yang tersedia.
+      operationId: listGolongan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: integer
+                        nama:
+                          type: string
+                        nama_pangkat:
+                          type: string
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/jenis-kenaikan-pangkat:
+    get:
+      tags:
+        - Jenis Kenaikan Pangkat
+      summary: List jenis kenaikan pangkat.
+      description: List jenis kenaikan pangkat.
+      operationId: listJenisKenaikanPangkat
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: integer
+                        nama:
+                          type: string
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/unit-kerja:
+    get:
+      tags:
+        - Unit Kerja
+      summary: Daftar unit kerja.
+      description: Daftar unit kerja dengan fitur pencarian dan filter berdasarkan unit induk.
+      operationId: listUnitKerja
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+        - name: nama
+          in: query
+          description: Pencarian berdasarkan nama unit kerja
+          schema:
+            type: string
+        - name: unor_induk
+          in: query
+          description: Filter berdasarkan unit induk
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: string
+                        nama:
+                          type: string
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
   /v1/asesmen-nine-box:
     get:
       tags:

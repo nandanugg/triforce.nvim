@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	dbRepo "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
 )
 
@@ -163,5 +164,5 @@ func (r *repository) listAnak(ctx context.Context, userID int64) ([]keluarga, er
 }
 
 func (r *repository) GetAnakByEmployeeID(ctx context.Context, pnsID sql.NullString) ([]dbRepo.GetChildrenByEmployeeIDRow, error) {
-	return r.sqlc.GetChildrenByEmployeeID(ctx, pnsID)
+	return r.sqlc.GetChildrenByEmployeeID(ctx, pgtype.Text{String: pnsID.String, Valid: pnsID.Valid})
 }
