@@ -25,6 +25,8 @@ func TestLoad(t *testing.T) {
 		"NEXUS_KEYCLOAK_CLIENT_SECRET":            "some-secret",
 		"NEXUS_KEYCLOAK_REDIRECT_URI":             "http://portal.local/callback",
 		"NEXUS_KEYCLOAK_POST_LOGOUT_REDIRECT_URI": "http://portal.local/",
+		"NEXUS_KEYCLOAK_PRIVATE_KEY":              "my-private-key",
+		"NEXUS_KEYCLOAK_KID":                      "my-kid",
 	} {
 		t.Setenv(k, v)
 	}
@@ -52,6 +54,8 @@ func TestLoad(t *testing.T) {
 			ClientSecret:          "some-secret",
 			RedirectURI:           "http://portal.local/callback",
 			PostLogoutRedirectURI: "http://portal.local/",
+			PrivateKey:            "my-private-key",
+			KID:                   "my-kid",
 		},
 		LogLevel: slog.LevelWarn,
 	}, c)

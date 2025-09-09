@@ -85,6 +85,8 @@ paths:
                 properties:
                   data:
                     $ref: "#/components/schemas/tokenResponse"
+        "422":
+          description: User tidak ditemukan.
   /v1/auth/refresh-token:
     post:
       tags:
@@ -122,6 +124,8 @@ paths:
                 properties:
                   data:
                     $ref: "#/components/schemas/tokenResponse"
+        "422":
+          description: User tidak ditemukan.
   /v1/dokumen-pendukung:
     get:
       tags:
