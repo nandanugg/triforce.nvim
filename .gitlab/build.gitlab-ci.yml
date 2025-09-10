@@ -2,6 +2,9 @@ build-image-test:
   extends:
     - .build-image
     - .rules-image-test
+  before_script:
+    - export EXTRA_ARGS="--opt build-arg:CA_CRT=$CA_DIGI_CERT"
+    - !reference [.build-image, before_script]
   variables:
     AUTO_PUSH: false
 
@@ -9,3 +12,6 @@ build-image:
   extends:
     - .build-image
     - .rules-staging
+  before_script:
+    - export EXTRA_ARGS="--opt build-arg:CA_CRT=$CA_DIGI_CERT"
+    - !reference [.build-image, before_script]

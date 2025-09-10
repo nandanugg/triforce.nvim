@@ -12,6 +12,9 @@ RUN go build -o bin/portal ./services/portal
 
 FROM $CI_REGISTRY/alpine:3.22
 
+ARG CA_CRT=LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+RUN echo $CA_CRT | base64 -d >> /etc/ssl/certs/ca-certificates.crt
+
 WORKDIR /app
 
 COPY --from=builder /app/bin/* .
