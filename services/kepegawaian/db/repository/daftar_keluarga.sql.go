@@ -9,47 +9,63 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const getChildrenByEmployeeID = `-- name: GetChildrenByEmployeeID :many
+const listAnakByNip = `-- name: ListAnakByNip :many
 SELECT
+    a.id,
+    a.pasangan_id,
     a.nama,
     a.jenis_kelamin,
     a.tanggal_lahir,
-    pas.nama AS nama_pasangan,
+    a.nip,
     a.status_anak,
-    a.pns_id
-FROM
-    anak a
-LEFT JOIN
-    pasangan pas ON a.pasangan_id = pas.id
-WHERE
-    a.pns_id = $1
+    ROW_NUMBER() OVER (
+        PARTITION BY a.pns_id
+        ORDER BY
+            a.tanggal_lahir ASC NULLS LAST,
+            a.id ASC  -- tie-breaker for same date or nulls
+    ) AS anak_ke,
+    -- a.status_sekolah,
+    pas.nama AS nama_ibu_bapak
+    -- '' AS dokumen_pendukung
+FROM anak a
+JOIN pegawai pg ON a.pns_id = pg.pns_id
+LEFT JOIN pasangan pas ON a.pasangan_id = pas.id
+WHERE a.deleted_at IS NULL
+AND pg.nip_baru = $1
+ORDER BY a.pns_id, anak_ke
 `
 
-type GetChildrenByEmployeeIDRow struct {
+type ListAnakByNipRow struct {
+	ID           int64       `db:"id"`
+	PasanganID   pgtype.Int8 `db:"pasangan_id"`
 	Nama         pgtype.Text `db:"nama"`
 	JenisKelamin pgtype.Text `db:"jenis_kelamin"`
 	TanggalLahir pgtype.Date `db:"tanggal_lahir"`
-	NamaPasangan pgtype.Text `db:"nama_pasangan"`
+	Nip          pgtype.Text `db:"nip"`
 	StatusAnak   pgtype.Text `db:"status_anak"`
-	PnsID        pgtype.Text `db:"pns_id"`
+	AnakKe       int64       `db:"anak_ke"`
+	NamaIbuBapak pgtype.Text `db:"nama_ibu_bapak"`
 }
 
-func (q *Queries) GetChildrenByEmployeeID(ctx context.Context, pnsID pgtype.Text) ([]GetChildrenByEmployeeIDRow, error) {
-	rows, err := q.db.Query(ctx, getChildrenByEmployeeID, pnsID)
+func (q *Queries) ListAnakByNip(ctx context.Context, nipBaru pgtype.Text) ([]ListAnakByNipRow, error) {
+	rows, err := q.db.Query(ctx, listAnakByNip, nipBaru)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetChildrenByEmployeeIDRow
+	var items []ListAnakByNipRow
 	for rows.Next() {
-		var i GetChildrenByEmployeeIDRow
+		var i ListAnakByNipRow
 		if err := rows.Scan(
+			&i.ID,
+			&i.PasanganID,
 			&i.Nama,
 			&i.JenisKelamin,
 			&i.TanggalLahir,
-			&i.NamaPasangan,
+			&i.Nip,
 			&i.StatusAnak,
-			&i.PnsID,
+			&i.AnakKe,
+			&i.NamaIbuBapak,
 		); err != nil {
 			return nil, err
 		}
@@ -61,69 +77,52 @@ func (q *Queries) GetChildrenByEmployeeID(ctx context.Context, pnsID pgtype.Text
 	return items, nil
 }
 
-const getEmployeeFamilyData = `-- name: GetEmployeeFamilyData :one
+const listOrangTuaByNip = `-- name: ListOrangTuaByNip :many
 SELECT
-    p.nama AS nama_pegawai,
-    p.id AS pns_id
-FROM
-    pegawai p
-WHERE
-    p.id = $1
-`
-
-type GetEmployeeFamilyDataRow struct {
-	NamaPegawai pgtype.Text `db:"nama_pegawai"`
-	PnsID       int32       `db:"pns_id"`
-}
-
-func (q *Queries) GetEmployeeFamilyData(ctx context.Context, id int32) (GetEmployeeFamilyDataRow, error) {
-	row := q.db.QueryRow(ctx, getEmployeeFamilyData, id)
-	var i GetEmployeeFamilyDataRow
-	err := row.Scan(&i.NamaPegawai, &i.PnsID)
-	return i, err
-}
-
-const getParentsByEmployeeID = `-- name: GetParentsByEmployeeID :many
-SELECT
+    ot.id,
+    ot.hubungan,
     ot.nama,
     ot.tgl_meninggal,
     ot.no_dokumen AS nik,
-    ra.nama AS agama,
-    ot.hubungan,
-    ot.pns_id
-FROM
-    orang_tua ot
-LEFT JOIN
-    ref_agama ra ON ot.agama_id = ra.id
-WHERE
-    ot.pns_id = $1
+    ot.agama_id,
+    ot.akte_meninggal AS dokumen_pendukung,
+    ra.nama AS agama_nama
+FROM orang_tua ot
+JOIN pegawai pg ON ot.pns_id = pg.pns_id
+LEFT JOIN ref_agama ra ON ot.agama_id = ra.id
+WHERE ot.deleted_at IS NULL
+AND pg.nip_baru = $1
 `
 
-type GetParentsByEmployeeIDRow struct {
-	Nama         pgtype.Text `db:"nama"`
-	TglMeninggal pgtype.Date `db:"tgl_meninggal"`
-	Nik          pgtype.Text `db:"nik"`
-	Agama        pgtype.Text `db:"agama"`
-	Hubungan     pgtype.Int2 `db:"hubungan"`
-	PnsID        pgtype.Text `db:"pns_id"`
+type ListOrangTuaByNipRow struct {
+	ID               int32       `db:"id"`
+	Hubungan         pgtype.Int2 `db:"hubungan"`
+	Nama             pgtype.Text `db:"nama"`
+	TglMeninggal     pgtype.Date `db:"tgl_meninggal"`
+	Nik              pgtype.Text `db:"nik"`
+	AgamaID          pgtype.Int2 `db:"agama_id"`
+	DokumenPendukung pgtype.Text `db:"dokumen_pendukung"`
+	AgamaNama        pgtype.Text `db:"agama_nama"`
 }
 
-func (q *Queries) GetParentsByEmployeeID(ctx context.Context, pnsID pgtype.Text) ([]GetParentsByEmployeeIDRow, error) {
-	rows, err := q.db.Query(ctx, getParentsByEmployeeID, pnsID)
+func (q *Queries) ListOrangTuaByNip(ctx context.Context, nipBaru pgtype.Text) ([]ListOrangTuaByNipRow, error) {
+	rows, err := q.db.Query(ctx, listOrangTuaByNip, nipBaru)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetParentsByEmployeeIDRow
+	var items []ListOrangTuaByNipRow
 	for rows.Next() {
-		var i GetParentsByEmployeeIDRow
+		var i ListOrangTuaByNipRow
 		if err := rows.Scan(
+			&i.ID,
+			&i.Hubungan,
 			&i.Nama,
 			&i.TglMeninggal,
 			&i.Nik,
-			&i.Agama,
-			&i.Hubungan,
-			&i.PnsID,
+			&i.AgamaID,
+			&i.DokumenPendukung,
+			&i.AgamaNama,
 		); err != nil {
 			return nil, err
 		}
@@ -135,36 +134,59 @@ func (q *Queries) GetParentsByEmployeeID(ctx context.Context, pnsID pgtype.Text)
 	return items, nil
 }
 
-const getSpouseByEmployeeID = `-- name: GetSpouseByEmployeeID :one
+const listPasanganByNip = `-- name: ListPasanganByNip :many
 SELECT
-    p.nama,
+    p.id,
     p.pns,
+    p.nama,
+    p.tanggal_menikah,
+    p.nip AS nik,
     p.karsus AS nomor_karis,
     p.status,
-    p.pns_id
-FROM
-    pasangan p
-WHERE
-    p.pns_id = $1
+    ra.nama AS agama_nama
+FROM pasangan p
+JOIN pegawai pg ON p.pns_id = pg.pns_id  -- Get PNS record
+LEFT JOIN ref_agama ra ON pg.agama_id = ra.id  -- Get religion from PNS
+WHERE p.deleted_at IS NULL
+AND pg.nip_baru = $1
 `
 
-type GetSpouseByEmployeeIDRow struct {
-	Nama       pgtype.Text `db:"nama"`
-	Pns        pgtype.Int2 `db:"pns"`
-	NomorKaris pgtype.Text `db:"nomor_karis"`
-	Status     pgtype.Int2 `db:"status"`
-	PnsID      pgtype.Text `db:"pns_id"`
+type ListPasanganByNipRow struct {
+	ID             int64       `db:"id"`
+	Pns            pgtype.Int2 `db:"pns"`
+	Nama           pgtype.Text `db:"nama"`
+	TanggalMenikah pgtype.Date `db:"tanggal_menikah"`
+	Nik            pgtype.Text `db:"nik"`
+	NomorKaris     pgtype.Text `db:"nomor_karis"`
+	Status         pgtype.Int2 `db:"status"`
+	AgamaNama      pgtype.Text `db:"agama_nama"`
 }
 
-func (q *Queries) GetSpouseByEmployeeID(ctx context.Context, pnsID pgtype.Text) (GetSpouseByEmployeeIDRow, error) {
-	row := q.db.QueryRow(ctx, getSpouseByEmployeeID, pnsID)
-	var i GetSpouseByEmployeeIDRow
-	err := row.Scan(
-		&i.Nama,
-		&i.Pns,
-		&i.NomorKaris,
-		&i.Status,
-		&i.PnsID,
-	)
-	return i, err
+func (q *Queries) ListPasanganByNip(ctx context.Context, nipBaru pgtype.Text) ([]ListPasanganByNipRow, error) {
+	rows, err := q.db.Query(ctx, listPasanganByNip, nipBaru)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListPasanganByNipRow
+	for rows.Next() {
+		var i ListPasanganByNipRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Pns,
+			&i.Nama,
+			&i.TanggalMenikah,
+			&i.Nik,
+			&i.NomorKaris,
+			&i.Status,
+			&i.AgamaNama,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

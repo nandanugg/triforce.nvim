@@ -411,129 +411,28 @@ paths:
                 additionalProperties: false
                 properties:
                   data:
-                    type: array
-                    items:
-                      type: object
-                      additionalProperties: false
-                      properties:
-                        id:
-                          type: integer
-                        peran:
-                          type: string
-                          enum:
-                            - AYAH
-                            - IBU
-                            - ISTRI
-                            - SUAMI
-                            - ANAK
-                        nama:
-                          type: string
-                        tanggal_lahir:
-                          type: string
-  /v1/keluarga/anak:
-    get:
-      tags:
-        - Keluarga
-      summary: Lihat daftar anak.
-      description: >-
-        Lihat daftar anak dari user yang login.
-      operationId: listAnak
-      parameters:
-        - $ref: "#/components/parameters/authRequired"
-      responses:
-        "200":
-          description: Sukses.
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                properties:
-                  data:
-                    type: array
-                    items:
-                      type: object
-                      additionalProperties: false
-                      properties:
-                        id:
-                          type: integer
-                        peran:
-                          type: string
-                          enum:
-                            - ANAK
-                        nama:
-                          type: string
-                        tanggal_lahir:
-                          type: string
-  /v1/keluarga/orang-tua:
-    get:
-      tags:
-        - Keluarga
-      summary: Lihat daftar orang tua.
-      description: >-
-        Lihat daftar orang tua dari user yang login.
-      operationId: listOrangTua
-      parameters:
-        - $ref: "#/components/parameters/authRequired"
-      responses:
-        "200":
-          description: Sukses.
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                properties:
-                  data:
-                    type: array
-                    items:
-                      type: object
-                      additionalProperties: false
-                      properties:
-                        id:
-                          type: integer
-                        peran:
-                          type: string
-                          enum:
-                            - AYAH
-                            - IBU
-                        nama:
-                          type: string
-                        tanggal_lahir:
-                          type: string
-  /v1/keluarga/pasangan:
-    get:
-      tags:
-        - Keluarga
-      summary: Lihat daftar pasangan.
-      description: >-
-        Lihat daftar pasangan dari user yang login.
-      operationId: listPasangan
-      parameters:
-        - $ref: "#/components/parameters/authRequired"
-      responses:
-        "200":
-          description: Sukses.
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                properties:
-                  data:
-                    type: array
-                    items:
-                      type: object
-                      additionalProperties: false
-                      properties:
-                        id:
-                          type: integer
-                        peran:
-                          type: string
-                          enum:
-                            - ISTRI
-                            - SUAMI
-                        nama:
-                          type: string
-                        tanggal_lahir:
-                          type: string
+                    $ref: "#/components/schemas/keluarga"
+              example:
+                data:
+                  orang_tua:
+                    - nama: "John Doe"
+                      nik: "1234567890123456"
+                      agama: "Islam"
+                      hubungan: 1
+                      tanggal_meninggal: null
+                  pasangan:
+                    - nama: "Jane Doe"
+                      nik: "6543210987654321"
+                      agama: "Islam"
+                      status_nikah: 1
+                      tanggal_menikah: "2020-01-15T00:00:00Z"
+                  anak:
+                    - nama: "Alice Doe"
+                      nik: "1111222233334444"
+                      jenis_kelamin: "Perempuan"
+                      status_anak: "Kandung"
+                      tanggal_lahir: "2021-05-10T00:00:00Z"
+                      anak_ke: 1
   /v1/kenaikan-gaji-berkala:
     get:
       tags:
@@ -1181,3 +1080,89 @@ components:
           type: integer
           example: 100
           minimum: 0
+    keluarga:
+      type: object
+      additionalProperties: false
+      properties:
+        orang_tua:
+          type: array
+          items:
+            $ref: "#/components/schemas/orangTua"
+        pasangan:
+          type: array
+          items:
+            $ref: "#/components/schemas/pasangan"
+        anak:
+          type: array
+          items:
+            $ref: "#/components/schemas/anak"
+      required:
+        - orang_tua
+        - pasangan
+        - anak
+    orangTua:
+      type: object
+      additionalProperties: false
+      properties:
+        nama:
+          type: string
+          nullable: true
+        nik:
+          type: string
+          nullable: true
+        agama:
+          type: string
+          nullable: true
+        hubungan:
+          type: integer
+          nullable: true
+        tanggal_meninggal:
+          type: string
+          format: date-time
+          nullable: true
+    pasangan:
+      type: object
+      additionalProperties: false
+      properties:
+        nama:
+          type: string
+          nullable: true
+        nik:
+          type: string
+          nullable: true
+        agama:
+          type: string
+          nullable: true
+        status_nikah:
+          type: integer
+          nullable: true
+        tanggal_menikah:
+          type: string
+          format: date-time
+          nullable: true
+    anak:
+      type: object
+      additionalProperties: false
+      properties:
+        nama:
+          type: string
+          nullable: true
+        nik:
+          type: string
+          nullable: true
+        jenis_kelamin:
+          type: string
+          nullable: true
+        status_anak:
+          type: string
+          nullable: true
+        status_sekolah:
+          type: string
+          nullable: true
+        tanggal_lahir:
+          type: string
+          format: date-time
+          nullable: true
+        anak_ke:
+          type: integer
+          nullable: true

@@ -61,7 +61,7 @@ func main() {
 	jabatan.RegisterRoutes(e, dbRepository, mwAuth)
 	jenisjabatan.RegisterRoutes(e, dbRepository, mwAuth)
 	jeniskenaikanpangkat.RegisterRoutes(e, dbRepository, mwAuth)
-	keluarga.RegisterRoutes(e, db, mwAuth)
+	keluarga.RegisterRoutes(e, dbRepository, mwAuth)
 	kenaikangajiberkala.RegisterRoutes(e, db, mwAuth)
 	kepangkatan.RegisterRoutes(e, db, mwAuth)
 	kinerja.RegisterRoutes(e, db, mwAuth)
