@@ -109,7 +109,8 @@ func TestNewAuthMiddleware(t *testing.T) {
 				"Authorization": []string{generateHeader(jwt.MapClaims{
 					"nip":   "100",
 					"aud":   []string{"nexus", "testing"},
-					"roles": map[string]any{"kepegawaian": "admin", "portal": "pegawai"}},
+					"roles": map[string]any{"kepegawaian": "admin", "portal": "pegawai"},
+				},
 				)},
 			},
 			wantResponseCode: http.StatusOK,

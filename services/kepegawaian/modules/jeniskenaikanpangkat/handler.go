@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
 )
 
@@ -32,10 +33,7 @@ func (h *handler) listJenisKP(c echo.Context) error {
 		return err
 	}
 	ctx := c.Request().Context()
-	data, total, err := h.service.listJenisKP(ctx, listJenisKPParams{
-		Limit:  req.Limit,
-		Offset: req.Offset,
-	})
+	data, total, err := h.service.listJenisKP(ctx, listJenisKPParams(req))
 	if err != nil {
 		slog.ErrorContext(ctx, "Error getting list jenis kenaikan pangkat.", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)

@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
 )
 
@@ -33,10 +34,7 @@ func (h *handler) listRefGolongan(c echo.Context) error {
 	}
 	ctx := c.Request().Context()
 
-	data, total, err := h.service.listRefGolongan(ctx, listRefGolonganParams{
-		Limit:  req.Limit,
-		Offset: req.Offset,
-	})
+	data, total, err := h.service.listRefGolongan(ctx, listRefGolonganParams(req))
 	if err != nil {
 		slog.ErrorContext(ctx, "Error getting list golongan.", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)

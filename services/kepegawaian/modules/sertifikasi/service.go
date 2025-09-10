@@ -10,6 +10,7 @@ import (
 
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v5/pgtype"
+
 	sqlc "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
 )
 
@@ -76,7 +77,7 @@ func (s *service) getBerkas(ctx context.Context, nip string, id int64) (string, 
 		return "", nil, fmt.Errorf("decode file base64: %w", err)
 	}
 
-	mimeType := "application/octet-stream"
+	var mimeType string
 	if strings.HasPrefix(res.String, "data:") {
 		header := strings.Split(parts[0], ";")[0]
 		mimeType = strings.TrimPrefix(header, "data:")

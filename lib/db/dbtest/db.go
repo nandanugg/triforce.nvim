@@ -98,7 +98,8 @@ func NewPgxPool(t *testing.T, migrationsFS embed.FS) *pgxpool.Pool {
 	// Apply migration files:
 	applyMigrations(t, user, password, dbname, schema, migrationsFS)
 	pgxPool, err := pgxpool.New(context.Background(), fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s", testDBHost, testDBPort, user, password, dbname))
-	_, err = pgxPool.Exec(context.Background(), fmt.Sprintf("set search_path to %s", schema))
+	require.NoError(t, err)
+	_, err = pgxPool.Exec(context.Background(), "set search_path to "+schema)
 	require.NoError(t, err)
 	return pgxPool
 }
@@ -164,7 +165,6 @@ func applyMigrations(t *testing.T, user, password, dbname, schema string, migrat
 }
 
 func getMigrationUpSQLs(fs embed.FS) ([]string, error) {
-
 	dir, err := fs.ReadDir(".")
 	if err != nil {
 		return nil, fmt.Errorf("read migrations dir: %w", err)

@@ -21,7 +21,7 @@ func New(host string, port uint, user, password, dbname, schema string) (*sql.DB
 	}
 
 	connConfig.AfterConnect = func(ctx context.Context, conn *pgx.Conn) error {
-		_, errExec := conn.Exec(ctx, fmt.Sprintf("SET search_path TO %s", schema))
+		_, errExec := conn.Exec(ctx, "SET search_path TO "+schema)
 		return errExec
 	}
 
@@ -51,7 +51,7 @@ func NewPgxPool(host string, port uint, user, password, dbname, schema string) (
 	}
 
 	connConfig.AfterConnect = func(ctx context.Context, conn *pgx.Conn) error {
-		_, errExec := conn.Exec(ctx, fmt.Sprintf("SET search_path TO %s", schema))
+		_, errExec := conn.Exec(ctx, "SET search_path TO "+schema)
 		return errExec
 	}
 

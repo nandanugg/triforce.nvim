@@ -4,13 +4,14 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
+	"errors"
 	"fmt"
 )
 
 func LoadRSAPrivateKey(privateKey string) (*rsa.PrivateKey, error) {
 	block, _ := pem.Decode([]byte(privateKey))
 	if block == nil {
-		return nil, fmt.Errorf("failed to decode PEM block containing private key")
+		return nil, errors.New("failed to decode PEM block containing private key")
 	}
 
 	switch block.Type {
@@ -30,7 +31,7 @@ func LoadRSAPrivateKey(privateKey string) (*rsa.PrivateKey, error) {
 		}
 		rsaKey, ok := key.(*rsa.PrivateKey)
 		if !ok {
-			return nil, fmt.Errorf("not RSA private key")
+			return nil, errors.New("not RSA private key")
 		}
 		return rsaKey, nil
 

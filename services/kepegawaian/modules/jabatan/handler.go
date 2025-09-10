@@ -34,10 +34,7 @@ func (h *handler) listJabatan(c echo.Context) error {
 	}
 
 	ctx := c.Request().Context()
-	data, total, err := h.service.listJabatan(ctx, listParams{
-		Limit:  req.Limit,
-		Offset: req.Offset,
-	})
+	data, total, err := h.service.listJabatan(ctx, listParams(req))
 	if err != nil {
 		slog.ErrorContext(ctx, "Error getting list jabatan.", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)

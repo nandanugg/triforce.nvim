@@ -152,7 +152,7 @@ func Test_handler_GetJenisKP(t *testing.T) {
 			_, err := pgxconn.Exec(context.Background(), tt.dbData)
 			require.NoError(t, err)
 
-			req := httptest.NewRequest(http.MethodGet, "/v1/kenaikan-pangkat", nil)
+			req := httptest.NewRequest(http.MethodGet, "/v1/jenis-kenaikan-pangkat", nil)
 			req.URL.RawQuery = tt.requestQuery.Encode()
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
