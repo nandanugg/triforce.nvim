@@ -13,7 +13,7 @@ type Querier interface {
 	CountRefGolongan(ctx context.Context) (int64, error)
 	CountRefJabatan(ctx context.Context) (int64, error)
 	CountRefJenisJabatan(ctx context.Context) (int64, error)
-	CountRiwayatJabatan(ctx context.Context) (int64, error)
+	CountRiwayatJabatan(ctx context.Context, pnsNip string) (int64, error)
 	CountRiwayatSertifikasi(ctx context.Context, nip pgtype.Text) (int64, error)
 	CountUnitKerja(ctx context.Context, arg CountUnitKerjaParams) (int64, error)
 	GetBerkasRiwayatSertifikasi(ctx context.Context, arg GetBerkasRiwayatSertifikasiParams) (pgtype.Text, error)

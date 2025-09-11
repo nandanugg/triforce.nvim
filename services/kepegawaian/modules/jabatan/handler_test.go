@@ -144,7 +144,8 @@ func Test_handler_listRiwayatJabatan(t *testing.T) {
 
 		insert into riwayat_jabatan(id, pns_nip, jenis_jabatan_id, jabatan_id, tmt_jabatan, no_sk, tanggal_sk, satuan_kerja_id, unor_id, kelas_jabatan_id, periode_jabatan_start_date, periode_jabatan_end_date) values
 		(1, '41', 1, 11, '2025-01-01', '1234567890', '2025-01-01', 1, 1, 1, '2024-01-01', '2024-12-31'),
-		(2, '41', 2, 12, '2025-02-01', '2234567890', '2025-02-01', 2, 2, 2, '2025-01-01', '2025-12-31');
+		(2, '41', 2, 12, '2025-02-01', '2234567890', '2025-02-01', 2, 2, 2, '2025-01-01', '2025-12-31'),
+		(3, '42', 2, 12, '2025-02-01', '2234567890', '2025-02-01', 2, 2, 2, '2025-01-01', '2025-12-31')
 	`
 
 	tests := []struct {

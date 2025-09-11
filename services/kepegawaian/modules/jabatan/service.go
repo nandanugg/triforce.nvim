@@ -13,7 +13,7 @@ type repository interface {
 	ListRefJabatan(ctx context.Context, arg repo.ListRefJabatanParams) ([]repo.ListRefJabatanRow, error)
 	CountRefJabatan(ctx context.Context) (int64, error)
 	ListRiwayatJabatan(ctx context.Context, arg repo.ListRiwayatJabatanParams) ([]repo.ListRiwayatJabatanRow, error)
-	CountRiwayatJabatan(ctx context.Context) (int64, error)
+	CountRiwayatJabatan(ctx context.Context, pnsNip string) (int64, error)
 }
 
 type service struct {
@@ -70,7 +70,7 @@ func (s *service) listRiwayatJabatan(ctx context.Context, arg listRiwayatJabatan
 		return nil, 0, fmt.Errorf("repo list: %w", err)
 	}
 
-	count, err := s.repo.CountRiwayatJabatan(ctx)
+	count, err := s.repo.CountRiwayatJabatan(ctx, arg.NIP)
 	if err != nil {
 		return nil, 0, fmt.Errorf("repo count: %w", err)
 	}
