@@ -26,7 +26,7 @@ build service:
 	go build -trimpath -ldflags="-s -w" ./services/{{service}}
 
 db-migrate-new service migration_name:
-	migrate create -ext sql -dir services/{{service}}/dbmigrations -seq {{migration_name}}
+	migrate create -ext sql -dir services/{{service}}/db/migrations -seq {{migration_name}}
 
 db-create-schema-kepegawaian:
 	psql "host=$NEXUS_KEPEGAWAIAN_DB_HOST port=$NEXUS_KEPEGAWAIAN_DB_PORT user=$NEXUS_KEPEGAWAIAN_DB_USER password=$NEXUS_KEPEGAWAIAN_DB_PASSWORD dbname=$NEXUS_KEPEGAWAIAN_DB_NAME" \

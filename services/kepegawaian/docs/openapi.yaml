@@ -1039,6 +1039,62 @@ paths:
                           type: string
                         nama:
                           type: string
+  /v1/riwayat-jabatan:
+    get:
+      tags:
+        - Jabatan
+      summary: Lihat riwayat jabatan.
+      description: >-
+        Lihat riwayat jabatan dari user yang login, urut berdasarkan TMT.
+      operationId: listRiwayatJabatan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: integer
+                        jenis_jabatan:
+                          type: string
+                        nama_jabatan:
+                          type: string
+                        tmt_jabatan:
+                          type: string
+                          format: date
+                        no_sk:
+                          type: string
+                        tanggal_sk:
+                          type: string
+                          format: date
+                        satuan_kerja:
+                          type: string
+                        unit_organisasi:
+                          type: string
+                        status_plt:
+                          type: boolean
+                        kelas_jabatan:
+                          type: string
+                        periode_jabatan_start_date:
+                          type: string
+                          format: date
+                        periode_jabatan_end_date:
+                          type: string
+                          format: date
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
 components:
   parameters:
     authRequired:

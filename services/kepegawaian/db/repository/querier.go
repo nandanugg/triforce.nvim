@@ -13,6 +13,7 @@ type Querier interface {
 	CountRefGolongan(ctx context.Context) (int64, error)
 	CountRefJabatan(ctx context.Context) (int64, error)
 	CountRefJenisJabatan(ctx context.Context) (int64, error)
+	CountRiwayatJabatan(ctx context.Context) (int64, error)
 	CountRiwayatSertifikasi(ctx context.Context, nip pgtype.Text) (int64, error)
 	CountUnitKerja(ctx context.Context, arg CountUnitKerjaParams) (int64, error)
 	GetBerkasRiwayatSertifikasi(ctx context.Context, arg GetBerkasRiwayatSertifikasiParams) (pgtype.Text, error)
@@ -22,8 +23,10 @@ type Querier interface {
 	ListAnakByNip(ctx context.Context, nipBaru pgtype.Text) ([]ListAnakByNipRow, error)
 	ListOrangTuaByNip(ctx context.Context, nipBaru pgtype.Text) ([]ListOrangTuaByNipRow, error)
 	ListPasanganByNip(ctx context.Context, nipBaru pgtype.Text) ([]ListPasanganByNipRow, error)
+	ListPendidikanFormal(ctx context.Context, pnsID pgtype.Text) ([]ListPendidikanFormalRow, error)
 	ListRefJabatan(ctx context.Context, arg ListRefJabatanParams) ([]ListRefJabatanRow, error)
 	ListRefJenisJabatan(ctx context.Context, arg ListRefJenisJabatanParams) ([]ListRefJenisJabatanRow, error)
+	ListRiwayatJabatan(ctx context.Context, arg ListRiwayatJabatanParams) ([]ListRiwayatJabatanRow, error)
 	ListRiwayatSertifikasi(ctx context.Context, arg ListRiwayatSertifikasiParams) ([]ListRiwayatSertifikasiRow, error)
 }
 

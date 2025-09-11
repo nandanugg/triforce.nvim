@@ -342,6 +342,14 @@ type RefKedudukanHukum struct {
 	DeletedAt  pgtype.Timestamptz `db:"deleted_at"`
 }
 
+type RefKelasJabatan struct {
+	ID               int32            `db:"id"`
+	KelasJabatan     pgtype.Text      `db:"kelas_jabatan"`
+	TunjanganKinerja pgtype.Int8      `db:"tunjangan_kinerja"`
+	CreatedAt        pgtype.Timestamp `db:"created_at"`
+	UpdatedAt        pgtype.Timestamp `db:"updated_at"`
+}
+
 type RefKpkn struct {
 	ID        string             `db:"id"`
 	Nama      pgtype.Text        `db:"nama"`
@@ -522,39 +530,43 @@ type RiwayatHukdi struct {
 }
 
 type RiwayatJabatan struct {
-	BknID          pgtype.Text        `db:"bkn_id"`
-	PnsID          pgtype.Text        `db:"pns_id"`
-	PnsNip         pgtype.Text        `db:"pns_nip"`
-	PnsNama        pgtype.Text        `db:"pns_nama"`
-	UnorID         pgtype.Text        `db:"unor_id"`
-	Unor           pgtype.Text        `db:"unor"`
-	JenisJabatanID pgtype.Text        `db:"jenis_jabatan_id"`
-	JenisJabatan   pgtype.Text        `db:"jenis_jabatan"`
-	JabatanID      pgtype.Text        `db:"jabatan_id"`
-	NamaJabatan    pgtype.Text        `db:"nama_jabatan"`
-	EselonID       pgtype.Text        `db:"eselon_id"`
-	Eselon         pgtype.Text        `db:"eselon"`
-	TmtJabatan     pgtype.Date        `db:"tmt_jabatan"`
-	NoSk           pgtype.Text        `db:"no_sk"`
-	TanggalSk      pgtype.Date        `db:"tanggal_sk"`
-	SatuanKerjaID  pgtype.Text        `db:"satuan_kerja_id"`
-	TmtPelantikan  pgtype.Date        `db:"tmt_pelantikan"`
-	IsActive       pgtype.Int2        `db:"is_active"`
-	Eselon1        pgtype.Text        `db:"eselon1"`
-	Eselon2        pgtype.Text        `db:"eselon2"`
-	Eselon3        pgtype.Text        `db:"eselon3"`
-	Eselon4        pgtype.Text        `db:"eselon4"`
-	ID             int64              `db:"id"`
-	Catatan        pgtype.Text        `db:"catatan"`
-	JenisSk        pgtype.Text        `db:"jenis_sk"`
-	StatusSatker   pgtype.Int4        `db:"status_satker"`
-	StatusBiro     pgtype.Int4        `db:"status_biro"`
-	JabatanIDBkn   pgtype.Text        `db:"jabatan_id_bkn"`
-	UnorIDBkn      pgtype.Text        `db:"unor_id_bkn"`
-	TabelMutasiID  pgtype.Int8        `db:"tabel_mutasi_id"`
-	CreatedAt      pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt      pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt      pgtype.Timestamptz `db:"deleted_at"`
+	BknID                   pgtype.Text        `db:"bkn_id"`
+	PnsID                   pgtype.Text        `db:"pns_id"`
+	PnsNip                  pgtype.Text        `db:"pns_nip"`
+	PnsNama                 pgtype.Text        `db:"pns_nama"`
+	UnorID                  pgtype.Text        `db:"unor_id"`
+	Unor                    pgtype.Text        `db:"unor"`
+	JenisJabatanID          pgtype.Int4        `db:"jenis_jabatan_id"`
+	JenisJabatan            pgtype.Text        `db:"jenis_jabatan"`
+	JabatanID               pgtype.Int4        `db:"jabatan_id"`
+	NamaJabatan             pgtype.Text        `db:"nama_jabatan"`
+	EselonID                pgtype.Text        `db:"eselon_id"`
+	Eselon                  pgtype.Text        `db:"eselon"`
+	TmtJabatan              pgtype.Date        `db:"tmt_jabatan"`
+	NoSk                    pgtype.Text        `db:"no_sk"`
+	TanggalSk               pgtype.Date        `db:"tanggal_sk"`
+	SatuanKerjaID           pgtype.Text        `db:"satuan_kerja_id"`
+	TmtPelantikan           pgtype.Date        `db:"tmt_pelantikan"`
+	IsActive                pgtype.Int2        `db:"is_active"`
+	Eselon1                 pgtype.Text        `db:"eselon1"`
+	Eselon2                 pgtype.Text        `db:"eselon2"`
+	Eselon3                 pgtype.Text        `db:"eselon3"`
+	Eselon4                 pgtype.Text        `db:"eselon4"`
+	ID                      int64              `db:"id"`
+	Catatan                 pgtype.Text        `db:"catatan"`
+	JenisSk                 pgtype.Text        `db:"jenis_sk"`
+	StatusSatker            pgtype.Int4        `db:"status_satker"`
+	StatusBiro              pgtype.Int4        `db:"status_biro"`
+	JabatanIDBkn            pgtype.Text        `db:"jabatan_id_bkn"`
+	UnorIDBkn               pgtype.Text        `db:"unor_id_bkn"`
+	TabelMutasiID           pgtype.Int8        `db:"tabel_mutasi_id"`
+	CreatedAt               pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt               pgtype.Timestamptz `db:"updated_at"`
+	DeletedAt               pgtype.Timestamptz `db:"deleted_at"`
+	StatusPlt               pgtype.Bool        `db:"status_plt"`
+	KelasJabatanID          pgtype.Int4        `db:"kelas_jabatan_id"`
+	PeriodeJabatanStartDate pgtype.Date        `db:"periode_jabatan_start_date"`
+	PeriodeJabatanEndDate   pgtype.Date        `db:"periode_jabatan_end_date"`
 }
 
 type RiwayatKgb struct {
