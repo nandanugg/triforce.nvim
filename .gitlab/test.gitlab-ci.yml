@@ -3,7 +3,7 @@ test:
     - .rules-merge-request
   needs: []
   stage: test
-  image: $CI_REGISTRY_DOCKER/golang:1.25.0-alpine3.22
+  image: $CI_REGISTRY_UTILITY/go-testkit:1.25.0-patch1
   services:
     - name: $CI_REGISTRY_DOCKER/postgres:17-alpine
       alias: postgres
@@ -30,6 +30,7 @@ test:
     NEXUS_TEST_DB_SUPERUSER: postgres
   script:
     - mkdir -p .go
+    - golangci-lint run --timeout=10m
     - go test ./...
   cache:
     when: always
@@ -38,5 +39,18 @@ test:
         - go.sum
     paths:
       - .go
-  # TODO: hapus setelah integrasi auth selesai dibuat.
-  allow_failure: true
+
+validate-api-doc:
+  needs: []
+  stage: test
+  image: $CI_REGISTRY_UTILITY/go-testkit:1.25.0-patch1
+  rules:
+  - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    changes:
+      compare_to: main
+      paths:
+        - services/kepegawaian/docs/openapi.yaml
+        - services/portal/docs/openapi.yaml
+        - .spectral.yaml
+  script:
+    - spectral lint --fail-severity=warn services/kepegawaian/docs/openapi.yaml services/portal/docs/openapi.yaml

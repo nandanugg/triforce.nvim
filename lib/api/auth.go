@@ -1,7 +1,11 @@
 package api
 
 import (
+	"errors"
 	"fmt"
+	"net/http"
+	"slices"
+	"strings"
 
 	"github.com/MicahParks/keyfunc/v3"
 	"github.com/golang-jwt/jwt/v5"
@@ -42,49 +46,49 @@ func NewAuthKeyfunc(host, realm, audience string) (*Keyfunc, error) {
 func NewAuthMiddleware(service string, keyfunc *Keyfunc) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			// header := c.Request().Header.Get("Authorization")
-			// if !strings.HasPrefix(header, "Bearer ") {
-			// 	return echo.NewHTTPError(http.StatusUnauthorized, "token otentikasi tidak valid")
-			// }
-			//
-			// token := strings.TrimPrefix(header, "Bearer ")
-			// claims := jwt.MapClaims{}
-			// _, err := jwt.ParseWithClaims(token, &claims, keyfunc.Keyfunc)
-			// if err != nil {
-			// 	msg := "akses ditolak"
-			// 	switch {
-			// 	case errors.Is(err, jwt.ErrTokenMalformed):
-			// 		msg = "token otentikasi tidak valid"
-			// 	case errors.Is(err, jwt.ErrTokenExpired):
-			// 		msg = "token otentikasi sudah kedaluwarsa"
-			// 	case errors.Is(err, jwt.ErrTokenSignatureInvalid):
-			// 		msg = "signature token otentikasi tidak valid"
-			// 	}
-			// 	return echo.NewHTTPError(http.StatusUnauthorized, msg)
-			// }
-			//
-			// switch aud := claims["aud"].(type) {
-			// case string:
-			// 	if aud != keyfunc.Audience {
-			// 		return echo.NewHTTPError(http.StatusUnauthorized, "audience tidak valid")
-			// 	}
-			// case []any:
-			// 	if !slices.Contains(aud, any(keyfunc.Audience)) {
-			// 		return echo.NewHTTPError(http.StatusUnauthorized, "audience tidak valid")
-			// 	}
-			// default:
-			// 	return echo.NewHTTPError(http.StatusUnauthorized, "audience tidak valid")
-			// }
-			//
-			// nip, ok := claims["nip"].(string)
-			// if !ok {
-			// 	return echo.NewHTTPError(http.StatusUnauthorized, "nip tidak valid")
-			// }
+			header := c.Request().Header.Get("Authorization")
+			if !strings.HasPrefix(header, "Bearer ") {
+				return echo.NewHTTPError(http.StatusUnauthorized, "token otentikasi tidak valid")
+			}
 
-			user := User{NIP: "198501012020011001"}
-			// if roles, ok := claims["roles"].(map[string]any); ok {
-			// 	user.Role, _ = roles[service].(string)
-			// }
+			token := strings.TrimPrefix(header, "Bearer ")
+			claims := jwt.MapClaims{}
+			_, err := jwt.ParseWithClaims(token, &claims, keyfunc.Keyfunc)
+			if err != nil {
+				msg := "akses ditolak"
+				switch {
+				case errors.Is(err, jwt.ErrTokenMalformed):
+					msg = "token otentikasi tidak valid"
+				case errors.Is(err, jwt.ErrTokenExpired):
+					msg = "token otentikasi sudah kedaluwarsa"
+				case errors.Is(err, jwt.ErrTokenSignatureInvalid):
+					msg = "signature token otentikasi tidak valid"
+				}
+				return echo.NewHTTPError(http.StatusUnauthorized, msg)
+			}
+
+			switch aud := claims["aud"].(type) {
+			case string:
+				if aud != keyfunc.Audience {
+					return echo.NewHTTPError(http.StatusUnauthorized, "audience tidak valid")
+				}
+			case []any:
+				if !slices.Contains(aud, any(keyfunc.Audience)) {
+					return echo.NewHTTPError(http.StatusUnauthorized, "audience tidak valid")
+				}
+			default:
+				return echo.NewHTTPError(http.StatusUnauthorized, "audience tidak valid")
+			}
+
+			nip, ok := claims["nip"].(string)
+			if !ok {
+				return echo.NewHTTPError(http.StatusUnauthorized, "nip tidak valid")
+			}
+
+			user := User{NIP: nip}
+			if roles, ok := claims["roles"].(map[string]any); ok {
+				user.Role, _ = roles[service].(string)
+			}
 			c.Set(contextKeyUser, &user)
 
 			return next(c)
