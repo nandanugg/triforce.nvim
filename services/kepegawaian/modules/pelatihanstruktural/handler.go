@@ -17,31 +17,18 @@ func newHandler(s *service) *handler {
 	return &handler{service: s}
 }
 
-type listRequest struct {
-	Limit  uint `query:"limit"`
-	Offset uint `query:"offset"`
-}
-
 type listResponse struct {
 	Data []pelatihanStruktural `json:"data"`
-	Meta api.MetaPagination    `json:"meta"`
 }
 
 func (h *handler) list(c echo.Context) error {
-	var req listRequest
-	if err := c.Bind(&req); err != nil {
-		return err
-	}
-
-	ctx := c.Request().Context()
-	data, total, err := h.service.list(ctx, api.CurrentUser(c).ID, req.Limit, req.Offset)
+	data, err := h.service.list(c.Request().Context(), api.CurrentUser(c).NIP)
 	if err != nil {
-		slog.ErrorContext(ctx, "Error getting list pelatihan struktural.", "error", err)
+		slog.ErrorContext(c.Request().Context(), "Error getting list pelatihan struktural.", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
 	return c.JSON(http.StatusOK, listResponse{
 		Data: data,
-		Meta: api.MetaPagination{Limit: req.Limit, Offset: req.Offset, Total: total},
 	})
 }

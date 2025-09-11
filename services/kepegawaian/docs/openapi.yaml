@@ -768,14 +768,13 @@ paths:
       operationId: listPelatihanStruktural
       parameters:
         - $ref: "#/components/parameters/authRequired"
-        - $ref: "#/components/parameters/limit"
-        - $ref: "#/components/parameters/offset"
       responses:
         "200":
           description: Sukses.
           content:
             application/json:
               schema:
+                type: object
                 additionalProperties: false
                 properties:
                   data:
@@ -785,18 +784,35 @@ paths:
                       additionalProperties: false
                       properties:
                         id:
-                          type: string
+                          type: integer
+                          example: 1
                         nama_diklat:
                           type: string
-                        nomor:
+                          example: "Pelatihan Kepemimpinan Administrator (PKA)"
+                        jenis_diklat:
                           type: string
-                        tanggal:
+                          example: "Struktural"
+                        nomor_sertifikat:
                           type: string
-                          format: date
+                          example: "LAN-PKA-2023-00123"
+                        istitusi_penyelenggara:
+                          type: string
+                          example: "Lembaga Administrasi Negara (LAN)"
                         tahun:
                           type: integer
-                  meta:
-                    $ref: "#/components/schemas/metaPagination"
+                          example: 2023
+                        durasi:
+                          type: integer
+                          description: "Durasi pelatihan dalam jam"
+                          example: 900
+                        tanggal_mulai:
+                          type: string
+                          format: date-time
+                          example: "2023-03-15T00:00:00Z"
+                        tanggal_selesai:
+                          type: string
+                          format: date-time
+                          example: "2023-06-20T00:00:00Z"
   /v1/pelatihan-teknis:
     get:
       tags:

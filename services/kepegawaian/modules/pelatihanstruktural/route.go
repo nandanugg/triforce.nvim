@@ -1,15 +1,15 @@
 package pelatihanstruktural
 
 import (
-	"database/sql"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+
+	dbRepo "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
 )
 
-func RegisterRoutes(e *echo.Echo, db *sql.DB, mwAuth echo.MiddlewareFunc) {
-	r := newRepository(db)
-	s := newService(r)
+func RegisterRoutes(e *echo.Echo, db dbRepo.Querier, mwAuth echo.MiddlewareFunc) {
+	s := newService(db)
 	h := newHandler(s)
 
 	e.Add(http.MethodGet, "/v1/pelatihan-struktural", h.list, mwAuth)
