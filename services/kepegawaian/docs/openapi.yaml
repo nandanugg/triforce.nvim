@@ -282,7 +282,7 @@ paths:
                         type: string
                       gelar_belakang:
                         type: string
-  /v1/hukuman-disiplin:
+  /v1/riwayat-hukuman-disiplin:
     get:
       tags:
         - Hukuman Disiplin
@@ -321,12 +321,40 @@ paths:
                         tanggal_mulai:
                           type: string
                           format: date
+                        tanggal_akhir:
+                          type: string
+                          format: date
                         masa_tahun:
                           type: integer
                         masa_bulan:
                           type: integer
                   meta:
                     $ref: "#/components/schemas/metaPagination"
+  /v1/riwayat-hukuman-disiplin/{id}/berkas:
+    get:
+      tags:
+        - Hukuman Disiplin
+      summary: Lihat berkas riwayat hukuman disiplin.
+      description: >-
+        Lihat berkas riwayat hukuman disiplin berdasarkan id hukuman disiplin.
+      operationId: getBerkasHukumanDisiplin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Hukuman Disiplin tidak ditemukan atau User tidak mempunyai akses.
   /v1/jabatan:
     get:
       tags:

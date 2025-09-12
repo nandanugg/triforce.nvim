@@ -2,15 +2,13 @@ package sertifikasi
 
 import (
 	"context"
-	"encoding/base64"
 	"errors"
 	"fmt"
-	"net/http"
-	"strings"
 
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v5/pgtype"
 
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
 	sqlc "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
 )
 
@@ -69,21 +67,5 @@ func (s *service) getBerkas(ctx context.Context, nip string, id int64) (string, 
 		return "", nil, fmt.Errorf("repo get berkas: %w", err)
 	}
 
-	parts := strings.SplitN(res.String, ",", 2)
-	rawBase64 := parts[len(parts)-1]
-
-	decoded, err := base64.StdEncoding.DecodeString(rawBase64)
-	if err != nil {
-		return "", nil, fmt.Errorf("decode file base64: %w", err)
-	}
-
-	var mimeType string
-	if strings.HasPrefix(res.String, "data:") {
-		header := strings.Split(parts[0], ";")[0]
-		mimeType = strings.TrimPrefix(header, "data:")
-	} else {
-		mimeType = http.DetectContentType(decoded)
-	}
-
-	return mimeType, decoded, nil
+	return api.GetMimetypeAndDecodedData(res.String)
 }

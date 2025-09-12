@@ -29,6 +29,7 @@ services:
       KC_DB_URL: jdbc:postgresql://keycloak_postgres:5432/keycloak
       KC_DB_USERNAME: postgres
       KC_DB_PASSWORD: postgres
+      KC_HTTP_ENABLED: true
     depends_on:
       - keycloak_postgres
     networks:

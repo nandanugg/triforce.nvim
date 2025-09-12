@@ -8,6 +8,7 @@ type hukumanDisiplin struct {
 	NomorSK      string  `json:"nomor_sk"`
 	TanggalSK    db.Date `json:"tanggal_sk"`
 	TanggalMulai db.Date `json:"tanggal_mulai"`
+	TanggalAkhir db.Date `json:"tanggal_akhir"`
 	MasaTahun    int     `json:"masa_tahun"`
 	MasaBulan    int     `json:"masa_bulan"`
 }

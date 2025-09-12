@@ -57,7 +57,7 @@ func main() {
 	asesmenninebox.RegisterRoutes(e, db, mwAuth)
 	golongan.RegisterRoutes(e, dbRepository, mwAuth)
 	datapribadi.RegisterRoutes(e, db, mwAuth)
-	hukumandisiplin.RegisterRoutes(e, db, mwAuth)
+	hukumandisiplin.RegisterRoutes(e, dbRepository, mwAuth)
 	jabatan.RegisterRoutes(e, dbRepository, mwAuth)
 	jenisjabatan.RegisterRoutes(e, dbRepository, mwAuth)
 	jeniskenaikanpangkat.RegisterRoutes(e, dbRepository, mwAuth)
