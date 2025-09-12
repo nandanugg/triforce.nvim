@@ -313,6 +313,10 @@ paths:
                           type: integer
                         jenis_hukuman:
                           type: string
+                        nama_golongan:
+                          type: string
+                        nama_pangkat:
+                          type: string
                         nomor_sk:
                           type: string
                         tanggal_sk:

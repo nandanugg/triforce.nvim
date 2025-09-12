@@ -34,6 +34,11 @@ func Test_handler_list(t *testing.T) {
 		INSERT INTO pegawai (pns_id, nip_baru, nama)
 		VALUES ('id1', '198765432100001', 'Budi');
 
+		INSERT INTO ref_golongan (id, nama, nama_pangkat, nama_2, gol, gol_pppk, deleted_at)
+		VALUES
+			(1, 'I/a', 'Juru Muda', 'Ia', 1, 'I', NULL),
+			(2, 'II/a', 'Pengatur Muda', 'IIa', 2, 'II', '2023-02-20');
+
 		INSERT INTO riwayat_hukdis (
 			pns_id, pns_nip, nama, golongan_id, nama_golongan, 
 			jenis_hukuman_id, nama_jenis_hukuman, sk_nomor, sk_tanggal, 
@@ -44,11 +49,12 @@ func Test_handler_list(t *testing.T) {
 		VALUES
 		('id1','198765432100001','Budi',1,'I/a',1,'Snapshotted Jenis Hukuman 1','SK1','2023-01-15','2023-01-20',0,1,'2023-02-20',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 		('id1','198765432100001','Budi',1,'I/a',1,NULL,'SK2','2023-03-10','2023-03-15',0,2,'2023-05-15',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-		('id1','198765432100001','Budi',2,'II/a',1,NULL,'SK3','2023-06-01','2023-06-10',1,0,'2024-06-10',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-		('id1','198765432100001','Budi',2,'II/b',1,NULL,'SK4','2023-09-01','2023-09-15',2,0,'2025-09-15',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-		('id1','198765432100001','Budi',3,'III/a',2,NULL,'SK5','2023-12-01','2023-12-10',3,0,'2026-12-10',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-		('id1','198765432100001','Budi',3,'III/a',3,NULL,'SK6','2023-12-02','2023-12-11',3,0,'2026-12-11',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-		('id1','198765432100001','Budi',1,'III/a',3,NULL,'SK7','2023-12-03','2023-12-12',3,0,'2026-12-12',NULL,NULL,NULL,NULL,NULL,NULL,'2023-02-20');
+		('id1','198765432100001','Budi',1,'I/a',1,NULL,'SK3','2023-06-01','2023-06-10',1,0,'2024-06-10',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+		('id1','198765432100001','Budi',1,'I/a',1,NULL,'SK4','2023-09-01','2023-09-15',2,0,'2025-09-15',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+		('id1','198765432100001','Budi',1,'I/a',2,NULL,'SK5','2023-12-01','2023-12-10',3,0,'2026-12-10',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+		('id1','198765432100001','Budi',1,'I/a',3,NULL,'SK6','2023-12-02','2023-12-11',3,0,'2026-12-11',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+		('id1','198765432100001','Budi',1,'I/a',3,NULL,'SK7','2023-12-03','2023-12-12',3,0,'2026-12-12',NULL,NULL,NULL,NULL,NULL,NULL,'2023-02-20'),
+		('id1','198765432100001','Budi',2,'I/a',1,NULL,'SK8','2023-12-04','2023-12-13',3,0,'2026-12-13',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 	`
 
 	tests := []struct {
@@ -68,8 +74,22 @@ func Test_handler_list(t *testing.T) {
 			{
 				"data": [
 					{
+						"id": 8,
+						"jenis_hukuman": "Jenis Hukuman 1",
+						"nama_golongan": "",
+						"nama_pangkat": "",
+						"masa_bulan": 0,
+						"masa_tahun": 3,
+						"nomor_sk": "SK8",
+						"tanggal_akhir": "2026-12-13",
+						"tanggal_mulai": "2023-12-13",
+						"tanggal_sk": "2023-12-04"
+					},
+					{
 						"id": 6,
 						"jenis_hukuman": "",
+						"nama_golongan": "I/a",
+						"nama_pangkat": "Juru Muda",
 						"masa_bulan": 0,
 						"masa_tahun": 3,
 						"nomor_sk": "SK6",
@@ -80,6 +100,8 @@ func Test_handler_list(t *testing.T) {
 					{
 						"id": 5,
 						"jenis_hukuman": "Jenis Hukuman 2",
+						"nama_golongan": "I/a",
+						"nama_pangkat": "Juru Muda",
 						"masa_bulan": 0,
 						"masa_tahun": 3,
 						"nomor_sk": "SK5",
@@ -90,6 +112,8 @@ func Test_handler_list(t *testing.T) {
 					{
 						"id": 4,
 						"jenis_hukuman": "Jenis Hukuman 1",
+						"nama_golongan": "I/a",
+						"nama_pangkat": "Juru Muda",
 						"masa_bulan": 0,
 						"masa_tahun": 2,
 						"nomor_sk": "SK4",
@@ -100,6 +124,8 @@ func Test_handler_list(t *testing.T) {
 					{
 						"id": 3,
 						"jenis_hukuman": "Jenis Hukuman 1",
+						"nama_golongan": "I/a",
+						"nama_pangkat": "Juru Muda",
 						"masa_bulan": 0,
 						"masa_tahun": 1,
 						"nomor_sk": "SK3",
@@ -110,6 +136,8 @@ func Test_handler_list(t *testing.T) {
 					{
 						"id": 2,
 						"jenis_hukuman": "Jenis Hukuman 1",
+						"nama_golongan": "I/a",
+						"nama_pangkat": "Juru Muda",
 						"masa_bulan": 2,
 						"masa_tahun": 0,
 						"nomor_sk": "SK2",
@@ -120,6 +148,8 @@ func Test_handler_list(t *testing.T) {
 					{
 						"id": 1,
 						"jenis_hukuman": "Snapshotted Jenis Hukuman 1",
+						"nama_golongan": "I/a",
+						"nama_pangkat": "Juru Muda",
 						"masa_bulan": 1,
 						"masa_tahun": 0,
 						"nomor_sk": "SK1",
@@ -131,14 +161,14 @@ func Test_handler_list(t *testing.T) {
 				"meta": {
 					"limit": 10,
 					"offset": 0,
-					"total": 6
+					"total": 7
 				}
 			}`,
 		},
 		{
 			name:             "ok: dengan parameter pagination",
 			dbData:           dbData,
-			requestQuery:     url.Values{"limit": []string{"1"}, "offset": []string{"1"}},
+			requestQuery:     url.Values{"limit": []string{"1"}, "offset": []string{"2"}},
 			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "198765432100001")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
@@ -146,6 +176,8 @@ func Test_handler_list(t *testing.T) {
 					{
 						"id": 5,
 						"jenis_hukuman": "Jenis Hukuman 2",
+						"nama_golongan": "I/a",
+						"nama_pangkat": "Juru Muda",
 						"masa_bulan": 0,
 						"masa_tahun": 3,
 						"nomor_sk": "SK5",
@@ -156,8 +188,8 @@ func Test_handler_list(t *testing.T) {
 				],
 				"meta": {
 					"limit": 1,
-					"offset": 1,
-					"total": 6
+					"offset": 2,
+					"total": 7
 				}
 			}`,
 		},

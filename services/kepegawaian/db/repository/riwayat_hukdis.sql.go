@@ -47,6 +47,8 @@ const listRiwayatHukdis = `-- name: ListRiwayatHukdis :many
 SELECT
   rh.id,
   COALESCE(rh.nama_jenis_hukuman, rjh.nama) as jenis_hukuman,
+  rg.nama as nama_golongan,
+  rg.nama_pangkat,
   tanggal_mulai_hukuman,
   tanggal_akhir_hukuman,
   masa_tahun,
@@ -55,6 +57,7 @@ SELECT
   sk_tanggal
 FROM riwayat_hukdis rh
 LEFT JOIN ref_jenis_hukuman rjh ON rh.jenis_hukuman_id=rjh.id AND rjh.deleted_at is null
+LEFT JOIN ref_golongan rg ON rh.golongan_id=rg.id AND rg.deleted_at is null
 WHERE pns_nip = $1
   AND rh.deleted_at is null
 ORDER BY sk_tanggal DESC
@@ -70,6 +73,8 @@ type ListRiwayatHukdisParams struct {
 type ListRiwayatHukdisRow struct {
 	ID                  int64       `db:"id"`
 	JenisHukuman        pgtype.Text `db:"jenis_hukuman"`
+	NamaGolongan        pgtype.Text `db:"nama_golongan"`
+	NamaPangkat         pgtype.Text `db:"nama_pangkat"`
 	TanggalMulaiHukuman pgtype.Date `db:"tanggal_mulai_hukuman"`
 	TanggalAkhirHukuman pgtype.Date `db:"tanggal_akhir_hukuman"`
 	MasaTahun           pgtype.Int2 `db:"masa_tahun"`
@@ -90,6 +95,8 @@ func (q *Queries) ListRiwayatHukdis(ctx context.Context, arg ListRiwayatHukdisPa
 		if err := rows.Scan(
 			&i.ID,
 			&i.JenisHukuman,
+			&i.NamaGolongan,
+			&i.NamaPangkat,
 			&i.TanggalMulaiHukuman,
 			&i.TanggalAkhirHukuman,
 			&i.MasaTahun,

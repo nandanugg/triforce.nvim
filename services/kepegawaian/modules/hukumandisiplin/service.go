@@ -48,6 +48,8 @@ func (s *service) list(ctx context.Context, nip string, limit, offset uint) ([]h
 		data = append(data, hukumanDisiplin{
 			ID:           row.ID,
 			JenisHukuman: row.JenisHukuman.String,
+			NamaGolongan: row.NamaGolongan.String,
+			NamaPangkat:  row.NamaPangkat.String,
 			NomorSK:      row.SkNomor.String,
 			TanggalSK:    db.Date(row.SkTanggal.Time),
 			TanggalMulai: db.Date(row.TanggalMulaiHukuman.Time),

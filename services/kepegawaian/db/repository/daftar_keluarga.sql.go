@@ -27,7 +27,7 @@ SELECT
     pas.nama AS nama_ibu_bapak
     -- '' AS dokumen_pendukung
 FROM anak a
-JOIN pegawai pg ON a.pns_id = pg.pns_id
+JOIN pegawai pg ON a.pns_id = pg.pns_id AND pg.deleted_at is null
 LEFT JOIN pasangan pas ON a.pasangan_id = pas.id AND pas.deleted_at is null
 WHERE a.deleted_at IS NULL
 AND pg.nip_baru = $1
@@ -85,7 +85,7 @@ SELECT
     ot.akte_meninggal AS dokumen_pendukung,
     ra.nama AS agama_nama
 FROM orang_tua ot
-JOIN pegawai pg ON ot.pns_id = pg.pns_id
+JOIN pegawai pg ON ot.pns_id = pg.pns_id AND pg.deleted_at is null
 LEFT JOIN ref_agama ra ON ot.agama_id = ra.id AND ra.deleted_at is null
 WHERE ot.deleted_at IS NULL
 AND pg.nip_baru = $1
@@ -141,7 +141,7 @@ SELECT
     p.status,
     ra.nama AS agama_nama
 FROM pasangan p
-JOIN pegawai pg ON p.pns_id = pg.pns_id
+JOIN pegawai pg ON p.pns_id = pg.pns_id AND pg.deleted_at is null
 LEFT JOIN ref_agama ra ON pg.agama_id = ra.id AND ra.deleted_at is null
 WHERE p.deleted_at IS NULL
 AND pg.nip_baru = $1
