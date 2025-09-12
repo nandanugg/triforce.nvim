@@ -61,7 +61,7 @@ func (h *handler) listRiwayatJabatan(c echo.Context) error {
 	data, total, err := h.service.listRiwayatJabatan(ctx, listRiwayatJabatanParams{
 		Limit:  req.Limit,
 		Offset: req.Offset,
-		NIP:    "41",
+		NIP:    api.CurrentUser(c).NIP,
 	})
 	if err != nil {
 		slog.ErrorContext(ctx, "Error getting list riwayat jabatan.", "error", err)
