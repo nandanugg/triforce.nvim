@@ -32,7 +32,7 @@ func Test_handler_login(t *testing.T) {
 		require.NoError(t, err)
 
 		keycloak := config.Keycloak{
-			Host:        "https://auth.local",
+			PublicHost:  "https://auth.local",
 			Realm:       "nexus",
 			ClientID:    "my-portal",
 			RedirectURI: "https://local/callback",
@@ -83,7 +83,7 @@ func Test_handler_logout(t *testing.T) {
 			require.NoError(t, err)
 
 			keycloak := config.Keycloak{
-				Host:                  "https://auth.local",
+				PublicHost:            "https://auth.local",
 				Realm:                 "nexus",
 				PostLogoutRedirectURI: "https://local/",
 			}

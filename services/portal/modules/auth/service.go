@@ -35,7 +35,7 @@ func newService(repo *repository, keycloak config.Keycloak, client *http.Client,
 }
 
 func (s *service) generateAuthURL() (string, error) {
-	authURL, err := url.Parse(fmt.Sprintf("%s/realms/%s/protocol/openid-connect/auth", s.keycloak.Host, s.keycloak.Realm))
+	authURL, err := url.Parse(fmt.Sprintf("%s/realms/%s/protocol/openid-connect/auth", s.keycloak.PublicHost, s.keycloak.Realm))
 	if err != nil {
 		return "", fmt.Errorf("url parse: %w", err)
 	}
@@ -52,7 +52,7 @@ func (s *service) generateAuthURL() (string, error) {
 }
 
 func (s *service) generateLogoutURL(idTokenHint string) (string, error) {
-	logoutURL, err := url.Parse(fmt.Sprintf("%s/realms/%s/protocol/openid-connect/logout", s.keycloak.Host, s.keycloak.Realm))
+	logoutURL, err := url.Parse(fmt.Sprintf("%s/realms/%s/protocol/openid-connect/logout", s.keycloak.PublicHost, s.keycloak.Realm))
 	if err != nil {
 		return "", fmt.Errorf("url parse: %w", err)
 	}

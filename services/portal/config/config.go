@@ -35,6 +35,7 @@ type Keycloak struct {
 	Audience              string `env:"AUDIENCE"`
 	ClientID              string `env:"CLIENT_ID"`
 	ClientSecret          string `env:"CLIENT_SECRET"`
+	PublicHost            string `env:"PUBLIC_HOST"`
 	RedirectURI           string `env:"REDIRECT_URI"`
 	PostLogoutRedirectURI string `env:"POST_LOGOUT_REDIRECT_URI"`
 	PrivateKey            string `env:"PRIVATE_KEY"`
