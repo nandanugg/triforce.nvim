@@ -73,7 +73,7 @@ func (s *service) mapListOrangTua(ot repo.ListOrangTuaByNipRow) orangTua {
 func (s *service) mapListPasangan(p repo.ListPasanganByNipRow) pasangan {
 	return pasangan{
 		Nama:           nullStringPtr(p.Nama),
-		Nik:            nullStringPtr(p.Nik),
+		Nik:            nullStringPtr(pgtype.Text{Valid: true, String: ""}),
 		StatusPNS:      PNSToLabel(p.Pns),
 		Agama:          nullStringPtr(p.AgamaNama),
 		StatusNikah:    StatusPernikahanToString(p.Status),
@@ -84,7 +84,7 @@ func (s *service) mapListPasangan(p repo.ListPasanganByNipRow) pasangan {
 func (s *service) mapListAnak(a repo.ListAnakByNipRow) anak {
 	return anak{
 		Nama:         nullStringPtr(a.Nama),
-		Nip:          nullStringPtr(a.Nip),
+		Nik:          nullStringPtr(pgtype.Text{Valid: true, String: ""}),
 		JenisKelamin: JenisKelaminToLabel(a.JenisKelamin),
 		StatusAnak:   StatusAnakToLabel(a.StatusAnak),
 		TanggalLahir: &a.TanggalLahir.Time,

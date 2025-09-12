@@ -27,7 +27,7 @@ type pasangan struct {
 
 type anak struct {
 	Nama          *string    `json:"nama"`
-	Nip           *string    `json:"nik"`
+	Nik           *string    `json:"nik"`
 	JenisKelamin  string     `json:"jenis_kelamin"`
 	StatusAnak    string     `json:"status_anak"`
 	StatusSekolah string     `json:"status_sekolah"`

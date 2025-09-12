@@ -16,7 +16,6 @@ SELECT
     a.nama,
     a.jenis_kelamin,
     a.tanggal_lahir,
-    a.nip,
     a.status_anak,
     ROW_NUMBER() OVER (
         PARTITION BY a.pns_id
@@ -29,7 +28,7 @@ SELECT
     -- '' AS dokumen_pendukung
 FROM anak a
 JOIN pegawai pg ON a.pns_id = pg.pns_id
-LEFT JOIN pasangan pas ON a.pasangan_id = pas.id
+LEFT JOIN pasangan pas ON a.pasangan_id = pas.id AND pas.deleted_at is null
 WHERE a.deleted_at IS NULL
 AND pg.nip_baru = $1
 ORDER BY a.pns_id, anak_ke
@@ -41,7 +40,6 @@ type ListAnakByNipRow struct {
 	Nama         pgtype.Text `db:"nama"`
 	JenisKelamin pgtype.Text `db:"jenis_kelamin"`
 	TanggalLahir pgtype.Date `db:"tanggal_lahir"`
-	Nip          pgtype.Text `db:"nip"`
 	StatusAnak   pgtype.Text `db:"status_anak"`
 	AnakKe       int64       `db:"anak_ke"`
 	NamaIbuBapak pgtype.Text `db:"nama_ibu_bapak"`
@@ -62,7 +60,6 @@ func (q *Queries) ListAnakByNip(ctx context.Context, nipBaru pgtype.Text) ([]Lis
 			&i.Nama,
 			&i.JenisKelamin,
 			&i.TanggalLahir,
-			&i.Nip,
 			&i.StatusAnak,
 			&i.AnakKe,
 			&i.NamaIbuBapak,
@@ -89,7 +86,7 @@ SELECT
     ra.nama AS agama_nama
 FROM orang_tua ot
 JOIN pegawai pg ON ot.pns_id = pg.pns_id
-LEFT JOIN ref_agama ra ON ot.agama_id = ra.id
+LEFT JOIN ref_agama ra ON ot.agama_id = ra.id AND ra.deleted_at is null
 WHERE ot.deleted_at IS NULL
 AND pg.nip_baru = $1
 `
@@ -140,13 +137,12 @@ SELECT
     p.pns,
     p.nama,
     p.tanggal_menikah,
-    p.nip AS nik,
     p.karsus AS nomor_karis,
     p.status,
     ra.nama AS agama_nama
 FROM pasangan p
-JOIN pegawai pg ON p.pns_id = pg.pns_id  -- Get PNS record
-LEFT JOIN ref_agama ra ON pg.agama_id = ra.id  -- Get religion from PNS
+JOIN pegawai pg ON p.pns_id = pg.pns_id
+LEFT JOIN ref_agama ra ON pg.agama_id = ra.id AND ra.deleted_at is null
 WHERE p.deleted_at IS NULL
 AND pg.nip_baru = $1
 `
@@ -156,7 +152,6 @@ type ListPasanganByNipRow struct {
 	Pns            pgtype.Int2 `db:"pns"`
 	Nama           pgtype.Text `db:"nama"`
 	TanggalMenikah pgtype.Date `db:"tanggal_menikah"`
-	Nik            pgtype.Text `db:"nik"`
 	NomorKaris     pgtype.Text `db:"nomor_karis"`
 	Status         pgtype.Int2 `db:"status"`
 	AgamaNama      pgtype.Text `db:"agama_nama"`
@@ -176,7 +171,6 @@ func (q *Queries) ListPasanganByNip(ctx context.Context, nipBaru pgtype.Text) ([
 			&i.Pns,
 			&i.Nama,
 			&i.TanggalMenikah,
-			&i.Nik,
 			&i.NomorKaris,
 			&i.Status,
 			&i.AgamaNama,
