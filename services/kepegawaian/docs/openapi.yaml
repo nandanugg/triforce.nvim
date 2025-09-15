@@ -384,9 +384,9 @@ paths:
     get:
       tags:
         - Jabatan
-      summary: Lihat riwayat jabatan.
+      summary: Daftar jabatan yang tersedia.
       description: >-
-        Lihat riwayat jabatan dari user yang login, urut berdasarkan TMT.
+        Daftar jabatan untuk form-form yang menggunakan pilihan jabatan.
       operationId: listJabatan
       parameters:
         - $ref: "#/components/parameters/authRequired"
@@ -486,7 +486,7 @@ paths:
                       status_anak: "Kandung"
                       tanggal_lahir: "2021-05-10T00:00:00Z"
                       anak_ke: 1
-  /v1/kenaikan-gaji-berkala:
+  /v1/riwayat-kenaikan-gaji-berkala:
     get:
       tags:
         - Kenaikan Gaji Berkala
@@ -529,7 +529,7 @@ paths:
                           type: string
                   meta:
                     $ref: "#/components/schemas/metaPagination"
-  /v1/kepangkatan:
+  /v1/riwayat-kepangkatan:
     get:
       tags:
         - Kepangkatan
@@ -745,7 +745,7 @@ paths:
                           type: string
                   meta:
                     $ref: "#/components/schemas/metaPagination"
-  /v1/penugasan:
+  /v1/riwayat-penugasan:
     get:
       tags:
         - Penugasan
@@ -1065,7 +1065,7 @@ paths:
                           type: string
                   meta:
                     $ref: "#/components/schemas/metaPagination"
-  /v1/sertifikasi:
+  /v1/riwayat-sertifikasi:
     get:
       tags:
         - Sertifikasi
@@ -1101,7 +1101,7 @@ paths:
                           type: string
                   meta:
                     $ref: "#/components/schemas/metaPagination"
-  /v1/sertifikasi/{id}/berkas:
+  /v1/riwayat-sertifikasi/{id}/berkas:
     get:
       tags:
         - Sertifikasi

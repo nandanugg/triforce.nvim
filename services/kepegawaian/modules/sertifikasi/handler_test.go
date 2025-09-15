@@ -114,7 +114,7 @@ func Test_handler_list(t *testing.T) {
 			_, err := pgxconn.Exec(context.Background(), tt.dbData)
 			require.NoError(t, err)
 
-			req := httptest.NewRequest(http.MethodGet, "/v1/sertifikasi", nil)
+			req := httptest.NewRequest(http.MethodGet, "/v1/riwayat-sertifikasi", nil)
 			req.URL.RawQuery = tt.requestQuery.Encode()
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
@@ -276,7 +276,7 @@ func Test_handler_getBerkas(t *testing.T) {
 			_, err := pgxconn.Exec(context.Background(), tt.dbData)
 			require.NoError(t, err)
 
-			req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/v1/sertifikasi/%s/berkas", tt.paramID), nil)
+			req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/v1/riwayat-sertifikasi/%s/berkas", tt.paramID), nil)
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
 

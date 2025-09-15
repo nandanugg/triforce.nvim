@@ -12,5 +12,5 @@ func RegisterRoutes(e *echo.Echo, db *pgxpool.Pool, mwAuth echo.MiddlewareFunc) 
 	s := newService(r)
 	h := newHandler(s)
 
-	e.Add(http.MethodGet, "/v1/penugasan", h.list, mwAuth)
+	e.Add(http.MethodGet, "/v1/riwayat-penugasan", h.list, mwAuth)
 }
