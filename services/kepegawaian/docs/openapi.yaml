@@ -900,8 +900,6 @@ paths:
       operationId: listPendidikanFormal
       parameters:
         - $ref: "#/components/parameters/authRequired"
-        - $ref: "#/components/parameters/limit"
-        - $ref: "#/components/parameters/offset"
       responses:
         "200":
           description: Sukses.
@@ -930,8 +928,12 @@ paths:
                           type: string
                         nomor_ijazah:
                           type: string
-                  meta:
-                    $ref: "#/components/schemas/metaPagination"
+                        gelar_depan:
+                          type: string
+                        gelar_belakang:
+                          type: string
+                        tugas_belajar:
+                          type: string
   /v1/penghargaan:
     get:
       tags:

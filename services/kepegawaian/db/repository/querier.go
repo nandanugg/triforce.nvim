@@ -26,7 +26,7 @@ type Querier interface {
 	ListOrangTuaByNip(ctx context.Context, nipBaru pgtype.Text) ([]ListOrangTuaByNipRow, error)
 	ListPasanganByNip(ctx context.Context, nipBaru pgtype.Text) ([]ListPasanganByNipRow, error)
 	ListPelatihanStruktural(ctx context.Context, nipBaru pgtype.Text) ([]ListPelatihanStrukturalRow, error)
-	ListPendidikanFormal(ctx context.Context, pnsID pgtype.Text) ([]ListPendidikanFormalRow, error)
+	ListPendidikanFormal(ctx context.Context, nipBaru pgtype.Text) ([]ListPendidikanFormalRow, error)
 	ListRefJabatan(ctx context.Context, arg ListRefJabatanParams) ([]ListRefJabatanRow, error)
 	ListRefJenisJabatan(ctx context.Context, arg ListRefJenisJabatanParams) ([]ListRefJenisJabatanRow, error)
 	ListRiwayatHukdis(ctx context.Context, arg ListRiwayatHukdisParams) ([]ListRiwayatHukdisRow, error)

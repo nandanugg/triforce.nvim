@@ -10,28 +10,40 @@ import (
 )
 
 const listPendidikanFormal = `-- name: ListPendidikanFormal :many
-SELECT
-    p.nama,
-    p.pns,
-    p.karsus AS nomor_karis,
-    p.status,
-    p.pns_id
-FROM
-    pasangan p
-WHERE
-    p.pns_id = $1
+SELECT 
+    rp.id,
+    rp.nama_sekolah,
+    rp.tahun_lulus,
+    rp.no_ijazah,
+    rp.gelar_depan,
+    rp.gelar_belakang,
+    rp.tugas_belajar,
+    rp.negara_sekolah,
+    tk.nama as jenjang_pendidikan,
+    pend.nama as pendidikan
+FROM riwayat_pendidikan rp
+    LEFT JOIN tingkat_pendidikan tk ON tk.id = rp.tingkat_pendidikan_id AND rp.deleted_at IS NULL
+    LEFT JOIN pendidikan pend ON rp.pendidikan_id = pend.id AND pend.deleted_at IS NULL
+JOIN pegawai p ON p.pns_id = rp.pns_id_3
+WHERE p.nip_baru = $1
+ORDER BY rp.tahun_lulus ASC
 `
 
 type ListPendidikanFormalRow struct {
-	Nama       pgtype.Text `db:"nama"`
-	Pns        pgtype.Int2 `db:"pns"`
-	NomorKaris pgtype.Text `db:"nomor_karis"`
-	Status     pgtype.Int2 `db:"status"`
-	PnsID      pgtype.Text `db:"pns_id"`
+	ID                int32       `db:"id"`
+	NamaSekolah       pgtype.Text `db:"nama_sekolah"`
+	TahunLulus        pgtype.Text `db:"tahun_lulus"`
+	NoIjazah          pgtype.Text `db:"no_ijazah"`
+	GelarDepan        pgtype.Text `db:"gelar_depan"`
+	GelarBelakang     pgtype.Text `db:"gelar_belakang"`
+	TugasBelajar      pgtype.Int2 `db:"tugas_belajar"`
+	NegaraSekolah     pgtype.Text `db:"negara_sekolah"`
+	JenjangPendidikan pgtype.Text `db:"jenjang_pendidikan"`
+	Pendidikan        pgtype.Text `db:"pendidikan"`
 }
 
-func (q *Queries) ListPendidikanFormal(ctx context.Context, pnsID pgtype.Text) ([]ListPendidikanFormalRow, error) {
-	rows, err := q.db.Query(ctx, listPendidikanFormal, pnsID)
+func (q *Queries) ListPendidikanFormal(ctx context.Context, nipBaru pgtype.Text) ([]ListPendidikanFormalRow, error) {
+	rows, err := q.db.Query(ctx, listPendidikanFormal, nipBaru)
 	if err != nil {
 		return nil, err
 	}
@@ -40,11 +52,16 @@ func (q *Queries) ListPendidikanFormal(ctx context.Context, pnsID pgtype.Text) (
 	for rows.Next() {
 		var i ListPendidikanFormalRow
 		if err := rows.Scan(
-			&i.Nama,
-			&i.Pns,
-			&i.NomorKaris,
-			&i.Status,
-			&i.PnsID,
+			&i.ID,
+			&i.NamaSekolah,
+			&i.TahunLulus,
+			&i.NoIjazah,
+			&i.GelarDepan,
+			&i.GelarBelakang,
+			&i.TugasBelajar,
+			&i.NegaraSekolah,
+			&i.JenjangPendidikan,
+			&i.Pendidikan,
 		); err != nil {
 			return nil, err
 		}

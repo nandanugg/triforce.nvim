@@ -1,148 +1,153 @@
 package pendidikanformal
 
-// import (
-// 	"net/http"
-// 	"net/http/httptest"
-// 	"net/url"
-// 	"testing"
+import (
+	"net/http"
+	"net/http/httptest"
+	"net/url"
+	"testing"
 
-// 	"github.com/stretchr/testify/assert"
-// 	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
-// 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
-// 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api/apitest"
-// 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db/dbtest"
-// 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/config"
-// 	dbmigrations "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/migrations"
-// 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/docs"
-// )
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api/apitest"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db/dbtest"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/config"
+	dbmigrations "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/migrations"
+	repo "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/docs"
+)
 
-// func Test_handler_list(t *testing.T) {
-// 	t.Parallel()
+func Test_handler_list(t *testing.T) {
+	t.Parallel()
 
-// 	dbData := `
-// 		insert into pegawai
-// 			("ID", "PNS_ID", "NIP_LAMA", "NIP_BARU", "NAMA", "GELAR_DEPAN", "GELAR_BELAKANG", "TEMPAT_LAHIR_ID", "TGL_LAHIR", "JENIS_KELAMIN", "AGAMA_ID", "JENIS_KAWIN_ID", "NIK", "NOMOR_DARURAT", "NOMOR_HP", "EMAIL", "ALAMAT", "NPWP", "BPJS", "JENIS_PEGAWAI_ID", "KEDUDUKAN_HUKUM_ID", "STATUS_CPNS_PNS", "KARTU_PEGAWAI", "NOMOR_SK_CPNS", "TGL_SK_CPNS", "TMT_CPNS",  "TMT_PNS",   "GOL_AWAL_ID", "GOL_ID", "TMT_GOLONGAN", "MK_TAHUN", "MK_BULAN", "JENIS_JABATAN_IDx", "JABATAN_ID", "TMT_JABATAN", "PENDIDIKAN_ID", "TAHUN_LULUS", "KPKN_ID", "LOKASI_KERJA_ID", "UNOR_ID", "UNOR_INDUK_ID", "INSTANSI_INDUK_ID", "INSTANSI_KERJA_ID", "SATUAN_KERJA_INDUK_ID", "SATUAN_KERJA_KERJA_ID", "GOLONGAN_DARAH", "PHOTO", "TMT_PENSIUN", "LOKASI_KERJA", "JML_ISTRI", "JML_ANAK", "NO_SURAT_DOKTER", "TGL_SURAT_DOKTER", "NO_BEBAS_NARKOBA", "TGL_BEBAS_NARKOBA", "NO_CATATAN_POLISI", "TGL_CATATAN_POLISI", "AKTE_KELAHIRAN", "STATUS_HIDUP", "AKTE_MENINGGAL", "TGL_MENINGGAL", "NO_ASKES", "NO_TASPEN", "TGL_NPWP",  "TEMPAT_LAHIR", "PENDIDIKAN", "TK_PENDIDIKAN", "TEMPAT_LAHIR_NAMA", "JENIS_JABATAN_NAMA", "JABATAN_NAMA", "KPKN_NAMA", "INSTANSI_INDUK_NAMA", "INSTANSI_KERJA_NAMA", "SATUAN_KERJA_INDUK_NAMA", "SATUAN_KERJA_NAMA", "JABATAN_INSTANSI_ID", "BUP", "JABATAN_INSTANSI_NAMA", "JENIS_JABATAN_ID", terminated_date, status_pegawai, "JABATAN_PPNPN", "JABATAN_INSTANSI_REAL_ID", "CREATED_DATE", "CREATED_BY", "UPDATED_DATE", "UPDATED_BY", "EMAIL_DIKBUD_BAK", "EMAIL_DIKBUD", "KODECEPAT", "IS_DOSEN", "MK_TAHUN_SWASTA", "MK_BULAN_SWASTA", "KK", "NIDN", "KET", "NO_SK_PEMBERHENTIAN", status_pegawai_backup, "MASA_KERJA", "KARTU_ASN") values
-// 			(11,   '1a',     '1b',       '1c',       '1d',   '1e',          '1f',             '1g',              '2000-01-02','1h',            21,         '5',              '1k',  '1l',            '1m',       '1n',    '1o',     '1p',   '1q',   '31',               '1s',                 '1t',              '1u',            '1v',            '2000-01-03',  '2000-01-04','2000-01-04','1z',          1,        '2000-01-05',   '1ac',      '1ad',      '1ae',               '1af',        '2000-01-06',  '1ah',           '1ai',         '1aj',     '1ak',             '1al',     '1am',           '1an',               '1ao',               '1ap',                   '1aq',                   '1ar',            '1as',   '2000-01-07',  '1au',          '1',         '1',        '1ax',             '2000-01-08',       '1az',              '2000-01-09',        '1bb',               '2000-01-10',         '1bd',            '1be',          '1bf',            '2000-01-11',    '1bh',      'bi',        '2000-01-12','1bk',          '1bl',        '1bm',           '1bn',               '1bo',                '1bp',          '1bq',       '1br',                 '1bs',                 '1bt',                     '1bu',               '1bv',                 1,     '1bx',                   1,                  '2000-01-13',    '1',            '1cb',           '1cc',                      '2000-01-14',   1,            '2000-01-15',   1,            '1ch',              '1ci',          '1cj',       1,          1,                 1,                 '1cn','1co',  '1cp', '1cq',                 1,                     '1cs',        '1ct');
-// 		insert into users
-// 			(id, role_id, email, username, password_hash, reset_hash, last_login,  last_ip, created_on,  deleted, reset_by, banned, ban_message, display_name, display_name_changed, timezone, language, active, activate_hash, password_iterations, force_password_reset, nip,  satkers, admin_nomor, imei, token, real_imei, fcm,  banned_asigo) values
-// 			(41, 41,      '41a', '41b',    '41c',         '41d',      '2001-01-02','41f',   '2001-01-03',1,       1,        1,      '41k',       '41l',        '2001-01-04',         '41n',    '41o',    1,      '41q',         1,                   1,                    '1c', '41u',   1,           '41w','41x', '41y',     '41z',1);
-// 		insert into tkpendidikan
-// 			("ID", "GOLONGAN_ID", "NAMA", "GOLONGAN_AWAL_ID", "DELETED", "ABBREVIATION", "TINGKAT") values
-// 			('21', '21a',         '21b',  '21c',              1,         '21d',          1),
-// 			('22', '22a',         '22b',  '22c',              2,         '22d',          2);
-// 		insert into rwt_pendidikan
-// 			("ID", "PNS_ID_3", "TINGKAT_PENDIDIKAN_ID", "PENDIDIKAN_ID_3", "TANGGAL_LULUS", "NOMOR_IJASAH", "NAMA_SEKOLAH", "GELAR_DEPAN", "GELAR_BELAKANG", "PENDIDIKAN_PERTAMA", "NEGARA_SEKOLAH", "TAHUN_LULUS", "NIP", "DIAKUI_BKN", "TUGAS_BELAJAR", "STATUS_SATKER", "STATUS_BIRO", "PENDIDIKAN_TERAKHIR", "FILE_BASE64", "KETERANGAN_BERKAS", "PNS_ID", "PENDIDIKAN_ID") values
-// 			(31,   '31a',      '21',                    '31c',             '2002-01-01',    '31e',          '31f',          '31g',         '31j',            '1',                  '31i',            'a31j',        '31k', 1,            '31m',           1,               1,             1,                     '31q',         '31r',               '1a',     '31t'),
-// 			(32,   '32a',      '21',                    '32c',             '2002-02-02',    '32e',          '32f',          '32g',         '32j',            '2',                  '32i',            'c32j',        '32k', 2,            '32m',           2,               2,             2,                     '32q',         '32r',               '1a',     '32t'),
-// 			(33,   '33a',      '22',                    '33c',             '3003-03-03',    '33e',          '33f',          '33g',         '33j',            '3',                  '33i',            'b33j',        '33k', 3,            '33m',           3,               3,             3,                     '33q',         '33r',               '1a',     '33t'),
-// 			(34,   '34a',      '22',                    '34c',             '3003-03-03',    '34e',          '34f',          '34g',         '34j',            '4',                  '34i',            'b34j',        '34k', 3,            '34m',           3,               3,             3,                     '34q',         '34r',               '2a',     '34t');
-// 	`
+	dbData := `
+		INSERT INTO tingkat_pendidikan (id, nama, abbreviation, tingkat) VALUES
+			(1, 'Sekolah Dasar', 'SD', 1),
+			(2, 'Sekolah Menengah Pertama', 'SMP', 2),
+			(3, 'Sekolah Menengah Atas', 'SMA', 3),
+			(4, 'Diploma I', 'D1', 4),
+			(5, 'Diploma II', 'D2', 5),
+			(6, 'Diploma III', 'D3', 6),
+			(7, 'Sarjana', 'S1', 7),
+			(8, 'Magister', 'S2', 8),
+			(9, 'Doktor', 'S3', 9);
+		INSERT INTO pendidikan (id, tingkat_pendidikan_id, nama) VALUES
+		('ed-003', 7, 'Akuntansi'),
+		('ed-004', 8, 'Magister Manajemen'),
+		('ed-006', 6, 'Diploma III Akuntansi');
 
-// 	tests := []struct {
-// 		name             string
-// 		dbData           string
-// 		requestQuery     url.Values
-// 		requestHeader    http.Header
-// 		wantResponseCode int
-// 		wantResponseBody string
-// 	}{
-// 		{
-// 			name:             "ok: tanpa parameter apapun",
-// 			dbData:           dbData,
-// 			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "41")}},
-// 			wantResponseCode: http.StatusOK,
-// 			wantResponseBody: `{
-// 				"data": [
-// 					{
-// 						"id":                    31,
-// 						"jenjang_pendidikan":    "21b",
-// 						"jurusan":               "TODO: Jurusan",
-// 						"keterangan_pendidikan": "31r",
-// 						"nama_sekolah":          "31f",
-// 						"nomor_ijazah":          "31e",
-// 						"tahun_lulus":           "a31j"
-// 					},
-// 					{
-// 						"id":                    33,
-// 						"jenjang_pendidikan":    "22b",
-// 						"jurusan":               "TODO: Jurusan",
-// 						"keterangan_pendidikan": "33r",
-// 						"nama_sekolah":          "33f",
-// 						"nomor_ijazah":          "33e",
-// 						"tahun_lulus":           "b33j"
-// 					},
-// 					{
-// 						"id":                    32,
-// 						"jenjang_pendidikan":    "21b",
-// 						"jurusan":               "TODO: Jurusan",
-// 						"keterangan_pendidikan": "32r",
-// 						"nama_sekolah":          "32f",
-// 						"nomor_ijazah":          "32e",
-// 						"tahun_lulus":           "c32j"
-// 					}
-// 				],
-// 				"meta": {"limit": 10, "offset": 0, "total": 3}
-// 			}`,
-// 		},
-// 		{
-// 			name:             "ok: dengan parameter pagination",
-// 			dbData:           dbData,
-// 			requestQuery:     url.Values{"limit": []string{"1"}, "offset": []string{"1"}},
-// 			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "41")}},
-// 			wantResponseCode: http.StatusOK,
-// 			wantResponseBody: `{
-// 				"data": [
-// 					{
-// 						"id":                    33,
-// 						"jenjang_pendidikan":    "22b",
-// 						"jurusan":               "TODO: Jurusan",
-// 						"keterangan_pendidikan": "33r",
-// 						"nama_sekolah":          "33f",
-// 						"nomor_ijazah":          "33e",
-// 						"tahun_lulus":           "b33j"
-// 					}
-// 				],
-// 				"meta": {"limit": 1, "offset": 1, "total": 3}
-// 			}`,
-// 		},
-// 		{
-// 			name:             "ok: tidak ada data milik user",
-// 			dbData:           dbData,
-// 			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "200")}},
-// 			wantResponseCode: http.StatusOK,
-// 			wantResponseBody: `{"data": [], "meta": {"limit": 10, "offset": 0, "total": 0}}`,
-// 		},
-// 		{
-// 			name:             "error: auth header tidak valid",
-// 			dbData:           dbData,
-// 			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
-// 			wantResponseCode: http.StatusUnauthorized,
-// 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
-// 		},
-// 	}
+		INSERT INTO pegawai (
+		    id, pns_id, nip_baru, nama, gelar_depan, gelar_belakang, 
+		    tgl_lahir, jenis_kelamin, tingkat_pendidikan_id
+		) VALUES
+		(1, 'pns-004', '198812252013014004', 'Maya Sari', NULL, 'S.E., M.M.', '1988-12-25', 'P', 8);
 
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			t.Parallel()
+		INSERT INTO riwayat_pendidikan (
+		    id, pns_id_3, pns_id, tingkat_pendidikan_id, pendidikan_id,
+		    nama_sekolah, tahun_lulus, no_ijazah, gelar_depan, gelar_belakang,
+		    tugas_belajar, negara_sekolah
+		) VALUES
+		(1, 'pns-004', 'pns-004', 6, 'ed-006', 'Politeknik Negeri Jakarta',
+		 '2009', 'PNJ/AK/2009/004', NULL, 'A.Md.', 0, 'Pendidikan Regular'),
+		(2, 'pns-004', 'pns-004', 7, 'ed-003', 'Universitas Airlangga',
+		 '2011', 'UNAIR/AK/2011/004', NULL, 'S.E.', 0, 'Program Ekstensi'),
+		(3, 'pns-004', 'pns-004', 8, 'ed-004', 'Universitas Airlangga',
+		 '2016', 'UNAIR/MM/2016/004', NULL, 'M.M.', 1, 'Beasiswa Institusi');
 
-// 			db := dbtest.New(t, dbmigrations.FS)
-// 			_, err := db.Exec(tt.dbData)
-// 			require.NoError(t, err)
+	`
 
-// 			req := httptest.NewRequest(http.MethodGet, "/v1/pendidikan-formal", nil)
-// 			req.URL.RawQuery = tt.requestQuery.Encode()
-// 			req.Header = tt.requestHeader
-// 			rec := httptest.NewRecorder()
+	tests := []struct {
+		name             string
+		dbData           string
+		requestQuery     url.Values
+		requestHeader    http.Header
+		wantResponseCode int
+		wantResponseBody string
+	}{
+		{
+			name:             "ok: tanpa parameter apapun",
+			dbData:           dbData,
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "198812252013014004")}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+				{
+					"id": 1,
+					"jenjang_pendidikan": "Diploma III",
+					"jurusan": "Diploma III Akuntansi",
+					"nama_sekolah": "Politeknik Negeri Jakarta",
+					"tahun_lulus": "2009",
+					"nomor_ijazah": "PNJ/AK/2009/004",
+					"gelar_depan": "",
+					"gelar_belakang": "A.Md.",
+					"tugas_belajar": "",
+					"keterangan_pendidikan": "Pendidikan Regular"
+				},
+				{
+					"id": 2,
+					"jenjang_pendidikan": "Sarjana",
+					"jurusan": "Akuntansi",
+					"nama_sekolah": "Universitas Airlangga",
+					"tahun_lulus": "2011",
+					"nomor_ijazah": "UNAIR/AK/2011/004",
+					"gelar_depan": "",
+					"gelar_belakang": "S.E.",
+					"tugas_belajar": "",
+					"keterangan_pendidikan": "Program Ekstensi"
+				},
+				{
+					"id": 3,
+					"jenjang_pendidikan": "Magister",
+					"jurusan": "Magister Manajemen",
+					"nama_sekolah": "Universitas Airlangga",
+					"tahun_lulus": "2016",
+					"nomor_ijazah": "UNAIR/MM/2016/004",
+					"gelar_depan": "",
+					"gelar_belakang": "M.M.",
+					"tugas_belajar": "Tugas Belajar",
+					"keterangan_pendidikan": "Beasiswa Institusi"
+				}			]
+			}`,
+		},
+		{
+			name:             "ok: tidak ada data milik user",
+			dbData:           dbData,
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "200")}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{"data": []}`,
+		},
+		{
+			name:             "error: auth header tidak valid",
+			dbData:           dbData,
+			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
+		},
+	}
 
-// 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-// 			require.NoError(t, err)
-// 			RegisterRoutes(e, db, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
-// 			e.ServeHTTP(rec, req)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 
-// 			assert.Equal(t, tt.wantResponseCode, rec.Code)
-// 			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
-// 			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
-// 		})
-// 	}
-// }
+			db := dbtest.NewPgxPool(t, dbmigrations.FS)
+			dbRepository := repo.New(db)
+			_, err := db.Exec(t.Context(), tt.dbData)
+			require.NoError(t, err)
+
+			req := httptest.NewRequest(http.MethodGet, "/v1/pendidikan-formal", nil)
+			req.URL.RawQuery = tt.requestQuery.Encode()
+			req.Header = tt.requestHeader
+			rec := httptest.NewRecorder()
+
+			e, err := api.NewEchoServer(docs.OpenAPIBytes)
+			require.NoError(t, err)
+			RegisterRoutes(e, dbRepository, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
+			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+		})
+	}
+}

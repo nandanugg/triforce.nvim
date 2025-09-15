@@ -42,7 +42,13 @@ db-migrate-down-kepegawaian:
 	migrate \
 	-path services/kepegawaian/db/migrations \
 	-database "pgx://$NEXUS_KEPEGAWAIAN_DB_USER:$NEXUS_KEPEGAWAIAN_DB_PASSWORD@$NEXUS_KEPEGAWAIAN_DB_HOST:$NEXUS_KEPEGAWAIAN_DB_PORT/$NEXUS_KEPEGAWAIAN_DB_NAME?search_path=$NEXUS_KEPEGAWAIAN_DB_SCHEMA" \
-	down
+	down 1
+
+db-migrate-drop-kepegawaian:
+	migrate \
+	-path services/kepegawaian/db/migrations \
+	-database "pgx://$NEXUS_KEPEGAWAIAN_DB_USER:$NEXUS_KEPEGAWAIAN_DB_PASSWORD@$NEXUS_KEPEGAWAIAN_DB_HOST:$NEXUS_KEPEGAWAIAN_DB_PORT/$NEXUS_KEPEGAWAIAN_DB_NAME?search_path=$NEXUS_KEPEGAWAIAN_DB_SCHEMA" \
+	drop
 
 db-doc-kepegawaian:
 	tbls doc "postgres://$NEXUS_KEPEGAWAIAN_DB_USER:$NEXUS_KEPEGAWAIAN_DB_PASSWORD@$NEXUS_KEPEGAWAIAN_DB_HOST:$NEXUS_KEPEGAWAIAN_DB_PORT/$NEXUS_KEPEGAWAIAN_DB_NAME?search_path=$NEXUS_KEPEGAWAIAN_DB_SCHEMA&sslmode=disable" services/kepegawaian/docs/db --rm-dist -t mermaid
