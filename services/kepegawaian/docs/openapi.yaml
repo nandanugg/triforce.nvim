@@ -535,18 +535,38 @@ paths:
                       additionalProperties: false
                       properties:
                         id:
+                          type: integer
+                        id_jenis_kp:
+                          type: integer
+                        nama_jenis_kp:
                           type: string
-                        pangkat:
+                        id_golongan:
+                          type: integer
+                        nama_golongan:
                           type: string
-                        golongan:
+                        nama_golongan_pangkat:
                           type: string
-                        tmt:
+                        tmt_golongan:
+                          type: string
+                          format: date
+                        sk_nomor:
+                          type: string
+                        sk_tanggal:
                           type: string
                           format: date
                         mk_golongan_tahun:
-                          type: string
+                          type: integer
                         mk_golongan_bulan:
+                          type: integer
+                        no_bkn:
                           type: string
+                        tanggal_bkn:
+                          type: string
+                          format: date
+                        jumlah_angka_kredit_tambahan:
+                          type: integer
+                        jumlah_angka_kredit_utama:
+                          type: integer
                   meta:
                     $ref: "#/components/schemas/metaPagination"
   /v1/kinerja:

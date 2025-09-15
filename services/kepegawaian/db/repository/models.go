@@ -501,6 +501,7 @@ type RiwayatGolongan struct {
 	CreatedAt                 pgtype.Timestamptz `db:"created_at"`
 	UpdatedAt                 pgtype.Timestamptz `db:"updated_at"`
 	DeletedAt                 pgtype.Timestamptz `db:"deleted_at"`
+	JenisKpID                 pgtype.Int4        `db:"jenis_kp_id"`
 }
 
 type RiwayatHukdi struct {

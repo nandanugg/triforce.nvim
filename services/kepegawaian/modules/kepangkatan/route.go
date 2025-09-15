@@ -1,14 +1,12 @@
 package kepangkatan
 
 import (
-	"database/sql"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
-func RegisterRoutes(e *echo.Echo, db *sql.DB, mwAuth echo.MiddlewareFunc) {
-	r := newRepository(db)
+func RegisterRoutes(e *echo.Echo, r repository, mwAuth echo.MiddlewareFunc) {
 	s := newService(r)
 	h := newHandler(s)
 
