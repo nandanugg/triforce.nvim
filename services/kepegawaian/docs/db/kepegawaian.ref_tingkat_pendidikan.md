@@ -1,4 +1,4 @@
-# kepegawaian.tingkat_pendidikan
+# kepegawaian.ref_tingkat_pendidikan
 
 ## Description
 
@@ -6,7 +6,7 @@
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| id | integer |  | false | [kepegawaian.pegawai](kepegawaian.pegawai.md) [kepegawaian.pendidikan](kepegawaian.pendidikan.md) [kepegawaian.riwayat_pendidikan](kepegawaian.riwayat_pendidikan.md) |  |  |
+| id | integer |  | false | [kepegawaian.pegawai](kepegawaian.pegawai.md) [kepegawaian.ref_pendidikan](kepegawaian.ref_pendidikan.md) [kepegawaian.riwayat_pendidikan](kepegawaian.riwayat_pendidikan.md) |  |  |
 | golongan_id | integer |  | true |  |  |  |
 | nama | varchar(200) |  | true |  |  |  |
 | golongan_awal_id | integer |  | true |  |  |  |
@@ -26,18 +26,18 @@
 
 | Name | Definition |
 | ---- | ---------- |
-| tingkat_pendidikan_pkey | CREATE UNIQUE INDEX tingkat_pendidikan_pkey ON kepegawaian.tingkat_pendidikan USING btree (id) |
+| tingkat_pendidikan_pkey | CREATE UNIQUE INDEX tingkat_pendidikan_pkey ON kepegawaian.ref_tingkat_pendidikan USING btree (id) |
 
 ## Relations
 
 ```mermaid
 erDiagram
 
-"kepegawaian.pegawai" }o--o| "kepegawaian.tingkat_pendidikan" : "FOREIGN KEY (tingkat_pendidikan_id) REFERENCES tingkat_pendidikan(id)"
-"kepegawaian.pendidikan" }o--o| "kepegawaian.tingkat_pendidikan" : "FOREIGN KEY (tingkat_pendidikan_id) REFERENCES tingkat_pendidikan(id)"
-"kepegawaian.riwayat_pendidikan" }o--o| "kepegawaian.tingkat_pendidikan" : "FOREIGN KEY (tingkat_pendidikan_id) REFERENCES tingkat_pendidikan(id)"
+"kepegawaian.pegawai" }o--o| "kepegawaian.ref_tingkat_pendidikan" : "FOREIGN KEY (tingkat_pendidikan_id) REFERENCES ref_tingkat_pendidikan(id)"
+"kepegawaian.ref_pendidikan" }o--o| "kepegawaian.ref_tingkat_pendidikan" : "FOREIGN KEY (tingkat_pendidikan_id) REFERENCES ref_tingkat_pendidikan(id)"
+"kepegawaian.riwayat_pendidikan" }o--o| "kepegawaian.ref_tingkat_pendidikan" : "FOREIGN KEY (tingkat_pendidikan_id) REFERENCES ref_tingkat_pendidikan(id)"
 
-"kepegawaian.tingkat_pendidikan" {
+"kepegawaian.ref_tingkat_pendidikan" {
   integer id
   integer golongan_id
   varchar_200_ nama
@@ -122,14 +122,14 @@ erDiagram
   varchar_200_ instansi_kerja_nama
   varchar_200_ satuan_kerja_induk_nama
   varchar_200_ satuan_kerja_nama
-  integer jabatan_instansi_id
+  varchar_36_ jabatan_instansi_id FK
   smallint bup
   varchar_200_ jabatan_instansi_nama
   smallint jenis_jabatan_id
   date terminated_date
   smallint status_pegawai
   varchar_200_ jabatan_ppnpn
-  integer jabatan_instansi_real_id
+  varchar_36_ jabatan_instansi_real_id FK
   integer created_by
   integer updated_by
   varchar_100_ email_dikbud_bak
@@ -149,7 +149,7 @@ erDiagram
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
 }
-"kepegawaian.pendidikan" {
+"kepegawaian.ref_pendidikan" {
   varchar_36_ id
   smallint tingkat_pendidikan_id FK
   varchar_200_ nama
@@ -180,6 +180,7 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  smallint tugas_belajar
 }
 ```
 

@@ -10,11 +10,11 @@
 | pns_id | varchar(36) |  | true |  | [kepegawaian.pegawai](kepegawaian.pegawai.md) |  |
 | pns_nip | varchar(20) |  | true |  |  |  |
 | pns_nama | varchar(100) |  | true |  |  |  |
-| unor_id | varchar(100) |  | true |  |  |  |
+| unor_id | varchar(36) |  | true |  |  |  |
 | unor | text |  | true |  |  |  |
-| jenis_jabatan_id | varchar(10) |  | true |  |  |  |
+| jenis_jabatan_id | integer |  | true |  |  |  |
 | jenis_jabatan | varchar(250) |  | true |  |  |  |
-| jabatan_id | varchar(100) |  | true |  |  |  |
+| jabatan_id | integer |  | true |  |  |  |
 | nama_jabatan | text |  | true |  |  |  |
 | eselon_id | varchar(36) |  | true |  |  |  |
 | eselon | varchar(100) |  | true |  |  |  |
@@ -39,6 +39,10 @@
 | created_at | timestamp with time zone | now() | true |  |  |  |
 | updated_at | timestamp with time zone | now() | true |  |  |  |
 | deleted_at | timestamp with time zone |  | true |  |  |  |
+| status_plt | boolean |  | true |  |  |  |
+| kelas_jabatan_id | integer |  | true |  | [kepegawaian.ref_kelas_jabatan](kepegawaian.ref_kelas_jabatan.md) |  |
+| periode_jabatan_start_date | date |  | true |  |  |  |
+| periode_jabatan_end_date | date |  | true |  |  |  |
 
 ## Constraints
 
@@ -47,6 +51,7 @@
 | fk_riwayat_jabatan_pns_id | FOREIGN KEY | FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id) |
 | riwayat_jabatan_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 | fk_riwayat_jabatan_satuan_kerja | FOREIGN KEY | FOREIGN KEY (satuan_kerja_id) REFERENCES unit_kerja(id) |
+| riwayat_jabatan_kelas_jabatan_id_fkey | FOREIGN KEY | FOREIGN KEY (kelas_jabatan_id) REFERENCES ref_kelas_jabatan(id) |
 
 ## Indexes
 
@@ -61,17 +66,18 @@ erDiagram
 
 "kepegawaian.riwayat_jabatan" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
 "kepegawaian.riwayat_jabatan" }o--o| "kepegawaian.unit_kerja" : "FOREIGN KEY (satuan_kerja_id) REFERENCES unit_kerja(id)"
+"kepegawaian.riwayat_jabatan" }o--o| "kepegawaian.ref_kelas_jabatan" : "FOREIGN KEY (kelas_jabatan_id) REFERENCES ref_kelas_jabatan(id)"
 
 "kepegawaian.riwayat_jabatan" {
   varchar_36_ bkn_id
   varchar_36_ pns_id FK
   varchar_20_ pns_nip
   varchar_100_ pns_nama
-  varchar_100_ unor_id
+  varchar_36_ unor_id
   text unor
-  varchar_10_ jenis_jabatan_id
+  integer jenis_jabatan_id
   varchar_250_ jenis_jabatan
-  varchar_100_ jabatan_id
+  integer jabatan_id
   text nama_jabatan
   varchar_36_ eselon_id
   varchar_100_ eselon
@@ -96,6 +102,10 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  boolean status_plt
+  integer kelas_jabatan_id FK
+  date periode_jabatan_start_date
+  date periode_jabatan_end_date
 }
 "kepegawaian.pegawai" {
   integer id
@@ -171,14 +181,14 @@ erDiagram
   varchar_200_ instansi_kerja_nama
   varchar_200_ satuan_kerja_induk_nama
   varchar_200_ satuan_kerja_nama
-  integer jabatan_instansi_id
+  varchar_36_ jabatan_instansi_id FK
   smallint bup
   varchar_200_ jabatan_instansi_nama
   smallint jenis_jabatan_id
   date terminated_date
   smallint status_pegawai
   varchar_200_ jabatan_ppnpn
-  integer jabatan_instansi_real_id
+  varchar_36_ jabatan_instansi_real_id FK
   integer created_by
   integer updated_by
   varchar_100_ email_dikbud_bak
@@ -233,6 +243,13 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+}
+"kepegawaian.ref_kelas_jabatan" {
+  integer id
+  text kelas_jabatan
+  bigint tunjangan_kinerja
+  timestamp_without_time_zone created_at
+  timestamp_without_time_zone updated_at
 }
 ```
 

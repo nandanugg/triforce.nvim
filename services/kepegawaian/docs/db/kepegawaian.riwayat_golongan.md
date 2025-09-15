@@ -42,12 +42,14 @@
 | created_at | timestamp with time zone | now() | true |  |  |  |
 | updated_at | timestamp with time zone | now() | true |  |  |  |
 | deleted_at | timestamp with time zone |  | true |  |  |  |
+| jenis_kp_id | integer |  | true |  | [kepegawaian.ref_jenis_kp](kepegawaian.ref_jenis_kp.md) |  |
 
 ## Constraints
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
 | fk_riwayat_golongan_golongan | FOREIGN KEY | FOREIGN KEY (golongan_id) REFERENCES ref_golongan(id) |
+| fk_riwayat_golongan_jenis_kp | FOREIGN KEY | FOREIGN KEY (jenis_kp_id) REFERENCES ref_jenis_kp(id) |
 | fk_riwayat_golongan_pns_id | FOREIGN KEY | FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id) |
 | riwayat_golongan_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 
@@ -64,6 +66,7 @@ erDiagram
 
 "kepegawaian.riwayat_golongan" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
 "kepegawaian.riwayat_golongan" }o--o| "kepegawaian.ref_golongan" : "FOREIGN KEY (golongan_id) REFERENCES ref_golongan(id)"
+"kepegawaian.riwayat_golongan" }o--o| "kepegawaian.ref_jenis_kp" : "FOREIGN KEY (jenis_kp_id) REFERENCES ref_jenis_kp(id)"
 
 "kepegawaian.riwayat_golongan" {
   integer id
@@ -102,6 +105,7 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  integer jenis_kp_id FK
 }
 "kepegawaian.pegawai" {
   integer id
@@ -177,14 +181,14 @@ erDiagram
   varchar_200_ instansi_kerja_nama
   varchar_200_ satuan_kerja_induk_nama
   varchar_200_ satuan_kerja_nama
-  integer jabatan_instansi_id
+  varchar_36_ jabatan_instansi_id FK
   smallint bup
   varchar_200_ jabatan_instansi_nama
   smallint jenis_jabatan_id
   date terminated_date
   smallint status_pegawai
   varchar_200_ jabatan_ppnpn
-  integer jabatan_instansi_real_id
+  varchar_36_ jabatan_instansi_real_id FK
   integer created_by
   integer updated_by
   varchar_100_ email_dikbud_bak
@@ -211,6 +215,14 @@ erDiagram
   varchar_10_ nama_2
   smallint gol
   varchar_10_ gol_pppk
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
+}
+"kepegawaian.ref_jenis_kp" {
+  integer id
+  varchar_4_ dikbud_hr_id
+  varchar_50_ nama
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at

@@ -12,6 +12,7 @@
 | created_at | timestamp with time zone | now() | true |  |  |  |  |
 | updated_at | timestamp with time zone | now() | true |  |  |  |  |
 | deleted_at | timestamp with time zone |  | true |  |  |  |  |
+| is_pppk | boolean | false | true |  |  |  |  |
 
 ## Constraints
 
@@ -38,6 +39,7 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  boolean is_pppk
 }
 ```
 

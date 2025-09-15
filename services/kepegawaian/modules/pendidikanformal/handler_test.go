@@ -22,7 +22,7 @@ func Test_handler_list(t *testing.T) {
 	t.Parallel()
 
 	dbData := `
-		INSERT INTO tingkat_pendidikan (id, nama, abbreviation, tingkat) VALUES
+		INSERT INTO ref_tingkat_pendidikan (id, nama, abbreviation, tingkat) VALUES
 			(1, 'Sekolah Dasar', 'SD', 1),
 			(2, 'Sekolah Menengah Pertama', 'SMP', 2),
 			(3, 'Sekolah Menengah Atas', 'SMA', 3),
@@ -32,7 +32,7 @@ func Test_handler_list(t *testing.T) {
 			(7, 'Sarjana', 'S1', 7),
 			(8, 'Magister', 'S2', 8),
 			(9, 'Doktor', 'S3', 9);
-		INSERT INTO pendidikan (id, tingkat_pendidikan_id, nama) VALUES
+		INSERT INTO ref_pendidikan (id, tingkat_pendidikan_id, nama) VALUES
 		('ed-003', 7, 'Akuntansi'),
 		('ed-004', 8, 'Magister Manajemen'),
 		('ed-006', 6, 'Diploma III Akuntansi');

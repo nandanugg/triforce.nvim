@@ -122,14 +122,14 @@ erDiagram
   varchar_200_ instansi_kerja_nama
   varchar_200_ satuan_kerja_induk_nama
   varchar_200_ satuan_kerja_nama
-  integer jabatan_instansi_id
+  varchar_36_ jabatan_instansi_id FK
   smallint bup
   varchar_200_ jabatan_instansi_nama
   smallint jenis_jabatan_id
   date terminated_date
   smallint status_pegawai
   varchar_200_ jabatan_ppnpn
-  integer jabatan_instansi_real_id
+  varchar_36_ jabatan_instansi_real_id FK
   integer created_by
   integer updated_by
   varchar_100_ email_dikbud_bak
@@ -186,6 +186,7 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  integer jenis_kp_id FK
 }
 ```
 

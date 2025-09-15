@@ -6,7 +6,7 @@
 
 | Name | Type | Default | Nullable | Extra Definition | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | ---------------- | -------- | ------- | ------- |
-| id | integer | nextval('ref_jenis_kp_id_seq'::regclass) | false |  |  |  |  |
+| id | integer | nextval('ref_jenis_kp_id_seq'::regclass) | false |  | [kepegawaian.riwayat_golongan](kepegawaian.riwayat_golongan.md) |  |  |
 | dikbud_hr_id | varchar(4) |  | true | GENERATED ALWAYS AS lpad((id)::text, 4, '0'::text) STORED |  |  |  |
 | nama | varchar(50) |  | true |  |  |  |  |
 | created_at | timestamp with time zone | now() | true |  |  |  |  |
@@ -30,6 +30,7 @@
 ```mermaid
 erDiagram
 
+"kepegawaian.riwayat_golongan" }o--o| "kepegawaian.ref_jenis_kp" : "FOREIGN KEY (jenis_kp_id) REFERENCES ref_jenis_kp(id)"
 
 "kepegawaian.ref_jenis_kp" {
   integer id
@@ -38,6 +39,45 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+}
+"kepegawaian.riwayat_golongan" {
+  integer id
+  varchar_36_ pns_id FK
+  varchar_20_ pns_nip
+  varchar_100_ pns_nama
+  varchar_4_ kode_jenis_kp
+  varchar_50_ jenis_kp
+  smallint golongan_id FK
+  varchar_10_ golongan_nama
+  varchar_50_ pangkat_nama
+  varchar_50_ sk_nomor
+  varchar_100_ no_bkn
+  smallint jumlah_angka_kredit_utama
+  smallint jumlah_angka_kredit_tambahan
+  smallint mk_golongan_tahun
+  smallint mk_golongan_bulan
+  date sk_tanggal
+  date tanggal_bkn
+  date tmt_golongan
+  integer status_satker
+  integer status_biro
+  integer pangkat_terakhir
+  varchar_36_ bkn_id
+  text file_base64
+  varchar_200_ keterangan_berkas
+  bigint arsip_id
+  varchar_2_ golongan_asal
+  varchar_15_ basic
+  smallint sk_type
+  varchar_5_ kanreg
+  varchar_50_ kpkn
+  varchar_200_ keterangan
+  varchar_10_ lpnk
+  varchar_50_ jenis_riwayat
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
+  integer jenis_kp_id FK
 }
 ```
 

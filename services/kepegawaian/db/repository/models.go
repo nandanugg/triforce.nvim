@@ -136,14 +136,14 @@ type Pegawai struct {
 	InstansiKerjaNama     pgtype.Text        `db:"instansi_kerja_nama"`
 	SatuanKerjaIndukNama  pgtype.Text        `db:"satuan_kerja_induk_nama"`
 	SatuanKerjaNama       pgtype.Text        `db:"satuan_kerja_nama"`
-	JabatanInstansiID     pgtype.Int4        `db:"jabatan_instansi_id"`
+	JabatanInstansiID     pgtype.Text        `db:"jabatan_instansi_id"`
 	Bup                   pgtype.Int2        `db:"bup"`
 	JabatanInstansiNama   pgtype.Text        `db:"jabatan_instansi_nama"`
 	JenisJabatanID        pgtype.Int2        `db:"jenis_jabatan_id"`
 	TerminatedDate        pgtype.Date        `db:"terminated_date"`
 	StatusPegawai         pgtype.Int2        `db:"status_pegawai"`
 	JabatanPpnpn          pgtype.Text        `db:"jabatan_ppnpn"`
-	JabatanInstansiRealID pgtype.Int4        `db:"jabatan_instansi_real_id"`
+	JabatanInstansiRealID pgtype.Text        `db:"jabatan_instansi_real_id"`
 	CreatedBy             pgtype.Int4        `db:"created_by"`
 	UpdatedBy             pgtype.Int4        `db:"updated_by"`
 	EmailDikbudBak        pgtype.Text        `db:"email_dikbud_bak"`
@@ -162,15 +162,6 @@ type Pegawai struct {
 	CreatedAt             pgtype.Timestamptz `db:"created_at"`
 	UpdatedAt             pgtype.Timestamptz `db:"updated_at"`
 	DeletedAt             pgtype.Timestamptz `db:"deleted_at"`
-}
-
-type Pendidikan struct {
-	ID                  string             `db:"id"`
-	TingkatPendidikanID pgtype.Int2        `db:"tingkat_pendidikan_id"`
-	Nama                pgtype.Text        `db:"nama"`
-	CreatedAt           pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt           pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt           pgtype.Timestamptz `db:"deleted_at"`
 }
 
 type PindahUnit struct {
@@ -340,6 +331,7 @@ type RefKedudukanHukum struct {
 	CreatedAt  pgtype.Timestamptz `db:"created_at"`
 	UpdatedAt  pgtype.Timestamptz `db:"updated_at"`
 	DeletedAt  pgtype.Timestamptz `db:"deleted_at"`
+	IsPppk     pgtype.Bool        `db:"is_pppk"`
 }
 
 type RefKelasJabatan struct {
@@ -367,6 +359,27 @@ type RefLokasi struct {
 	JenisKabupaten pgtype.Text        `db:"jenis_kabupaten"`
 	JenisDesa      pgtype.Text        `db:"jenis_desa"`
 	Ibukota        pgtype.Text        `db:"ibukota"`
+	CreatedAt      pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt      pgtype.Timestamptz `db:"updated_at"`
+	DeletedAt      pgtype.Timestamptz `db:"deleted_at"`
+}
+
+type RefPendidikan struct {
+	ID                  string             `db:"id"`
+	TingkatPendidikanID pgtype.Int2        `db:"tingkat_pendidikan_id"`
+	Nama                pgtype.Text        `db:"nama"`
+	CreatedAt           pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt           pgtype.Timestamptz `db:"updated_at"`
+	DeletedAt           pgtype.Timestamptz `db:"deleted_at"`
+}
+
+type RefTingkatPendidikan struct {
+	ID             int32              `db:"id"`
+	GolonganID     pgtype.Int4        `db:"golongan_id"`
+	Nama           pgtype.Text        `db:"nama"`
+	GolonganAwalID pgtype.Int4        `db:"golongan_awal_id"`
+	Abbreviation   pgtype.Text        `db:"abbreviation"`
+	Tingkat        pgtype.Int2        `db:"tingkat"`
 	CreatedAt      pgtype.Timestamptz `db:"created_at"`
 	UpdatedAt      pgtype.Timestamptz `db:"updated_at"`
 	DeletedAt      pgtype.Timestamptz `db:"deleted_at"`
@@ -751,18 +764,6 @@ type RiwayatUjikom struct {
 	LinkSertifikat pgtype.Text        `db:"link_sertifikat"`
 	Exist          pgtype.Bool        `db:"exist"`
 	Tahun          pgtype.Int4        `db:"tahun"`
-	CreatedAt      pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt      pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt      pgtype.Timestamptz `db:"deleted_at"`
-}
-
-type TingkatPendidikan struct {
-	ID             int32              `db:"id"`
-	GolonganID     pgtype.Int4        `db:"golongan_id"`
-	Nama           pgtype.Text        `db:"nama"`
-	GolonganAwalID pgtype.Int4        `db:"golongan_awal_id"`
-	Abbreviation   pgtype.Text        `db:"abbreviation"`
-	Tingkat        pgtype.Int2        `db:"tingkat"`
 	CreatedAt      pgtype.Timestamptz `db:"created_at"`
 	UpdatedAt      pgtype.Timestamptz `db:"updated_at"`
 	DeletedAt      pgtype.Timestamptz `db:"deleted_at"`

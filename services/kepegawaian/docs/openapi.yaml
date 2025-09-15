@@ -187,82 +187,106 @@ paths:
                     type: object
                     additionalProperties: false
                     properties:
-                      id:
-                        type: integer
+                      nama:
+                        type: string
+                      gelar_depan:
+                        type: string
+                      gelar_belakang:
+                        type: string
+                      jabatan_aktual:
+                        type: string
+                      jenis_jabatan_aktual:
+                        type: string
+                      tmt_jabatan:
+                        type: string
+                        format: date
+                        nullable: true
                       nip:
                         type: string
-                      nip_baru:
-                        type: string
                       nik:
+                        type: string
+                      nomor_kk:
+                        type: string
+                      jenis_kelamin:
                         type: string
                       tempat_lahir:
                         type: string
                       tanggal_lahir:
                         type: string
                         format: date
+                        nullable: true
+                      tingkat_pendidikan:
+                        type: string
+                      pendidikan:
+                        type: string
+                      status_perkawinan:
+                        type: string
+                      agama:
+                        type: string
                       email_dikbud:
                         type: string
-                      email_lain:
+                      email_pribadi:
                         type: string
                       alamat:
                         type: string
                       nomor_hp:
                         type: string
-                      agama:
-                        type: string
-                      jenis_kelamin:
-                        type: string
-                      tingkat_pendidikan:
-                        type: string
-                      pendidikan:
-                        type: string
-                      masa_kerja:
-                        type: string
-                      lokasi_kerja:
+                      nomor_kontak_darurat:
                         type: string
                       jenis_pegawai:
                         type: string
-                      pangkat_golongan_aktif:
+                      masa_kerja_keseluruhan:
+                        type: string
+                      masa_kerja_golongan:
+                        type: string
+                      jabatan:
+                        type: string
+                      kelas_jabatan:
+                        type: string
+                      lokasi_kerja:
                         type: string
                       golongan_ruang_awal:
                         type: string
-                      golongan_ruang_terakhir:
+                      golongan_ruang_akhir:
+                        type: string
+                      pangkat_akhir:
                         type: string
                       tmt_golongan:
                         type: string
                         format: date
-                      jabatan:
-                        type: string
-                      unit_kerja:
-                        type: string
-                      gaji_pokok:
-                        type: string
+                        nullable: true
                       tmt_asn:
                         type: string
                         format: date
-                      sk_asn:
+                        nullable: true
+                      nomor_sk_asn:
                         type: string
-                      status_pns:
+                      status_asn:
                         type: string
+                      tmt_pns:
+                        type: string
+                        format: date
+                        nullable: true
                       kartu_pegawai:
-                        type: string
-                      status_perkawinan:
                         type: string
                       nomor_surat_dokter:
                         type: string
                       tanggal_surat_dokter:
                         type: string
                         format: date
+                        nullable: true
                       nomor_surat_bebas_narkoba:
                         type: string
                       tanggal_surat_bebas_narkoba:
                         type: string
                         format: date
+                        nullable: true
                       nomor_catatan_polisi:
                         type: string
                       tanggal_catatan_polisi:
                         type: string
                         format: date
+                        nullable: true
                       akte_kelahiran:
                         type: string
                       nomor_bpjs:
@@ -272,16 +296,13 @@ paths:
                       tanggal_npwp:
                         type: string
                         format: date
-                      nomor_darurat:
+                        nullable: true
+                      nomor_taspen:
                         type: string
-                      nama:
-                        type: string
-                      photo:
-                        type: string
-                      gelar_depan:
-                        type: string
-                      gelar_belakang:
-                        type: string
+                      unit_organisasi:
+                        type: array
+                        items:
+                          type: string
   /v1/riwayat-hukuman-disiplin:
     get:
       tags:
@@ -1081,33 +1102,6 @@ paths:
       summary: Daftar status pegawai.
       description: Daftar status pegawai.
       operationId: listStatusPegawai
-      parameters:
-        - $ref: "#/components/parameters/authRequired"
-      responses:
-        "200":
-          description: Sukses.
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                properties:
-                  data:
-                    type: array
-                    items:
-                      type: object
-                      additionalProperties: false
-                      properties:
-                        id:
-                          type: string
-                        nama:
-                          type: string
-  /v1/status-pernikahan:
-    get:
-      tags:
-        - Data Pribadi
-      summary: Daftar status pernikahan.
-      description: Daftar status pernikahan.
-      operationId: listStatusPernikahan
       parameters:
         - $ref: "#/components/parameters/authRequired"
       responses:

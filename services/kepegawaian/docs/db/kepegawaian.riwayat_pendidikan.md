@@ -8,7 +8,7 @@
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
 | id | integer | nextval('riwayat_pendidikan_id_seq'::regclass) | false |  |  |  |
 | pns_id_3 | varchar(32) |  | true |  |  |  |
-| tingkat_pendidikan_id | smallint |  | true |  | [kepegawaian.tingkat_pendidikan](kepegawaian.tingkat_pendidikan.md) |  |
+| tingkat_pendidikan_id | smallint |  | true |  | [kepegawaian.ref_tingkat_pendidikan](kepegawaian.ref_tingkat_pendidikan.md) |  |
 | pendidikan_id_3 | varchar(32) |  | true |  |  |  |
 | tanggal_lulus | date |  | true |  |  |  |
 | no_ijazah | varchar(100) |  | true |  |  |  |
@@ -24,19 +24,20 @@
 | status_biro | integer |  | true |  |  |  |
 | pendidikan_terakhir | integer |  | true |  |  |  |
 | pns_id | varchar(36) |  | true |  | [kepegawaian.pegawai](kepegawaian.pegawai.md) |  |
-| pendidikan_id | varchar(36) |  | true |  | [kepegawaian.pendidikan](kepegawaian.pendidikan.md) |  |
+| pendidikan_id | varchar(36) |  | true |  | [kepegawaian.ref_pendidikan](kepegawaian.ref_pendidikan.md) |  |
 | created_at | timestamp with time zone | now() | true |  |  |  |
 | updated_at | timestamp with time zone | now() | true |  |  |  |
 | deleted_at | timestamp with time zone |  | true |  |  |  |
+| tugas_belajar | smallint |  | true |  |  |  |
 
 ## Constraints
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
 | fk_riwayat_pendidikan_pns_id | FOREIGN KEY | FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id) |
-| fk_riwayat_pendidikan_pendidikan | FOREIGN KEY | FOREIGN KEY (pendidikan_id) REFERENCES pendidikan(id) |
+| fk_riwayat_pendidikan_pendidikan | FOREIGN KEY | FOREIGN KEY (pendidikan_id) REFERENCES ref_pendidikan(id) |
 | riwayat_pendidikan_pkey | PRIMARY KEY | PRIMARY KEY (id) |
-| fk_riwayat_pendidikan_tingkat | FOREIGN KEY | FOREIGN KEY (tingkat_pendidikan_id) REFERENCES tingkat_pendidikan(id) |
+| fk_riwayat_pendidikan_tingkat | FOREIGN KEY | FOREIGN KEY (tingkat_pendidikan_id) REFERENCES ref_tingkat_pendidikan(id) |
 
 ## Indexes
 
@@ -49,9 +50,9 @@
 ```mermaid
 erDiagram
 
-"kepegawaian.riwayat_pendidikan" }o--o| "kepegawaian.tingkat_pendidikan" : "FOREIGN KEY (tingkat_pendidikan_id) REFERENCES tingkat_pendidikan(id)"
+"kepegawaian.riwayat_pendidikan" }o--o| "kepegawaian.ref_tingkat_pendidikan" : "FOREIGN KEY (tingkat_pendidikan_id) REFERENCES ref_tingkat_pendidikan(id)"
 "kepegawaian.riwayat_pendidikan" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
-"kepegawaian.riwayat_pendidikan" }o--o| "kepegawaian.pendidikan" : "FOREIGN KEY (pendidikan_id) REFERENCES pendidikan(id)"
+"kepegawaian.riwayat_pendidikan" }o--o| "kepegawaian.ref_pendidikan" : "FOREIGN KEY (pendidikan_id) REFERENCES ref_pendidikan(id)"
 
 "kepegawaian.riwayat_pendidikan" {
   integer id
@@ -76,8 +77,9 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  smallint tugas_belajar
 }
-"kepegawaian.tingkat_pendidikan" {
+"kepegawaian.ref_tingkat_pendidikan" {
   integer id
   integer golongan_id
   varchar_200_ nama
@@ -162,14 +164,14 @@ erDiagram
   varchar_200_ instansi_kerja_nama
   varchar_200_ satuan_kerja_induk_nama
   varchar_200_ satuan_kerja_nama
-  integer jabatan_instansi_id
+  varchar_36_ jabatan_instansi_id FK
   smallint bup
   varchar_200_ jabatan_instansi_nama
   smallint jenis_jabatan_id
   date terminated_date
   smallint status_pegawai
   varchar_200_ jabatan_ppnpn
-  integer jabatan_instansi_real_id
+  varchar_36_ jabatan_instansi_real_id FK
   integer created_by
   integer updated_by
   varchar_100_ email_dikbud_bak
@@ -189,7 +191,7 @@ erDiagram
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
 }
-"kepegawaian.pendidikan" {
+"kepegawaian.ref_pendidikan" {
   varchar_36_ id
   smallint tingkat_pendidikan_id FK
   varchar_200_ nama

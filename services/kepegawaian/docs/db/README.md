@@ -18,7 +18,7 @@
 | [kepegawaian.ref_jenis_kp](kepegawaian.ref_jenis_kp.md) | 6 |  | BASE TABLE |
 | [kepegawaian.ref_jenis_pegawai](kepegawaian.ref_jenis_pegawai.md) | 6 |  | BASE TABLE |
 | [kepegawaian.ref_jenis_penghargaan](kepegawaian.ref_jenis_penghargaan.md) | 5 |  | BASE TABLE |
-| [kepegawaian.ref_kedudukan_hukum](kepegawaian.ref_kedudukan_hukum.md) | 6 |  | BASE TABLE |
+| [kepegawaian.ref_kedudukan_hukum](kepegawaian.ref_kedudukan_hukum.md) | 7 |  | BASE TABLE |
 | [kepegawaian.ref_kpkn](kepegawaian.ref_kpkn.md) | 5 |  | BASE TABLE |
 | [kepegawaian.ref_lokasi](kepegawaian.ref_lokasi.md) | 11 |  | BASE TABLE |
 | [kepegawaian.ref_jenis_satker](kepegawaian.ref_jenis_satker.md) | 5 |  | BASE TABLE |
@@ -26,27 +26,29 @@
 | [kepegawaian.pasangan](kepegawaian.pasangan.md) | 17 |  | BASE TABLE |
 | [kepegawaian.orang_tua](kepegawaian.orang_tua.md) | 18 |  | BASE TABLE |
 | [kepegawaian.pegawai](kepegawaian.pegawai.md) | 99 |  | BASE TABLE |
-| [kepegawaian.pendidikan](kepegawaian.pendidikan.md) | 6 |  | BASE TABLE |
+| [kepegawaian.ref_pendidikan](kepegawaian.ref_pendidikan.md) | 6 |  | BASE TABLE |
 | [kepegawaian.pindah_unit](kepegawaian.pindah_unit.md) | 23 |  | BASE TABLE |
 | [kepegawaian.riwayat_assesmen](kepegawaian.riwayat_assesmen.md) | 22 |  | BASE TABLE |
 | [kepegawaian.riwayat_diklat](kepegawaian.riwayat_diklat.md) | 21 |  | BASE TABLE |
 | [kepegawaian.riwayat_diklat_fungsional](kepegawaian.riwayat_diklat_fungsional.md) | 20 |  | BASE TABLE |
 | [kepegawaian.riwayat_diklat_struktural](kepegawaian.riwayat_diklat_struktural.md) | 17 |  | BASE TABLE |
-| [kepegawaian.riwayat_golongan](kepegawaian.riwayat_golongan.md) | 36 |  | BASE TABLE |
+| [kepegawaian.riwayat_golongan](kepegawaian.riwayat_golongan.md) | 37 |  | BASE TABLE |
 | [kepegawaian.riwayat_hukdis](kepegawaian.riwayat_hukdis.md) | 23 |  | BASE TABLE |
-| [kepegawaian.riwayat_jabatan](kepegawaian.riwayat_jabatan.md) | 33 |  | BASE TABLE |
+| [kepegawaian.riwayat_jabatan](kepegawaian.riwayat_jabatan.md) | 37 |  | BASE TABLE |
 | [kepegawaian.riwayat_kgb](kepegawaian.riwayat_kgb.md) | 29 |  | BASE TABLE |
 | [kepegawaian.riwayat_kinerja](kepegawaian.riwayat_kinerja.md) | 19 |  | BASE TABLE |
 | [kepegawaian.riwayat_kursus](kepegawaian.riwayat_kursus.md) | 15 |  | BASE TABLE |
 | [kepegawaian.riwayat_nine_box](kepegawaian.riwayat_nine_box.md) | 10 |  | BASE TABLE |
-| [kepegawaian.riwayat_pendidikan](kepegawaian.riwayat_pendidikan.md) | 22 |  | BASE TABLE |
+| [kepegawaian.riwayat_pendidikan](kepegawaian.riwayat_pendidikan.md) | 23 |  | BASE TABLE |
 | [kepegawaian.riwayat_penghargaan_umum](kepegawaian.riwayat_penghargaan_umum.md) | 11 |  | BASE TABLE |
 | [kepegawaian.riwayat_pindah_unit_kerja](kepegawaian.riwayat_pindah_unit_kerja.md) | 19 |  | BASE TABLE |
 | [kepegawaian.riwayat_ujikom](kepegawaian.riwayat_ujikom.md) | 9 |  | BASE TABLE |
-| [kepegawaian.tingkat_pendidikan](kepegawaian.tingkat_pendidikan.md) | 9 |  | BASE TABLE |
+| [kepegawaian.ref_tingkat_pendidikan](kepegawaian.ref_tingkat_pendidikan.md) | 9 |  | BASE TABLE |
 | [kepegawaian.unit_kerja](kepegawaian.unit_kerja.md) | 34 |  | BASE TABLE |
 | [kepegawaian.update_mandiri](kepegawaian.update_mandiri.md) | 15 |  | BASE TABLE |
 | [kepegawaian.riwayat_sertifikasi](kepegawaian.riwayat_sertifikasi.md) | 9 |  | BASE TABLE |
+| [kepegawaian.riwayat_penugasan](kepegawaian.riwayat_penugasan.md) | 12 |  | BASE TABLE |
+| [kepegawaian.ref_kelas_jabatan](kepegawaian.ref_kelas_jabatan.md) | 5 |  | BASE TABLE |
 
 ## Stored procedures and functions
 
@@ -78,12 +80,14 @@ erDiagram
 "kepegawaian.pegawai" }o--o| "kepegawaian.ref_instansi" : "FOREIGN KEY (instansi_induk_id) REFERENCES ref_instansi(id)"
 "kepegawaian.pegawai" }o--o| "kepegawaian.ref_instansi" : "FOREIGN KEY (instansi_kerja_id) REFERENCES ref_instansi(id)"
 "kepegawaian.pegawai" }o--o| "kepegawaian.ref_jabatan" : "FOREIGN KEY (jabatan_id) REFERENCES ref_jabatan(kode_jabatan)"
+"kepegawaian.pegawai" }o--o| "kepegawaian.ref_jabatan" : "FOREIGN KEY (jabatan_instansi_id) REFERENCES ref_jabatan(kode_jabatan)"
+"kepegawaian.pegawai" }o--o| "kepegawaian.ref_jabatan" : "FOREIGN KEY (jabatan_instansi_real_id) REFERENCES ref_jabatan(kode_jabatan)"
 "kepegawaian.pegawai" }o--o| "kepegawaian.ref_jenis_kawin" : "FOREIGN KEY (jenis_kawin_id) REFERENCES ref_jenis_kawin(id)"
 "kepegawaian.pegawai" }o--o| "kepegawaian.ref_kpkn" : "FOREIGN KEY (kpkn_id) REFERENCES ref_kpkn(id)"
 "kepegawaian.pegawai" }o--o| "kepegawaian.ref_lokasi" : "FOREIGN KEY (lokasi_kerja_id) REFERENCES ref_lokasi(id)"
-"kepegawaian.pegawai" }o--o| "kepegawaian.tingkat_pendidikan" : "FOREIGN KEY (tingkat_pendidikan_id) REFERENCES tingkat_pendidikan(id)"
+"kepegawaian.pegawai" }o--o| "kepegawaian.ref_tingkat_pendidikan" : "FOREIGN KEY (tingkat_pendidikan_id) REFERENCES ref_tingkat_pendidikan(id)"
 "kepegawaian.pegawai" }o--o| "kepegawaian.unit_kerja" : "FOREIGN KEY (unor_id) REFERENCES unit_kerja(id)"
-"kepegawaian.pendidikan" }o--o| "kepegawaian.tingkat_pendidikan" : "FOREIGN KEY (tingkat_pendidikan_id) REFERENCES tingkat_pendidikan(id)"
+"kepegawaian.ref_pendidikan" }o--o| "kepegawaian.ref_tingkat_pendidikan" : "FOREIGN KEY (tingkat_pendidikan_id) REFERENCES ref_tingkat_pendidikan(id)"
 "kepegawaian.pindah_unit" }o--o| "kepegawaian.unit_kerja" : "FOREIGN KEY (unit_asal) REFERENCES unit_kerja(id)"
 "kepegawaian.pindah_unit" }o--o| "kepegawaian.unit_kerja" : "FOREIGN KEY (unit_tujuan) REFERENCES unit_kerja(id)"
 "kepegawaian.riwayat_assesmen" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
@@ -93,15 +97,17 @@ erDiagram
 "kepegawaian.riwayat_diklat_struktural" }o--o| "kepegawaian.ref_jenis_diklat_struktural" : "FOREIGN KEY (jenis_diklat_id) REFERENCES ref_jenis_diklat_struktural(id)"
 "kepegawaian.riwayat_diklat_struktural" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
 "kepegawaian.riwayat_golongan" }o--o| "kepegawaian.ref_golongan" : "FOREIGN KEY (golongan_id) REFERENCES ref_golongan(id)"
+"kepegawaian.riwayat_golongan" }o--o| "kepegawaian.ref_jenis_kp" : "FOREIGN KEY (jenis_kp_id) REFERENCES ref_jenis_kp(id)"
 "kepegawaian.riwayat_golongan" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
 "kepegawaian.riwayat_hukdis" }o--o| "kepegawaian.ref_jenis_hukuman" : "FOREIGN KEY (jenis_hukuman_id) REFERENCES ref_jenis_hukuman(id)"
 "kepegawaian.riwayat_hukdis" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
 "kepegawaian.riwayat_jabatan" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
 "kepegawaian.riwayat_jabatan" }o--o| "kepegawaian.unit_kerja" : "FOREIGN KEY (satuan_kerja_id) REFERENCES unit_kerja(id)"
+"kepegawaian.riwayat_jabatan" }o--o| "kepegawaian.ref_kelas_jabatan" : "FOREIGN KEY (kelas_jabatan_id) REFERENCES ref_kelas_jabatan(id)"
 "kepegawaian.riwayat_kursus" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
 "kepegawaian.riwayat_pendidikan" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
-"kepegawaian.riwayat_pendidikan" }o--o| "kepegawaian.pendidikan" : "FOREIGN KEY (pendidikan_id) REFERENCES pendidikan(id)"
-"kepegawaian.riwayat_pendidikan" }o--o| "kepegawaian.tingkat_pendidikan" : "FOREIGN KEY (tingkat_pendidikan_id) REFERENCES tingkat_pendidikan(id)"
+"kepegawaian.riwayat_pendidikan" }o--o| "kepegawaian.ref_pendidikan" : "FOREIGN KEY (pendidikan_id) REFERENCES ref_pendidikan(id)"
+"kepegawaian.riwayat_pendidikan" }o--o| "kepegawaian.ref_tingkat_pendidikan" : "FOREIGN KEY (tingkat_pendidikan_id) REFERENCES ref_tingkat_pendidikan(id)"
 "kepegawaian.riwayat_pindah_unit_kerja" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
 "kepegawaian.unit_kerja" }o--o| "kepegawaian.ref_instansi" : "FOREIGN KEY (instansi_id) REFERENCES ref_instansi(id)"
 "kepegawaian.unit_kerja" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pemimpin_pns_id) REFERENCES pegawai(pns_id)"
@@ -232,6 +238,7 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  boolean is_pppk
 }
 "kepegawaian.ref_kpkn" {
   varchar_36_ id
@@ -387,14 +394,14 @@ erDiagram
   varchar_200_ instansi_kerja_nama
   varchar_200_ satuan_kerja_induk_nama
   varchar_200_ satuan_kerja_nama
-  integer jabatan_instansi_id
+  varchar_36_ jabatan_instansi_id FK
   smallint bup
   varchar_200_ jabatan_instansi_nama
   smallint jenis_jabatan_id
   date terminated_date
   smallint status_pegawai
   varchar_200_ jabatan_ppnpn
-  integer jabatan_instansi_real_id
+  varchar_36_ jabatan_instansi_real_id FK
   integer created_by
   integer updated_by
   varchar_100_ email_dikbud_bak
@@ -414,7 +421,7 @@ erDiagram
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
 }
-"kepegawaian.pendidikan" {
+"kepegawaian.ref_pendidikan" {
   varchar_36_ id
   smallint tingkat_pendidikan_id FK
   varchar_200_ nama
@@ -572,6 +579,7 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  integer jenis_kp_id FK
 }
 "kepegawaian.riwayat_hukdis" {
   bigint id
@@ -603,11 +611,11 @@ erDiagram
   varchar_36_ pns_id FK
   varchar_20_ pns_nip
   varchar_100_ pns_nama
-  varchar_100_ unor_id
+  varchar_36_ unor_id
   text unor
-  varchar_10_ jenis_jabatan_id
+  integer jenis_jabatan_id
   varchar_250_ jenis_jabatan
-  varchar_100_ jabatan_id
+  integer jabatan_id
   text nama_jabatan
   varchar_36_ eselon_id
   varchar_100_ eselon
@@ -632,6 +640,10 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  boolean status_plt
+  integer kelas_jabatan_id FK
+  date periode_jabatan_start_date
+  date periode_jabatan_end_date
 }
 "kepegawaian.riwayat_kgb" {
   integer pegawai_id
@@ -737,6 +749,7 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  smallint tugas_belajar
 }
 "kepegawaian.riwayat_penghargaan_umum" {
   integer id
@@ -783,7 +796,7 @@ erDiagram
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
 }
-"kepegawaian.tingkat_pendidikan" {
+"kepegawaian.ref_tingkat_pendidikan" {
   integer id
   integer golongan_id
   varchar_200_ nama
@@ -857,6 +870,27 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+}
+"kepegawaian.riwayat_penugasan" {
+  integer id
+  varchar_200_ tipe_jabatan
+  varchar_200_ deskripsi_jabatan
+  date tanggal_mulai
+  date tanggal_selesai
+  text file_base64
+  varchar_20_ nip
+  varchar_200_ nama_jabatan
+  boolean is_menjabat
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
+}
+"kepegawaian.ref_kelas_jabatan" {
+  integer id
+  text kelas_jabatan
+  bigint tunjangan_kinerja
+  timestamp_without_time_zone created_at
+  timestamp_without_time_zone updated_at
 }
 ```
 

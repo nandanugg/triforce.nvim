@@ -70,7 +70,7 @@
 | no_taspen | varchar(100) |  | true |  |  |  |
 | tgl_npwp | date |  | true |  |  |  |
 | tempat_lahir | varchar(100) |  | true |  |  |  |
-| tingkat_pendidikan_id | smallint |  | true |  | [kepegawaian.tingkat_pendidikan](kepegawaian.tingkat_pendidikan.md) |  |
+| tingkat_pendidikan_id | smallint |  | true |  | [kepegawaian.ref_tingkat_pendidikan](kepegawaian.ref_tingkat_pendidikan.md) |  |
 | tempat_lahir_nama | varchar(200) |  | true |  |  |  |
 | jenis_jabatan_nama | varchar(200) |  | true |  |  |  |
 | jabatan_nama | varchar(200) |  | true |  |  |  |
@@ -79,14 +79,14 @@
 | instansi_kerja_nama | varchar(200) |  | true |  |  |  |
 | satuan_kerja_induk_nama | varchar(200) |  | true |  |  |  |
 | satuan_kerja_nama | varchar(200) |  | true |  |  |  |
-| jabatan_instansi_id | integer |  | true |  |  |  |
+| jabatan_instansi_id | varchar(36) |  | true |  | [kepegawaian.ref_jabatan](kepegawaian.ref_jabatan.md) |  |
 | bup | smallint | 58 | true |  |  |  |
 | jabatan_instansi_nama | varchar(200) |  | true |  |  |  |
 | jenis_jabatan_id | smallint |  | true |  |  |  |
 | terminated_date | date |  | true |  |  |  |
 | status_pegawai | smallint | 1 | true |  |  |  |
 | jabatan_ppnpn | varchar(200) |  | true |  |  |  |
-| jabatan_instansi_real_id | integer |  | true |  |  |  |
+| jabatan_instansi_real_id | varchar(36) |  | true |  | [kepegawaian.ref_jabatan](kepegawaian.ref_jabatan.md) |  |
 | created_by | integer |  | true |  |  |  |
 | updated_by | integer |  | true |  |  |  |
 | email_dikbud_bak | varchar(100) |  | true |  |  |  |
@@ -116,12 +116,14 @@
 | fk_pegawai_instansi_induk | FOREIGN KEY | FOREIGN KEY (instansi_induk_id) REFERENCES ref_instansi(id) |
 | fk_pegawai_instansi_kerja | FOREIGN KEY | FOREIGN KEY (instansi_kerja_id) REFERENCES ref_instansi(id) |
 | fk_pegawai_jabatan | FOREIGN KEY | FOREIGN KEY (jabatan_id) REFERENCES ref_jabatan(kode_jabatan) |
+| fk_pegawai_jabatan_instansi | FOREIGN KEY | FOREIGN KEY (jabatan_instansi_id) REFERENCES ref_jabatan(kode_jabatan) |
+| fk_pegawai_jabatan_instansi_real | FOREIGN KEY | FOREIGN KEY (jabatan_instansi_real_id) REFERENCES ref_jabatan(kode_jabatan) |
 | fk_pegawai_jenis_kawin | FOREIGN KEY | FOREIGN KEY (jenis_kawin_id) REFERENCES ref_jenis_kawin(id) |
 | fk_pegawai_kpkn | FOREIGN KEY | FOREIGN KEY (kpkn_id) REFERENCES ref_kpkn(id) |
 | fk_pegawai_lokasi_kerja | FOREIGN KEY | FOREIGN KEY (lokasi_kerja_id) REFERENCES ref_lokasi(id) |
 | pegawai_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 | pegawai_pns_id_key | UNIQUE | UNIQUE (pns_id) |
-| fk_pegawai_pendidikan | FOREIGN KEY | FOREIGN KEY (tingkat_pendidikan_id) REFERENCES tingkat_pendidikan(id) |
+| fk_pegawai_pendidikan | FOREIGN KEY | FOREIGN KEY (tingkat_pendidikan_id) REFERENCES ref_tingkat_pendidikan(id) |
 | fk_pegawai_unor | FOREIGN KEY | FOREIGN KEY (unor_id) REFERENCES unit_kerja(id) |
 
 ## Indexes
@@ -160,7 +162,9 @@ erDiagram
 "kepegawaian.pegawai" }o--o| "kepegawaian.unit_kerja" : "FOREIGN KEY (unor_id) REFERENCES unit_kerja(id)"
 "kepegawaian.pegawai" }o--o| "kepegawaian.ref_instansi" : "FOREIGN KEY (instansi_induk_id) REFERENCES ref_instansi(id)"
 "kepegawaian.pegawai" }o--o| "kepegawaian.ref_instansi" : "FOREIGN KEY (instansi_kerja_id) REFERENCES ref_instansi(id)"
-"kepegawaian.pegawai" }o--o| "kepegawaian.tingkat_pendidikan" : "FOREIGN KEY (tingkat_pendidikan_id) REFERENCES tingkat_pendidikan(id)"
+"kepegawaian.pegawai" }o--o| "kepegawaian.ref_tingkat_pendidikan" : "FOREIGN KEY (tingkat_pendidikan_id) REFERENCES ref_tingkat_pendidikan(id)"
+"kepegawaian.pegawai" }o--o| "kepegawaian.ref_jabatan" : "FOREIGN KEY (jabatan_instansi_id) REFERENCES ref_jabatan(kode_jabatan)"
+"kepegawaian.pegawai" }o--o| "kepegawaian.ref_jabatan" : "FOREIGN KEY (jabatan_instansi_real_id) REFERENCES ref_jabatan(kode_jabatan)"
 
 "kepegawaian.pegawai" {
   integer id
@@ -236,14 +240,14 @@ erDiagram
   varchar_200_ instansi_kerja_nama
   varchar_200_ satuan_kerja_induk_nama
   varchar_200_ satuan_kerja_nama
-  integer jabatan_instansi_id
+  varchar_36_ jabatan_instansi_id FK
   smallint bup
   varchar_200_ jabatan_instansi_nama
   smallint jenis_jabatan_id
   date terminated_date
   smallint status_pegawai
   varchar_200_ jabatan_ppnpn
-  integer jabatan_instansi_real_id
+  varchar_36_ jabatan_instansi_real_id FK
   integer created_by
   integer updated_by
   varchar_100_ email_dikbud_bak
@@ -419,6 +423,7 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  integer jenis_kp_id FK
 }
 "kepegawaian.riwayat_hukdis" {
   bigint id
@@ -450,11 +455,11 @@ erDiagram
   varchar_36_ pns_id FK
   varchar_20_ pns_nip
   varchar_100_ pns_nama
-  varchar_100_ unor_id
+  varchar_36_ unor_id
   text unor
-  varchar_10_ jenis_jabatan_id
+  integer jenis_jabatan_id
   varchar_250_ jenis_jabatan
-  varchar_100_ jabatan_id
+  integer jabatan_id
   text nama_jabatan
   varchar_36_ eselon_id
   varchar_100_ eselon
@@ -479,6 +484,10 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  boolean status_plt
+  integer kelas_jabatan_id FK
+  date periode_jabatan_start_date
+  date periode_jabatan_end_date
 }
 "kepegawaian.riwayat_kursus" {
   integer id
@@ -520,6 +529,7 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  smallint tugas_belajar
 }
 "kepegawaian.riwayat_pindah_unit_kerja" {
   bigint id
@@ -664,7 +674,7 @@ erDiagram
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
 }
-"kepegawaian.tingkat_pendidikan" {
+"kepegawaian.ref_tingkat_pendidikan" {
   integer id
   integer golongan_id
   varchar_200_ nama
