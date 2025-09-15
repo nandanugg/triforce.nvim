@@ -852,7 +852,7 @@ paths:
       summary: Lihat daftar pelatihan teknis/seminar/workshop/kursus.
       description: >-
         Lihat daftar pelatihan teknis/seminar/workshop/kursus dari user yang
-        login, urut berdasarkan tanggal.
+        login, urut berdasarkan tanggal mulai (terbaru di atas).
       operationId: listPelatihanTeknis
       parameters:
         - $ref: "#/components/parameters/authRequired"
@@ -874,19 +874,38 @@ paths:
                       properties:
                         id:
                           type: integer
-                        tipe_diklat:
+                          description: ID pelatihan teknis
+                        tipe_pelatihan:
                           type: string
-                        jenis_diklat:
+                          description: Tipe pelatihan (Sertifikat/Non-sertifikat/Teknis)
+                          enum: [Sertifikat, Non-sertifikat, Teknis, ""]
+                        jenis_pelatihan:
                           type: string
-                        nama_diklat:
+                          description: Jenis pelatihan (Workshop/Seminar/Kursus/Lainnya)
+                        nama_pelatihan:
                           type: string
-                        jumlah_jam:
-                          type: integer
-                        tanggal_diklat:
+                          description: Nama pelatihan
+                        tanggal_mulai:
                           type: string
                           format: date
+                          description: Tanggal mulai pelatihan
+                        tanggal_selesai:
+                          type: string
+                          format: date
+                          description: Tanggal selesai pelatihan
+                        tahun:
+                          type: integer
+                          description: Tahun pelatihan
+                          nullable: true
+                        durasi:
+                          type: integer
+                          description: Durasi pelatihan dalam jam
+                        institusi_penyelenggara:
+                          type: string
+                          description: Institusi penyelenggara
                         nomor_sertifikat:
                           type: string
+                          description: Nomor sertifikat (jika ada)
                   meta:
                     $ref: "#/components/schemas/metaPagination"
   /v1/pendidikan-formal:

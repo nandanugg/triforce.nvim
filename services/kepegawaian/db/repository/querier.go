@@ -10,6 +10,7 @@ import (
 
 type Querier interface {
 	CountJenisKP(ctx context.Context) (int64, error)
+	CountPelatihanTeknis(ctx context.Context, nipBaru pgtype.Text) (int64, error)
 	CountRefGolongan(ctx context.Context) (int64, error)
 	CountRefJabatan(ctx context.Context) (int64, error)
 	CountRefJenisJabatan(ctx context.Context) (int64, error)
@@ -26,6 +27,7 @@ type Querier interface {
 	ListOrangTuaByNip(ctx context.Context, nipBaru pgtype.Text) ([]ListOrangTuaByNipRow, error)
 	ListPasanganByNip(ctx context.Context, nipBaru pgtype.Text) ([]ListPasanganByNipRow, error)
 	ListPelatihanStruktural(ctx context.Context, nipBaru pgtype.Text) ([]ListPelatihanStrukturalRow, error)
+	ListPelatihanTeknis(ctx context.Context, arg ListPelatihanTeknisParams) ([]ListPelatihanTeknisRow, error)
 	ListPendidikanFormal(ctx context.Context, nipBaru pgtype.Text) ([]ListPendidikanFormalRow, error)
 	ListRefJabatan(ctx context.Context, arg ListRefJabatanParams) ([]ListRefJabatanRow, error)
 	ListRefJenisJabatan(ctx context.Context, arg ListRefJenisJabatanParams) ([]ListRefJenisJabatanRow, error)

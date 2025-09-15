@@ -34,7 +34,7 @@ func (h *handler) list(c echo.Context) error {
 	}
 
 	ctx := c.Request().Context()
-	data, total, err := h.service.list(ctx, api.CurrentUser(c).ID, req.Limit, req.Offset)
+	data, total, err := h.service.list(ctx, api.CurrentUser(c).NIP, req.Limit, req.Offset)
 	if err != nil {
 		slog.ErrorContext(ctx, "Error getting list pelatihan teknis.", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
