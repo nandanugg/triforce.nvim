@@ -19,7 +19,7 @@ tags:
   - name: Pelatihan Fungsional
   - name: Pelatihan Struktural
   - name: Pelatihan Teknis
-  - name: Pendidikan Formal
+  - name: Riwayat Pendidikan
   - name: Penghargaan
   - name: Sertifikasi
   - name: Penugasan
@@ -949,17 +949,18 @@ paths:
                           description: Nomor sertifikat (jika ada)
                   meta:
                     $ref: "#/components/schemas/metaPagination"
-  /v1/pendidikan-formal:
+  /v1/riwayat-pendidikan:
     get:
       tags:
-        - Pendidikan Formal
-      summary: Lihat daftar pendidikan formal
+        - Riwayat Pendidikan
+      summary: Lihat daftar riwayat pendidikan.
       description: >-
-        Lihat daftar pendidikan formal dari user yang login, urut berdasarkan
-        tahun lulus.
-      operationId: listPendidikanFormal
+        Lihat daftar riwayat pendidikan dari user yang login, urut berdasarkan tahun lulus desc.
+      operationId: listRiwayatPendidikan
       parameters:
         - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
       responses:
         "200":
           description: Sukses.
@@ -985,7 +986,7 @@ paths:
                         keterangan_pendidikan:
                           type: string
                         tahun_lulus:
-                          type: string
+                          type: integer
                         nomor_ijazah:
                           type: string
                         gelar_depan:
@@ -994,6 +995,33 @@ paths:
                           type: string
                         tugas_belajar:
                           type: string
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/riwayat-pendidikan/{id}/berkas:
+    get:
+      tags:
+        - Riwayat Pendidikan
+      summary: Lihat berkas riwayat pendidikan.
+      description: >-
+        Lihat berkas riwayat pendidikan berdasarkan id.
+      operationId: getBerkasRiwayatPendidikan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Riwayat Pendidikan tidak ditemukan atau User tidak mempunyai akses.
   /v1/penghargaan:
     get:
       tags:

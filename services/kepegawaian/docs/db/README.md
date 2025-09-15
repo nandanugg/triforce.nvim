@@ -39,7 +39,7 @@
 | [kepegawaian.riwayat_kinerja](kepegawaian.riwayat_kinerja.md) | 19 |  | BASE TABLE |
 | [kepegawaian.riwayat_kursus](kepegawaian.riwayat_kursus.md) | 15 |  | BASE TABLE |
 | [kepegawaian.riwayat_nine_box](kepegawaian.riwayat_nine_box.md) | 10 |  | BASE TABLE |
-| [kepegawaian.riwayat_pendidikan](kepegawaian.riwayat_pendidikan.md) | 23 |  | BASE TABLE |
+| [kepegawaian.riwayat_pendidikan](kepegawaian.riwayat_pendidikan.md) | 25 |  | BASE TABLE |
 | [kepegawaian.riwayat_penghargaan_umum](kepegawaian.riwayat_penghargaan_umum.md) | 11 |  | BASE TABLE |
 | [kepegawaian.riwayat_pindah_unit_kerja](kepegawaian.riwayat_pindah_unit_kerja.md) | 19 |  | BASE TABLE |
 | [kepegawaian.riwayat_ujikom](kepegawaian.riwayat_ujikom.md) | 9 |  | BASE TABLE |
@@ -225,11 +225,11 @@ erDiagram
   timestamp_with_time_zone deleted_at
 }
 "kepegawaian.ref_jenis_penghargaan" {
+  integer id
   varchar_100_ nama
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
-  integer id
 }
 "kepegawaian.ref_kedudukan_hukum" {
   integer id
@@ -738,7 +738,7 @@ erDiagram
   varchar_60_ gelar_belakang
   varchar_1_ pendidikan_pertama
   varchar_255_ negara_sekolah
-  varchar_4_ tahun_lulus
+  smallint tahun_lulus
   varchar_20_ nip
   integer diakui_bkn
   integer status_satker
@@ -750,6 +750,8 @@ erDiagram
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
   smallint tugas_belajar
+  text file_base64
+  varchar_200_ keterangan_berkas
 }
 "kepegawaian.riwayat_penghargaan_umum" {
   integer id

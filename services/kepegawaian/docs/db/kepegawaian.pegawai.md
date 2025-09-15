@@ -518,7 +518,7 @@ erDiagram
   varchar_60_ gelar_belakang
   varchar_1_ pendidikan_pertama
   varchar_255_ negara_sekolah
-  varchar_4_ tahun_lulus
+  smallint tahun_lulus
   varchar_20_ nip
   integer diakui_bkn
   integer status_satker
@@ -530,6 +530,8 @@ erDiagram
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
   smallint tugas_belajar
+  text file_base64
+  varchar_200_ keterangan_berkas
 }
 "kepegawaian.riwayat_pindah_unit_kerja" {
   bigint id

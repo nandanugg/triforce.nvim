@@ -60,11 +60,11 @@ func (s *service) getBerkas(ctx context.Context, nip string, id int64) (string, 
 		Nip: pgNip,
 		ID:  id,
 	})
-	if errors.Is(err, pgx.ErrNoRows) || len(res.String) == 0 {
-		return "", nil, nil
-	}
-	if err != nil {
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 		return "", nil, fmt.Errorf("repo get berkas: %w", err)
+	}
+	if len(res.String) == 0 {
+		return "", nil, nil
 	}
 
 	return api.GetMimetypeAndDecodedData(res.String)

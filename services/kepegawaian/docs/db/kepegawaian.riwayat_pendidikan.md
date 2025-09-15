@@ -17,7 +17,7 @@
 | gelar_belakang | varchar(60) |  | true |  |  |  |
 | pendidikan_pertama | varchar(1) |  | true |  |  |  |
 | negara_sekolah | varchar(255) |  | true |  |  |  |
-| tahun_lulus | varchar(4) |  | true |  |  |  |
+| tahun_lulus | smallint |  | true |  |  |  |
 | nip | varchar(20) |  | true |  |  |  |
 | diakui_bkn | integer |  | true |  |  |  |
 | status_satker | integer |  | true |  |  |  |
@@ -29,6 +29,8 @@
 | updated_at | timestamp with time zone | now() | true |  |  |  |
 | deleted_at | timestamp with time zone |  | true |  |  |  |
 | tugas_belajar | smallint |  | true |  |  |  |
+| file_base64 | text |  | true |  |  |  |
+| keterangan_berkas | varchar(200) |  | true |  |  |  |
 
 ## Constraints
 
@@ -66,7 +68,7 @@ erDiagram
   varchar_60_ gelar_belakang
   varchar_1_ pendidikan_pertama
   varchar_255_ negara_sekolah
-  varchar_4_ tahun_lulus
+  smallint tahun_lulus
   varchar_20_ nip
   integer diakui_bkn
   integer status_satker
@@ -78,6 +80,8 @@ erDiagram
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
   smallint tugas_belajar
+  text file_base64
+  varchar_200_ keterangan_berkas
 }
 "kepegawaian.ref_tingkat_pendidikan" {
   integer id

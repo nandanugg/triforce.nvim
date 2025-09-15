@@ -26,9 +26,9 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/pelatihanfungsional"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/pelatihanstruktural"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/pelatihanteknis"
-	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/pendidikanformal"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/penghargaan"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/penugasan"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/riwayatpendidikan"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/sertifikasi"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/unitkerja"
 )
@@ -69,7 +69,7 @@ func main() {
 	pelatihanfungsional.RegisterRoutes(e, db, mwAuth)
 	pelatihanstruktural.RegisterRoutes(e, dbRepository, mwAuth)
 	pelatihanteknis.RegisterRoutes(e, dbRepository, mwAuth)
-	pendidikanformal.RegisterRoutes(e, dbRepository, mwAuth)
+	riwayatpendidikan.RegisterRoutes(e, dbRepository, mwAuth)
 	penghargaan.RegisterRoutes(e, db, mwAuth)
 	penugasan.RegisterRoutes(e, db, mwAuth)
 	sertifikasi.RegisterRoutes(e, dbRepository, mwAuth)

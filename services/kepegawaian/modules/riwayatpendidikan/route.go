@@ -1,0 +1,17 @@
+package riwayatpendidikan
+
+import (
+	"net/http"
+
+	"github.com/labstack/echo/v4"
+
+	sqlc "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
+)
+
+func RegisterRoutes(e *echo.Echo, sqlc sqlc.Querier, mwAuth echo.MiddlewareFunc) {
+	s := newService(sqlc)
+	h := newHandler(s)
+
+	e.Add(http.MethodGet, "/v1/riwayat-pendidikan", h.list, mwAuth)
+	e.Add(http.MethodGet, "/v1/riwayat-pendidikan/:id/berkas", h.getBerkas, mwAuth)
+}

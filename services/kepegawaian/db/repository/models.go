@@ -680,7 +680,7 @@ type RiwayatPendidikan struct {
 	GelarBelakang       pgtype.Text        `db:"gelar_belakang"`
 	PendidikanPertama   pgtype.Text        `db:"pendidikan_pertama"`
 	NegaraSekolah       pgtype.Text        `db:"negara_sekolah"`
-	TahunLulus          pgtype.Text        `db:"tahun_lulus"`
+	TahunLulus          pgtype.Int2        `db:"tahun_lulus"`
 	Nip                 pgtype.Text        `db:"nip"`
 	DiakuiBkn           pgtype.Int4        `db:"diakui_bkn"`
 	StatusSatker        pgtype.Int4        `db:"status_satker"`
@@ -692,6 +692,8 @@ type RiwayatPendidikan struct {
 	UpdatedAt           pgtype.Timestamptz `db:"updated_at"`
 	DeletedAt           pgtype.Timestamptz `db:"deleted_at"`
 	TugasBelajar        pgtype.Int2        `db:"tugas_belajar"`
+	FileBase64          pgtype.Text        `db:"file_base64"`
+	KeteranganBerkas    pgtype.Text        `db:"keterangan_berkas"`
 }
 
 type RiwayatPenghargaanUmum struct {
