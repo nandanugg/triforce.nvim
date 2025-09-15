@@ -3,7 +3,6 @@ package dbtest
 import (
 	"context"
 	"crypto/sha1"
-	"database/sql"
 	"embed"
 	"encoding/hex"
 	"fmt"
@@ -11,16 +10,18 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
 )
 
 var (
-	adminDB         *sql.DB
+	adminDB         *pgxpool.Pool
 	testDBHost      string
 	testDBPort      uint
 	testDBName      string
@@ -42,13 +43,9 @@ func init() {
 	testDBSuperuser = os.Getenv("NEXUS_TEST_DB_SUPERUSER")
 	testDBPassword = os.Getenv("NEXUS_TEST_DB_PASSWORD")
 
-	adminDB, err = db.New(
-		testDBHost,
-		testDBPort,
-		testDBSuperuser,
-		testDBPassword,
-		testDBName,
-		testDBSchema)
+	adminDB, err = db.New(testDBHost, testDBPort, testDBSuperuser, testDBPassword, testDBName, testDBSchema, db.Options{
+		PingTimeout: 5 * time.Second,
+	})
 	if err != nil {
 		fmt.Println("Error connecting to database: " + err.Error())
 		os.Exit(1)
@@ -57,11 +54,11 @@ func init() {
 
 // New creates an isolated database for t, using application config values only
 // as initial connection parameters.
-func New(t *testing.T, migrationsFS embed.FS) *sql.DB {
+func New(t *testing.T, migrationsFS embed.FS) *pgxpool.Pool {
 	t.Helper()
 
-	testID := randomString()
 	var (
+		testID   = randomString()
 		dbname   = "nexus_test_db_" + testID
 		user     = "nexus_test_user_" + testID
 		schema   = "nexus_test_schema_" + testID
@@ -78,87 +75,67 @@ func New(t *testing.T, migrationsFS embed.FS) *sql.DB {
 	return applyMigrations(t, user, password, dbname, schema, migrationsFS)
 }
 
-// NewPgxPool creates an isolated database for t, using application config values only
-// as initial connection parameters.
-func NewPgxPool(t *testing.T, migrationsFS embed.FS) *pgxpool.Pool {
-	t.Helper()
-
-	testID := randomString()
-	var (
-		dbname   = "nexus_test_db_" + testID
-		user     = "nexus_test_user_" + testID
-		schema   = "nexus_test_schema_" + testID
-		password = "any"
-	)
-	createTestDBAndRole(t, user, password, dbname)
-
-	// Do necessary preparation in new DB before applying migration files:
-	prepareTestDB(t, user, password, dbname, schema)
-
-	// Apply migration files:
-	applyMigrations(t, user, password, dbname, schema, migrationsFS)
-	pgxPool, err := pgxpool.New(context.Background(), fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s", testDBHost, testDBPort, user, password, dbname))
-	require.NoError(t, err)
-	_, err = pgxPool.Exec(context.Background(), "set search_path to "+schema)
-	require.NoError(t, err)
-	return pgxPool
-}
-
 func randomString() string {
 	sum := sha1.Sum([]byte(uuid.New().String()))
 	return hex.EncodeToString(sum[:4])
 }
 
 func createTestDBAndRole(t *testing.T, user, password, dbname string) {
-	_, err := adminDB.Exec("create database " + dbname)
+	_, err := adminDB.Exec(context.Background(), "create database "+dbname)
 	require.NoError(t, err)
 
-	_, err = adminDB.Exec(fmt.Sprintf(`
+	_, err = adminDB.Exec(context.Background(), fmt.Sprintf(`
 		create role %[1]s login password '%[2]s';
 		grant create on database %[3]s to %[1]s;
 		`, user, password, dbname,
 	))
 	require.NoError(t, err)
 
-	// t.Cleanup(func() {
-	// 	_, err = adminDB.Exec("drop database " + dbname)
-	// 	assert.NoError(t, err)
-	// 	_, err = adminDB.Exec("reassign owned by " + user + " to postgres")
-	// 	assert.NoError(t, err)
-	// 	_, err = adminDB.Exec("drop owned by " + user)
-	// 	assert.NoError(t, err)
-	// 	_, err = adminDB.Exec("drop role " + user)
-	// 	assert.NoError(t, err)
-	// })
+	t.Cleanup(func() {
+		_, err = adminDB.Exec(context.Background(), "drop database "+dbname)
+		assert.NoError(t, err)
+		_, err = adminDB.Exec(context.Background(), "reassign owned by "+user+" to "+testDBSuperuser)
+		assert.NoError(t, err)
+		_, err = adminDB.Exec(context.Background(), "drop owned by "+user)
+		assert.NoError(t, err)
+		_, err = adminDB.Exec(context.Background(), "drop role "+user)
+		assert.NoError(t, err)
+	})
 }
 
 func prepareTestDB(t *testing.T, user, password, dbname, schema string) {
-	d, err := db.New(testDBHost, testDBPort, testDBSuperuser, testDBPassword, dbname, schema)
+	d, err := db.New(testDBHost, testDBPort, testDBSuperuser, testDBPassword, dbname, schema, db.Options{
+		PingTimeout: 5 * time.Second,
+	})
 	require.NoError(t, err)
 	defer d.Close()
 
 	// NOTE: 'update pg_language' dibutuhkan di DB kepegawaian (search
 	// "LANGUAGE c" di file migrations).
-	_, err = d.Exec("update pg_language set lanpltrusted = true where lanname = 'c'")
+	_, err = d.Exec(context.Background(), "update pg_language set lanpltrusted = true where lanname = 'c'")
 	require.NoError(t, err)
 
-	d2, err := db.New(testDBHost, testDBPort, user, password, dbname, schema)
+	d2, err := db.New(testDBHost, testDBPort, user, password, dbname, schema, db.Options{
+		PingTimeout: 5 * time.Second,
+	})
 	require.NoError(t, err)
 	defer d2.Close()
 
-	_, err = d2.Exec("create schema " + schema)
+	_, err = d2.Exec(context.Background(), "create schema "+schema)
 	require.NoError(t, err)
 }
 
-func applyMigrations(t *testing.T, user, password, dbname, schema string, migrationsFS embed.FS) *sql.DB {
-	db, err := db.New(testDBHost, testDBPort, user, password, dbname, schema)
+func applyMigrations(t *testing.T, user, password, dbname, schema string, migrationsFS embed.FS) *pgxpool.Pool {
+	db, err := db.New(testDBHost, testDBPort, user, password, dbname, schema, db.Options{
+		PingTimeout: 5 * time.Second,
+	})
 	require.NoError(t, err)
 	t.Cleanup(func() { db.Close() })
 
 	sqls, err := getMigrationUpSQLs(migrationsFS)
 	require.NoError(t, err)
 
-	_, err = db.Exec(strings.Join(sqls, "\n"))
+	_, err = db.Exec(context.Background(), strings.Join(sqls, "\n"))
 	require.NoError(t, err, "Error running SQL:\n%s")
 
 	return db
@@ -187,18 +164,14 @@ func getMigrationUpSQLs(fs embed.FS) ([]string, error) {
 type Rows []map[string]any
 
 // QueryAll fetches all rows in table tableName from db.
-func QueryAll(db *sql.DB, tableName, orderBy string) (Rows, error) {
-	rows, err := db.Query("select * from " + tableName + " order by " + orderBy)
+func QueryAll(db *pgxpool.Pool, tableName, orderBy string) (Rows, error) {
+	rows, err := db.Query(context.Background(), "select * from "+tableName+" order by "+orderBy)
 	if err != nil {
 		return nil, fmt.Errorf("db query: %w", err)
 	}
 	defer rows.Close()
 
-	cols, err := rows.Columns()
-	if err != nil {
-		return nil, fmt.Errorf("get rows cols: %w", err)
-	}
-
+	cols := rows.FieldDescriptions()
 	result := []map[string]any{}
 	for rows.Next() {
 		row := make([]any, len(cols))
@@ -211,9 +184,9 @@ func QueryAll(db *sql.DB, tableName, orderBy string) (Rows, error) {
 			return nil, fmt.Errorf("row scan: %w", err)
 		}
 
-		rowMap := map[string]any{}
+		rowMap := make(map[string]any, len(cols))
 		for i, v := range row {
-			rowMap[cols[i]] = v
+			rowMap[cols[i].Name] = v
 		}
 		result = append(result, rowMap)
 	}

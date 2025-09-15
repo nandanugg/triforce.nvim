@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
-	dblib "gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/config"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/docs"
@@ -38,19 +38,16 @@ func main() {
 
 	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: c.LogLevel})))
 
-	db, err := dblib.New(c.DB.Host, c.DB.Port, c.DB.User, c.DB.Password, c.DB.Name, c.DB.Schema)
-	exitIfError("Error connecting to database.", err)
-
 	e, err := api.NewEchoServer(docs.OpenAPIBytes)
 	exitIfError("Error creating new echo server.", err)
 
 	keyfunc, err := api.NewAuthKeyfunc(c.Keycloak.Host, c.Keycloak.Realm, c.Keycloak.Audience)
 	exitIfError("Error initializing auth keyfunc.", err)
 
-	pgxConn, err := dblib.NewPgxPool(c.DB.Host, c.DB.Port, c.DB.User, c.DB.Password, c.DB.Name, c.DB.Schema)
+	db, err := db.New(c.DB.Host, c.DB.Port, c.DB.User, c.DB.Password, c.DB.Name, c.DB.Schema)
 	exitIfError("Error connecting to database with pgx.", err)
 
-	dbRepository := repository.New(pgxConn)
+	dbRepository := repository.New(db)
 
 	mwAuth := api.NewAuthMiddleware(config.Service, keyfunc)
 

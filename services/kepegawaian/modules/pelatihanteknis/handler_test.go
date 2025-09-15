@@ -25,7 +25,7 @@ func Test_handler_list(t *testing.T) {
 		(1, '1c', null),
 		(2, '2c', null),
 		(3, '3c', '2020-01-01');
-		
+
 		insert into riwayat_kursus
 			(id, pns_id, pns_nip, tipe_kursus, jenis_kursus, nama_kursus, tanggal_kursus, lama_kursus, institusi_penyelenggara, no_sertifikat, deleted_at) values
 			(11, '1', '1c', 'Teknis', 'Workshop', '11a', '2000-01-01', 24, 'Institution 11', 'CERT11', null),
@@ -224,7 +224,7 @@ func Test_handler_list(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			pgxconn := dbtest.NewPgxPool(t, dbmigrations.FS)
+			pgxconn := dbtest.New(t, dbmigrations.FS)
 			_, err := pgxconn.Exec(context.Background(), tt.dbData)
 			require.NoError(t, err)
 

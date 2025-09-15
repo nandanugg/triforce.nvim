@@ -2,18 +2,18 @@ package pegawai
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"strings"
 
 	"github.com/Masterminds/squirrel"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type repository struct {
-	db *sql.DB
+	db *pgxpool.Pool
 }
 
-func newRepository(db *sql.DB) *repository {
+func newRepository(db *pgxpool.Pool) *repository {
 	return &repository{db: db}
 }
 
@@ -58,7 +58,7 @@ func (r *repository) list(ctx context.Context, limit, offset uint64, opts listOp
 	}
 
 	q, args, _ := qb.ToSql()
-	rows, err := r.db.QueryContext(ctx, q, args...)
+	rows, err := r.db.Query(ctx, q, args...)
 	if err != nil {
 		return nil, fmt.Errorf("sql select: %w", err)
 	}
@@ -121,13 +121,13 @@ func (r *repository) count(ctx context.Context, opts listOptions) (uint, error) 
 
 	var result uint
 	q, args, _ := qb.ToSql()
-	err := r.db.QueryRowContext(ctx, q, args...).Scan(&result)
+	err := r.db.QueryRow(ctx, q, args...).Scan(&result)
 
 	return result, err
 }
 
 func (r *repository) listStatusPegawai(ctx context.Context) ([]statusPegawai, error) {
-	rows, err := r.db.QueryContext(ctx, `select "ID", "NAMA" from jenis_pegawai order by 2 asc`)
+	rows, err := r.db.Query(ctx, `select "ID", "NAMA" from jenis_pegawai order by 2 asc`)
 	if err != nil {
 		return nil, fmt.Errorf("sql select: %w", err)
 	}

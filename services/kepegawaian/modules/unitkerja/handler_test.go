@@ -226,7 +226,7 @@ func Test_handler_ListUnitKerja(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			pgxconn := dbtest.NewPgxPool(t, dbmigrations.FS)
+			pgxconn := dbtest.New(t, dbmigrations.FS)
 
 			_, err := pgxconn.Exec(context.Background(), tt.dbData)
 			require.NoError(t, err)

@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -370,7 +371,7 @@ func Test_handler_exchangeToken(t *testing.T) {
 			require.NoError(t, err)
 
 			db := dbtest.New(t, dbmigrations.FS)
-			_, err = db.Exec(tt.dbData)
+			_, err = db.Exec(context.Background(), tt.dbData)
 			require.NoError(t, err)
 
 			keycloak := config.Keycloak{
@@ -658,7 +659,7 @@ func Test_handler_refreshToken(t *testing.T) {
 			require.NoError(t, err)
 
 			db := dbtest.New(t, dbmigrations.FS)
-			_, err = db.Exec(tt.dbData)
+			_, err = db.Exec(context.Background(), tt.dbData)
 			require.NoError(t, err)
 
 			keycloak := config.Keycloak{

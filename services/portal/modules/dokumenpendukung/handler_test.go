@@ -1,6 +1,7 @@
 package dokumenpendukung
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -73,7 +74,7 @@ func Test_handler_list(t *testing.T) {
 			t.Parallel()
 
 			db := dbtest.New(t, dbmigrations.FS)
-			_, err := db.Exec(tt.dbData)
+			_, err := db.Exec(context.Background(), tt.dbData)
 			require.NoError(t, err)
 
 			req := httptest.NewRequest(http.MethodGet, "/v1/dokumen-pendukung", nil)

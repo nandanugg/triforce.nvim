@@ -16,6 +16,9 @@ lint: lint-go lint-openapi
 test:
 	go test ./...
 
+test-cleanup:
+	./bin/test_cleanup.sh
+
 test-nocache:
 	go test -count=1 ./...
 

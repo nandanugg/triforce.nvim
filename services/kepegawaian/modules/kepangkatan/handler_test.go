@@ -182,7 +182,7 @@ func Test_handler_list(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			db := dbtest.NewPgxPool(t, dbmigrations.FS)
+			db := dbtest.New(t, dbmigrations.FS)
 			_, err := db.Exec(context.Background(), tt.dbData)
 			repo := dbrepo.New(db)
 			require.NoError(t, err)

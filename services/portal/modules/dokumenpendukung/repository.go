@@ -2,20 +2,25 @@ package dokumenpendukung
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
+
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/jackc/pgx/v5/pgxpool"
+
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/typeutil"
 )
 
 type repository struct {
-	db *sql.DB
+	db *pgxpool.Pool
 }
 
-func newRepository(db *sql.DB) *repository {
+func newRepository(db *pgxpool.Pool) *repository {
 	return &repository{db: db}
 }
 
 func (r *repository) list(ctx context.Context) ([]dokumenPendukung, error) {
-	rows, err := r.db.QueryContext(ctx, `
+	rows, err := r.db.Query(ctx, `
 		select
 			dp.id,
 			dp.nama_tombol,
@@ -33,18 +38,22 @@ func (r *repository) list(ctx context.Context) ([]dokumenPendukung, error) {
 	result := []dokumenPendukung{}
 	for rows.Next() {
 		var row dokumenPendukung
+		var terakhirDiperbarui pgtype.Date
 		err := rows.Scan(
 			&row.ID,
 			&row.NamaTombol,
 			&row.NamaHalaman,
 			&row.DiperbaruiOleh,
-			&row.TerakhirDiperbarui,
+			&terakhirDiperbarui,
 			&row.Status,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("row scan: %w", err)
 		}
 
+		if terakhirDiperbarui.Valid {
+			row.TerakhirDiperbarui = typeutil.ToPtr(db.Date(terakhirDiperbarui.Time))
+		}
 		result = append(result, row)
 	}
 

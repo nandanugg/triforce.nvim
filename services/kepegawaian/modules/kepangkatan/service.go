@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/typeutil"
 	dbrepo "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
-	utility "gitlab.com/wartek-id/matk/nexus/nexus-be/utils"
 )
 
 type repository interface {
@@ -43,7 +43,7 @@ func (s *service) list(ctx context.Context, params listRiwayatParams) ([]kepangk
 		return nil, 0, fmt.Errorf("repo CountRiwayatKepangkatan: %w", err)
 	}
 
-	result := utility.SlimMap(data, func(row dbrepo.ListRiwayatKepangkatanRow) kepangkatan {
+	result := typeutil.Map(data, func(row dbrepo.ListRiwayatKepangkatanRow) kepangkatan {
 		return kepangkatan{
 			ID:                        row.ID,
 			IDJenisKP:                 row.JenisKpID.Int32,

@@ -2,16 +2,19 @@ package datapribadi
 
 import (
 	"context"
-	"database/sql"
+	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type repository struct {
-	db *sql.DB
+	db *pgxpool.Pool
 }
 
-func newRepository(db *sql.DB) *repository {
+func newRepository(db *pgxpool.Pool) *repository {
 	return &repository{db: db}
 }
 
@@ -72,7 +75,7 @@ func (r *repository) getDataPribadi(ctx context.Context, userID int64) (*dataPri
 	`
 
 	var data dataPribadi
-	err := r.db.QueryRowContext(ctx, q, userID).Scan(
+	err := r.db.QueryRow(ctx, q, userID).Scan(
 		&data.ID,
 		&data.NIP,
 		&data.NIPBaru,
@@ -118,7 +121,7 @@ func (r *repository) getDataPribadi(ctx context.Context, userID int64) (*dataPri
 		&data.GelarDepan,
 		&data.GelarBelakang,
 	)
-	if err == sql.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
 
@@ -139,7 +142,7 @@ func (r *repository) getDataPribadi(ctx context.Context, userID int64) (*dataPri
 }
 
 func (r *repository) listStatusPernikahan(ctx context.Context) ([]statusPernikahan, error) {
-	rows, err := r.db.QueryContext(ctx, `select "ID", "NAMA" from jenis_kawin order by 2 asc`)
+	rows, err := r.db.Query(ctx, `select "ID", "NAMA" from jenis_kawin order by 2 asc`)
 	if err != nil {
 		return nil, fmt.Errorf("sql select: %w", err)
 	}

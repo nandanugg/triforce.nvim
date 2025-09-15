@@ -38,7 +38,7 @@ func Test_handler_list(t *testing.T) {
 		('ed-006', 6, 'Diploma III Akuntansi');
 
 		INSERT INTO pegawai (
-		    id, pns_id, nip_baru, nama, gelar_depan, gelar_belakang, 
+		    id, pns_id, nip_baru, nama, gelar_depan, gelar_belakang,
 		    tgl_lahir, jenis_kelamin, tingkat_pendidikan_id
 		) VALUES
 		(1, 'pns-004', '198812252013014004', 'Maya Sari', NULL, 'S.E., M.M.', '1988-12-25', 'P', 8);
@@ -130,7 +130,7 @@ func Test_handler_list(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			db := dbtest.NewPgxPool(t, dbmigrations.FS)
+			db := dbtest.New(t, dbmigrations.FS)
 			dbRepository := repo.New(db)
 			_, err := db.Exec(t.Context(), tt.dbData)
 			require.NoError(t, err)

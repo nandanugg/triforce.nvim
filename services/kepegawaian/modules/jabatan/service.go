@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/typeutil"
 	repo "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
-	utility "gitlab.com/wartek-id/matk/nexus/nexus-be/utils"
 )
 
 type repository interface {
@@ -49,7 +49,7 @@ func (s *service) listJabatan(ctx context.Context, arg listParams) ([]jabatan, i
 		return nil, 0, fmt.Errorf("repo count: %w", err)
 	}
 
-	result := utility.SlimMap(data, func(row repo.ListRefJabatanRow) jabatan {
+	result := typeutil.Map(data, func(row repo.ListRefJabatanRow) jabatan {
 		return jabatan{
 			ID:          row.ID,
 			NamaJabatan: row.NamaJabatan.String,
@@ -75,7 +75,7 @@ func (s *service) listRiwayatJabatan(ctx context.Context, arg listRiwayatJabatan
 		return nil, 0, fmt.Errorf("repo count: %w", err)
 	}
 
-	result := utility.SlimMap(data, func(row repo.ListRiwayatJabatanRow) riwayatJabatan {
+	result := typeutil.Map(data, func(row repo.ListRiwayatJabatanRow) riwayatJabatan {
 		return riwayatJabatan{
 			ID:                      row.ID,
 			JenisJabatan:            row.JenisJabatan.String,

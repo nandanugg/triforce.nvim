@@ -40,9 +40,9 @@ func Test_handler_list(t *testing.T) {
 			(2, 'II/a', 'Pengatur Muda', 'IIa', 2, 'II', '2023-02-20');
 
 		INSERT INTO riwayat_hukdis (
-			pns_id, pns_nip, nama, golongan_id, nama_golongan, 
-			jenis_hukuman_id, nama_jenis_hukuman, sk_nomor, sk_tanggal, 
-			tanggal_mulai_hukuman, masa_tahun, masa_bulan, tanggal_akhir_hukuman, 
+			pns_id, pns_nip, nama, golongan_id, nama_golongan,
+			jenis_hukuman_id, nama_jenis_hukuman, sk_nomor, sk_tanggal,
+			tanggal_mulai_hukuman, masa_tahun, masa_bulan, tanggal_akhir_hukuman,
 			no_pp, no_sk_pembatalan, tanggal_sk_pembatalan, bkn_id, file_base64, keterangan_berkas,
 			deleted_at
 		)
@@ -213,7 +213,7 @@ func Test_handler_list(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			pgxconn := dbtest.NewPgxPool(t, dbmigrations.FS)
+			pgxconn := dbtest.New(t, dbmigrations.FS)
 			_, err := pgxconn.Exec(context.Background(), tt.dbData)
 			require.NoError(t, err)
 
@@ -262,9 +262,9 @@ func Test_handler_getBerkas(t *testing.T) {
 		VALUES ('id1', '198765432100001', 'Budi');
 
 		INSERT INTO riwayat_hukdis (
-			id, pns_id, pns_nip, nama, golongan_id, nama_golongan, 
-			jenis_hukuman_id, nama_jenis_hukuman, sk_nomor, sk_tanggal, 
-			tanggal_mulai_hukuman, masa_tahun, masa_bulan, tanggal_akhir_hukuman, 
+			id, pns_id, pns_nip, nama, golongan_id, nama_golongan,
+			jenis_hukuman_id, nama_jenis_hukuman, sk_nomor, sk_tanggal,
+			tanggal_mulai_hukuman, masa_tahun, masa_bulan, tanggal_akhir_hukuman,
 			no_pp, no_sk_pembatalan, tanggal_sk_pembatalan, bkn_id, file_base64, keterangan_berkas,
 			deleted_at
 		)
@@ -363,7 +363,7 @@ func Test_handler_getBerkas(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			pgxconn := dbtest.NewPgxPool(t, dbmigrations.FS)
+			pgxconn := dbtest.New(t, dbmigrations.FS)
 			_, err := pgxconn.Exec(context.Background(), tt.dbData)
 			require.NoError(t, err)
 

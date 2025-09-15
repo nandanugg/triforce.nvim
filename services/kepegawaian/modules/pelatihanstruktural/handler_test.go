@@ -26,7 +26,7 @@ func Test_handler_list(t *testing.T) {
 		(1, 1, 'Struktural', '01', 1),
 		(2, 2, 'Fungsional', '02', 1),
 		(3, 3, 'Teknis', '03', 1);
-		INSERT INTO "pegawai" ( id, pns_id, nip_baru, nama) VALUES 
+		INSERT INTO "pegawai" ( id, pns_id, nip_baru, nama) VALUES
 		    ( 1, 'uuid-pns-orang-001', '199001012020121001', 'Agus Purnomo');
 		INSERT INTO "riwayat_diklat" (
 		    id, jenis_diklat_id, nama_diklat, institusi_penyelenggara, no_sertifikat, tanggal_mulai, tanggal_selesai, tahun_diklat, durasi_jam, nip_baru, pns_orang_id) VALUES
@@ -118,7 +118,7 @@ func Test_handler_list(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			db := dbtest.NewPgxPool(t, dbmigrations.FS)
+			db := dbtest.New(t, dbmigrations.FS)
 			dbRepository := repo.New(db)
 			_, err := db.Exec(t.Context(), tt.dbData)
 			require.NoError(t, err)

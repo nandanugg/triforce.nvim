@@ -2,20 +2,21 @@ package kinerja
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type repository struct {
-	db *sql.DB
+	db *pgxpool.Pool
 }
 
-func newRepository(db *sql.DB) *repository {
+func newRepository(db *pgxpool.Pool) *repository {
 	return &repository{db: db}
 }
 
 func (r *repository) list(ctx context.Context, userID int64, limit, offset uint) ([]kinerja, error) {
-	rows, err := r.db.QueryContext(ctx, `
+	rows, err := r.db.Query(ctx, `
 		select
 			rk.id,
 			rk.tahun,
@@ -60,7 +61,7 @@ func (r *repository) list(ctx context.Context, userID int64, limit, offset uint)
 
 func (r *repository) count(ctx context.Context, userID int64) (uint, error) {
 	var result uint
-	err := r.db.QueryRowContext(ctx, `
+	err := r.db.QueryRow(ctx, `
 		select count(1)
 		from rwt_kinerja rk
 		join users u on rk.nip = u.nip

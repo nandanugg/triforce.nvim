@@ -2,25 +2,27 @@ package auth
 
 import (
 	"context"
-	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type repository struct {
-	db *sql.DB
+	db *pgxpool.Pool
 }
 
-func newRepository(db *sql.DB) *repository {
+func newRepository(db *pgxpool.Pool) *repository {
 	return &repository{db: db}
 }
 
 func (r *repository) getUser(ctx context.Context, id uuid.UUID, source string) (*user, error) {
 	query := `select nip from "user" where id = $1 and source = $2 and deleted_at is null`
 	var nip string
-	if err := r.db.QueryRowContext(ctx, query, id, source).Scan(&nip); err != nil {
-		if err == sql.ErrNoRows {
+	if err := r.db.QueryRow(ctx, query, id, source).Scan(&nip); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, nil
 		}
 		return nil, fmt.Errorf("query user: %w", err)
@@ -35,7 +37,7 @@ func (r *repository) getUser(ctx context.Context, id uuid.UUID, source string) (
 		where ur.nip = $1 and ur.deleted_at is null
 		order by r.service, ur.updated_at desc
 	`
-	rows, err := r.db.QueryContext(ctx, query, nip)
+	rows, err := r.db.Query(ctx, query, nip)
 	if err != nil {
 		return nil, fmt.Errorf("query user_role: %w", err)
 	}

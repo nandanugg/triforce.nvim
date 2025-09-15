@@ -2,21 +2,22 @@ package penghargaan
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"strings"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type repository struct {
-	db *sql.DB
+	db *pgxpool.Pool
 }
 
-func newRepository(db *sql.DB) *repository {
+func newRepository(db *pgxpool.Pool) *repository {
 	return &repository{db: db}
 }
 
 func (r *repository) list(ctx context.Context, userID int64, limit, offset uint) ([]penghargaan, error) {
-	rows, err := r.db.QueryContext(ctx, `
+	rows, err := r.db.Query(ctx, `
 		select
 			rp."ID",
 			rp."NAMA_JENIS_PENGHARGAAN",
@@ -68,7 +69,7 @@ func (r *repository) list(ctx context.Context, userID int64, limit, offset uint)
 
 func (r *repository) count(ctx context.Context, userID int64) (uint, error) {
 	var result uint
-	err := r.db.QueryRowContext(ctx, `
+	err := r.db.QueryRow(ctx, `
 		select count(1)
 		from rwt_penghargaan rp
 		join users u on rp."PNS_NIP" = u.nip

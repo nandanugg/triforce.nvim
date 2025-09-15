@@ -2,17 +2,20 @@ package pemberitahuan
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 
 	"github.com/Masterminds/squirrel"
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/jackc/pgx/v5/pgxpool"
+
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
 )
 
 type repository struct {
-	db *sql.DB
+	db *pgxpool.Pool
 }
 
-func newRepository(db *sql.DB) *repository {
+func newRepository(db *pgxpool.Pool) *repository {
 	return &repository{db: db}
 }
 
@@ -36,7 +39,7 @@ func (r *repository) list(ctx context.Context, limit, offset uint, cari string) 
 	}
 
 	q, args, _ := qb.ToSql()
-	rows, err := r.db.QueryContext(ctx, q, args...)
+	rows, err := r.db.Query(ctx, q, args...)
 	if err != nil {
 		return nil, fmt.Errorf("sql select: %w", err)
 	}
@@ -45,18 +48,20 @@ func (r *repository) list(ctx context.Context, limit, offset uint, cari string) 
 	result := []pemberitahuan{}
 	for rows.Next() {
 		var row pemberitahuan
+		var terakhirDiperbarui pgtype.Date
 		err := rows.Scan(
 			&row.ID,
 			&row.JudulBerita,
 			&row.DeskripsiBerita,
 			&row.Status,
 			&row.DiperbaruiOleh,
-			&row.TerakhirDiperbarui,
+			&terakhirDiperbarui,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("row scan: %w", err)
 		}
 
+		row.TerakhirDiperbarui = db.Date(terakhirDiperbarui.Time)
 		result = append(result, row)
 	}
 
@@ -79,7 +84,7 @@ func (r *repository) count(ctx context.Context, cari string) (uint, error) {
 
 	q, args, _ := qb.ToSql()
 	var result uint
-	err := r.db.QueryRowContext(ctx, q, args...).Scan(&result)
+	err := r.db.QueryRow(ctx, q, args...).Scan(&result)
 
 	return result, err
 }
