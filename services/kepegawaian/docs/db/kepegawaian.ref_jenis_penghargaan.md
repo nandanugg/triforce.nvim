@@ -6,11 +6,11 @@
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| id | varchar(3) |  | false |  |  |  |
 | nama | varchar(100) |  | true |  |  |  |
 | created_at | timestamp with time zone | now() | true |  |  |  |
 | updated_at | timestamp with time zone | now() | true |  |  |  |
 | deleted_at | timestamp with time zone |  | true |  |  |  |
+| id | integer | nextval('ref_jenis_penghargaan_id_seq'::regclass) | false |  |  |  |
 
 ## Constraints
 
@@ -31,11 +31,11 @@ erDiagram
 
 
 "kepegawaian.ref_jenis_penghargaan" {
-  varchar_3_ id
   varchar_100_ nama
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  integer id
 }
 ```
 

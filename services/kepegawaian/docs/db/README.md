@@ -225,11 +225,11 @@ erDiagram
   timestamp_with_time_zone deleted_at
 }
 "kepegawaian.ref_jenis_penghargaan" {
-  varchar_3_ id
   varchar_100_ nama
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  integer id
 }
 "kepegawaian.ref_kedudukan_hukum" {
   integer id

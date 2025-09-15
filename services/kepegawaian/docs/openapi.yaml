@@ -1034,6 +1034,37 @@ paths:
                           format: date
                   meta:
                     $ref: "#/components/schemas/metaPagination"
+  /v1/jenis-penghargaan:
+    get:
+      tags:
+        - Penghargaan
+      summary: Daftar jenis penghargaan.
+      description: Daftar jenis penghargaan.
+      operationId: listJenisPenghargaan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: integer
+                        nama:
+                          type: string
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
   /v1/sertifikasi:
     get:
       tags:

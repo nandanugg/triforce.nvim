@@ -309,7 +309,7 @@ type RefJenisPegawai struct {
 }
 
 type RefJenisPenghargaan struct {
-	ID        string             `db:"id"`
+	ID        int32              `db:"id"`
 	Nama      pgtype.Text        `db:"nama"`
 	CreatedAt pgtype.Timestamptz `db:"created_at"`
 	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
