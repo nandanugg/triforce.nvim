@@ -451,7 +451,7 @@ paths:
                       nik: "1234567890123456"
                       agama: "Islam"
                       hubungan: 1
-                      tanggal_meninggal: null
+                      status_hidup: null
                   pasangan:
                     - nama: "Jane Doe"
                       nik: "6543210987654321"
@@ -1249,6 +1249,8 @@ components:
       type: object
       additionalProperties: false
       properties:
+        id:
+          type: integer
         nama:
           type: string
           nullable: true
@@ -1261,14 +1263,15 @@ components:
         hubungan:
           type: integer
           nullable: true
-        tanggal_meninggal:
+        status_hidup:
           type: string
-          format: date-time
           nullable: true
     pasangan:
       type: object
       additionalProperties: false
       properties:
+        id:
+          type: integer
         nama:
           type: string
           nullable: true
@@ -1289,6 +1292,8 @@ components:
       type: object
       additionalProperties: false
       properties:
+        id:
+          type: integer
         nama:
           type: string
           nullable: true

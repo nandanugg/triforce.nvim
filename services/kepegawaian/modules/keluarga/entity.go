@@ -9,14 +9,16 @@ type keluarga struct {
 }
 
 type orangTua struct {
-	Nama            *string `json:"nama"`
-	Nik             *string `json:"nik"`
-	Agama           *string `json:"agama"`
-	Hubungan        string  `json:"hubungan"`
-	StatusMeninggal string  `json:"tanggal_meninggal"`
+	ID          int32   `json:"id"`
+	Nama        *string `json:"nama"`
+	Nik         *string `json:"nik"`
+	Agama       *string `json:"agama"`
+	Hubungan    string  `json:"hubungan"`
+	StatusHidup string  `json:"status_hidup"`
 }
 
 type pasangan struct {
+	ID             int64      `json:"id"`
 	Nama           *string    `json:"nama"`
 	Nik            *string    `json:"nik"`
 	StatusPNS      string     `json:"status_pns"`
@@ -26,6 +28,7 @@ type pasangan struct {
 }
 
 type anak struct {
+	ID            int64      `json:"id"`
 	Nama          *string    `json:"nama"`
 	Nik           *string    `json:"nik"`
 	JenisKelamin  string     `json:"jenis_kelamin"`

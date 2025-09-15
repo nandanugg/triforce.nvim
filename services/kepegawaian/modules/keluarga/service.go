@@ -62,18 +62,20 @@ func (s *service) list(ctx context.Context, NIP string) (keluarga, error) {
 
 func (s *service) mapListOrangTua(ot repo.ListOrangTuaByNipRow) orangTua {
 	return orangTua{
-		Hubungan:        HubunganToPeran(ot.Hubungan),
-		StatusMeninggal: StatusHidupFromTanggalMeninggal(ot.TglMeninggal),
-		Nama:            nullStringPtr(ot.Nama),
-		Agama:           nullStringPtr(ot.AgamaNama),
-		Nik:             nullStringPtr(ot.Nik),
+		ID:          ot.ID,
+		Hubungan:    HubunganToPeran(ot.Hubungan),
+		StatusHidup: StatusHidupFromTanggalMeninggal(ot.TglMeninggal),
+		Nama:        nullStringPtr(ot.Nama),
+		Agama:       nullStringPtr(ot.AgamaNama),
+		Nik:         nullStringPtr(ot.Nik),
 	}
 }
 
 func (s *service) mapListPasangan(p repo.ListPasanganByNipRow) pasangan {
 	return pasangan{
+		ID:             p.ID,
 		Nama:           nullStringPtr(p.Nama),
-		Nik:            nullStringPtr(pgtype.Text{Valid: true, String: ""}),
+		Nik:            nullStringPtr(pgtype.Text{Valid: true, String: ""}), // TODO: map actual nik if available
 		StatusPNS:      PNSToLabel(p.Pns),
 		Agama:          nullStringPtr(p.AgamaNama),
 		StatusNikah:    StatusPernikahanToString(p.Status),
@@ -83,8 +85,9 @@ func (s *service) mapListPasangan(p repo.ListPasanganByNipRow) pasangan {
 
 func (s *service) mapListAnak(a repo.ListAnakByNipRow) anak {
 	return anak{
+		ID:           a.ID,
 		Nama:         nullStringPtr(a.Nama),
-		Nik:          nullStringPtr(pgtype.Text{Valid: true, String: ""}),
+		Nik:          nullStringPtr(pgtype.Text{Valid: true, String: ""}), // TODO: map actual nik if available
 		JenisKelamin: JenisKelaminToLabel(a.JenisKelamin),
 		StatusAnak:   StatusAnakToLabel(a.StatusAnak),
 		TanggalLahir: &a.TanggalLahir.Time,
