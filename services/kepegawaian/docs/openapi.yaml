@@ -26,6 +26,7 @@ tags:
   - name: Golongan
   - name: Unit Kerja
   - name: Jenis Kenaikan Pangkat
+  - name: Jenis Hukuman
 paths:
   /v1/golongan:
     get:
@@ -411,6 +412,37 @@ paths:
                         kode_jabatan:
                           type: string
                         nama_jabatan:
+                          type: string
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/jenis-hukuman:
+    get:
+      tags:
+        - Jenis Hukuman
+      summary: Daftar jenis hukuman.
+      description: Daftar jenis hukuman.
+      operationId: listJenisHukuman
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: integer
+                        nama:
                           type: string
                   meta:
                     $ref: "#/components/schemas/metaPagination"
