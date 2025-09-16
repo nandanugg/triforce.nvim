@@ -70,7 +70,7 @@ func main() {
 	pelatihanstruktural.RegisterRoutes(e, dbRepository, mwAuth)
 	pelatihanteknis.RegisterRoutes(e, dbRepository, mwAuth)
 	riwayatpendidikan.RegisterRoutes(e, dbRepository, mwAuth)
-	penghargaan.RegisterRoutes(e, db, mwAuth)
+	penghargaan.RegisterRoutes(e, dbRepository, mwAuth)
 	penugasan.RegisterRoutes(e, db, mwAuth)
 	sertifikasi.RegisterRoutes(e, dbRepository, mwAuth)
 	unitkerja.RegisterRoutes(e, dbRepository, mwAuth)

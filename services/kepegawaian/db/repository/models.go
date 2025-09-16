@@ -698,7 +698,6 @@ type RiwayatPendidikan struct {
 
 type RiwayatPenghargaanUmum struct {
 	ID                   int32              `db:"id"`
-	JenisPenghargaan     pgtype.Text        `db:"jenis_penghargaan"`
 	DeskripsiPenghargaan pgtype.Text        `db:"deskripsi_penghargaan"`
 	TanggalPenghargaan   pgtype.Date        `db:"tanggal_penghargaan"`
 	Exist                pgtype.Bool        `db:"exist"`
@@ -708,6 +707,7 @@ type RiwayatPenghargaanUmum struct {
 	CreatedAt            pgtype.Timestamptz `db:"created_at"`
 	UpdatedAt            pgtype.Timestamptz `db:"updated_at"`
 	DeletedAt            pgtype.Timestamptz `db:"deleted_at"`
+	JenisPenghargaanID   pgtype.Int4        `db:"jenis_penghargaan_id"`
 }
 
 type RiwayatPenugasan struct {

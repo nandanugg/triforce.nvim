@@ -1022,7 +1022,7 @@ paths:
                 format: binary
         "404":
           description: Riwayat Pendidikan tidak ditemukan atau User tidak mempunyai akses.
-  /v1/penghargaan:
+  /v1/riwayat-penghargaan:
     get:
       tags:
         - Penghargaan

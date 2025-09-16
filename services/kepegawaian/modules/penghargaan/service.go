@@ -3,26 +3,55 @@ package penghargaan
 import (
 	"context"
 	"fmt"
+
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/typeutil"
+	repo "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
 )
 
-type service struct {
-	repo *repository
+type repository interface {
+	ListRiwayatPenghargaan(ctx context.Context, arg repo.ListRiwayatPenghargaanParams) ([]repo.ListRiwayatPenghargaanRow, error)
+	CountRiwayatPenghargaan(ctx context.Context, nip string) (int64, error)
 }
 
-func newService(r *repository) *service {
+type service struct {
+	repo repository
+}
+
+func newService(r repository) *service {
 	return &service{repo: r}
 }
 
-func (s *service) list(ctx context.Context, userID int64, limit, offset uint) ([]penghargaan, uint, error) {
-	data, err := s.repo.list(ctx, userID, limit, offset)
+type listParams struct {
+	Limit  uint
+	Offset uint
+	NIP    string
+}
+
+func (s *service) list(ctx context.Context, params listParams) ([]penghargaan, uint, error) {
+	data, err := s.repo.ListRiwayatPenghargaan(ctx, repo.ListRiwayatPenghargaanParams{
+		Nip:    params.NIP,
+		Limit:  int32(params.Limit),
+		Offset: int32(params.Offset),
+	})
 	if err != nil {
 		return nil, 0, fmt.Errorf("repo list: %w", err)
 	}
 
-	count, err := s.repo.count(ctx, userID)
+	count, err := s.repo.CountRiwayatPenghargaan(ctx, params.NIP)
 	if err != nil {
 		return nil, 0, fmt.Errorf("repo count: %w", err)
 	}
 
-	return data, count, nil
+	result := typeutil.Map(data, func(row repo.ListRiwayatPenghargaanRow) penghargaan {
+		return penghargaan{
+			ID:               int(row.ID),
+			JenisPenghargaan: row.JenisPenghargaan.String,
+			NamaPenghargaan:  row.NamaPenghargaan.String,
+			Deskripsi:        row.DeskripsiPenghargaan.String,
+			Tanggal:          db.Date(row.TanggalPenghargaan.Time),
+		}
+	})
+
+	return result, uint(count), nil
 }

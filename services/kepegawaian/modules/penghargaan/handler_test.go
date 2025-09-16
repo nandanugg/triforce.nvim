@@ -1,133 +1,143 @@
 package penghargaan
 
-// import (
-// 	"net/http"
-// 	"net/http/httptest"
-// 	"net/url"
-// 	"testing"
+import (
+	"context"
+	"net/http"
+	"net/http/httptest"
+	"net/url"
+	"testing"
 
-// 	"github.com/stretchr/testify/assert"
-// 	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
-// 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
-// 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api/apitest"
-// 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db/dbtest"
-// 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/config"
-// 	dbmigrations "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/migrations"
-// 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/docs"
-// )
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api/apitest"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db/dbtest"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/config"
+	dbmigrations "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/migrations"
+	repo "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/docs"
+)
 
-// func Test_handler_list(t *testing.T) {
-// 	t.Parallel()
+func Test_handler_list(t *testing.T) {
+	t.Parallel()
 
-// 	dbData := `
-// 		insert into users
-// 			(id, role_id, email, username, password_hash, reset_hash, last_login,  last_ip, created_on,  deleted, reset_by, banned, ban_message, display_name, display_name_changed, timezone, language, active, activate_hash, password_iterations, force_password_reset, nip,  satkers, admin_nomor, imei, token, real_imei, fcm,  banned_asigo) values
-// 			(41, 41,      '41a', '41b',    '41c',         '41d',      '2001-01-02','41f',   '2001-01-03',1,       1,        1,      '41k',       '41l',        '2001-01-04',         '41n',    '41o',    1,      '41q',         1,                   1,                    '1c', '41u',   1,           '41w','41x', '41y',     '41z',1);
-// 		insert into rwt_penghargaan
-// 			("ID", "PNS_ID", "PNS_NIP", "NAMA", "ID_GOLONGAN", "NAMA_GOLONGAN", "ID_JENIS_PENGHARGAAN", "NAMA_JENIS_PENGHARGAAN", "SK_NOMOR", "SK_TANGGAL", "ID_BKN", "SURAT_USUL", "KETERANGAN") values
-// 			(11,   '11a',    '1c',      '11b',  '11',          '11c',           '11d',                  '11e',                    '11f',      '2000-01-01', '11g',    '11h',        '11j'),
-// 			(12,   '12a',    '1c',      '12b',  '12',          '12c',           '12d',                  '12e',                    '12f',      '2001-01-01', '12g',    '12h',        '12j'),
-// 			(13,   '13a',    '1c',      '13b',  '13',          '13c',           '13d',                  '13e',                    '13f',      '2002-01-01', '13g',    '13h',        '13j'),
-// 			(14,   '14a',    '2c',      '14b',  '14',          '14c',           '14d',                  '14e',                    '14f',      '2003-01-01', '14g',    '14h',        '14j');
-// 	`
+	dbData := `
+		insert into ref_jenis_penghargaan
+			(id, nama, deleted_at)
+			values
+			(11, 'Jenis Penghargaan 1', NULL),
+			(12, 'Jenis Penghargaan 2', NULL),
+			(14, 'Jenis Penghargaan 3', now());
 
-// 	tests := []struct {
-// 		name             string
-// 		dbData           string
-// 		requestQuery     url.Values
-// 		requestHeader    http.Header
-// 		wantResponseCode int
-// 		wantResponseBody string
-// 	}{
-// 		{
-// 			name:             "ok: tanpa parameter apapun",
-// 			dbData:           dbData,
-// 			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "41")}},
-// 			wantResponseCode: http.StatusOK,
-// 			wantResponseBody: `{
-// 				"data": [
-// 					{
-// 						"id":                11,
-// 						"deskripsi":         "11j",
-// 						"jenis_penghargaan": "11e",
-// 						"nama_penghargaan":  "11b",
-// 						"tanggal":           "2000-01-01"
-// 					},
-// 					{
-// 						"id":                12,
-// 						"deskripsi":         "12j",
-// 						"jenis_penghargaan": "12e",
-// 						"nama_penghargaan":  "12b",
-// 						"tanggal":           "2001-01-01"
-// 					},
-// 					{
-// 						"id": 13,
-// 						"deskripsi": "13j",
-// 						"jenis_penghargaan": "13e",
-// 						"nama_penghargaan": "13b",
-// 						"tanggal": "2002-01-01"
-// 					}
-// 				],
-// 				"meta": {"limit": 10, "offset": 0, "total": 3}
-// 			}`,
-// 		},
-// 		{
-// 			name:             "ok: dengan parameter pagination",
-// 			dbData:           dbData,
-// 			requestQuery:     url.Values{"limit": []string{"1"}, "offset": []string{"1"}},
-// 			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "41")}},
-// 			wantResponseCode: http.StatusOK,
-// 			wantResponseBody: `{
-// 				"data": [
-// 					{
-// 						"id":                12,
-// 						"deskripsi":         "12j",
-// 						"jenis_penghargaan": "12e",
-// 						"nama_penghargaan":  "12b",
-// 						"tanggal":           "2001-01-01"
-// 					}
-// 				],
-// 				"meta": {"limit": 1, "offset": 1, "total": 3}
-// 			}`,
-// 		},
-// 		{
-// 			name:             "ok: tidak ada data milik user",
-// 			dbData:           dbData,
-// 			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "200")}},
-// 			wantResponseCode: http.StatusOK,
-// 			wantResponseBody: `{"data": [], "meta": {"limit": 10, "offset": 0, "total": 0}}`,
-// 		},
-// 		{
-// 			name:             "error: auth header tidak valid",
-// 			dbData:           dbData,
-// 			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
-// 			wantResponseCode: http.StatusUnauthorized,
-// 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
-// 		},
-// 	}
+		insert into riwayat_penghargaan_umum
+			(id, jenis_penghargaan_id, nama_penghargaan, deskripsi_penghargaan, tanggal_penghargaan, nip, deleted_at)
+			values
+			(11, 11, 'Penghargaan 1', 'Deskripsi Penghargaan 1', '2000-01-01', '41', NULL),
+			(12, 12, 'Penghargaan 2', 'Deskripsi Penghargaan 2', '2001-01-01', '41', NULL),
+			(13, 14, 'Penghargaan 3', 'Deskripsi Penghargaan 3', '2002-01-01', '41', NULL),
+			(14, 11, 'Penghargaan 4', 'Deskripsi Penghargaan 4', '2003-01-01', '41', now()),
+			(15, 11, 'Penghargaan 5', 'Deskripsi Penghargaan 5', '2004-01-01', '42', NULL);
+	`
 
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			t.Parallel()
+	tests := []struct {
+		name             string
+		dbData           string
+		requestQuery     url.Values
+		requestHeader    http.Header
+		wantResponseCode int
+		wantResponseBody string
+	}{
+		{
+			name:             "ok: tanpa parameter apapun",
+			dbData:           dbData,
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "41")}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{
+						"id": 13,
+						"deskripsi": "Deskripsi Penghargaan 3",
+						"jenis_penghargaan": "",
+						"nama_penghargaan": "Penghargaan 3",
+						"tanggal": "2002-01-01"
+					},
+					{
+						"id":                12,
+						"deskripsi":         "Deskripsi Penghargaan 2",
+						"jenis_penghargaan": "Jenis Penghargaan 2",
+						"nama_penghargaan":  "Penghargaan 2",
+						"tanggal":           "2001-01-01"
+					},
+					{
+						"id":                11,
+						"deskripsi":         "Deskripsi Penghargaan 1",
+						"jenis_penghargaan": "Jenis Penghargaan 1",
+						"nama_penghargaan":  "Penghargaan 1",
+						"tanggal":           "2000-01-01"
+					}
 
-// 			db := dbtest.New(t, dbmigrations.FS)
-// 			_, err := db.Exec(tt.dbData)
-// 			require.NoError(t, err)
+				],
+				"meta": {"limit": 10, "offset": 0, "total": 3}
+			}`,
+		},
+		{
+			name:             "ok: dengan parameter pagination",
+			dbData:           dbData,
+			requestQuery:     url.Values{"limit": []string{"1"}, "offset": []string{"1"}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "41")}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{
+						"id":                12,
+						"deskripsi":         "Deskripsi Penghargaan 2",
+						"jenis_penghargaan": "Jenis Penghargaan 2",
+						"nama_penghargaan":  "Penghargaan 2",
+						"tanggal":           "2001-01-01"
+					}
+				],
+				"meta": {"limit": 1, "offset": 1, "total": 3}
+			}`,
+		},
+		{
+			name:             "ok: tidak ada data milik user",
+			dbData:           dbData,
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "200")}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{"data": [], "meta": {"limit": 10, "offset": 0, "total": 0}}`,
+		},
+		{
+			name:             "error: auth header tidak valid",
+			dbData:           dbData,
+			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
+		},
+	}
 
-// 			req := httptest.NewRequest(http.MethodGet, "/v1/penghargaan", nil)
-// 			req.URL.RawQuery = tt.requestQuery.Encode()
-// 			req.Header = tt.requestHeader
-// 			rec := httptest.NewRecorder()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 
-// 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-// 			require.NoError(t, err)
-// 			RegisterRoutes(e, db, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
-// 			e.ServeHTTP(rec, req)
+			db := dbtest.New(t, dbmigrations.FS)
+			repo := repo.New(db)
+			_, err := db.Exec(context.Background(), tt.dbData)
+			require.NoError(t, err)
 
-// 			assert.Equal(t, tt.wantResponseCode, rec.Code)
-// 			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
-// 			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
-// 		})
-// 	}
-// }
+			req := httptest.NewRequest(http.MethodGet, "/v1/riwayat-penghargaan", nil)
+			req.URL.RawQuery = tt.requestQuery.Encode()
+			req.Header = tt.requestHeader
+			rec := httptest.NewRecorder()
+
+			e, err := api.NewEchoServer(docs.OpenAPIBytes)
+			require.NoError(t, err)
+			RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
+			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+		})
+	}
+}
