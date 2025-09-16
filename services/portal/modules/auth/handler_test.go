@@ -31,17 +31,17 @@ func Test_handler_login(t *testing.T) {
 		wantRedirect     string
 	}{
 		{
-			name:             "missing required params",
-			wantResponseCode: 400,
-			wantResponseBody: `{"message": "parameter \"redirect_uri\" harus diisi"}`,
-		},
-		{
-			name: "success redirect",
+			name: "success redirect with redirect_uri",
 			requestQuery: url.Values{
 				"redirect_uri": []string{"http://localhost:5173/callback"},
 			},
 			wantResponseCode: 302,
 			wantRedirect:     `https://auth.local/realms/nexus/protocol/openid-connect/auth?client_id=my-portal&prompt=login&redirect_uri=http%3A%2F%2Flocalhost%3A5173%2Fcallback&response_type=code&scope=openid`,
+		},
+		{
+			name:             "success redirect without redirect_uri",
+			wantResponseCode: 302,
+			wantRedirect:     `https://auth.local/realms/nexus/protocol/openid-connect/auth?client_id=my-portal&prompt=login&redirect_uri=https%3A%2F%2Fportal.local%2Fcallback&response_type=code&scope=openid`,
 		},
 	}
 	for _, tt := range tests {
@@ -56,9 +56,10 @@ func Test_handler_login(t *testing.T) {
 			require.NoError(t, err)
 
 			keycloak := config.Keycloak{
-				PublicHost: "https://auth.local",
-				Realm:      "nexus",
-				ClientID:   "my-portal",
+				PublicHost:  "https://auth.local",
+				Realm:       "nexus",
+				ClientID:    "my-portal",
+				RedirectURI: "https://portal.local/callback",
 			}
 			RegisterRoutes(e, nil, keycloak, nil, nil, nil)
 			e.ServeHTTP(rec, req)
@@ -88,17 +89,24 @@ func Test_handler_logout(t *testing.T) {
 		{
 			name:             "missing required params",
 			wantResponseCode: 400,
-			wantResponseBody: `{"message": "parameter \"id_token_hint\" harus diisi` +
-				` | parameter \"post_logout_redirect_uri\" harus diisi"}`,
+			wantResponseBody: `{"message": "parameter \"id_token_hint\" harus diisi"}`,
 		},
 		{
-			name: "success redirect",
+			name: "success redirect with post_logout_redirect_uri",
 			requestQuery: url.Values{
 				"id_token_hint":            []string{"e9d74da4-a4e7-4865-8a4b-601ad1bca900"},
 				"post_logout_redirect_uri": []string{"http://localhost:5173/"},
 			},
 			wantResponseCode: 302,
 			wantRedirect:     `https://auth.local/realms/nexus/protocol/openid-connect/logout?id_token_hint=e9d74da4-a4e7-4865-8a4b-601ad1bca900&post_logout_redirect_uri=http%3A%2F%2Flocalhost%3A5173%2F`,
+		},
+		{
+			name: "success redirect without post_logout_redirect_uri",
+			requestQuery: url.Values{
+				"id_token_hint": []string{"e9d74da4-a4e7-4865-8a4b-601ad1bca123"},
+			},
+			wantResponseCode: 302,
+			wantRedirect:     `https://auth.local/realms/nexus/protocol/openid-connect/logout?id_token_hint=e9d74da4-a4e7-4865-8a4b-601ad1bca123&post_logout_redirect_uri=https%3A%2F%2Fportal.local%2F`,
 		},
 	}
 	for _, tt := range tests {
@@ -113,8 +121,9 @@ func Test_handler_logout(t *testing.T) {
 			require.NoError(t, err)
 
 			keycloak := config.Keycloak{
-				PublicHost: "https://auth.local",
-				Realm:      "nexus",
+				PublicHost:            "https://auth.local",
+				Realm:                 "nexus",
+				PostLogoutRedirectURI: "https://portal.local/",
 			}
 			RegisterRoutes(e, nil, keycloak, nil, nil, nil)
 			e.ServeHTTP(rec, req)
@@ -153,6 +162,7 @@ func Test_handler_exchangeToken(t *testing.T) {
 		requestBody      string
 		keycloakRespCode int
 		keycloakRespBody []byte
+		wantRedirectURI  string
 		wantResponseCode int
 		wantResponseBody string
 	}{
@@ -162,10 +172,7 @@ func Test_handler_exchangeToken(t *testing.T) {
 				insert into "user" (id, source, nip) values
 					('00000000-0000-0000-0000-000000000001', 'keycloak', '1c');
 			`,
-			requestBody: `{
-				"code":         "my-code",
-				"redirect_uri": "http://localhost:5173/callback"
-			}`,
+			requestBody:      `{"code": "my-code", "redirect_uri": "http://localhost:5173/callback"}`,
 			keycloakRespCode: 200,
 			keycloakRespBody: []byte(`{
 					"access_token": "` + generateToken(jwt.MapClaims{"sub": "00000000-0000-0000-0000-000000000001"}) + `",
@@ -178,6 +185,7 @@ func Test_handler_exchangeToken(t *testing.T) {
 					"session_state": "state",
 					"token_type": "Bearer"
 				}`),
+			wantRedirectURI:  "http://localhost:5173/callback",
 			wantResponseCode: 200,
 			wantResponseBody: `{
 				"data": {
@@ -190,7 +198,7 @@ func Test_handler_exchangeToken(t *testing.T) {
 			}`,
 		},
 		{
-			name: "success exchange token user without deleted roles using zimbra_id as priority with forwarded header",
+			name: "success exchange token user without deleted roles using zimbra_id as priority with forwarded header without redirect_uri",
 			dbData: `
 				insert into "user" (id, source, nip) values
 					('00000000-0000-0000-0000-000000000001', 'keycloak', '1c'),
@@ -203,10 +211,7 @@ func Test_handler_exchangeToken(t *testing.T) {
 					('1b', 1, null),
 					('1b', 2, '2000-01-01');
 			`,
-			requestBody: `{
-				"code":         "my-code",
-				"redirect_uri": "http://localhost:5173/callback"
-			}`,
+			requestBody:      `{"code": "my-code"}`,
 			keycloakRespCode: 200,
 			keycloakRespBody: []byte(`{
 					"access_token": "` + generateToken(jwt.MapClaims{"sub": "00000000-0000-0000-0000-000000000001", "zimbra_id": "00000000-0000-0000-0000-000000000002"}) + `",
@@ -219,6 +224,7 @@ func Test_handler_exchangeToken(t *testing.T) {
 					"session_state": "state",
 					"token_type": "Bearer"
 				}`),
+			wantRedirectURI:  "https://portal.local/callback",
 			wantResponseCode: 200,
 			wantResponseBody: `{
 				"data": {
@@ -231,7 +237,7 @@ func Test_handler_exchangeToken(t *testing.T) {
 			}`,
 		},
 		{
-			name: "success exchange token user with multiple roles order by updated_at fallback using keycloak_id when user zimbra is not found with forwarded host only",
+			name: "success exchange token user with multiple roles order by updated_at fallback using keycloak_id when user zimbra is not found with forwarded host only and with redirect_uri",
 			dbData: `
 				insert into "user" (id, source, nip) values
 					('00000000-0000-0000-0000-000000000001', 'keycloak', '1c');
@@ -248,10 +254,7 @@ func Test_handler_exchangeToken(t *testing.T) {
 					('1c', 4, '2000-01-02', null),
 					('1c', 5, '2000-01-03', '2000-01-03');
 			`,
-			requestBody: `{
-				"code":         "my-code",
-				"redirect_uri": "http://localhost:5173/callback"
-			}`,
+			requestBody:      `{"code": "my-code", "redirect_uri": "http://localhost:5173/callback"}`,
 			keycloakRespCode: 200,
 			keycloakRespBody: []byte(`{
 					"access_token": "` + generateToken(jwt.MapClaims{"sub": "00000000-0000-0000-0000-000000000001", "zimbra_id": "00000000-0000-0000-0000-000000000002"}) + `",
@@ -264,6 +267,7 @@ func Test_handler_exchangeToken(t *testing.T) {
 					"session_state": "state",
 					"token_type": "Bearer"
 				}`),
+			wantRedirectURI:  "http://localhost:5173/callback",
 			wantResponseCode: 200,
 			wantResponseBody: `{
 				"data": {
@@ -284,10 +288,7 @@ func Test_handler_exchangeToken(t *testing.T) {
 					('00000000-0000-0000-0000-000000000002', 'keycloak', '1a', null),
 					('00000000-0000-0000-0000-000000000001', 'zimbra', '1b', null);
 			`,
-			requestBody: `{
-				"code":         "my-code",
-				"redirect_uri": "http://localhost:5173/callback"
-			}`,
+			requestBody:      `{"code": "my-code", "redirect_uri": "http://localhost:5173/callback"}`,
 			keycloakRespCode: 200,
 			keycloakRespBody: []byte(`{
 					"access_token": "` + generateToken(jwt.MapClaims{"sub": "00000000-0000-0000-0000-000000000001", "zimbra_id": "00000000-0000-0000-0000-000000000002"}) + `",
@@ -300,15 +301,13 @@ func Test_handler_exchangeToken(t *testing.T) {
 					"session_state": "state",
 					"token_type": "Bearer"
 				}`),
+			wantRedirectURI:  "http://localhost:5173/callback",
 			wantResponseCode: 422,
 			wantResponseBody: `{"message": "user tidak ditemukan"}`,
 		},
 		{
-			name: "error exchange token, user keycloak or zimbra is not uuid",
-			requestBody: `{
-				"code":         "my-code",
-				"redirect_uri": "http://localhost:5173/callback"
-			}`,
+			name:             "error exchange token, user keycloak or zimbra is not uuid",
+			requestBody:      `{"code": "my-code"}`,
 			keycloakRespCode: 200,
 			keycloakRespBody: []byte(`{
 					"access_token": "` + generateToken(jwt.MapClaims{"sub": "1", "zimbra_id": "2"}) + `",
@@ -321,15 +320,13 @@ func Test_handler_exchangeToken(t *testing.T) {
 					"session_state": "state",
 					"token_type": "Bearer"
 				}`),
+			wantRedirectURI:  "https://portal.local/callback",
 			wantResponseCode: 422,
 			wantResponseBody: `{"message": "user tidak ditemukan"}`,
 		},
 		{
-			name: "error exchange token, invalid access_token from keycloak",
-			requestBody: `{
-				"code":         "my-code",
-				"redirect_uri": "http://localhost:5173/callback"
-			}`,
+			name:             "error exchange token, invalid access_token from keycloak",
+			requestBody:      `{"code": "my-code", "redirect_uri": "http://localhost:5173/callback"}`,
 			keycloakRespCode: 200,
 			keycloakRespBody: []byte(`{
 					"access_token": "foo",
@@ -342,28 +339,25 @@ func Test_handler_exchangeToken(t *testing.T) {
 					"session_state": "state",
 					"token_type": "Bearer"
 				}`),
+			wantRedirectURI:  "http://localhost:5173/callback",
 			wantResponseCode: 500,
 			wantResponseBody: `{"message": "Internal Server Error"}`,
 		},
 		{
-			name: "error exchange token, keycloak return status 4xx",
-			requestBody: `{
-				"code":         "my-code",
-				"redirect_uri": "http://localhost:5173/callback"
-			}`,
+			name:             "error exchange token, keycloak return status 4xx",
+			requestBody:      `{"code": "my-code", "redirect_uri": "http://localhost:5173/callback"}`,
 			keycloakRespCode: 422,
 			keycloakRespBody: []byte(`{"error": "invalid code"}`),
+			wantRedirectURI:  "http://localhost:5173/callback",
 			wantResponseCode: 422,
 			wantResponseBody: `{"error": "invalid code"}`,
 		},
 		{
-			name: "error exchange token, keycloak return status 5xx",
-			requestBody: `{
-				"code":         "my-code",
-				"redirect_uri": "http://localhost:5173/callback"
-			}`,
+			name:             "error exchange token, keycloak return status 5xx",
+			requestBody:      `{"code": "my-code"}`,
 			keycloakRespCode: 502,
 			keycloakRespBody: []byte(`{"error": "server down"}`),
+			wantRedirectURI:  "https://portal.local/callback",
 			wantResponseCode: 500,
 			wantResponseBody: `{"message": "Internal Server Error"}`,
 		},
@@ -376,16 +370,11 @@ func Test_handler_exchangeToken(t *testing.T) {
 			name:             "missing `code` in request body, and request body have additional parameter",
 			requestBody:      `{"token": "my-code"}`,
 			wantResponseCode: 400,
-			wantResponseBody: `{"message": "parameter \"token\" tidak didukung` +
-				` | parameter \"code\" harus diisi` +
-				` | parameter \"redirect_uri\" harus diisi"}`,
+			wantResponseBody: `{"message": "parameter \"token\" tidak didukung | parameter \"code\" harus diisi"}`,
 		},
 		{
-			name: "keycloak is unreachable",
-			requestBody: `{
-				"code":         "my-code",
-				"redirect_uri": "http://localhost:5173/callback"
-			}`,
+			name:             "keycloak is unreachable",
+			requestBody:      `{"code": "my-code"}`,
 			wantResponseCode: 500,
 			wantResponseBody: `{"message": "Internal Server Error"}`,
 		},
@@ -405,7 +394,7 @@ func Test_handler_exchangeToken(t *testing.T) {
 						url.Values{
 							"grant_type":    []string{"authorization_code"},
 							"code":          []string{"my-code"},
-							"redirect_uri":  []string{"http://localhost:5173/callback"},
+							"redirect_uri":  []string{tt.wantRedirectURI},
 							"client_id":     []string{"my-portal"},
 							"client_secret": []string{"my-secret"},
 						}, r.PostForm)
@@ -437,6 +426,7 @@ func Test_handler_exchangeToken(t *testing.T) {
 				ClientID:     "my-portal",
 				ClientSecret: "my-secret",
 				KID:          "my-kid",
+				RedirectURI:  "https://portal.local/callback",
 			}
 			RegisterRoutes(e, db, keycloak, &http.Client{}, apitest.JwtPrivateKey, apitest.Keyfunc.Keyfunc)
 			e.ServeHTTP(rec, req)

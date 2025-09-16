@@ -40,6 +40,10 @@ func (s *service) generateAuthURL(redirectURI string) (string, error) {
 		return "", fmt.Errorf("url parse: %w", err)
 	}
 
+	if redirectURI == "" {
+		redirectURI = s.keycloak.RedirectURI
+	}
+
 	query := authURL.Query()
 	query.Set("client_id", s.keycloak.ClientID)
 	query.Set("response_type", "code")
@@ -57,6 +61,10 @@ func (s *service) generateLogoutURL(idTokenHint, postLogoutRedirectURI string) (
 		return "", fmt.Errorf("url parse: %w", err)
 	}
 
+	if postLogoutRedirectURI == "" {
+		postLogoutRedirectURI = s.keycloak.PostLogoutRedirectURI
+	}
+
 	query := logoutURL.Query()
 	query.Set("id_token_hint", idTokenHint)
 	query.Set("post_logout_redirect_uri", postLogoutRedirectURI)
@@ -66,6 +74,10 @@ func (s *service) generateLogoutURL(idTokenHint, postLogoutRedirectURI string) (
 }
 
 func (s *service) exchangeToken(ctx context.Context, code, redirectURI string) (*token, error) {
+	if redirectURI == "" {
+		redirectURI = s.keycloak.RedirectURI
+	}
+
 	tokenURL := fmt.Sprintf("%s/realms/%s/protocol/openid-connect/token", s.keycloak.Host, s.keycloak.Realm)
 	data := url.Values{}
 	data.Set("grant_type", "authorization_code")
