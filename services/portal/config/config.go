@@ -30,16 +30,14 @@ type Database struct {
 }
 
 type Keycloak struct {
-	Host                   string `env:"HOST"`
-	Realm                  string `env:"REALM"`
-	Audience               string `env:"AUDIENCE"`
-	ClientID               string `env:"CLIENT_ID"`
-	ClientSecret           string `env:"CLIENT_SECRET"`
-	PublicHost             string `env:"PUBLIC_HOST"`
-	RedirectPath           string `env:"REDIRECT_PATH"`
-	PostLogoutRedirectPath string `env:"POST_LOGOUT_REDIRECT_PATH"`
-	PrivateKey             string `env:"PRIVATE_KEY"`
-	KID                    string `env:"KID"`
+	Host         string `env:"HOST"`
+	Realm        string `env:"REALM"`
+	Audience     string `env:"AUDIENCE"`
+	ClientID     string `env:"CLIENT_ID"`
+	ClientSecret string `env:"CLIENT_SECRET"`
+	PublicHost   string `env:"PUBLIC_HOST"`
+	PrivateKey   string `env:"PRIVATE_KEY"`
+	KID          string `env:"KID"`
 }
 
 func Load() (Config, error) {

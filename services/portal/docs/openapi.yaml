@@ -17,6 +17,13 @@ paths:
       summary: Login.
       description: Redirect ke laman login keycloak.
       operationId: authLogin
+      parameters:
+        - name: redirect_uri
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uri
       responses:
         "302":
           description: Redirect ke laman login keycloak.
@@ -39,6 +46,12 @@ paths:
           required: true
           schema:
             type: string
+        - name: post_logout_redirect_uri
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uri
       responses:
         "302":
           description: Redirect ke laman logout keycloak.
@@ -61,13 +74,18 @@ paths:
           application/json:
             example:
               code: e512390d-b20c-41fc-a0b1-3a006107dc77.3bbc36e9-db2c-4801-8f81-5384d17a2a64
+              redirect_uri: http://localhost:5173/auth/callback
             schema:
               additionalProperties: false
               properties:
                 code:
                   type: string
+                redirect_uri:
+                  type: string
+                  format: uri
               required:
                 - code
+                - redirect_uri
       responses:
         "200":
           description: Sukses.

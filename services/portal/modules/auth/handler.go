@@ -16,8 +16,17 @@ func newHandler(s *service) *handler {
 	return &handler{svc: s}
 }
 
+type loginRequest struct {
+	RedirectURI string `query:"redirect_uri"`
+}
+
 func (h *handler) login(c echo.Context) error {
-	authURL, err := h.svc.generateAuthURL(getRequestBaseURL(c))
+	var req loginRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	authURL, err := h.svc.generateAuthURL(req.RedirectURI)
 	if err != nil {
 		slog.ErrorContext(c.Request().Context(), "Error generating keycloak auth URL.", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
@@ -27,7 +36,8 @@ func (h *handler) login(c echo.Context) error {
 }
 
 type logoutRequest struct {
-	IDTokenHint string `query:"id_token_hint"`
+	IDTokenHint           string `query:"id_token_hint"`
+	PostLogoutRedirectURI string `query:"post_logout_redirect_uri"`
 }
 
 func (h *handler) logout(c echo.Context) error {
@@ -36,7 +46,7 @@ func (h *handler) logout(c echo.Context) error {
 		return err
 	}
 
-	logoutURL, err := h.svc.generateLogoutURL(getRequestBaseURL(c), req.IDTokenHint)
+	logoutURL, err := h.svc.generateLogoutURL(req.IDTokenHint, req.PostLogoutRedirectURI)
 	if err != nil {
 		slog.ErrorContext(c.Request().Context(), "Error generating keycloak logout URL.", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
@@ -46,7 +56,8 @@ func (h *handler) logout(c echo.Context) error {
 }
 
 type exchangeTokenRequest struct {
-	Code string `json:"code"`
+	Code        string `json:"code"`
+	RedirectURI string `json:"redirect_uri"`
 }
 
 type exchangeTokenResponse struct {
@@ -59,7 +70,7 @@ func (h *handler) exchangeToken(c echo.Context) error {
 		return err
 	}
 
-	token, err := h.svc.exchangeToken(c.Request().Context(), getRequestBaseURL(c), req.Code)
+	token, err := h.svc.exchangeToken(c.Request().Context(), req.Code, req.RedirectURI)
 	if err != nil {
 		if errors.Is(err, errUserNotFound) {
 			return echo.NewHTTPError(http.StatusUnprocessableEntity, "user tidak ditemukan")
@@ -111,20 +122,4 @@ func (h *handler) refreshToken(c echo.Context) error {
 	return c.JSON(http.StatusOK, refreshTokenResponse{
 		Data: token,
 	})
-}
-
-func getRequestBaseURL(c echo.Context) string {
-	scheme := "http"
-	if forwardedProto := c.Request().Header.Get("X-Forwarded-Proto"); forwardedProto != "" {
-		scheme = forwardedProto
-	} else if c.Request().TLS != nil {
-		scheme = "https"
-	}
-
-	host := c.Request().Host
-	if forwardedHost := c.Request().Header.Get("X-Forwarded-Host"); forwardedHost != "" {
-		host = forwardedHost
-	}
-
-	return scheme + "://" + host
 }
