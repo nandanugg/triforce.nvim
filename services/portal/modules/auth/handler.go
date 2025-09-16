@@ -17,7 +17,7 @@ func newHandler(s *service) *handler {
 }
 
 func (h *handler) login(c echo.Context) error {
-	authURL, err := h.svc.generateAuthURL()
+	authURL, err := h.svc.generateAuthURL(getRequestBaseURL(c))
 	if err != nil {
 		slog.ErrorContext(c.Request().Context(), "Error generating keycloak auth URL.", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
@@ -36,7 +36,7 @@ func (h *handler) logout(c echo.Context) error {
 		return err
 	}
 
-	logoutURL, err := h.svc.generateLogoutURL(req.IDTokenHint)
+	logoutURL, err := h.svc.generateLogoutURL(getRequestBaseURL(c), req.IDTokenHint)
 	if err != nil {
 		slog.ErrorContext(c.Request().Context(), "Error generating keycloak logout URL.", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
@@ -59,7 +59,7 @@ func (h *handler) exchangeToken(c echo.Context) error {
 		return err
 	}
 
-	token, err := h.svc.exchangeToken(c.Request().Context(), req.Code)
+	token, err := h.svc.exchangeToken(c.Request().Context(), getRequestBaseURL(c), req.Code)
 	if err != nil {
 		if errors.Is(err, errUserNotFound) {
 			return echo.NewHTTPError(http.StatusUnprocessableEntity, "user tidak ditemukan")
@@ -111,4 +111,20 @@ func (h *handler) refreshToken(c echo.Context) error {
 	return c.JSON(http.StatusOK, refreshTokenResponse{
 		Data: token,
 	})
+}
+
+func getRequestBaseURL(c echo.Context) string {
+	scheme := "http"
+	if forwardedProto := c.Request().Header.Get("X-Forwarded-Proto"); forwardedProto != "" {
+		scheme = forwardedProto
+	} else if c.Request().TLS != nil {
+		scheme = "https"
+	}
+
+	host := c.Request().Host
+	if forwardedHost := c.Request().Header.Get("X-Forwarded-Host"); forwardedHost != "" {
+		host = forwardedHost
+	}
+
+	return scheme + "://" + host
 }

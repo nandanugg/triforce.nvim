@@ -23,7 +23,7 @@ Tools tambahan (opsional):
 
 ### Quick Start
 
-1. Buat file .env di root project directory dengan menggunakan file .env.sample
+1. Buat file .env di root project directory dengan menggunakan file env.sample
    sebagai referensi. Edit sesuai dengan konfigurasi di local.
 1. Jalankan test dengan perintah `just test` (atau `source .env; go test ./...`).
 

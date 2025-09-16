@@ -1,6 +1,7 @@
 .playground/
-.env
+.env*
 coverage.*
 .DS_Store
 .idea
 .spec-driven
+.vscode

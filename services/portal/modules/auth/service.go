@@ -34,7 +34,7 @@ func newService(repo *repository, keycloak config.Keycloak, client *http.Client,
 	}
 }
 
-func (s *service) generateAuthURL() (string, error) {
+func (s *service) generateAuthURL(requestBaseURL string) (string, error) {
 	authURL, err := url.Parse(fmt.Sprintf("%s/realms/%s/protocol/openid-connect/auth", s.keycloak.PublicHost, s.keycloak.Realm))
 	if err != nil {
 		return "", fmt.Errorf("url parse: %w", err)
@@ -44,14 +44,14 @@ func (s *service) generateAuthURL() (string, error) {
 	query.Set("client_id", s.keycloak.ClientID)
 	query.Set("response_type", "code")
 	query.Set("scope", "openid")
-	query.Set("redirect_uri", s.keycloak.RedirectURI)
+	query.Set("redirect_uri", requestBaseURL+s.keycloak.RedirectPath)
 	query.Set("prompt", "login")
 
 	authURL.RawQuery = query.Encode()
 	return authURL.String(), nil
 }
 
-func (s *service) generateLogoutURL(idTokenHint string) (string, error) {
+func (s *service) generateLogoutURL(requestBaseURL, idTokenHint string) (string, error) {
 	logoutURL, err := url.Parse(fmt.Sprintf("%s/realms/%s/protocol/openid-connect/logout", s.keycloak.PublicHost, s.keycloak.Realm))
 	if err != nil {
 		return "", fmt.Errorf("url parse: %w", err)
@@ -59,18 +59,18 @@ func (s *service) generateLogoutURL(idTokenHint string) (string, error) {
 
 	query := logoutURL.Query()
 	query.Set("id_token_hint", idTokenHint)
-	query.Set("post_logout_redirect_uri", s.keycloak.PostLogoutRedirectURI)
+	query.Set("post_logout_redirect_uri", requestBaseURL+s.keycloak.PostLogoutRedirectPath)
 
 	logoutURL.RawQuery = query.Encode()
 	return logoutURL.String(), nil
 }
 
-func (s *service) exchangeToken(ctx context.Context, code string) (*token, error) {
+func (s *service) exchangeToken(ctx context.Context, requestBaseURL, code string) (*token, error) {
 	tokenURL := fmt.Sprintf("%s/realms/%s/protocol/openid-connect/token", s.keycloak.Host, s.keycloak.Realm)
 	data := url.Values{}
 	data.Set("grant_type", "authorization_code")
 	data.Set("code", code)
-	data.Set("redirect_uri", s.keycloak.RedirectURI)
+	data.Set("redirect_uri", requestBaseURL+s.keycloak.RedirectPath)
 	data.Set("client_id", s.keycloak.ClientID)
 	data.Set("client_secret", s.keycloak.ClientSecret)
 
