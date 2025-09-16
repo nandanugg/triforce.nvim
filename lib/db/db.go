@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -15,16 +14,11 @@ type Options struct {
 
 func New(host string, port uint, user, password, dbname, schema string, opts ...Options) (*pgxpool.Pool, error) {
 	connConfig, err := pgxpool.ParseConfig(fmt.Sprintf(
-		"host=%s port=%d user=%s password=%s dbname=%s",
-		host, port, user, password, dbname,
+		"host=%s port=%d user=%s password=%s dbname=%s options='-c search_path=%s'",
+		host, port, user, password, dbname, schema,
 	))
 	if err != nil {
 		return nil, fmt.Errorf("parse config: %w", err)
-	}
-
-	connConfig.AfterConnect = func(ctx context.Context, conn *pgx.Conn) error {
-		_, errExec := conn.Exec(ctx, "SET search_path TO "+schema)
-		return errExec
 	}
 
 	pool, err := pgxpool.NewWithConfig(context.Background(), connConfig)
@@ -32,13 +26,11 @@ func New(host string, port uint, user, password, dbname, schema string, opts ...
 		return nil, fmt.Errorf("create pool: %w", err)
 	}
 
-	opt := Options{
-		PingTimeout: time.Second,
-	}
+	pingTimeout := time.Second
 	if len(opts) > 0 && opts[0].PingTimeout > 0 {
-		opt.PingTimeout = opts[0].PingTimeout
+		pingTimeout = opts[0].PingTimeout
 	}
-	timeout, cancel := context.WithTimeout(context.Background(), opt.PingTimeout)
+	timeout, cancel := context.WithTimeout(context.Background(), pingTimeout)
 	defer cancel()
 	if err := pool.Ping(timeout); err != nil {
 		return nil, fmt.Errorf("db ping: %w", err)
