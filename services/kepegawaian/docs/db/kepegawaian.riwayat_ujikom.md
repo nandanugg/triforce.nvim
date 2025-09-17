@@ -22,7 +22,6 @@ Riwayat uji kompetensi pegawai
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| riwayat_ujikom_id_not_null | n | NOT NULL id |
 | riwayat_ujikom_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 
 ## Indexes

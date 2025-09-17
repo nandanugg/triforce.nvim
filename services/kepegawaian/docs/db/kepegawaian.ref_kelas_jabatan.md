@@ -18,7 +18,6 @@ Referensi kelas jabatan
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| ref_kelas_jabatan_id_not_null | n | NOT NULL id |
 | ref_kelas_jabatan_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 
 ## Indexes

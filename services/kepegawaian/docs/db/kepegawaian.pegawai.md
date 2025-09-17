@@ -101,8 +101,8 @@ Data utama pegawai
 | nidn | varchar(30) |  | true |  |  |  |
 | ket | varchar(200) |  | true |  |  | Keterangan tambahan terhadap pegawai |
 | no_sk_pemberhentian | varchar(100) |  | true |  |  | Nomor SK pemberhentian dari PNS |
-| status_pegawai_backup | integer |  | true |  |  | Status pegawai backup |
-| masa_kerja | varchar(50) |  | true |  |  | masa kerja |
+| status_pegawai_backup | smallint |  | true |  |  | Status pegawai backup |
+| masa_kerja | varchar(50) |  | true |  |  |  |
 | kartu_asn | varchar(50) |  | true |  |  | Nomor kartu ASN |
 | created_at | timestamp with time zone | now() | true |  |  | Waktu perekaman data dibuat |
 | updated_at | timestamp with time zone | now() | true |  |  | Waktu terakhir data diperbarui |
@@ -112,8 +112,6 @@ Data utama pegawai
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| pegawai_id_not_null | n | NOT NULL id |
-| pegawai_pns_id_not_null | n | NOT NULL pns_id |
 | fk_pegawai_agama | FOREIGN KEY | FOREIGN KEY (agama_id) REFERENCES ref_agama(id) |
 | fk_pegawai_golongan | FOREIGN KEY | FOREIGN KEY (gol_id) REFERENCES ref_golongan(id) |
 | fk_pegawai_golongan_awal | FOREIGN KEY | FOREIGN KEY (gol_awal_id) REFERENCES ref_golongan(id) |
@@ -264,7 +262,7 @@ erDiagram
   varchar_30_ nidn
   varchar_200_ ket
   varchar_100_ no_sk_pemberhentian
-  integer status_pegawai_backup
+  smallint status_pegawai_backup
   varchar_50_ masa_kerja
   varchar_50_ kartu_asn
   timestamp_with_time_zone created_at
@@ -303,6 +301,7 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  date tanggal_lahir
 }
 "kepegawaian.orang_tua" {
   integer id

@@ -23,7 +23,6 @@ Riwayat asesmen nine box pegawai
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| riwayat_nine_box_id_not_null | n | NOT NULL id |
 | riwayat_nine_box_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 
 ## Indexes

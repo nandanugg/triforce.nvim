@@ -47,8 +47,6 @@ Referensi referensi unit kerja
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| unit_kerja_id_not_null | n | NOT NULL id |
-| unit_kerja_is_satker_not_null | n | NOT NULL is_satker |
 | fk_unit_kerja_instansi | FOREIGN KEY | FOREIGN KEY (instansi_id) REFERENCES ref_instansi(id) |
 | fk_unit_kerja_pemimpin | FOREIGN KEY | FOREIGN KEY (pemimpin_pns_id) REFERENCES pegawai(pns_id) |
 | fk_unit_kerja_diatasan | FOREIGN KEY | FOREIGN KEY (diatasan_id) REFERENCES unit_kerja(id) |
@@ -204,7 +202,7 @@ erDiagram
   varchar_30_ nidn
   varchar_200_ ket
   varchar_100_ no_sk_pemberhentian
-  integer status_pegawai_backup
+  smallint status_pegawai_backup
   varchar_50_ masa_kerja
   varchar_50_ kartu_asn
   timestamp_with_time_zone created_at

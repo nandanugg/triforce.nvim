@@ -19,7 +19,6 @@ Referensi pendidikan
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| pendidikan_id_not_null | n | NOT NULL id |
 | pendidikan_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 | fk_pendidikan_tingkat | FOREIGN KEY | FOREIGN KEY (tingkat_pendidikan_id) REFERENCES ref_tingkat_pendidikan(id) |
 

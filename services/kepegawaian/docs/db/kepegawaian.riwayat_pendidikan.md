@@ -38,7 +38,6 @@ Riwayat pendidikan pegawai
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| riwayat_pendidikan_id_not_null | n | NOT NULL id |
 | fk_riwayat_pendidikan_pns_id | FOREIGN KEY | FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id) |
 | fk_riwayat_pendidikan_pendidikan | FOREIGN KEY | FOREIGN KEY (pendidikan_id) REFERENCES ref_pendidikan(id) |
 | riwayat_pendidikan_pkey | PRIMARY KEY | PRIMARY KEY (id) |
@@ -191,7 +190,7 @@ erDiagram
   varchar_30_ nidn
   varchar_200_ ket
   varchar_100_ no_sk_pemberhentian
-  integer status_pegawai_backup
+  smallint status_pegawai_backup
   varchar_50_ masa_kerja
   varchar_50_ kartu_asn
   timestamp_with_time_zone created_at

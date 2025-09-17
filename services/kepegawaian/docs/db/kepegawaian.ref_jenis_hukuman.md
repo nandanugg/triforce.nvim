@@ -21,7 +21,6 @@ Referensi jenis hukuman disiplin
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| ref_jenis_hukuman_id_not_null | n | NOT NULL id |
 | ref_jenis_hukuman_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 
 ## Indexes

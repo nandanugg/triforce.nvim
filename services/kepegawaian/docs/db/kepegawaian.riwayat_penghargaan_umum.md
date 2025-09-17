@@ -24,7 +24,6 @@ Riwayat penghargaan umum pegawai
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| riwayat_penghargaan_umum_id_not_null | n | NOT NULL id |
 | riwayat_penghargaan_umum_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 | riwayat_penghargaan_umum_jenis_penghargaan_id_fkey | FOREIGN KEY | FOREIGN KEY (jenis_penghargaan_id) REFERENCES ref_jenis_penghargaan(id) |
 

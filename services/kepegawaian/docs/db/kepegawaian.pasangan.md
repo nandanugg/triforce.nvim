@@ -25,12 +25,12 @@ Pasangan pegawai
 | created_at | timestamp with time zone | now() | true |  |  | Waktu perekaman data |
 | updated_at | timestamp with time zone | now() | true |  |  | Waktu terakhir pembaruan |
 | deleted_at | timestamp with time zone |  | true |  |  | Waktu penghapusan data |
+| tanggal_lahir | date |  | true |  |  | Tanggal lahir pasangan |
 
 ## Constraints
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| pasangan_id_not_null | n | NOT NULL id |
 | pasangan_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 | fk_pasangan_pns_id | FOREIGN KEY | FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id) |
 
@@ -65,6 +65,7 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  date tanggal_lahir
 }
 "kepegawaian.pegawai" {
   integer id
@@ -160,7 +161,7 @@ erDiagram
   varchar_30_ nidn
   varchar_200_ ket
   varchar_100_ no_sk_pemberhentian
-  integer status_pegawai_backup
+  smallint status_pegawai_backup
   varchar_50_ masa_kerja
   varchar_50_ kartu_asn
   timestamp_with_time_zone created_at

@@ -36,8 +36,6 @@ Riwayat perpindahan unit kerja
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| pindah_unit_id_not_null | n | NOT NULL id |
-| pindah_unit_nip_not_null | n | NOT NULL nip |
 | pindah_unit_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 | fk_pindah_unit_unit_asal | FOREIGN KEY | FOREIGN KEY (unit_asal) REFERENCES unit_kerja(id) |
 | fk_pindah_unit_unit_tujuan | FOREIGN KEY | FOREIGN KEY (unit_tujuan) REFERENCES unit_kerja(id) |

@@ -18,7 +18,6 @@ Referensi jenis satuan kerja
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| ref_jenis_satker_id_not_null | n | NOT NULL id |
 | ref_jenis_satker_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 
 ## Indexes

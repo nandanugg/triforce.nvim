@@ -25,7 +25,6 @@ Riwayat penugasan pegawai
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| riwayat_penugasan_id_not_null | n | NOT NULL id |
 | riwayat_penugasan_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 
 ## Indexes

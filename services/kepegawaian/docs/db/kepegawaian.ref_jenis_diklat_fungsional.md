@@ -18,7 +18,6 @@ Referensi jenis diklat fungsional
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| ref_jenis_diklat_fungsional_id_not_null | n | NOT NULL id |
 | ref_jenis_diklat_fungsional_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 
 ## Indexes

@@ -20,7 +20,6 @@ Referensi kedudukan hukum
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| ref_kedudukan_hukum_id_not_null | n | NOT NULL id |
 | ref_kedudukan_hukum_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 
 ## Indexes

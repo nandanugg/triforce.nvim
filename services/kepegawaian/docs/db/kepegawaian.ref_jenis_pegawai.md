@@ -19,7 +19,6 @@ Referensi jenis pegawai
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| ref_jenis_pegawai_id_not_null | n | NOT NULL id |
 | ref_jenis_pegawai_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 
 ## Indexes

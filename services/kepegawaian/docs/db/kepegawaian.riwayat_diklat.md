@@ -34,7 +34,6 @@ Riwayat diklat pegawai
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| riwayat_diklat_id_not_null | n | NOT NULL id |
 | fk_riwayat_diklat_jenis | FOREIGN KEY | FOREIGN KEY (jenis_diklat_id) REFERENCES ref_jenis_diklat(id) |
 | fk_riwayat_diklat_pns_id | FOREIGN KEY | FOREIGN KEY (pns_orang_id) REFERENCES pegawai(pns_id) |
 | riwayat_diklat_pkey | PRIMARY KEY | PRIMARY KEY (id) |
@@ -180,7 +179,7 @@ erDiagram
   varchar_30_ nidn
   varchar_200_ ket
   varchar_100_ no_sk_pemberhentian
-  integer status_pegawai_backup
+  smallint status_pegawai_backup
   varchar_50_ masa_kerja
   varchar_50_ kartu_asn
   timestamp_with_time_zone created_at

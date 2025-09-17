@@ -23,7 +23,7 @@ Riwayat kinerja pegawai
 | rating_hasil_kerja | varchar(50) |  | true |  |  | Nilai hasil kerja |
 | rating_perilaku_kerja | varchar(50) |  | true |  |  | Nilai perilaku kerja |
 | predikat_kinerja | varchar(100) |  | true |  |  | Predikat penilaian kinerja |
-| ref | uuid | uuid_generate_v4() | true |  |  | Nomor referensi |
+| ref | uuid | public.uuid_generate_v4() | true |  |  | Nomor referensi |
 | created_at | timestamp with time zone | now() | true |  |  | Waktu pembuatan data |
 | updated_at | timestamp with time zone | now() | true |  |  | Waktu terakhir pembaruan |
 | deleted_at | timestamp with time zone |  | true |  |  | Waktu penghapusan data |
@@ -32,7 +32,6 @@ Riwayat kinerja pegawai
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| riwayat_kinerja_id_not_null | n | NOT NULL id |
 | riwayat_kinerja_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 
 ## Indexes

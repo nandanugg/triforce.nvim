@@ -28,9 +28,6 @@ Referensi jabatan
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| ref_jabatan_id_not_null | n | NOT NULL id |
-| ref_jabatan_kode_jabatan_not_null | n | NOT NULL kode_jabatan |
-| ref_jabatan_no_not_null | n | NOT NULL no |
 | ref_jabatan_pkey | PRIMARY KEY | PRIMARY KEY (kode_jabatan) |
 
 ## Indexes
@@ -159,7 +156,7 @@ erDiagram
   varchar_30_ nidn
   varchar_200_ ket
   varchar_100_ no_sk_pemberhentian
-  integer status_pegawai_backup
+  smallint status_pegawai_backup
   varchar_50_ masa_kerja
   varchar_50_ kartu_asn
   timestamp_with_time_zone created_at

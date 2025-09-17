@@ -23,7 +23,7 @@
 | [kepegawaian.ref_lokasi](kepegawaian.ref_lokasi.md) | 11 | Referensi lokasi | BASE TABLE |
 | [kepegawaian.ref_jenis_satker](kepegawaian.ref_jenis_satker.md) | 5 | Referensi jenis satuan kerja | BASE TABLE |
 | [kepegawaian.anak](kepegawaian.anak.md) | 12 | Anak pegawai | BASE TABLE |
-| [kepegawaian.pasangan](kepegawaian.pasangan.md) | 17 | Pasangan pegawai | BASE TABLE |
+| [kepegawaian.pasangan](kepegawaian.pasangan.md) | 18 | Pasangan pegawai | BASE TABLE |
 | [kepegawaian.orang_tua](kepegawaian.orang_tua.md) | 18 | Orang tua pegawai | BASE TABLE |
 | [kepegawaian.pegawai](kepegawaian.pegawai.md) | 99 | Data utama pegawai | BASE TABLE |
 | [kepegawaian.ref_pendidikan](kepegawaian.ref_pendidikan.md) | 6 | Referensi pendidikan | BASE TABLE |
@@ -300,6 +300,7 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  date tanggal_lahir
 }
 "kepegawaian.orang_tua" {
   integer id
@@ -415,7 +416,7 @@ erDiagram
   varchar_30_ nidn
   varchar_200_ ket
   varchar_100_ no_sk_pemberhentian
-  integer status_pegawai_backup
+  smallint status_pegawai_backup
   varchar_50_ masa_kerja
   varchar_50_ kartu_asn
   timestamp_with_time_zone created_at

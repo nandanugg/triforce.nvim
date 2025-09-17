@@ -50,7 +50,6 @@ Riwayat golongan pegawai
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| riwayat_golongan_id_not_null | n | NOT NULL id |
 | fk_riwayat_golongan_golongan | FOREIGN KEY | FOREIGN KEY (golongan_id) REFERENCES ref_golongan(id) |
 | fk_riwayat_golongan_jenis_kp | FOREIGN KEY | FOREIGN KEY (jenis_kp_id) REFERENCES ref_jenis_kp(id) |
 | fk_riwayat_golongan_pns_id | FOREIGN KEY | FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id) |
@@ -204,7 +203,7 @@ erDiagram
   varchar_30_ nidn
   varchar_200_ ket
   varchar_100_ no_sk_pemberhentian
-  integer status_pegawai_backup
+  smallint status_pegawai_backup
   varchar_50_ masa_kerja
   varchar_50_ kartu_asn
   timestamp_with_time_zone created_at
