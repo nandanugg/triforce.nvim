@@ -27,6 +27,7 @@ type Querier interface {
 	CountUnitKerja(ctx context.Context, arg CountUnitKerjaParams) (int64, error)
 	GetBerkasRiwayatHukdis(ctx context.Context, arg GetBerkasRiwayatHukdisParams) (pgtype.Text, error)
 	GetBerkasRiwayatPendidikan(ctx context.Context, arg GetBerkasRiwayatPendidikanParams) (pgtype.Text, error)
+	GetBerkasRiwayatPenghargaan(ctx context.Context, arg GetBerkasRiwayatPenghargaanParams) (pgtype.Text, error)
 	GetBerkasRiwayatSertifikasi(ctx context.Context, arg GetBerkasRiwayatSertifikasiParams) (pgtype.Text, error)
 	GetDataPribadi(ctx context.Context, arg GetDataPribadiParams) (GetDataPribadiRow, error)
 	GetJenisKP(ctx context.Context, arg GetJenisKPParams) ([]GetJenisKPRow, error)

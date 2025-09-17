@@ -15,3 +15,10 @@ LIMIT $1 OFFSET $2;
 SELECT COUNT(1)
 FROM riwayat_penghargaan_umum
 WHERE nip = @nip::varchar and riwayat_penghargaan_umum.deleted_at is null;
+
+-- name: GetBerkasRiwayatPenghargaan :one
+SELECT file_base64
+FROM riwayat_penghargaan_umum rpu
+WHERE nip = $1
+  AND rpu.id = $2
+  AND rpu.deleted_at is null;

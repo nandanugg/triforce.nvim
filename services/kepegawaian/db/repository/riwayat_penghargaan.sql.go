@@ -22,6 +22,26 @@ func (q *Queries) CountRiwayatPenghargaan(ctx context.Context, nip string) (int6
 	return count, err
 }
 
+const getBerkasRiwayatPenghargaan = `-- name: GetBerkasRiwayatPenghargaan :one
+SELECT file_base64
+FROM riwayat_penghargaan_umum rpu
+WHERE nip = $1
+  AND rpu.id = $2
+  AND rpu.deleted_at is null
+`
+
+type GetBerkasRiwayatPenghargaanParams struct {
+	Nip pgtype.Text `db:"nip"`
+	ID  int32       `db:"id"`
+}
+
+func (q *Queries) GetBerkasRiwayatPenghargaan(ctx context.Context, arg GetBerkasRiwayatPenghargaanParams) (pgtype.Text, error) {
+	row := q.db.QueryRow(ctx, getBerkasRiwayatPenghargaan, arg.Nip, arg.ID)
+	var file_base64 pgtype.Text
+	err := row.Scan(&file_base64)
+	return file_base64, err
+}
+
 const listRiwayatPenghargaan = `-- name: ListRiwayatPenghargaan :many
 SELECT
     riwayat_penghargaan_umum.id,

@@ -272,8 +272,8 @@ func Test_handler_getBerkas(t *testing.T) {
 		(1, 'id1','198765432100001','Budi',1,'I/a',1,'Snapshotted Jenis Hukuman 1','SK1','2023-01-15','2023-01-20',0,1,'2023-02-20',NULL,NULL,NULL,NULL,'data:image/png;base64,` + pngBase64 + `',NULL,NULL),
 		(2, 'id1','198765432100001','Budi',1,'I/a',1,'Snapshotted Jenis Hukuman 1','SK2','2023-01-15','2023-01-20',0,1,'2023-02-20',NULL,NULL,NULL,NULL,'data:image/png;base64,invalid',NULL,NULL),
 		(3, 'id1','198765432100001','Budi',1,'I/a',1,'Snapshotted Jenis Hukuman 1','SK2','2023-01-15','2023-01-20',0,1,'2023-02-20',NULL,NULL,NULL,NULL,'data:image/png;base64,invalid',NULL,'2023-02-20'),
-		(4, 'id1','198765432100001','Budi',1,'I/a',1,'Snapshotted Jenis Hukuman 1','SK2','2023-01-15','2023-01-20',0,1,'2023-02-20',NULL,NULL,NULL,NULL,NULL,NULL,'2023-02-20'),
-		(5, 'id1','198765432100001','Budi',1,'I/a',1,'Snapshotted Jenis Hukuman 1','SK2','2023-01-15','2023-01-20',0,1,'2023-02-20',NULL,NULL,NULL,NULL,'',NULL,'2023-02-20');
+		(4, 'id1','198765432100001','Budi',1,'I/a',1,'Snapshotted Jenis Hukuman 1','SK2','2023-01-15','2023-01-20',0,1,'2023-02-20',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+		(5, 'id1','198765432100001','Budi',1,'I/a',1,'Snapshotted Jenis Hukuman 1','SK2','2023-01-15','2023-01-20',0,1,'2023-02-20',NULL,NULL,NULL,NULL,'',NULL,NULL);
 		`
 
 	tests := []struct {

@@ -20,7 +20,7 @@ tags:
   - name: Pelatihan Struktural
   - name: Pelatihan Teknis
   - name: Riwayat Pendidikan
-  - name: Penghargaan
+  - name: Riwayat Penghargaan
   - name: Sertifikasi
   - name: Penugasan
   - name: Golongan
@@ -29,6 +29,7 @@ tags:
   - name: Jenis Kenaikan Pangkat
   - name: Jenis Hukuman
   - name: Jenis Diklat
+  - name : Jenis Penghargaan
 paths:
   /v1/golongan:
     get:
@@ -1077,7 +1078,7 @@ paths:
   /v1/riwayat-penghargaan:
     get:
       tags:
-        - Penghargaan
+        - Riwayat Penghargaan
       summary: Lihat riwayat penghargaan.
       description: >-
         Lihat riwayat penghargaan dari user yang login, urut berdasarkan
@@ -1114,10 +1115,35 @@ paths:
                           format: date
                   meta:
                     $ref: "#/components/schemas/metaPagination"
+  /v1/riwayat-penghargaan/{id}/berkas:
+    get:
+      tags:
+        - Riwayat Penghargaan
+      summary: Lihat berkas riwayat penghargaan.
+      description: >-
+        Lihat berkas riwayat penghargaan berdasarkan id.
+      operationId: getBerkasRiwayatPenghargaan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Riwayat Penghargaan tidak ditemukan atau User tidak mempunyai akses.
   /v1/jenis-penghargaan:
     get:
       tags:
-        - Penghargaan
+        - Jenis Penghargaan
       summary: Daftar jenis penghargaan.
       description: Daftar jenis penghargaan.
       operationId: listJenisPenghargaan
