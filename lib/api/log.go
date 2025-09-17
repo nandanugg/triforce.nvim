@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"log/slog"
+	"slices"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -46,6 +47,18 @@ func newLogMiddleware() echo.MiddlewareFunc {
 
 			slog.LogAttrs(c.Request().Context(), l, "HTTP request", attrs...)
 			return nil
+		},
+		Skipper: func(c echo.Context) bool {
+			skippedPaths := []string{
+				"/health",
+				"/metrics",
+			}
+
+			index := slices.IndexFunc(skippedPaths, func(skippedPath string) bool {
+				return skippedPath == c.Request().URL.Path
+			})
+
+			return index > -1
 		},
 	})
 }
