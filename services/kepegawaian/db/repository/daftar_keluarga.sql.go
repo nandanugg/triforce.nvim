@@ -136,10 +136,16 @@ SELECT
     p.id,
     p.pns,
     p.nama,
-    p.tanggal_menikah,
-    p.karsus AS nomor_karis,
+    p.karsus,
     p.status,
-    ra.nama AS agama_nama
+    ra.nama AS agama,
+    p.tanggal_lahir,
+    p.tanggal_menikah,
+    p.akte_nikah,
+    p.akte_cerai,
+    p.tanggal_cerai,
+    p.akte_meninggal,
+    p.tanggal_meninggal
 FROM pasangan p
 JOIN pegawai pg ON p.pns_id = pg.pns_id AND pg.deleted_at is null
 LEFT JOIN ref_agama ra ON pg.agama_id = ra.id AND ra.deleted_at is null
@@ -148,13 +154,19 @@ AND pg.nip_baru = $1
 `
 
 type ListPasanganByNipRow struct {
-	ID             int64       `db:"id"`
-	Pns            pgtype.Int2 `db:"pns"`
-	Nama           pgtype.Text `db:"nama"`
-	TanggalMenikah pgtype.Date `db:"tanggal_menikah"`
-	NomorKaris     pgtype.Text `db:"nomor_karis"`
-	Status         pgtype.Int2 `db:"status"`
-	AgamaNama      pgtype.Text `db:"agama_nama"`
+	ID               int64       `db:"id"`
+	Pns              pgtype.Int2 `db:"pns"`
+	Nama             pgtype.Text `db:"nama"`
+	Karsus           pgtype.Text `db:"karsus"`
+	Status           pgtype.Int2 `db:"status"`
+	Agama            pgtype.Text `db:"agama"`
+	TanggalLahir     pgtype.Date `db:"tanggal_lahir"`
+	TanggalMenikah   pgtype.Date `db:"tanggal_menikah"`
+	AkteNikah        pgtype.Text `db:"akte_nikah"`
+	AkteCerai        pgtype.Text `db:"akte_cerai"`
+	TanggalCerai     pgtype.Date `db:"tanggal_cerai"`
+	AkteMeninggal    pgtype.Text `db:"akte_meninggal"`
+	TanggalMeninggal pgtype.Date `db:"tanggal_meninggal"`
 }
 
 func (q *Queries) ListPasanganByNip(ctx context.Context, nipBaru pgtype.Text) ([]ListPasanganByNipRow, error) {
@@ -170,10 +182,16 @@ func (q *Queries) ListPasanganByNip(ctx context.Context, nipBaru pgtype.Text) ([
 			&i.ID,
 			&i.Pns,
 			&i.Nama,
-			&i.TanggalMenikah,
-			&i.NomorKaris,
+			&i.Karsus,
 			&i.Status,
-			&i.AgamaNama,
+			&i.Agama,
+			&i.TanggalLahir,
+			&i.TanggalMenikah,
+			&i.AkteNikah,
+			&i.AkteCerai,
+			&i.TanggalCerai,
+			&i.AkteMeninggal,
+			&i.TanggalMeninggal,
 		); err != nil {
 			return nil, err
 		}

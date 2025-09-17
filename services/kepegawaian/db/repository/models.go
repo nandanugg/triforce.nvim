@@ -60,6 +60,7 @@ type Pasangan struct {
 	CreatedAt        pgtype.Timestamptz `db:"created_at"`
 	UpdatedAt        pgtype.Timestamptz `db:"updated_at"`
 	DeletedAt        pgtype.Timestamptz `db:"deleted_at"`
+	TanggalLahir     pgtype.Date        `db:"tanggal_lahir"`
 }
 
 type Pegawai struct {

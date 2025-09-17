@@ -6,6 +6,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgtype"
 
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
 	repo "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
 )
 
@@ -73,13 +74,20 @@ func (s *service) mapListOrangTua(ot repo.ListOrangTuaByNipRow) orangTua {
 
 func (s *service) mapListPasangan(p repo.ListPasanganByNipRow) pasangan {
 	return pasangan{
-		ID:             p.ID,
-		Nama:           nullStringPtr(p.Nama),
-		Nik:            nullStringPtr(pgtype.Text{Valid: true, String: ""}), // TODO: map actual nik if available
-		StatusPNS:      PNSToLabel(p.Pns),
-		Agama:          nullStringPtr(p.AgamaNama),
-		StatusNikah:    StatusPernikahanToString(p.Status),
-		TanggalMenikah: &p.TanggalMenikah.Time,
+		ID:               p.ID,
+		StatusPNS:        PNSToLabel(p.Pns),
+		Nama:             nullStringPtr(p.Nama),
+		TanggalMenikah:   db.Date(p.TanggalMenikah.Time),
+		Karsus:           &p.Karsus.String,
+		StatusNikah:      StatusPernikahanToString(p.Status),
+		Agama:            nullStringPtr(p.Agama),
+		Nik:              nullStringPtr(pgtype.Text{Valid: true, String: ""}), // TODO: map actual nik if available
+		AkteNikah:        nullStringPtr(p.AkteNikah),
+		AkteMeninggal:    nullStringPtr(p.AkteMeninggal),
+		AkteCerai:        nullStringPtr(p.AkteCerai),
+		TanggalMeninggal: db.Date(p.TanggalMeninggal.Time),
+		TanggalCerai:     db.Date(p.TanggalCerai.Time),
+		TanggalLahir:     db.Date(p.TanggalLahir.Time),
 	}
 }
 

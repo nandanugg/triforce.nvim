@@ -19,10 +19,16 @@ SELECT
     p.id,
     p.pns,
     p.nama,
-    p.tanggal_menikah,
-    p.karsus AS nomor_karis,
+    p.karsus,
     p.status,
-    ra.nama AS agama_nama
+    ra.nama AS agama,
+    p.tanggal_lahir,
+    p.tanggal_menikah,
+    p.akte_nikah,
+    p.akte_cerai,
+    p.tanggal_cerai,
+    p.akte_meninggal,
+    p.tanggal_meninggal
 FROM pasangan p
 JOIN pegawai pg ON p.pns_id = pg.pns_id AND pg.deleted_at is null
 LEFT JOIN ref_agama ra ON pg.agama_id = ra.id AND ra.deleted_at is null

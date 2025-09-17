@@ -529,27 +529,6 @@ paths:
                 properties:
                   data:
                     $ref: "#/components/schemas/keluarga"
-              example:
-                data:
-                  orang_tua:
-                    - nama: "John Doe"
-                      nik: "1234567890123456"
-                      agama: "Islam"
-                      hubungan: 1
-                      status_hidup: null
-                  pasangan:
-                    - nama: "Jane Doe"
-                      nik: "6543210987654321"
-                      agama: "Islam"
-                      status_nikah: 1
-                      tanggal_menikah: "2020-01-15T00:00:00Z"
-                  anak:
-                    - nama: "Alice Doe"
-                      nik: "1111222233334444"
-                      jenis_kelamin: "Perempuan"
-                      status_anak: "Kandung"
-                      tanggal_lahir: "2021-05-10T00:00:00Z"
-                      anak_ke: 1
   /v1/riwayat-kenaikan-gaji-berkala:
     get:
       tags:
@@ -1378,7 +1357,7 @@ components:
           type: string
           nullable: true
         hubungan:
-          type: integer
+          type: string
           nullable: true
         status_hidup:
           type: string
@@ -1398,12 +1377,39 @@ components:
         agama:
           type: string
           nullable: true
+        status_pns:
+          type: string
+          nullable: true
         status_nikah:
-          type: integer
+          type: string
+          nullable: true
+        tanggal_lahir:
+          type: string
+          format: date
           nullable: true
         tanggal_menikah:
           type: string
-          format: date-time
+          format: date
+          nullable: true
+        tanggal_meninggal:
+          type: string
+          format: date
+          nullable: true
+        tanggal_cerai:
+          type: string
+          format: date
+          nullable: true
+        karsus:
+          type: string
+          nullable: true
+        akte_nikah:
+          type: string
+          nullable: true
+        akte_meninggal:
+          type: string
+          nullable: true
+        akte_cerai:
+          type: string
           nullable: true
     anak:
       type: object
