@@ -16,7 +16,7 @@ tags:
   - name: Kinerja
   - name: Pegawai
   - name: Pekerjaan
-  - name: Pelatihan Fungsional
+  - name: Riwayat Pelatihan Fungsional
   - name: Pelatihan Struktural
   - name: Pelatihan Teknis
   - name: Riwayat Pendidikan
@@ -829,10 +829,10 @@ paths:
                           format: date
                   meta:
                     $ref: "#/components/schemas/metaPagination"
-  /v1/pelatihan-fungsional:
+  /v1/riwayat-pelatihan-fungsional:
     get:
       tags:
-        - Pelatihan Fungsional
+        - Riwayat Pelatihan Fungsional
       summary: Lihat daftar pelatihan fungsional.
       description: >-
         Lihat daftar pelatihan fungsional dari user yang login, urut
@@ -840,8 +840,8 @@ paths:
       operationId: listPelatihanFungsional
       parameters:
         - $ref: "#/components/parameters/authRequired"
-        - $ref: "#/components/parameters/limit"
         - $ref: "#/components/parameters/offset"
+        - $ref: "#/components/parameters/limit"
       responses:
         "200":
           description: Sukses.
@@ -862,17 +862,25 @@ paths:
                           type: string
                         nama_diklat:
                           type: string
-                        tanggal:
-                          type: string
-                          format: date
                         tahun:
-                          type: string
+                          type: integer
                         institusi_penyelenggara:
                           type: string
                         nomor_sertifikat:
                           type: string
+                        durasi:
+                          type: integer
+                          description: Jumlah jam pelatihan
+                        tanggal_mulai:
+                          type: string
+                          nullable: true
+                          format: date
+                        tanggal_selesai:
+                          type: string
+                          format: date
                   meta:
-                    $ref: "#/components/schemas/metaPagination"
+                     $ref: "#/components/schemas/metaPagination"
+
   /v1/pelatihan-struktural:
     get:
       tags:

@@ -3,14 +3,12 @@ package pelatihanfungsional
 import (
 	"net/http"
 
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v4"
 )
 
-func RegisterRoutes(e *echo.Echo, db *pgxpool.Pool, mwAuth echo.MiddlewareFunc) {
-	r := newRepository(db)
-	s := newService(r)
+func RegisterRoutes(e *echo.Echo, db repository, mwAuth echo.MiddlewareFunc) {
+	s := newService(db)
 	h := newHandler(s)
 
-	e.Add(http.MethodGet, "/v1/pelatihan-fungsional", h.list, mwAuth)
+	e.Add(http.MethodGet, "/v1/riwayat-pelatihan-fungsional", h.list, mwAuth)
 }

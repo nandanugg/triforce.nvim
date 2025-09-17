@@ -32,9 +32,9 @@ func (h *handler) list(c echo.Context) error {
 	if err := c.Bind(&req); err != nil {
 		return err
 	}
-
 	ctx := c.Request().Context()
-	data, total, err := h.service.list(ctx, api.CurrentUser(c).ID, req.Limit, req.Offset)
+
+	data, total, err := h.service.list(ctx, api.CurrentUser(c).NIP, req.Limit, req.Offset)
 	if err != nil {
 		slog.ErrorContext(ctx, "Error getting list pelatihan fungsional.", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
@@ -42,6 +42,10 @@ func (h *handler) list(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, listResponse{
 		Data: data,
-		Meta: api.MetaPagination{Limit: req.Limit, Offset: req.Offset, Total: total},
+		Meta: api.MetaPagination{
+			Limit:  req.Limit,
+			Offset: req.Offset,
+			Total:  total,
+		},
 	})
 }
