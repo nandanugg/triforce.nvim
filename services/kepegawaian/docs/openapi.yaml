@@ -27,6 +27,7 @@ tags:
   - name: Unit Kerja
   - name: Jenis Kenaikan Pangkat
   - name: Jenis Hukuman
+  - name: Jenis Diklat
 paths:
   /v1/golongan:
     get:
@@ -412,6 +413,37 @@ paths:
                         kode_jabatan:
                           type: string
                         nama_jabatan:
+                          type: string
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/jenis-diklat:
+    get:
+      tags:
+        - Jenis Diklat
+      summary: Daftar jenis diklat.
+      description: Daftar jenis diklat.
+      operationId: listJenisDiklat
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: integer
+                        nama:
                           type: string
                   meta:
                     $ref: "#/components/schemas/metaPagination"
