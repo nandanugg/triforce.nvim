@@ -42,6 +42,7 @@ type Querier interface {
 	ListRefJenisHukuman(ctx context.Context, arg ListRefJenisHukumanParams) ([]ListRefJenisHukumanRow, error)
 	ListRefJenisJabatan(ctx context.Context, arg ListRefJenisJabatanParams) ([]ListRefJenisJabatanRow, error)
 	ListRefJenisPenghargaan(ctx context.Context, arg ListRefJenisPenghargaanParams) ([]ListRefJenisPenghargaanRow, error)
+	ListRefTingkatPendidikan(ctx context.Context) ([]ListRefTingkatPendidikanRow, error)
 	ListRiwayatDiklatFungsional(ctx context.Context, arg ListRiwayatDiklatFungsionalParams) ([]ListRiwayatDiklatFungsionalRow, error)
 	ListRiwayatHukdis(ctx context.Context, arg ListRiwayatHukdisParams) ([]ListRiwayatHukdisRow, error)
 	ListRiwayatJabatan(ctx context.Context, arg ListRiwayatJabatanParams) ([]ListRiwayatJabatanRow, error)

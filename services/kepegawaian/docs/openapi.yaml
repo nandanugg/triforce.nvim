@@ -25,6 +25,7 @@ tags:
   - name: Penugasan
   - name: Golongan
   - name: Unit Kerja
+  - name: Tingkat Pendidikan
   - name: Jenis Kenaikan Pangkat
   - name: Jenis Hukuman
   - name: Jenis Diklat
@@ -1288,6 +1289,34 @@ paths:
                           format: date
                   meta:
                     $ref: "#/components/schemas/metaPagination"
+  /v1/tingkat-pendidikan:
+    get:
+      tags:
+        - Tingkat Pendidikan
+      summary: Lihat tingkat pendidikan.
+      description: >-
+        Lihat semua tingkat pendidikan.
+      operationId: ListTingkatPendidikan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: integer
+                        nama:
+                          type: string
 components:
   parameters:
     authRequired:
