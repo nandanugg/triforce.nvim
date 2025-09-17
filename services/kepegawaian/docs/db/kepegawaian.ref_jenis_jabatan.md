@@ -2,20 +2,23 @@
 
 ## Description
 
+Referensi jenis jabatan
+
 ## Columns
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| id | integer | nextval('ref_jenis_jabatan_id_seq'::regclass) | false |  |  |  |
-| nama | varchar(50) |  | true |  |  |  |
-| created_at | timestamp with time zone | now() | true |  |  |  |
-| updated_at | timestamp with time zone | now() | true |  |  |  |
-| deleted_at | timestamp with time zone |  | true |  |  |  |
+| id | integer | nextval('ref_jenis_jabatan_id_seq'::regclass) | false |  |  | id jenis jabatan |
+| nama | varchar(50) |  | true |  |  | Nama jenis jabatan |
+| created_at | timestamp with time zone | now() | true |  |  | Waktu perekaman data |
+| updated_at | timestamp with time zone | now() | true |  |  | Waktu terakhir pembaruan |
+| deleted_at | timestamp with time zone |  | true |  |  | Waktu penghapusan data |
 
 ## Constraints
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
+| ref_jenis_jabatan_id_not_null | n | NOT NULL id |
 | ref_jenis_jabatan_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 
 ## Indexes

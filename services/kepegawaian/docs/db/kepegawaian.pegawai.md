@@ -2,114 +2,118 @@
 
 ## Description
 
+Data utama pegawai
+
 ## Columns
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| id | integer | nextval('pegawai_id_seq'::regclass) | false |  |  |  |
-| pns_id | varchar(36) |  | false | [kepegawaian.anak](kepegawaian.anak.md) [kepegawaian.pasangan](kepegawaian.pasangan.md) [kepegawaian.orang_tua](kepegawaian.orang_tua.md) [kepegawaian.riwayat_assesmen](kepegawaian.riwayat_assesmen.md) [kepegawaian.riwayat_diklat](kepegawaian.riwayat_diklat.md) [kepegawaian.riwayat_diklat_struktural](kepegawaian.riwayat_diklat_struktural.md) [kepegawaian.riwayat_golongan](kepegawaian.riwayat_golongan.md) [kepegawaian.riwayat_hukdis](kepegawaian.riwayat_hukdis.md) [kepegawaian.riwayat_jabatan](kepegawaian.riwayat_jabatan.md) [kepegawaian.riwayat_kursus](kepegawaian.riwayat_kursus.md) [kepegawaian.riwayat_pendidikan](kepegawaian.riwayat_pendidikan.md) [kepegawaian.riwayat_pindah_unit_kerja](kepegawaian.riwayat_pindah_unit_kerja.md) [kepegawaian.unit_kerja](kepegawaian.unit_kerja.md) [kepegawaian.update_mandiri](kepegawaian.update_mandiri.md) |  |  |
-| nip_lama | varchar(9) |  | true |  |  |  |
-| nip_baru | varchar(20) |  | true |  |  |  |
-| nama | varchar(100) |  | true |  |  |  |
-| gelar_depan | varchar(20) |  | true |  |  |  |
-| gelar_belakang | varchar(50) |  | true |  |  |  |
-| tempat_lahir_id | varchar(50) |  | true |  |  |  |
-| tgl_lahir | date |  | true |  |  |  |
-| jenis_kelamin | varchar(1) |  | true |  |  |  |
-| agama_id | smallint |  | true |  | [kepegawaian.ref_agama](kepegawaian.ref_agama.md) |  |
-| jenis_kawin_id | smallint |  | true |  | [kepegawaian.ref_jenis_kawin](kepegawaian.ref_jenis_kawin.md) |  |
-| nik | varchar(20) |  | true |  |  |  |
-| no_darurat | varchar(60) |  | true |  |  |  |
-| no_hp | varchar(60) |  | true |  |  |  |
-| email | varchar(60) |  | true |  |  |  |
-| alamat | varchar(200) |  | true |  |  |  |
-| npwp | varchar(20) |  | true |  |  |  |
-| bpjs | varchar(20) |  | true |  |  |  |
-| jenis_pegawai_id | smallint |  | true |  |  |  |
-| kedudukan_hukum_id | integer |  | true |  |  |  |
-| status_cpns_pns | varchar(20) |  | true |  |  |  |
-| kartu_pegawai | varchar(30) |  | true |  |  |  |
-| no_sk_cpns | varchar(100) |  | true |  |  |  |
-| tgl_sk_cpns | date |  | true |  |  |  |
-| tmt_cpns | date |  | true |  |  |  |
-| tmt_pns | date |  | true |  |  |  |
-| gol_awal_id | smallint |  | true |  | [kepegawaian.ref_golongan](kepegawaian.ref_golongan.md) |  |
-| gol_id | smallint |  | true |  | [kepegawaian.ref_golongan](kepegawaian.ref_golongan.md) |  |
-| tmt_golongan | date |  | true |  |  |  |
-| mk_tahun | smallint |  | true |  |  |  |
-| mk_bulan | smallint |  | true |  |  |  |
-| jabatan_id | varchar(36) |  | true |  | [kepegawaian.ref_jabatan](kepegawaian.ref_jabatan.md) |  |
-| tmt_jabatan | date |  | true |  |  |  |
-| pendidikan_id | varchar(36) |  | true |  |  |  |
-| tahun_lulus | smallint |  | true |  |  |  |
-| kpkn_id | varchar(36) |  | true |  | [kepegawaian.ref_kpkn](kepegawaian.ref_kpkn.md) |  |
-| lokasi_kerja_id | varchar(36) |  | true |  | [kepegawaian.ref_lokasi](kepegawaian.ref_lokasi.md) |  |
-| unor_id | varchar(36) |  | true |  | [kepegawaian.unit_kerja](kepegawaian.unit_kerja.md) |  |
-| unor_induk_id | varchar(36) |  | true |  |  |  |
-| instansi_induk_id | varchar(36) |  | true |  | [kepegawaian.ref_instansi](kepegawaian.ref_instansi.md) |  |
-| instansi_kerja_id | varchar(36) |  | true |  | [kepegawaian.ref_instansi](kepegawaian.ref_instansi.md) |  |
-| satuan_kerja_induk_id | varchar(36) |  | true |  |  |  |
-| satuan_kerja_kerja_id | varchar(36) |  | true |  |  |  |
-| golongan_darah | varchar(10) |  | true |  |  |  |
-| foto | varchar(200) |  | true |  |  |  |
-| tmt_pensiun | date |  | true |  |  |  |
-| lokasi_kerja | varchar(36) |  | true |  |  |  |
-| jml_istri | smallint |  | true |  |  |  |
-| jml_anak | smallint |  | true |  |  |  |
-| no_surat_dokter | varchar(100) |  | true |  |  |  |
-| tgl_surat_dokter | date |  | true |  |  |  |
-| no_bebas_narkoba | varchar(100) |  | true |  |  |  |
-| tgl_bebas_narkoba | date |  | true |  |  |  |
-| no_catatan_polisi | varchar(100) |  | true |  |  |  |
-| tgl_catatan_polisi | date |  | true |  |  |  |
-| akte_kelahiran | varchar(50) |  | true |  |  |  |
-| status_hidup | varchar(15) |  | true |  |  |  |
-| akte_meninggal | varchar(50) |  | true |  |  |  |
-| tgl_meninggal | date |  | true |  |  |  |
-| no_askes | varchar(100) |  | true |  |  |  |
-| no_taspen | varchar(100) |  | true |  |  |  |
-| tgl_npwp | date |  | true |  |  |  |
-| tempat_lahir | varchar(100) |  | true |  |  |  |
-| tingkat_pendidikan_id | smallint |  | true |  | [kepegawaian.ref_tingkat_pendidikan](kepegawaian.ref_tingkat_pendidikan.md) |  |
-| tempat_lahir_nama | varchar(200) |  | true |  |  |  |
-| jenis_jabatan_nama | varchar(200) |  | true |  |  |  |
-| jabatan_nama | varchar(200) |  | true |  |  |  |
-| kpkn_nama | varchar(200) |  | true |  |  |  |
-| instansi_induk_nama | varchar(200) |  | true |  |  |  |
-| instansi_kerja_nama | varchar(200) |  | true |  |  |  |
-| satuan_kerja_induk_nama | varchar(200) |  | true |  |  |  |
-| satuan_kerja_nama | varchar(200) |  | true |  |  |  |
-| jabatan_instansi_id | varchar(36) |  | true |  | [kepegawaian.ref_jabatan](kepegawaian.ref_jabatan.md) |  |
-| bup | smallint | 58 | true |  |  |  |
-| jabatan_instansi_nama | varchar(200) |  | true |  |  |  |
-| jenis_jabatan_id | smallint |  | true |  |  |  |
+| id | integer | nextval('pegawai_id_seq'::regclass) | false |  |  | Identitas numerik unik baris data pegawai |
+| pns_id | varchar(36) |  | false | [kepegawaian.anak](kepegawaian.anak.md) [kepegawaian.pasangan](kepegawaian.pasangan.md) [kepegawaian.orang_tua](kepegawaian.orang_tua.md) [kepegawaian.riwayat_assesmen](kepegawaian.riwayat_assesmen.md) [kepegawaian.riwayat_diklat](kepegawaian.riwayat_diklat.md) [kepegawaian.riwayat_diklat_struktural](kepegawaian.riwayat_diklat_struktural.md) [kepegawaian.riwayat_golongan](kepegawaian.riwayat_golongan.md) [kepegawaian.riwayat_hukdis](kepegawaian.riwayat_hukdis.md) [kepegawaian.riwayat_jabatan](kepegawaian.riwayat_jabatan.md) [kepegawaian.riwayat_kursus](kepegawaian.riwayat_kursus.md) [kepegawaian.riwayat_pendidikan](kepegawaian.riwayat_pendidikan.md) [kepegawaian.riwayat_pindah_unit_kerja](kepegawaian.riwayat_pindah_unit_kerja.md) [kepegawaian.unit_kerja](kepegawaian.unit_kerja.md) [kepegawaian.update_mandiri](kepegawaian.update_mandiri.md) |  | id pegawai negeri sipil (UUID) yang menjadi kunci rujukan antar tabel |
+| nip_lama | varchar(9) |  | true |  |  | Nomor Induk Pegawai format lama |
+| nip_baru | varchar(20) |  | true |  |  | Nomor Induk Pegawai format baru (20 digit) |
+| nama | varchar(100) |  | true |  |  | Nama lengkap pegawai |
+| gelar_depan | varchar(50) |  | true |  |  | Gelar akademik/jabatan di depan nama |
+| gelar_belakang | varchar(50) |  | true |  |  | Gelar akademik/jabatan di belakang nama |
+| tempat_lahir_id | varchar(50) |  | true |  |  | id tempat lahir (rujuk ref_lokasi) |
+| tgl_lahir | date |  | true |  |  | Tanggal lahir pegawai |
+| jenis_kelamin | varchar(1) |  | true |  |  | Kode jenis kelamin, M: laki-laki, F: perempuan |
+| agama_id | smallint |  | true |  | [kepegawaian.ref_agama](kepegawaian.ref_agama.md) | Kode agama (rujuk ref_agama) |
+| jenis_kawin_id | smallint |  | true |  | [kepegawaian.ref_jenis_kawin](kepegawaian.ref_jenis_kawin.md) | Status perkawinan (rujuk ref_jenis_kawin) |
+| nik | varchar(50) |  | true |  |  | Nomor Induk Kependudukan |
+| no_darurat | varchar(60) |  | true |  |  | Nomor telepon yang dapat dihubungi dalam keadaan darurat |
+| no_hp | varchar(60) |  | true |  |  | Nomor telepon seluler pegawai |
+| email | varchar(60) |  | true |  |  | Alamat surat elektronik pribadi |
+| alamat | varchar(300) |  | true |  |  | Alamat domisili pegawai |
+| npwp | varchar(50) |  | true |  |  | Nomor Pokok Wajib Pajak |
+| bpjs | varchar(50) |  | true |  |  | Nomor kepesertaan BPJS |
+| jenis_pegawai_id | smallint |  | true |  |  | id jenis pegawai (PNS/PPPK/dll; rujuk ref_jenis_pegawai) |
+| kedudukan_hukum_id | integer |  | true |  |  | id kedudukan hukum (rujuk ref_kedudukan_hukum) |
+| status_cpns_pns | varchar(20) |  | true |  |  | Status CPNS/PNS |
+| kartu_pegawai | varchar(50) |  | true |  |  | Nomor kartu pegawai |
+| no_sk_cpns | varchar(100) |  | true |  |  | Nomor SK pengangkatan CPNS |
+| tgl_sk_cpns | date |  | true |  |  | Tanggal SK pengangkatan CPNS |
+| tmt_cpns | date |  | true |  |  | Tanggal mulai tugas (CPNS) |
+| tmt_pns | date |  | true |  |  | Tanggal mulai tugas (PNS) |
+| gol_awal_id | smallint |  | true |  | [kepegawaian.ref_golongan](kepegawaian.ref_golongan.md) | Golongan awal saat pengangkatan (rujuk ref_golongan) |
+| gol_id | smallint |  | true |  | [kepegawaian.ref_golongan](kepegawaian.ref_golongan.md) | Golongan terakhir/aktif (rujuk ref_golongan) |
+| tmt_golongan | date |  | true |  |  | Tanggal mulai berlaku golongan saat ini |
+| mk_tahun | smallint |  | true |  |  | Masa kerja tahun |
+| mk_bulan | smallint |  | true |  |  | Masa kerja bulan |
+| jabatan_id | varchar(36) |  | true |  | [kepegawaian.ref_jabatan](kepegawaian.ref_jabatan.md) | id jabatan pegawai (rujuk ref_jabatan) |
+| tmt_jabatan | date |  | true |  |  | Tanggal mulai jabatan |
+| pendidikan_id | varchar(36) |  | true |  |  | id pendidikan (rujuk ref_pendidikan) |
+| tahun_lulus | smallint |  | true |  |  | Tahun kelulusan pendidikan terakhir |
+| kpkn_id | varchar(36) |  | true |  | [kepegawaian.ref_kpkn](kepegawaian.ref_kpkn.md) | id KPPN/KPKN pembayaran gaji (rujuk ref_kpkn) |
+| lokasi_kerja_id | varchar(36) |  | true |  | [kepegawaian.ref_lokasi](kepegawaian.ref_lokasi.md) | id lokasi kerja (rujuk ref_lokasi) |
+| unor_id | varchar(36) |  | true |  | [kepegawaian.unit_kerja](kepegawaian.unit_kerja.md) | Unit organisasi/kerja (rujuk unit_kerja) |
+| unor_induk_id | varchar(36) |  | true |  |  | Unit organisasi/kerja induk (rujuk unit_kerja) |
+| instansi_induk_id | varchar(36) |  | true |  | [kepegawaian.ref_instansi](kepegawaian.ref_instansi.md) | id instansi induk pegawai (rujuk ref_instansi) |
+| instansi_kerja_id | varchar(36) |  | true |  | [kepegawaian.ref_instansi](kepegawaian.ref_instansi.md) | id instansi tempat bekerja (rujuk ref_instansi) |
+| satuan_kerja_induk_id | varchar(36) |  | true |  |  | id satuan kerja induk pegawai |
+| satuan_kerja_kerja_id | varchar(36) |  | true |  |  | id satuan kerja pegawai |
+| golongan_darah | varchar(10) |  | true |  |  | Golongan darah |
+| foto | varchar(200) |  | true |  |  | Lokasi/URL berkas foto pegawai |
+| tmt_pensiun | date |  | true |  |  | Tanggal perkiraan/penetapan pensiun (BUP) |
+| lokasi_kerja | varchar(36) |  | true |  |  | Nama lokasi kerja |
+| jml_istri | smallint |  | true |  |  | Jumlah pasangan |
+| jml_anak | smallint |  | true |  |  | Jumlah anak yang tercatat |
+| no_surat_dokter | varchar(100) |  | true |  |  | Nomor surat pemeriksaan kesehatan |
+| tgl_surat_dokter | date |  | true |  |  | Tanggal surat pemeriksaan kesehatan |
+| no_bebas_narkoba | varchar(100) |  | true |  |  | Nomor Surat Keterangan Bebas Narkoba |
+| tgl_bebas_narkoba | date |  | true |  |  | Tanggal Surat Keterangan Bebas Narkoba |
+| no_catatan_polisi | varchar(100) |  | true |  |  | Nomor Surat Catatan Kelakukan Baik dari kepolisian |
+| tgl_catatan_polisi | date |  | true |  |  | Tanggal Surat Catatan Kelakukan Baik dari kepolisian |
+| akte_kelahiran | varchar(50) |  | true |  |  | Nomor akte kelahiran |
+| status_hidup | varchar(15) |  | true |  |  | Status hidup pegawai |
+| akte_meninggal | varchar(50) |  | true |  |  | Nomor akte meninggal |
+| tgl_meninggal | date |  | true |  |  | Tanggal meninggal pegawai |
+| no_askes | varchar(100) |  | true |  |  | Nomor ASKES (jika tersedia/legacy) |
+| no_taspen | varchar(100) |  | true |  |  | Nomor Taspen |
+| tgl_npwp | date |  | true |  |  | Tanggal terbit NPWP |
+| tempat_lahir | varchar(100) |  | true |  |  | Nama tempat lahir berdasarkan referensi ref_lokasi |
+| tingkat_pendidikan_id | smallint |  | true |  | [kepegawaian.ref_tingkat_pendidikan](kepegawaian.ref_tingkat_pendidikan.md) | Tingkat pendidikan terakhir (rujuk tingkat_pendidikan) |
+| tempat_lahir_nama | varchar(200) |  | true |  |  | Nama tempat lahir (teks bebas) |
+| jenis_jabatan_nama | varchar(200) |  | true |  |  | Nama jenis jabatan |
+| jabatan_nama | varchar(300) |  | true |  |  | Nama jabatan pegawai |
+| kpkn_nama | varchar(200) |  | true |  |  | Nama KPPN/KPKN pembayaran gaji |
+| instansi_induk_nama | varchar(200) |  | true |  |  | Nama instansi induk pegawai |
+| instansi_kerja_nama | varchar(200) |  | true |  |  | Nama instansi tempat bekerja pegawai |
+| satuan_kerja_induk_nama | varchar(200) |  | true |  |  | Nama satuan kerja induk pegawai |
+| satuan_kerja_nama | varchar(200) |  | true |  |  | Nama satuan kerja pegawai |
+| jabatan_instansi_id | varchar(36) |  | true |  | [kepegawaian.ref_jabatan](kepegawaian.ref_jabatan.md) | id jabatan instansi pegawai (rujuk ref_jabatan) |
+| bup | smallint | 58 | true |  |  | Batas usia pensiun |
+| jabatan_instansi_nama | varchar(400) |  | true |  |  | Nama jabatan instansi pegawai |
+| jenis_jabatan_id | smallint |  | true |  |  | id jenis jabatan |
 | terminated_date | date |  | true |  |  |  |
-| status_pegawai | smallint | 1 | true |  |  |  |
-| jabatan_ppnpn | varchar(200) |  | true |  |  |  |
-| jabatan_instansi_real_id | varchar(36) |  | true |  | [kepegawaian.ref_jabatan](kepegawaian.ref_jabatan.md) |  |
-| created_by | integer |  | true |  |  |  |
-| updated_by | integer |  | true |  |  |  |
-| email_dikbud_bak | varchar(100) |  | true |  |  |  |
-| email_dikbud | varchar(100) |  | true |  |  |  |
+| status_pegawai | smallint | 1 | true |  |  | Status pegawai, 1: pns, 2: honorer |
+| jabatan_ppnpn | varchar(200) |  | true |  |  | Nama jabatan Pegawai Pemerintah Non Pegawai Negeri |
+| jabatan_instansi_real_id | varchar(36) |  | true |  | [kepegawaian.ref_jabatan](kepegawaian.ref_jabatan.md) | id jabatan instansi pegawai (rujuk ref_jabatan) |
+| created_by | integer |  | true |  |  | id user yang memasukkan data pegawai |
+| updated_by | integer |  | true |  |  | id user yang memperbarui data pegawai |
+| email_dikbud_bak | varchar(100) |  | true |  |  | Alamat surat elektronik backup untuk kepentingan pekerjaan |
+| email_dikbud | varchar(100) |  | true |  |  | Alamat surat elektronik untuk kepentingan pekerjaan |
 | kodecepat | varchar(100) |  | true |  |  |  |
 | is_dosen | smallint |  | true |  |  |  |
-| mk_tahun_swasta | smallint | 0 | true |  |  |  |
-| mk_bulan_swasta | smallint | 0 | true |  |  |  |
-| kk | varchar(30) |  | true |  |  |  |
+| mk_tahun_swasta | smallint | 0 | true |  |  | Masa kerja tahun di swasta, sebelum menjadi ASN |
+| mk_bulan_swasta | smallint | 0 | true |  |  | Masa kerja bulan di swasta, sebelum menjadi ASN |
+| kk | varchar(30) |  | true |  |  | Nomor kartu keluarga |
 | nidn | varchar(30) |  | true |  |  |  |
-| ket | varchar(200) |  | true |  |  |  |
-| no_sk_pemberhentian | varchar(100) |  | true |  |  |  |
-| status_pegawai_backup | smallint |  | true |  |  |  |
-| masa_kerja | varchar(50) |  | true |  |  |  |
-| kartu_asn | varchar(50) |  | true |  |  |  |
-| created_at | timestamp with time zone | now() | true |  |  |  |
-| updated_at | timestamp with time zone | now() | true |  |  |  |
-| deleted_at | timestamp with time zone |  | true |  |  |  |
+| ket | varchar(200) |  | true |  |  | Keterangan tambahan terhadap pegawai |
+| no_sk_pemberhentian | varchar(100) |  | true |  |  | Nomor SK pemberhentian dari PNS |
+| status_pegawai_backup | integer |  | true |  |  | Status pegawai backup |
+| masa_kerja | varchar(50) |  | true |  |  | masa kerja |
+| kartu_asn | varchar(50) |  | true |  |  | Nomor kartu ASN |
+| created_at | timestamp with time zone | now() | true |  |  | Waktu perekaman data dibuat |
+| updated_at | timestamp with time zone | now() | true |  |  | Waktu terakhir data diperbarui |
+| deleted_at | timestamp with time zone |  | true |  |  | Waktu penghapusan lunak (soft delete) bila ada |
 
 ## Constraints
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
+| pegawai_id_not_null | n | NOT NULL id |
+| pegawai_pns_id_not_null | n | NOT NULL pns_id |
 | fk_pegawai_agama | FOREIGN KEY | FOREIGN KEY (agama_id) REFERENCES ref_agama(id) |
 | fk_pegawai_golongan | FOREIGN KEY | FOREIGN KEY (gol_id) REFERENCES ref_golongan(id) |
 | fk_pegawai_golongan_awal | FOREIGN KEY | FOREIGN KEY (gol_awal_id) REFERENCES ref_golongan(id) |
@@ -172,24 +176,24 @@ erDiagram
   varchar_9_ nip_lama
   varchar_20_ nip_baru
   varchar_100_ nama
-  varchar_20_ gelar_depan
+  varchar_50_ gelar_depan
   varchar_50_ gelar_belakang
   varchar_50_ tempat_lahir_id
   date tgl_lahir
   varchar_1_ jenis_kelamin
   smallint agama_id FK
   smallint jenis_kawin_id FK
-  varchar_20_ nik
+  varchar_50_ nik
   varchar_60_ no_darurat
   varchar_60_ no_hp
   varchar_60_ email
-  varchar_200_ alamat
-  varchar_20_ npwp
-  varchar_20_ bpjs
+  varchar_300_ alamat
+  varchar_50_ npwp
+  varchar_50_ bpjs
   smallint jenis_pegawai_id
   integer kedudukan_hukum_id
   varchar_20_ status_cpns_pns
-  varchar_30_ kartu_pegawai
+  varchar_50_ kartu_pegawai
   varchar_100_ no_sk_cpns
   date tgl_sk_cpns
   date tmt_cpns
@@ -234,7 +238,7 @@ erDiagram
   smallint tingkat_pendidikan_id FK
   varchar_200_ tempat_lahir_nama
   varchar_200_ jenis_jabatan_nama
-  varchar_200_ jabatan_nama
+  varchar_300_ jabatan_nama
   varchar_200_ kpkn_nama
   varchar_200_ instansi_induk_nama
   varchar_200_ instansi_kerja_nama
@@ -242,7 +246,7 @@ erDiagram
   varchar_200_ satuan_kerja_nama
   varchar_36_ jabatan_instansi_id FK
   smallint bup
-  varchar_200_ jabatan_instansi_nama
+  varchar_400_ jabatan_instansi_nama
   smallint jenis_jabatan_id
   date terminated_date
   smallint status_pegawai
@@ -260,7 +264,7 @@ erDiagram
   varchar_30_ nidn
   varchar_200_ ket
   varchar_100_ no_sk_pemberhentian
-  smallint status_pegawai_backup
+  integer status_pegawai_backup
   varchar_50_ masa_kerja
   varchar_50_ kartu_asn
   timestamp_with_time_zone created_at

@@ -1,54 +1,54 @@
-# nexus
+# portal_kementerian
 
 ## Tables
 
 | Name | Columns | Comment | Type |
 | ---- | ------- | ------- | ---- |
 | [kepegawaian.schema_migrations](kepegawaian.schema_migrations.md) | 2 |  | BASE TABLE |
-| [kepegawaian.ref_agama](kepegawaian.ref_agama.md) | 5 |  | BASE TABLE |
-| [kepegawaian.ref_golongan](kepegawaian.ref_golongan.md) | 9 |  | BASE TABLE |
-| [kepegawaian.ref_instansi](kepegawaian.ref_instansi.md) | 5 |  | BASE TABLE |
-| [kepegawaian.ref_jabatan](kepegawaian.ref_jabatan.md) | 15 |  | BASE TABLE |
-| [kepegawaian.ref_jenis_diklat](kepegawaian.ref_jenis_diklat.md) | 8 |  | BASE TABLE |
-| [kepegawaian.ref_jenis_diklat_fungsional](kepegawaian.ref_jenis_diklat_fungsional.md) | 5 |  | BASE TABLE |
-| [kepegawaian.ref_jenis_diklat_struktural](kepegawaian.ref_jenis_diklat_struktural.md) | 5 |  | BASE TABLE |
-| [kepegawaian.ref_jenis_hukuman](kepegawaian.ref_jenis_hukuman.md) | 8 |  | BASE TABLE |
-| [kepegawaian.ref_jenis_jabatan](kepegawaian.ref_jenis_jabatan.md) | 5 |  | BASE TABLE |
-| [kepegawaian.ref_jenis_kawin](kepegawaian.ref_jenis_kawin.md) | 5 |  | BASE TABLE |
-| [kepegawaian.ref_jenis_kp](kepegawaian.ref_jenis_kp.md) | 6 |  | BASE TABLE |
-| [kepegawaian.ref_jenis_pegawai](kepegawaian.ref_jenis_pegawai.md) | 6 |  | BASE TABLE |
-| [kepegawaian.ref_jenis_penghargaan](kepegawaian.ref_jenis_penghargaan.md) | 5 |  | BASE TABLE |
-| [kepegawaian.ref_kedudukan_hukum](kepegawaian.ref_kedudukan_hukum.md) | 7 |  | BASE TABLE |
-| [kepegawaian.ref_kpkn](kepegawaian.ref_kpkn.md) | 5 |  | BASE TABLE |
-| [kepegawaian.ref_lokasi](kepegawaian.ref_lokasi.md) | 11 |  | BASE TABLE |
-| [kepegawaian.ref_jenis_satker](kepegawaian.ref_jenis_satker.md) | 5 |  | BASE TABLE |
-| [kepegawaian.anak](kepegawaian.anak.md) | 12 |  | BASE TABLE |
-| [kepegawaian.pasangan](kepegawaian.pasangan.md) | 17 |  | BASE TABLE |
-| [kepegawaian.orang_tua](kepegawaian.orang_tua.md) | 18 |  | BASE TABLE |
-| [kepegawaian.pegawai](kepegawaian.pegawai.md) | 99 |  | BASE TABLE |
-| [kepegawaian.ref_pendidikan](kepegawaian.ref_pendidikan.md) | 6 |  | BASE TABLE |
-| [kepegawaian.pindah_unit](kepegawaian.pindah_unit.md) | 23 |  | BASE TABLE |
-| [kepegawaian.riwayat_assesmen](kepegawaian.riwayat_assesmen.md) | 22 |  | BASE TABLE |
-| [kepegawaian.riwayat_diklat](kepegawaian.riwayat_diklat.md) | 21 |  | BASE TABLE |
-| [kepegawaian.riwayat_diklat_fungsional](kepegawaian.riwayat_diklat_fungsional.md) | 20 |  | BASE TABLE |
-| [kepegawaian.riwayat_diklat_struktural](kepegawaian.riwayat_diklat_struktural.md) | 17 |  | BASE TABLE |
-| [kepegawaian.riwayat_golongan](kepegawaian.riwayat_golongan.md) | 37 |  | BASE TABLE |
-| [kepegawaian.riwayat_hukdis](kepegawaian.riwayat_hukdis.md) | 23 |  | BASE TABLE |
-| [kepegawaian.riwayat_jabatan](kepegawaian.riwayat_jabatan.md) | 37 |  | BASE TABLE |
-| [kepegawaian.riwayat_kgb](kepegawaian.riwayat_kgb.md) | 29 |  | BASE TABLE |
-| [kepegawaian.riwayat_kinerja](kepegawaian.riwayat_kinerja.md) | 19 |  | BASE TABLE |
-| [kepegawaian.riwayat_kursus](kepegawaian.riwayat_kursus.md) | 15 |  | BASE TABLE |
-| [kepegawaian.riwayat_nine_box](kepegawaian.riwayat_nine_box.md) | 10 |  | BASE TABLE |
-| [kepegawaian.riwayat_pendidikan](kepegawaian.riwayat_pendidikan.md) | 25 |  | BASE TABLE |
-| [kepegawaian.riwayat_penghargaan_umum](kepegawaian.riwayat_penghargaan_umum.md) | 11 |  | BASE TABLE |
-| [kepegawaian.riwayat_pindah_unit_kerja](kepegawaian.riwayat_pindah_unit_kerja.md) | 19 |  | BASE TABLE |
-| [kepegawaian.riwayat_ujikom](kepegawaian.riwayat_ujikom.md) | 9 |  | BASE TABLE |
-| [kepegawaian.ref_tingkat_pendidikan](kepegawaian.ref_tingkat_pendidikan.md) | 9 |  | BASE TABLE |
-| [kepegawaian.unit_kerja](kepegawaian.unit_kerja.md) | 34 |  | BASE TABLE |
-| [kepegawaian.update_mandiri](kepegawaian.update_mandiri.md) | 15 |  | BASE TABLE |
-| [kepegawaian.riwayat_sertifikasi](kepegawaian.riwayat_sertifikasi.md) | 9 |  | BASE TABLE |
-| [kepegawaian.riwayat_penugasan](kepegawaian.riwayat_penugasan.md) | 12 |  | BASE TABLE |
-| [kepegawaian.ref_kelas_jabatan](kepegawaian.ref_kelas_jabatan.md) | 5 |  | BASE TABLE |
+| [kepegawaian.ref_agama](kepegawaian.ref_agama.md) | 5 | Referensi agama | BASE TABLE |
+| [kepegawaian.ref_golongan](kepegawaian.ref_golongan.md) | 9 | Referensi golongan | BASE TABLE |
+| [kepegawaian.ref_instansi](kepegawaian.ref_instansi.md) | 5 | Referensi instansi | BASE TABLE |
+| [kepegawaian.ref_jabatan](kepegawaian.ref_jabatan.md) | 15 | Referensi jabatan | BASE TABLE |
+| [kepegawaian.ref_jenis_diklat](kepegawaian.ref_jenis_diklat.md) | 8 | Referensi jenis diklat | BASE TABLE |
+| [kepegawaian.ref_jenis_diklat_fungsional](kepegawaian.ref_jenis_diklat_fungsional.md) | 5 | Referensi jenis diklat fungsional | BASE TABLE |
+| [kepegawaian.ref_jenis_diklat_struktural](kepegawaian.ref_jenis_diklat_struktural.md) | 5 | Referensi jenis diklat struktural | BASE TABLE |
+| [kepegawaian.ref_jenis_hukuman](kepegawaian.ref_jenis_hukuman.md) | 8 | Referensi jenis hukuman disiplin | BASE TABLE |
+| [kepegawaian.ref_jenis_jabatan](kepegawaian.ref_jenis_jabatan.md) | 5 | Referensi jenis jabatan | BASE TABLE |
+| [kepegawaian.ref_jenis_kawin](kepegawaian.ref_jenis_kawin.md) | 5 | Referensi status pernikahan | BASE TABLE |
+| [kepegawaian.ref_jenis_kp](kepegawaian.ref_jenis_kp.md) | 6 | Referensi jenis kenaikan pangkat | BASE TABLE |
+| [kepegawaian.ref_jenis_pegawai](kepegawaian.ref_jenis_pegawai.md) | 6 | Referensi jenis pegawai | BASE TABLE |
+| [kepegawaian.ref_jenis_penghargaan](kepegawaian.ref_jenis_penghargaan.md) | 5 | Referensi jenis penghargaan | BASE TABLE |
+| [kepegawaian.ref_kedudukan_hukum](kepegawaian.ref_kedudukan_hukum.md) | 7 | Referensi kedudukan hukum | BASE TABLE |
+| [kepegawaian.ref_kpkn](kepegawaian.ref_kpkn.md) | 5 | Referensi kantor pelayanan kekayaan negara | BASE TABLE |
+| [kepegawaian.ref_lokasi](kepegawaian.ref_lokasi.md) | 11 | Referensi lokasi | BASE TABLE |
+| [kepegawaian.ref_jenis_satker](kepegawaian.ref_jenis_satker.md) | 5 | Referensi jenis satuan kerja | BASE TABLE |
+| [kepegawaian.anak](kepegawaian.anak.md) | 12 | Anak pegawai | BASE TABLE |
+| [kepegawaian.pasangan](kepegawaian.pasangan.md) | 17 | Pasangan pegawai | BASE TABLE |
+| [kepegawaian.orang_tua](kepegawaian.orang_tua.md) | 18 | Orang tua pegawai | BASE TABLE |
+| [kepegawaian.pegawai](kepegawaian.pegawai.md) | 99 | Data utama pegawai | BASE TABLE |
+| [kepegawaian.ref_pendidikan](kepegawaian.ref_pendidikan.md) | 6 | Referensi pendidikan | BASE TABLE |
+| [kepegawaian.pindah_unit](kepegawaian.pindah_unit.md) | 23 | Riwayat perpindahan unit kerja | BASE TABLE |
+| [kepegawaian.riwayat_assesmen](kepegawaian.riwayat_assesmen.md) | 22 | Riwayat asesmen pegawai | BASE TABLE |
+| [kepegawaian.riwayat_diklat](kepegawaian.riwayat_diklat.md) | 21 | Riwayat diklat pegawai | BASE TABLE |
+| [kepegawaian.riwayat_diklat_fungsional](kepegawaian.riwayat_diklat_fungsional.md) | 20 | Riwayat diklat fungsional pegawai | BASE TABLE |
+| [kepegawaian.riwayat_diklat_struktural](kepegawaian.riwayat_diklat_struktural.md) | 17 | Riwayat diklat struktural pegawai | BASE TABLE |
+| [kepegawaian.riwayat_golongan](kepegawaian.riwayat_golongan.md) | 37 | Riwayat golongan pegawai | BASE TABLE |
+| [kepegawaian.riwayat_hukdis](kepegawaian.riwayat_hukdis.md) | 23 | Riwayat hukuman disiplin pegawai | BASE TABLE |
+| [kepegawaian.riwayat_jabatan](kepegawaian.riwayat_jabatan.md) | 37 | Riwayat jabatan pegawai | BASE TABLE |
+| [kepegawaian.riwayat_kgb](kepegawaian.riwayat_kgb.md) | 29 | Riwayat kenaikan gaji berkala pegawai | BASE TABLE |
+| [kepegawaian.riwayat_kinerja](kepegawaian.riwayat_kinerja.md) | 19 | Riwayat kinerja pegawai | BASE TABLE |
+| [kepegawaian.riwayat_kursus](kepegawaian.riwayat_kursus.md) | 15 | Riwayat kursus pegawai | BASE TABLE |
+| [kepegawaian.riwayat_nine_box](kepegawaian.riwayat_nine_box.md) | 10 | Riwayat asesmen nine box pegawai | BASE TABLE |
+| [kepegawaian.riwayat_pendidikan](kepegawaian.riwayat_pendidikan.md) | 25 | Riwayat pendidikan pegawai | BASE TABLE |
+| [kepegawaian.riwayat_penghargaan_umum](kepegawaian.riwayat_penghargaan_umum.md) | 11 | Riwayat penghargaan umum pegawai | BASE TABLE |
+| [kepegawaian.riwayat_pindah_unit_kerja](kepegawaian.riwayat_pindah_unit_kerja.md) | 19 | Riwayat pindah unit kerja pegawai | BASE TABLE |
+| [kepegawaian.riwayat_ujikom](kepegawaian.riwayat_ujikom.md) | 9 | Riwayat uji kompetensi pegawai | BASE TABLE |
+| [kepegawaian.ref_tingkat_pendidikan](kepegawaian.ref_tingkat_pendidikan.md) | 9 | Referensi referensi pendidikan | BASE TABLE |
+| [kepegawaian.unit_kerja](kepegawaian.unit_kerja.md) | 34 | Referensi referensi unit kerja | BASE TABLE |
+| [kepegawaian.update_mandiri](kepegawaian.update_mandiri.md) | 15 | Riwayat pembaruan data secara mandiri oleh pegawai | BASE TABLE |
+| [kepegawaian.riwayat_sertifikasi](kepegawaian.riwayat_sertifikasi.md) | 9 | Riwayat sertifikasi pegawai | BASE TABLE |
+| [kepegawaian.riwayat_penugasan](kepegawaian.riwayat_penugasan.md) | 12 | Riwayat penugasan pegawai | BASE TABLE |
+| [kepegawaian.ref_kelas_jabatan](kepegawaian.ref_kelas_jabatan.md) | 5 | Referensi kelas jabatan | BASE TABLE |
 
 ## Stored procedures and functions
 
@@ -108,6 +108,7 @@ erDiagram
 "kepegawaian.riwayat_pendidikan" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
 "kepegawaian.riwayat_pendidikan" }o--o| "kepegawaian.ref_pendidikan" : "FOREIGN KEY (pendidikan_id) REFERENCES ref_pendidikan(id)"
 "kepegawaian.riwayat_pendidikan" }o--o| "kepegawaian.ref_tingkat_pendidikan" : "FOREIGN KEY (tingkat_pendidikan_id) REFERENCES ref_tingkat_pendidikan(id)"
+"kepegawaian.riwayat_penghargaan_umum" }o--o| "kepegawaian.ref_jenis_penghargaan" : "FOREIGN KEY (jenis_penghargaan_id) REFERENCES ref_jenis_penghargaan(id)"
 "kepegawaian.riwayat_pindah_unit_kerja" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
 "kepegawaian.unit_kerja" }o--o| "kepegawaian.ref_instansi" : "FOREIGN KEY (instansi_id) REFERENCES ref_instansi(id)"
 "kepegawaian.unit_kerja" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pemimpin_pns_id) REFERENCES pegawai(pns_id)"
@@ -326,24 +327,24 @@ erDiagram
   varchar_9_ nip_lama
   varchar_20_ nip_baru
   varchar_100_ nama
-  varchar_20_ gelar_depan
+  varchar_50_ gelar_depan
   varchar_50_ gelar_belakang
   varchar_50_ tempat_lahir_id
   date tgl_lahir
   varchar_1_ jenis_kelamin
   smallint agama_id FK
   smallint jenis_kawin_id FK
-  varchar_20_ nik
+  varchar_50_ nik
   varchar_60_ no_darurat
   varchar_60_ no_hp
   varchar_60_ email
-  varchar_200_ alamat
-  varchar_20_ npwp
-  varchar_20_ bpjs
+  varchar_300_ alamat
+  varchar_50_ npwp
+  varchar_50_ bpjs
   smallint jenis_pegawai_id
   integer kedudukan_hukum_id
   varchar_20_ status_cpns_pns
-  varchar_30_ kartu_pegawai
+  varchar_50_ kartu_pegawai
   varchar_100_ no_sk_cpns
   date tgl_sk_cpns
   date tmt_cpns
@@ -388,7 +389,7 @@ erDiagram
   smallint tingkat_pendidikan_id FK
   varchar_200_ tempat_lahir_nama
   varchar_200_ jenis_jabatan_nama
-  varchar_200_ jabatan_nama
+  varchar_300_ jabatan_nama
   varchar_200_ kpkn_nama
   varchar_200_ instansi_induk_nama
   varchar_200_ instansi_kerja_nama
@@ -396,7 +397,7 @@ erDiagram
   varchar_200_ satuan_kerja_nama
   varchar_36_ jabatan_instansi_id FK
   smallint bup
-  varchar_200_ jabatan_instansi_nama
+  varchar_400_ jabatan_instansi_nama
   smallint jenis_jabatan_id
   date terminated_date
   smallint status_pegawai
@@ -414,7 +415,7 @@ erDiagram
   varchar_30_ nidn
   varchar_200_ ket
   varchar_100_ no_sk_pemberhentian
-  smallint status_pegawai_backup
+  integer status_pegawai_backup
   varchar_50_ masa_kerja
   varchar_50_ kartu_asn
   timestamp_with_time_zone created_at
@@ -755,7 +756,6 @@ erDiagram
 }
 "kepegawaian.riwayat_penghargaan_umum" {
   integer id
-  varchar_50_ jenis_penghargaan
   varchar_100_ deskripsi_penghargaan
   date tanggal_penghargaan
   boolean exist
@@ -765,6 +765,7 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  integer jenis_penghargaan_id FK
 }
 "kepegawaian.riwayat_pindah_unit_kerja" {
   bigint id

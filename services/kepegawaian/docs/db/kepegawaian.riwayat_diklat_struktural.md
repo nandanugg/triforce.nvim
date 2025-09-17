@@ -2,6 +2,8 @@
 
 ## Description
 
+Riwayat diklat struktural pegawai
+
 ## Columns
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
@@ -28,6 +30,7 @@
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
+| riwayat_diklat_struktural_id_not_null | n | NOT NULL id |
 | fk_riwayat_diklat_struktural_jenis | FOREIGN KEY | FOREIGN KEY (jenis_diklat_id) REFERENCES ref_jenis_diklat_struktural(id) |
 | fk_riwayat_diklat_struktural_pns_id | FOREIGN KEY | FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id) |
 | riwayat_diklat_struktural_pkey | PRIMARY KEY | PRIMARY KEY (id) |
@@ -71,24 +74,24 @@ erDiagram
   varchar_9_ nip_lama
   varchar_20_ nip_baru
   varchar_100_ nama
-  varchar_20_ gelar_depan
+  varchar_50_ gelar_depan
   varchar_50_ gelar_belakang
   varchar_50_ tempat_lahir_id
   date tgl_lahir
   varchar_1_ jenis_kelamin
   smallint agama_id FK
   smallint jenis_kawin_id FK
-  varchar_20_ nik
+  varchar_50_ nik
   varchar_60_ no_darurat
   varchar_60_ no_hp
   varchar_60_ email
-  varchar_200_ alamat
-  varchar_20_ npwp
-  varchar_20_ bpjs
+  varchar_300_ alamat
+  varchar_50_ npwp
+  varchar_50_ bpjs
   smallint jenis_pegawai_id
   integer kedudukan_hukum_id
   varchar_20_ status_cpns_pns
-  varchar_30_ kartu_pegawai
+  varchar_50_ kartu_pegawai
   varchar_100_ no_sk_cpns
   date tgl_sk_cpns
   date tmt_cpns
@@ -133,7 +136,7 @@ erDiagram
   smallint tingkat_pendidikan_id FK
   varchar_200_ tempat_lahir_nama
   varchar_200_ jenis_jabatan_nama
-  varchar_200_ jabatan_nama
+  varchar_300_ jabatan_nama
   varchar_200_ kpkn_nama
   varchar_200_ instansi_induk_nama
   varchar_200_ instansi_kerja_nama
@@ -141,7 +144,7 @@ erDiagram
   varchar_200_ satuan_kerja_nama
   varchar_36_ jabatan_instansi_id FK
   smallint bup
-  varchar_200_ jabatan_instansi_nama
+  varchar_400_ jabatan_instansi_nama
   smallint jenis_jabatan_id
   date terminated_date
   smallint status_pegawai
@@ -159,7 +162,7 @@ erDiagram
   varchar_30_ nidn
   varchar_200_ ket
   varchar_100_ no_sk_pemberhentian
-  smallint status_pegawai_backup
+  integer status_pegawai_backup
   varchar_50_ masa_kerja
   varchar_50_ kartu_asn
   timestamp_with_time_zone created_at

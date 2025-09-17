@@ -2,37 +2,40 @@
 
 ## Description
 
+Riwayat asesmen pegawai
+
 ## Columns
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| id | integer | nextval('riwayat_assesmen_id_seq'::regclass) | false |  |  |  |
-| pns_id | varchar(36) |  | true |  | [kepegawaian.pegawai](kepegawaian.pegawai.md) |  |
-| pns_nip | varchar(20) |  | true |  |  |  |
-| tahun | smallint |  | true |  |  |  |
-| file_upload | varchar(200) |  | true |  |  |  |
-| nilai | real |  | true |  |  |  |
-| nilai_kinerja | real |  | true |  |  |  |
-| tahun_penilaian_id | smallint |  | true |  |  |  |
-| tahun_penilaian_title | varchar(50) |  | true |  |  |  |
-| nama_lengkap | varchar(100) |  | true |  |  |  |
-| posisi_id | varchar(20) |  | true |  |  |  |
-| unit_org_id | varchar(36) |  | true |  | [kepegawaian.unit_kerja](kepegawaian.unit_kerja.md) |  |
-| nama_unor | varchar(200) |  | true |  |  |  |
-| saran_pengembangan | text |  | true |  |  |  |
-| file_upload_fb_potensi | varchar(200) |  | true |  |  |  |
-| file_upload_lengkap_pt | varchar(200) |  | true |  |  |  |
-| file_upload_fb_pt | varchar(200) |  | true |  |  |  |
-| file_upload_exists | smallint | 0 | true |  |  |  |
-| satker_id | varchar(36) |  | true |  |  |  |
-| created_at | timestamp with time zone | now() | true |  |  |  |
-| updated_at | timestamp with time zone | now() | true |  |  |  |
-| deleted_at | timestamp with time zone |  | true |  |  |  |
+| id | integer | nextval('riwayat_assesmen_id_seq'::regclass) | false |  |  | id data asesmen |
+| pns_id | varchar(36) |  | true |  | [kepegawaian.pegawai](kepegawaian.pegawai.md) | id PNS |
+| pns_nip | varchar(20) |  | true |  |  | NIP pegawai |
+| tahun | smallint |  | true |  |  | Tahun asesmen |
+| file_upload | varchar(200) |  | true |  |  | Lokasi penyimpanan berkas asesmen |
+| nilai | real |  | true |  |  | Hasil penilaian asesmen |
+| nilai_kinerja | real |  | true |  |  | Hasil penilaian kinerja |
+| tahun_penilaian_id | smallint |  | true |  |  | id tahun penilaian |
+| tahun_penilaian_title | varchar(50) |  | true |  |  | Judul tahun pada laporan hasil asesmen |
+| nama_lengkap | varchar(100) |  | true |  |  | Nama lengkap pegawai yang diases |
+| posisi_id | varchar(20) |  | true |  |  | id posisi |
+| unit_org_id | varchar(36) |  | true |  | [kepegawaian.unit_kerja](kepegawaian.unit_kerja.md) | id unit organisasi |
+| nama_unor | varchar(200) |  | true |  |  | Nama unit organisasi pegawai yang diases |
+| saran_pengembangan | text |  | true |  |  | Saran pengembangan |
+| file_upload_fb_potensi | varchar(200) |  | true |  |  | Lokasi penyimpanan berkas umpan balik asesmen pada asesmen-pegawai.kemendikdasmen.go.id |
+| file_upload_lengkap_pt | varchar(200) |  | true |  |  | Lokasi penyimpanan berkas lengkap hasil asesmen pada asesmen-pegawai.kemendikdasmen.go.id |
+| file_upload_fb_pt | varchar(200) |  | true |  |  | Lokasi penyimpanan berkas umpan balik asesmen pada asesmen-pegawai.kemendikdasmen.go.id |
+| file_upload_exists | smallint | 0 | true |  |  | Penanda apakah berkas telah diunggah |
+| satker_id | varchar(36) |  | true |  |  | id satuan kerja |
+| created_at | timestamp with time zone | now() | true |  |  | Waktu perekaman data |
+| updated_at | timestamp with time zone | now() | true |  |  | Waktu terakhir pembaruan |
+| deleted_at | timestamp with time zone |  | true |  |  | Waktu penghapusan data |
 
 ## Constraints
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
+| riwayat_assesmen_id_not_null | n | NOT NULL id |
 | fk_riwayat_assesmen_pns_id | FOREIGN KEY | FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id) |
 | riwayat_assesmen_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 | fk_riwayat_assesmen_unit_org | FOREIGN KEY | FOREIGN KEY (unit_org_id) REFERENCES unit_kerja(id) |
@@ -81,24 +84,24 @@ erDiagram
   varchar_9_ nip_lama
   varchar_20_ nip_baru
   varchar_100_ nama
-  varchar_20_ gelar_depan
+  varchar_50_ gelar_depan
   varchar_50_ gelar_belakang
   varchar_50_ tempat_lahir_id
   date tgl_lahir
   varchar_1_ jenis_kelamin
   smallint agama_id FK
   smallint jenis_kawin_id FK
-  varchar_20_ nik
+  varchar_50_ nik
   varchar_60_ no_darurat
   varchar_60_ no_hp
   varchar_60_ email
-  varchar_200_ alamat
-  varchar_20_ npwp
-  varchar_20_ bpjs
+  varchar_300_ alamat
+  varchar_50_ npwp
+  varchar_50_ bpjs
   smallint jenis_pegawai_id
   integer kedudukan_hukum_id
   varchar_20_ status_cpns_pns
-  varchar_30_ kartu_pegawai
+  varchar_50_ kartu_pegawai
   varchar_100_ no_sk_cpns
   date tgl_sk_cpns
   date tmt_cpns
@@ -143,7 +146,7 @@ erDiagram
   smallint tingkat_pendidikan_id FK
   varchar_200_ tempat_lahir_nama
   varchar_200_ jenis_jabatan_nama
-  varchar_200_ jabatan_nama
+  varchar_300_ jabatan_nama
   varchar_200_ kpkn_nama
   varchar_200_ instansi_induk_nama
   varchar_200_ instansi_kerja_nama
@@ -151,7 +154,7 @@ erDiagram
   varchar_200_ satuan_kerja_nama
   varchar_36_ jabatan_instansi_id FK
   smallint bup
-  varchar_200_ jabatan_instansi_nama
+  varchar_400_ jabatan_instansi_nama
   smallint jenis_jabatan_id
   date terminated_date
   smallint status_pegawai
@@ -169,7 +172,7 @@ erDiagram
   varchar_30_ nidn
   varchar_200_ ket
   varchar_100_ no_sk_pemberhentian
-  smallint status_pegawai_backup
+  integer status_pegawai_backup
   varchar_50_ masa_kerja
   varchar_50_ kartu_asn
   timestamp_with_time_zone created_at

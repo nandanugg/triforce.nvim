@@ -2,49 +2,53 @@
 
 ## Description
 
+Referensi referensi unit kerja
+
 ## Columns
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| id | varchar(36) |  | false | [kepegawaian.pegawai](kepegawaian.pegawai.md) [kepegawaian.pindah_unit](kepegawaian.pindah_unit.md) [kepegawaian.riwayat_assesmen](kepegawaian.riwayat_assesmen.md) [kepegawaian.riwayat_jabatan](kepegawaian.riwayat_jabatan.md) [kepegawaian.unit_kerja](kepegawaian.unit_kerja.md) |  |  |
-| no | integer |  | true |  |  |  |
-| kode_internal | varchar(36) |  | true |  |  |  |
-| nama_unor | varchar(200) |  | true |  |  |  |
-| eselon_id | varchar(36) |  | true |  |  |  |
-| cepat_kode | varchar(36) |  | true |  |  |  |
-| nama_jabatan | varchar(200) |  | true |  |  |  |
-| nama_pejabat | varchar(200) |  | true |  |  |  |
-| diatasan_id | varchar(36) |  | true |  | [kepegawaian.unit_kerja](kepegawaian.unit_kerja.md) |  |
-| instansi_id | varchar(36) |  | true |  | [kepegawaian.ref_instansi](kepegawaian.ref_instansi.md) |  |
-| pemimpin_pns_id | varchar(36) |  | true |  | [kepegawaian.pegawai](kepegawaian.pegawai.md) |  |
-| jenis_unor_id | varchar(36) |  | true |  |  |  |
-| unor_induk | varchar(36) |  | true |  |  |  |
-| jumlah_ideal_staff | smallint |  | true |  |  |  |
-| order | integer |  | true |  |  |  |
-| is_satker | smallint | 0 | false |  |  |  |
-| eselon_1 | varchar(36) |  | true |  |  |  |
-| eselon_2 | varchar(36) |  | true |  |  |  |
-| eselon_3 | varchar(36) |  | true |  |  |  |
-| eselon_4 | varchar(36) |  | true |  |  |  |
-| expired_date | date |  | true |  |  |  |
-| keterangan | varchar(200) |  | true |  |  |  |
-| jenis_satker | varchar(200) |  | true |  |  |  |
-| abbreviation | varchar(200) |  | true |  |  |  |
-| unor_induk_penyetaraan | varchar(200) |  | true |  |  |  |
-| jabatan_id | varchar(32) |  | true |  |  |  |
-| waktu | varchar(4) |  | true |  |  |  |
-| peraturan | varchar(100) |  | true |  |  |  |
-| remark | varchar(50) |  | true |  |  |  |
-| aktif | boolean |  | true |  |  |  |
-| eselon_nama | varchar(50) |  | true |  |  |  |
-| created_at | timestamp with time zone | now() | true |  |  |  |
-| updated_at | timestamp with time zone | now() | true |  |  |  |
-| deleted_at | timestamp with time zone |  | true |  |  |  |
+| id | varchar(36) |  | false | [kepegawaian.pegawai](kepegawaian.pegawai.md) [kepegawaian.pindah_unit](kepegawaian.pindah_unit.md) [kepegawaian.riwayat_assesmen](kepegawaian.riwayat_assesmen.md) [kepegawaian.riwayat_jabatan](kepegawaian.riwayat_jabatan.md) [kepegawaian.unit_kerja](kepegawaian.unit_kerja.md) |  | id unit organisasi (UUID) |
+| no | integer |  | true |  |  | Nomor urut unit kerja |
+| kode_internal | varchar(36) |  | true |  |  | Kode internal unit organisasi |
+| nama_unor | varchar(200) |  | true |  |  | Nama unit organisasi |
+| eselon_id | varchar(36) |  | true |  |  | id eselon unit (bila berlaku) |
+| cepat_kode | varchar(36) |  | true |  |  | Kode cepat untuk pencarian unit kerja |
+| nama_jabatan | varchar(200) |  | true |  |  | Nama jabatan dalam unit kerja |
+| nama_pejabat | varchar(200) |  | true |  |  | Nama pejabat yang menjabat |
+| diatasan_id | varchar(36) |  | true |  | [kepegawaian.unit_kerja](kepegawaian.unit_kerja.md) | Unit atasan langsung (self-reference ke unit_kerja) |
+| instansi_id | varchar(36) |  | true |  | [kepegawaian.ref_instansi](kepegawaian.ref_instansi.md) | id instansi pemilik unit (rujuk ref_instansi) |
+| pemimpin_pns_id | varchar(36) |  | true |  | [kepegawaian.pegawai](kepegawaian.pegawai.md) | ID PNS yang memimpin unit kerja |
+| jenis_unor_id | varchar(36) |  | true |  |  | Jenis unit organisasi (bila digunakan) |
+| unor_induk | varchar(36) |  | true |  |  | Unit organisasi induk |
+| jumlah_ideal_staff | smallint |  | true |  |  | Jumlah ideal staf dalam unit kerja |
+| order | integer |  | true |  |  | Urutan tampilan unit kerja |
+| is_satker | smallint | 0 | false |  |  | Penanda apakah unit merupakan Satuan Kerja |
+| eselon_1 | varchar(36) |  | true |  |  | Kode eselon 1 unit kerja |
+| eselon_2 | varchar(36) |  | true |  |  | Kode eselon 2 unit kerja |
+| eselon_3 | varchar(36) |  | true |  |  | Kode eselon 3 unit kerja |
+| eselon_4 | varchar(36) |  | true |  |  | Kode eselon 4 unit kerja |
+| expired_date | date |  | true |  |  | Tanggal kedaluwarsa unit kerja |
+| keterangan | varchar(200) |  | true |  |  | Keterangan tambahan untuk unit kerja |
+| jenis_satker | varchar(200) |  | true |  |  | Jenis satuan kerja |
+| abbreviation | varchar(200) |  | true |  |  | Singkatan unit organisasi |
+| unor_induk_penyetaraan | varchar(200) |  | true |  |  | Penyetaraan unit organisasi induk |
+| jabatan_id | varchar(32) |  | true |  |  | ID jabatan yang terkait dengan unit kerja |
+| waktu | varchar(4) |  | true |  |  | Waktu pencatatan data unit kerja |
+| peraturan | varchar(100) |  | true |  |  | Peraturan yang mendasari unit kerja |
+| remark | varchar(50) |  | true |  |  | Catatan tambahan untuk unit kerja |
+| aktif | boolean |  | true |  |  | Status keaktifan unit |
+| eselon_nama | varchar(50) |  | true |  |  | Nama eselon unit kerja |
+| created_at | timestamp with time zone | now() | true |  |  | Waktu perekaman data |
+| updated_at | timestamp with time zone | now() | true |  |  | Waktu terakhir data diperbarui |
+| deleted_at | timestamp with time zone |  | true |  |  | Waktu penghapusan data |
 
 ## Constraints
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
+| unit_kerja_id_not_null | n | NOT NULL id |
+| unit_kerja_is_satker_not_null | n | NOT NULL is_satker |
 | fk_unit_kerja_instansi | FOREIGN KEY | FOREIGN KEY (instansi_id) REFERENCES ref_instansi(id) |
 | fk_unit_kerja_pemimpin | FOREIGN KEY | FOREIGN KEY (pemimpin_pns_id) REFERENCES pegawai(pns_id) |
 | fk_unit_kerja_diatasan | FOREIGN KEY | FOREIGN KEY (diatasan_id) REFERENCES unit_kerja(id) |
@@ -112,24 +116,24 @@ erDiagram
   varchar_9_ nip_lama
   varchar_20_ nip_baru
   varchar_100_ nama
-  varchar_20_ gelar_depan
+  varchar_50_ gelar_depan
   varchar_50_ gelar_belakang
   varchar_50_ tempat_lahir_id
   date tgl_lahir
   varchar_1_ jenis_kelamin
   smallint agama_id FK
   smallint jenis_kawin_id FK
-  varchar_20_ nik
+  varchar_50_ nik
   varchar_60_ no_darurat
   varchar_60_ no_hp
   varchar_60_ email
-  varchar_200_ alamat
-  varchar_20_ npwp
-  varchar_20_ bpjs
+  varchar_300_ alamat
+  varchar_50_ npwp
+  varchar_50_ bpjs
   smallint jenis_pegawai_id
   integer kedudukan_hukum_id
   varchar_20_ status_cpns_pns
-  varchar_30_ kartu_pegawai
+  varchar_50_ kartu_pegawai
   varchar_100_ no_sk_cpns
   date tgl_sk_cpns
   date tmt_cpns
@@ -174,7 +178,7 @@ erDiagram
   smallint tingkat_pendidikan_id FK
   varchar_200_ tempat_lahir_nama
   varchar_200_ jenis_jabatan_nama
-  varchar_200_ jabatan_nama
+  varchar_300_ jabatan_nama
   varchar_200_ kpkn_nama
   varchar_200_ instansi_induk_nama
   varchar_200_ instansi_kerja_nama
@@ -182,7 +186,7 @@ erDiagram
   varchar_200_ satuan_kerja_nama
   varchar_36_ jabatan_instansi_id FK
   smallint bup
-  varchar_200_ jabatan_instansi_nama
+  varchar_400_ jabatan_instansi_nama
   smallint jenis_jabatan_id
   date terminated_date
   smallint status_pegawai
@@ -200,7 +204,7 @@ erDiagram
   varchar_30_ nidn
   varchar_200_ ket
   varchar_100_ no_sk_pemberhentian
-  smallint status_pegawai_backup
+  integer status_pegawai_backup
   varchar_50_ masa_kerja
   varchar_50_ kartu_asn
   timestamp_with_time_zone created_at

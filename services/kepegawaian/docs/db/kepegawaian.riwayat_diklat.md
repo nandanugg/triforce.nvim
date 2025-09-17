@@ -2,36 +2,39 @@
 
 ## Description
 
+Riwayat diklat pegawai
+
 ## Columns
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| id | bigint | nextval('riwayat_diklat_id_seq'::regclass) | false |  |  |  |
-| jenis_diklat | varchar(200) |  | true |  |  |  |
-| jenis_diklat_id | smallint |  | true |  | [kepegawaian.ref_jenis_diklat](kepegawaian.ref_jenis_diklat.md) |  |
-| institusi_penyelenggara | varchar(200) |  | true |  |  |  |
-| no_sertifikat | varchar(100) |  | true |  |  |  |
-| tanggal_mulai | date |  | true |  |  |  |
-| tanggal_selesai | date |  | true |  |  |  |
-| tahun_diklat | smallint |  | true |  |  |  |
-| durasi_jam | smallint |  | true |  |  |  |
-| pns_orang_id | varchar(36) |  | true |  | [kepegawaian.pegawai](kepegawaian.pegawai.md) |  |
-| nip_baru | varchar(20) |  | true |  |  |  |
-| diklat_struktural_id | varchar(36) |  | true |  |  |  |
-| nama_diklat | varchar(200) |  | true |  |  |  |
-| file_base64 | text |  | true |  |  |  |
-| rumpun_diklat_nama | varchar(200) |  | true |  |  |  |
-| rumpun_diklat_id | varchar(36) |  | true |  |  |  |
-| sudah_kirim_siasn | varchar(10) | 'belum'::character varying | true |  |  |  |
-| siasn_id | varchar(36) |  | true |  |  |  |
-| created_at | timestamp with time zone | now() | true |  |  |  |
-| updated_at | timestamp with time zone | now() | true |  |  |  |
-| deleted_at | timestamp with time zone |  | true |  |  |  |
+| id | bigint | nextval('riwayat_diklat_id_seq'::regclass) | false |  |  | id riwayat diklat |
+| jenis_diklat | varchar(200) |  | true |  |  | Nama jenis diklat |
+| jenis_diklat_id | smallint |  | true |  | [kepegawaian.ref_jenis_diklat](kepegawaian.ref_jenis_diklat.md) | Jenis diklat (rujuk ref_jenis_diklat) |
+| institusi_penyelenggara | varchar(200) |  | true |  |  | Nama lembaga penyelenggara diklat |
+| no_sertifikat | varchar(100) |  | true |  |  | Nomor sertifikat diklat |
+| tanggal_mulai | date |  | true |  |  | Tanggal mulai diklat |
+| tanggal_selesai | date |  | true |  |  | Tanggal selesai diklat |
+| tahun_diklat | smallint |  | true |  |  | Tahun pelaksanaan diklat |
+| durasi_jam | smallint |  | true |  |  | Durasi pelatihan dalam jam |
+| pns_orang_id | varchar(36) |  | true |  | [kepegawaian.pegawai](kepegawaian.pegawai.md) | Referensi pegawai (rujuk pegawai.pns_id) |
+| nip_baru | varchar(20) |  | true |  |  | NIP pegawai |
+| diklat_struktural_id | varchar(36) |  | true |  |  | id referensi diklat struktural |
+| nama_diklat | varchar(200) |  | true |  |  | Nama diklat |
+| file_base64 | text |  | true |  |  | Berkas sertifikat diklat dalam format base64 |
+| rumpun_diklat_nama | varchar(200) |  | true |  |  | Nama rumpun diklat |
+| rumpun_diklat_id | varchar(36) |  | true |  |  | id rumpun diklat |
+| sudah_kirim_siasn | varchar(10) | 'belum'::character varying | true |  |  | Penanda data sudah dikirim ke BKN |
+| siasn_id | varchar(36) |  | true |  |  | id referensi pada sistem BKN |
+| created_at | timestamp with time zone | now() | true |  |  | Waktu perekaman data |
+| updated_at | timestamp with time zone | now() | true |  |  | Waktu terakhir pembaruan |
+| deleted_at | timestamp with time zone |  | true |  |  | Waktu penghapusan data |
 
 ## Constraints
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
+| riwayat_diklat_id_not_null | n | NOT NULL id |
 | fk_riwayat_diklat_jenis | FOREIGN KEY | FOREIGN KEY (jenis_diklat_id) REFERENCES ref_jenis_diklat(id) |
 | fk_riwayat_diklat_pns_id | FOREIGN KEY | FOREIGN KEY (pns_orang_id) REFERENCES pegawai(pns_id) |
 | riwayat_diklat_pkey | PRIMARY KEY | PRIMARY KEY (id) |
@@ -89,24 +92,24 @@ erDiagram
   varchar_9_ nip_lama
   varchar_20_ nip_baru
   varchar_100_ nama
-  varchar_20_ gelar_depan
+  varchar_50_ gelar_depan
   varchar_50_ gelar_belakang
   varchar_50_ tempat_lahir_id
   date tgl_lahir
   varchar_1_ jenis_kelamin
   smallint agama_id FK
   smallint jenis_kawin_id FK
-  varchar_20_ nik
+  varchar_50_ nik
   varchar_60_ no_darurat
   varchar_60_ no_hp
   varchar_60_ email
-  varchar_200_ alamat
-  varchar_20_ npwp
-  varchar_20_ bpjs
+  varchar_300_ alamat
+  varchar_50_ npwp
+  varchar_50_ bpjs
   smallint jenis_pegawai_id
   integer kedudukan_hukum_id
   varchar_20_ status_cpns_pns
-  varchar_30_ kartu_pegawai
+  varchar_50_ kartu_pegawai
   varchar_100_ no_sk_cpns
   date tgl_sk_cpns
   date tmt_cpns
@@ -151,7 +154,7 @@ erDiagram
   smallint tingkat_pendidikan_id FK
   varchar_200_ tempat_lahir_nama
   varchar_200_ jenis_jabatan_nama
-  varchar_200_ jabatan_nama
+  varchar_300_ jabatan_nama
   varchar_200_ kpkn_nama
   varchar_200_ instansi_induk_nama
   varchar_200_ instansi_kerja_nama
@@ -159,7 +162,7 @@ erDiagram
   varchar_200_ satuan_kerja_nama
   varchar_36_ jabatan_instansi_id FK
   smallint bup
-  varchar_200_ jabatan_instansi_nama
+  varchar_400_ jabatan_instansi_nama
   smallint jenis_jabatan_id
   date terminated_date
   smallint status_pegawai
@@ -177,7 +180,7 @@ erDiagram
   varchar_30_ nidn
   varchar_200_ ket
   varchar_100_ no_sk_pemberhentian
-  smallint status_pegawai_backup
+  integer status_pegawai_backup
   varchar_50_ masa_kerja
   varchar_50_ kartu_asn
   timestamp_with_time_zone created_at

@@ -2,25 +2,28 @@
 
 ## Description
 
+Riwayat asesmen nine box pegawai
+
 ## Columns
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| id | integer | nextval('riwayat_nine_box_id_seq'::regclass) | false |  |  |  |
-| pns_nip | varchar(20) |  | true |  |  |  |
-| nama | varchar(200) |  | true |  |  |  |
-| nama_jabatan | varchar(200) |  | true |  |  |  |
-| kelas_jabatan | smallint |  | true |  |  |  |
-| kesimpulan | varchar(200) |  | true |  |  |  |
-| tahun | varchar(4) |  | true |  |  |  |
-| created_at | timestamp with time zone | now() | true |  |  |  |
-| updated_at | timestamp with time zone | now() | true |  |  |  |
-| deleted_at | timestamp with time zone |  | true |  |  |  |
+| id | integer | nextval('riwayat_nine_box_id_seq'::regclass) | false |  |  | id data nine box |
+| pns_nip | varchar(20) |  | true |  |  | NIP pegawai |
+| nama | varchar(200) |  | true |  |  | Nama pegawai |
+| nama_jabatan | varchar(200) |  | true |  |  | Nama jabatan pegawai |
+| kelas_jabatan | smallint |  | true |  |  | Kelas jabatan pegawai |
+| kesimpulan | varchar(200) |  | true |  |  | Kesimpulan hasil penilaian |
+| tahun | varchar(4) |  | true |  |  | Tahun penilaian |
+| created_at | timestamp with time zone | now() | true |  |  | Waktu pembuatan data |
+| updated_at | timestamp with time zone | now() | true |  |  | Waktu terakhir pembaruan data |
+| deleted_at | timestamp with time zone |  | true |  |  | Waktu penghapusan data |
 
 ## Constraints
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
+| riwayat_nine_box_id_not_null | n | NOT NULL id |
 | riwayat_nine_box_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 
 ## Indexes

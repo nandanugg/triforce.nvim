@@ -2,6 +2,8 @@
 
 ## Description
 
+Referensi jenis diklat struktural
+
 ## Columns
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
@@ -16,6 +18,7 @@
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
+| ref_jenis_diklat_struktural_id_not_null | n | NOT NULL id |
 | ref_jenis_diklat_struktural_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 
 ## Indexes

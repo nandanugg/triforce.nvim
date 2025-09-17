@@ -2,6 +2,8 @@
 
 ## Description
 
+Riwayat diklat fungsional pegawai
+
 ## Columns
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
@@ -31,6 +33,7 @@
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
+| riwayat_diklat_fungsional_id_not_null | n | NOT NULL id |
 | riwayat_diklat_fungsional_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 
 ## Indexes

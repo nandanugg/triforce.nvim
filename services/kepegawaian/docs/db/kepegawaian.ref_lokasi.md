@@ -2,26 +2,29 @@
 
 ## Description
 
+Referensi lokasi
+
 ## Columns
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| id | varchar(36) |  | false | [kepegawaian.pegawai](kepegawaian.pegawai.md) |  |  |
-| kanreg_id | varchar(2) |  | true |  |  |  |
-| lokasi_id | varchar(36) |  | true |  |  |  |
-| nama | varchar(100) |  | true |  |  |  |
-| jenis | varchar(2) |  | true |  |  |  |
-| jenis_kabupaten | varchar(3) |  | true |  |  |  |
-| jenis_desa | varchar(1) |  | true |  |  |  |
-| ibukota | varchar(100) |  | true |  |  |  |
-| created_at | timestamp with time zone | now() | true |  |  |  |
-| updated_at | timestamp with time zone | now() | true |  |  |  |
-| deleted_at | timestamp with time zone |  | true |  |  |  |
+| id | varchar(36) |  | false | [kepegawaian.pegawai](kepegawaian.pegawai.md) |  | id lokasi |
+| kanreg_id | varchar(2) |  | true |  |  | id kantor regional |
+| lokasi_id | varchar(36) |  | true |  |  | id lokasi wilayah administratif 1 tingkat di atasnya |
+| nama | varchar(100) |  | true |  |  | Nama lokasi |
+| jenis | varchar(2) |  | true |  |  | Jenis lokasi, P: Provinsi, KA: Kota, KB: Kabupaten, KC: Kecamatan, DE: Desa, NG: Negara |
+| jenis_kabupaten | varchar(3) |  | true |  |  | Jenis kabupaten, KOT: Kota, KBP: Kabupaten |
+| jenis_desa | varchar(1) |  | true |  |  | Jenis desa, K: Kelurahan, D: Desa |
+| ibukota | varchar(100) |  | true |  |  | Nama ibu kota |
+| created_at | timestamp with time zone | now() | true |  |  | Waktu perekaman data |
+| updated_at | timestamp with time zone | now() | true |  |  | Waktu terakhir pembaruan |
+| deleted_at | timestamp with time zone |  | true |  |  | Waktu penghapusan data |
 
 ## Constraints
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
+| ref_lokasi_id_not_null | n | NOT NULL id |
 | ref_lokasi_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 
 ## Indexes
@@ -56,24 +59,24 @@ erDiagram
   varchar_9_ nip_lama
   varchar_20_ nip_baru
   varchar_100_ nama
-  varchar_20_ gelar_depan
+  varchar_50_ gelar_depan
   varchar_50_ gelar_belakang
   varchar_50_ tempat_lahir_id
   date tgl_lahir
   varchar_1_ jenis_kelamin
   smallint agama_id FK
   smallint jenis_kawin_id FK
-  varchar_20_ nik
+  varchar_50_ nik
   varchar_60_ no_darurat
   varchar_60_ no_hp
   varchar_60_ email
-  varchar_200_ alamat
-  varchar_20_ npwp
-  varchar_20_ bpjs
+  varchar_300_ alamat
+  varchar_50_ npwp
+  varchar_50_ bpjs
   smallint jenis_pegawai_id
   integer kedudukan_hukum_id
   varchar_20_ status_cpns_pns
-  varchar_30_ kartu_pegawai
+  varchar_50_ kartu_pegawai
   varchar_100_ no_sk_cpns
   date tgl_sk_cpns
   date tmt_cpns
@@ -118,7 +121,7 @@ erDiagram
   smallint tingkat_pendidikan_id FK
   varchar_200_ tempat_lahir_nama
   varchar_200_ jenis_jabatan_nama
-  varchar_200_ jabatan_nama
+  varchar_300_ jabatan_nama
   varchar_200_ kpkn_nama
   varchar_200_ instansi_induk_nama
   varchar_200_ instansi_kerja_nama
@@ -126,7 +129,7 @@ erDiagram
   varchar_200_ satuan_kerja_nama
   varchar_36_ jabatan_instansi_id FK
   smallint bup
-  varchar_200_ jabatan_instansi_nama
+  varchar_400_ jabatan_instansi_nama
   smallint jenis_jabatan_id
   date terminated_date
   smallint status_pegawai
@@ -144,7 +147,7 @@ erDiagram
   varchar_30_ nidn
   varchar_200_ ket
   varchar_100_ no_sk_pemberhentian
-  smallint status_pegawai_backup
+  integer status_pegawai_backup
   varchar_50_ masa_kerja
   varchar_50_ kartu_asn
   timestamp_with_time_zone created_at

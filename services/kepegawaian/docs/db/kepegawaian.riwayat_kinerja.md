@@ -2,34 +2,37 @@
 
 ## Description
 
+Riwayat kinerja pegawai
+
 ## Columns
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| id | integer | nextval('riwayat_kinerja_id_seq'::regclass) | false |  |  |  |
-| tahun | integer |  | true |  |  |  |
-| nip | varchar(20) |  | true |  |  |  |
-| nama | varchar(200) |  | true |  |  |  |
-| nip_penilai | varchar(20) |  | true |  |  |  |
-| nama_penilai | varchar(200) |  | true |  |  |  |
-| jabatan_penilai | varchar(200) |  | true |  |  |  |
-| unit_kerja_penilai | varchar(200) |  | true |  |  |  |
-| nip_penilai_realisasi | varchar(20) |  | true |  |  |  |
-| nama_penilai_realisasi | varchar(200) |  | true |  |  |  |
-| jabatan_penilai_realisasi | varchar(200) |  | true |  |  |  |
-| unit_kerja_penilai_realisasi | varchar(200) |  | true |  |  |  |
-| rating_hasil_kerja | varchar(50) |  | true |  |  |  |
-| rating_perilaku_kerja | varchar(50) |  | true |  |  |  |
-| predikat_kinerja | varchar(100) |  | true |  |  |  |
-| ref | uuid | uuid_generate_v4() | true |  |  |  |
-| created_at | timestamp with time zone | now() | true |  |  |  |
-| updated_at | timestamp with time zone | now() | true |  |  |  |
-| deleted_at | timestamp with time zone |  | true |  |  |  |
+| id | integer | nextval('riwayat_kinerja_id_seq'::regclass) | false |  |  | id riwayat kinerja |
+| tahun | integer |  | true |  |  | Tahun penilaian |
+| nip | varchar(20) |  | true |  |  | Nomor Induk Pegawai |
+| nama | varchar(200) |  | true |  |  | Nama pegawai |
+| nip_penilai | varchar(20) |  | true |  |  | NIP pejabat penilai |
+| nama_penilai | varchar(200) |  | true |  |  | Nama pejabat penilai |
+| jabatan_penilai | varchar(200) |  | true |  |  | Jabatan pejabat penilai |
+| unit_kerja_penilai | varchar(200) |  | true |  |  | Unit kerja pejabat penilai |
+| nip_penilai_realisasi | varchar(20) |  | true |  |  | NIP pejabat penilai hasil aktual |
+| nama_penilai_realisasi | varchar(200) |  | true |  |  | Nama pejabat penilai hasil aktual |
+| jabatan_penilai_realisasi | varchar(200) |  | true |  |  | Jabatan pejabat penilai hasil aktual |
+| unit_kerja_penilai_realisasi | varchar(200) |  | true |  |  | Unit kerja pejabat penilai hasil aktual |
+| rating_hasil_kerja | varchar(50) |  | true |  |  | Nilai hasil kerja |
+| rating_perilaku_kerja | varchar(50) |  | true |  |  | Nilai perilaku kerja |
+| predikat_kinerja | varchar(100) |  | true |  |  | Predikat penilaian kinerja |
+| ref | uuid | uuid_generate_v4() | true |  |  | Nomor referensi |
+| created_at | timestamp with time zone | now() | true |  |  | Waktu pembuatan data |
+| updated_at | timestamp with time zone | now() | true |  |  | Waktu terakhir pembaruan |
+| deleted_at | timestamp with time zone |  | true |  |  | Waktu penghapusan data |
 
 ## Constraints
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
+| riwayat_kinerja_id_not_null | n | NOT NULL id |
 | riwayat_kinerja_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 
 ## Indexes

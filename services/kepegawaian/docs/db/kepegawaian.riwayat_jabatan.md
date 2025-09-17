@@ -2,52 +2,55 @@
 
 ## Description
 
+Riwayat jabatan pegawai
+
 ## Columns
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| bkn_id | varchar(36) |  | true |  |  |  |
-| pns_id | varchar(36) |  | true |  | [kepegawaian.pegawai](kepegawaian.pegawai.md) |  |
-| pns_nip | varchar(20) |  | true |  |  |  |
-| pns_nama | varchar(100) |  | true |  |  |  |
-| unor_id | varchar(36) |  | true |  |  |  |
-| unor | text |  | true |  |  |  |
-| jenis_jabatan_id | integer |  | true |  |  |  |
-| jenis_jabatan | varchar(250) |  | true |  |  |  |
-| jabatan_id | integer |  | true |  |  |  |
-| nama_jabatan | text |  | true |  |  |  |
-| eselon_id | varchar(36) |  | true |  |  |  |
-| eselon | varchar(100) |  | true |  |  |  |
-| tmt_jabatan | date |  | true |  |  |  |
-| no_sk | varchar(100) |  | true |  |  |  |
-| tanggal_sk | date |  | true |  |  |  |
-| satuan_kerja_id | varchar(36) |  | true |  | [kepegawaian.unit_kerja](kepegawaian.unit_kerja.md) |  |
-| tmt_pelantikan | date |  | true |  |  |  |
-| is_active | smallint |  | true |  |  |  |
-| eselon1 | text |  | true |  |  |  |
-| eselon2 | text |  | true |  |  |  |
-| eselon3 | text |  | true |  |  |  |
-| eselon4 | text |  | true |  |  |  |
-| id | bigint | nextval('riwayat_jabatan_id_seq'::regclass) | false |  |  |  |
-| catatan | varchar(200) |  | true |  |  |  |
-| jenis_sk | varchar(100) |  | true |  |  |  |
-| status_satker | integer |  | true |  |  |  |
-| status_biro | integer |  | true |  |  |  |
-| jabatan_id_bkn | varchar(36) |  | true |  |  |  |
-| unor_id_bkn | varchar(36) |  | true |  |  |  |
-| tabel_mutasi_id | bigint |  | true |  |  |  |
-| created_at | timestamp with time zone | now() | true |  |  |  |
-| updated_at | timestamp with time zone | now() | true |  |  |  |
-| deleted_at | timestamp with time zone |  | true |  |  |  |
-| status_plt | boolean |  | true |  |  |  |
-| kelas_jabatan_id | integer |  | true |  | [kepegawaian.ref_kelas_jabatan](kepegawaian.ref_kelas_jabatan.md) |  |
-| periode_jabatan_start_date | date |  | true |  |  |  |
-| periode_jabatan_end_date | date |  | true |  |  |  |
+| bkn_id | varchar(36) |  | true |  |  | id pada sistem BKN |
+| pns_id | varchar(36) |  | true |  | [kepegawaian.pegawai](kepegawaian.pegawai.md) | Referensi pegawai (rujuk pegawai.pns_id) |
+| pns_nip | varchar(20) |  | true |  |  | NIP pegawai |
+| pns_nama | varchar(100) |  | true |  |  | Nama pegawai |
+| unor_id | varchar(36) |  | true |  |  | id unit organisasi saat jabatan (rujuk unit_kerja) |
+| unor | text |  | true |  |  | Nama unit organisasi |
+| jenis_jabatan_id | integer |  | true |  |  | id jenis jabatan (struktural/fungsional/dll) |
+| jenis_jabatan | varchar(250) |  | true |  |  | Nama jenis jabatan |
+| jabatan_id | integer |  | true |  |  | id jabatan (rujuk ref_jabatan) |
+| nama_jabatan | text |  | true |  |  | Nama jabatan (teks) |
+| eselon_id | varchar(36) |  | true |  |  | id eselon jabatan |
+| eselon | varchar(100) |  | true |  |  | Nama eselon jabatan |
+| tmt_jabatan | date |  | true |  |  | Tanggal mulai memangku jabatan |
+| no_sk | varchar(100) |  | true |  |  | Nomor SK jabatan |
+| tanggal_sk | date |  | true |  |  | Tanggal SK jabatan |
+| satuan_kerja_id | varchar(36) |  | true |  | [kepegawaian.unit_kerja](kepegawaian.unit_kerja.md) | Satuan kerja terkait jabatan (rujuk unit_kerja) |
+| tmt_pelantikan | date |  | true |  |  | Tanggal mulai pelantikan |
+| is_active | smallint |  | true |  |  | Penanda apakah jabatan masih aktif saat ini |
+| eselon1 | text |  | true |  |  | Unit eselon 1 terkait jabatan |
+| eselon2 | text |  | true |  |  | Unit eselon 2 terkait jabatan |
+| eselon3 | text |  | true |  |  | Unit eselon 3 terkait jabatan |
+| eselon4 | text |  | true |  |  | Unit eselon 4 terkait jabatan |
+| id | bigint | nextval('riwayat_jabatan_id_seq'::regclass) | false |  |  | id riwayat jabatan |
+| catatan | varchar(200) |  | true |  |  | Catatan atas riwayat jabatan |
+| jenis_sk | varchar(100) |  | true |  |  | Kategori/jenis SK jabatan |
+| status_satker | integer |  | true |  |  | Status persetujuan satuan kerja |
+| status_biro | integer |  | true |  |  | Status persetujuan biro kepegawaian |
+| jabatan_id_bkn | varchar(36) |  | true |  |  | id jabatan pada sistem BKN |
+| unor_id_bkn | varchar(36) |  | true |  |  | id unit organisasi saat jabatan pada sistem BKN |
+| tabel_mutasi_id | bigint |  | true |  |  | Referensi ke tabel mutasi |
+| created_at | timestamp with time zone | now() | true |  |  | Waktu perekaman data |
+| updated_at | timestamp with time zone | now() | true |  |  | Waktu terakhir pembaruan |
+| deleted_at | timestamp with time zone |  | true |  |  | Waktu penghapusan data |
+| status_plt | boolean |  | true |  |  | Status pelaksana tugas (PLT) |
+| kelas_jabatan_id | integer |  | true |  | [kepegawaian.ref_kelas_jabatan](kepegawaian.ref_kelas_jabatan.md) | id kelas jabatan |
+| periode_jabatan_start_date | date |  | true |  |  | Tanggal mulai periode jabatan |
+| periode_jabatan_end_date | date |  | true |  |  | Tanggal akhir periode jabatan |
 
 ## Constraints
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
+| riwayat_jabatan_id_not_null | n | NOT NULL id |
 | fk_riwayat_jabatan_pns_id | FOREIGN KEY | FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id) |
 | riwayat_jabatan_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 | fk_riwayat_jabatan_satuan_kerja | FOREIGN KEY | FOREIGN KEY (satuan_kerja_id) REFERENCES unit_kerja(id) |
@@ -113,24 +116,24 @@ erDiagram
   varchar_9_ nip_lama
   varchar_20_ nip_baru
   varchar_100_ nama
-  varchar_20_ gelar_depan
+  varchar_50_ gelar_depan
   varchar_50_ gelar_belakang
   varchar_50_ tempat_lahir_id
   date tgl_lahir
   varchar_1_ jenis_kelamin
   smallint agama_id FK
   smallint jenis_kawin_id FK
-  varchar_20_ nik
+  varchar_50_ nik
   varchar_60_ no_darurat
   varchar_60_ no_hp
   varchar_60_ email
-  varchar_200_ alamat
-  varchar_20_ npwp
-  varchar_20_ bpjs
+  varchar_300_ alamat
+  varchar_50_ npwp
+  varchar_50_ bpjs
   smallint jenis_pegawai_id
   integer kedudukan_hukum_id
   varchar_20_ status_cpns_pns
-  varchar_30_ kartu_pegawai
+  varchar_50_ kartu_pegawai
   varchar_100_ no_sk_cpns
   date tgl_sk_cpns
   date tmt_cpns
@@ -175,7 +178,7 @@ erDiagram
   smallint tingkat_pendidikan_id FK
   varchar_200_ tempat_lahir_nama
   varchar_200_ jenis_jabatan_nama
-  varchar_200_ jabatan_nama
+  varchar_300_ jabatan_nama
   varchar_200_ kpkn_nama
   varchar_200_ instansi_induk_nama
   varchar_200_ instansi_kerja_nama
@@ -183,7 +186,7 @@ erDiagram
   varchar_200_ satuan_kerja_nama
   varchar_36_ jabatan_instansi_id FK
   smallint bup
-  varchar_200_ jabatan_instansi_nama
+  varchar_400_ jabatan_instansi_nama
   smallint jenis_jabatan_id
   date terminated_date
   smallint status_pegawai
@@ -201,7 +204,7 @@ erDiagram
   varchar_30_ nidn
   varchar_200_ ket
   varchar_100_ no_sk_pemberhentian
-  smallint status_pegawai_backup
+  integer status_pegawai_backup
   varchar_50_ masa_kerja
   varchar_50_ kartu_asn
   timestamp_with_time_zone created_at

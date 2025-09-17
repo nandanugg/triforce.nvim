@@ -2,27 +2,31 @@
 
 ## Description
 
+Riwayat penghargaan umum pegawai
+
 ## Columns
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| id | integer | nextval('riwayat_penghargaan_umum_id_seq'::regclass) | false |  |  |  |
-| jenis_penghargaan | varchar(50) |  | true |  |  |  |
-| deskripsi_penghargaan | varchar(100) |  | true |  |  |  |
-| tanggal_penghargaan | date |  | true |  |  |  |
-| exist | boolean | true | true |  |  |  |
-| file_base64 | text |  | true |  |  |  |
-| nip | varchar(20) |  | true |  |  |  |
-| nama_penghargaan | varchar(200) |  | true |  |  |  |
-| created_at | timestamp with time zone | now() | true |  |  |  |
-| updated_at | timestamp with time zone | now() | true |  |  |  |
-| deleted_at | timestamp with time zone |  | true |  |  |  |
+| id | integer | nextval('riwayat_penghargaan_umum_id_seq'::regclass) | false |  |  | ID unik data penghargaan |
+| deskripsi_penghargaan | varchar(100) |  | true |  |  | Deskripsi lengkap penghargaan yang diterima |
+| tanggal_penghargaan | date |  | true |  |  | Tanggal penerimaan penghargaan |
+| exist | boolean | true | true |  |  | Penanda keberadaan data |
+| file_base64 | text |  | true |  |  | Berkas bukti penghargaan dalam format base64 |
+| nip | varchar(20) |  | true |  |  | NIP pegawai |
+| nama_penghargaan | varchar(200) |  | true |  |  | Nama penghargaan yang diterima |
+| created_at | timestamp with time zone | now() | true |  |  | Waktu pembuatan data |
+| updated_at | timestamp with time zone | now() | true |  |  | Waktu terakhir pembaruan data |
+| deleted_at | timestamp with time zone |  | true |  |  | Waktu penghapusan data |
+| jenis_penghargaan_id | integer |  | true |  | [kepegawaian.ref_jenis_penghargaan](kepegawaian.ref_jenis_penghargaan.md) | Jenis atau kategori penghargaan (rujuk ref_jenis_penghargaan) |
 
 ## Constraints
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
+| riwayat_penghargaan_umum_id_not_null | n | NOT NULL id |
 | riwayat_penghargaan_umum_pkey | PRIMARY KEY | PRIMARY KEY (id) |
+| riwayat_penghargaan_umum_jenis_penghargaan_id_fkey | FOREIGN KEY | FOREIGN KEY (jenis_penghargaan_id) REFERENCES ref_jenis_penghargaan(id) |
 
 ## Indexes
 
@@ -35,16 +39,24 @@
 ```mermaid
 erDiagram
 
+"kepegawaian.riwayat_penghargaan_umum" }o--o| "kepegawaian.ref_jenis_penghargaan" : "FOREIGN KEY (jenis_penghargaan_id) REFERENCES ref_jenis_penghargaan(id)"
 
 "kepegawaian.riwayat_penghargaan_umum" {
   integer id
-  varchar_50_ jenis_penghargaan
   varchar_100_ deskripsi_penghargaan
   date tanggal_penghargaan
   boolean exist
   text file_base64
   varchar_20_ nip
   varchar_200_ nama_penghargaan
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
+  integer jenis_penghargaan_id FK
+}
+"kepegawaian.ref_jenis_penghargaan" {
+  integer id
+  varchar_100_ nama
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at

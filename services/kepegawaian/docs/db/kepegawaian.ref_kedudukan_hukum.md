@@ -2,22 +2,25 @@
 
 ## Description
 
+Referensi kedudukan hukum
+
 ## Columns
 
 | Name | Type | Default | Nullable | Extra Definition | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | ---------------- | -------- | ------- | ------- |
-| id | integer | nextval('ref_kedudukan_hukum_id_seq'::regclass) | false |  |  |  |  |
-| dikbud_hr_id | varchar(4) |  | true | GENERATED ALWAYS AS lpad((id)::text, 4, '0'::text) STORED |  |  |  |
-| nama | varchar(100) |  | true |  |  |  |  |
-| created_at | timestamp with time zone | now() | true |  |  |  |  |
-| updated_at | timestamp with time zone | now() | true |  |  |  |  |
-| deleted_at | timestamp with time zone |  | true |  |  |  |  |
-| is_pppk | boolean | false | true |  |  |  |  |
+| id | integer | nextval('ref_kedudukan_hukum_id_seq'::regclass) | false |  |  |  | id kedudukan hukum |
+| dikbud_hr_id | varchar(4) |  | true | GENERATED ALWAYS AS lpad((id)::text, 4, '0'::text) STORED |  |  | id kedudukan hukum pada Dikbud HR |
+| nama | varchar(100) |  | true |  |  |  | Nama kedudukan hukum |
+| created_at | timestamp with time zone | now() | true |  |  |  | Waktu perekaman data |
+| updated_at | timestamp with time zone | now() | true |  |  |  | Waktu terakhir pembaruan |
+| deleted_at | timestamp with time zone |  | true |  |  |  | Waktu penghapusan data |
+| is_pppk | boolean | false | true |  |  |  | Apakah kedudukan hukum merupakan PPPK |
 
 ## Constraints
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
+| ref_kedudukan_hukum_id_not_null | n | NOT NULL id |
 | ref_kedudukan_hukum_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 
 ## Indexes

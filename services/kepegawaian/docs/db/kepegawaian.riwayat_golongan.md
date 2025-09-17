@@ -2,52 +2,55 @@
 
 ## Description
 
+Riwayat golongan pegawai
+
 ## Columns
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| id | integer | nextval('riwayat_golongan_id_seq'::regclass) | false |  |  |  |
-| pns_id | varchar(36) |  | true |  | [kepegawaian.pegawai](kepegawaian.pegawai.md) |  |
-| pns_nip | varchar(20) |  | true |  |  |  |
-| pns_nama | varchar(100) |  | true |  |  |  |
-| kode_jenis_kp | varchar(4) |  | true |  |  |  |
-| jenis_kp | varchar(50) |  | true |  |  |  |
-| golongan_id | smallint |  | true |  | [kepegawaian.ref_golongan](kepegawaian.ref_golongan.md) |  |
-| golongan_nama | varchar(10) |  | true |  |  |  |
-| pangkat_nama | varchar(50) |  | true |  |  |  |
-| sk_nomor | varchar(50) |  | true |  |  |  |
-| no_bkn | varchar(100) |  | true |  |  |  |
-| jumlah_angka_kredit_utama | smallint |  | true |  |  |  |
-| jumlah_angka_kredit_tambahan | smallint |  | true |  |  |  |
-| mk_golongan_tahun | smallint |  | true |  |  |  |
-| mk_golongan_bulan | smallint |  | true |  |  |  |
-| sk_tanggal | date |  | true |  |  |  |
-| tanggal_bkn | date |  | true |  |  |  |
-| tmt_golongan | date |  | true |  |  |  |
-| status_satker | integer |  | true |  |  |  |
-| status_biro | integer |  | true |  |  |  |
-| pangkat_terakhir | integer |  | true |  |  |  |
-| bkn_id | varchar(36) |  | true |  |  |  |
-| file_base64 | text |  | true |  |  |  |
-| keterangan_berkas | varchar(200) |  | true |  |  |  |
-| arsip_id | bigint |  | true |  |  |  |
-| golongan_asal | varchar(2) |  | true |  |  |  |
-| basic | varchar(15) |  | true |  |  |  |
-| sk_type | smallint |  | true |  |  |  |
-| kanreg | varchar(5) |  | true |  |  |  |
-| kpkn | varchar(50) |  | true |  |  |  |
-| keterangan | varchar(200) |  | true |  |  |  |
-| lpnk | varchar(10) |  | true |  |  |  |
-| jenis_riwayat | varchar(50) |  | true |  |  |  |
-| created_at | timestamp with time zone | now() | true |  |  |  |
-| updated_at | timestamp with time zone | now() | true |  |  |  |
-| deleted_at | timestamp with time zone |  | true |  |  |  |
-| jenis_kp_id | integer |  | true |  | [kepegawaian.ref_jenis_kp](kepegawaian.ref_jenis_kp.md) |  |
+| id | integer | nextval('riwayat_golongan_id_seq'::regclass) | false |  |  | id riwayat golongan |
+| pns_id | varchar(36) |  | true |  | [kepegawaian.pegawai](kepegawaian.pegawai.md) | Referensi pegawai (rujuk pegawai) |
+| pns_nip | varchar(20) |  | true |  |  | NIP pegawai |
+| pns_nama | varchar(100) |  | true |  |  | Nama pegawai |
+| kode_jenis_kp | varchar(4) |  | true |  |  | Kode jenis kp |
+| jenis_kp | varchar(50) |  | true |  |  | Jenis kp |
+| golongan_id | smallint |  | true |  | [kepegawaian.ref_golongan](kepegawaian.ref_golongan.md) | id golongan pegawai |
+| golongan_nama | varchar(10) |  | true |  |  | Nama golongan pegawai |
+| pangkat_nama | varchar(50) |  | true |  |  | Nama pangkat |
+| sk_nomor | varchar(50) |  | true |  |  | Nomor SK pemberian golongan |
+| no_bkn | varchar(100) |  | true |  |  | Nomor BKN |
+| jumlah_angka_kredit_utama | smallint |  | true |  |  | Jumlah angka kredit utama |
+| jumlah_angka_kredit_tambahan | smallint |  | true |  |  | Jumlah angka kredit tambahan |
+| mk_golongan_tahun | smallint |  | true |  |  | Tahun pemberian golongan |
+| mk_golongan_bulan | smallint |  | true |  |  | Bulan pemberian golongan |
+| sk_tanggal | date |  | true |  |  | Tanggal SK pemberian golongan |
+| tanggal_bkn | date |  | true |  |  | Tanggal BKN |
+| tmt_golongan | date |  | true |  |  | Tanggal mulai efektif golongan |
+| status_satker | integer |  | true |  |  | Status verifikasi di tingkat satuan kerja |
+| status_biro | integer |  | true |  |  | Status verifikasi di tingkat biro |
+| pangkat_terakhir | integer |  | true |  |  | Penanda apakah golongan merupakan golongan terakhir |
+| bkn_id | varchar(36) |  | true |  |  | id pada sistem BKN |
+| file_base64 | text |  | true |  |  | Berkas dalam format base64 |
+| keterangan_berkas | varchar(200) |  | true |  |  | Keterangan berkas |
+| arsip_id | bigint |  | true |  |  | id referensi arsip |
+| golongan_asal | varchar(2) |  | true |  |  | Golongan asal pegawai |
+| basic | varchar(15) |  | true |  |  | Penanda golongan basic |
+| sk_type | smallint |  | true |  |  | Jenis SK pemberian golongan |
+| kanreg | varchar(5) |  | true |  |  | Penanda apakah pegawai memiliki keterangan reguler |
+| kpkn | varchar(50) |  | true |  |  | Keterangan kpkn |
+| keterangan | varchar(200) |  | true |  |  | Keterangan golongan |
+| lpnk | varchar(10) |  | true |  |  | Keterangan lpnk |
+| jenis_riwayat | varchar(50) |  | true |  |  | Jenis riwayat |
+| created_at | timestamp with time zone | now() | true |  |  | Waktu perekaman data |
+| updated_at | timestamp with time zone | now() | true |  |  | Waktu terakhir pembaruan |
+| deleted_at | timestamp with time zone |  | true |  |  | Waktu penghapusan data |
+| jenis_kp_id | integer |  | true |  | [kepegawaian.ref_jenis_kp](kepegawaian.ref_jenis_kp.md) | Jenis kp (rujuk ref_jenis_kp) |
 
 ## Constraints
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
+| riwayat_golongan_id_not_null | n | NOT NULL id |
 | fk_riwayat_golongan_golongan | FOREIGN KEY | FOREIGN KEY (golongan_id) REFERENCES ref_golongan(id) |
 | fk_riwayat_golongan_jenis_kp | FOREIGN KEY | FOREIGN KEY (jenis_kp_id) REFERENCES ref_jenis_kp(id) |
 | fk_riwayat_golongan_pns_id | FOREIGN KEY | FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id) |
@@ -113,24 +116,24 @@ erDiagram
   varchar_9_ nip_lama
   varchar_20_ nip_baru
   varchar_100_ nama
-  varchar_20_ gelar_depan
+  varchar_50_ gelar_depan
   varchar_50_ gelar_belakang
   varchar_50_ tempat_lahir_id
   date tgl_lahir
   varchar_1_ jenis_kelamin
   smallint agama_id FK
   smallint jenis_kawin_id FK
-  varchar_20_ nik
+  varchar_50_ nik
   varchar_60_ no_darurat
   varchar_60_ no_hp
   varchar_60_ email
-  varchar_200_ alamat
-  varchar_20_ npwp
-  varchar_20_ bpjs
+  varchar_300_ alamat
+  varchar_50_ npwp
+  varchar_50_ bpjs
   smallint jenis_pegawai_id
   integer kedudukan_hukum_id
   varchar_20_ status_cpns_pns
-  varchar_30_ kartu_pegawai
+  varchar_50_ kartu_pegawai
   varchar_100_ no_sk_cpns
   date tgl_sk_cpns
   date tmt_cpns
@@ -175,7 +178,7 @@ erDiagram
   smallint tingkat_pendidikan_id FK
   varchar_200_ tempat_lahir_nama
   varchar_200_ jenis_jabatan_nama
-  varchar_200_ jabatan_nama
+  varchar_300_ jabatan_nama
   varchar_200_ kpkn_nama
   varchar_200_ instansi_induk_nama
   varchar_200_ instansi_kerja_nama
@@ -183,7 +186,7 @@ erDiagram
   varchar_200_ satuan_kerja_nama
   varchar_36_ jabatan_instansi_id FK
   smallint bup
-  varchar_200_ jabatan_instansi_nama
+  varchar_400_ jabatan_instansi_nama
   smallint jenis_jabatan_id
   date terminated_date
   smallint status_pegawai
@@ -201,7 +204,7 @@ erDiagram
   varchar_30_ nidn
   varchar_200_ ket
   varchar_100_ no_sk_pemberhentian
-  smallint status_pegawai_backup
+  integer status_pegawai_backup
   varchar_50_ masa_kerja
   varchar_50_ kartu_asn
   timestamp_with_time_zone created_at

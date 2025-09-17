@@ -2,32 +2,35 @@
 
 ## Description
 
+Pasangan pegawai
+
 ## Columns
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| id | bigint | nextval('pasangan_id_seq'::regclass) | false |  |  |  |
-| pns | smallint |  | true |  |  |  |
-| nama | varchar(100) |  | true |  |  |  |
-| tanggal_menikah | date |  | true |  |  |  |
-| akte_nikah | varchar(100) |  | true |  |  |  |
-| tanggal_meninggal | date |  | true |  |  |  |
-| akte_meninggal | varchar(100) |  | true |  |  |  |
-| tanggal_cerai | date |  | true |  |  |  |
-| akte_cerai | varchar(100) |  | true |  |  |  |
-| karsus | varchar(100) |  | true |  |  |  |
-| status | smallint |  | true |  |  |  |
-| hubungan | smallint |  | true |  |  |  |
-| pns_id | varchar(36) |  | true |  | [kepegawaian.pegawai](kepegawaian.pegawai.md) |  |
-| nip | varchar(20) |  | true |  |  |  |
-| created_at | timestamp with time zone | now() | true |  |  |  |
-| updated_at | timestamp with time zone | now() | true |  |  |  |
-| deleted_at | timestamp with time zone |  | true |  |  |  |
+| id | bigint | nextval('pasangan_id_seq'::regclass) | false |  |  | id data pasangan |
+| pns | smallint |  | true |  |  | Penanda apakah pasangan juga PNS |
+| nama | varchar(100) |  | true |  |  | Nama lengkap pasangan |
+| tanggal_menikah | date |  | true |  |  | Tanggal pernikahan |
+| akte_nikah | varchar(100) |  | true |  |  | Nomor/berkas akta nikah |
+| tanggal_meninggal | date |  | true |  |  | Tanggal wafat pasangan (jika ada) |
+| akte_meninggal | varchar(100) |  | true |  |  | Nomor/berkas akta kematian |
+| tanggal_cerai | date |  | true |  |  | Tanggal perceraian (jika ada) |
+| akte_cerai | varchar(100) |  | true |  |  | Nomor/berkas akta cerai |
+| karsus | varchar(100) |  | true |  |  | Nomor kartu suami istri |
+| status | smallint |  | true |  |  | Status hubungan saat ini, 1: menikah, 2: cerai, 3: jada/duda |
+| hubungan | smallint |  | true |  |  | Kode hubungan, 1: istri, 2: suami |
+| pns_id | varchar(36) |  | true |  | [kepegawaian.pegawai](kepegawaian.pegawai.md) | Referensi ke pegawai.pns_id |
+| nip | varchar(20) |  | true |  |  | NIP pegawai |
+| created_at | timestamp with time zone | now() | true |  |  | Waktu perekaman data |
+| updated_at | timestamp with time zone | now() | true |  |  | Waktu terakhir pembaruan |
+| deleted_at | timestamp with time zone |  | true |  |  | Waktu penghapusan data |
 
 ## Constraints
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
+| pasangan_id_not_null | n | NOT NULL id |
 | pasangan_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 | fk_pasangan_pns_id | FOREIGN KEY | FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id) |
 
@@ -69,24 +72,24 @@ erDiagram
   varchar_9_ nip_lama
   varchar_20_ nip_baru
   varchar_100_ nama
-  varchar_20_ gelar_depan
+  varchar_50_ gelar_depan
   varchar_50_ gelar_belakang
   varchar_50_ tempat_lahir_id
   date tgl_lahir
   varchar_1_ jenis_kelamin
   smallint agama_id FK
   smallint jenis_kawin_id FK
-  varchar_20_ nik
+  varchar_50_ nik
   varchar_60_ no_darurat
   varchar_60_ no_hp
   varchar_60_ email
-  varchar_200_ alamat
-  varchar_20_ npwp
-  varchar_20_ bpjs
+  varchar_300_ alamat
+  varchar_50_ npwp
+  varchar_50_ bpjs
   smallint jenis_pegawai_id
   integer kedudukan_hukum_id
   varchar_20_ status_cpns_pns
-  varchar_30_ kartu_pegawai
+  varchar_50_ kartu_pegawai
   varchar_100_ no_sk_cpns
   date tgl_sk_cpns
   date tmt_cpns
@@ -131,7 +134,7 @@ erDiagram
   smallint tingkat_pendidikan_id FK
   varchar_200_ tempat_lahir_nama
   varchar_200_ jenis_jabatan_nama
-  varchar_200_ jabatan_nama
+  varchar_300_ jabatan_nama
   varchar_200_ kpkn_nama
   varchar_200_ instansi_induk_nama
   varchar_200_ instansi_kerja_nama
@@ -139,7 +142,7 @@ erDiagram
   varchar_200_ satuan_kerja_nama
   varchar_36_ jabatan_instansi_id FK
   smallint bup
-  varchar_200_ jabatan_instansi_nama
+  varchar_400_ jabatan_instansi_nama
   smallint jenis_jabatan_id
   date terminated_date
   smallint status_pegawai
@@ -157,7 +160,7 @@ erDiagram
   varchar_30_ nidn
   varchar_200_ ket
   varchar_100_ no_sk_pemberhentian
-  smallint status_pegawai_backup
+  integer status_pegawai_backup
   varchar_50_ masa_kerja
   varchar_50_ kartu_asn
   timestamp_with_time_zone created_at

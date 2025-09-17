@@ -2,20 +2,23 @@
 
 ## Description
 
+Referensi kelas jabatan
+
 ## Columns
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| id | integer | nextval('ref_kelas_jabatan_id_seq'::regclass) | false | [kepegawaian.riwayat_jabatan](kepegawaian.riwayat_jabatan.md) |  |  |
-| kelas_jabatan | text |  | true |  |  |  |
-| tunjangan_kinerja | bigint |  | true |  |  |  |
-| created_at | timestamp without time zone | now() | true |  |  |  |
-| updated_at | timestamp without time zone | now() | true |  |  |  |
+| id | integer | nextval('ref_kelas_jabatan_id_seq'::regclass) | false | [kepegawaian.riwayat_jabatan](kepegawaian.riwayat_jabatan.md) |  | id kelas jabatan |
+| kelas_jabatan | text |  | true |  |  | Nama kelas jabatan |
+| tunjangan_kinerja | bigint |  | true |  |  | Nilai tunjangan kinerja pada kelas jabatan terkait |
+| created_at | timestamp without time zone | now() | true |  |  | Waktu perekaman data |
+| updated_at | timestamp without time zone | now() | true |  |  | Waktu terakhir pembaruan |
 
 ## Constraints
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
+| ref_kelas_jabatan_id_not_null | n | NOT NULL id |
 | ref_kelas_jabatan_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 
 ## Indexes

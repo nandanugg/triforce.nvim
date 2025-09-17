@@ -2,44 +2,47 @@
 
 ## Description
 
+Riwayat kenaikan gaji berkala pegawai
+
 ## Columns
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| pegawai_id | integer |  | true |  |  |  |
-| tmt_sk | date |  | true |  |  |  |
-| alasan | varchar(255) |  | true |  |  |  |
-| mv_kgb_id | bigint |  | true |  |  |  |
-| no_sk | varchar(100) |  | true |  |  |  |
-| pejabat | varchar(255) |  | true |  |  |  |
-| id | bigint | nextval('riwayat_kgb_id_seq'::regclass) | false |  |  |  |
-| ref | varchar(255) | uuid_generate_v4() | true |  |  |  |
-| tgl_sk | date |  | true |  |  |  |
-| pegawai_nama | varchar(255) |  | true |  |  |  |
-| pegawai_nip | varchar(20) |  | true |  |  |  |
-| birth_place | varchar(255) |  | true |  |  |  |
-| birth_date | date |  | true |  |  |  |
-| n_gol_ruang | varchar(50) |  | true |  |  |  |
-| n_gol_tmt | date |  | true |  |  |  |
-| n_masakerja_thn | smallint |  | true |  |  |  |
-| n_masakerja_bln | smallint |  | true |  |  |  |
-| n_gapok | varchar(200) |  | true |  |  |  |
-| n_jabatan_text | varchar(200) |  | true |  |  |  |
-| n_tmt_jabatan | date |  | true |  |  |  |
-| n_golongan_id | integer |  | true |  |  |  |
-| unit_kerja_induk_text | varchar(200) |  | true |  |  |  |
-| unit_kerja_induk_id | varchar(200) |  | true |  |  |  |
-| kantor_pembayaran | varchar(200) |  | true |  |  |  |
-| last_education | varchar(200) |  | true |  |  |  |
-| last_education_date | date |  | true |  |  |  |
-| created_at | timestamp with time zone | now() | true |  |  |  |
-| updated_at | timestamp with time zone | now() | true |  |  |  |
-| deleted_at | timestamp with time zone |  | true |  |  |  |
+| pegawai_id | integer |  | true |  |  | Referensi ke data pegawai |
+| tmt_sk | date |  | true |  |  | TMT SK kenaikan gaji berkala |
+| alasan | varchar(255) |  | true |  |  | Alasan kenaikan gaji berkala |
+| mv_kgb_id | bigint |  | true |  |  | Referensi ke materialized view KGB |
+| no_sk | varchar(100) |  | true |  |  | Nomor SK kenaikan gaji berkala |
+| pejabat | varchar(255) |  | true |  |  | Pejabat yang menandatangani |
+| id | bigint | nextval('riwayat_kgb_id_seq'::regclass) | false |  |  | id riwayat kenaikan gaji berkala |
+| ref | varchar(255) | uuid_generate_v4() | true |  |  | Nomor referensi |
+| tgl_sk | date |  | true |  |  | Tanggal SK kenaikan gaji berkala |
+| pegawai_nama | varchar(255) |  | true |  |  | Nama pegawai |
+| pegawai_nip | varchar(20) |  | true |  |  | NIP pegawai |
+| birth_place | varchar(255) |  | true |  |  | Tempat lahir pegawai |
+| birth_date | date |  | true |  |  | Tanggal lahir pegawai |
+| n_gol_ruang | varchar(50) |  | true |  |  | Golongan ruang |
+| n_gol_tmt | date |  | true |  |  | Tanggal mulai golongan terkait |
+| n_masakerja_thn | smallint |  | true |  |  | Masa kerja dalam tahun |
+| n_masakerja_bln | smallint |  | true |  |  | Masa kerja dalam bulan |
+| n_gapok | varchar(200) |  | true |  |  | Nilai gaji pokok |
+| n_jabatan_text | varchar(200) |  | true |  |  | Nama jabatan |
+| n_tmt_jabatan | date |  | true |  |  | Tanggal mulai memangku jabatan |
+| n_golongan_id | integer |  | true |  |  | Referensi ke golongan |
+| unit_kerja_induk_text | varchar(200) |  | true |  |  | Nama unit kerja induk |
+| unit_kerja_induk_id | varchar(200) |  | true |  |  | id unit kerja induk |
+| kantor_pembayaran | varchar(200) |  | true |  |  | Kantor yang melakukan pembayaran gaji |
+| last_education | varchar(200) |  | true |  |  | Pendidikan terakhir |
+| last_education_date | date |  | true |  |  | Tanggal lulus pendidikan terakhir |
+| created_at | timestamp with time zone | now() | true |  |  | Waktu perekaman data |
+| updated_at | timestamp with time zone | now() | true |  |  | Waktu terakhir pembaruan |
+| deleted_at | timestamp with time zone |  | true |  |  | Waktu penghapusan data |
 
 ## Constraints
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
+| riwayat_kgb_id_not_null | n | NOT NULL id |
 | riwayat_kgb_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 
 ## Indexes

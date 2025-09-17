@@ -2,30 +2,33 @@
 
 ## Description
 
+Riwayat pembaruan data secara mandiri oleh pegawai
+
 ## Columns
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| id | integer | nextval('update_mandiri_id_seq'::regclass) | false |  |  |  |
-| pns_id | varchar(36) |  | true |  | [kepegawaian.pegawai](kepegawaian.pegawai.md) |  |
-| kolom | varchar(70) |  | true |  |  |  |
-| dari | varchar(400) |  | true |  |  |  |
-| perubahan | varchar(400) |  | true |  |  |  |
-| status | integer |  | true |  |  |  |
-| verifikasi_by | integer |  | true |  |  |  |
-| verifikasi_tgl | date |  | true |  |  |  |
-| nama_kolom | varchar(100) |  | true |  |  |  |
-| level_update | integer |  | true |  |  |  |
-| tabel_id | integer |  | true |  |  |  |
-| updated_by | integer |  | true |  |  |  |
-| created_at | timestamp with time zone | now() | true |  |  |  |
-| updated_at | timestamp with time zone | now() | true |  |  |  |
-| deleted_at | timestamp with time zone |  | true |  |  |  |
+| id | integer | nextval('update_mandiri_id_seq'::regclass) | false |  |  | id unik data update mandiri |
+| pns_id | varchar(36) |  | true |  | [kepegawaian.pegawai](kepegawaian.pegawai.md) | id pegawai |
+| kolom | varchar(70) |  | true |  |  | Kolom yang diperbarui |
+| dari | varchar(400) |  | true |  |  | Nilai asli kolom sebelum perubahan |
+| perubahan | varchar(400) |  | true |  |  | Nilai perubahan kolom |
+| status | integer |  | true |  |  | Status verifikasi diperbarui |
+| verifikasi_by | integer |  | true |  |  | id user yang melakukan verifikasi |
+| verifikasi_tgl | date |  | true |  |  | Tanggal verifikasi |
+| nama_kolom | varchar(100) |  | true |  |  | Nama kolom yang diperbarui |
+| level_update | integer |  | true |  |  | Level/update yang dilakukan |
+| tabel_id | integer |  | true |  |  | id tabel yang diperbarui |
+| updated_by | integer |  | true |  |  | id user yang melakukan pembaruan |
+| created_at | timestamp with time zone | now() | true |  |  | Waktu perekaman data |
+| updated_at | timestamp with time zone | now() | true |  |  | Waktu terakhir pembaruan data |
+| deleted_at | timestamp with time zone |  | true |  |  | Waktu penghapusan data |
 
 ## Constraints
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
+| update_mandiri_id_not_null | n | NOT NULL id |
 | fk_update_mandiri_pns_id | FOREIGN KEY | FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id) |
 | update_mandiri_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 
@@ -65,24 +68,24 @@ erDiagram
   varchar_9_ nip_lama
   varchar_20_ nip_baru
   varchar_100_ nama
-  varchar_20_ gelar_depan
+  varchar_50_ gelar_depan
   varchar_50_ gelar_belakang
   varchar_50_ tempat_lahir_id
   date tgl_lahir
   varchar_1_ jenis_kelamin
   smallint agama_id FK
   smallint jenis_kawin_id FK
-  varchar_20_ nik
+  varchar_50_ nik
   varchar_60_ no_darurat
   varchar_60_ no_hp
   varchar_60_ email
-  varchar_200_ alamat
-  varchar_20_ npwp
-  varchar_20_ bpjs
+  varchar_300_ alamat
+  varchar_50_ npwp
+  varchar_50_ bpjs
   smallint jenis_pegawai_id
   integer kedudukan_hukum_id
   varchar_20_ status_cpns_pns
-  varchar_30_ kartu_pegawai
+  varchar_50_ kartu_pegawai
   varchar_100_ no_sk_cpns
   date tgl_sk_cpns
   date tmt_cpns
@@ -127,7 +130,7 @@ erDiagram
   smallint tingkat_pendidikan_id FK
   varchar_200_ tempat_lahir_nama
   varchar_200_ jenis_jabatan_nama
-  varchar_200_ jabatan_nama
+  varchar_300_ jabatan_nama
   varchar_200_ kpkn_nama
   varchar_200_ instansi_induk_nama
   varchar_200_ instansi_kerja_nama
@@ -135,7 +138,7 @@ erDiagram
   varchar_200_ satuan_kerja_nama
   varchar_36_ jabatan_instansi_id FK
   smallint bup
-  varchar_200_ jabatan_instansi_nama
+  varchar_400_ jabatan_instansi_nama
   smallint jenis_jabatan_id
   date terminated_date
   smallint status_pegawai
@@ -153,7 +156,7 @@ erDiagram
   varchar_30_ nidn
   varchar_200_ ket
   varchar_100_ no_sk_pemberhentian
-  smallint status_pegawai_backup
+  integer status_pegawai_backup
   varchar_50_ masa_kerja
   varchar_50_ kartu_asn
   timestamp_with_time_zone created_at

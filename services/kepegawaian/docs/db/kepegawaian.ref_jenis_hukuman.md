@@ -2,23 +2,26 @@
 
 ## Description
 
+Referensi jenis hukuman disiplin
+
 ## Columns
 
 | Name | Type | Default | Nullable | Extra Definition | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | ---------------- | -------- | ------- | ------- |
-| id | integer | nextval('ref_jenis_hukuman_id_seq'::regclass) | false |  | [kepegawaian.riwayat_hukdis](kepegawaian.riwayat_hukdis.md) |  |  |
-| dikbud_hr_id | varchar(2) |  | true | GENERATED ALWAYS AS lpad((id)::text, 2, '0'::text) STORED |  |  |  |
-| nama | varchar(100) |  | true |  |  |  |  |
-| tingkat_hukuman | varchar(1) |  | true |  |  |  |  |
-| nama_tingkat_hukuman | varchar(10) |  | true |  |  |  |  |
-| created_at | timestamp with time zone | now() | true |  |  |  |  |
-| updated_at | timestamp with time zone | now() | true |  |  |  |  |
-| deleted_at | timestamp with time zone |  | true |  |  |  |  |
+| id | integer | nextval('ref_jenis_hukuman_id_seq'::regclass) | false |  | [kepegawaian.riwayat_hukdis](kepegawaian.riwayat_hukdis.md) |  | id jenis hukuman disiplin |
+| dikbud_hr_id | varchar(2) |  | true | GENERATED ALWAYS AS lpad((id)::text, 2, '0'::text) STORED |  |  | id jenis hukuman disiplin pada Dikbud HR |
+| nama | varchar(100) |  | true |  |  |  | Nama jenis hukuman disiplin |
+| tingkat_hukuman | varchar(1) |  | true |  |  |  | Nama pendek jenis hukuman disiplin, R: Ringan, S: Sedang, B: Berat |
+| nama_tingkat_hukuman | varchar(10) |  | true |  |  |  | Nama jenis tingkat hukuman disiplin |
+| created_at | timestamp with time zone | now() | true |  |  |  | Waktu perekaman data |
+| updated_at | timestamp with time zone | now() | true |  |  |  | Waktu terakhir pembaruan |
+| deleted_at | timestamp with time zone |  | true |  |  |  | Waktu penghapusan data |
 
 ## Constraints
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
+| ref_jenis_hukuman_id_not_null | n | NOT NULL id |
 | ref_jenis_hukuman_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 
 ## Indexes

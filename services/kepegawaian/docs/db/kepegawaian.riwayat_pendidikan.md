@@ -2,40 +2,43 @@
 
 ## Description
 
+Riwayat pendidikan pegawai
+
 ## Columns
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| id | integer | nextval('riwayat_pendidikan_id_seq'::regclass) | false |  |  |  |
-| pns_id_3 | varchar(32) |  | true |  |  |  |
-| tingkat_pendidikan_id | smallint |  | true |  | [kepegawaian.ref_tingkat_pendidikan](kepegawaian.ref_tingkat_pendidikan.md) |  |
-| pendidikan_id_3 | varchar(32) |  | true |  |  |  |
-| tanggal_lulus | date |  | true |  |  |  |
-| no_ijazah | varchar(100) |  | true |  |  |  |
-| nama_sekolah | varchar(200) |  | true |  |  |  |
-| gelar_depan | varchar(50) |  | true |  |  |  |
-| gelar_belakang | varchar(60) |  | true |  |  |  |
-| pendidikan_pertama | varchar(1) |  | true |  |  |  |
-| negara_sekolah | varchar(255) |  | true |  |  |  |
-| tahun_lulus | smallint |  | true |  |  |  |
-| nip | varchar(20) |  | true |  |  |  |
-| diakui_bkn | integer |  | true |  |  |  |
-| status_satker | integer |  | true |  |  |  |
-| status_biro | integer |  | true |  |  |  |
-| pendidikan_terakhir | integer |  | true |  |  |  |
-| pns_id | varchar(36) |  | true |  | [kepegawaian.pegawai](kepegawaian.pegawai.md) |  |
-| pendidikan_id | varchar(36) |  | true |  | [kepegawaian.ref_pendidikan](kepegawaian.ref_pendidikan.md) |  |
-| created_at | timestamp with time zone | now() | true |  |  |  |
-| updated_at | timestamp with time zone | now() | true |  |  |  |
-| deleted_at | timestamp with time zone |  | true |  |  |  |
-| tugas_belajar | smallint |  | true |  |  |  |
-| file_base64 | text |  | true |  |  |  |
-| keterangan_berkas | varchar(200) |  | true |  |  |  |
+| id | integer | nextval('riwayat_pendidikan_id_seq'::regclass) | false |  |  | id riwayat pendidikan pegawai |
+| pns_id_3 | varchar(32) |  | true |  |  | id PNS versi 3 |
+| tingkat_pendidikan_id | smallint |  | true |  | [kepegawaian.ref_tingkat_pendidikan](kepegawaian.ref_tingkat_pendidikan.md) | Tingkat pendidikan (rujuk tingkat_pendidikan) |
+| pendidikan_id_3 | varchar(32) |  | true |  |  | id pendidikan versi 3 |
+| tanggal_lulus | date |  | true |  |  | Tanggal kelulusan |
+| no_ijazah | varchar(100) |  | true |  |  | Nomor ijazah |
+| nama_sekolah | varchar(200) |  | true |  |  | Nama institusi pendidikan |
+| gelar_depan | varchar(50) |  | true |  |  | Gelar depan terkait pendidikan |
+| gelar_belakang | varchar(60) |  | true |  |  | Gelar belakang terkait pendidikan |
+| pendidikan_pertama | varchar(1) |  | true |  |  | Penanda pendidikan pertama |
+| negara_sekolah | varchar(255) |  | true |  |  | Negara tempat sekolah/pendidikan |
+| tahun_lulus | smallint |  | true |  |  | Tahun kelulusan |
+| nip | varchar(20) |  | true |  |  | Nomor Induk Pegawai |
+| diakui_bkn | integer |  | true |  |  | Penanda pengakuan oleh BKN |
+| status_satker | integer |  | true |  |  | Status verifikasi di tingkat satuan kerja |
+| status_biro | integer |  | true |  |  | Status verifikasi di tingkat biro |
+| pendidikan_terakhir | integer |  | true |  |  | Penanda pendidikan terakhir |
+| pns_id | varchar(36) |  | true |  | [kepegawaian.pegawai](kepegawaian.pegawai.md) | Referensi pegawai (rujuk pegawai.pns_id) |
+| pendidikan_id | varchar(36) |  | true |  | [kepegawaian.ref_pendidikan](kepegawaian.ref_pendidikan.md) | Program pendidikan (rujuk pendidikan) |
+| created_at | timestamp with time zone | now() | true |  |  | Waktu perekaman data |
+| updated_at | timestamp with time zone | now() | true |  |  | Waktu terakhir pembaruan |
+| deleted_at | timestamp with time zone |  | true |  |  | Waktu penghapusan data |
+| tugas_belajar | smallint |  | true |  |  | Tugas belajar |
+| file_base64 | text |  | true |  |  | File berkas dalam format base64 |
+| keterangan_berkas | varchar(200) |  | true |  |  | Keterangan berkas |
 
 ## Constraints
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
+| riwayat_pendidikan_id_not_null | n | NOT NULL id |
 | fk_riwayat_pendidikan_pns_id | FOREIGN KEY | FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id) |
 | fk_riwayat_pendidikan_pendidikan | FOREIGN KEY | FOREIGN KEY (pendidikan_id) REFERENCES ref_pendidikan(id) |
 | riwayat_pendidikan_pkey | PRIMARY KEY | PRIMARY KEY (id) |
@@ -100,24 +103,24 @@ erDiagram
   varchar_9_ nip_lama
   varchar_20_ nip_baru
   varchar_100_ nama
-  varchar_20_ gelar_depan
+  varchar_50_ gelar_depan
   varchar_50_ gelar_belakang
   varchar_50_ tempat_lahir_id
   date tgl_lahir
   varchar_1_ jenis_kelamin
   smallint agama_id FK
   smallint jenis_kawin_id FK
-  varchar_20_ nik
+  varchar_50_ nik
   varchar_60_ no_darurat
   varchar_60_ no_hp
   varchar_60_ email
-  varchar_200_ alamat
-  varchar_20_ npwp
-  varchar_20_ bpjs
+  varchar_300_ alamat
+  varchar_50_ npwp
+  varchar_50_ bpjs
   smallint jenis_pegawai_id
   integer kedudukan_hukum_id
   varchar_20_ status_cpns_pns
-  varchar_30_ kartu_pegawai
+  varchar_50_ kartu_pegawai
   varchar_100_ no_sk_cpns
   date tgl_sk_cpns
   date tmt_cpns
@@ -162,7 +165,7 @@ erDiagram
   smallint tingkat_pendidikan_id FK
   varchar_200_ tempat_lahir_nama
   varchar_200_ jenis_jabatan_nama
-  varchar_200_ jabatan_nama
+  varchar_300_ jabatan_nama
   varchar_200_ kpkn_nama
   varchar_200_ instansi_induk_nama
   varchar_200_ instansi_kerja_nama
@@ -170,7 +173,7 @@ erDiagram
   varchar_200_ satuan_kerja_nama
   varchar_36_ jabatan_instansi_id FK
   smallint bup
-  varchar_200_ jabatan_instansi_nama
+  varchar_400_ jabatan_instansi_nama
   smallint jenis_jabatan_id
   date terminated_date
   smallint status_pegawai
@@ -188,7 +191,7 @@ erDiagram
   varchar_30_ nidn
   varchar_200_ ket
   varchar_100_ no_sk_pemberhentian
-  smallint status_pegawai_backup
+  integer status_pegawai_backup
   varchar_50_ masa_kerja
   varchar_50_ kartu_asn
   timestamp_with_time_zone created_at

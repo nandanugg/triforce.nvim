@@ -2,21 +2,24 @@
 
 ## Description
 
+Referensi jenis kenaikan pangkat
+
 ## Columns
 
 | Name | Type | Default | Nullable | Extra Definition | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | ---------------- | -------- | ------- | ------- |
-| id | integer | nextval('ref_jenis_kp_id_seq'::regclass) | false |  | [kepegawaian.riwayat_golongan](kepegawaian.riwayat_golongan.md) |  |  |
-| dikbud_hr_id | varchar(4) |  | true | GENERATED ALWAYS AS lpad((id)::text, 4, '0'::text) STORED |  |  |  |
-| nama | varchar(50) |  | true |  |  |  |  |
-| created_at | timestamp with time zone | now() | true |  |  |  |  |
-| updated_at | timestamp with time zone | now() | true |  |  |  |  |
-| deleted_at | timestamp with time zone |  | true |  |  |  |  |
+| id | integer | nextval('ref_jenis_kp_id_seq'::regclass) | false |  | [kepegawaian.riwayat_golongan](kepegawaian.riwayat_golongan.md) |  | id jenis kenaikan pangkat |
+| dikbud_hr_id | varchar(4) |  | true | GENERATED ALWAYS AS lpad((id)::text, 4, '0'::text) STORED |  |  | id jenis kenaikan pangkat pada Dikbud HR |
+| nama | varchar(50) |  | true |  |  |  | Nama jenis kenaikan pangkat |
+| created_at | timestamp with time zone | now() | true |  |  |  | Waktu perekaman data |
+| updated_at | timestamp with time zone | now() | true |  |  |  | Waktu terakhir pembaruan |
+| deleted_at | timestamp with time zone |  | true |  |  |  | Waktu penghapusan data |
 
 ## Constraints
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
+| ref_jenis_kp_id_not_null | n | NOT NULL id |
 | ref_jenis_kp_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 
 ## Indexes
