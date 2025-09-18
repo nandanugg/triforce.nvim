@@ -24,8 +24,7 @@ type listRequest struct {
 	JabatanID  string `query:"jabatan_id"`
 	Status     string `query:"status"`
 
-	Limit  uint `query:"limit"`
-	Offset uint `query:"offset"`
+	api.PaginationRequest
 }
 
 type listResponse struct {

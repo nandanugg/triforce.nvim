@@ -22,23 +22,17 @@ func newService(r repository) *service {
 	return &service{repo: r}
 }
 
-type listParams struct {
-	Limit  uint
-	Offset uint
-	NIP    string
-}
-
-func (s *service) list(ctx context.Context, arg listParams) ([]riwayatJabatan, int64, error) {
+func (s *service) list(ctx context.Context, nip string, limit, offset uint) ([]riwayatJabatan, int64, error) {
 	data, err := s.repo.ListRiwayatJabatan(ctx, repo.ListRiwayatJabatanParams{
-		Limit:  int32(arg.Limit),
-		Offset: int32(arg.Offset),
-		PnsNip: arg.NIP,
+		Limit:  int32(limit),
+		Offset: int32(offset),
+		PnsNip: nip,
 	})
 	if err != nil {
 		return nil, 0, fmt.Errorf("repo list: %w", err)
 	}
 
-	count, err := s.repo.CountRiwayatJabatan(ctx, arg.NIP)
+	count, err := s.repo.CountRiwayatJabatan(ctx, nip)
 	if err != nil {
 		return nil, 0, fmt.Errorf("repo count: %w", err)
 	}

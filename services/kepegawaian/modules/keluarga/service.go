@@ -24,14 +24,14 @@ func newService(r repository) *service {
 }
 
 // list returns a structured keluarga containing all family members categorized by type.
-func (s *service) list(ctx context.Context, NIP string) (keluarga, error) {
+func (s *service) list(ctx context.Context, nip string) (keluarga, error) {
 	var result keluarga
 	result.OrangTua = []orangTua{}
 	result.Pasangan = []pasangan{}
 	result.Anak = []anak{}
 
 	// 1. Orang Tua
-	orangTuaList, err := s.repo.ListOrangTuaByNip(ctx, pgtype.Text{String: NIP, Valid: true})
+	orangTuaList, err := s.repo.ListOrangTuaByNip(ctx, pgtype.Text{String: nip, Valid: true})
 	if err != nil {
 		return keluarga{}, fmt.Errorf("repo list orang tua: %w", err)
 	}
@@ -41,7 +41,7 @@ func (s *service) list(ctx context.Context, NIP string) (keluarga, error) {
 	}
 
 	// 2. Pasangan
-	pasanganList, err := s.repo.ListPasanganByNip(ctx, pgtype.Text{String: NIP, Valid: true})
+	pasanganList, err := s.repo.ListPasanganByNip(ctx, pgtype.Text{String: nip, Valid: true})
 	if err != nil {
 		return keluarga{}, fmt.Errorf("repo list pasangan: %w", err)
 	}
@@ -50,7 +50,7 @@ func (s *service) list(ctx context.Context, NIP string) (keluarga, error) {
 	}
 
 	// 3. Anak
-	anakList, err := s.repo.ListAnakByNip(ctx, pgtype.Text{String: NIP, Valid: true})
+	anakList, err := s.repo.ListAnakByNip(ctx, pgtype.Text{String: nip, Valid: true})
 	if err != nil {
 		return keluarga{}, fmt.Errorf("repo list anak: %w", err)
 	}

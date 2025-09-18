@@ -9,21 +9,40 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countRefTingkatPendidikan = `-- name: CountRefTingkatPendidikan :one
+SELECT COUNT(1)
+FROM ref_tingkat_pendidikan
+WHERE deleted_at IS NULL
+`
+
+func (q *Queries) CountRefTingkatPendidikan(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, countRefTingkatPendidikan)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const listRefTingkatPendidikan = `-- name: ListRefTingkatPendidikan :many
 SELECT
     tp.id,
     tp.nama
 FROM ref_tingkat_pendidikan tp
 WHERE tp.deleted_at IS NULL
+LIMIT $1 OFFSET $2
 `
+
+type ListRefTingkatPendidikanParams struct {
+	Limit  int32 `db:"limit"`
+	Offset int32 `db:"offset"`
+}
 
 type ListRefTingkatPendidikanRow struct {
 	ID   int32       `db:"id"`
 	Nama pgtype.Text `db:"nama"`
 }
 
-func (q *Queries) ListRefTingkatPendidikan(ctx context.Context) ([]ListRefTingkatPendidikanRow, error) {
-	rows, err := q.db.Query(ctx, listRefTingkatPendidikan)
+func (q *Queries) ListRefTingkatPendidikan(ctx context.Context, arg ListRefTingkatPendidikanParams) ([]ListRefTingkatPendidikanRow, error) {
+	rows, err := q.db.Query(ctx, listRefTingkatPendidikan, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}

@@ -19,15 +19,10 @@ func newService(repo repository) *service {
 	return &service{repo: repo}
 }
 
-type listRefGolonganParams struct {
-	Limit  uint
-	Offset uint
-}
-
-func (s *service) listRefGolongan(ctx context.Context, arg listRefGolonganParams) ([]refGolongan, int64, error) {
+func (s *service) listRefGolongan(ctx context.Context, limit, offset uint) ([]refGolongan, int64, error) {
 	rows, err := s.repo.ListRefGolongan(ctx, repo.ListRefGolonganParams{
-		Limit:  int32(arg.Limit),
-		Offset: int32(arg.Offset),
+		Limit:  int32(limit),
+		Offset: int32(offset),
 	})
 	if err != nil {
 		return nil, 0, fmt.Errorf("[listRefGolongan] error GetRefGolongan: %w", err)

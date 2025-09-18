@@ -18,27 +18,21 @@ type service struct {
 	repo repository
 }
 
-type listRiwayatParams struct {
-	Limit  uint
-	Offset uint
-	PnsNip string
-}
-
 func newService(r repository) *service {
 	return &service{repo: r}
 }
 
-func (s *service) list(ctx context.Context, params listRiwayatParams) ([]riwayatKepangkatan, uint, error) {
+func (s *service) list(ctx context.Context, nip string, limit, offset uint) ([]riwayatKepangkatan, uint, error) {
 	data, err := s.repo.ListRiwayatKepangkatan(ctx, dbrepo.ListRiwayatKepangkatanParams{
-		PnsNip: params.PnsNip,
-		Limit:  int32(params.Limit),
-		Offset: int32(params.Offset),
+		PnsNip: nip,
+		Limit:  int32(limit),
+		Offset: int32(offset),
 	})
 	if err != nil {
 		return nil, 0, fmt.Errorf("repo ListRiwayatKepangkatan: %w", err)
 	}
 
-	count, err := s.repo.CountRiwayatKepangkatan(ctx, params.PnsNip)
+	count, err := s.repo.CountRiwayatKepangkatan(ctx, nip)
 	if err != nil {
 		return nil, 0, fmt.Errorf("repo CountRiwayatKepangkatan: %w", err)
 	}

@@ -5,6 +5,8 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
 )
 
 type handler struct {
@@ -17,11 +19,17 @@ func newHandler(s *service) *handler {
 
 type listResponse struct {
 	Data []tingkatPendidikan `json:"data"`
+	Meta api.MetaPagination  `json:"meta"`
 }
 
 func (h *handler) list(c echo.Context) error {
+	var req api.PaginationRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
 	ctx := c.Request().Context()
-	data, err := h.service.list(ctx)
+	data, total, err := h.service.list(ctx, req.Limit, req.Offset)
 	if err != nil {
 		slog.ErrorContext(ctx, "Error getting list tingkat pendidikan.", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
@@ -29,5 +37,6 @@ func (h *handler) list(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, listResponse{
 		Data: data,
+		Meta: api.MetaPagination{Limit: req.Limit, Offset: req.Offset, Total: total},
 	})
 }

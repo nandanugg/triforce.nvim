@@ -22,19 +22,14 @@ type listRefGolonganResponse struct {
 	Meta api.MetaPagination `json:"meta"`
 }
 
-type listRefGolonganRequest struct {
-	Limit  uint `query:"limit"`
-	Offset uint `query:"offset"`
-}
-
 func (h *handler) listRefGolongan(c echo.Context) error {
-	var req listRefGolonganRequest
+	var req api.PaginationRequest
 	if err := c.Bind(&req); err != nil {
 		return err
 	}
 	ctx := c.Request().Context()
 
-	data, total, err := h.service.listRefGolongan(ctx, listRefGolonganParams(req))
+	data, total, err := h.service.listRefGolongan(ctx, req.Limit, req.Offset)
 	if err != nil {
 		slog.ErrorContext(ctx, "Error getting list golongan.", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)

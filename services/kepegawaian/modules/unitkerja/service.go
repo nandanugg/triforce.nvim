@@ -21,18 +21,18 @@ func newService(repo repository) *service {
 }
 
 type listUnitKerjaParams struct {
-	Nama      string `db:"nama_unor"`
-	UnorInduk string `db:"unor_induk"`
-	Limit     uint
-	Offset    uint
+	nama      string
+	unorInduk string
+	limit     uint
+	offset    uint
 }
 
 func (s *service) listUnitKerja(ctx context.Context, arg listUnitKerjaParams) ([]unitKerja, int64, error) {
 	rows, err := s.repo.ListUnitKerjaByNamaOrInduk(ctx, repo.ListUnitKerjaByNamaOrIndukParams{
-		UnorInduk: arg.UnorInduk,
-		Limit:     int32(arg.Limit),
-		Offset:    int32(arg.Offset),
-		Nama:      arg.Nama,
+		UnorInduk: arg.unorInduk,
+		Limit:     int32(arg.limit),
+		Offset:    int32(arg.offset),
+		Nama:      arg.nama,
 	})
 	if err != nil {
 		return nil, 0, fmt.Errorf("[listUnitKerja] error getUnitKerjaByNamaOrInduk: %w", err)
@@ -47,8 +47,8 @@ func (s *service) listUnitKerja(ctx context.Context, arg listUnitKerjaParams) ([
 	}
 
 	total, err := s.repo.CountUnitKerja(ctx, repo.CountUnitKerjaParams{
-		Nama:      arg.Nama,
-		UnorInduk: arg.UnorInduk,
+		Nama:      arg.nama,
+		UnorInduk: arg.unorInduk,
 	})
 	if err != nil {
 		return nil, 0, fmt.Errorf("[listUnitKerja] error countUnitKerja: %w", err)

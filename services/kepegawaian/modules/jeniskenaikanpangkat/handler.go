@@ -22,18 +22,13 @@ type listJenisKPResponse struct {
 	Meta api.MetaPagination `json:"meta"`
 }
 
-type listJenisKPRequest struct {
-	Limit  uint `query:"limit"`
-	Offset uint `query:"offset"`
-}
-
 func (h *handler) listJenisKP(c echo.Context) error {
-	var req listJenisKPRequest
+	var req api.PaginationRequest
 	if err := c.Bind(&req); err != nil {
 		return err
 	}
 	ctx := c.Request().Context()
-	data, total, err := h.service.listJenisKP(ctx, listJenisKPParams(req))
+	data, total, err := h.service.listJenisKP(ctx, req.Limit, req.Offset)
 	if err != nil {
 		slog.ErrorContext(ctx, "Error getting list jenis kenaikan pangkat.", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)

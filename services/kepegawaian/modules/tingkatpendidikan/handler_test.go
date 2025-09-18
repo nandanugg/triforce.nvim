@@ -54,7 +54,24 @@ func Test_handler_list(t *testing.T) {
 						"id": 2,
 						"nama": "Jenis Pendidikan 2"
 					}
-				]
+				],
+				"meta": {"limit": 10, "offset": 0, "total": 2}
+			}`,
+		},
+		{
+			name:             "ok: dengan parameter pagination",
+			dbData:           dbData,
+			requestQuery:     url.Values{"limit": []string{"1"}, "offset": []string{"1"}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1c")}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{
+						"id": 2,
+						"nama": "Jenis Pendidikan 2"
+					}
+				],
+				"meta": {"limit": 1, "offset": 1, "total": 2}
 			}`,
 		},
 		{

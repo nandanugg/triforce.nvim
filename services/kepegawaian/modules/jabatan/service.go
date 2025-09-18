@@ -21,15 +21,10 @@ func newService(r repository) *service {
 	return &service{repo: r}
 }
 
-type listParams struct {
-	Limit  uint
-	Offset uint
-}
-
-func (s *service) listJabatan(ctx context.Context, arg listParams) ([]jabatan, int64, error) {
+func (s *service) listJabatan(ctx context.Context, limit, offset uint) ([]jabatan, int64, error) {
 	data, err := s.repo.ListRefJabatan(ctx, repo.ListRefJabatanParams{
-		Limit:  int32(arg.Limit),
-		Offset: int32(arg.Offset),
+		Limit:  int32(limit),
+		Offset: int32(offset),
 	})
 	if err != nil {
 		return nil, 0, fmt.Errorf("repo list: %w", err)

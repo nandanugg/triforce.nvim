@@ -23,10 +23,9 @@ type listJenisKPResponse struct {
 }
 
 type listUnitKerjaRequest struct {
-	Limit     uint   `query:"limit"`
-	Offset    uint   `query:"offset"`
 	Nama      string `query:"nama"`
 	UnorInduk string `query:"unor_induk"`
+	api.PaginationRequest
 }
 
 func (h *handler) listUnitKerja(c echo.Context) error {
@@ -35,11 +34,12 @@ func (h *handler) listUnitKerja(c echo.Context) error {
 	if err := c.Bind(&req); err != nil {
 		return err
 	}
+
 	data, total, err := h.service.listUnitKerja(ctx, listUnitKerjaParams{
-		Limit:     req.Limit,
-		Offset:    req.Offset,
-		Nama:      req.Nama,
-		UnorInduk: req.UnorInduk,
+		nama:      req.Nama,
+		unorInduk: req.UnorInduk,
+		limit:     req.Limit,
+		offset:    req.Offset,
 	})
 	if err != nil {
 		slog.ErrorContext(ctx, "Error getting list unit kerja.", "error", err)

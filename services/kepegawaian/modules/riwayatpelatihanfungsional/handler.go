@@ -17,18 +17,13 @@ func newHandler(s *service) *handler {
 	return &handler{service: s}
 }
 
-type listRequest struct {
-	Limit  uint `query:"limit"`
-	Offset uint `query:"offset"`
-}
-
 type listResponse struct {
 	Data []riwayatPelatihanFungsional `json:"data"`
 	Meta api.MetaPagination           `json:"meta"`
 }
 
 func (h *handler) list(c echo.Context) error {
-	var req listRequest
+	var req api.PaginationRequest
 	if err := c.Bind(&req); err != nil {
 		return err
 	}

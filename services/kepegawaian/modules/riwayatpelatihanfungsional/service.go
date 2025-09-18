@@ -28,9 +28,9 @@ func newService(r repository) *service {
 	return &service{repo: r}
 }
 
-func (s *service) list(ctx context.Context, Nip string, limit, offset uint) ([]riwayatPelatihanFungsional, uint, error) {
+func (s *service) list(ctx context.Context, nip string, limit, offset uint) ([]riwayatPelatihanFungsional, uint, error) {
 	data, err := s.repo.ListRiwayatPelatihanFungsional(ctx, repo.ListRiwayatPelatihanFungsionalParams{
-		NipBaru: pgtype.Text{String: Nip, Valid: true},
+		NipBaru: pgtype.Text{String: nip, Valid: true},
 		Limit:   int32(limit),
 		Offset:  int32(offset),
 	})
@@ -52,7 +52,7 @@ func (s *service) list(ctx context.Context, Nip string, limit, offset uint) ([]r
 		}
 	})
 
-	total, err := s.repo.CountRiwayatPelatihanFungsional(ctx, pgtype.Text{String: Nip, Valid: true})
+	total, err := s.repo.CountRiwayatPelatihanFungsional(ctx, pgtype.Text{String: nip, Valid: true})
 	if err != nil {
 		return nil, 0, fmt.Errorf("count list: %w", err)
 	}

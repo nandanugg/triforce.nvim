@@ -20,15 +20,10 @@ func newService(repo repository) *service {
 	return &service{repo: repo}
 }
 
-type listJenisKPParams struct {
-	Limit  uint
-	Offset uint
-}
-
-func (s *service) listJenisKP(ctx context.Context, arg listJenisKPParams) ([]jenisKp, int64, error) {
+func (s *service) listJenisKP(ctx context.Context, limit, offset uint) ([]jenisKp, int64, error) {
 	rows, err := s.repo.ListJenisKP(ctx, repo.ListJenisKPParams{
-		Limit:  int32(arg.Limit),
-		Offset: int32(arg.Offset),
+		Limit:  int32(limit),
+		Offset: int32(offset),
 	})
 	if err != nil {
 		return nil, 0, fmt.Errorf("[listJenisKP] error getJenisKP: %w", err)

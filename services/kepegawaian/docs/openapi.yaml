@@ -1366,6 +1366,8 @@ paths:
       operationId: listTingkatPendidikan
       parameters:
         - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
       responses:
         "200":
           description: Sukses.
@@ -1384,6 +1386,8 @@ paths:
                           type: integer
                         nama:
                           type: string
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
   /v1/unit-kerja:
     get:
       tags:

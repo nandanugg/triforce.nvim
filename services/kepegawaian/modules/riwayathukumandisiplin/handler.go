@@ -17,18 +17,13 @@ func newHandler(s *service) *handler {
 	return &handler{service: s}
 }
 
-type listRequest struct {
-	Limit  uint `query:"limit"`
-	Offset uint `query:"offset"`
-}
-
 type listResponse struct {
 	Data []riwayatHukumanDisiplin `json:"data"`
 	Meta api.MetaPagination       `json:"meta"`
 }
 
 func (h *handler) list(c echo.Context) error {
-	var req listRequest
+	var req api.PaginationRequest
 	if err := c.Bind(&req); err != nil {
 		return err
 	}
@@ -36,7 +31,7 @@ func (h *handler) list(c echo.Context) error {
 	ctx := c.Request().Context()
 	data, total, err := h.service.list(ctx, api.CurrentUser(c).NIP, req.Limit, req.Offset)
 	if err != nil {
-		slog.ErrorContext(ctx, "Error getting list hukuman disiplin.", "error", err)
+		slog.ErrorContext(ctx, "Error getting list riwayat hukuman disiplin.", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
@@ -59,7 +54,7 @@ func (h *handler) getBerkas(c echo.Context) error {
 	ctx := c.Request().Context()
 	mimeType, blob, err := h.service.getBerkas(ctx, api.CurrentUser(c).NIP, req.ID)
 	if err != nil {
-		slog.ErrorContext(ctx, "Error getting berkas hukuman disiplin.", "error", err)
+		slog.ErrorContext(ctx, "Error getting berkas riwayat hukuman disiplin.", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
