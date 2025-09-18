@@ -703,20 +703,82 @@ paths:
                       properties:
                         id:
                           type: integer
-                        tmt_kgb:
+                        id_golongan:
+                          type: integer
+                        nama_golongan:
+                          type: string
+                        nama_golongan_pangkat:
+                          type: string
+                        tmt_golongan:
                           type: string
                           format: date
-                        no_sk:
+                          nullable: true
+                        masa_kerja_golongan_tahun:
+                          type: integer
+                          nullable: true
+                        masa_kerja_golongan_bulan:
+                          type: integer
+                          nullable: true
+                        nomor_sk:
                           type: string
-                        tgl_sk:
+                        tanggal_sk:
                           type: string
                           format: date
-                        gol_ruang:
+                          nullable: true
+                        tmt_kenaikan_gaji_berkala:
                           type: string
+                          format: date
+                          nullable: true
                         gaji_pokok:
+                          type: integer
+                          nullable: true
+                        jabatan:
+                          type: string
+                        tmt_jabatan:
+                          type: string
+                          format: date
+                          nullable: true
+                        pendidikan:
+                          type: string
+                        tanggal_lulus:
+                          type: string
+                          format: date
+                          nullable: true
+                        kantor_pembayaran:
+                          type: string
+                        unit_kerja_induk_id:
+                          type: string
+                        unit_kerja_induk:
+                          type: string
+                        pejabat:
                           type: string
                   meta:
                     $ref: "#/components/schemas/metaPagination"
+  /v1/riwayat-kenaikan-gaji-berkala/{id}/berkas:
+    get:
+      tags:
+        - Riwayat Kenaikan Gaji Berkala
+      summary: Lihat berkas riwayat kenaikan gaji berkala.
+      description: >-
+        Lihat berkas riwayat kenaikan gaji berkala berdasarkan id.
+      operationId: getBerkasRiwayatKenaikanGajiBerkala
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Berkas riwayat kenaikan gaji berkala tidak ditemukan atau User tidak mempunyai akses.
   /v1/riwayat-kepangkatan:
     get:
       tags:

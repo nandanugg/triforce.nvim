@@ -69,7 +69,7 @@ func main() {
 	riwayatasesmenninebox.RegisterRoutes(e, db, mwAuth)
 	riwayathukumandisiplin.RegisterRoutes(e, dbRepository, mwAuth)
 	riwayatjabatan.RegisterRoutes(e, dbRepository, mwAuth)
-	riwayatkenaikangajiberkala.RegisterRoutes(e, db, mwAuth)
+	riwayatkenaikangajiberkala.RegisterRoutes(e, dbRepository, mwAuth)
 	riwayatkepangkatan.RegisterRoutes(e, dbRepository, mwAuth)
 	riwayatkinerja.RegisterRoutes(e, db, mwAuth)
 	riwayatpekerjaan.RegisterRoutes(e, db, mwAuth)

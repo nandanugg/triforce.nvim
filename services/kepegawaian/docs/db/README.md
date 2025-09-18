@@ -35,7 +35,7 @@
 | [kepegawaian.riwayat_golongan](kepegawaian.riwayat_golongan.md) | 37 | Riwayat golongan pegawai | BASE TABLE |
 | [kepegawaian.riwayat_hukdis](kepegawaian.riwayat_hukdis.md) | 23 | Riwayat hukuman disiplin pegawai | BASE TABLE |
 | [kepegawaian.riwayat_jabatan](kepegawaian.riwayat_jabatan.md) | 39 | Riwayat jabatan pegawai | BASE TABLE |
-| [kepegawaian.riwayat_kgb](kepegawaian.riwayat_kgb.md) | 31 | Riwayat kenaikan gaji berkala pegawai | BASE TABLE |
+| [kepegawaian.riwayat_kenaikan_gaji_berkala](kepegawaian.riwayat_kenaikan_gaji_berkala.md) | 32 | Riwayat kenaikan gaji berkala pegawai | BASE TABLE |
 | [kepegawaian.riwayat_kinerja](kepegawaian.riwayat_kinerja.md) | 19 | Riwayat kinerja pegawai | BASE TABLE |
 | [kepegawaian.riwayat_kursus](kepegawaian.riwayat_kursus.md) | 17 | Riwayat kursus pegawai | BASE TABLE |
 | [kepegawaian.riwayat_nine_box](kepegawaian.riwayat_nine_box.md) | 10 | Riwayat asesmen nine box pegawai | BASE TABLE |
@@ -650,7 +650,7 @@ erDiagram
   text file_base64
   varchar_200_ keterangan_berkas
 }
-"kepegawaian.riwayat_kgb" {
+"kepegawaian.riwayat_kenaikan_gaji_berkala" {
   integer pegawai_id
   date tmt_sk
   varchar_255_ alasan
@@ -659,19 +659,19 @@ erDiagram
   varchar_255_ pejabat
   bigint id
   varchar_255_ ref
-  date tgl_sk
+  date tanggal_sk
   varchar_255_ pegawai_nama
   varchar_20_ pegawai_nip
   varchar_255_ birth_place
   date birth_date
   varchar_50_ n_gol_ruang
-  date n_gol_tmt
-  smallint n_masakerja_thn
-  smallint n_masakerja_bln
+  date tmt_golongan
+  smallint masa_kerja_golongan_tahun
+  smallint masa_kerja_golongan_bulan
   varchar_200_ n_gapok
-  varchar_200_ n_jabatan_text
-  date n_tmt_jabatan
-  integer n_golongan_id
+  varchar_200_ jabatan
+  date tmt_jabatan
+  integer golongan_id
   varchar_200_ unit_kerja_induk_text
   varchar_200_ unit_kerja_induk_id
   varchar_200_ kantor_pembayaran
@@ -682,6 +682,7 @@ erDiagram
   timestamp_with_time_zone deleted_at
   text file_base64
   varchar_200_ keterangan_berkas
+  integer gaji_pokok
 }
 "kepegawaian.riwayat_kinerja" {
   integer id

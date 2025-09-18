@@ -1050,7 +1050,7 @@ type RiwayatJabatan struct {
 }
 
 // Riwayat kenaikan gaji berkala pegawai
-type RiwayatKgb struct {
+type RiwayatKenaikanGajiBerkala struct {
 	// Referensi ke data pegawai
 	PegawaiID pgtype.Int4 `db:"pegawai_id"`
 	// TMT SK kenaikan gaji berkala
@@ -1068,7 +1068,7 @@ type RiwayatKgb struct {
 	// Nomor referensi
 	Ref pgtype.Text `db:"ref"`
 	// Tanggal SK kenaikan gaji berkala
-	TglSk pgtype.Date `db:"tgl_sk"`
+	TanggalSk pgtype.Date `db:"tanggal_sk"`
 	// Nama pegawai
 	PegawaiNama pgtype.Text `db:"pegawai_nama"`
 	// NIP pegawai
@@ -1080,19 +1080,19 @@ type RiwayatKgb struct {
 	// Golongan ruang
 	NGolRuang pgtype.Text `db:"n_gol_ruang"`
 	// Tanggal mulai golongan terkait
-	NGolTmt pgtype.Date `db:"n_gol_tmt"`
+	TmtGolongan pgtype.Date `db:"tmt_golongan"`
 	// Masa kerja dalam tahun
-	NMasakerjaThn pgtype.Int2 `db:"n_masakerja_thn"`
+	MasaKerjaGolonganTahun pgtype.Int2 `db:"masa_kerja_golongan_tahun"`
 	// Masa kerja dalam bulan
-	NMasakerjaBln pgtype.Int2 `db:"n_masakerja_bln"`
+	MasaKerjaGolonganBulan pgtype.Int2 `db:"masa_kerja_golongan_bulan"`
 	// Nilai gaji pokok
 	NGapok pgtype.Text `db:"n_gapok"`
 	// Nama jabatan
-	NJabatanText pgtype.Text `db:"n_jabatan_text"`
+	Jabatan pgtype.Text `db:"jabatan"`
 	// Tanggal mulai memangku jabatan
-	NTmtJabatan pgtype.Date `db:"n_tmt_jabatan"`
+	TmtJabatan pgtype.Date `db:"tmt_jabatan"`
 	// Referensi ke golongan
-	NGolonganID pgtype.Int4 `db:"n_golongan_id"`
+	GolonganID pgtype.Int4 `db:"golongan_id"`
 	// Nama unit kerja induk
 	UnitKerjaIndukText pgtype.Text `db:"unit_kerja_induk_text"`
 	// id unit kerja induk
@@ -1111,6 +1111,7 @@ type RiwayatKgb struct {
 	DeletedAt        pgtype.Timestamptz `db:"deleted_at"`
 	FileBase64       pgtype.Text        `db:"file_base64"`
 	KeteranganBerkas pgtype.Text        `db:"keterangan_berkas"`
+	GajiPokok        pgtype.Int4        `db:"gaji_pokok"`
 }
 
 // Riwayat kinerja pegawai

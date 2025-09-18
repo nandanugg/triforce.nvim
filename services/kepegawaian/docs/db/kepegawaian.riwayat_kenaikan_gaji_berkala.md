@@ -1,4 +1,4 @@
-# kepegawaian.riwayat_kgb
+# kepegawaian.riwayat_kenaikan_gaji_berkala
 
 ## Description
 
@@ -16,19 +16,19 @@ Riwayat kenaikan gaji berkala pegawai
 | pejabat | varchar(255) |  | true |  |  | Pejabat yang menandatangani |
 | id | bigint | nextval('riwayat_kgb_id_seq'::regclass) | false |  |  | id riwayat kenaikan gaji berkala |
 | ref | varchar(255) | uuid_generate_v4() | true |  |  | Nomor referensi |
-| tgl_sk | date |  | true |  |  | Tanggal SK kenaikan gaji berkala |
+| tanggal_sk | date |  | true |  |  | Tanggal SK kenaikan gaji berkala |
 | pegawai_nama | varchar(255) |  | true |  |  | Nama pegawai |
 | pegawai_nip | varchar(20) |  | true |  |  | NIP pegawai |
 | birth_place | varchar(255) |  | true |  |  | Tempat lahir pegawai |
 | birth_date | date |  | true |  |  | Tanggal lahir pegawai |
 | n_gol_ruang | varchar(50) |  | true |  |  | Golongan ruang |
-| n_gol_tmt | date |  | true |  |  | Tanggal mulai golongan terkait |
-| n_masakerja_thn | smallint |  | true |  |  | Masa kerja dalam tahun |
-| n_masakerja_bln | smallint |  | true |  |  | Masa kerja dalam bulan |
+| tmt_golongan | date |  | true |  |  | Tanggal mulai golongan terkait |
+| masa_kerja_golongan_tahun | smallint |  | true |  |  | Masa kerja dalam tahun |
+| masa_kerja_golongan_bulan | smallint |  | true |  |  | Masa kerja dalam bulan |
 | n_gapok | varchar(200) |  | true |  |  | Nilai gaji pokok |
-| n_jabatan_text | varchar(200) |  | true |  |  | Nama jabatan |
-| n_tmt_jabatan | date |  | true |  |  | Tanggal mulai memangku jabatan |
-| n_golongan_id | integer |  | true |  |  | Referensi ke golongan |
+| jabatan | varchar(200) |  | true |  |  | Nama jabatan |
+| tmt_jabatan | date |  | true |  |  | Tanggal mulai memangku jabatan |
+| golongan_id | integer |  | true |  |  | Referensi ke golongan |
 | unit_kerja_induk_text | varchar(200) |  | true |  |  | Nama unit kerja induk |
 | unit_kerja_induk_id | varchar(200) |  | true |  |  | id unit kerja induk |
 | kantor_pembayaran | varchar(200) |  | true |  |  | Kantor yang melakukan pembayaran gaji |
@@ -39,6 +39,7 @@ Riwayat kenaikan gaji berkala pegawai
 | deleted_at | timestamp with time zone |  | true |  |  | Waktu penghapusan data |
 | file_base64 | text |  | true |  |  |  |
 | keterangan_berkas | varchar(200) |  | true |  |  |  |
+| gaji_pokok | integer |  | true |  |  |  |
 
 ## Constraints
 
@@ -50,7 +51,7 @@ Riwayat kenaikan gaji berkala pegawai
 
 | Name | Definition |
 | ---- | ---------- |
-| riwayat_kgb_pkey | CREATE UNIQUE INDEX riwayat_kgb_pkey ON kepegawaian.riwayat_kgb USING btree (id) |
+| riwayat_kgb_pkey | CREATE UNIQUE INDEX riwayat_kgb_pkey ON kepegawaian.riwayat_kenaikan_gaji_berkala USING btree (id) |
 
 ## Relations
 
@@ -58,7 +59,7 @@ Riwayat kenaikan gaji berkala pegawai
 erDiagram
 
 
-"kepegawaian.riwayat_kgb" {
+"kepegawaian.riwayat_kenaikan_gaji_berkala" {
   integer pegawai_id
   date tmt_sk
   varchar_255_ alasan
@@ -67,19 +68,19 @@ erDiagram
   varchar_255_ pejabat
   bigint id
   varchar_255_ ref
-  date tgl_sk
+  date tanggal_sk
   varchar_255_ pegawai_nama
   varchar_20_ pegawai_nip
   varchar_255_ birth_place
   date birth_date
   varchar_50_ n_gol_ruang
-  date n_gol_tmt
-  smallint n_masakerja_thn
-  smallint n_masakerja_bln
+  date tmt_golongan
+  smallint masa_kerja_golongan_tahun
+  smallint masa_kerja_golongan_bulan
   varchar_200_ n_gapok
-  varchar_200_ n_jabatan_text
-  date n_tmt_jabatan
-  integer n_golongan_id
+  varchar_200_ jabatan
+  date tmt_jabatan
+  integer golongan_id
   varchar_200_ unit_kerja_induk_text
   varchar_200_ unit_kerja_induk_id
   varchar_200_ kantor_pembayaran
@@ -90,6 +91,7 @@ erDiagram
   timestamp_with_time_zone deleted_at
   text file_base64
   varchar_200_ keterangan_berkas
+  integer gaji_pokok
 }
 ```
 
