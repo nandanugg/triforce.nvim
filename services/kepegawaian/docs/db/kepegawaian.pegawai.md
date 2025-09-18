@@ -492,6 +492,8 @@ erDiagram
   integer kelas_jabatan_id FK
   date periode_jabatan_start_date
   date periode_jabatan_end_date
+  text file_base64
+  varchar_200_ keterangan_berkas
 }
 "kepegawaian.riwayat_kursus" {
   integer id
@@ -509,6 +511,8 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  text file_base64
+  varchar_200_ keterangan_berkas
 }
 "kepegawaian.riwayat_pendidikan" {
   integer id

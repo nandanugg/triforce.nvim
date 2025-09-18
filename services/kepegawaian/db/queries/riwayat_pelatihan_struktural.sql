@@ -17,3 +17,7 @@ LIMIT $2 OFFSET $3;
 -- name: CountRiwayatPelatihanStruktural :one
 SELECT count(*) FROM riwayat_diklat_struktural
 WHERE pns_nip = $1 AND deleted_at IS NULL;
+
+-- name: GetBerkasRiwayatPelatihanStruktural :one
+select file_base64 from riwayat_diklat_struktural
+where pns_nip = $1 and id = $2 and deleted_at is null;

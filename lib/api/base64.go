@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func GetMimetypeAndDecodedData(fileBase64 string) (string, []byte, error) {
+func GetMimeTypeAndDecodedData(fileBase64 string) (string, []byte, error) {
 	parts := strings.SplitN(fileBase64, ",", 2)
 	rawBase64 := parts[len(parts)-1]
 

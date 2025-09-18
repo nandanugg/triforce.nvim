@@ -19,3 +19,7 @@ SELECT COUNT(1) AS total
 FROM riwayat_diklat_fungsional rf
 WHERE rf.nip_baru = $1
   AND rf.deleted_at IS NULL;
+
+-- name: GetBerkasRiwayatPelatihanFungsional :one
+select file_base64 from riwayat_diklat_fungsional
+where nip_baru = $1 and id = $2 and deleted_at is null;

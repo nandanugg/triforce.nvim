@@ -2,11 +2,14 @@ package riwayatpelatihanstruktural
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/typeutil"
 	sqlc "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
@@ -15,6 +18,7 @@ import (
 type repository interface {
 	ListRiwayatPelatihanStruktural(ctx context.Context, arg sqlc.ListRiwayatPelatihanStrukturalParams) ([]sqlc.ListRiwayatPelatihanStrukturalRow, error)
 	CountRiwayatPelatihanStruktural(ctx context.Context, pnsNip pgtype.Text) (int64, error)
+	GetBerkasRiwayatPelatihanStruktural(ctx context.Context, arg sqlc.GetBerkasRiwayatPelatihanStrukturalParams) (pgtype.Text, error)
 }
 type service struct {
 	repo repository
@@ -66,4 +70,19 @@ func (s *service) list(ctx context.Context, nip string, limit, offset uint) ([]r
 			Durasi:                 int(row.Lama.Float32),
 		}
 	}), uint(count), nil
+}
+
+func (s *service) getBerkas(ctx context.Context, nip, id string) (string, []byte, error) {
+	res, err := s.repo.GetBerkasRiwayatPelatihanStruktural(ctx, sqlc.GetBerkasRiwayatPelatihanStrukturalParams{
+		PnsNip: pgtype.Text{String: nip, Valid: true},
+		ID:     id,
+	})
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+		return "", nil, fmt.Errorf("repo get berkas: %w", err)
+	}
+	if len(res.String) == 0 {
+		return "", nil, nil
+	}
+
+	return api.GetMimeTypeAndDecodedData(res.String)
 }

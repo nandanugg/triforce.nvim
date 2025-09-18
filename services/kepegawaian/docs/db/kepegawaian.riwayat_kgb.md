@@ -37,6 +37,8 @@ Riwayat kenaikan gaji berkala pegawai
 | created_at | timestamp with time zone | now() | true |  |  | Waktu perekaman data |
 | updated_at | timestamp with time zone | now() | true |  |  | Waktu terakhir pembaruan |
 | deleted_at | timestamp with time zone |  | true |  |  | Waktu penghapusan data |
+| file_base64 | text |  | true |  |  |  |
+| keterangan_berkas | varchar(200) |  | true |  |  |  |
 
 ## Constraints
 
@@ -86,6 +88,8 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  text file_base64
+  varchar_200_ keterangan_berkas
 }
 ```
 

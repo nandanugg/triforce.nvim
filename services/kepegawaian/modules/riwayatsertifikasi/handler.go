@@ -59,12 +59,12 @@ func (h *handler) getBerkas(c echo.Context) error {
 	ctx := c.Request().Context()
 	mimeType, blob, err := h.service.getBerkas(ctx, api.CurrentUser(c).NIP, req.ID)
 	if err != nil {
-		slog.ErrorContext(ctx, "Error getting berkas sertifikasi.", "error", err)
+		slog.ErrorContext(ctx, "Error getting berkas riwayat sertifikasi.", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
 	if blob == nil {
-		return echo.NewHTTPError(http.StatusNotFound, "sertifikasi tidak ditemukan")
+		return echo.NewHTTPError(http.StatusNotFound, "berkas riwayat sertifikasi tidak ditemukan")
 	}
 
 	c.Response().Header().Set("Content-Disposition", "inline")

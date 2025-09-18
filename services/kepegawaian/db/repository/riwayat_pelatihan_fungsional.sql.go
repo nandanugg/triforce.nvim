@@ -23,6 +23,23 @@ func (q *Queries) CountRiwayatPelatihanFungsional(ctx context.Context, nipBaru p
 	return total, err
 }
 
+const getBerkasRiwayatPelatihanFungsional = `-- name: GetBerkasRiwayatPelatihanFungsional :one
+select file_base64 from riwayat_diklat_fungsional
+where nip_baru = $1 and id = $2 and deleted_at is null
+`
+
+type GetBerkasRiwayatPelatihanFungsionalParams struct {
+	NipBaru pgtype.Text `db:"nip_baru"`
+	ID      string      `db:"id"`
+}
+
+func (q *Queries) GetBerkasRiwayatPelatihanFungsional(ctx context.Context, arg GetBerkasRiwayatPelatihanFungsionalParams) (pgtype.Text, error) {
+	row := q.db.QueryRow(ctx, getBerkasRiwayatPelatihanFungsional, arg.NipBaru, arg.ID)
+	var file_base64 pgtype.Text
+	err := row.Scan(&file_base64)
+	return file_base64, err
+}
+
 const listRiwayatPelatihanFungsional = `-- name: ListRiwayatPelatihanFungsional :many
 SELECT
     rf.id,

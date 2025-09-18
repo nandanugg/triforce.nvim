@@ -45,6 +45,8 @@ Riwayat jabatan pegawai
 | kelas_jabatan_id | integer |  | true |  | [kepegawaian.ref_kelas_jabatan](kepegawaian.ref_kelas_jabatan.md) | id kelas jabatan |
 | periode_jabatan_start_date | date |  | true |  |  | Tanggal mulai periode jabatan |
 | periode_jabatan_end_date | date |  | true |  |  | Tanggal akhir periode jabatan |
+| file_base64 | text |  | true |  |  |  |
+| keterangan_berkas | varchar(200) |  | true |  |  |  |
 
 ## Constraints
 
@@ -108,6 +110,8 @@ erDiagram
   integer kelas_jabatan_id FK
   date periode_jabatan_start_date
   date periode_jabatan_end_date
+  text file_base64
+  varchar_200_ keterangan_berkas
 }
 "kepegawaian.pegawai" {
   integer id

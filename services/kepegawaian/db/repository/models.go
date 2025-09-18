@@ -1045,6 +1045,8 @@ type RiwayatJabatan struct {
 	PeriodeJabatanStartDate pgtype.Date `db:"periode_jabatan_start_date"`
 	// Tanggal akhir periode jabatan
 	PeriodeJabatanEndDate pgtype.Date `db:"periode_jabatan_end_date"`
+	FileBase64            pgtype.Text `db:"file_base64"`
+	KeteranganBerkas      pgtype.Text `db:"keterangan_berkas"`
 }
 
 // Riwayat kenaikan gaji berkala pegawai
@@ -1106,7 +1108,9 @@ type RiwayatKgb struct {
 	// Waktu terakhir pembaruan
 	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
 	// Waktu penghapusan data
-	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
+	DeletedAt        pgtype.Timestamptz `db:"deleted_at"`
+	FileBase64       pgtype.Text        `db:"file_base64"`
+	KeteranganBerkas pgtype.Text        `db:"keterangan_berkas"`
 }
 
 // Riwayat kinerja pegawai
@@ -1182,7 +1186,9 @@ type RiwayatKursu struct {
 	// Waktu terakhir data diperbarui
 	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
 	// Waktu penghapusan data
-	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
+	DeletedAt        pgtype.Timestamptz `db:"deleted_at"`
+	FileBase64       pgtype.Text        `db:"file_base64"`
+	KeteranganBerkas pgtype.Text        `db:"keterangan_berkas"`
 }
 
 // Riwayat asesmen nine box pegawai

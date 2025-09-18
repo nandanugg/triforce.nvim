@@ -2,9 +2,12 @@ package riwayatpelatihanteknis
 
 import (
 	"context"
+	"encoding/base64"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -21,26 +24,21 @@ import (
 
 func Test_handler_list(t *testing.T) {
 	dbData := `
-		insert into pegawai (pns_id, nip_baru, deleted_at) values
-		(1, '1c', null),
-		(2, '2c', null),
-		(3, '3c', '2020-01-01');
-
 		insert into riwayat_kursus
-			(id, pns_id, pns_nip, tipe_kursus, jenis_kursus, nama_kursus, tanggal_kursus, lama_kursus, institusi_penyelenggara, no_sertifikat, deleted_at) values
-			(11, '1', '1c', 'Teknis', 'Workshop', '11a', '2000-01-01', 24, 'Institution 11', 'CERT11', null),
-			(12, '1', '1c', 'Teknis', 'Seminar', '12a', '2001-01-01', 16, 'Institution 12', '', null),
-			(13, '1', '1c', 'Teknis', 'Kursus', '13a', '2002-01-01', 40, 'Institution 13', 'CERT13', null),
-			(14, '2', '2c', 'Teknis', 'Workshop', '14a', '2003-01-01', 8, 'Institution 14', 'CERT14', null),
-			(15, '1', '1c', 'Teknis', 'Seminar', '15a', '2004-01-01', 4, 'Institution 15', 'CERT15', null),
-			(16, '1', '1c', 'Teknis', 'Kursus', '16a', '2005-01-01', 20, 'Institution 16', null, null),
-			(17, '1', '1c', 'Teknis', 'Workshop', '17a', '2006-01-01', 12, 'Institution 17', 'CERT17', null),
+			(id, pns_nip, tipe_kursus, jenis_kursus, nama_kursus, tanggal_kursus, lama_kursus, institusi_penyelenggara, no_sertifikat, deleted_at) values
+			(11, '1c', 'Teknis', 'Workshop', '11a', '2000-01-01', 24, 'Institution 11', 'CERT11', null),
+			(12, '1c', 'Teknis', 'Seminar', '12a', '2001-01-01', 16, 'Institution 12', '', null),
+			(13, '1c', 'Teknis', 'Kursus', '13a', '2002-01-01', 40, 'Institution 13', 'CERT13', null),
+			(14, '2c', 'Teknis', 'Workshop', '14a', '2003-01-01', 8, 'Institution 14', 'CERT14', null),
+			(15, '1c', 'Teknis', 'Seminar', '15a', '2004-01-01', 4, 'Institution 15', 'CERT15', null),
+			(16, '1c', 'Teknis', 'Kursus', '16a', '2005-01-01', 20, 'Institution 16', null, null),
+			(17, '1c', 'Teknis', 'Workshop', '17a', '2006-01-01', 12, 'Institution 17', 'CERT17', null),
 			-- Null test cases
-			(18, '1', '1c', 'Teknis', 'Workshop', '18a', '2010-01-01', null, 'Institution 18', 'CERT18', null),
-			(19, '1', '1c', 'Teknis', 'Seminar', '19a', null, 8, 'Institution 19', 'CERT19', null),
-			(20, '1', '1c', null, null, '20a', '2012-01-01', 12, 'Institution 20', 'CERT20', null),
-			(21, '1', '1c', 'Teknis', 'Workshop', null, '2013-01-01', 16, 'Institution 21', 'CERT21', null),
-			(22, '1', '1c', 'Teknis', 'Seminar', '22a', '2014-01-01', 8, null, 'CERT22', null);
+			(18, '1c', 'Teknis', 'Workshop', '18a', '2010-01-01', null, 'Institution 18', 'CERT18', null),
+			(19, '1c', 'Teknis', 'Seminar', '19a', null, 8, 'Institution 19', 'CERT19', null),
+			(20, '1c', null, null, '20a', '2012-01-01', 12, 'Institution 20', 'CERT20', null),
+			(21, '1c', 'Teknis', 'Workshop', null, '2013-01-01', 16, 'Institution 21', 'CERT21', null),
+			(22, '1c', 'Teknis', 'Seminar', '22a', '2014-01-01', 8, null, 'CERT22', null);
 	`
 
 	tests := []struct {
@@ -243,6 +241,172 @@ func Test_handler_list(t *testing.T) {
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
 			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
 			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+		})
+	}
+}
+
+func Test_handler_getBerkas(t *testing.T) {
+	t.Parallel()
+
+	filePath := "../../../../lib/api/sample/hello.pdf"
+	pdfBytes, err := os.ReadFile(filePath)
+	require.NoError(t, err)
+
+	pngBytes := []byte{
+		0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+		0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
+		0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+		0x08, 0x06, 0x00, 0x00, 0x00, 0x1f, 0x15, 0xc4,
+		0x89, 0x00, 0x00, 0x00, 0x0a, 0x49, 0x44, 0x41,
+		0x54, 0x78, 0x9c, 0x63, 0xf8, 0xff, 0xff, 0x3f,
+		0x00, 0x05, 0xfe, 0x02, 0xfe, 0xa7, 0x46, 0x90,
+		0x3d, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e,
+		0x44, 0xae, 0x42, 0x60, 0x82,
+	}
+
+	pdfBase64 := base64.StdEncoding.EncodeToString(pdfBytes)
+	pngBase64 := base64.StdEncoding.EncodeToString(pngBytes)
+
+	dbData := `
+		insert into riwayat_kursus
+			(id, pns_nip, deleted_at,   file_base64) values
+			(1, '1c',     null,         'data:application/pdf;base64,` + pdfBase64 + `'),
+			(2, '1c',     null,         '` + pdfBase64 + `'),
+			(3, '1c',     null,         'data:images/png;base64,` + pngBase64 + `'),
+			(4, '1c',     null,         'data:application/pdf;base64,invalid'),
+			(5, '1c',     '2020-01-02', 'data:application/pdf;base64,` + pdfBase64 + `'),
+			(6, '1c',     null,         null),
+			(7, '1c',     null,         '');
+		`
+
+	tests := []struct {
+		name              string
+		dbData            string
+		paramID           string
+		requestHeader     http.Header
+		wantResponseCode  int
+		wantContentType   string
+		wantResponseBytes []byte
+	}{
+		{
+			name:              "ok: valid pdf with data: prefix",
+			dbData:            dbData,
+			paramID:           "1",
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1c")}},
+			wantResponseCode:  http.StatusOK,
+			wantContentType:   "application/pdf",
+			wantResponseBytes: pdfBytes,
+		},
+		{
+			name:              "ok: valid pdf without data: prefix",
+			dbData:            dbData,
+			paramID:           "2",
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1c")}},
+			wantResponseCode:  http.StatusOK,
+			wantContentType:   "application/pdf",
+			wantResponseBytes: pdfBytes,
+		},
+		{
+			name:              "ok: valid png with incorrect content-type",
+			dbData:            dbData,
+			paramID:           "3",
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1c")}},
+			wantResponseCode:  http.StatusOK,
+			wantContentType:   "images/png",
+			wantResponseBytes: pngBytes,
+		},
+		{
+			name:              "error: base64 pelatihan teknis tidak valid",
+			dbData:            dbData,
+			paramID:           "4",
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1c")}},
+			wantResponseCode:  http.StatusInternalServerError,
+			wantResponseBytes: []byte(`{"message": "Internal Server Error"}`),
+		},
+		{
+			name:              "error: riwayat pelatihan teknis sudah dihapus",
+			dbData:            dbData,
+			paramID:           "5",
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1c")}},
+			wantResponseCode:  http.StatusNotFound,
+			wantResponseBytes: []byte(`{"message": "berkas riwayat pelatihan teknis tidak ditemukan"}`),
+		},
+		{
+			name:              "error: base64 riwayat pelatihan teknis berisi null value",
+			dbData:            dbData,
+			paramID:           "6",
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1c")}},
+			wantResponseCode:  http.StatusNotFound,
+			wantResponseBytes: []byte(`{"message": "berkas riwayat pelatihan teknis tidak ditemukan"}`),
+		},
+		{
+			name:              "error: base64 riwayat pelatihan teknis berupa string kosong",
+			dbData:            dbData,
+			paramID:           "7",
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1c")}},
+			wantResponseCode:  http.StatusNotFound,
+			wantResponseBytes: []byte(`{"message": "berkas riwayat pelatihan teknis tidak ditemukan"}`),
+		},
+		{
+			name:              "error: riwayat pelatihan teknis bukan milik user login",
+			dbData:            dbData,
+			paramID:           "1",
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a")}},
+			wantResponseCode:  http.StatusNotFound,
+			wantResponseBytes: []byte(`{"message": "berkas riwayat pelatihan teknis tidak ditemukan"}`),
+		},
+		{
+			name:              "error: riwayat pelatihan teknis tidak ditemukan",
+			dbData:            dbData,
+			paramID:           "0",
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1c")}},
+			wantResponseCode:  http.StatusNotFound,
+			wantResponseBytes: []byte(`{"message": "berkas riwayat pelatihan teknis tidak ditemukan"}`),
+		},
+		{
+			name:              "error: invalid id",
+			dbData:            dbData,
+			paramID:           "abc",
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1c")}},
+			wantResponseCode:  http.StatusBadRequest,
+			wantResponseBytes: []byte(`{"message": "parameter \"id\" harus dalam format yang sesuai"}`),
+		},
+		{
+			name:              "error: auth header tidak valid",
+			dbData:            dbData,
+			paramID:           "1",
+			requestHeader:     http.Header{"Authorization": []string{"Bearer some-token"}},
+			wantResponseCode:  http.StatusUnauthorized,
+			wantResponseBytes: []byte(`{"message": "token otentikasi tidak valid"}`),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			pgxconn := dbtest.New(t, dbmigrations.FS)
+			_, err := pgxconn.Exec(context.Background(), tt.dbData)
+			require.NoError(t, err)
+
+			req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/v1/riwayat-pelatihan-teknis/%s/berkas", tt.paramID), nil)
+			req.Header = tt.requestHeader
+			rec := httptest.NewRecorder()
+
+			e, err := api.NewEchoServer(docs.OpenAPIBytes)
+			require.NoError(t, err)
+
+			repo := sqlc.New(pgxconn)
+			RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			if tt.wantResponseCode == http.StatusOK {
+				assert.Equal(t, "inline", rec.Header().Get("Content-Disposition"))
+				assert.Equal(t, tt.wantContentType, rec.Header().Get("Content-Type"))
+				assert.Equal(t, tt.wantResponseBytes, rec.Body.Bytes())
+			} else {
+				assert.JSONEq(t, string(tt.wantResponseBytes), rec.Body.String())
+			}
 		})
 	}
 }

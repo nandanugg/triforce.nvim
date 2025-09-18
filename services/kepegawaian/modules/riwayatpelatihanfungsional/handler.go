@@ -36,7 +36,7 @@ func (h *handler) list(c echo.Context) error {
 
 	data, total, err := h.service.list(ctx, api.CurrentUser(c).NIP, req.Limit, req.Offset)
 	if err != nil {
-		slog.ErrorContext(ctx, "Error getting list pelatihan fungsional.", "error", err)
+		slog.ErrorContext(ctx, "Error getting list riwayat pelatihan fungsional.", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
@@ -48,4 +48,29 @@ func (h *handler) list(c echo.Context) error {
 			Total:  total,
 		},
 	})
+}
+
+type getBerkasRequest struct {
+	ID string `param:"id"`
+}
+
+func (h *handler) getBerkas(c echo.Context) error {
+	var req getBerkasRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	ctx := c.Request().Context()
+	mimeType, blob, err := h.service.getBerkas(ctx, api.CurrentUser(c).NIP, req.ID)
+	if err != nil {
+		slog.ErrorContext(ctx, "Error getting berkas riwayat pelatihan fungsional.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	if blob == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "berkas riwayat pelatihan fungsional tidak ditemukan")
+	}
+
+	c.Response().Header().Set("Content-Disposition", "inline")
+	return c.Blob(http.StatusOK, mimeType, blob)
 }

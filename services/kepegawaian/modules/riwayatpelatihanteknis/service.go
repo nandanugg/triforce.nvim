@@ -2,11 +2,14 @@ package riwayatpelatihanteknis
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/typeutil"
 	sqlc "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
@@ -15,6 +18,7 @@ import (
 type repository interface {
 	ListRiwayatPelatihanTeknis(ctx context.Context, arg sqlc.ListRiwayatPelatihanTeknisParams) ([]sqlc.ListRiwayatPelatihanTeknisRow, error)
 	CountRiwayatPelatihanTeknis(ctx context.Context, nip pgtype.Text) (int64, error)
+	GetBerkasRiwayatPelatihanTeknis(ctx context.Context, arg sqlc.GetBerkasRiwayatPelatihanTeknisParams) (pgtype.Text, error)
 }
 
 type service struct {
@@ -28,9 +32,9 @@ func newService(r repository) *service {
 func (s *service) list(ctx context.Context, nip string, limit, offset uint) ([]riwayatPelatihanTeknis, uint, error) {
 	pgNip := pgtype.Text{String: nip, Valid: true}
 	rows, err := s.repo.ListRiwayatPelatihanTeknis(ctx, sqlc.ListRiwayatPelatihanTeknisParams{
-		NipBaru: pgNip,
-		Limit:   int32(limit),
-		Offset:  int32(offset),
+		PnsNip: pgNip,
+		Limit:  int32(limit),
+		Offset: int32(offset),
 	})
 	if err != nil {
 		return nil, 0, fmt.Errorf("repo list: %w", err)
@@ -64,4 +68,19 @@ func (s *service) list(ctx context.Context, nip string, limit, offset uint) ([]r
 		})
 	}
 	return data, uint(count), nil
+}
+
+func (s *service) getBerkas(ctx context.Context, nip string, id int32) (string, []byte, error) {
+	res, err := s.repo.GetBerkasRiwayatPelatihanTeknis(ctx, sqlc.GetBerkasRiwayatPelatihanTeknisParams{
+		PnsNip: pgtype.Text{String: nip, Valid: true},
+		ID:     id,
+	})
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+		return "", nil, fmt.Errorf("repo get berkas: %w", err)
+	}
+	if len(res.String) == 0 {
+		return "", nil, nil
+	}
+
+	return api.GetMimeTypeAndDecodedData(res.String)
 }

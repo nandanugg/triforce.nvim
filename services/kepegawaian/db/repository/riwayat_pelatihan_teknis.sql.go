@@ -12,15 +12,31 @@ import (
 const countRiwayatPelatihanTeknis = `-- name: CountRiwayatPelatihanTeknis :one
 SELECT COUNT(1)
 FROM riwayat_kursus rk
-JOIN pegawai p ON rk.pns_id = p.pns_id AND p.deleted_at IS NULL
-WHERE p.nip_baru = $1 AND rk.deleted_at IS NULL
+WHERE rk.pns_nip = $1 AND rk.deleted_at IS NULL
 `
 
-func (q *Queries) CountRiwayatPelatihanTeknis(ctx context.Context, nipBaru pgtype.Text) (int64, error) {
-	row := q.db.QueryRow(ctx, countRiwayatPelatihanTeknis, nipBaru)
+func (q *Queries) CountRiwayatPelatihanTeknis(ctx context.Context, pnsNip pgtype.Text) (int64, error) {
+	row := q.db.QueryRow(ctx, countRiwayatPelatihanTeknis, pnsNip)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
+}
+
+const getBerkasRiwayatPelatihanTeknis = `-- name: GetBerkasRiwayatPelatihanTeknis :one
+select file_base64 from riwayat_kursus
+where pns_nip = $1 and id = $2 and deleted_at is null
+`
+
+type GetBerkasRiwayatPelatihanTeknisParams struct {
+	PnsNip pgtype.Text `db:"pns_nip"`
+	ID     int32       `db:"id"`
+}
+
+func (q *Queries) GetBerkasRiwayatPelatihanTeknis(ctx context.Context, arg GetBerkasRiwayatPelatihanTeknisParams) (pgtype.Text, error) {
+	row := q.db.QueryRow(ctx, getBerkasRiwayatPelatihanTeknis, arg.PnsNip, arg.ID)
+	var file_base64 pgtype.Text
+	err := row.Scan(&file_base64)
+	return file_base64, err
 }
 
 const listRiwayatPelatihanTeknis = `-- name: ListRiwayatPelatihanTeknis :many
@@ -34,16 +50,15 @@ SELECT
     rk.institusi_penyelenggara,
     rk.no_sertifikat
 FROM riwayat_kursus rk
-JOIN pegawai p ON rk.pns_id = p.pns_id AND p.deleted_at IS NULL
-WHERE p.nip_baru = $1 AND rk.deleted_at IS NULL
+WHERE rk.pns_nip = $1 AND rk.deleted_at IS NULL
 ORDER BY rk.tanggal_kursus DESC NULLS LAST
 LIMIT $2 OFFSET $3
 `
 
 type ListRiwayatPelatihanTeknisParams struct {
-	NipBaru pgtype.Text `db:"nip_baru"`
-	Limit   int32       `db:"limit"`
-	Offset  int32       `db:"offset"`
+	PnsNip pgtype.Text `db:"pns_nip"`
+	Limit  int32       `db:"limit"`
+	Offset int32       `db:"offset"`
 }
 
 type ListRiwayatPelatihanTeknisRow struct {
@@ -58,7 +73,7 @@ type ListRiwayatPelatihanTeknisRow struct {
 }
 
 func (q *Queries) ListRiwayatPelatihanTeknis(ctx context.Context, arg ListRiwayatPelatihanTeknisParams) ([]ListRiwayatPelatihanTeknisRow, error) {
-	rows, err := q.db.Query(ctx, listRiwayatPelatihanTeknis, arg.NipBaru, arg.Limit, arg.Offset)
+	rows, err := q.db.Query(ctx, listRiwayatPelatihanTeknis, arg.PnsNip, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}

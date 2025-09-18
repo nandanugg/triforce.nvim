@@ -13,4 +13,5 @@ func RegisterRoutes(e *echo.Echo, repo sqlc.Querier, mwAuth echo.MiddlewareFunc)
 	h := newHandler(s)
 
 	e.Add(http.MethodGet, "/v1/riwayat-pelatihan-teknis", h.list, mwAuth)
+	e.Add(http.MethodGet, "/v1/riwayat-pelatihan-teknis/:id/berkas", h.getBerkas, mwAuth)
 }

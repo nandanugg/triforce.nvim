@@ -34,10 +34,10 @@
 | [kepegawaian.riwayat_diklat_struktural](kepegawaian.riwayat_diklat_struktural.md) | 18 | Riwayat diklat struktural pegawai | BASE TABLE |
 | [kepegawaian.riwayat_golongan](kepegawaian.riwayat_golongan.md) | 37 | Riwayat golongan pegawai | BASE TABLE |
 | [kepegawaian.riwayat_hukdis](kepegawaian.riwayat_hukdis.md) | 23 | Riwayat hukuman disiplin pegawai | BASE TABLE |
-| [kepegawaian.riwayat_jabatan](kepegawaian.riwayat_jabatan.md) | 37 | Riwayat jabatan pegawai | BASE TABLE |
-| [kepegawaian.riwayat_kgb](kepegawaian.riwayat_kgb.md) | 29 | Riwayat kenaikan gaji berkala pegawai | BASE TABLE |
+| [kepegawaian.riwayat_jabatan](kepegawaian.riwayat_jabatan.md) | 39 | Riwayat jabatan pegawai | BASE TABLE |
+| [kepegawaian.riwayat_kgb](kepegawaian.riwayat_kgb.md) | 31 | Riwayat kenaikan gaji berkala pegawai | BASE TABLE |
 | [kepegawaian.riwayat_kinerja](kepegawaian.riwayat_kinerja.md) | 19 | Riwayat kinerja pegawai | BASE TABLE |
-| [kepegawaian.riwayat_kursus](kepegawaian.riwayat_kursus.md) | 15 | Riwayat kursus pegawai | BASE TABLE |
+| [kepegawaian.riwayat_kursus](kepegawaian.riwayat_kursus.md) | 17 | Riwayat kursus pegawai | BASE TABLE |
 | [kepegawaian.riwayat_nine_box](kepegawaian.riwayat_nine_box.md) | 10 | Riwayat asesmen nine box pegawai | BASE TABLE |
 | [kepegawaian.riwayat_pendidikan](kepegawaian.riwayat_pendidikan.md) | 25 | Riwayat pendidikan pegawai | BASE TABLE |
 | [kepegawaian.riwayat_penghargaan_umum](kepegawaian.riwayat_penghargaan_umum.md) | 11 | Riwayat penghargaan umum pegawai | BASE TABLE |
@@ -647,6 +647,8 @@ erDiagram
   integer kelas_jabatan_id FK
   date periode_jabatan_start_date
   date periode_jabatan_end_date
+  text file_base64
+  varchar_200_ keterangan_berkas
 }
 "kepegawaian.riwayat_kgb" {
   integer pegawai_id
@@ -678,6 +680,8 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  text file_base64
+  varchar_200_ keterangan_berkas
 }
 "kepegawaian.riwayat_kinerja" {
   integer id
@@ -716,6 +720,8 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  text file_base64
+  varchar_200_ keterangan_berkas
 }
 "kepegawaian.riwayat_nine_box" {
   integer id

@@ -21,6 +21,23 @@ func (q *Queries) CountRiwayatPelatihanStruktural(ctx context.Context, pnsNip pg
 	return count, err
 }
 
+const getBerkasRiwayatPelatihanStruktural = `-- name: GetBerkasRiwayatPelatihanStruktural :one
+select file_base64 from riwayat_diklat_struktural
+where pns_nip = $1 and id = $2 and deleted_at is null
+`
+
+type GetBerkasRiwayatPelatihanStrukturalParams struct {
+	PnsNip pgtype.Text `db:"pns_nip"`
+	ID     string      `db:"id"`
+}
+
+func (q *Queries) GetBerkasRiwayatPelatihanStruktural(ctx context.Context, arg GetBerkasRiwayatPelatihanStrukturalParams) (pgtype.Text, error) {
+	row := q.db.QueryRow(ctx, getBerkasRiwayatPelatihanStruktural, arg.PnsNip, arg.ID)
+	var file_base64 pgtype.Text
+	err := row.Scan(&file_base64)
+	return file_base64, err
+}
+
 const listRiwayatPelatihanStruktural = `-- name: ListRiwayatPelatihanStruktural :many
 SELECT
 	rjd.nama as jenis_diklat,

@@ -599,7 +599,7 @@ paths:
         - Riwayat Hukuman Disiplin
       summary: Lihat berkas riwayat hukuman disiplin.
       description: >-
-        Lihat berkas riwayat hukuman disiplin berdasarkan id hukuman disiplin.
+        Lihat berkas riwayat hukuman disiplin berdasarkan id.
       operationId: getBerkasRiwayatHukumanDisiplin
       parameters:
         - $ref: "#/components/parameters/authRequired"
@@ -617,7 +617,7 @@ paths:
                 type: string
                 format: binary
         "404":
-          description: Hukuman Disiplin tidak ditemukan atau User tidak mempunyai akses.
+          description: Berkas riwayat hukuman disiplin tidak ditemukan atau User tidak mempunyai akses.
   /v1/riwayat-jabatan:
     get:
       tags:
@@ -916,6 +916,31 @@ paths:
                           format: date
                   meta:
                      $ref: "#/components/schemas/metaPagination"
+  /v1/riwayat-pelatihan-fungsional/{id}/berkas:
+    get:
+      tags:
+        - Riwayat Pelatihan Fungsional
+      summary: Lihat berkas riwayat pelatihan fungsional.
+      description: >-
+        Lihat berkas riwayat pelatihan fungsional berdasarkan id.
+      operationId: getBerkasRiwayatPelatihanFungsional
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Berkas riwayat pelatihan fungsional tidak ditemukan atau User tidak mempunyai akses.
   /v1/riwayat-pelatihan-struktural:
     get:
       tags:
@@ -978,6 +1003,31 @@ paths:
                           example: "2023-06-20"
                   meta:
                     $ref: "#/components/schemas/metaPagination"
+  /v1/riwayat-pelatihan-struktural/{id}/berkas:
+    get:
+      tags:
+        - Riwayat Pelatihan Struktural
+      summary: Lihat berkas riwayat pelatihan struktural.
+      description: >-
+        Lihat berkas riwayat pelatihan struktural berdasarkan id.
+      operationId: getBerkasRiwayatPelatihanStruktural
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Berkas riwayat pelatihan struktural tidak ditemukan atau User tidak mempunyai akses.
   /v1/riwayat-pelatihan-teknis:
     get:
       tags:
@@ -1041,6 +1091,31 @@ paths:
                           description: Nomor sertifikat (jika ada)
                   meta:
                     $ref: "#/components/schemas/metaPagination"
+  /v1/riwayat-pelatihan-teknis/{id}/berkas:
+    get:
+      tags:
+        - Riwayat Pelatihan Teknis
+      summary: Lihat berkas riwayat pelatihan teknis.
+      description: >-
+        Lihat berkas riwayat pelatihan teknis berdasarkan id.
+      operationId: getBerkasRiwayatPelatihanTeknis
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Berkas riwayat pelatihan teknis tidak ditemukan atau User tidak mempunyai akses.
   /v1/riwayat-pendidikan:
     get:
       tags:
@@ -1113,7 +1188,7 @@ paths:
                 type: string
                 format: binary
         "404":
-          description: Riwayat Pendidikan tidak ditemukan atau User tidak mempunyai akses.
+          description: Berkas riwayat pendidikan tidak ditemukan atau User tidak mempunyai akses.
   /v1/riwayat-penghargaan:
     get:
       tags:
@@ -1178,7 +1253,7 @@ paths:
                 type: string
                 format: binary
         "404":
-          description: Riwayat Penghargaan tidak ditemukan atau User tidak mempunyai akses.
+          description: Berkas riwayat penghargaan tidak ditemukan atau User tidak mempunyai akses.
   /v1/riwayat-penugasan:
     get:
       tags:
@@ -1262,7 +1337,7 @@ paths:
         - Riwayat Sertifikasi
       summary: Lihat berkas riwayat sertifikasi.
       description: >-
-        Lihat berkas riwayat sertifikasi berdasarkan id sertifikasi.
+        Lihat berkas riwayat sertifikasi berdasarkan id.
       operationId: getBerkasRiwayatSertifikasi
       parameters:
         - $ref: "#/components/parameters/authRequired"
@@ -1280,7 +1355,7 @@ paths:
                 type: string
                 format: binary
         "404":
-          description: Sertifikasi tidak ditemukan atau User tidak mempunyai akses.
+          description: Berkas riwayat sertifikasi tidak ditemukan atau User tidak mempunyai akses.
   /v1/tingkat-pendidikan:
     get:
       tags:

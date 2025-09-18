@@ -2,11 +2,14 @@ package riwayatpelatihanfungsional
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/typeutil"
 	repo "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
@@ -15,6 +18,7 @@ import (
 type repository interface {
 	ListRiwayatPelatihanFungsional(ctx context.Context, arg repo.ListRiwayatPelatihanFungsionalParams) ([]repo.ListRiwayatPelatihanFungsionalRow, error)
 	CountRiwayatPelatihanFungsional(ctx context.Context, nipBaru pgtype.Text) (int64, error)
+	GetBerkasRiwayatPelatihanFungsional(ctx context.Context, arg repo.GetBerkasRiwayatPelatihanFungsionalParams) (pgtype.Text, error)
 }
 type service struct {
 	repo repository
@@ -54,4 +58,19 @@ func (s *service) list(ctx context.Context, Nip string, limit, offset uint) ([]r
 	}
 
 	return result, uint(total), nil
+}
+
+func (s *service) getBerkas(ctx context.Context, nip, id string) (string, []byte, error) {
+	res, err := s.repo.GetBerkasRiwayatPelatihanFungsional(ctx, repo.GetBerkasRiwayatPelatihanFungsionalParams{
+		NipBaru: pgtype.Text{String: nip, Valid: true},
+		ID:      id,
+	})
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+		return "", nil, fmt.Errorf("repo get berkas: %w", err)
+	}
+	if len(res.String) == 0 {
+		return "", nil, nil
+	}
+
+	return api.GetMimeTypeAndDecodedData(res.String)
 }

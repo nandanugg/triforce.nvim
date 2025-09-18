@@ -74,5 +74,5 @@ func (s *service) getBerkas(ctx context.Context, nip string, id int64) (string, 
 		return "", nil, nil
 	}
 
-	return api.GetMimetypeAndDecodedData(res.String)
+	return api.GetMimeTypeAndDecodedData(res.String)
 }

@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test_base64_GetMimetypeAndDecodedData(t *testing.T) {
+func Test_base64_GetMimeTypeAndDecodedData(t *testing.T) {
 	t.Parallel()
 
 	filePath := "sample/hello.pdf"
@@ -67,7 +67,7 @@ func Test_base64_GetMimetypeAndDecodedData(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			mimetype, decodedData, err := GetMimetypeAndDecodedData(tt.fileBase64)
+			mimetype, decodedData, err := GetMimeTypeAndDecodedData(tt.fileBase64)
 
 			if tt.wantError != nil {
 				assert.EqualError(t, err, tt.wantError.Error())
