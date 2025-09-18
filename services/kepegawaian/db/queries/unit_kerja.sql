@@ -1,4 +1,4 @@
--- name: GetUnitKerjaByNamaOrInduk :many
+-- name: ListUnitKerjaByNamaOrInduk :many
 SELECT id, nama_unor
 from unit_kerja
 WHERE

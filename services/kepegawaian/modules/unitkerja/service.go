@@ -8,7 +8,7 @@ import (
 )
 
 type repository interface {
-	GetUnitKerjaByNamaOrInduk(ctx context.Context, arg repo.GetUnitKerjaByNamaOrIndukParams) ([]repo.GetUnitKerjaByNamaOrIndukRow, error)
+	ListUnitKerjaByNamaOrInduk(ctx context.Context, arg repo.ListUnitKerjaByNamaOrIndukParams) ([]repo.ListUnitKerjaByNamaOrIndukRow, error)
 	CountUnitKerja(ctx context.Context, arg repo.CountUnitKerjaParams) (int64, error)
 }
 
@@ -28,7 +28,7 @@ type listUnitKerjaParams struct {
 }
 
 func (s *service) listUnitKerja(ctx context.Context, arg listUnitKerjaParams) ([]unitKerja, int64, error) {
-	rows, err := s.repo.GetUnitKerjaByNamaOrInduk(ctx, repo.GetUnitKerjaByNamaOrIndukParams{
+	rows, err := s.repo.ListUnitKerjaByNamaOrInduk(ctx, repo.ListUnitKerjaByNamaOrIndukParams{
 		UnorInduk: arg.UnorInduk,
 		Limit:     int32(arg.Limit),
 		Offset:    int32(arg.Offset),

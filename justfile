@@ -73,6 +73,12 @@ db-migrate-down-portal:
 	-database "pgx://$NEXUS_PORTAL_DB_USER:$NEXUS_PORTAL_DB_PASSWORD@$NEXUS_PORTAL_DB_HOST:$NEXUS_PORTAL_DB_PORT/$NEXUS_PORTAL_DB_NAME?search_path=$NEXUS_PORTAL_DB_SCHEMA" \
 	down
 
+db-migrate-drop-portal:
+	migrate \
+	-path services/portal/dbmigrations \
+	-database "pgx://$NEXUS_PORTAL_DB_USER:$NEXUS_PORTAL_DB_PASSWORD@$NEXUS_PORTAL_DB_HOST:$NEXUS_PORTAL_DB_PORT/$NEXUS_PORTAL_DB_NAME?search_path=$NEXUS_PORTAL_DB_SCHEMA" \
+	drop
+
 db-doc-portal:
 	tbls doc "postgres://$NEXUS_PORTAL_DB_USER:$NEXUS_PORTAL_DB_PASSWORD@$NEXUS_PORTAL_DB_HOST:$NEXUS_PORTAL_DB_PORT/$NEXUS_PORTAL_DB_NAME?search_path=$NEXUS_PORTAL_DB_SCHEMA&sslmode=disable" services/portal/docs/db --rm-dist -t mermaid
 	rm services/portal/docs/db/schema.json

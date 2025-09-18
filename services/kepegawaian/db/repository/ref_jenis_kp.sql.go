@@ -21,31 +21,31 @@ func (q *Queries) CountJenisKP(ctx context.Context) (int64, error) {
 	return count, err
 }
 
-const getJenisKP = `-- name: GetJenisKP :many
+const listJenisKP = `-- name: ListJenisKP :many
 SELECT id, nama FROM ref_jenis_kp
 WHERE deleted_at IS NULL
 LIMIT $1 OFFSET $2
 `
 
-type GetJenisKPParams struct {
+type ListJenisKPParams struct {
 	Limit  int32 `db:"limit"`
 	Offset int32 `db:"offset"`
 }
 
-type GetJenisKPRow struct {
+type ListJenisKPRow struct {
 	ID   int32       `db:"id"`
 	Nama pgtype.Text `db:"nama"`
 }
 
-func (q *Queries) GetJenisKP(ctx context.Context, arg GetJenisKPParams) ([]GetJenisKPRow, error) {
-	rows, err := q.db.Query(ctx, getJenisKP, arg.Limit, arg.Offset)
+func (q *Queries) ListJenisKP(ctx context.Context, arg ListJenisKPParams) ([]ListJenisKPRow, error) {
+	rows, err := q.db.Query(ctx, listJenisKP, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetJenisKPRow
+	var items []ListJenisKPRow
 	for rows.Next() {
-		var i GetJenisKPRow
+		var i ListJenisKPRow
 		if err := rows.Scan(&i.ID, &i.Nama); err != nil {
 			return nil, err
 		}

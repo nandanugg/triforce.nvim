@@ -1,4 +1,4 @@
--- name: GetJenisKP :many
+-- name: ListJenisKP :many
 SELECT id, nama FROM ref_jenis_kp
 WHERE deleted_at IS NULL
 LIMIT $1 OFFSET $2;

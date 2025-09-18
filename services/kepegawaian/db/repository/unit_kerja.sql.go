@@ -29,7 +29,7 @@ func (q *Queries) CountUnitKerja(ctx context.Context, arg CountUnitKerjaParams) 
 	return count, err
 }
 
-const getUnitKerjaByNamaOrInduk = `-- name: GetUnitKerjaByNamaOrInduk :many
+const listUnitKerjaByNamaOrInduk = `-- name: ListUnitKerjaByNamaOrInduk :many
 SELECT id, nama_unor
 from unit_kerja
 WHERE
@@ -39,20 +39,20 @@ WHERE
 LIMIT $1 OFFSET $2
 `
 
-type GetUnitKerjaByNamaOrIndukParams struct {
+type ListUnitKerjaByNamaOrIndukParams struct {
 	Limit     int32  `db:"limit"`
 	Offset    int32  `db:"offset"`
 	Nama      string `db:"nama"`
 	UnorInduk string `db:"unor_induk"`
 }
 
-type GetUnitKerjaByNamaOrIndukRow struct {
+type ListUnitKerjaByNamaOrIndukRow struct {
 	ID       string      `db:"id"`
 	NamaUnor pgtype.Text `db:"nama_unor"`
 }
 
-func (q *Queries) GetUnitKerjaByNamaOrInduk(ctx context.Context, arg GetUnitKerjaByNamaOrIndukParams) ([]GetUnitKerjaByNamaOrIndukRow, error) {
-	rows, err := q.db.Query(ctx, getUnitKerjaByNamaOrInduk,
+func (q *Queries) ListUnitKerjaByNamaOrInduk(ctx context.Context, arg ListUnitKerjaByNamaOrIndukParams) ([]ListUnitKerjaByNamaOrIndukRow, error) {
+	rows, err := q.db.Query(ctx, listUnitKerjaByNamaOrInduk,
 		arg.Limit,
 		arg.Offset,
 		arg.Nama,
@@ -62,9 +62,9 @@ func (q *Queries) GetUnitKerjaByNamaOrInduk(ctx context.Context, arg GetUnitKerj
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetUnitKerjaByNamaOrIndukRow
+	var items []ListUnitKerjaByNamaOrIndukRow
 	for rows.Next() {
-		var i GetUnitKerjaByNamaOrIndukRow
+		var i ListUnitKerjaByNamaOrIndukRow
 		if err := rows.Scan(&i.ID, &i.NamaUnor); err != nil {
 			return nil, err
 		}

@@ -27,11 +27,6 @@ type listResponse struct {
 	Meta api.MetaPagination `json:"meta"`
 }
 
-type listRiwayatJabatanResponse struct {
-	Data []riwayatJabatan   `json:"data"`
-	Meta api.MetaPagination `json:"meta"`
-}
-
 func (h *handler) listJabatan(c echo.Context) error {
 	var req listRequest
 	if err := c.Bind(&req); err != nil {
@@ -46,29 +41,6 @@ func (h *handler) listJabatan(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, listResponse{
-		Data: data,
-		Meta: api.MetaPagination{Limit: req.Limit, Offset: req.Offset, Total: uint(total)},
-	})
-}
-
-func (h *handler) listRiwayatJabatan(c echo.Context) error {
-	ctx := c.Request().Context()
-	var req listRequest
-	if err := c.Bind(&req); err != nil {
-		return err
-	}
-
-	data, total, err := h.service.listRiwayatJabatan(ctx, listRiwayatJabatanParams{
-		Limit:  req.Limit,
-		Offset: req.Offset,
-		NIP:    api.CurrentUser(c).NIP,
-	})
-	if err != nil {
-		slog.ErrorContext(ctx, "Error getting list riwayat jabatan.", "error", err)
-		return echo.NewHTTPError(http.StatusInternalServerError)
-	}
-
-	return c.JSON(http.StatusOK, listRiwayatJabatanResponse{
 		Data: data,
 		Meta: api.MetaPagination{Limit: req.Limit, Offset: req.Offset, Total: uint(total)},
 	})

@@ -6,170 +6,33 @@ info:
 servers:
   - url: http://localhost:8000
 tags:
-  - name: Asesmen Nine Box
   - name: Data Pribadi
-  - name: Hukuman Disiplin
+  - name: Golongan
   - name: Jabatan
+  - name: Jenis Diklat
+  - name: Jenis Hukuman
+  - name: Jenis Jabatan
+  - name: Jenis Kenaikan Pangkat
+  - name: Jenis Penghargaan
   - name: Keluarga
-  - name: Kenaikan Gaji Berkala
-  - name: Kepangkatan
-  - name: Kinerja
   - name: Pegawai
-  - name: Pekerjaan
+  - name: Riwayat Asesmen Nine Box
+  - name: Riwayat Hukuman Disiplin
+  - name: Riwayat Jabatan
+  - name: Riwayat Kenaikan Gaji Berkala
+  - name: Riwayat Kepangkatan
+  - name: Riwayat Kinerja
+  - name: Riwayat Pekerjaan
   - name: Riwayat Pelatihan Fungsional
   - name: Riwayat Pelatihan Struktural
   - name: Riwayat Pelatihan Teknis
   - name: Riwayat Pendidikan
   - name: Riwayat Penghargaan
-  - name: Sertifikasi
-  - name: Penugasan
-  - name: Golongan
-  - name: Unit Kerja
+  - name: Riwayat Penugasan
+  - name: Riwayat Sertifikasi
   - name: Tingkat Pendidikan
-  - name: Jenis Kenaikan Pangkat
-  - name: Jenis Hukuman
-  - name: Jenis Diklat
-  - name : Jenis Penghargaan
+  - name: Unit Kerja
 paths:
-  /v1/golongan:
-    get:
-      tags:
-        - Golongan
-      summary: List Golongan.
-      description: List golongan yang tersedia.
-      operationId: listGolongan
-      parameters:
-        - $ref: "#/components/parameters/authRequired"
-        - $ref: "#/components/parameters/limit"
-        - $ref: "#/components/parameters/offset"
-      responses:
-        "200":
-          description: Sukses.
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                properties:
-                  data:
-                    type: array
-                    items:
-                      type: object
-                      additionalProperties: false
-                      properties:
-                        id:
-                          type: integer
-                        nama:
-                          type: string
-                        nama_pangkat:
-                          type: string
-                  meta:
-                    $ref: "#/components/schemas/metaPagination"
-  /v1/jenis-kenaikan-pangkat:
-    get:
-      tags:
-        - Jenis Kenaikan Pangkat
-      summary: List jenis kenaikan pangkat.
-      description: List jenis kenaikan pangkat.
-      operationId: listJenisKenaikanPangkat
-      parameters:
-        - $ref: "#/components/parameters/authRequired"
-        - $ref: "#/components/parameters/limit"
-        - $ref: "#/components/parameters/offset"
-      responses:
-        "200":
-          description: Sukses.
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                properties:
-                  data:
-                    type: array
-                    items:
-                      type: object
-                      additionalProperties: false
-                      properties:
-                        id:
-                          type: integer
-                        nama:
-                          type: string
-                  meta:
-                    $ref: "#/components/schemas/metaPagination"
-  /v1/unit-kerja:
-    get:
-      tags:
-        - Unit Kerja
-      summary: Daftar unit kerja.
-      description: Daftar unit kerja dengan fitur pencarian dan filter berdasarkan unit induk.
-      operationId: listUnitKerja
-      parameters:
-        - $ref: "#/components/parameters/authRequired"
-        - $ref: "#/components/parameters/limit"
-        - $ref: "#/components/parameters/offset"
-        - name: nama
-          in: query
-          description: Pencarian berdasarkan nama unit kerja
-          schema:
-            type: string
-        - name: unor_induk
-          in: query
-          description: Filter berdasarkan unit induk
-          schema:
-            type: string
-      responses:
-        "200":
-          description: Sukses.
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                properties:
-                  data:
-                    type: array
-                    items:
-                      type: object
-                      additionalProperties: false
-                      properties:
-                        id:
-                          type: string
-                        nama:
-                          type: string
-                  meta:
-                    $ref: "#/components/schemas/metaPagination"
-  /v1/asesmen-nine-box:
-    get:
-      tags:
-        - Asesmen Nine Box
-      summary: Lihat riwayat asesmen nine box.
-      description: >-
-        Lihat riwayat asesmen nine box dari user yang login, urut berdasarkan tahun.
-      operationId: listAsesmenNineBox
-      parameters:
-        - $ref: "#/components/parameters/authRequired"
-        - $ref: "#/components/parameters/limit"
-        - $ref: "#/components/parameters/offset"
-      responses:
-        "200":
-          description: Sukses.
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                properties:
-                  data:
-                    type: array
-                    items:
-                      type: object
-                      additionalProperties: false
-                      properties:
-                        id:
-                          type: integer
-                        tahun:
-                          type: string
-                        kesimpulan:
-                          type: string
-                  meta:
-                    $ref: "#/components/schemas/metaPagination"
   /v1/data-pribadi:
     get:
       tags:
@@ -307,15 +170,13 @@ paths:
                         type: array
                         items:
                           type: string
-  /v1/riwayat-hukuman-disiplin:
+  /v1/golongan:
     get:
       tags:
-        - Hukuman Disiplin
-      summary: Lihat riwayat hukuman disiplin.
-      description: >-
-        Lihat riwayat hukuman disiplin dari user yang login, urut berdasarkan
-        tanggal mulai.
-      operationId: listHukumanDisiplin
+        - Golongan
+      summary: List Golongan.
+      description: List golongan yang tersedia.
+      operationId: listGolongan
       parameters:
         - $ref: "#/components/parameters/authRequired"
         - $ref: "#/components/parameters/limit"
@@ -336,54 +197,12 @@ paths:
                       properties:
                         id:
                           type: integer
-                        jenis_hukuman:
-                          type: string
-                        nama_golongan:
+                        nama:
                           type: string
                         nama_pangkat:
                           type: string
-                        nomor_sk:
-                          type: string
-                        tanggal_sk:
-                          type: string
-                          format: date
-                        tanggal_mulai:
-                          type: string
-                          format: date
-                        tanggal_akhir:
-                          type: string
-                          format: date
-                        masa_tahun:
-                          type: integer
-                        masa_bulan:
-                          type: integer
                   meta:
                     $ref: "#/components/schemas/metaPagination"
-  /v1/riwayat-hukuman-disiplin/{id}/berkas:
-    get:
-      tags:
-        - Hukuman Disiplin
-      summary: Lihat berkas riwayat hukuman disiplin.
-      description: >-
-        Lihat berkas riwayat hukuman disiplin berdasarkan id hukuman disiplin.
-      operationId: getBerkasHukumanDisiplin
-      parameters:
-        - $ref: "#/components/parameters/authRequired"
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        "200":
-          description: Sukses.
-          content:
-            "*/*":
-              schema:
-                type: string
-                format: binary
-        "404":
-          description: Hukuman Disiplin tidak ditemukan atau User tidak mempunyai akses.
   /v1/jabatan:
     get:
       tags:
@@ -483,10 +302,72 @@ paths:
   /v1/jenis-jabatan:
     get:
       tags:
-        - Jabatan
+        - Jenis Jabatan
       summary: Daftar jenis jabatan.
       description: Daftar jenis jabatan.
       operationId: listJenisJabatan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: integer
+                        nama:
+                          type: string
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/jenis-kenaikan-pangkat:
+    get:
+      tags:
+        - Jenis Kenaikan Pangkat
+      summary: List jenis kenaikan pangkat.
+      description: List jenis kenaikan pangkat.
+      operationId: listJenisKenaikanPangkat
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: integer
+                        nama:
+                          type: string
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/jenis-penghargaan:
+    get:
+      tags:
+        - Jenis Penghargaan
+      summary: Daftar jenis penghargaan.
+      description: Daftar jenis penghargaan.
+      operationId: listJenisPenghargaan
       parameters:
         - $ref: "#/components/parameters/authRequired"
         - $ref: "#/components/parameters/limit"
@@ -531,148 +412,6 @@ paths:
                 properties:
                   data:
                     $ref: "#/components/schemas/keluarga"
-  /v1/riwayat-kenaikan-gaji-berkala:
-    get:
-      tags:
-        - Kenaikan Gaji Berkala
-      summary: Lihat riwayat kenaikan gaji berkala.
-      description: >-
-        Lihat riwayat kenaikan gaji berkala dari user yang login, urut
-        berdasarkan TMT.
-      operationId: listKenaikanGajiBerkala
-      parameters:
-        - $ref: "#/components/parameters/authRequired"
-        - $ref: "#/components/parameters/limit"
-        - $ref: "#/components/parameters/offset"
-      responses:
-        "200":
-          description: Sukses.
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                properties:
-                  data:
-                    type: array
-                    items:
-                      type: object
-                      additionalProperties: false
-                      properties:
-                        id:
-                          type: integer
-                        tmt_kgb:
-                          type: string
-                          format: date
-                        no_sk:
-                          type: string
-                        tgl_sk:
-                          type: string
-                          format: date
-                        gol_ruang:
-                          type: string
-                        gaji_pokok:
-                          type: string
-                  meta:
-                    $ref: "#/components/schemas/metaPagination"
-  /v1/riwayat-kepangkatan:
-    get:
-      tags:
-        - Kepangkatan
-      summary: Lihat riwayat kepangkatan.
-      description: >-
-        Lihat riwayat kepangkatan dari user yang login, urut berdasarkan TMT.
-      operationId: listKepangkatan
-      parameters:
-        - $ref: "#/components/parameters/authRequired"
-        - $ref: "#/components/parameters/limit"
-        - $ref: "#/components/parameters/offset"
-      responses:
-        "200":
-          description: Sukses.
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                properties:
-                  data:
-                    type: array
-                    items:
-                      type: object
-                      additionalProperties: false
-                      properties:
-                        id:
-                          type: integer
-                        id_jenis_kp:
-                          type: integer
-                        nama_jenis_kp:
-                          type: string
-                        id_golongan:
-                          type: integer
-                        nama_golongan:
-                          type: string
-                        nama_golongan_pangkat:
-                          type: string
-                        tmt_golongan:
-                          type: string
-                          format: date
-                        sk_nomor:
-                          type: string
-                        sk_tanggal:
-                          type: string
-                          format: date
-                        mk_golongan_tahun:
-                          type: integer
-                        mk_golongan_bulan:
-                          type: integer
-                        no_bkn:
-                          type: string
-                        tanggal_bkn:
-                          type: string
-                          format: date
-                        jumlah_angka_kredit_tambahan:
-                          type: integer
-                        jumlah_angka_kredit_utama:
-                          type: integer
-                  meta:
-                    $ref: "#/components/schemas/metaPagination"
-  /v1/kinerja:
-    get:
-      tags:
-        - Kinerja
-      summary: Lihat riwayat kinerja.
-      description: >-
-        Lihat riwayat kinerja dari user yang login, urut berdasarkan tahun.
-      operationId: listKinerja
-      parameters:
-        - $ref: "#/components/parameters/authRequired"
-        - $ref: "#/components/parameters/limit"
-        - $ref: "#/components/parameters/offset"
-      responses:
-        "200":
-          description: Sukses.
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                properties:
-                  data:
-                    type: array
-                    items:
-                      type: object
-                      additionalProperties: false
-                      properties:
-                        id:
-                          type: integer
-                        tahun:
-                          type: integer
-                        hasil_kinerja:
-                          type: string
-                        perilaku_kerja:
-                          type: string
-                        kuadran_kinerja:
-                          type: string
-                  meta:
-                    $ref: "#/components/schemas/metaPagination"
   /v1/pegawai:
     get:
       tags:
@@ -741,15 +480,351 @@ paths:
                           type: string
                   meta:
                     $ref: "#/components/schemas/metaPagination"
-  /v1/pekerjaan:
+  /v1/status-pegawai:
     get:
       tags:
-        - Pekerjaan
+        - Pegawai
+      summary: Daftar status pegawai.
+      description: Daftar status pegawai.
+      operationId: listStatusPegawai
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: string
+                        nama:
+                          type: string
+  /v1/riwayat-asesmen-nine-box:
+    get:
+      tags:
+        - Riwayat Asesmen Nine Box
+      summary: Lihat riwayat asesmen nine box.
+      description: >-
+        Lihat riwayat asesmen nine box dari user yang login, urut berdasarkan tahun.
+      operationId: listRiwayatAsesmenNineBox
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: integer
+                        tahun:
+                          type: string
+                        kesimpulan:
+                          type: string
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/riwayat-hukuman-disiplin:
+    get:
+      tags:
+        - Riwayat Hukuman Disiplin
+      summary: Lihat riwayat hukuman disiplin.
+      description: >-
+        Lihat riwayat hukuman disiplin dari user yang login, urut berdasarkan
+        tanggal mulai.
+      operationId: listRiwayatHukumanDisiplin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: integer
+                        jenis_hukuman:
+                          type: string
+                        nama_golongan:
+                          type: string
+                        nama_pangkat:
+                          type: string
+                        nomor_sk:
+                          type: string
+                        tanggal_sk:
+                          type: string
+                          format: date
+                        tanggal_mulai:
+                          type: string
+                          format: date
+                        tanggal_akhir:
+                          type: string
+                          format: date
+                        masa_tahun:
+                          type: integer
+                        masa_bulan:
+                          type: integer
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/riwayat-hukuman-disiplin/{id}/berkas:
+    get:
+      tags:
+        - Riwayat Hukuman Disiplin
+      summary: Lihat berkas riwayat hukuman disiplin.
+      description: >-
+        Lihat berkas riwayat hukuman disiplin berdasarkan id hukuman disiplin.
+      operationId: getBerkasRiwayatHukumanDisiplin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Hukuman Disiplin tidak ditemukan atau User tidak mempunyai akses.
+  /v1/riwayat-jabatan:
+    get:
+      tags:
+        - Riwayat Jabatan
+      summary: Lihat riwayat jabatan.
+      description: >-
+        Lihat riwayat jabatan dari user yang login, urut berdasarkan TMT.
+      operationId: listRiwayatJabatan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: integer
+                        jenis_jabatan:
+                          type: string
+                        nama_jabatan:
+                          type: string
+                        tmt_jabatan:
+                          type: string
+                          format: date
+                        no_sk:
+                          type: string
+                        tanggal_sk:
+                          type: string
+                          format: date
+                        satuan_kerja:
+                          type: string
+                        unit_organisasi:
+                          type: string
+                        status_plt:
+                          type: boolean
+                        kelas_jabatan:
+                          type: string
+                        periode_jabatan_start_date:
+                          type: string
+                          format: date
+                        periode_jabatan_end_date:
+                          type: string
+                          format: date
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/riwayat-kenaikan-gaji-berkala:
+    get:
+      tags:
+        - Riwayat Kenaikan Gaji Berkala
+      summary: Lihat riwayat kenaikan gaji berkala.
+      description: >-
+        Lihat riwayat kenaikan gaji berkala dari user yang login, urut
+        berdasarkan TMT.
+      operationId: listRiwayatKenaikanGajiBerkala
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: integer
+                        tmt_kgb:
+                          type: string
+                          format: date
+                        no_sk:
+                          type: string
+                        tgl_sk:
+                          type: string
+                          format: date
+                        gol_ruang:
+                          type: string
+                        gaji_pokok:
+                          type: string
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/riwayat-kepangkatan:
+    get:
+      tags:
+        - Riwayat Kepangkatan
+      summary: Lihat riwayat kepangkatan.
+      description: >-
+        Lihat riwayat kepangkatan dari user yang login, urut berdasarkan TMT.
+      operationId: listRiwayatKepangkatan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: integer
+                        id_jenis_kp:
+                          type: integer
+                        nama_jenis_kp:
+                          type: string
+                        id_golongan:
+                          type: integer
+                        nama_golongan:
+                          type: string
+                        nama_golongan_pangkat:
+                          type: string
+                        tmt_golongan:
+                          type: string
+                          format: date
+                        sk_nomor:
+                          type: string
+                        sk_tanggal:
+                          type: string
+                          format: date
+                        mk_golongan_tahun:
+                          type: integer
+                        mk_golongan_bulan:
+                          type: integer
+                        no_bkn:
+                          type: string
+                        tanggal_bkn:
+                          type: string
+                          format: date
+                        jumlah_angka_kredit_tambahan:
+                          type: integer
+                        jumlah_angka_kredit_utama:
+                          type: integer
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/riwayat-kinerja:
+    get:
+      tags:
+        - Riwayat Kinerja
+      summary: Lihat riwayat kinerja.
+      description: >-
+        Lihat riwayat kinerja dari user yang login, urut berdasarkan tahun.
+      operationId: listRiwayatKinerja
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: integer
+                        tahun:
+                          type: integer
+                        hasil_kinerja:
+                          type: string
+                        perilaku_kerja:
+                          type: string
+                        kuadran_kinerja:
+                          type: string
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/riwayat-pekerjaan:
+    get:
+      tags:
+        - Riwayat Pekerjaan
       summary: Lihat riwayat pekerjaan.
       description: >-
         Lihat riwayat pekerjaan dari user yang login, urut berdasarkan tanggal
         mulai.
-      operationId: listPekerjaan
+      operationId: listRiwayatPekerjaan
       parameters:
         - $ref: "#/components/parameters/authRequired"
         - $ref: "#/components/parameters/limit"
@@ -790,56 +865,15 @@ paths:
                           type: string
                   meta:
                     $ref: "#/components/schemas/metaPagination"
-  /v1/riwayat-penugasan:
-    get:
-      tags:
-        - Penugasan
-      summary: Lihat riwayat penugasan.
-      description: >-
-        Lihat riwayat penugasan dari user yang login, urut berdasarkan tanggal
-        mulai (terbaru di atas).
-      operationId: listPenugasan
-      parameters:
-        - $ref: "#/components/parameters/authRequired"
-        - $ref: "#/components/parameters/limit"
-        - $ref: "#/components/parameters/offset"
-      responses:
-        "200":
-          description: Sukses.
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                properties:
-                  data:
-                    type: array
-                    items:
-                      type: object
-                      additionalProperties: false
-                      properties:
-                        id:
-                          type: integer
-                        tipe_jabatan:
-                          type: string
-                        deskripsi_jabatan:
-                          type: string
-                        tanggal_mulai:
-                          type: string
-                          format: date
-                        tanggal_selesai:
-                          type: string
-                          format: date
-                  meta:
-                    $ref: "#/components/schemas/metaPagination"
   /v1/riwayat-pelatihan-fungsional:
     get:
       tags:
         - Riwayat Pelatihan Fungsional
-      summary: Lihat daftar pelatihan fungsional.
+      summary: Lihat daftar riwayat pelatihan fungsional.
       description: >-
-        Lihat daftar pelatihan fungsional dari user yang login, urut
+        Lihat daftar riwayat pelatihan fungsional dari user yang login, urut
         berdasarkan tanggal.
-      operationId: listPelatihanFungsional
+      operationId: listRiwayatPelatihanFungsional
       parameters:
         - $ref: "#/components/parameters/authRequired"
         - $ref: "#/components/parameters/offset"
@@ -1088,7 +1122,7 @@ paths:
       description: >-
         Lihat riwayat penghargaan dari user yang login, urut berdasarkan
         tanggal.
-      operationId: listPenghargaan
+      operationId: listRiwayatPenghargaan
       parameters:
         - $ref: "#/components/parameters/authRequired"
         - $ref: "#/components/parameters/limit"
@@ -1145,13 +1179,15 @@ paths:
                 format: binary
         "404":
           description: Riwayat Penghargaan tidak ditemukan atau User tidak mempunyai akses.
-  /v1/jenis-penghargaan:
+  /v1/riwayat-penugasan:
     get:
       tags:
-        - Jenis Penghargaan
-      summary: Daftar jenis penghargaan.
-      description: Daftar jenis penghargaan.
-      operationId: listJenisPenghargaan
+        - Riwayat Penugasan
+      summary: Lihat riwayat penugasan.
+      description: >-
+        Lihat riwayat penugasan dari user yang login, urut berdasarkan tanggal
+        mulai (terbaru di atas).
+      operationId: listRiwayatPenugasan
       parameters:
         - $ref: "#/components/parameters/authRequired"
         - $ref: "#/components/parameters/limit"
@@ -1172,18 +1208,26 @@ paths:
                       properties:
                         id:
                           type: integer
-                        nama:
+                        tipe_jabatan:
                           type: string
+                        deskripsi_jabatan:
+                          type: string
+                        tanggal_mulai:
+                          type: string
+                          format: date
+                        tanggal_selesai:
+                          type: string
+                          format: date
                   meta:
                     $ref: "#/components/schemas/metaPagination"
   /v1/riwayat-sertifikasi:
     get:
       tags:
-        - Sertifikasi
+        - Riwayat Sertifikasi
       summary: Lihat riwayat sertifikasi.
       description: >-
         Lihat riwayat sertifikasi dari user yang login, urut berdasarkan tahun desc.
-      operationId: listSertifikasi
+      operationId: listRiwayatSertifikasi
       parameters:
         - $ref: "#/components/parameters/authRequired"
         - $ref: "#/components/parameters/limit"
@@ -1215,11 +1259,11 @@ paths:
   /v1/riwayat-sertifikasi/{id}/berkas:
     get:
       tags:
-        - Sertifikasi
+        - Riwayat Sertifikasi
       summary: Lihat berkas riwayat sertifikasi.
       description: >-
         Lihat berkas riwayat sertifikasi berdasarkan id sertifikasi.
-      operationId: getBerkasSertifikasi
+      operationId: getBerkasRiwayatSertifikasi
       parameters:
         - $ref: "#/components/parameters/authRequired"
         - name: id
@@ -1237,89 +1281,6 @@ paths:
                 format: binary
         "404":
           description: Sertifikasi tidak ditemukan atau User tidak mempunyai akses.
-  /v1/status-pegawai:
-    get:
-      tags:
-        - Pegawai
-      summary: Daftar status pegawai.
-      description: Daftar status pegawai.
-      operationId: listStatusPegawai
-      parameters:
-        - $ref: "#/components/parameters/authRequired"
-      responses:
-        "200":
-          description: Sukses.
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                properties:
-                  data:
-                    type: array
-                    items:
-                      type: object
-                      additionalProperties: false
-                      properties:
-                        id:
-                          type: string
-                        nama:
-                          type: string
-  /v1/riwayat-jabatan:
-    get:
-      tags:
-        - Jabatan
-      summary: Lihat riwayat jabatan.
-      description: >-
-        Lihat riwayat jabatan dari user yang login, urut berdasarkan TMT.
-      operationId: listRiwayatJabatan
-      parameters:
-        - $ref: "#/components/parameters/authRequired"
-        - $ref: "#/components/parameters/limit"
-        - $ref: "#/components/parameters/offset"
-      responses:
-        "200":
-          description: Sukses.
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                properties:
-                  data:
-                    type: array
-                    items:
-                      type: object
-                      additionalProperties: false
-                      properties:
-                        id:
-                          type: integer
-                        jenis_jabatan:
-                          type: string
-                        nama_jabatan:
-                          type: string
-                        tmt_jabatan:
-                          type: string
-                          format: date
-                        no_sk:
-                          type: string
-                        tanggal_sk:
-                          type: string
-                          format: date
-                        satuan_kerja:
-                          type: string
-                        unit_organisasi:
-                          type: string
-                        status_plt:
-                          type: boolean
-                        kelas_jabatan:
-                          type: string
-                        periode_jabatan_start_date:
-                          type: string
-                          format: date
-                        periode_jabatan_end_date:
-                          type: string
-                          format: date
-                  meta:
-                    $ref: "#/components/schemas/metaPagination"
   /v1/tingkat-pendidikan:
     get:
       tags:
@@ -1327,7 +1288,7 @@ paths:
       summary: Lihat tingkat pendidikan.
       description: >-
         Lihat semua tingkat pendidikan.
-      operationId: ListTingkatPendidikan
+      operationId: listTingkatPendidikan
       parameters:
         - $ref: "#/components/parameters/authRequired"
       responses:
@@ -1348,6 +1309,47 @@ paths:
                           type: integer
                         nama:
                           type: string
+  /v1/unit-kerja:
+    get:
+      tags:
+        - Unit Kerja
+      summary: Daftar unit kerja.
+      description: Daftar unit kerja dengan fitur pencarian dan filter berdasarkan unit induk.
+      operationId: listUnitKerja
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+        - name: nama
+          in: query
+          description: Pencarian berdasarkan nama unit kerja
+          schema:
+            type: string
+        - name: unor_induk
+          in: query
+          description: Filter berdasarkan unit induk
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: string
+                        nama:
+                          type: string
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
 components:
   parameters:
     authRequired:

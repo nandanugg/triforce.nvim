@@ -8,7 +8,7 @@ import (
 )
 
 type repository interface {
-	GetJenisKP(ctx context.Context, arg repo.GetJenisKPParams) ([]repo.GetJenisKPRow, error)
+	ListJenisKP(ctx context.Context, arg repo.ListJenisKPParams) ([]repo.ListJenisKPRow, error)
 	CountJenisKP(ctx context.Context) (int64, error)
 }
 
@@ -26,7 +26,7 @@ type listJenisKPParams struct {
 }
 
 func (s *service) listJenisKP(ctx context.Context, arg listJenisKPParams) ([]jenisKp, int64, error) {
-	rows, err := s.repo.GetJenisKP(ctx, repo.GetJenisKPParams{
+	rows, err := s.repo.ListJenisKP(ctx, repo.ListJenisKPParams{
 		Limit:  int32(arg.Limit),
 		Offset: int32(arg.Offset),
 	})

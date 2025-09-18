@@ -9,10 +9,8 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/config"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/docs"
-	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/asesmenninebox"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/datapribadi"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/golongan"
-	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/hukumandisiplin"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/jabatan"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/jenisdiklat"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/jenishukuman"
@@ -20,18 +18,22 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/jeniskenaikanpangkat"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/jenispenghargaan"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/keluarga"
-	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/kenaikangajiberkala"
-	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/kepangkatan"
-	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/kinerja"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/pegawai"
-	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/pekerjaan"
-	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/pelatihanfungsional"
-	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/penghargaan"
-	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/penugasan"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/riwayatasesmenninebox"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/riwayathukumandisiplin"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/riwayatjabatan"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/riwayatkenaikangajiberkala"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/riwayatkepangkatan"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/riwayatkinerja"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/riwayatpekerjaan"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/riwayatpelatihanfungsional"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/riwayatpelatihanstruktural"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/riwayatpelatihanteknis"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/riwayatpendidikan"
-	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/sertifikasi"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/riwayatpenghargaan"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/riwayatpenugasan"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/riwayatsertifikasi"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/tingkatpendidikan"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/unitkerja"
 )
 
@@ -54,10 +56,8 @@ func main() {
 
 	mwAuth := api.NewAuthMiddleware(config.Service, keyfunc)
 
-	asesmenninebox.RegisterRoutes(e, db, mwAuth)
-	golongan.RegisterRoutes(e, dbRepository, mwAuth)
 	datapribadi.RegisterRoutes(e, dbRepository, mwAuth)
-	hukumandisiplin.RegisterRoutes(e, dbRepository, mwAuth)
+	golongan.RegisterRoutes(e, dbRepository, mwAuth)
 	jabatan.RegisterRoutes(e, dbRepository, mwAuth)
 	jenisdiklat.RegisterRoutes(e, dbRepository, mwAuth)
 	jenishukuman.RegisterRoutes(e, dbRepository, mwAuth)
@@ -65,19 +65,24 @@ func main() {
 	jeniskenaikanpangkat.RegisterRoutes(e, dbRepository, mwAuth)
 	jenispenghargaan.RegisterRoutes(e, dbRepository, mwAuth)
 	keluarga.RegisterRoutes(e, dbRepository, mwAuth)
-	kenaikangajiberkala.RegisterRoutes(e, db, mwAuth)
-	kepangkatan.RegisterRoutes(e, dbRepository, mwAuth)
-	kinerja.RegisterRoutes(e, db, mwAuth)
 	pegawai.RegisterRoutes(e, db, mwAuth)
-	pekerjaan.RegisterRoutes(e, db, mwAuth)
-	pelatihanfungsional.RegisterRoutes(e, dbRepository, mwAuth)
+	riwayatasesmenninebox.RegisterRoutes(e, db, mwAuth)
+	riwayathukumandisiplin.RegisterRoutes(e, dbRepository, mwAuth)
+	riwayatjabatan.RegisterRoutes(e, dbRepository, mwAuth)
+	riwayatkenaikangajiberkala.RegisterRoutes(e, db, mwAuth)
+	riwayatkepangkatan.RegisterRoutes(e, dbRepository, mwAuth)
+	riwayatkinerja.RegisterRoutes(e, db, mwAuth)
+	riwayatpekerjaan.RegisterRoutes(e, db, mwAuth)
+	riwayatpelatihanfungsional.RegisterRoutes(e, dbRepository, mwAuth)
 	riwayatpelatihanstruktural.RegisterRoutes(e, dbRepository, mwAuth)
 	riwayatpelatihanteknis.RegisterRoutes(e, dbRepository, mwAuth)
 	riwayatpendidikan.RegisterRoutes(e, dbRepository, mwAuth)
-	penghargaan.RegisterRoutes(e, dbRepository, mwAuth)
-	penugasan.RegisterRoutes(e, db, mwAuth)
-	sertifikasi.RegisterRoutes(e, dbRepository, mwAuth)
+	riwayatpenghargaan.RegisterRoutes(e, dbRepository, mwAuth)
+	riwayatpenugasan.RegisterRoutes(e, db, mwAuth)
+	riwayatsertifikasi.RegisterRoutes(e, dbRepository, mwAuth)
+	tingkatpendidikan.RegisterRoutes(e, dbRepository, mwAuth)
 	unitkerja.RegisterRoutes(e, dbRepository, mwAuth)
+
 	err = api.StartEchoServer(e, c.Server.Port)
 	exitIfError("Error starting server.", err)
 }

@@ -8,7 +8,7 @@ import (
 )
 
 type repository interface {
-	GetRefGolongan(ctx context.Context, arg repo.GetRefGolonganParams) ([]repo.GetRefGolonganRow, error)
+	ListRefGolongan(ctx context.Context, arg repo.ListRefGolonganParams) ([]repo.ListRefGolonganRow, error)
 	CountRefGolongan(ctx context.Context) (int64, error)
 }
 type service struct {
@@ -25,7 +25,7 @@ type listRefGolonganParams struct {
 }
 
 func (s *service) listRefGolongan(ctx context.Context, arg listRefGolonganParams) ([]refGolongan, int64, error) {
-	rows, err := s.repo.GetRefGolongan(ctx, repo.GetRefGolonganParams{
+	rows, err := s.repo.ListRefGolongan(ctx, repo.ListRefGolonganParams{
 		Limit:  int32(arg.Limit),
 		Offset: int32(arg.Offset),
 	})

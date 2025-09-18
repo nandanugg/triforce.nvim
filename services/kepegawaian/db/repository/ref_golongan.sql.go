@@ -21,32 +21,32 @@ func (q *Queries) CountRefGolongan(ctx context.Context) (int64, error) {
 	return count, err
 }
 
-const getRefGolongan = `-- name: GetRefGolongan :many
+const listRefGolongan = `-- name: ListRefGolongan :many
 SELECT id, nama, nama_pangkat FROM ref_golongan
 WHERE deleted_at IS NULL
 LIMIT $1 OFFSET $2
 `
 
-type GetRefGolonganParams struct {
+type ListRefGolonganParams struct {
 	Limit  int32 `db:"limit"`
 	Offset int32 `db:"offset"`
 }
 
-type GetRefGolonganRow struct {
+type ListRefGolonganRow struct {
 	ID          int32       `db:"id"`
 	Nama        pgtype.Text `db:"nama"`
 	NamaPangkat pgtype.Text `db:"nama_pangkat"`
 }
 
-func (q *Queries) GetRefGolongan(ctx context.Context, arg GetRefGolonganParams) ([]GetRefGolonganRow, error) {
-	rows, err := q.db.Query(ctx, getRefGolongan, arg.Limit, arg.Offset)
+func (q *Queries) ListRefGolongan(ctx context.Context, arg ListRefGolonganParams) ([]ListRefGolonganRow, error) {
+	rows, err := q.db.Query(ctx, listRefGolongan, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetRefGolonganRow
+	var items []ListRefGolonganRow
 	for rows.Next() {
-		var i GetRefGolonganRow
+		var i ListRefGolonganRow
 		if err := rows.Scan(&i.ID, &i.Nama, &i.NamaPangkat); err != nil {
 			return nil, err
 		}
