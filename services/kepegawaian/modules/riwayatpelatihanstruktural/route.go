@@ -1,4 +1,4 @@
-package pelatihanstruktural
+package riwayatpelatihanstruktural
 
 import (
 	"net/http"
@@ -12,5 +12,5 @@ func RegisterRoutes(e *echo.Echo, db dbRepo.Querier, mwAuth echo.MiddlewareFunc)
 	s := newService(db)
 	h := newHandler(s)
 
-	e.Add(http.MethodGet, "/v1/pelatihan-struktural", h.list, mwAuth)
+	e.Add(http.MethodGet, "/v1/riwayat-pelatihan-struktural", h.list, mwAuth)
 }

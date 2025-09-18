@@ -1,4 +1,4 @@
-package pelatihanteknis
+package riwayatpelatihanteknis
 
 import (
 	"log/slog"
@@ -23,8 +23,8 @@ type listRequest struct {
 }
 
 type listResponse struct {
-	Data []pelatihanTeknis  `json:"data"`
-	Meta api.MetaPagination `json:"meta"`
+	Data []riwayatPelatihanTeknis `json:"data"`
+	Meta api.MetaPagination       `json:"meta"`
 }
 
 func (h *handler) list(c echo.Context) error {

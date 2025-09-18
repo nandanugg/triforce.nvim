@@ -6,248 +6,466 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+// Anak pegawai
 type Anak struct {
-	ID           int64              `db:"id"`
-	PasanganID   pgtype.Int8        `db:"pasangan_id"`
-	Nama         pgtype.Text        `db:"nama"`
-	JenisKelamin pgtype.Text        `db:"jenis_kelamin"`
-	TanggalLahir pgtype.Date        `db:"tanggal_lahir"`
-	TempatLahir  pgtype.Text        `db:"tempat_lahir"`
-	StatusAnak   pgtype.Text        `db:"status_anak"`
-	PnsID        pgtype.Text        `db:"pns_id"`
-	Nip          pgtype.Text        `db:"nip"`
-	CreatedAt    pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt    pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt    pgtype.Timestamptz `db:"deleted_at"`
+	// id data anak
+	ID int64 `db:"id"`
+	// Kaitan ke data pasangan (jika anak dikaitkan ke pasangan tertentu)
+	PasanganID pgtype.Int8 `db:"pasangan_id"`
+	// Nama anak
+	Nama pgtype.Text `db:"nama"`
+	// Kode jenis kelamin anak, M: laki-laki, F: perempuan
+	JenisKelamin pgtype.Text `db:"jenis_kelamin"`
+	// Tanggal lahir anak
+	TanggalLahir pgtype.Date `db:"tanggal_lahir"`
+	// Tempat lahir anak
+	TempatLahir pgtype.Text `db:"tempat_lahir"`
+	// Status anak, 1: kandung, 2: angkat
+	StatusAnak pgtype.Text `db:"status_anak"`
+	// Referensi ke pegawai.pns_id
+	PnsID pgtype.Text `db:"pns_id"`
+	// NIP pegawai
+	Nip pgtype.Text `db:"nip"`
+	// Waktu perekaman data
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir pembaruan
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
+	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 }
 
+// Orang tua pegawai
 type OrangTua struct {
-	ID            int32              `db:"id"`
-	Hubungan      pgtype.Int2        `db:"hubungan"`
-	AkteMeninggal pgtype.Text        `db:"akte_meninggal"`
-	TglMeninggal  pgtype.Date        `db:"tgl_meninggal"`
-	Nama          pgtype.Text        `db:"nama"`
-	GelarDepan    pgtype.Text        `db:"gelar_depan"`
-	GelarBelakang pgtype.Text        `db:"gelar_belakang"`
-	TempatLahir   pgtype.Text        `db:"tempat_lahir"`
-	TanggalLahir  pgtype.Date        `db:"tanggal_lahir"`
-	AgamaID       pgtype.Int2        `db:"agama_id"`
-	Email         pgtype.Text        `db:"email"`
-	JenisDokumen  pgtype.Text        `db:"jenis_dokumen"`
-	NoDokumen     pgtype.Text        `db:"no_dokumen"`
-	Nip           pgtype.Text        `db:"nip"`
-	PnsID         pgtype.Text        `db:"pns_id"`
-	CreatedAt     pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt     pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt     pgtype.Timestamptz `db:"deleted_at"`
+	// id data orang tua
+	ID int32 `db:"id"`
+	// Kode hubungan, 1: ayah, 2: ibu
+	Hubungan pgtype.Int2 `db:"hubungan"`
+	// Nomor akte meninggal orang tua
+	AkteMeninggal pgtype.Text `db:"akte_meninggal"`
+	// Tanggal meninggal orang tua
+	TglMeninggal pgtype.Date `db:"tgl_meninggal"`
+	// Nama lengkap orang tua
+	Nama pgtype.Text `db:"nama"`
+	// Gelar di depan nama orang tua
+	GelarDepan pgtype.Text `db:"gelar_depan"`
+	// Gelar di belakang nama orang tua
+	GelarBelakang pgtype.Text `db:"gelar_belakang"`
+	// Tempat lahir orang tua
+	TempatLahir pgtype.Text `db:"tempat_lahir"`
+	// Tanggal lahir orang tua
+	TanggalLahir pgtype.Date `db:"tanggal_lahir"`
+	// id agama orang tua (rujuk ref_agama)
+	AgamaID pgtype.Int2 `db:"agama_id"`
+	// Alamat email orang tua (bila ada)
+	Email pgtype.Text `db:"email"`
+	// Jenis dokumen identitas, enum: KTP, PASPOR
+	JenisDokumen pgtype.Text `db:"jenis_dokumen"`
+	// Nomor dokumen identitas
+	NoDokumen pgtype.Text `db:"no_dokumen"`
+	// NIP pegawai
+	Nip pgtype.Text `db:"nip"`
+	// Referensi ke pegawai.pns_id
+	PnsID pgtype.Text `db:"pns_id"`
+	// Waktu perekaman data
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir pembaruan
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
+	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 }
 
+// Pasangan pegawai
 type Pasangan struct {
-	ID               int64              `db:"id"`
-	Pns              pgtype.Int2        `db:"pns"`
-	Nama             pgtype.Text        `db:"nama"`
-	TanggalMenikah   pgtype.Date        `db:"tanggal_menikah"`
-	AkteNikah        pgtype.Text        `db:"akte_nikah"`
-	TanggalMeninggal pgtype.Date        `db:"tanggal_meninggal"`
-	AkteMeninggal    pgtype.Text        `db:"akte_meninggal"`
-	TanggalCerai     pgtype.Date        `db:"tanggal_cerai"`
-	AkteCerai        pgtype.Text        `db:"akte_cerai"`
-	Karsus           pgtype.Text        `db:"karsus"`
-	Status           pgtype.Int2        `db:"status"`
-	Hubungan         pgtype.Int2        `db:"hubungan"`
-	PnsID            pgtype.Text        `db:"pns_id"`
-	Nip              pgtype.Text        `db:"nip"`
-	CreatedAt        pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt        pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt        pgtype.Timestamptz `db:"deleted_at"`
-	TanggalLahir     pgtype.Date        `db:"tanggal_lahir"`
+	// id data pasangan
+	ID int64 `db:"id"`
+	// Penanda apakah pasangan juga PNS
+	Pns pgtype.Int2 `db:"pns"`
+	// Nama lengkap pasangan
+	Nama pgtype.Text `db:"nama"`
+	// Tanggal pernikahan
+	TanggalMenikah pgtype.Date `db:"tanggal_menikah"`
+	// Nomor/berkas akta nikah
+	AkteNikah pgtype.Text `db:"akte_nikah"`
+	// Tanggal wafat pasangan (jika ada)
+	TanggalMeninggal pgtype.Date `db:"tanggal_meninggal"`
+	// Nomor/berkas akta kematian
+	AkteMeninggal pgtype.Text `db:"akte_meninggal"`
+	// Tanggal perceraian (jika ada)
+	TanggalCerai pgtype.Date `db:"tanggal_cerai"`
+	// Nomor/berkas akta cerai
+	AkteCerai pgtype.Text `db:"akte_cerai"`
+	// Nomor kartu suami istri
+	Karsus pgtype.Text `db:"karsus"`
+	// Status hubungan saat ini, 1: menikah, 2: cerai, 3: jada/duda
+	Status pgtype.Int2 `db:"status"`
+	// Kode hubungan, 1: istri, 2: suami
+	Hubungan pgtype.Int2 `db:"hubungan"`
+	// Referensi ke pegawai.pns_id
+	PnsID pgtype.Text `db:"pns_id"`
+	// NIP pegawai
+	Nip pgtype.Text `db:"nip"`
+	// Waktu perekaman data
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir pembaruan
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
+	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
+	// Tanggal lahir pasangan
+	TanggalLahir pgtype.Date `db:"tanggal_lahir"`
 }
 
+// Data utama pegawai
 type Pegawai struct {
-	ID                    int32              `db:"id"`
-	PnsID                 string             `db:"pns_id"`
-	NipLama               pgtype.Text        `db:"nip_lama"`
-	NipBaru               pgtype.Text        `db:"nip_baru"`
-	Nama                  pgtype.Text        `db:"nama"`
-	GelarDepan            pgtype.Text        `db:"gelar_depan"`
-	GelarBelakang         pgtype.Text        `db:"gelar_belakang"`
-	TempatLahirID         pgtype.Text        `db:"tempat_lahir_id"`
-	TglLahir              pgtype.Date        `db:"tgl_lahir"`
-	JenisKelamin          pgtype.Text        `db:"jenis_kelamin"`
-	AgamaID               pgtype.Int2        `db:"agama_id"`
-	JenisKawinID          pgtype.Int2        `db:"jenis_kawin_id"`
-	Nik                   pgtype.Text        `db:"nik"`
-	NoDarurat             pgtype.Text        `db:"no_darurat"`
-	NoHp                  pgtype.Text        `db:"no_hp"`
-	Email                 pgtype.Text        `db:"email"`
-	Alamat                pgtype.Text        `db:"alamat"`
-	Npwp                  pgtype.Text        `db:"npwp"`
-	Bpjs                  pgtype.Text        `db:"bpjs"`
-	JenisPegawaiID        pgtype.Int2        `db:"jenis_pegawai_id"`
-	KedudukanHukumID      pgtype.Int4        `db:"kedudukan_hukum_id"`
-	StatusCpnsPns         pgtype.Text        `db:"status_cpns_pns"`
-	KartuPegawai          pgtype.Text        `db:"kartu_pegawai"`
-	NoSkCpns              pgtype.Text        `db:"no_sk_cpns"`
-	TglSkCpns             pgtype.Date        `db:"tgl_sk_cpns"`
-	TmtCpns               pgtype.Date        `db:"tmt_cpns"`
-	TmtPns                pgtype.Date        `db:"tmt_pns"`
-	GolAwalID             pgtype.Int2        `db:"gol_awal_id"`
-	GolID                 pgtype.Int2        `db:"gol_id"`
-	TmtGolongan           pgtype.Date        `db:"tmt_golongan"`
-	MkTahun               pgtype.Int2        `db:"mk_tahun"`
-	MkBulan               pgtype.Int2        `db:"mk_bulan"`
-	JabatanID             pgtype.Text        `db:"jabatan_id"`
-	TmtJabatan            pgtype.Date        `db:"tmt_jabatan"`
-	PendidikanID          pgtype.Text        `db:"pendidikan_id"`
-	TahunLulus            pgtype.Int2        `db:"tahun_lulus"`
-	KpknID                pgtype.Text        `db:"kpkn_id"`
-	LokasiKerjaID         pgtype.Text        `db:"lokasi_kerja_id"`
-	UnorID                pgtype.Text        `db:"unor_id"`
-	UnorIndukID           pgtype.Text        `db:"unor_induk_id"`
-	InstansiIndukID       pgtype.Text        `db:"instansi_induk_id"`
-	InstansiKerjaID       pgtype.Text        `db:"instansi_kerja_id"`
-	SatuanKerjaIndukID    pgtype.Text        `db:"satuan_kerja_induk_id"`
-	SatuanKerjaKerjaID    pgtype.Text        `db:"satuan_kerja_kerja_id"`
-	GolonganDarah         pgtype.Text        `db:"golongan_darah"`
-	Foto                  pgtype.Text        `db:"foto"`
-	TmtPensiun            pgtype.Date        `db:"tmt_pensiun"`
-	LokasiKerja           pgtype.Text        `db:"lokasi_kerja"`
-	JmlIstri              pgtype.Int2        `db:"jml_istri"`
-	JmlAnak               pgtype.Int2        `db:"jml_anak"`
-	NoSuratDokter         pgtype.Text        `db:"no_surat_dokter"`
-	TglSuratDokter        pgtype.Date        `db:"tgl_surat_dokter"`
-	NoBebasNarkoba        pgtype.Text        `db:"no_bebas_narkoba"`
-	TglBebasNarkoba       pgtype.Date        `db:"tgl_bebas_narkoba"`
-	NoCatatanPolisi       pgtype.Text        `db:"no_catatan_polisi"`
-	TglCatatanPolisi      pgtype.Date        `db:"tgl_catatan_polisi"`
-	AkteKelahiran         pgtype.Text        `db:"akte_kelahiran"`
-	StatusHidup           pgtype.Text        `db:"status_hidup"`
-	AkteMeninggal         pgtype.Text        `db:"akte_meninggal"`
-	TglMeninggal          pgtype.Date        `db:"tgl_meninggal"`
-	NoAskes               pgtype.Text        `db:"no_askes"`
-	NoTaspen              pgtype.Text        `db:"no_taspen"`
-	TglNpwp               pgtype.Date        `db:"tgl_npwp"`
-	TempatLahir           pgtype.Text        `db:"tempat_lahir"`
-	TingkatPendidikanID   pgtype.Int2        `db:"tingkat_pendidikan_id"`
-	TempatLahirNama       pgtype.Text        `db:"tempat_lahir_nama"`
-	JenisJabatanNama      pgtype.Text        `db:"jenis_jabatan_nama"`
-	JabatanNama           pgtype.Text        `db:"jabatan_nama"`
-	KpknNama              pgtype.Text        `db:"kpkn_nama"`
-	InstansiIndukNama     pgtype.Text        `db:"instansi_induk_nama"`
-	InstansiKerjaNama     pgtype.Text        `db:"instansi_kerja_nama"`
-	SatuanKerjaIndukNama  pgtype.Text        `db:"satuan_kerja_induk_nama"`
-	SatuanKerjaNama       pgtype.Text        `db:"satuan_kerja_nama"`
-	JabatanInstansiID     pgtype.Text        `db:"jabatan_instansi_id"`
-	Bup                   pgtype.Int2        `db:"bup"`
-	JabatanInstansiNama   pgtype.Text        `db:"jabatan_instansi_nama"`
-	JenisJabatanID        pgtype.Int2        `db:"jenis_jabatan_id"`
-	TerminatedDate        pgtype.Date        `db:"terminated_date"`
-	StatusPegawai         pgtype.Int2        `db:"status_pegawai"`
-	JabatanPpnpn          pgtype.Text        `db:"jabatan_ppnpn"`
-	JabatanInstansiRealID pgtype.Text        `db:"jabatan_instansi_real_id"`
-	CreatedBy             pgtype.Int4        `db:"created_by"`
-	UpdatedBy             pgtype.Int4        `db:"updated_by"`
-	EmailDikbudBak        pgtype.Text        `db:"email_dikbud_bak"`
-	EmailDikbud           pgtype.Text        `db:"email_dikbud"`
-	Kodecepat             pgtype.Text        `db:"kodecepat"`
-	IsDosen               pgtype.Int2        `db:"is_dosen"`
-	MkTahunSwasta         pgtype.Int2        `db:"mk_tahun_swasta"`
-	MkBulanSwasta         pgtype.Int2        `db:"mk_bulan_swasta"`
-	Kk                    pgtype.Text        `db:"kk"`
-	Nidn                  pgtype.Text        `db:"nidn"`
-	Ket                   pgtype.Text        `db:"ket"`
-	NoSkPemberhentian     pgtype.Text        `db:"no_sk_pemberhentian"`
-	StatusPegawaiBackup   pgtype.Int2        `db:"status_pegawai_backup"`
-	MasaKerja             pgtype.Text        `db:"masa_kerja"`
-	KartuAsn              pgtype.Text        `db:"kartu_asn"`
-	CreatedAt             pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt             pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt             pgtype.Timestamptz `db:"deleted_at"`
+	// Identitas numerik unik baris data pegawai
+	ID int32 `db:"id"`
+	// id pegawai negeri sipil (UUID) yang menjadi kunci rujukan antar tabel
+	PnsID string `db:"pns_id"`
+	// Nomor Induk Pegawai format lama
+	NipLama pgtype.Text `db:"nip_lama"`
+	// Nomor Induk Pegawai format baru (20 digit)
+	NipBaru pgtype.Text `db:"nip_baru"`
+	// Nama lengkap pegawai
+	Nama pgtype.Text `db:"nama"`
+	// Gelar akademik/jabatan di depan nama
+	GelarDepan pgtype.Text `db:"gelar_depan"`
+	// Gelar akademik/jabatan di belakang nama
+	GelarBelakang pgtype.Text `db:"gelar_belakang"`
+	// id tempat lahir (rujuk ref_lokasi)
+	TempatLahirID pgtype.Text `db:"tempat_lahir_id"`
+	// Tanggal lahir pegawai
+	TglLahir pgtype.Date `db:"tgl_lahir"`
+	// Kode jenis kelamin, M: laki-laki, F: perempuan
+	JenisKelamin pgtype.Text `db:"jenis_kelamin"`
+	// Kode agama (rujuk ref_agama)
+	AgamaID pgtype.Int2 `db:"agama_id"`
+	// Status perkawinan (rujuk ref_jenis_kawin)
+	JenisKawinID pgtype.Int2 `db:"jenis_kawin_id"`
+	// Nomor Induk Kependudukan
+	Nik pgtype.Text `db:"nik"`
+	// Nomor telepon yang dapat dihubungi dalam keadaan darurat
+	NoDarurat pgtype.Text `db:"no_darurat"`
+	// Nomor telepon seluler pegawai
+	NoHp pgtype.Text `db:"no_hp"`
+	// Alamat surat elektronik pribadi
+	Email pgtype.Text `db:"email"`
+	// Alamat domisili pegawai
+	Alamat pgtype.Text `db:"alamat"`
+	// Nomor Pokok Wajib Pajak
+	Npwp pgtype.Text `db:"npwp"`
+	// Nomor kepesertaan BPJS
+	Bpjs pgtype.Text `db:"bpjs"`
+	// id jenis pegawai (PNS/PPPK/dll; rujuk ref_jenis_pegawai)
+	JenisPegawaiID pgtype.Int2 `db:"jenis_pegawai_id"`
+	// id kedudukan hukum (rujuk ref_kedudukan_hukum)
+	KedudukanHukumID pgtype.Int4 `db:"kedudukan_hukum_id"`
+	// Status CPNS/PNS
+	StatusCpnsPns pgtype.Text `db:"status_cpns_pns"`
+	// Nomor kartu pegawai
+	KartuPegawai pgtype.Text `db:"kartu_pegawai"`
+	// Nomor SK pengangkatan CPNS
+	NoSkCpns pgtype.Text `db:"no_sk_cpns"`
+	// Tanggal SK pengangkatan CPNS
+	TglSkCpns pgtype.Date `db:"tgl_sk_cpns"`
+	// Tanggal mulai tugas (CPNS)
+	TmtCpns pgtype.Date `db:"tmt_cpns"`
+	// Tanggal mulai tugas (PNS)
+	TmtPns pgtype.Date `db:"tmt_pns"`
+	// Golongan awal saat pengangkatan (rujuk ref_golongan)
+	GolAwalID pgtype.Int2 `db:"gol_awal_id"`
+	// Golongan terakhir/aktif (rujuk ref_golongan)
+	GolID pgtype.Int2 `db:"gol_id"`
+	// Tanggal mulai berlaku golongan saat ini
+	TmtGolongan pgtype.Date `db:"tmt_golongan"`
+	// Masa kerja tahun
+	MkTahun pgtype.Int2 `db:"mk_tahun"`
+	// Masa kerja bulan
+	MkBulan pgtype.Int2 `db:"mk_bulan"`
+	// id jabatan pegawai (rujuk ref_jabatan)
+	JabatanID pgtype.Text `db:"jabatan_id"`
+	// Tanggal mulai jabatan
+	TmtJabatan pgtype.Date `db:"tmt_jabatan"`
+	// id pendidikan (rujuk ref_pendidikan)
+	PendidikanID pgtype.Text `db:"pendidikan_id"`
+	// Tahun kelulusan pendidikan terakhir
+	TahunLulus pgtype.Int2 `db:"tahun_lulus"`
+	// id KPPN/KPKN pembayaran gaji (rujuk ref_kpkn)
+	KpknID pgtype.Text `db:"kpkn_id"`
+	// id lokasi kerja (rujuk ref_lokasi)
+	LokasiKerjaID pgtype.Text `db:"lokasi_kerja_id"`
+	// Unit organisasi/kerja (rujuk unit_kerja)
+	UnorID pgtype.Text `db:"unor_id"`
+	// Unit organisasi/kerja induk (rujuk unit_kerja)
+	UnorIndukID pgtype.Text `db:"unor_induk_id"`
+	// id instansi induk pegawai (rujuk ref_instansi)
+	InstansiIndukID pgtype.Text `db:"instansi_induk_id"`
+	// id instansi tempat bekerja (rujuk ref_instansi)
+	InstansiKerjaID pgtype.Text `db:"instansi_kerja_id"`
+	// id satuan kerja induk pegawai
+	SatuanKerjaIndukID pgtype.Text `db:"satuan_kerja_induk_id"`
+	// id satuan kerja pegawai
+	SatuanKerjaKerjaID pgtype.Text `db:"satuan_kerja_kerja_id"`
+	// Golongan darah
+	GolonganDarah pgtype.Text `db:"golongan_darah"`
+	// Lokasi/URL berkas foto pegawai
+	Foto pgtype.Text `db:"foto"`
+	// Tanggal perkiraan/penetapan pensiun (BUP)
+	TmtPensiun pgtype.Date `db:"tmt_pensiun"`
+	// Nama lokasi kerja
+	LokasiKerja pgtype.Text `db:"lokasi_kerja"`
+	// Jumlah pasangan
+	JmlIstri pgtype.Int2 `db:"jml_istri"`
+	// Jumlah anak yang tercatat
+	JmlAnak pgtype.Int2 `db:"jml_anak"`
+	// Nomor surat pemeriksaan kesehatan
+	NoSuratDokter pgtype.Text `db:"no_surat_dokter"`
+	// Tanggal surat pemeriksaan kesehatan
+	TglSuratDokter pgtype.Date `db:"tgl_surat_dokter"`
+	// Nomor Surat Keterangan Bebas Narkoba
+	NoBebasNarkoba pgtype.Text `db:"no_bebas_narkoba"`
+	// Tanggal Surat Keterangan Bebas Narkoba
+	TglBebasNarkoba pgtype.Date `db:"tgl_bebas_narkoba"`
+	// Nomor Surat Catatan Kelakukan Baik dari kepolisian
+	NoCatatanPolisi pgtype.Text `db:"no_catatan_polisi"`
+	// Tanggal Surat Catatan Kelakukan Baik dari kepolisian
+	TglCatatanPolisi pgtype.Date `db:"tgl_catatan_polisi"`
+	// Nomor akte kelahiran
+	AkteKelahiran pgtype.Text `db:"akte_kelahiran"`
+	// Status hidup pegawai
+	StatusHidup pgtype.Text `db:"status_hidup"`
+	// Nomor akte meninggal
+	AkteMeninggal pgtype.Text `db:"akte_meninggal"`
+	// Tanggal meninggal pegawai
+	TglMeninggal pgtype.Date `db:"tgl_meninggal"`
+	// Nomor ASKES (jika tersedia/legacy)
+	NoAskes pgtype.Text `db:"no_askes"`
+	// Nomor Taspen
+	NoTaspen pgtype.Text `db:"no_taspen"`
+	// Tanggal terbit NPWP
+	TglNpwp pgtype.Date `db:"tgl_npwp"`
+	// Nama tempat lahir berdasarkan referensi ref_lokasi
+	TempatLahir pgtype.Text `db:"tempat_lahir"`
+	// Tingkat pendidikan terakhir (rujuk tingkat_pendidikan)
+	TingkatPendidikanID pgtype.Int2 `db:"tingkat_pendidikan_id"`
+	// Nama tempat lahir (teks bebas)
+	TempatLahirNama pgtype.Text `db:"tempat_lahir_nama"`
+	// Nama jenis jabatan
+	JenisJabatanNama pgtype.Text `db:"jenis_jabatan_nama"`
+	// Nama jabatan pegawai
+	JabatanNama pgtype.Text `db:"jabatan_nama"`
+	// Nama KPPN/KPKN pembayaran gaji
+	KpknNama pgtype.Text `db:"kpkn_nama"`
+	// Nama instansi induk pegawai
+	InstansiIndukNama pgtype.Text `db:"instansi_induk_nama"`
+	// Nama instansi tempat bekerja pegawai
+	InstansiKerjaNama pgtype.Text `db:"instansi_kerja_nama"`
+	// Nama satuan kerja induk pegawai
+	SatuanKerjaIndukNama pgtype.Text `db:"satuan_kerja_induk_nama"`
+	// Nama satuan kerja pegawai
+	SatuanKerjaNama pgtype.Text `db:"satuan_kerja_nama"`
+	// id jabatan instansi pegawai (rujuk ref_jabatan)
+	JabatanInstansiID pgtype.Text `db:"jabatan_instansi_id"`
+	// Batas usia pensiun
+	Bup pgtype.Int2 `db:"bup"`
+	// Nama jabatan instansi pegawai
+	JabatanInstansiNama pgtype.Text `db:"jabatan_instansi_nama"`
+	// id jenis jabatan
+	JenisJabatanID pgtype.Int2 `db:"jenis_jabatan_id"`
+	TerminatedDate pgtype.Date `db:"terminated_date"`
+	// Status pegawai, 1: pns, 2: honorer
+	StatusPegawai pgtype.Int2 `db:"status_pegawai"`
+	// Nama jabatan Pegawai Pemerintah Non Pegawai Negeri
+	JabatanPpnpn pgtype.Text `db:"jabatan_ppnpn"`
+	// id jabatan instansi pegawai (rujuk ref_jabatan)
+	JabatanInstansiRealID pgtype.Text `db:"jabatan_instansi_real_id"`
+	// id user yang memasukkan data pegawai
+	CreatedBy pgtype.Int4 `db:"created_by"`
+	// id user yang memperbarui data pegawai
+	UpdatedBy pgtype.Int4 `db:"updated_by"`
+	// Alamat surat elektronik backup untuk kepentingan pekerjaan
+	EmailDikbudBak pgtype.Text `db:"email_dikbud_bak"`
+	// Alamat surat elektronik untuk kepentingan pekerjaan
+	EmailDikbud pgtype.Text `db:"email_dikbud"`
+	Kodecepat   pgtype.Text `db:"kodecepat"`
+	IsDosen     pgtype.Int2 `db:"is_dosen"`
+	// Masa kerja tahun di swasta, sebelum menjadi ASN
+	MkTahunSwasta pgtype.Int2 `db:"mk_tahun_swasta"`
+	// Masa kerja bulan di swasta, sebelum menjadi ASN
+	MkBulanSwasta pgtype.Int2 `db:"mk_bulan_swasta"`
+	// Nomor kartu keluarga
+	Kk   pgtype.Text `db:"kk"`
+	Nidn pgtype.Text `db:"nidn"`
+	// Keterangan tambahan terhadap pegawai
+	Ket pgtype.Text `db:"ket"`
+	// Nomor SK pemberhentian dari PNS
+	NoSkPemberhentian pgtype.Text `db:"no_sk_pemberhentian"`
+	// Status pegawai backup
+	StatusPegawaiBackup pgtype.Int2 `db:"status_pegawai_backup"`
+	MasaKerja           pgtype.Text `db:"masa_kerja"`
+	// Nomor kartu ASN
+	KartuAsn pgtype.Text `db:"kartu_asn"`
+	// Waktu perekaman data dibuat
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir data diperbarui
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan lunak (soft delete) bila ada
+	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 }
 
+// Riwayat perpindahan unit kerja
 type PindahUnit struct {
-	ID                      int32              `db:"id"`
-	Nip                     string             `db:"nip"`
-	SuratPermohonanPindah   pgtype.Text        `db:"surat_permohonan_pindah"`
-	UnitAsal                pgtype.Text        `db:"unit_asal"`
-	UnitTujuan              pgtype.Text        `db:"unit_tujuan"`
-	SuratPernyataanMelepas  pgtype.Text        `db:"surat_pernyataan_melepas"`
-	SkKpTerakhir            pgtype.Text        `db:"sk_kp_terakhir"`
-	SkJabatan               pgtype.Text        `db:"sk_jabatan"`
-	Skp                     pgtype.Text        `db:"skp"`
-	SkTunkin                pgtype.Text        `db:"sk_tunkin"`
-	SuratPernyataanMenerima pgtype.Text        `db:"surat_pernyataan_menerima"`
-	NoSkPindah              pgtype.Text        `db:"no_sk_pindah"`
-	TanggalSkPindah         pgtype.Date        `db:"tanggal_sk_pindah"`
-	FileSk                  pgtype.Text        `db:"file_sk"`
-	StatusSatker            pgtype.Int2        `db:"status_satker"`
-	StatusBiro              pgtype.Int2        `db:"status_biro"`
-	JabatanID               pgtype.Int2        `db:"jabatan_id"`
-	Keterangan              pgtype.Text        `db:"keterangan"`
-	TanggalTmtPindah        pgtype.Date        `db:"tanggal_tmt_pindah"`
-	CreatedBy               pgtype.Int4        `db:"created_by"`
-	CreatedAt               pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt               pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt               pgtype.Timestamptz `db:"deleted_at"`
+	// id pindah unit
+	ID int32 `db:"id"`
+	// NIP pegawai
+	Nip string `db:"nip"`
+	// Lokasi penyimpanan berkas permohonan pindah
+	SuratPermohonanPindah pgtype.Text `db:"surat_permohonan_pindah"`
+	// Unit kerja asal (rujuk unit_kerja)
+	UnitAsal pgtype.Text `db:"unit_asal"`
+	// Unit kerja tujuan (rujuk unit_kerja)
+	UnitTujuan pgtype.Text `db:"unit_tujuan"`
+	// Lokasi penyimpanan berkas pernyataan melepas pegawai
+	SuratPernyataanMelepas pgtype.Text `db:"surat_pernyataan_melepas"`
+	// Nomor SK kenaikan pangkat terakhir
+	SkKpTerakhir pgtype.Text `db:"sk_kp_terakhir"`
+	// Nomor SK jabatan
+	SkJabatan pgtype.Text `db:"sk_jabatan"`
+	// Sasaran kinerja pegawai
+	Skp pgtype.Text `db:"skp"`
+	// Nomor SK tunjangan kinerja
+	SkTunkin pgtype.Text `db:"sk_tunkin"`
+	// Lokasi penyimpanan berkas pernyataan menerima pegawai
+	SuratPernyataanMenerima pgtype.Text `db:"surat_pernyataan_menerima"`
+	// Nomor SK pindah unit
+	NoSkPindah pgtype.Text `db:"no_sk_pindah"`
+	// Tanggal SK pindah unit
+	TanggalSkPindah pgtype.Date `db:"tanggal_sk_pindah"`
+	// Lokasi penyimpanan berkas pindah unit
+	FileSk pgtype.Text `db:"file_sk"`
+	// Status pengajuan pindah unit kerja di satuan kerja
+	StatusSatker pgtype.Int2 `db:"status_satker"`
+	// Status pengajuan pindah unit kerja di biro
+	StatusBiro pgtype.Int2 `db:"status_biro"`
+	// id jabatan terkait pada proses pindah (bila diisi)
+	JabatanID pgtype.Int2 `db:"jabatan_id"`
+	// Keterangan tambahan
+	Keterangan pgtype.Text `db:"keterangan"`
+	// TMT efektif perpindahan unit
+	TanggalTmtPindah pgtype.Date `db:"tanggal_tmt_pindah"`
+	// id user yang membuat data pindah unit
+	CreatedBy pgtype.Int4 `db:"created_by"`
+	// Waktu perekaman data
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir pembaruan
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
+	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 }
 
+// Referensi agama
 type RefAgama struct {
-	ID        int32              `db:"id"`
-	Nama      pgtype.Text        `db:"nama"`
+	// id agama
+	ID int32 `db:"id"`
+	// Nama agama
+	Nama pgtype.Text `db:"nama"`
+	// Waktu perekaman data
 	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir pembaruan
 	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
 	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 }
 
+// Referensi golongan
 type RefGolongan struct {
-	ID          int32              `db:"id"`
-	Nama        pgtype.Text        `db:"nama"`
-	NamaPangkat pgtype.Text        `db:"nama_pangkat"`
-	Nama2       pgtype.Text        `db:"nama_2"`
-	Gol         pgtype.Int2        `db:"gol"`
-	GolPppk     pgtype.Text        `db:"gol_pppk"`
-	CreatedAt   pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt   pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt   pgtype.Timestamptz `db:"deleted_at"`
-}
-
-type RefInstansi struct {
-	ID        string             `db:"id"`
-	Nama      pgtype.Text        `db:"nama"`
+	// id golongan
+	ID int32 `db:"id"`
+	// Nama singkat golongan (mis. III/a)
+	Nama pgtype.Text `db:"nama"`
+	// Nama pangkat resmi
+	NamaPangkat pgtype.Text `db:"nama_pangkat"`
+	// Nama singkat golongan lainnya (mis. 3a)
+	Nama2 pgtype.Text `db:"nama_2"`
+	// Golongan pada PNS
+	Gol pgtype.Int2 `db:"gol"`
+	// Golongan pada PPPK
+	GolPppk pgtype.Text `db:"gol_pppk"`
+	// Waktu perekaman data
 	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir pembaruan
 	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
 	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 }
 
+// Referensi instansi
+type RefInstansi struct {
+	// id instansi
+	ID string `db:"id"`
+	// Nama instansi
+	Nama pgtype.Text `db:"nama"`
+	// Waktu perekaman data
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir pembaruan
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
+	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
+}
+
+// Referensi jabatan
 type RefJabatan struct {
-	KodeJabatan     string             `db:"kode_jabatan"`
-	ID              int32              `db:"id"`
-	No              int32              `db:"no"`
-	NamaJabatan     pgtype.Text        `db:"nama_jabatan"`
-	NamaJabatanFull pgtype.Text        `db:"nama_jabatan_full"`
-	JenisJabatan    pgtype.Int2        `db:"jenis_jabatan"`
-	Kelas           pgtype.Int2        `db:"kelas"`
-	Pensiun         pgtype.Int2        `db:"pensiun"`
-	KodeBkn         pgtype.Text        `db:"kode_bkn"`
-	NamaJabatanBkn  pgtype.Text        `db:"nama_jabatan_bkn"`
-	KategoriJabatan pgtype.Text        `db:"kategori_jabatan"`
-	BknID           pgtype.Text        `db:"bkn_id"`
-	CreatedAt       pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt       pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt       pgtype.Timestamptz `db:"deleted_at"`
+	// Kode unik jabatan
+	KodeJabatan string `db:"kode_jabatan"`
+	// id jabatan
+	ID int32 `db:"id"`
+	// sama dengan id jabatan
+	No int32 `db:"no"`
+	// Nama jabatan
+	NamaJabatan pgtype.Text `db:"nama_jabatan"`
+	// Nama jabatan lengkap
+	NamaJabatanFull pgtype.Text `db:"nama_jabatan_full"`
+	// Kode jenis jabatan
+	JenisJabatan pgtype.Int2 `db:"jenis_jabatan"`
+	// Kelas jabatan
+	Kelas pgtype.Int2 `db:"kelas"`
+	// Usia pensiun jabatan terkait
+	Pensiun pgtype.Int2 `db:"pensiun"`
+	// Kode pada sistem BKN
+	KodeBkn pgtype.Text `db:"kode_bkn"`
+	// Nama jabatan pada sistem BKN
+	NamaJabatanBkn pgtype.Text `db:"nama_jabatan_bkn"`
+	// Nama kategori jabatan
+	KategoriJabatan pgtype.Text `db:"kategori_jabatan"`
+	// id pada sistem BKN
+	BknID pgtype.Text `db:"bkn_id"`
+	// Waktu perekaman data
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir pembaruan
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
+	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 }
 
+// Referensi jenis diklat
 type RefJenisDiklat struct {
-	ID          int32              `db:"id"`
-	BknID       pgtype.Int2        `db:"bkn_id"`
-	JenisDiklat pgtype.Text        `db:"jenis_diklat"`
-	Kode        pgtype.Text        `db:"kode"`
-	Status      pgtype.Int2        `db:"status"`
-	CreatedAt   pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt   pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt   pgtype.Timestamptz `db:"deleted_at"`
+	// id jenis diklat
+	ID int32 `db:"id"`
+	// id pada sistem BKN
+	BknID pgtype.Int2 `db:"bkn_id"`
+	// Nama jenis diklat
+	JenisDiklat pgtype.Text `db:"jenis_diklat"`
+	// kode jenis diklat
+	Kode pgtype.Text `db:"kode"`
+	// status jenis diklat
+	Status pgtype.Int2 `db:"status"`
+	// Waktu perekaman data
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir pembaruan
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
+	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 }
 
+// Referensi jenis diklat fungsional
 type RefJenisDiklatFungsional struct {
 	ID        int32              `db:"id"`
 	Nama      pgtype.Text        `db:"nama"`
@@ -256,6 +474,7 @@ type RefJenisDiklatFungsional struct {
 	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 }
 
+// Referensi jenis diklat struktural
 type RefJenisDiklatStruktural struct {
 	ID        int32              `db:"id"`
 	Nama      pgtype.Text        `db:"nama"`
@@ -264,177 +483,319 @@ type RefJenisDiklatStruktural struct {
 	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 }
 
+// Referensi jenis hukuman disiplin
 type RefJenisHukuman struct {
-	ID                 int32              `db:"id"`
-	DikbudHrID         pgtype.Text        `db:"dikbud_hr_id"`
-	Nama               pgtype.Text        `db:"nama"`
-	TingkatHukuman     pgtype.Text        `db:"tingkat_hukuman"`
-	NamaTingkatHukuman pgtype.Text        `db:"nama_tingkat_hukuman"`
-	CreatedAt          pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt          pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt          pgtype.Timestamptz `db:"deleted_at"`
+	// id jenis hukuman disiplin
+	ID int32 `db:"id"`
+	// id jenis hukuman disiplin pada Dikbud HR
+	DikbudHrID pgtype.Text `db:"dikbud_hr_id"`
+	// Nama jenis hukuman disiplin
+	Nama pgtype.Text `db:"nama"`
+	// Nama pendek jenis hukuman disiplin, R: Ringan, S: Sedang, B: Berat
+	TingkatHukuman pgtype.Text `db:"tingkat_hukuman"`
+	// Nama jenis tingkat hukuman disiplin
+	NamaTingkatHukuman pgtype.Text `db:"nama_tingkat_hukuman"`
+	// Waktu perekaman data
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir pembaruan
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
+	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 }
 
+// Referensi jenis jabatan
 type RefJenisJabatan struct {
-	ID        int32              `db:"id"`
-	Nama      pgtype.Text        `db:"nama"`
+	// id jenis jabatan
+	ID int32 `db:"id"`
+	// Nama jenis jabatan
+	Nama pgtype.Text `db:"nama"`
+	// Waktu perekaman data
 	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir pembaruan
 	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
 	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 }
 
+// Referensi status pernikahan
 type RefJenisKawin struct {
-	ID        int32              `db:"id"`
-	Nama      pgtype.Text        `db:"nama"`
+	// id status perkawinan
+	ID int32 `db:"id"`
+	// Nama status perkawinan
+	Nama pgtype.Text `db:"nama"`
+	// Waktu perekaman data
 	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir pembaruan
 	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
 	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 }
 
+// Referensi jenis kenaikan pangkat
 type RefJenisKp struct {
-	ID         int32              `db:"id"`
-	DikbudHrID pgtype.Text        `db:"dikbud_hr_id"`
-	Nama       pgtype.Text        `db:"nama"`
-	CreatedAt  pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt  pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt  pgtype.Timestamptz `db:"deleted_at"`
+	// id jenis kenaikan pangkat
+	ID int32 `db:"id"`
+	// id jenis kenaikan pangkat pada Dikbud HR
+	DikbudHrID pgtype.Text `db:"dikbud_hr_id"`
+	// Nama jenis kenaikan pangkat
+	Nama pgtype.Text `db:"nama"`
+	// Waktu perekaman data
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir pembaruan
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
+	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 }
 
+// Referensi jenis pegawai
 type RefJenisPegawai struct {
-	ID         int32              `db:"id"`
-	DikbudHrID pgtype.Text        `db:"dikbud_hr_id"`
-	Nama       pgtype.Text        `db:"nama"`
-	CreatedAt  pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt  pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt  pgtype.Timestamptz `db:"deleted_at"`
+	// id jenis pegawai
+	ID int32 `db:"id"`
+	// id jenis pegawai pada Dikbud HR
+	DikbudHrID pgtype.Text `db:"dikbud_hr_id"`
+	// Nama jenis pegawai
+	Nama pgtype.Text `db:"nama"`
+	// Waktu perekaman data
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir pembaruan
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
+	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 }
 
+// Referensi jenis penghargaan
 type RefJenisPenghargaan struct {
-	ID        int32              `db:"id"`
-	Nama      pgtype.Text        `db:"nama"`
+	// id jenis penghargaan
+	ID int32 `db:"id"`
+	// Nama jenis penghargaan
+	Nama pgtype.Text `db:"nama"`
+	// Waktu perekaman data
 	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir pembaruan
 	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
 	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 }
 
+// Referensi jenis satuan kerja
 type RefJenisSatker struct {
-	ID        int32              `db:"id"`
-	Nama      pgtype.Text        `db:"nama"`
+	// id jenis satuan kerja
+	ID int32 `db:"id"`
+	// Nama jenis satuan kerja
+	Nama pgtype.Text `db:"nama"`
+	// Waktu perekaman data
 	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir pembaruan
 	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
 	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 }
 
+// Referensi kedudukan hukum
 type RefKedudukanHukum struct {
-	ID         int32              `db:"id"`
-	DikbudHrID pgtype.Text        `db:"dikbud_hr_id"`
-	Nama       pgtype.Text        `db:"nama"`
-	CreatedAt  pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt  pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt  pgtype.Timestamptz `db:"deleted_at"`
-	IsPppk     pgtype.Bool        `db:"is_pppk"`
-}
-
-type RefKelasJabatan struct {
-	ID               int32            `db:"id"`
-	KelasJabatan     pgtype.Text      `db:"kelas_jabatan"`
-	TunjanganKinerja pgtype.Int8      `db:"tunjangan_kinerja"`
-	CreatedAt        pgtype.Timestamp `db:"created_at"`
-	UpdatedAt        pgtype.Timestamp `db:"updated_at"`
-}
-
-type RefKpkn struct {
-	ID        string             `db:"id"`
-	Nama      pgtype.Text        `db:"nama"`
+	// id kedudukan hukum
+	ID int32 `db:"id"`
+	// id kedudukan hukum pada Dikbud HR
+	DikbudHrID pgtype.Text `db:"dikbud_hr_id"`
+	// Nama kedudukan hukum
+	Nama pgtype.Text `db:"nama"`
+	// Waktu perekaman data
 	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir pembaruan
 	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
+	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
+	// Apakah kedudukan hukum merupakan PPPK
+	IsPppk pgtype.Bool `db:"is_pppk"`
+}
+
+// Referensi kelas jabatan
+type RefKelasJabatan struct {
+	// id kelas jabatan
+	ID int32 `db:"id"`
+	// Nama kelas jabatan
+	KelasJabatan pgtype.Text `db:"kelas_jabatan"`
+	// Nilai tunjangan kinerja pada kelas jabatan terkait
+	TunjanganKinerja pgtype.Int8 `db:"tunjangan_kinerja"`
+	// Waktu perekaman data
+	CreatedAt pgtype.Timestamp `db:"created_at"`
+	// Waktu terakhir pembaruan
+	UpdatedAt pgtype.Timestamp `db:"updated_at"`
+}
+
+// Referensi kantor pelayanan kekayaan negara
+type RefKpkn struct {
+	// id KPPN/KPKN
+	ID string `db:"id"`
+	// Nama KPPN/KPKN
+	Nama pgtype.Text `db:"nama"`
+	// Waktu perekaman data
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir pembaruan
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
 	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 }
 
+// Referensi lokasi
 type RefLokasi struct {
-	ID             string             `db:"id"`
-	KanregID       pgtype.Text        `db:"kanreg_id"`
-	LokasiID       pgtype.Text        `db:"lokasi_id"`
-	Nama           pgtype.Text        `db:"nama"`
-	Jenis          pgtype.Text        `db:"jenis"`
-	JenisKabupaten pgtype.Text        `db:"jenis_kabupaten"`
-	JenisDesa      pgtype.Text        `db:"jenis_desa"`
-	Ibukota        pgtype.Text        `db:"ibukota"`
-	CreatedAt      pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt      pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt      pgtype.Timestamptz `db:"deleted_at"`
+	// id lokasi
+	ID string `db:"id"`
+	// id kantor regional
+	KanregID pgtype.Text `db:"kanreg_id"`
+	// id lokasi wilayah administratif 1 tingkat di atasnya
+	LokasiID pgtype.Text `db:"lokasi_id"`
+	// Nama lokasi
+	Nama pgtype.Text `db:"nama"`
+	// Jenis lokasi, P: Provinsi, KA: Kota, KB: Kabupaten, KC: Kecamatan, DE: Desa, NG: Negara
+	Jenis pgtype.Text `db:"jenis"`
+	// Jenis kabupaten, KOT: Kota, KBP: Kabupaten
+	JenisKabupaten pgtype.Text `db:"jenis_kabupaten"`
+	// Jenis desa, K: Kelurahan, D: Desa
+	JenisDesa pgtype.Text `db:"jenis_desa"`
+	// Nama ibu kota
+	Ibukota pgtype.Text `db:"ibukota"`
+	// Waktu perekaman data
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir pembaruan
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
+	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 }
 
+// Referensi pendidikan
 type RefPendidikan struct {
-	ID                  string             `db:"id"`
-	TingkatPendidikanID pgtype.Int2        `db:"tingkat_pendidikan_id"`
-	Nama                pgtype.Text        `db:"nama"`
-	CreatedAt           pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt           pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt           pgtype.Timestamptz `db:"deleted_at"`
+	// id pendidikan (UUID)
+	ID string `db:"id"`
+	// Tingkat pendidikan (rujuk tingkat_pendidikan)
+	TingkatPendidikanID pgtype.Int2 `db:"tingkat_pendidikan_id"`
+	// Nama program/jurusan/pendidikan
+	Nama pgtype.Text `db:"nama"`
+	// Waktu perekaman data
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir pembaruan
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
+	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 }
 
+// Referensi referensi pendidikan
 type RefTingkatPendidikan struct {
-	ID             int32              `db:"id"`
-	GolonganID     pgtype.Int4        `db:"golongan_id"`
-	Nama           pgtype.Text        `db:"nama"`
-	GolonganAwalID pgtype.Int4        `db:"golongan_awal_id"`
-	Abbreviation   pgtype.Text        `db:"abbreviation"`
-	Tingkat        pgtype.Int2        `db:"tingkat"`
-	CreatedAt      pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt      pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt      pgtype.Timestamptz `db:"deleted_at"`
+	// Kode/ID tingkat pendidikan
+	ID int32 `db:"id"`
+	// Kaitan ke golongan awal/rujukan (jika relevan)
+	GolonganID pgtype.Int4 `db:"golongan_id"`
+	// Nama tingkat pendidikan (mis. S1, S2)
+	Nama pgtype.Text `db:"nama"`
+	// id golongan awal
+	GolonganAwalID pgtype.Int4 `db:"golongan_awal_id"`
+	// Singkatan tingkat pendidikan
+	Abbreviation pgtype.Text `db:"abbreviation"`
+	// Urutan/level numerik pendidikan
+	Tingkat pgtype.Int2 `db:"tingkat"`
+	// Waktu perekaman data
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir pembaruan
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
+	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 }
 
+// Riwayat asesmen pegawai
 type RiwayatAssesman struct {
-	ID                  int32              `db:"id"`
-	PnsID               pgtype.Text        `db:"pns_id"`
-	PnsNip              pgtype.Text        `db:"pns_nip"`
-	Tahun               pgtype.Int2        `db:"tahun"`
-	FileUpload          pgtype.Text        `db:"file_upload"`
-	Nilai               pgtype.Float4      `db:"nilai"`
-	NilaiKinerja        pgtype.Float4      `db:"nilai_kinerja"`
-	TahunPenilaianID    pgtype.Int2        `db:"tahun_penilaian_id"`
-	TahunPenilaianTitle pgtype.Text        `db:"tahun_penilaian_title"`
-	NamaLengkap         pgtype.Text        `db:"nama_lengkap"`
-	PosisiID            pgtype.Text        `db:"posisi_id"`
-	UnitOrgID           pgtype.Text        `db:"unit_org_id"`
-	NamaUnor            pgtype.Text        `db:"nama_unor"`
-	SaranPengembangan   pgtype.Text        `db:"saran_pengembangan"`
-	FileUploadFbPotensi pgtype.Text        `db:"file_upload_fb_potensi"`
-	FileUploadLengkapPt pgtype.Text        `db:"file_upload_lengkap_pt"`
-	FileUploadFbPt      pgtype.Text        `db:"file_upload_fb_pt"`
-	FileUploadExists    pgtype.Int2        `db:"file_upload_exists"`
-	SatkerID            pgtype.Text        `db:"satker_id"`
-	CreatedAt           pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt           pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt           pgtype.Timestamptz `db:"deleted_at"`
+	// id data asesmen
+	ID int32 `db:"id"`
+	// id PNS
+	PnsID pgtype.Text `db:"pns_id"`
+	// NIP pegawai
+	PnsNip pgtype.Text `db:"pns_nip"`
+	// Tahun asesmen
+	Tahun pgtype.Int2 `db:"tahun"`
+	// Lokasi penyimpanan berkas asesmen
+	FileUpload pgtype.Text `db:"file_upload"`
+	// Hasil penilaian asesmen
+	Nilai pgtype.Float4 `db:"nilai"`
+	// Hasil penilaian kinerja
+	NilaiKinerja pgtype.Float4 `db:"nilai_kinerja"`
+	// id tahun penilaian
+	TahunPenilaianID pgtype.Int2 `db:"tahun_penilaian_id"`
+	// Judul tahun pada laporan hasil asesmen
+	TahunPenilaianTitle pgtype.Text `db:"tahun_penilaian_title"`
+	// Nama lengkap pegawai yang diases
+	NamaLengkap pgtype.Text `db:"nama_lengkap"`
+	// id posisi
+	PosisiID pgtype.Text `db:"posisi_id"`
+	// id unit organisasi
+	UnitOrgID pgtype.Text `db:"unit_org_id"`
+	// Nama unit organisasi pegawai yang diases
+	NamaUnor pgtype.Text `db:"nama_unor"`
+	// Saran pengembangan
+	SaranPengembangan pgtype.Text `db:"saran_pengembangan"`
+	// Lokasi penyimpanan berkas umpan balik asesmen pada asesmen-pegawai.kemendikdasmen.go.id
+	FileUploadFbPotensi pgtype.Text `db:"file_upload_fb_potensi"`
+	// Lokasi penyimpanan berkas lengkap hasil asesmen pada asesmen-pegawai.kemendikdasmen.go.id
+	FileUploadLengkapPt pgtype.Text `db:"file_upload_lengkap_pt"`
+	// Lokasi penyimpanan berkas umpan balik asesmen pada asesmen-pegawai.kemendikdasmen.go.id
+	FileUploadFbPt pgtype.Text `db:"file_upload_fb_pt"`
+	// Penanda apakah berkas telah diunggah
+	FileUploadExists pgtype.Int2 `db:"file_upload_exists"`
+	// id satuan kerja
+	SatkerID pgtype.Text `db:"satker_id"`
+	// Waktu perekaman data
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir pembaruan
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
+	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 }
 
+// Riwayat diklat pegawai
 type RiwayatDiklat struct {
-	ID                     int64              `db:"id"`
-	JenisDiklat            pgtype.Text        `db:"jenis_diklat"`
-	JenisDiklatID          pgtype.Int2        `db:"jenis_diklat_id"`
-	InstitusiPenyelenggara pgtype.Text        `db:"institusi_penyelenggara"`
-	NoSertifikat           pgtype.Text        `db:"no_sertifikat"`
-	TanggalMulai           pgtype.Date        `db:"tanggal_mulai"`
-	TanggalSelesai         pgtype.Date        `db:"tanggal_selesai"`
-	TahunDiklat            pgtype.Int2        `db:"tahun_diklat"`
-	DurasiJam              pgtype.Int2        `db:"durasi_jam"`
-	PnsOrangID             pgtype.Text        `db:"pns_orang_id"`
-	NipBaru                pgtype.Text        `db:"nip_baru"`
-	DiklatStrukturalID     pgtype.Text        `db:"diklat_struktural_id"`
-	NamaDiklat             pgtype.Text        `db:"nama_diklat"`
-	FileBase64             pgtype.Text        `db:"file_base64"`
-	RumpunDiklatNama       pgtype.Text        `db:"rumpun_diklat_nama"`
-	RumpunDiklatID         pgtype.Text        `db:"rumpun_diklat_id"`
-	SudahKirimSiasn        pgtype.Text        `db:"sudah_kirim_siasn"`
-	SiasnID                pgtype.Text        `db:"siasn_id"`
-	CreatedAt              pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt              pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt              pgtype.Timestamptz `db:"deleted_at"`
+	// id riwayat diklat
+	ID int64 `db:"id"`
+	// Nama jenis diklat
+	JenisDiklat pgtype.Text `db:"jenis_diklat"`
+	// Jenis diklat (rujuk ref_jenis_diklat)
+	JenisDiklatID pgtype.Int2 `db:"jenis_diklat_id"`
+	// Nama lembaga penyelenggara diklat
+	InstitusiPenyelenggara pgtype.Text `db:"institusi_penyelenggara"`
+	// Nomor sertifikat diklat
+	NoSertifikat pgtype.Text `db:"no_sertifikat"`
+	// Tanggal mulai diklat
+	TanggalMulai pgtype.Date `db:"tanggal_mulai"`
+	// Tanggal selesai diklat
+	TanggalSelesai pgtype.Date `db:"tanggal_selesai"`
+	// Tahun pelaksanaan diklat
+	TahunDiklat pgtype.Int2 `db:"tahun_diklat"`
+	// Durasi pelatihan dalam jam
+	DurasiJam pgtype.Int2 `db:"durasi_jam"`
+	// Referensi pegawai (rujuk pegawai.pns_id)
+	PnsOrangID pgtype.Text `db:"pns_orang_id"`
+	// NIP pegawai
+	NipBaru pgtype.Text `db:"nip_baru"`
+	// id referensi diklat struktural
+	DiklatStrukturalID pgtype.Text `db:"diklat_struktural_id"`
+	// Nama diklat
+	NamaDiklat pgtype.Text `db:"nama_diklat"`
+	// Berkas sertifikat diklat dalam format base64
+	FileBase64 pgtype.Text `db:"file_base64"`
+	// Nama rumpun diklat
+	RumpunDiklatNama pgtype.Text `db:"rumpun_diklat_nama"`
+	// id rumpun diklat
+	RumpunDiklatID pgtype.Text `db:"rumpun_diklat_id"`
+	// Penanda data sudah dikirim ke BKN
+	SudahKirimSiasn pgtype.Text `db:"sudah_kirim_siasn"`
+	// id referensi pada sistem BKN
+	SiasnID pgtype.Text `db:"siasn_id"`
+	// Waktu perekaman data
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir pembaruan
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
+	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 }
 
+// Riwayat diklat fungsional pegawai
 type RiwayatDiklatFungsional struct {
 	ID                     string             `db:"id"`
 	NipBaru                pgtype.Text        `db:"nip_baru"`
@@ -458,371 +819,692 @@ type RiwayatDiklatFungsional struct {
 	DeletedAt              pgtype.Timestamptz `db:"deleted_at"`
 }
 
+// Riwayat diklat struktural pegawai
 type RiwayatDiklatStruktural struct {
-	ID               string             `db:"id"`
-	PnsID            pgtype.Text        `db:"pns_id"`
-	PnsNip           pgtype.Text        `db:"pns_nip"`
-	PnsNama          pgtype.Text        `db:"pns_nama"`
-	JenisDiklatID    pgtype.Int4        `db:"jenis_diklat_id"`
-	NamaDiklat       pgtype.Text        `db:"nama_diklat"`
-	Nomor            pgtype.Text        `db:"nomor"`
-	Tanggal          pgtype.Date        `db:"tanggal"`
-	Tahun            pgtype.Int2        `db:"tahun"`
-	StatusData       pgtype.Text        `db:"status_data"`
-	FileBase64       pgtype.Text        `db:"file_base64"`
-	KeteranganBerkas pgtype.Text        `db:"keterangan_berkas"`
-	Lama             pgtype.Float4      `db:"lama"`
-	SiasnID          pgtype.Text        `db:"siasn_id"`
-	CreatedAt        pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt        pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt        pgtype.Timestamptz `db:"deleted_at"`
-}
-
-type RiwayatGolongan struct {
-	ID                        int32              `db:"id"`
-	PnsID                     pgtype.Text        `db:"pns_id"`
-	PnsNip                    pgtype.Text        `db:"pns_nip"`
-	PnsNama                   pgtype.Text        `db:"pns_nama"`
-	KodeJenisKp               pgtype.Text        `db:"kode_jenis_kp"`
-	JenisKp                   pgtype.Text        `db:"jenis_kp"`
-	GolonganID                pgtype.Int2        `db:"golongan_id"`
-	GolonganNama              pgtype.Text        `db:"golongan_nama"`
-	PangkatNama               pgtype.Text        `db:"pangkat_nama"`
-	SkNomor                   pgtype.Text        `db:"sk_nomor"`
-	NoBkn                     pgtype.Text        `db:"no_bkn"`
-	JumlahAngkaKreditUtama    pgtype.Int2        `db:"jumlah_angka_kredit_utama"`
-	JumlahAngkaKreditTambahan pgtype.Int2        `db:"jumlah_angka_kredit_tambahan"`
-	MkGolonganTahun           pgtype.Int2        `db:"mk_golongan_tahun"`
-	MkGolonganBulan           pgtype.Int2        `db:"mk_golongan_bulan"`
-	SkTanggal                 pgtype.Date        `db:"sk_tanggal"`
-	TanggalBkn                pgtype.Date        `db:"tanggal_bkn"`
-	TmtGolongan               pgtype.Date        `db:"tmt_golongan"`
-	StatusSatker              pgtype.Int4        `db:"status_satker"`
-	StatusBiro                pgtype.Int4        `db:"status_biro"`
-	PangkatTerakhir           pgtype.Int4        `db:"pangkat_terakhir"`
-	BknID                     pgtype.Text        `db:"bkn_id"`
-	FileBase64                pgtype.Text        `db:"file_base64"`
-	KeteranganBerkas          pgtype.Text        `db:"keterangan_berkas"`
-	ArsipID                   pgtype.Int8        `db:"arsip_id"`
-	GolonganAsal              pgtype.Text        `db:"golongan_asal"`
-	Basic                     pgtype.Text        `db:"basic"`
-	SkType                    pgtype.Int2        `db:"sk_type"`
-	Kanreg                    pgtype.Text        `db:"kanreg"`
-	Kpkn                      pgtype.Text        `db:"kpkn"`
-	Keterangan                pgtype.Text        `db:"keterangan"`
-	Lpnk                      pgtype.Text        `db:"lpnk"`
-	JenisRiwayat              pgtype.Text        `db:"jenis_riwayat"`
-	CreatedAt                 pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt                 pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt                 pgtype.Timestamptz `db:"deleted_at"`
-	JenisKpID                 pgtype.Int4        `db:"jenis_kp_id"`
-}
-
-type RiwayatHukdi struct {
-	ID                  int64              `db:"id"`
-	PnsID               pgtype.Text        `db:"pns_id"`
-	PnsNip              pgtype.Text        `db:"pns_nip"`
-	Nama                pgtype.Text        `db:"nama"`
-	GolonganID          pgtype.Int2        `db:"golongan_id"`
-	NamaGolongan        pgtype.Text        `db:"nama_golongan"`
-	JenisHukumanID      pgtype.Int2        `db:"jenis_hukuman_id"`
-	NamaJenisHukuman    pgtype.Text        `db:"nama_jenis_hukuman"`
-	SkNomor             pgtype.Text        `db:"sk_nomor"`
-	SkTanggal           pgtype.Date        `db:"sk_tanggal"`
-	TanggalMulaiHukuman pgtype.Date        `db:"tanggal_mulai_hukuman"`
-	MasaTahun           pgtype.Int2        `db:"masa_tahun"`
-	MasaBulan           pgtype.Int2        `db:"masa_bulan"`
-	TanggalAkhirHukuman pgtype.Date        `db:"tanggal_akhir_hukuman"`
-	NoPp                pgtype.Text        `db:"no_pp"`
-	NoSkPembatalan      pgtype.Text        `db:"no_sk_pembatalan"`
-	TanggalSkPembatalan pgtype.Date        `db:"tanggal_sk_pembatalan"`
-	BknID               pgtype.Text        `db:"bkn_id"`
-	FileBase64          pgtype.Text        `db:"file_base64"`
-	KeteranganBerkas    pgtype.Text        `db:"keterangan_berkas"`
-	CreatedAt           pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt           pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt           pgtype.Timestamptz `db:"deleted_at"`
-}
-
-type RiwayatJabatan struct {
-	BknID                   pgtype.Text        `db:"bkn_id"`
-	PnsID                   pgtype.Text        `db:"pns_id"`
-	PnsNip                  pgtype.Text        `db:"pns_nip"`
-	PnsNama                 pgtype.Text        `db:"pns_nama"`
-	UnorID                  pgtype.Text        `db:"unor_id"`
-	Unor                    pgtype.Text        `db:"unor"`
-	JenisJabatanID          pgtype.Int4        `db:"jenis_jabatan_id"`
-	JenisJabatan            pgtype.Text        `db:"jenis_jabatan"`
-	JabatanID               pgtype.Int4        `db:"jabatan_id"`
-	NamaJabatan             pgtype.Text        `db:"nama_jabatan"`
-	EselonID                pgtype.Text        `db:"eselon_id"`
-	Eselon                  pgtype.Text        `db:"eselon"`
-	TmtJabatan              pgtype.Date        `db:"tmt_jabatan"`
-	NoSk                    pgtype.Text        `db:"no_sk"`
-	TanggalSk               pgtype.Date        `db:"tanggal_sk"`
-	SatuanKerjaID           pgtype.Text        `db:"satuan_kerja_id"`
-	TmtPelantikan           pgtype.Date        `db:"tmt_pelantikan"`
-	IsActive                pgtype.Int2        `db:"is_active"`
-	Eselon1                 pgtype.Text        `db:"eselon1"`
-	Eselon2                 pgtype.Text        `db:"eselon2"`
-	Eselon3                 pgtype.Text        `db:"eselon3"`
-	Eselon4                 pgtype.Text        `db:"eselon4"`
-	ID                      int64              `db:"id"`
-	Catatan                 pgtype.Text        `db:"catatan"`
-	JenisSk                 pgtype.Text        `db:"jenis_sk"`
-	StatusSatker            pgtype.Int4        `db:"status_satker"`
-	StatusBiro              pgtype.Int4        `db:"status_biro"`
-	JabatanIDBkn            pgtype.Text        `db:"jabatan_id_bkn"`
-	UnorIDBkn               pgtype.Text        `db:"unor_id_bkn"`
-	TabelMutasiID           pgtype.Int8        `db:"tabel_mutasi_id"`
-	CreatedAt               pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt               pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt               pgtype.Timestamptz `db:"deleted_at"`
-	StatusPlt               pgtype.Bool        `db:"status_plt"`
-	KelasJabatanID          pgtype.Int4        `db:"kelas_jabatan_id"`
-	PeriodeJabatanStartDate pgtype.Date        `db:"periode_jabatan_start_date"`
-	PeriodeJabatanEndDate   pgtype.Date        `db:"periode_jabatan_end_date"`
-}
-
-type RiwayatKgb struct {
-	PegawaiID          pgtype.Int4        `db:"pegawai_id"`
-	TmtSk              pgtype.Date        `db:"tmt_sk"`
-	Alasan             pgtype.Text        `db:"alasan"`
-	MvKgbID            pgtype.Int8        `db:"mv_kgb_id"`
-	NoSk               pgtype.Text        `db:"no_sk"`
-	Pejabat            pgtype.Text        `db:"pejabat"`
-	ID                 int64              `db:"id"`
-	Ref                pgtype.Text        `db:"ref"`
-	TglSk              pgtype.Date        `db:"tgl_sk"`
-	PegawaiNama        pgtype.Text        `db:"pegawai_nama"`
-	PegawaiNip         pgtype.Text        `db:"pegawai_nip"`
-	BirthPlace         pgtype.Text        `db:"birth_place"`
-	BirthDate          pgtype.Date        `db:"birth_date"`
-	NGolRuang          pgtype.Text        `db:"n_gol_ruang"`
-	NGolTmt            pgtype.Date        `db:"n_gol_tmt"`
-	NMasakerjaThn      pgtype.Int2        `db:"n_masakerja_thn"`
-	NMasakerjaBln      pgtype.Int2        `db:"n_masakerja_bln"`
-	NGapok             pgtype.Text        `db:"n_gapok"`
-	NJabatanText       pgtype.Text        `db:"n_jabatan_text"`
-	NTmtJabatan        pgtype.Date        `db:"n_tmt_jabatan"`
-	NGolonganID        pgtype.Int4        `db:"n_golongan_id"`
-	UnitKerjaIndukText pgtype.Text        `db:"unit_kerja_induk_text"`
-	UnitKerjaIndukID   pgtype.Text        `db:"unit_kerja_induk_id"`
-	KantorPembayaran   pgtype.Text        `db:"kantor_pembayaran"`
-	LastEducation      pgtype.Text        `db:"last_education"`
-	LastEducationDate  pgtype.Date        `db:"last_education_date"`
-	CreatedAt          pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt          pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt          pgtype.Timestamptz `db:"deleted_at"`
-}
-
-type RiwayatKinerja struct {
-	ID                        int32              `db:"id"`
-	Tahun                     pgtype.Int4        `db:"tahun"`
-	Nip                       pgtype.Text        `db:"nip"`
-	Nama                      pgtype.Text        `db:"nama"`
-	NipPenilai                pgtype.Text        `db:"nip_penilai"`
-	NamaPenilai               pgtype.Text        `db:"nama_penilai"`
-	JabatanPenilai            pgtype.Text        `db:"jabatan_penilai"`
-	UnitKerjaPenilai          pgtype.Text        `db:"unit_kerja_penilai"`
-	NipPenilaiRealisasi       pgtype.Text        `db:"nip_penilai_realisasi"`
-	NamaPenilaiRealisasi      pgtype.Text        `db:"nama_penilai_realisasi"`
-	JabatanPenilaiRealisasi   pgtype.Text        `db:"jabatan_penilai_realisasi"`
-	UnitKerjaPenilaiRealisasi pgtype.Text        `db:"unit_kerja_penilai_realisasi"`
-	RatingHasilKerja          pgtype.Text        `db:"rating_hasil_kerja"`
-	RatingPerilakuKerja       pgtype.Text        `db:"rating_perilaku_kerja"`
-	PredikatKinerja           pgtype.Text        `db:"predikat_kinerja"`
-	Ref                       pgtype.UUID        `db:"ref"`
-	CreatedAt                 pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt                 pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt                 pgtype.Timestamptz `db:"deleted_at"`
-}
-
-type RiwayatKursu struct {
-	ID                     int32              `db:"id"`
-	PnsNip                 pgtype.Text        `db:"pns_nip"`
-	TipeKursus             pgtype.Text        `db:"tipe_kursus"`
-	JenisKursus            pgtype.Text        `db:"jenis_kursus"`
-	NamaKursus             pgtype.Text        `db:"nama_kursus"`
-	LamaKursus             pgtype.Float8      `db:"lama_kursus"`
-	TanggalKursus          pgtype.Date        `db:"tanggal_kursus"`
-	NoSertifikat           pgtype.Text        `db:"no_sertifikat"`
-	Instansi               pgtype.Text        `db:"instansi"`
-	InstitusiPenyelenggara pgtype.Text        `db:"institusi_penyelenggara"`
-	SiasnID                pgtype.Text        `db:"siasn_id"`
+	ID                     string             `db:"id"`
 	PnsID                  pgtype.Text        `db:"pns_id"`
+	PnsNip                 pgtype.Text        `db:"pns_nip"`
+	PnsNama                pgtype.Text        `db:"pns_nama"`
+	JenisDiklatID          pgtype.Int4        `db:"jenis_diklat_id"`
+	NamaDiklat             pgtype.Text        `db:"nama_diklat"`
+	Nomor                  pgtype.Text        `db:"nomor"`
+	Tanggal                pgtype.Date        `db:"tanggal"`
+	Tahun                  pgtype.Int2        `db:"tahun"`
+	StatusData             pgtype.Text        `db:"status_data"`
+	FileBase64             pgtype.Text        `db:"file_base64"`
+	KeteranganBerkas       pgtype.Text        `db:"keterangan_berkas"`
+	Lama                   pgtype.Float4      `db:"lama"`
+	SiasnID                pgtype.Text        `db:"siasn_id"`
 	CreatedAt              pgtype.Timestamptz `db:"created_at"`
 	UpdatedAt              pgtype.Timestamptz `db:"updated_at"`
 	DeletedAt              pgtype.Timestamptz `db:"deleted_at"`
+	InstitusiPenyelenggara pgtype.Text        `db:"institusi_penyelenggara"`
 }
 
+// Riwayat golongan pegawai
+type RiwayatGolongan struct {
+	// id riwayat golongan
+	ID int32 `db:"id"`
+	// Referensi pegawai (rujuk pegawai)
+	PnsID pgtype.Text `db:"pns_id"`
+	// NIP pegawai
+	PnsNip pgtype.Text `db:"pns_nip"`
+	// Nama pegawai
+	PnsNama pgtype.Text `db:"pns_nama"`
+	// Kode jenis kp
+	KodeJenisKp pgtype.Text `db:"kode_jenis_kp"`
+	// Jenis kp
+	JenisKp pgtype.Text `db:"jenis_kp"`
+	// id golongan pegawai
+	GolonganID pgtype.Int2 `db:"golongan_id"`
+	// Nama golongan pegawai
+	GolonganNama pgtype.Text `db:"golongan_nama"`
+	// Nama pangkat
+	PangkatNama pgtype.Text `db:"pangkat_nama"`
+	// Nomor SK pemberian golongan
+	SkNomor pgtype.Text `db:"sk_nomor"`
+	// Nomor BKN
+	NoBkn pgtype.Text `db:"no_bkn"`
+	// Jumlah angka kredit utama
+	JumlahAngkaKreditUtama pgtype.Int2 `db:"jumlah_angka_kredit_utama"`
+	// Jumlah angka kredit tambahan
+	JumlahAngkaKreditTambahan pgtype.Int2 `db:"jumlah_angka_kredit_tambahan"`
+	// Tahun pemberian golongan
+	MkGolonganTahun pgtype.Int2 `db:"mk_golongan_tahun"`
+	// Bulan pemberian golongan
+	MkGolonganBulan pgtype.Int2 `db:"mk_golongan_bulan"`
+	// Tanggal SK pemberian golongan
+	SkTanggal pgtype.Date `db:"sk_tanggal"`
+	// Tanggal BKN
+	TanggalBkn pgtype.Date `db:"tanggal_bkn"`
+	// Tanggal mulai efektif golongan
+	TmtGolongan pgtype.Date `db:"tmt_golongan"`
+	// Status verifikasi di tingkat satuan kerja
+	StatusSatker pgtype.Int4 `db:"status_satker"`
+	// Status verifikasi di tingkat biro
+	StatusBiro pgtype.Int4 `db:"status_biro"`
+	// Penanda apakah golongan merupakan golongan terakhir
+	PangkatTerakhir pgtype.Int4 `db:"pangkat_terakhir"`
+	// id pada sistem BKN
+	BknID pgtype.Text `db:"bkn_id"`
+	// Berkas dalam format base64
+	FileBase64 pgtype.Text `db:"file_base64"`
+	// Keterangan berkas
+	KeteranganBerkas pgtype.Text `db:"keterangan_berkas"`
+	// id referensi arsip
+	ArsipID pgtype.Int8 `db:"arsip_id"`
+	// Golongan asal pegawai
+	GolonganAsal pgtype.Text `db:"golongan_asal"`
+	// Penanda golongan basic
+	Basic pgtype.Text `db:"basic"`
+	// Jenis SK pemberian golongan
+	SkType pgtype.Int2 `db:"sk_type"`
+	// Penanda apakah pegawai memiliki keterangan reguler
+	Kanreg pgtype.Text `db:"kanreg"`
+	// Keterangan kpkn
+	Kpkn pgtype.Text `db:"kpkn"`
+	// Keterangan golongan
+	Keterangan pgtype.Text `db:"keterangan"`
+	// Keterangan lpnk
+	Lpnk pgtype.Text `db:"lpnk"`
+	// Jenis riwayat
+	JenisRiwayat pgtype.Text `db:"jenis_riwayat"`
+	// Waktu perekaman data
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir pembaruan
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
+	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
+	// Jenis kp (rujuk ref_jenis_kp)
+	JenisKpID pgtype.Int4 `db:"jenis_kp_id"`
+}
+
+// Riwayat hukuman disiplin pegawai
+type RiwayatHukdi struct {
+	// id riwayat hukuman disiplin
+	ID int64 `db:"id"`
+	// Referensi pegawai (rujuk pegawai.pns_id)
+	PnsID pgtype.Text `db:"pns_id"`
+	// NIP pegawai
+	PnsNip pgtype.Text `db:"pns_nip"`
+	// Nama pegawai
+	Nama pgtype.Text `db:"nama"`
+	// id golongan pegawai
+	GolonganID pgtype.Int2 `db:"golongan_id"`
+	// Nama golongan pegawai
+	NamaGolongan pgtype.Text `db:"nama_golongan"`
+	// id jenis hukuman (rujuk ref_jenis_hukuman)
+	JenisHukumanID pgtype.Int2 `db:"jenis_hukuman_id"`
+	// Nama jenis hukuman
+	NamaJenisHukuman pgtype.Text `db:"nama_jenis_hukuman"`
+	// Nomor SK hukuman
+	SkNomor pgtype.Text `db:"sk_nomor"`
+	// Tanggal SK hukuman
+	SkTanggal pgtype.Date `db:"sk_tanggal"`
+	// Tanggal mulai masa hukuman
+	TanggalMulaiHukuman pgtype.Date `db:"tanggal_mulai_hukuman"`
+	// Masa hukuman dalam tahun
+	MasaTahun pgtype.Int2 `db:"masa_tahun"`
+	// Masa hukuman dalam bulan
+	MasaBulan pgtype.Int2 `db:"masa_bulan"`
+	// Tanggal akhir masa hukuman
+	TanggalAkhirHukuman pgtype.Date `db:"tanggal_akhir_hukuman"`
+	// Nomor PP pegawai
+	NoPp pgtype.Text `db:"no_pp"`
+	// Nomor SK pembatalan
+	NoSkPembatalan pgtype.Text `db:"no_sk_pembatalan"`
+	// Tanggal SK pembatalan
+	TanggalSkPembatalan pgtype.Date `db:"tanggal_sk_pembatalan"`
+	// id pada sistem BKN
+	BknID pgtype.Text `db:"bkn_id"`
+	// Berkas dalam format base64
+	FileBase64 pgtype.Text `db:"file_base64"`
+	// Keterangan berkas
+	KeteranganBerkas pgtype.Text `db:"keterangan_berkas"`
+	// Waktu perekaman data
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir pembaruan
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
+	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
+}
+
+// Riwayat jabatan pegawai
+type RiwayatJabatan struct {
+	// id pada sistem BKN
+	BknID pgtype.Text `db:"bkn_id"`
+	// Referensi pegawai (rujuk pegawai.pns_id)
+	PnsID pgtype.Text `db:"pns_id"`
+	// NIP pegawai
+	PnsNip pgtype.Text `db:"pns_nip"`
+	// Nama pegawai
+	PnsNama pgtype.Text `db:"pns_nama"`
+	// id unit organisasi saat jabatan (rujuk unit_kerja)
+	UnorID pgtype.Text `db:"unor_id"`
+	// Nama unit organisasi
+	Unor pgtype.Text `db:"unor"`
+	// id jenis jabatan (struktural/fungsional/dll)
+	JenisJabatanID pgtype.Int4 `db:"jenis_jabatan_id"`
+	// Nama jenis jabatan
+	JenisJabatan pgtype.Text `db:"jenis_jabatan"`
+	// id jabatan (rujuk ref_jabatan)
+	JabatanID pgtype.Int4 `db:"jabatan_id"`
+	// Nama jabatan (teks)
+	NamaJabatan pgtype.Text `db:"nama_jabatan"`
+	// id eselon jabatan
+	EselonID pgtype.Text `db:"eselon_id"`
+	// Nama eselon jabatan
+	Eselon pgtype.Text `db:"eselon"`
+	// Tanggal mulai memangku jabatan
+	TmtJabatan pgtype.Date `db:"tmt_jabatan"`
+	// Nomor SK jabatan
+	NoSk pgtype.Text `db:"no_sk"`
+	// Tanggal SK jabatan
+	TanggalSk pgtype.Date `db:"tanggal_sk"`
+	// Satuan kerja terkait jabatan (rujuk unit_kerja)
+	SatuanKerjaID pgtype.Text `db:"satuan_kerja_id"`
+	// Tanggal mulai pelantikan
+	TmtPelantikan pgtype.Date `db:"tmt_pelantikan"`
+	// Penanda apakah jabatan masih aktif saat ini
+	IsActive pgtype.Int2 `db:"is_active"`
+	// Unit eselon 1 terkait jabatan
+	Eselon1 pgtype.Text `db:"eselon1"`
+	// Unit eselon 2 terkait jabatan
+	Eselon2 pgtype.Text `db:"eselon2"`
+	// Unit eselon 3 terkait jabatan
+	Eselon3 pgtype.Text `db:"eselon3"`
+	// Unit eselon 4 terkait jabatan
+	Eselon4 pgtype.Text `db:"eselon4"`
+	// id riwayat jabatan
+	ID int64 `db:"id"`
+	// Catatan atas riwayat jabatan
+	Catatan pgtype.Text `db:"catatan"`
+	// Kategori/jenis SK jabatan
+	JenisSk pgtype.Text `db:"jenis_sk"`
+	// Status persetujuan satuan kerja
+	StatusSatker pgtype.Int4 `db:"status_satker"`
+	// Status persetujuan biro kepegawaian
+	StatusBiro pgtype.Int4 `db:"status_biro"`
+	// id jabatan pada sistem BKN
+	JabatanIDBkn pgtype.Text `db:"jabatan_id_bkn"`
+	// id unit organisasi saat jabatan pada sistem BKN
+	UnorIDBkn pgtype.Text `db:"unor_id_bkn"`
+	// Referensi ke tabel mutasi
+	TabelMutasiID pgtype.Int8 `db:"tabel_mutasi_id"`
+	// Waktu perekaman data
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir pembaruan
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
+	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
+	// Status pelaksana tugas (PLT)
+	StatusPlt pgtype.Bool `db:"status_plt"`
+	// id kelas jabatan
+	KelasJabatanID pgtype.Int4 `db:"kelas_jabatan_id"`
+	// Tanggal mulai periode jabatan
+	PeriodeJabatanStartDate pgtype.Date `db:"periode_jabatan_start_date"`
+	// Tanggal akhir periode jabatan
+	PeriodeJabatanEndDate pgtype.Date `db:"periode_jabatan_end_date"`
+}
+
+// Riwayat kenaikan gaji berkala pegawai
+type RiwayatKgb struct {
+	// Referensi ke data pegawai
+	PegawaiID pgtype.Int4 `db:"pegawai_id"`
+	// TMT SK kenaikan gaji berkala
+	TmtSk pgtype.Date `db:"tmt_sk"`
+	// Alasan kenaikan gaji berkala
+	Alasan pgtype.Text `db:"alasan"`
+	// Referensi ke materialized view KGB
+	MvKgbID pgtype.Int8 `db:"mv_kgb_id"`
+	// Nomor SK kenaikan gaji berkala
+	NoSk pgtype.Text `db:"no_sk"`
+	// Pejabat yang menandatangani
+	Pejabat pgtype.Text `db:"pejabat"`
+	// id riwayat kenaikan gaji berkala
+	ID int64 `db:"id"`
+	// Nomor referensi
+	Ref pgtype.Text `db:"ref"`
+	// Tanggal SK kenaikan gaji berkala
+	TglSk pgtype.Date `db:"tgl_sk"`
+	// Nama pegawai
+	PegawaiNama pgtype.Text `db:"pegawai_nama"`
+	// NIP pegawai
+	PegawaiNip pgtype.Text `db:"pegawai_nip"`
+	// Tempat lahir pegawai
+	BirthPlace pgtype.Text `db:"birth_place"`
+	// Tanggal lahir pegawai
+	BirthDate pgtype.Date `db:"birth_date"`
+	// Golongan ruang
+	NGolRuang pgtype.Text `db:"n_gol_ruang"`
+	// Tanggal mulai golongan terkait
+	NGolTmt pgtype.Date `db:"n_gol_tmt"`
+	// Masa kerja dalam tahun
+	NMasakerjaThn pgtype.Int2 `db:"n_masakerja_thn"`
+	// Masa kerja dalam bulan
+	NMasakerjaBln pgtype.Int2 `db:"n_masakerja_bln"`
+	// Nilai gaji pokok
+	NGapok pgtype.Text `db:"n_gapok"`
+	// Nama jabatan
+	NJabatanText pgtype.Text `db:"n_jabatan_text"`
+	// Tanggal mulai memangku jabatan
+	NTmtJabatan pgtype.Date `db:"n_tmt_jabatan"`
+	// Referensi ke golongan
+	NGolonganID pgtype.Int4 `db:"n_golongan_id"`
+	// Nama unit kerja induk
+	UnitKerjaIndukText pgtype.Text `db:"unit_kerja_induk_text"`
+	// id unit kerja induk
+	UnitKerjaIndukID pgtype.Text `db:"unit_kerja_induk_id"`
+	// Kantor yang melakukan pembayaran gaji
+	KantorPembayaran pgtype.Text `db:"kantor_pembayaran"`
+	// Pendidikan terakhir
+	LastEducation pgtype.Text `db:"last_education"`
+	// Tanggal lulus pendidikan terakhir
+	LastEducationDate pgtype.Date `db:"last_education_date"`
+	// Waktu perekaman data
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir pembaruan
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
+	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
+}
+
+// Riwayat kinerja pegawai
+type RiwayatKinerja struct {
+	// id riwayat kinerja
+	ID int32 `db:"id"`
+	// Tahun penilaian
+	Tahun pgtype.Int4 `db:"tahun"`
+	// Nomor Induk Pegawai
+	Nip pgtype.Text `db:"nip"`
+	// Nama pegawai
+	Nama pgtype.Text `db:"nama"`
+	// NIP pejabat penilai
+	NipPenilai pgtype.Text `db:"nip_penilai"`
+	// Nama pejabat penilai
+	NamaPenilai pgtype.Text `db:"nama_penilai"`
+	// Jabatan pejabat penilai
+	JabatanPenilai pgtype.Text `db:"jabatan_penilai"`
+	// Unit kerja pejabat penilai
+	UnitKerjaPenilai pgtype.Text `db:"unit_kerja_penilai"`
+	// NIP pejabat penilai hasil aktual
+	NipPenilaiRealisasi pgtype.Text `db:"nip_penilai_realisasi"`
+	// Nama pejabat penilai hasil aktual
+	NamaPenilaiRealisasi pgtype.Text `db:"nama_penilai_realisasi"`
+	// Jabatan pejabat penilai hasil aktual
+	JabatanPenilaiRealisasi pgtype.Text `db:"jabatan_penilai_realisasi"`
+	// Unit kerja pejabat penilai hasil aktual
+	UnitKerjaPenilaiRealisasi pgtype.Text `db:"unit_kerja_penilai_realisasi"`
+	// Nilai hasil kerja
+	RatingHasilKerja pgtype.Text `db:"rating_hasil_kerja"`
+	// Nilai perilaku kerja
+	RatingPerilakuKerja pgtype.Text `db:"rating_perilaku_kerja"`
+	// Predikat penilaian kinerja
+	PredikatKinerja pgtype.Text `db:"predikat_kinerja"`
+	// Nomor referensi
+	Ref pgtype.UUID `db:"ref"`
+	// Waktu pembuatan data
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir pembaruan
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
+	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
+}
+
+// Riwayat kursus pegawai
+type RiwayatKursu struct {
+	// id riwayat kursus
+	ID int32 `db:"id"`
+	// NIP pegawai
+	PnsNip pgtype.Text `db:"pns_nip"`
+	// Tipe kursus
+	TipeKursus pgtype.Text `db:"tipe_kursus"`
+	// Jenis kursus
+	JenisKursus pgtype.Text `db:"jenis_kursus"`
+	// Nama kursus
+	NamaKursus pgtype.Text `db:"nama_kursus"`
+	// Durasi pelaksanaan
+	LamaKursus pgtype.Float8 `db:"lama_kursus"`
+	// Tanggal pelaksanaan
+	TanggalKursus pgtype.Date `db:"tanggal_kursus"`
+	// Nomor sertifikat yang diterbitkan
+	NoSertifikat pgtype.Text `db:"no_sertifikat"`
+	// Nama instansi penyelenggara
+	Instansi pgtype.Text `db:"instansi"`
+	// Nama lembaga yang menyelenggarakan
+	InstitusiPenyelenggara pgtype.Text `db:"institusi_penyelenggara"`
+	// id pada sistem BKN
+	SiasnID pgtype.Text `db:"siasn_id"`
+	// id PNS
+	PnsID pgtype.Text `db:"pns_id"`
+	// Waktu perekaman data
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir data diperbarui
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
+	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
+}
+
+// Riwayat asesmen nine box pegawai
 type RiwayatNineBox struct {
-	ID           int32              `db:"id"`
-	PnsNip       pgtype.Text        `db:"pns_nip"`
-	Nama         pgtype.Text        `db:"nama"`
-	NamaJabatan  pgtype.Text        `db:"nama_jabatan"`
-	KelasJabatan pgtype.Int2        `db:"kelas_jabatan"`
-	Kesimpulan   pgtype.Text        `db:"kesimpulan"`
-	Tahun        pgtype.Text        `db:"tahun"`
-	CreatedAt    pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt    pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt    pgtype.Timestamptz `db:"deleted_at"`
+	// id data nine box
+	ID int32 `db:"id"`
+	// NIP pegawai
+	PnsNip pgtype.Text `db:"pns_nip"`
+	// Nama pegawai
+	Nama pgtype.Text `db:"nama"`
+	// Nama jabatan pegawai
+	NamaJabatan pgtype.Text `db:"nama_jabatan"`
+	// Kelas jabatan pegawai
+	KelasJabatan pgtype.Int2 `db:"kelas_jabatan"`
+	// Kesimpulan hasil penilaian
+	Kesimpulan pgtype.Text `db:"kesimpulan"`
+	// Tahun penilaian
+	Tahun pgtype.Text `db:"tahun"`
+	// Waktu pembuatan data
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir pembaruan data
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
+	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 }
 
+// Riwayat pendidikan pegawai
 type RiwayatPendidikan struct {
-	ID                  int32              `db:"id"`
-	PnsID3              pgtype.Text        `db:"pns_id_3"`
-	TingkatPendidikanID pgtype.Int2        `db:"tingkat_pendidikan_id"`
-	PendidikanID3       pgtype.Text        `db:"pendidikan_id_3"`
-	TanggalLulus        pgtype.Date        `db:"tanggal_lulus"`
-	NoIjazah            pgtype.Text        `db:"no_ijazah"`
-	NamaSekolah         pgtype.Text        `db:"nama_sekolah"`
-	GelarDepan          pgtype.Text        `db:"gelar_depan"`
-	GelarBelakang       pgtype.Text        `db:"gelar_belakang"`
-	PendidikanPertama   pgtype.Text        `db:"pendidikan_pertama"`
-	NegaraSekolah       pgtype.Text        `db:"negara_sekolah"`
-	TahunLulus          pgtype.Int2        `db:"tahun_lulus"`
-	Nip                 pgtype.Text        `db:"nip"`
-	DiakuiBkn           pgtype.Int4        `db:"diakui_bkn"`
-	StatusSatker        pgtype.Int4        `db:"status_satker"`
-	StatusBiro          pgtype.Int4        `db:"status_biro"`
-	PendidikanTerakhir  pgtype.Int4        `db:"pendidikan_terakhir"`
-	PnsID               pgtype.Text        `db:"pns_id"`
-	PendidikanID        pgtype.Text        `db:"pendidikan_id"`
-	CreatedAt           pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt           pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt           pgtype.Timestamptz `db:"deleted_at"`
-	TugasBelajar        pgtype.Int2        `db:"tugas_belajar"`
-	FileBase64          pgtype.Text        `db:"file_base64"`
-	KeteranganBerkas    pgtype.Text        `db:"keterangan_berkas"`
+	// id riwayat pendidikan pegawai
+	ID int32 `db:"id"`
+	// id PNS versi 3
+	PnsID3 pgtype.Text `db:"pns_id_3"`
+	// Tingkat pendidikan (rujuk tingkat_pendidikan)
+	TingkatPendidikanID pgtype.Int2 `db:"tingkat_pendidikan_id"`
+	// id pendidikan versi 3
+	PendidikanID3 pgtype.Text `db:"pendidikan_id_3"`
+	// Tanggal kelulusan
+	TanggalLulus pgtype.Date `db:"tanggal_lulus"`
+	// Nomor ijazah
+	NoIjazah pgtype.Text `db:"no_ijazah"`
+	// Nama institusi pendidikan
+	NamaSekolah pgtype.Text `db:"nama_sekolah"`
+	// Gelar depan terkait pendidikan
+	GelarDepan pgtype.Text `db:"gelar_depan"`
+	// Gelar belakang terkait pendidikan
+	GelarBelakang pgtype.Text `db:"gelar_belakang"`
+	// Penanda pendidikan pertama
+	PendidikanPertama pgtype.Text `db:"pendidikan_pertama"`
+	// Negara tempat sekolah/pendidikan
+	NegaraSekolah pgtype.Text `db:"negara_sekolah"`
+	// Tahun kelulusan
+	TahunLulus pgtype.Int2 `db:"tahun_lulus"`
+	// Nomor Induk Pegawai
+	Nip pgtype.Text `db:"nip"`
+	// Penanda pengakuan oleh BKN
+	DiakuiBkn pgtype.Int4 `db:"diakui_bkn"`
+	// Status verifikasi di tingkat satuan kerja
+	StatusSatker pgtype.Int4 `db:"status_satker"`
+	// Status verifikasi di tingkat biro
+	StatusBiro pgtype.Int4 `db:"status_biro"`
+	// Penanda pendidikan terakhir
+	PendidikanTerakhir pgtype.Int4 `db:"pendidikan_terakhir"`
+	// Referensi pegawai (rujuk pegawai.pns_id)
+	PnsID pgtype.Text `db:"pns_id"`
+	// Program pendidikan (rujuk pendidikan)
+	PendidikanID pgtype.Text `db:"pendidikan_id"`
+	// Waktu perekaman data
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir pembaruan
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
+	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
+	// Tugas belajar
+	TugasBelajar pgtype.Int2 `db:"tugas_belajar"`
+	// File berkas dalam format base64
+	FileBase64 pgtype.Text `db:"file_base64"`
+	// Keterangan berkas
+	KeteranganBerkas pgtype.Text `db:"keterangan_berkas"`
 }
 
+// Riwayat penghargaan umum pegawai
 type RiwayatPenghargaanUmum struct {
-	ID                   int32              `db:"id"`
-	DeskripsiPenghargaan pgtype.Text        `db:"deskripsi_penghargaan"`
-	TanggalPenghargaan   pgtype.Date        `db:"tanggal_penghargaan"`
-	Exist                pgtype.Bool        `db:"exist"`
-	FileBase64           pgtype.Text        `db:"file_base64"`
-	Nip                  pgtype.Text        `db:"nip"`
-	NamaPenghargaan      pgtype.Text        `db:"nama_penghargaan"`
-	CreatedAt            pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt            pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt            pgtype.Timestamptz `db:"deleted_at"`
-	JenisPenghargaanID   pgtype.Int4        `db:"jenis_penghargaan_id"`
+	// ID unik data penghargaan
+	ID int32 `db:"id"`
+	// Deskripsi lengkap penghargaan yang diterima
+	DeskripsiPenghargaan pgtype.Text `db:"deskripsi_penghargaan"`
+	// Tanggal penerimaan penghargaan
+	TanggalPenghargaan pgtype.Date `db:"tanggal_penghargaan"`
+	// Penanda keberadaan data
+	Exist pgtype.Bool `db:"exist"`
+	// Berkas bukti penghargaan dalam format base64
+	FileBase64 pgtype.Text `db:"file_base64"`
+	// NIP pegawai
+	Nip pgtype.Text `db:"nip"`
+	// Nama penghargaan yang diterima
+	NamaPenghargaan pgtype.Text `db:"nama_penghargaan"`
+	// Waktu pembuatan data
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir pembaruan data
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
+	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
+	// Jenis atau kategori penghargaan (rujuk ref_jenis_penghargaan)
+	JenisPenghargaanID pgtype.Int4 `db:"jenis_penghargaan_id"`
 }
 
+// Riwayat penugasan pegawai
 type RiwayatPenugasan struct {
-	ID               int32              `db:"id"`
-	TipeJabatan      pgtype.Text        `db:"tipe_jabatan"`
-	DeskripsiJabatan pgtype.Text        `db:"deskripsi_jabatan"`
-	TanggalMulai     pgtype.Date        `db:"tanggal_mulai"`
-	TanggalSelesai   pgtype.Date        `db:"tanggal_selesai"`
-	FileBase64       pgtype.Text        `db:"file_base64"`
-	Nip              pgtype.Text        `db:"nip"`
-	NamaJabatan      pgtype.Text        `db:"nama_jabatan"`
-	IsMenjabat       pgtype.Bool        `db:"is_menjabat"`
-	CreatedAt        pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt        pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt        pgtype.Timestamptz `db:"deleted_at"`
+	// ID unik data penugasan
+	ID int32 `db:"id"`
+	// Tipe jabatan
+	TipeJabatan pgtype.Text `db:"tipe_jabatan"`
+	// Deskripsi jabatan
+	DeskripsiJabatan pgtype.Text `db:"deskripsi_jabatan"`
+	// Tanggal mulai penugasan
+	TanggalMulai pgtype.Date `db:"tanggal_mulai"`
+	// Tanggal selesai penugasan
+	TanggalSelesai pgtype.Date `db:"tanggal_selesai"`
+	// Berkas bukti penugasan dalam format base64
+	FileBase64 pgtype.Text `db:"file_base64"`
+	// NIP pegawai
+	Nip pgtype.Text `db:"nip"`
+	// Nama jabatan
+	NamaJabatan pgtype.Text `db:"nama_jabatan"`
+	// Penanda apakah pegawai masih menjabat
+	IsMenjabat pgtype.Bool `db:"is_menjabat"`
+	// Waktu perekaman data
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir pembaruan data
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
+	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 }
 
+// Riwayat pindah unit kerja pegawai
 type RiwayatPindahUnitKerja struct {
-	ID               int64              `db:"id"`
-	PnsID            pgtype.Text        `db:"pns_id"`
-	PnsNip           pgtype.Text        `db:"pns_nip"`
-	PnsNama          pgtype.Text        `db:"pns_nama"`
-	SkNomor          pgtype.Text        `db:"sk_nomor"`
-	AsalID           pgtype.Text        `db:"asal_id"`
-	AsalNama         pgtype.Text        `db:"asal_nama"`
-	UnorIDBaru       pgtype.Text        `db:"unor_id_baru"`
-	NamaUnorBaru     pgtype.Text        `db:"nama_unor_baru"`
-	InstansiID       pgtype.Text        `db:"instansi_id"`
-	NamaInstansi     pgtype.Text        `db:"nama_instansi"`
-	SkTanggal        pgtype.Date        `db:"sk_tanggal"`
-	SatuanKerjaID    pgtype.Text        `db:"satuan_kerja_id"`
-	NamaSatuanKerja  pgtype.Text        `db:"nama_satuan_kerja"`
-	FileBase64       pgtype.Text        `db:"file_base64"`
-	KeteranganBerkas pgtype.Text        `db:"keterangan_berkas"`
-	CreatedAt        pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt        pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt        pgtype.Timestamptz `db:"deleted_at"`
+	// id unik data pindah unit kerja
+	ID int64 `db:"id"`
+	// id pegawai
+	PnsID pgtype.Text `db:"pns_id"`
+	// NIP pegawai
+	PnsNip pgtype.Text `db:"pns_nip"`
+	// Nama pegawai
+	PnsNama pgtype.Text `db:"pns_nama"`
+	// Nomor SK pindah unit kerja
+	SkNomor pgtype.Text `db:"sk_nomor"`
+	// id unit kerja asal
+	AsalID pgtype.Text `db:"asal_id"`
+	// Nama unit kerja asal
+	AsalNama pgtype.Text `db:"asal_nama"`
+	// id unit organisasi baru
+	UnorIDBaru pgtype.Text `db:"unor_id_baru"`
+	// Nama unit organisasi baru
+	NamaUnorBaru pgtype.Text `db:"nama_unor_baru"`
+	// id instansi tujuan
+	InstansiID pgtype.Text `db:"instansi_id"`
+	// Nama instansi tujuan
+	NamaInstansi pgtype.Text `db:"nama_instansi"`
+	// Tanggal SK pindah unit kerja
+	SkTanggal pgtype.Date `db:"sk_tanggal"`
+	// id satuan kerja tujuan
+	SatuanKerjaID pgtype.Text `db:"satuan_kerja_id"`
+	// Nama satuan kerja tujuan
+	NamaSatuanKerja pgtype.Text `db:"nama_satuan_kerja"`
+	// Berkas bukti pindah unit kerja dalam format base64
+	FileBase64 pgtype.Text `db:"file_base64"`
+	// Keterangan berkas
+	KeteranganBerkas pgtype.Text `db:"keterangan_berkas"`
+	// Waktu perekaman data
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir pembaruan data
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
+	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 }
 
+// Riwayat sertifikasi pegawai
 type RiwayatSertifikasi struct {
-	ID              int64              `db:"id"`
-	Nip             pgtype.Text        `db:"nip"`
-	Tahun           pgtype.Int8        `db:"tahun"`
-	NamaSertifikasi pgtype.Text        `db:"nama_sertifikasi"`
-	FileBase64      pgtype.Text        `db:"file_base64"`
-	Deskripsi       pgtype.Text        `db:"deskripsi"`
-	CreatedAt       pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt       pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt       pgtype.Timestamptz `db:"deleted_at"`
+	// id unik data sertifikasi
+	ID int64 `db:"id"`
+	// NIP pegawai
+	Nip pgtype.Text `db:"nip"`
+	// Tahun sertifikasi
+	Tahun pgtype.Int8 `db:"tahun"`
+	// Nama sertifikasi
+	NamaSertifikasi pgtype.Text `db:"nama_sertifikasi"`
+	// Berkas bukti sertifikasi dalam format base64
+	FileBase64 pgtype.Text `db:"file_base64"`
+	// Deskripsi sertifikasi
+	Deskripsi pgtype.Text `db:"deskripsi"`
+	// Waktu perekaman data
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir pembaruan data
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
+	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 }
 
+// Riwayat uji kompetensi pegawai
 type RiwayatUjikom struct {
-	ID             int64              `db:"id"`
-	JenisUjikom    pgtype.Text        `db:"jenis_ujikom"`
-	NipBaru        pgtype.Text        `db:"nip_baru"`
-	LinkSertifikat pgtype.Text        `db:"link_sertifikat"`
-	Exist          pgtype.Bool        `db:"exist"`
-	Tahun          pgtype.Int4        `db:"tahun"`
-	CreatedAt      pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt      pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt      pgtype.Timestamptz `db:"deleted_at"`
+	// id unik data uji kompetensi
+	ID int64 `db:"id"`
+	// Jenis uji kompetensi
+	JenisUjikom pgtype.Text `db:"jenis_ujikom"`
+	// NIP pegawai
+	NipBaru pgtype.Text `db:"nip_baru"`
+	// Link sertifikat
+	LinkSertifikat pgtype.Text `db:"link_sertifikat"`
+	// Status apakah uji kompetensi sudah ada
+	Exist pgtype.Bool `db:"exist"`
+	// Tahun uji kompetensi
+	Tahun pgtype.Int4 `db:"tahun"`
+	// Waktu perekaman data
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir pembaruan data
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
+	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 }
 
+// Referensi referensi unit kerja
 type UnitKerja struct {
-	ID                   string             `db:"id"`
-	No                   pgtype.Int4        `db:"no"`
-	KodeInternal         pgtype.Text        `db:"kode_internal"`
-	NamaUnor             pgtype.Text        `db:"nama_unor"`
-	EselonID             pgtype.Text        `db:"eselon_id"`
-	CepatKode            pgtype.Text        `db:"cepat_kode"`
-	NamaJabatan          pgtype.Text        `db:"nama_jabatan"`
-	NamaPejabat          pgtype.Text        `db:"nama_pejabat"`
-	DiatasanID           pgtype.Text        `db:"diatasan_id"`
-	InstansiID           pgtype.Text        `db:"instansi_id"`
-	PemimpinPnsID        pgtype.Text        `db:"pemimpin_pns_id"`
-	JenisUnorID          pgtype.Text        `db:"jenis_unor_id"`
-	UnorInduk            pgtype.Text        `db:"unor_induk"`
-	JumlahIdealStaff     pgtype.Int2        `db:"jumlah_ideal_staff"`
-	Order                pgtype.Int4        `db:"order"`
-	IsSatker             int16              `db:"is_satker"`
-	Eselon1              pgtype.Text        `db:"eselon_1"`
-	Eselon2              pgtype.Text        `db:"eselon_2"`
-	Eselon3              pgtype.Text        `db:"eselon_3"`
-	Eselon4              pgtype.Text        `db:"eselon_4"`
-	ExpiredDate          pgtype.Date        `db:"expired_date"`
-	Keterangan           pgtype.Text        `db:"keterangan"`
-	JenisSatker          pgtype.Text        `db:"jenis_satker"`
-	Abbreviation         pgtype.Text        `db:"abbreviation"`
-	UnorIndukPenyetaraan pgtype.Text        `db:"unor_induk_penyetaraan"`
-	JabatanID            pgtype.Text        `db:"jabatan_id"`
-	Waktu                pgtype.Text        `db:"waktu"`
-	Peraturan            pgtype.Text        `db:"peraturan"`
-	Remark               pgtype.Text        `db:"remark"`
-	Aktif                pgtype.Bool        `db:"aktif"`
-	EselonNama           pgtype.Text        `db:"eselon_nama"`
-	CreatedAt            pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt            pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt            pgtype.Timestamptz `db:"deleted_at"`
+	// id unit organisasi (UUID)
+	ID string `db:"id"`
+	// Nomor urut unit kerja
+	No pgtype.Int4 `db:"no"`
+	// Kode internal unit organisasi
+	KodeInternal pgtype.Text `db:"kode_internal"`
+	// Nama unit organisasi
+	NamaUnor pgtype.Text `db:"nama_unor"`
+	// id eselon unit (bila berlaku)
+	EselonID pgtype.Text `db:"eselon_id"`
+	// Kode cepat untuk pencarian unit kerja
+	CepatKode pgtype.Text `db:"cepat_kode"`
+	// Nama jabatan dalam unit kerja
+	NamaJabatan pgtype.Text `db:"nama_jabatan"`
+	// Nama pejabat yang menjabat
+	NamaPejabat pgtype.Text `db:"nama_pejabat"`
+	// Unit atasan langsung (self-reference ke unit_kerja)
+	DiatasanID pgtype.Text `db:"diatasan_id"`
+	// id instansi pemilik unit (rujuk ref_instansi)
+	InstansiID pgtype.Text `db:"instansi_id"`
+	// ID PNS yang memimpin unit kerja
+	PemimpinPnsID pgtype.Text `db:"pemimpin_pns_id"`
+	// Jenis unit organisasi (bila digunakan)
+	JenisUnorID pgtype.Text `db:"jenis_unor_id"`
+	// Unit organisasi induk
+	UnorInduk pgtype.Text `db:"unor_induk"`
+	// Jumlah ideal staf dalam unit kerja
+	JumlahIdealStaff pgtype.Int2 `db:"jumlah_ideal_staff"`
+	// Urutan tampilan unit kerja
+	Order pgtype.Int4 `db:"order"`
+	// Penanda apakah unit merupakan Satuan Kerja
+	IsSatker int16 `db:"is_satker"`
+	// Kode eselon 1 unit kerja
+	Eselon1 pgtype.Text `db:"eselon_1"`
+	// Kode eselon 2 unit kerja
+	Eselon2 pgtype.Text `db:"eselon_2"`
+	// Kode eselon 3 unit kerja
+	Eselon3 pgtype.Text `db:"eselon_3"`
+	// Kode eselon 4 unit kerja
+	Eselon4 pgtype.Text `db:"eselon_4"`
+	// Tanggal kedaluwarsa unit kerja
+	ExpiredDate pgtype.Date `db:"expired_date"`
+	// Keterangan tambahan untuk unit kerja
+	Keterangan pgtype.Text `db:"keterangan"`
+	// Jenis satuan kerja
+	JenisSatker pgtype.Text `db:"jenis_satker"`
+	// Singkatan unit organisasi
+	Abbreviation pgtype.Text `db:"abbreviation"`
+	// Penyetaraan unit organisasi induk
+	UnorIndukPenyetaraan pgtype.Text `db:"unor_induk_penyetaraan"`
+	// ID jabatan yang terkait dengan unit kerja
+	JabatanID pgtype.Text `db:"jabatan_id"`
+	// Waktu pencatatan data unit kerja
+	Waktu pgtype.Text `db:"waktu"`
+	// Peraturan yang mendasari unit kerja
+	Peraturan pgtype.Text `db:"peraturan"`
+	// Catatan tambahan untuk unit kerja
+	Remark pgtype.Text `db:"remark"`
+	// Status keaktifan unit
+	Aktif pgtype.Bool `db:"aktif"`
+	// Nama eselon unit kerja
+	EselonNama pgtype.Text `db:"eselon_nama"`
+	// Waktu perekaman data
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir data diperbarui
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
+	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 }
 
+// Riwayat pembaruan data secara mandiri oleh pegawai
 type UpdateMandiri struct {
-	ID            int32              `db:"id"`
-	PnsID         pgtype.Text        `db:"pns_id"`
-	Kolom         pgtype.Text        `db:"kolom"`
-	Dari          pgtype.Text        `db:"dari"`
-	Perubahan     pgtype.Text        `db:"perubahan"`
-	Status        pgtype.Int4        `db:"status"`
-	VerifikasiBy  pgtype.Int4        `db:"verifikasi_by"`
-	VerifikasiTgl pgtype.Date        `db:"verifikasi_tgl"`
-	NamaKolom     pgtype.Text        `db:"nama_kolom"`
-	LevelUpdate   pgtype.Int4        `db:"level_update"`
-	TabelID       pgtype.Int4        `db:"tabel_id"`
-	UpdatedBy     pgtype.Int4        `db:"updated_by"`
-	CreatedAt     pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt     pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt     pgtype.Timestamptz `db:"deleted_at"`
+	// id unik data update mandiri
+	ID int32 `db:"id"`
+	// id pegawai
+	PnsID pgtype.Text `db:"pns_id"`
+	// Kolom yang diperbarui
+	Kolom pgtype.Text `db:"kolom"`
+	// Nilai asli kolom sebelum perubahan
+	Dari pgtype.Text `db:"dari"`
+	// Nilai perubahan kolom
+	Perubahan pgtype.Text `db:"perubahan"`
+	// Status verifikasi diperbarui
+	Status pgtype.Int4 `db:"status"`
+	// id user yang melakukan verifikasi
+	VerifikasiBy pgtype.Int4 `db:"verifikasi_by"`
+	// Tanggal verifikasi
+	VerifikasiTgl pgtype.Date `db:"verifikasi_tgl"`
+	// Nama kolom yang diperbarui
+	NamaKolom pgtype.Text `db:"nama_kolom"`
+	// Level/update yang dilakukan
+	LevelUpdate pgtype.Int4 `db:"level_update"`
+	// id tabel yang diperbarui
+	TabelID pgtype.Int4 `db:"tabel_id"`
+	// id user yang melakukan pembaruan
+	UpdatedBy pgtype.Int4 `db:"updated_by"`
+	// Waktu perekaman data
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir pembaruan data
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
+	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 }

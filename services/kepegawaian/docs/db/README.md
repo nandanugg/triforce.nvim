@@ -1,4 +1,4 @@
-# portal_kementerian
+# nexus
 
 ## Tables
 
@@ -31,7 +31,7 @@
 | [kepegawaian.riwayat_assesmen](kepegawaian.riwayat_assesmen.md) | 22 | Riwayat asesmen pegawai | BASE TABLE |
 | [kepegawaian.riwayat_diklat](kepegawaian.riwayat_diklat.md) | 21 | Riwayat diklat pegawai | BASE TABLE |
 | [kepegawaian.riwayat_diklat_fungsional](kepegawaian.riwayat_diklat_fungsional.md) | 20 | Riwayat diklat fungsional pegawai | BASE TABLE |
-| [kepegawaian.riwayat_diklat_struktural](kepegawaian.riwayat_diklat_struktural.md) | 17 | Riwayat diklat struktural pegawai | BASE TABLE |
+| [kepegawaian.riwayat_diklat_struktural](kepegawaian.riwayat_diklat_struktural.md) | 18 | Riwayat diklat struktural pegawai | BASE TABLE |
 | [kepegawaian.riwayat_golongan](kepegawaian.riwayat_golongan.md) | 37 | Riwayat golongan pegawai | BASE TABLE |
 | [kepegawaian.riwayat_hukdis](kepegawaian.riwayat_hukdis.md) | 23 | Riwayat hukuman disiplin pegawai | BASE TABLE |
 | [kepegawaian.riwayat_jabatan](kepegawaian.riwayat_jabatan.md) | 37 | Riwayat jabatan pegawai | BASE TABLE |
@@ -543,6 +543,7 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  varchar_200_ institusi_penyelenggara
 }
 "kepegawaian.riwayat_golongan" {
   integer id

@@ -17,8 +17,8 @@ tags:
   - name: Pegawai
   - name: Pekerjaan
   - name: Riwayat Pelatihan Fungsional
-  - name: Pelatihan Struktural
-  - name: Pelatihan Teknis
+  - name: Riwayat Pelatihan Struktural
+  - name: Riwayat Pelatihan Teknis
   - name: Riwayat Pendidikan
   - name: Riwayat Penghargaan
   - name: Sertifikasi
@@ -882,18 +882,19 @@ paths:
                           format: date
                   meta:
                      $ref: "#/components/schemas/metaPagination"
-
-  /v1/pelatihan-struktural:
+  /v1/riwayat-pelatihan-struktural:
     get:
       tags:
-        - Pelatihan Struktural
-      summary: Lihat daftar pelatihan struktural.
+        - Riwayat Pelatihan Struktural
+      summary: Lihat daftar riwayat pelatihan struktural.
       description: >-
-        Lihat daftar pelatihan struktural dari user yang login, urut
+        Lihat daftar riwayat pelatihan struktural dari user yang login, urut
         berdasarkan tanggal.
-      operationId: listPelatihanStruktural
+      operationId: listRiwayatPelatihanStruktural
       parameters:
         - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
       responses:
         "200":
           description: Sukses.
@@ -910,8 +911,7 @@ paths:
                       additionalProperties: false
                       properties:
                         id:
-                          type: integer
-                          example: 1
+                          type: string
                         nama_diklat:
                           type: string
                           example: "Pelatihan Kepemimpinan Administrator (PKA)"
@@ -921,33 +921,38 @@ paths:
                         nomor_sertifikat:
                           type: string
                           example: "LAN-PKA-2023-00123"
-                        istitusi_penyelenggara:
+                        institusi_penyelenggara:
                           type: string
                           example: "Lembaga Administrasi Negara (LAN)"
                         tahun:
                           type: integer
                           example: 2023
+                          nullable: true
                         durasi:
                           type: integer
                           description: "Durasi pelatihan dalam jam"
                           example: 900
                         tanggal_mulai:
                           type: string
-                          format: date-time
-                          example: "2023-03-15T00:00:00Z"
+                          format: date
+                          nullable: true
+                          example: "2023-03-15"
                         tanggal_selesai:
                           type: string
-                          format: date-time
-                          example: "2023-06-20T00:00:00Z"
-  /v1/pelatihan-teknis:
+                          format: date
+                          nullable: true
+                          example: "2023-06-20"
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/riwayat-pelatihan-teknis:
     get:
       tags:
-        - Pelatihan Teknis
-      summary: Lihat daftar pelatihan teknis/seminar/workshop/kursus.
+        - Riwayat Pelatihan Teknis
+      summary: Lihat daftar riwayat pelatihan teknis/seminar/workshop/kursus.
       description: >-
-        Lihat daftar pelatihan teknis/seminar/workshop/kursus dari user yang
+        Lihat daftar riwayat pelatihan teknis/seminar/workshop/kursus dari user yang
         login, urut berdasarkan tanggal mulai (terbaru di atas).
-      operationId: listPelatihanTeknis
+      operationId: listRiwayatPelatihanTeknis
       parameters:
         - $ref: "#/components/parameters/authRequired"
         - $ref: "#/components/parameters/limit"

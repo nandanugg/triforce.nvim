@@ -26,10 +26,10 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/pegawai"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/pekerjaan"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/pelatihanfungsional"
-	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/pelatihanstruktural"
-	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/pelatihanteknis"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/penghargaan"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/penugasan"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/riwayatpelatihanstruktural"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/riwayatpelatihanteknis"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/riwayatpendidikan"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/sertifikasi"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/unitkerja"
@@ -71,8 +71,8 @@ func main() {
 	pegawai.RegisterRoutes(e, db, mwAuth)
 	pekerjaan.RegisterRoutes(e, db, mwAuth)
 	pelatihanfungsional.RegisterRoutes(e, dbRepository, mwAuth)
-	pelatihanstruktural.RegisterRoutes(e, dbRepository, mwAuth)
-	pelatihanteknis.RegisterRoutes(e, dbRepository, mwAuth)
+	riwayatpelatihanstruktural.RegisterRoutes(e, dbRepository, mwAuth)
+	riwayatpelatihanteknis.RegisterRoutes(e, dbRepository, mwAuth)
 	riwayatpendidikan.RegisterRoutes(e, dbRepository, mwAuth)
 	penghargaan.RegisterRoutes(e, dbRepository, mwAuth)
 	penugasan.RegisterRoutes(e, db, mwAuth)

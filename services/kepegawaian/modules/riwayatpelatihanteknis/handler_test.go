@@ -1,4 +1,4 @@
-package pelatihanteknis
+package riwayatpelatihanteknis
 
 import (
 	"context"
@@ -228,7 +228,7 @@ func Test_handler_list(t *testing.T) {
 			_, err := pgxconn.Exec(context.Background(), tt.dbData)
 			require.NoError(t, err)
 
-			req := httptest.NewRequest(http.MethodGet, "/v1/pelatihan-teknis", nil)
+			req := httptest.NewRequest(http.MethodGet, "/v1/riwayat-pelatihan-teknis", nil)
 			req.URL.RawQuery = tt.requestQuery.Encode()
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()

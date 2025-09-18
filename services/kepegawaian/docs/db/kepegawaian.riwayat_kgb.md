@@ -15,7 +15,7 @@ Riwayat kenaikan gaji berkala pegawai
 | no_sk | varchar(100) |  | true |  |  | Nomor SK kenaikan gaji berkala |
 | pejabat | varchar(255) |  | true |  |  | Pejabat yang menandatangani |
 | id | bigint | nextval('riwayat_kgb_id_seq'::regclass) | false |  |  | id riwayat kenaikan gaji berkala |
-| ref | varchar(255) | public.uuid_generate_v4() | true |  |  | Nomor referensi |
+| ref | varchar(255) | uuid_generate_v4() | true |  |  | Nomor referensi |
 | tgl_sk | date |  | true |  |  | Tanggal SK kenaikan gaji berkala |
 | pegawai_nama | varchar(255) |  | true |  |  | Nama pegawai |
 | pegawai_nip | varchar(20) |  | true |  |  | NIP pegawai |

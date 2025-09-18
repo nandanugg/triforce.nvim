@@ -388,6 +388,7 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  varchar_200_ institusi_penyelenggara
 }
 "kepegawaian.riwayat_golongan" {
   integer id
