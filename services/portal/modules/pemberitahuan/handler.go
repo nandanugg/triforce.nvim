@@ -18,9 +18,8 @@ func newHandler(s *service) *handler {
 }
 
 type listRequest struct {
-	Cari   string `query:"cari"`
-	Limit  uint   `query:"limit"`
-	Offset uint   `query:"offset"`
+	Cari string `query:"cari"`
+	api.PaginationRequest
 }
 
 type listResponse struct {

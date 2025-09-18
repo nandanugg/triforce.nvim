@@ -63,19 +63,19 @@ db-create-schema-portal:
 
 db-migrate-up-portal:
 	migrate \
-	-path services/portal/dbmigrations \
+	-path services/portal/db/migrations \
 	-database "pgx://$NEXUS_PORTAL_DB_USER:$NEXUS_PORTAL_DB_PASSWORD@$NEXUS_PORTAL_DB_HOST:$NEXUS_PORTAL_DB_PORT/$NEXUS_PORTAL_DB_NAME?search_path=$NEXUS_PORTAL_DB_SCHEMA" \
 	up
 
 db-migrate-down-portal:
 	migrate \
-	-path services/portal/dbmigrations \
+	-path services/portal/db/migrations \
 	-database "pgx://$NEXUS_PORTAL_DB_USER:$NEXUS_PORTAL_DB_PASSWORD@$NEXUS_PORTAL_DB_HOST:$NEXUS_PORTAL_DB_PORT/$NEXUS_PORTAL_DB_NAME?search_path=$NEXUS_PORTAL_DB_SCHEMA" \
 	down
 
 db-migrate-drop-portal:
 	migrate \
-	-path services/portal/dbmigrations \
+	-path services/portal/db/migrations \
 	-database "pgx://$NEXUS_PORTAL_DB_USER:$NEXUS_PORTAL_DB_PASSWORD@$NEXUS_PORTAL_DB_HOST:$NEXUS_PORTAL_DB_PORT/$NEXUS_PORTAL_DB_NAME?search_path=$NEXUS_PORTAL_DB_SCHEMA" \
 	drop
 

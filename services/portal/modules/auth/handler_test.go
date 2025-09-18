@@ -16,7 +16,8 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api/apitest"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db/dbtest"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/config"
-	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/dbmigrations"
+	dbmigrations "gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/db/migrations"
+	sqlc "gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/db/repository"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/docs"
 )
 
@@ -428,7 +429,8 @@ func Test_handler_exchangeToken(t *testing.T) {
 				KID:          "my-kid",
 				RedirectURI:  "https://portal.local/callback",
 			}
-			RegisterRoutes(e, db, keycloak, &http.Client{}, apitest.JwtPrivateKey, apitest.Keyfunc.Keyfunc)
+			repo := sqlc.New(db)
+			RegisterRoutes(e, repo, keycloak, &http.Client{}, apitest.JwtPrivateKey, apitest.Keyfunc.Keyfunc)
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -715,7 +717,8 @@ func Test_handler_refreshToken(t *testing.T) {
 				ClientSecret: "my-secret",
 				KID:          "my-kid",
 			}
-			RegisterRoutes(e, db, keycloak, &http.Client{}, apitest.JwtPrivateKey, apitest.Keyfunc.Keyfunc)
+			repo := sqlc.New(db)
+			RegisterRoutes(e, repo, keycloak, &http.Client{}, apitest.JwtPrivateKey, apitest.Keyfunc.Keyfunc)
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)

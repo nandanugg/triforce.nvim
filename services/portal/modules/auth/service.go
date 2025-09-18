@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rsa"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -12,19 +13,27 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/config"
+	sqlc "gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/db/repository"
 )
 
+type repository interface {
+	GetUserNIPByIDAndSource(ctx context.Context, arg sqlc.GetUserNIPByIDAndSourceParams) (string, error)
+	ListUserRoleByNIP(ctx context.Context, nip string) ([]sqlc.ListUserRoleByNIPRow, error)
+}
+
 type service struct {
-	repo       *repository
+	repo       repository
 	keycloak   config.Keycloak
 	client     *http.Client
 	privateKey *rsa.PrivateKey
 	keyfunc    jwt.Keyfunc
 }
 
-func newService(repo *repository, keycloak config.Keycloak, client *http.Client, privateKey *rsa.PrivateKey, keyfunc jwt.Keyfunc) *service {
+func newService(repo repository, keycloak config.Keycloak, client *http.Client, privateKey *rsa.PrivateKey, keyfunc jwt.Keyfunc) *service {
 	return &service{
 		repo:       repo,
 		keycloak:   keycloak,
@@ -161,7 +170,7 @@ func (s *service) enrichTokenWithAdditionalUserData(ctx context.Context, accessT
 	var user *user
 	if zimbraID, ok := claims["zimbra_id"].(string); ok {
 		if id, err := uuid.Parse(zimbraID); err == nil {
-			if user, err = s.repo.getUser(ctx, id, sourceZimbra); err != nil {
+			if user, err = s.getUser(ctx, id, sourceZimbra); err != nil {
 				return "", fmt.Errorf("get user zimbra: %w", err)
 			}
 		}
@@ -171,7 +180,7 @@ func (s *service) enrichTokenWithAdditionalUserData(ctx context.Context, accessT
 	if user == nil {
 		if keycloakID, err := claims.GetSubject(); err == nil {
 			if id, err := uuid.Parse(keycloakID); err == nil {
-				if user, err = s.repo.getUser(ctx, id, sourceKeycloak); err != nil {
+				if user, err = s.getUser(ctx, id, sourceKeycloak); err != nil {
 					return "", fmt.Errorf("get user keycloak: %w", err)
 				}
 			}
@@ -194,4 +203,29 @@ func (s *service) enrichTokenWithAdditionalUserData(ctx context.Context, accessT
 		return "", fmt.Errorf("sign token: %w", err)
 	}
 	return signed, nil
+}
+
+func (s *service) getUser(ctx context.Context, id uuid.UUID, source string) (*user, error) {
+	nip, err := s.repo.GetUserNIPByIDAndSource(ctx, sqlc.GetUserNIPByIDAndSourceParams{
+		ID:     pgtype.UUID{Bytes: id, Valid: true},
+		Source: source,
+	})
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("repo get user nip: %w", err)
+	}
+
+	rows, err := s.repo.ListUserRoleByNIP(ctx, nip)
+	if err != nil {
+		return nil, fmt.Errorf("repo list user role: %w", err)
+	}
+
+	roles := make(map[string]string, len(rows))
+	for _, row := range rows {
+		roles[row.Service] = row.Nama
+	}
+
+	return &user{nip: nip, roles: roles}, nil
 }

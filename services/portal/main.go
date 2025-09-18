@@ -7,6 +7,7 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/config"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/db/repository"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/docs"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/modules/auth"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/modules/dokumenpendukung"
@@ -28,13 +29,14 @@ func main() {
 	keyfunc, err := api.NewAuthKeyfunc(c.Keycloak.Host, c.Keycloak.Realm, c.Keycloak.Audience)
 	exitIfError("Error initializing auth keyfunc.", err)
 
-	mwAuth := api.NewAuthMiddleware(config.Service, keyfunc)
-
 	client := api.NewHTTPClient()
 	privateKey, err := api.LoadRSAPrivateKey(c.Keycloak.PrivateKey)
 	exitIfError("Error loading rsa private key.", err)
 
-	auth.RegisterRoutes(e, db, c.Keycloak, client, privateKey, keyfunc.Keyfunc)
+	dbRepository := repository.New(db)
+	mwAuth := api.NewAuthMiddleware(config.Service, keyfunc)
+
+	auth.RegisterRoutes(e, dbRepository, c.Keycloak, client, privateKey, keyfunc.Keyfunc)
 	dokumenpendukung.RegisterRoutes(e, db, mwAuth)
 	pemberitahuan.RegisterRoutes(e, db, mwAuth)
 

@@ -14,7 +14,7 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api/apitest"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db/dbtest"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/config"
-	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/dbmigrations"
+	dbmigrations "gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/db/migrations"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/docs"
 )
 
