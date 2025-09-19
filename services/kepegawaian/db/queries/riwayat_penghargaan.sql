@@ -2,6 +2,7 @@
 SELECT
     riwayat_penghargaan_umum.id,
     ref_jenis_penghargaan.nama as jenis_penghargaan,
+    ref_jenis_penghargaan.id as jenis_penghargaan_id,
     nama_penghargaan,
     deskripsi_penghargaan,
     tanggal_penghargaan

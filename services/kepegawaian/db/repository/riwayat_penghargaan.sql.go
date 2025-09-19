@@ -46,6 +46,7 @@ const listRiwayatPenghargaan = `-- name: ListRiwayatPenghargaan :many
 SELECT
     riwayat_penghargaan_umum.id,
     ref_jenis_penghargaan.nama as jenis_penghargaan,
+    ref_jenis_penghargaan.id as jenis_penghargaan_id,
     nama_penghargaan,
     deskripsi_penghargaan,
     tanggal_penghargaan
@@ -65,6 +66,7 @@ type ListRiwayatPenghargaanParams struct {
 type ListRiwayatPenghargaanRow struct {
 	ID                   int32       `db:"id"`
 	JenisPenghargaan     pgtype.Text `db:"jenis_penghargaan"`
+	JenisPenghargaanID   pgtype.Int4 `db:"jenis_penghargaan_id"`
 	NamaPenghargaan      pgtype.Text `db:"nama_penghargaan"`
 	DeskripsiPenghargaan pgtype.Text `db:"deskripsi_penghargaan"`
 	TanggalPenghargaan   pgtype.Date `db:"tanggal_penghargaan"`
@@ -82,6 +84,7 @@ func (q *Queries) ListRiwayatPenghargaan(ctx context.Context, arg ListRiwayatPen
 		if err := rows.Scan(
 			&i.ID,
 			&i.JenisPenghargaan,
+			&i.JenisPenghargaanID,
 			&i.NamaPenghargaan,
 			&i.DeskripsiPenghargaan,
 			&i.TanggalPenghargaan,

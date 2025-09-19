@@ -1330,6 +1330,8 @@ paths:
                       properties:
                         id:
                           type: integer
+                        jenis_penghargaan_id:
+                          type: integer
                         jenis_penghargaan:
                           type: string
                         nama_penghargaan:

@@ -45,11 +45,12 @@ func (s *service) list(ctx context.Context, nip string, limit, offset uint) ([]r
 
 	result := typeutil.Map(data, func(row repo.ListRiwayatPenghargaanRow) riwayatPenghargaan {
 		return riwayatPenghargaan{
-			ID:               int(row.ID),
-			JenisPenghargaan: row.JenisPenghargaan.String,
-			NamaPenghargaan:  row.NamaPenghargaan.String,
-			Deskripsi:        row.DeskripsiPenghargaan.String,
-			Tanggal:          db.Date(row.TanggalPenghargaan.Time),
+			ID:                 int(row.ID),
+			JenisPenghargaanID: row.JenisPenghargaanID.Int32,
+			JenisPenghargaan:   row.JenisPenghargaan.String,
+			NamaPenghargaan:    row.NamaPenghargaan.String,
+			Deskripsi:          row.DeskripsiPenghargaan.String,
+			Tanggal:            db.Date(row.TanggalPenghargaan.Time),
 		}
 	})
 

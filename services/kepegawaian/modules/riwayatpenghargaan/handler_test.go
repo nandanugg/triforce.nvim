@@ -61,6 +61,7 @@ func Test_handler_list(t *testing.T) {
 						"id": 13,
 						"deskripsi": "Deskripsi Penghargaan 3",
 						"jenis_penghargaan": "",
+						"jenis_penghargaan_id": 0,
 						"nama_penghargaan": "Penghargaan 3",
 						"tanggal": "2002-01-01"
 					},
@@ -68,6 +69,7 @@ func Test_handler_list(t *testing.T) {
 						"id":                12,
 						"deskripsi":         "Deskripsi Penghargaan 2",
 						"jenis_penghargaan": "Jenis Penghargaan 2",
+						"jenis_penghargaan_id": 12,
 						"nama_penghargaan":  "Penghargaan 2",
 						"tanggal":           "2001-01-01"
 					},
@@ -75,6 +77,7 @@ func Test_handler_list(t *testing.T) {
 						"id":                11,
 						"deskripsi":         "Deskripsi Penghargaan 1",
 						"jenis_penghargaan": "Jenis Penghargaan 1",
+						"jenis_penghargaan_id": 11,
 						"nama_penghargaan":  "Penghargaan 1",
 						"tanggal":           "2000-01-01"
 					}
@@ -95,6 +98,7 @@ func Test_handler_list(t *testing.T) {
 						"id":                12,
 						"deskripsi":         "Deskripsi Penghargaan 2",
 						"jenis_penghargaan": "Jenis Penghargaan 2",
+						"jenis_penghargaan_id": 12,
 						"nama_penghargaan":  "Penghargaan 2",
 						"tanggal":           "2001-01-01"
 					}
