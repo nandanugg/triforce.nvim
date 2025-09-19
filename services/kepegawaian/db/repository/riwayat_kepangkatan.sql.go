@@ -21,8 +21,25 @@ func (q *Queries) CountRiwayatKepangkatan(ctx context.Context, pnsNip string) (i
 	return count, err
 }
 
+const getBerkasRiwayatKepangkatan = `-- name: GetBerkasRiwayatKepangkatan :one
+select file_base64 from riwayat_golongan
+where pns_nip = $1 and id = $2 and deleted_at is null
+`
+
+type GetBerkasRiwayatKepangkatanParams struct {
+	PnsNip pgtype.Text `db:"pns_nip"`
+	ID     int32       `db:"id"`
+}
+
+func (q *Queries) GetBerkasRiwayatKepangkatan(ctx context.Context, arg GetBerkasRiwayatKepangkatanParams) (pgtype.Text, error) {
+	row := q.db.QueryRow(ctx, getBerkasRiwayatKepangkatan, arg.PnsNip, arg.ID)
+	var file_base64 pgtype.Text
+	err := row.Scan(&file_base64)
+	return file_base64, err
+}
+
 const listRiwayatKepangkatan = `-- name: ListRiwayatKepangkatan :many
-select 
+select
     rg.id,
     ref_jenis_kp.id as jenis_kp_id,
     ref_jenis_kp.nama as nama_jenis_kp,

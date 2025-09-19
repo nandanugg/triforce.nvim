@@ -31,6 +31,7 @@ type Querier interface {
 	GetBerkasRiwayatHukdis(ctx context.Context, arg GetBerkasRiwayatHukdisParams) (pgtype.Text, error)
 	GetBerkasRiwayatJabatan(ctx context.Context, arg GetBerkasRiwayatJabatanParams) (pgtype.Text, error)
 	GetBerkasRiwayatKenaikanGajiBerkala(ctx context.Context, arg GetBerkasRiwayatKenaikanGajiBerkalaParams) (pgtype.Text, error)
+	GetBerkasRiwayatKepangkatan(ctx context.Context, arg GetBerkasRiwayatKepangkatanParams) (pgtype.Text, error)
 	GetBerkasRiwayatPelatihanFungsional(ctx context.Context, arg GetBerkasRiwayatPelatihanFungsionalParams) (pgtype.Text, error)
 	GetBerkasRiwayatPelatihanStruktural(ctx context.Context, arg GetBerkasRiwayatPelatihanStrukturalParams) (pgtype.Text, error)
 	GetBerkasRiwayatPelatihanTeknis(ctx context.Context, arg GetBerkasRiwayatPelatihanTeknisParams) (pgtype.Text, error)

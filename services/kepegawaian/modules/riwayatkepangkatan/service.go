@@ -2,8 +2,13 @@ package riwayatkepangkatan
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
+
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/typeutil"
 	dbrepo "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
@@ -12,6 +17,7 @@ import (
 type repository interface {
 	ListRiwayatKepangkatan(ctx context.Context, arg dbrepo.ListRiwayatKepangkatanParams) ([]dbrepo.ListRiwayatKepangkatanRow, error)
 	CountRiwayatKepangkatan(ctx context.Context, pnsNip string) (int64, error)
+	GetBerkasRiwayatKepangkatan(ctx context.Context, arg dbrepo.GetBerkasRiwayatKepangkatanParams) (pgtype.Text, error)
 }
 
 type service struct {
@@ -58,4 +64,19 @@ func (s *service) list(ctx context.Context, nip string, limit, offset uint) ([]r
 	})
 
 	return result, uint(count), nil
+}
+
+func (s *service) getBerkas(ctx context.Context, nip string, id int32) (string, []byte, error) {
+	res, err := s.repo.GetBerkasRiwayatKepangkatan(ctx, dbrepo.GetBerkasRiwayatKepangkatanParams{
+		PnsNip: pgtype.Text{String: nip, Valid: true},
+		ID:     id,
+	})
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+		return "", nil, fmt.Errorf("repo get berkas: %w", err)
+	}
+	if len(res.String) == 0 {
+		return "", nil, nil
+	}
+
+	return api.GetMimeTypeAndDecodedData(res.String)
 }

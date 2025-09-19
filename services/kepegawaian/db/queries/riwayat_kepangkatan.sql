@@ -1,5 +1,5 @@
 -- name: ListRiwayatKepangkatan :many
-select 
+select
     rg.id,
     ref_jenis_kp.id as jenis_kp_id,
     ref_jenis_kp.nama as nama_jenis_kp,
@@ -25,3 +25,7 @@ limit $1 offset $2;
 -- name: CountRiwayatKepangkatan :one
 select count(*) from riwayat_golongan rg
 where rg.deleted_at is null and rg.pns_nip = @pns_nip::varchar;
+
+-- name: GetBerkasRiwayatKepangkatan :one
+select file_base64 from riwayat_golongan
+where pns_nip = $1 and id = $2 and deleted_at is null;

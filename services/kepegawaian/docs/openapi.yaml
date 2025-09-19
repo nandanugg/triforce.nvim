@@ -865,6 +865,31 @@ paths:
                           type: integer
                   meta:
                     $ref: "#/components/schemas/metaPagination"
+  /v1/riwayat-kepangkatan/{id}/berkas:
+    get:
+      tags:
+        - Riwayat Kepangkatan
+      summary: Lihat berkas riwayat kepangkatan.
+      description: >-
+        Lihat berkas riwayat kepangkatan berdasarkan id.
+      operationId: getBerkasRiwayatKepangkatan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Berkas riwayat kepangkatan tidak ditemukan atau User tidak mempunyai akses.
   /v1/riwayat-kinerja:
     get:
       tags:
