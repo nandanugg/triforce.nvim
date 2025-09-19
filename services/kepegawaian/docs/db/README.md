@@ -1,4 +1,4 @@
-# nexus
+# postgres
 
 ## Tables
 
@@ -49,6 +49,10 @@
 | [kepegawaian.riwayat_sertifikasi](kepegawaian.riwayat_sertifikasi.md) | 9 | Riwayat sertifikasi pegawai | BASE TABLE |
 | [kepegawaian.riwayat_penugasan](kepegawaian.riwayat_penugasan.md) | 12 | Riwayat penugasan pegawai | BASE TABLE |
 | [kepegawaian.ref_kelas_jabatan](kepegawaian.ref_kelas_jabatan.md) | 5 | Referensi kelas jabatan | BASE TABLE |
+| [kepegawaian.file_digital_signature](kepegawaian.file_digital_signature.md) | 40 |  | BASE TABLE |
+| [kepegawaian.file_digital_signature_corrector](kepegawaian.file_digital_signature_corrector.md) | 10 |  | BASE TABLE |
+| [kepegawaian.file_digital_signature_riwayat](kepegawaian.file_digital_signature_riwayat.md) | 10 |  | BASE TABLE |
+| [kepegawaian.log_digital_signature](kepegawaian.log_digital_signature.md) | 10 |  | BASE TABLE |
 
 ## Stored procedures and functions
 
@@ -903,6 +907,84 @@ erDiagram
   bigint tunjangan_kinerja
   timestamp_without_time_zone created_at
   timestamp_without_time_zone updated_at
+}
+"kepegawaian.file_digital_signature" {
+  varchar_200_ file_id
+  varchar_100_ kategori
+  text file_base64
+  varchar_255_ ttd_pegawai_id
+  smallint status_ttd
+  varchar_50_ nip_sk
+  varchar_50_ no_sk
+  date tanggal_sk
+  date tmt_sk
+  text lokasi_file
+  smallint status_koreksi
+  text catatan
+  varchar_100_ pegawai_korektor_id
+  varchar_100_ asal_surat_sk
+  smallint status_kembali
+  varchar_200_ nama_pemilik_sk
+  text jabatan_pemilik_sk
+  text file_base64_sign
+  text unit_kerja_pemilik_sk
+  varchar_50_ nip_pemroses
+  boolean ds_ok
+  varchar_50_ arsip
+  varchar_20_ status_pns
+  date tmt_sampai_dengan
+  boolean telah_kirim
+  boolean halaman_ttd
+  boolean show_qrcode
+  smallint letak_ttd
+  varchar_200_ kode_unit_kerja_internal
+  varchar_200_ kode_jabatan_internal
+  varchar_200_ kelompok_jabatan
+  timestamp_with_time_zone tanggal_ttd
+  varchar_200_ email_kirim
+  varchar_100_ sent_to_siasin
+  text blockchain_issuer_id
+  text blockchain_image_url
+  text blockchain_hash
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
+}
+"kepegawaian.file_digital_signature_corrector" {
+  integer id
+  smallint korektor_ke
+  varchar_100_ pegawai_korektor_id
+  smallint status_kembali
+  text catatan_koreksi
+  smallint status_koreksi
+  varchar_200_ file_id
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
+}
+"kepegawaian.file_digital_signature_riwayat" {
+  bigint id
+  varchar_200_ file_id
+  varchar_255_ pemroses_id
+  text tindakan
+  text catatan_tindakan
+  timestamp_with_time_zone waktu_tindakan
+  varchar_200_ akses_pengguna
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
+}
+"kepegawaian.log_digital_signature" {
+  integer id
+  varchar_32_ file_id
+  varchar_30_ nik
+  varchar_255_ keterangan
+  smallint status
+  boolean proses_cron
+  integer created_by
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
 }
 ```
 
