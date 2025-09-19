@@ -1,78 +1,98 @@
 -- name: GetDataPribadi :one
 select
-  p.nama,
-  p.gelar_depan,
-  p.gelar_belakang,
+  pegawai.nama,
+  pegawai.gelar_depan,
+  pegawai.gelar_belakang,
   case
-    when p.jenis_jabatan_id = @jenis_jabatan_struktural::int and p.pns_id = uk.pemimpin_pns_id then uk.nama_jabatan
-    else rjf.nama_jabatan
+    when pegawai.jenis_jabatan_id = @jenis_jabatan_struktural::int and pegawai.pns_id = unit_kerja.pemimpin_pns_id then unit_kerja.nama_jabatan
+    else ref_jabatan_aktual.nama_jabatan
   end as jabatan_aktual,
   case
-    when p.jenis_jabatan_id = @jenis_jabatan_struktural::int and p.pns_id = uk.pemimpin_pns_id then 'Struktural'
-    else rjj.nama
+    when pegawai.jenis_jabatan_id = @jenis_jabatan_struktural::int and pegawai.pns_id = unit_kerja.pemimpin_pns_id then 'Struktural'
+    else ref_jenis_jabatan_aktual.nama
   end as jenis_jabatan_aktual,
-  p.tmt_jabatan,
-  p.unor_id,
-  p.nip_baru as nip,
-  p.nik,
-  p.kk,
-  p.jenis_kelamin,
-  coalesce(rltl.nama, p.tempat_lahir) as tempat_lahir,
-  p.tgl_lahir,
-  rtp.nama as tingkat_pendidikan,
-  rp.nama as pendidikan,
-  rjk.nama as jenis_kawin,
-  ra.nama as agama,
-  p.email_dikbud,
-  p.email,
-  p.alamat,
-  p.no_hp,
-  p.no_darurat,
-  rjp.nama as jenis_pegawai,
+  pegawai.tmt_jabatan,
+  pegawai.unor_id,
+  pegawai.nip_baru as nip,
+  pegawai.nik,
+  pegawai.kk,
+  pegawai.jenis_kelamin,
+  coalesce(ref_lokasi_tempat_lahir.nama, pegawai.tempat_lahir) as tempat_lahir,
+  pegawai.tgl_lahir,
+  ref_tingkat_pendidikan.nama as tingkat_pendidikan,
+  ref_pendidikan.nama as pendidikan,
+  ref_jenis_kawin.nama as jenis_kawin,
+  ref_agama.nama as agama,
+  pegawai.email_dikbud,
+  pegawai.email,
+  pegawai.alamat,
+  pegawai.no_hp,
+  pegawai.no_darurat,
+  ref_jenis_pegawai.nama as jenis_pegawai,
   case
-    when p.status_pegawai = 1 and (p.terminated_date is null or p.terminated_date > current_date)
-      then (coalesce(extract(year from age(current_date, p.tmt_cpns)), 0) + coalesce(p.mk_tahun_swasta, 0) +
-        floor((coalesce(extract(month from age(current_date, p.tmt_cpns)), 0) + coalesce(p.mk_bulan_swasta, 0)) / 12)) || ' Tahun ' ||
-        ((coalesce(extract(month from age(current_date, p.tmt_cpns)), 0) + coalesce(p.mk_bulan_swasta, 0)) % 12) || ' Bulan'
+    when pegawai.status_pegawai = 1 and (pegawai.terminated_date is null or pegawai.terminated_date > current_date)
+      then (coalesce(extract(year from age(current_date, pegawai.tmt_cpns)), 0) + coalesce(pegawai.mk_tahun_swasta, 0) +
+        floor((coalesce(extract(month from age(current_date, pegawai.tmt_cpns)), 0) + coalesce(pegawai.mk_bulan_swasta, 0)) / 12)) || ' Tahun ' ||
+        ((coalesce(extract(month from age(current_date, pegawai.tmt_cpns)), 0) + coalesce(pegawai.mk_bulan_swasta, 0)) % 12) || ' Bulan'
   end as masa_kerja_keseluruhan,
-  p.masa_kerja as masa_kerja_golongan,
-  rj.nama_jabatan as jabatan,
-  rkj.kelas_jabatan,
-  coalesce(rlk.nama, p.lokasi_kerja) as lokasi_kerja,
-  rge.nama_pangkat as pangkat_akhir,
-  case when rkh.is_pppk then rgs.gol_pppk else rgs.nama end as golongan_awal,
-  case when rkh.is_pppk then rge.gol_pppk else rge.nama end as golongan_akhir,
-  p.tmt_golongan,
-  p.tmt_cpns as tmt_asn,
-  p.no_sk_cpns as no_sk_asn,
-  case when rkh.is_pppk then rkh.nama else p.status_cpns_pns end as status_asn,
-  case when rkh.is_pppk then null else p.tmt_pns end as tmt_pns,
-  p.kartu_pegawai,
-  p.no_surat_dokter,
-  p.tgl_surat_dokter,
-  p.no_bebas_narkoba,
-  p.tgl_bebas_narkoba,
-  p.no_catatan_polisi,
-  p.tgl_catatan_polisi,
-  p.akte_kelahiran,
-  p.bpjs,
-  p.npwp,
-  p.tgl_npwp,
-  p.no_taspen
-from pegawai p
-left join ref_lokasi rltl on rltl.id = p.tempat_lahir_id and rltl.deleted_at is null
-left join ref_agama ra on ra.id = p.agama_id and ra.deleted_at is null
-left join ref_tingkat_pendidikan rtp on rtp.id = p.tingkat_pendidikan_id and rtp.deleted_at is null
-left join ref_pendidikan rp on rp.id = p.pendidikan_id and rp.deleted_at is null
-left join ref_lokasi rlk on rlk.id = p.lokasi_kerja_id and rlk.deleted_at is null
-left join ref_jenis_pegawai rjp on rjp.id = p.jenis_pegawai_id and rjp.deleted_at is null
-left join ref_golongan rge on rge.id = p.gol_id and rge.deleted_at is null
-left join ref_golongan rgs on rgs.id = p.gol_awal_id and rgs.deleted_at is null
-left join ref_kedudukan_hukum rkh on rkh.id = p.kedudukan_hukum_id and rkh.deleted_at is null
-left join ref_jenis_kawin rjk on rjk.id = p.jenis_kawin_id and rjk.deleted_at is null
-left join unit_kerja uk on uk.id = p.unor_id and uk.deleted_at is null
-left join ref_jabatan rj on rj.kode_jabatan = p.jabatan_instansi_id and rj.deleted_at is null
-left join ref_kelas_jabatan rkj on rkj.id = rj.kelas
-left join ref_jabatan rjf on rjf.kode_jabatan = p.jabatan_instansi_real_id and rjf.deleted_at is null
-left join ref_jenis_jabatan rjj on rjj.id = rjf.jenis_jabatan and rjj.deleted_at is null
-where p.nip_baru = $1 and p.deleted_at is null;
+  pegawai.masa_kerja as masa_kerja_golongan,
+  ref_jabatan.nama_jabatan as jabatan,
+  ref_jenis_jabatan.nama as jenis_jabatan,
+  ref_kelas_jabatan.kelas_jabatan,
+  coalesce(ref_lokasi_lokasi_kerja.nama, pegawai.lokasi_kerja) as lokasi_kerja,
+  ref_golongan_akhir.nama_pangkat as pangkat_akhir,
+  case when ref_kedudukan_hukum.is_pppk then ref_golongan_awal.gol_pppk else ref_golongan_awal.nama end as golongan_awal,
+  case when ref_kedudukan_hukum.is_pppk then ref_golongan_akhir.gol_pppk else ref_golongan_akhir.nama end as golongan_akhir,
+  pegawai.tmt_golongan,
+  pegawai.tmt_cpns as tmt_asn,
+  pegawai.no_sk_cpns as no_sk_asn,
+  ref_kedudukan_hukum.is_pppk,
+  ref_kedudukan_hukum.nama as status_asn,
+  pegawai.status_cpns_pns as status_pns,
+  pegawai.tmt_pns,
+  pegawai.kartu_pegawai,
+  pegawai.no_surat_dokter,
+  pegawai.tgl_surat_dokter,
+  pegawai.no_bebas_narkoba,
+  pegawai.tgl_bebas_narkoba,
+  pegawai.no_catatan_polisi,
+  pegawai.tgl_catatan_polisi,
+  pegawai.akte_kelahiran,
+  pegawai.bpjs,
+  pegawai.npwp,
+  pegawai.tgl_npwp,
+  pegawai.no_taspen
+from pegawai
+left join ref_lokasi ref_lokasi_tempat_lahir
+	on ref_lokasi_tempat_lahir.id = pegawai.tempat_lahir_id and ref_lokasi_tempat_lahir.deleted_at is null
+left join ref_agama
+	on ref_agama.id = pegawai.agama_id and ref_agama.deleted_at is null
+left join ref_tingkat_pendidikan
+	on ref_tingkat_pendidikan.id = pegawai.tingkat_pendidikan_id and ref_tingkat_pendidikan.deleted_at is null
+left join ref_pendidikan
+	on ref_pendidikan.id = pegawai.pendidikan_id and ref_pendidikan.deleted_at is null
+left join ref_lokasi ref_lokasi_lokasi_kerja
+	on ref_lokasi_lokasi_kerja.id = pegawai.lokasi_kerja_id and ref_lokasi_lokasi_kerja.deleted_at is null
+left join ref_jenis_pegawai
+	on ref_jenis_pegawai.id = pegawai.jenis_pegawai_id and ref_jenis_pegawai.deleted_at is null
+left join ref_golongan ref_golongan_akhir
+	on ref_golongan_akhir.id = pegawai.gol_id and ref_golongan_akhir.deleted_at is null
+left join ref_golongan ref_golongan_awal
+	on ref_golongan_awal.id = pegawai.gol_awal_id and ref_golongan_awal.deleted_at is null
+left join ref_kedudukan_hukum
+	on ref_kedudukan_hukum.id = pegawai.kedudukan_hukum_id and ref_kedudukan_hukum.deleted_at is null
+left join ref_jenis_kawin
+	on ref_jenis_kawin.id = pegawai.jenis_kawin_id and ref_jenis_kawin.deleted_at is null
+left join unit_kerja
+	on unit_kerja.id = pegawai.unor_id and unit_kerja.deleted_at is null
+left join ref_jabatan
+	on ref_jabatan.kode_jabatan = pegawai.jabatan_instansi_id and ref_jabatan.deleted_at is null
+left join ref_jenis_jabatan
+	on ref_jenis_jabatan.id = ref_jabatan.jenis_jabatan and ref_jenis_jabatan.deleted_at is null
+left join ref_kelas_jabatan
+	on ref_kelas_jabatan.id = ref_jabatan.kelas
+left join ref_jabatan ref_jabatan_aktual
+	on ref_jabatan_aktual.kode_jabatan = pegawai.jabatan_instansi_real_id and ref_jabatan_aktual.deleted_at is null
+left join ref_jenis_jabatan ref_jenis_jabatan_aktual
+	on ref_jenis_jabatan_aktual.id = ref_jabatan_aktual.jenis_jabatan and ref_jenis_jabatan_aktual.deleted_at is null
+where pegawai.nip_baru = $1 and pegawai.deleted_at is null;

@@ -78,30 +78,32 @@ func Test_handler_getDataPribadi(t *testing.T) {
 			(1,  'Kristen', null),
 			(2,  'Katolik', '2000-01-01');
 		insert into unit_kerja
-			(id,  diatasan_id, nama_unor, is_satker, nama_jabatan,    pemimpin_pns_id, deleted_at) values
-			('0', '1',         'Unor 0',  0,         'Unit Kerja 0',  null,            null),
-			('1', '2',         'Unor 1',  0,         'Unit Kerja 1',  null,            null),
-			('2', '3',         'Unor 2',  0,         'Unit Kerja 2',  null,            null),
-			('3', '4',         'Unor 3',  0,         'Unit Kerja 3',  null,            null),
-			('4', '5',         'Unor 4',  0,         'Unit Kerja 4',  null,            null),
-			('5', '6',         'Unor 5',  0,         'Unit Kerja 5',  null,            null),
-			('6', '7',         'Unor 6',  0,         'Unit Kerja 6',  null,            null),
-			('7', '8',         'Unor 7',  0,         'Unit Kerja 7',  null,            null),
-			('8', '9',         'Unor 8',  0,         'Unit Kerja 8',  null,            null),
-			('9', 'A',         'Unor 9',  0,         'Unit Kerja 9',  null,            null),
-			('A', 'B',         'Unor A',  0,         'Unit Kerja A',  null,            null),
-			('B', 'C',         'Unor B',  1,         'Unit Kerja B',  null,            null),
-			('C', 'D',         'Unor C',  0,         'Unit Kerja C',  null,            null),
-			('D', null,        'Unor D',  0,         'Unit Kerja D',  null,            null),
-			('E', 'F',         'Unor E',  0,         'Unit Kerja E',  null,            null),
-			('F', '6',         'Unor F',  0,         'Unit Kerja F',  null,            '2000-01-01');
+			(id,  diatasan_id, nama_unor, nama_jabatan,    pemimpin_pns_id, deleted_at) values
+			('0', '1',         'Unor 0',  'Unit Kerja 0',  null,            null),
+			('1', '2',         'Unor 1',  'Unit Kerja 1',  null,            null),
+			('2', '3',         'Unor 2',  'Unit Kerja 2',  null,            null),
+			('3', '4',         'Unor 3',  'Unit Kerja 3',  null,            null),
+			('4', '5',         'Unor 4',  'Unit Kerja 4',  null,            null),
+			('5', '6',         'Unor 5',  'Unit Kerja 5',  null,            null),
+			('6', '7',         'Unor 6',  'Unit Kerja 6',  null,            null),
+			('7', '8',         'Unor 7',  'Unit Kerja 7',  null,            null),
+			('8', '9',         'Unor 8',  'Unit Kerja 8',  null,            null),
+			('9', 'A',         'Unor 9',  'Unit Kerja 9',  null,            null),
+			('A', 'B',         'Unor A',  'Unit Kerja A',  null,            null),
+			('B', 'C',         'Unor B',  'Unit Kerja B',  null,            null),
+			('C', 'D',         'Unor C',  'Unit Kerja C',  null,            null),
+			('D', null,        'Unor D',  'Unit Kerja D',  null,            null),
+			('E', 'F',         'Unor E',  'Unit Kerja E',  null,            null),
+			('F', 'G',         '',        '',              null,            null),
+			('G', 'H',         'Unor G',  'Unit Kerja G',  null,            null),
+			('H', '6',         'Unor H',  'Unit Kerja H',  null,            '2000-01-01');
 		insert into pegawai
 			(nip_baru, pns_id, nama, gelar_depan, gelar_belakang, jenis_jabatan_id, tmt_jabatan, unor_id, nik, kk, jenis_kelamin, tempat_lahir, tempat_lahir_id, tgl_lahir, tingkat_pendidikan_id, pendidikan_id, jenis_kawin_id, agama_id, email_dikbud, email, alamat, no_hp, no_darurat, jenis_pegawai_id, status_pegawai, tmt_cpns, mk_tahun_swasta, mk_bulan_swasta, masa_kerja, jabatan_instansi_id, jabatan_instansi_real_id, lokasi_kerja, lokasi_kerja_id, gol_awal_id, gol_id, tmt_golongan, no_sk_cpns, status_cpns_pns, tmt_pns, kartu_pegawai, no_surat_dokter, tgl_surat_dokter, no_bebas_narkoba, tgl_bebas_narkoba, no_catatan_polisi, tgl_catatan_polisi, akte_kelahiran, bpjs, npwp, tgl_npwp, no_taspen, kedudukan_hukum_id, terminated_date, deleted_at) values
-			('1c', 'PNS_1c', 'Budi Santoso', 'Dr.', 'M.Sc', 2, '2020-01-01', '0', '3173000000000001', '3173000000000002', 'L', 'DKI Jakarta', 1, '1990-05-20', 1, '1', 1, 1, 'budi@dikbud.go.id', 'budi@gmail.com', 'Jl. Merdeka No. 123', '08123456789', '08198765432', 1, 1, '2015-06-01', 2, 12, '5 Tahun 6 Bulan', 'KJ2', 'KJ3', 'Jakarta HQ', 2, 1, 2, '2018-01-01', 'SK-CPNS-2015', 'CPNS', '2017-01-01', 'KARPEG001', 'DOC-HEALTH-001', '2015-05-01', 'BN-001', '2015-05-02', 'SKCK-001', '2015-05-03', 'AKTE-001', 'BPJS-001', 'NPWP-001', '2016-01-01', 'TASPEN-001', 2, null, null),
+			('1c', 'PNS_1c', 'Budi Santoso', 'Dr.', 'M.Sc', 2, '2020-01-01', '0', '3173000000000001', '3173000000000002', 'L', 'DKI Jakarta', 1, '1990-05-20', 1, '1', 1, 1, 'budi@dikbud.go.id', 'budi@gmail.com', 'Jl. Merdeka No. 123', '08123456789', '08198765432', 1, 1, '2015-06-01', 2, 12, '5 Tahun 6 Bulan', 'KJ2', 'KJ3', 'Jakarta HQ', 2, 1, 2, '2018-01-01', 'SK-CPNS-2015', 'PNS', '2017-01-01', 'KARPEG001', 'DOC-HEALTH-001', '2015-05-01', 'BN-001', '2015-05-02', 'SKCK-001', '2015-05-03', 'AKTE-001', 'BPJS-001', 'NPWP-001', '2016-01-01', 'TASPEN-001', 2, null, null),
 			('1d', 'PNS_1d', 'John Doe', null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null),
 			('1e', 'PNS_1e', 'John Santoso', 'Dr.', 'M.Sc', 4, '2020-01-01', 'E', '3173000000000001', '3173000000000002', 'L', 'DKI Jakarta', 3, '1990-05-20', 2, '2', 2, 2, 'budi@dikbud.go.id', 'budi@gmail.com', 'Jl. Merdeka No. 123', '08123456789', '08198765432', 2, 1, null, 2, 12, '5 Tahun 6 Bulan', 'KJ5', 'KJ5', 'Jakarta HQ', 3, 3, 3, '2018-01-01', 'SK-CPNS-2015', 'CPNS', '2017-01-01', 'KARPEG001', 'DOC-HEALTH-001', '2015-05-01', 'BN-001', '2015-05-02', 'SKCK-001', '2015-05-03', 'AKTE-001', 'BPJS-001', 'NPWP-001', '2016-01-01', 'TASPEN-001', 3, null, null),
-			('1f', 'PNS001', 'Budi John', '', '', 1, '2020-01-01', '8', '3173000000000001', '3173000000000002', 'L', 'DKI Jakarta', 1, '1990-05-20', 1, '1', 1, 1, 'budi@dikbud.go.id', 'budi@gmail.com', 'Jl. Merdeka No. 123', '08123456789', '08198765432', 1, 1, '2015-06-01', null, null, '5 Tahun 6 Bulan', 'KJ4', 'KJ6', 'Jakarta HQ', 1, 1, 2, '2018-01-01', 'SK-CPNS-2015', 'CPNS', '2017-01-01', 'KARPEG001', 'DOC-HEALTH-001', '2015-05-01', 'BN-001', '2015-05-02', 'SKCK-001', '2015-05-03', 'AKTE-001', 'BPJS-001', 'NPWP-001', '2016-01-01', 'TASPEN-001', 1, '3000-01-01', null),
-			('1g', 'PNS_1g', 'Budi Santoso', 'Dr.', 'M.Sc', 1, '2020-01-01', 'C', '3173000000000001', '3173000000000002', 'L', 'DKI Jakarta', 1, '1990-05-20', 1, '1', 1, 1, 'budi@dikbud.go.id', 'budi@gmail.com', 'Jl. Merdeka No. 123', '08123456789', '08198765432', 1, 1, '2015-06-01', 2, 4, '5 Tahun 6 Bulan', 'KJ1', 'KJ6', 'Jakarta HQ', 2, 1, 2, '2018-01-01', 'SK-CPNS-2015', 'CPNS', '2017-01-01', 'KARPEG001', 'DOC-HEALTH-001', '2015-05-01', 'BN-001', '2015-05-02', 'SKCK-001', '2015-05-03', 'AKTE-001', 'BPJS-001', 'NPWP-001', '2016-01-01', 'TASPEN-001', 4, '2000-01-01', null),
+			('1f', 'PNS001', 'Budi John', '', '', 1, '2020-01-01', '8', '3173000000000001', '3173000000000002', 'L', 'DKI Jakarta', 1, '1990-05-20', 1, '1', 1, 1, 'budi@dikbud.go.id', 'budi@gmail.com', 'Jl. Merdeka No. 123', '08123456789', '08198765432', 1, 1, '2015-06-01', null, null, '5 Tahun 6 Bulan', 'KJ4', 'KJ6', 'Jakarta HQ', 1, 1, 2, '2018-01-01', 'SK-CPNS-2015', 'C', '2017-01-01', 'KARPEG001', 'DOC-HEALTH-001', '2015-05-01', 'BN-001', '2015-05-02', 'SKCK-001', '2015-05-03', 'AKTE-001', 'BPJS-001', 'NPWP-001', '2016-01-01', 'TASPEN-001', 1, '3000-01-01', null),
+			('1g', 'PNS_1g', 'Budi Santoso', 'Dr.', 'M.Sc', 1, '2020-01-01', 'C', '3173000000000001', '3173000000000002', 'L', 'DKI Jakarta', 1, '1990-05-20', 1, '1', 1, 1, 'budi@dikbud.go.id', 'budi@gmail.com', 'Jl. Merdeka No. 123', '08123456789', '08198765432', 1, 1, '2015-06-01', 2, 4, '5 Tahun 6 Bulan', 'KJ1', 'KJ6', 'Jakarta HQ', 2, 1, 2, '2018-01-01', 'SK-CPNS-2015', 'P', null, 'KARPEG001', 'DOC-HEALTH-001', '2015-05-01', 'BN-001', '2015-05-02', 'SKCK-001', '2015-05-03', 'AKTE-001', 'BPJS-001', 'NPWP-001', '2016-01-01', 'TASPEN-001', 4, '2000-01-01', null),
 			('2c', 'PNS002', 'Budi Santoso', 'Dr.', 'M.Sc', 2, '2020-01-01', '0', '3173000000000001', '3173000000000002', 'L', 'DKI Jakarta', 1, '1990-05-20', 1, '1', 1, 1, 'budi@dikbud.go.id', 'budi@gmail.com', 'Jl. Merdeka No. 123', '08123456789', '08198765432', 1, 1, '2015-06-01', 2, 12, '5 Tahun 6 Bulan', 'KJ2', 'KJ3', 'Jakarta HQ', 1, 1, 2, '2018-01-01', 'SK-CPNS-2015', 'CPNS', '2017-01-01', 'KARPEG001', 'DOC-HEALTH-001', '2015-05-01', 'BN-001', '2015-05-02', 'SKCK-001', '2015-05-03', 'AKTE-001', 'BPJS-001', 'NPWP-001', '2016-01-01', 'TASPEN-001', 2, null, '2000-01-01');
 		update unit_kerja set pemimpin_pns_id = 'PNS001' where id = '8';
 	`
@@ -128,7 +130,7 @@ func Test_handler_getDataPribadi(t *testing.T) {
 		wantResponseBody string
 	}{
 		{
-			name:             "ok: non pppk",
+			name:             "ok: non pppk with status_pns & tmt_pns",
 			dbData:           dbData,
 			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1c")}},
 			wantResponseCode: http.StatusOK,
@@ -160,6 +162,7 @@ func Test_handler_getDataPribadi(t *testing.T) {
 						"masa_kerja_keseluruhan":      "` + masaKerjaKeseluruhan(time.Date(2015, 6, 1, 0, 0, 0, 0, time.Local), 2, 12) + `",
 						"masa_kerja_golongan":         "5 Tahun 6 Bulan",
 						"jabatan":                     "Jabatan 2",
+						"jenis_jabatan":               "Jenis Jabatan 2",
 						"kelas_jabatan":               "Kelas 1",
 						"lokasi_kerja":                "Medan",
 						"golongan_ruang_awal":         "I/a",
@@ -168,7 +171,9 @@ func Test_handler_getDataPribadi(t *testing.T) {
 						"tmt_golongan":                "2018-01-01",
 						"tmt_asn":                     "2015-06-01",
 						"nomor_sk_asn":                "SK-CPNS-2015",
-						"status_asn":                  "CPNS",
+						"is_pppk":                     false,
+						"status_asn":                  "PNS",
+						"status_pns":                  "PNS",
 						"tmt_pns":                     "2017-01-01",
 						"kartu_pegawai":               "KARPEG001",
 						"nomor_surat_dokter":          "DOC-HEALTH-001",
@@ -220,6 +225,7 @@ func Test_handler_getDataPribadi(t *testing.T) {
 						"masa_kerja_keseluruhan":      "",
 						"masa_kerja_golongan":         "",
 						"jabatan":                     "",
+						"jenis_jabatan":               "",
 						"kelas_jabatan":               "",
 						"lokasi_kerja":                "",
 						"golongan_ruang_awal":         "",
@@ -228,7 +234,9 @@ func Test_handler_getDataPribadi(t *testing.T) {
 						"tmt_golongan":                null,
 						"tmt_asn":                     null,
 						"nomor_sk_asn":                "",
+						"is_pppk":                     false,
 						"status_asn":                  "",
+						"status_pns":                  "",
 						"tmt_pns":                     null,
 						"kartu_pegawai":               "",
 						"nomor_surat_dokter":          "",
@@ -248,7 +256,7 @@ func Test_handler_getDataPribadi(t *testing.T) {
 			`,
 		},
 		{
-			name:             "ok: references record is deleted with empty tmt_cpns",
+			name:             "ok: references record is deleted with empty tmt_cpns without status_pns",
 			dbData:           dbData,
 			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1e")}},
 			wantResponseCode: http.StatusOK,
@@ -280,6 +288,7 @@ func Test_handler_getDataPribadi(t *testing.T) {
 						"masa_kerja_keseluruhan":      "3 Tahun 0 Bulan",
 						"masa_kerja_golongan":         "5 Tahun 6 Bulan",
 						"jabatan":                     "",
+						"jenis_jabatan":               "",
 						"kelas_jabatan":               "",
 						"lokasi_kerja":                "Jakarta HQ",
 						"golongan_ruang_awal":         "",
@@ -288,8 +297,10 @@ func Test_handler_getDataPribadi(t *testing.T) {
 						"tmt_golongan":                "2018-01-01",
 						"tmt_asn":                     null,
 						"nomor_sk_asn":                "SK-CPNS-2015",
-						"status_asn":                  "CPNS",
-						"tmt_pns":                     "2017-01-01",
+						"is_pppk":                     false,
+						"status_asn":                  "",
+						"status_pns":                  "",
+						"tmt_pns":                     null,
 						"kartu_pegawai":               "KARPEG001",
 						"nomor_surat_dokter":          "DOC-HEALTH-001",
 						"tanggal_surat_dokter":        "2015-05-01",
@@ -302,7 +313,7 @@ func Test_handler_getDataPribadi(t *testing.T) {
 						"npwp":                        "NPWP-001",
 						"tanggal_npwp":                "2016-01-01",
 						"nomor_taspen":                "TASPEN-001",
-						"unit_organisasi":             ["Unor E"]
+						"unit_organisasi":             ["Unor E", "Unor G"]
 					}
 				}
 			`,
@@ -340,6 +351,7 @@ func Test_handler_getDataPribadi(t *testing.T) {
 						"masa_kerja_keseluruhan":      "` + masaKerjaKeseluruhan(time.Date(2015, 6, 1, 0, 0, 0, 0, time.Local), 0, 0) + `",
 						"masa_kerja_golongan":         "5 Tahun 6 Bulan",
 						"jabatan":                     "Jabatan 4",
+						"jenis_jabatan":               "",
 						"kelas_jabatan":               "",
 						"lokasi_kerja":                "Jakarta",
 						"golongan_ruang_awal":         "I",
@@ -348,7 +360,9 @@ func Test_handler_getDataPribadi(t *testing.T) {
 						"tmt_golongan":                "2018-01-01",
 						"tmt_asn":                     "2015-06-01",
 						"nomor_sk_asn":                "SK-CPNS-2015",
+						"is_pppk":                     true,
 						"status_asn":                  "P3K",
+						"status_pns":                  "",
 						"tmt_pns":                     null,
 						"kartu_pegawai":               "KARPEG001",
 						"nomor_surat_dokter":          "DOC-HEALTH-001",
@@ -362,13 +376,13 @@ func Test_handler_getDataPribadi(t *testing.T) {
 						"npwp":                        "NPWP-001",
 						"tanggal_npwp":                "2016-01-01",
 						"nomor_taspen":                "TASPEN-001",
-						"unit_organisasi":             ["Unor 8", "Unor 9", "Unor A", "Unor B"]
+						"unit_organisasi":             ["Unor 8", "Unor 9", "Unor A", "Unor B", "Unor C", "Unor D"]
 					}
 				}
 			`,
 		},
 		{
-			name:             "ok: another case with edge case",
+			name:             "ok: status_pns without tmt_pns and another case with edge case",
 			dbData:           dbData,
 			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1g")}},
 			wantResponseCode: http.StatusOK,
@@ -400,6 +414,7 @@ func Test_handler_getDataPribadi(t *testing.T) {
 						"masa_kerja_keseluruhan":      "",
 						"masa_kerja_golongan":         "5 Tahun 6 Bulan",
 						"jabatan":                     "Jabatan 1",
+						"jenis_jabatan":               "Jenis Jabatan 1",
 						"kelas_jabatan":               "Kelas 1",
 						"lokasi_kerja":                "Medan",
 						"golongan_ruang_awal":         "I/a",
@@ -408,8 +423,10 @@ func Test_handler_getDataPribadi(t *testing.T) {
 						"tmt_golongan":                "2018-01-01",
 						"tmt_asn":                     "2015-06-01",
 						"nomor_sk_asn":                "SK-CPNS-2015",
-						"status_asn":                  "CPNS",
-						"tmt_pns":                     "2017-01-01",
+						"is_pppk":                     false,
+						"status_asn":                  "POL",
+						"status_pns":                  "PNS",
+						"tmt_pns":                     null,
 						"kartu_pegawai":               "KARPEG001",
 						"nomor_surat_dokter":          "DOC-HEALTH-001",
 						"tanggal_surat_dokter":        "2015-05-01",

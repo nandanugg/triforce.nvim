@@ -89,7 +89,7 @@ with recursive unit_kerja_path as (
     select uk.id, uk.nama_unor, uk.diatasan_id, uk.is_satker, ukp.depth + 1
     from unit_kerja uk
     join unit_kerja_path ukp on uk.id = ukp.diatasan_id
-    where ukp.depth < 10 and ukp.is_satker <> 1 and uk.deleted_at is null
+    where ukp.depth < 10 and uk.deleted_at is null
 )
 select id, nama_unor from unit_kerja_path
 `

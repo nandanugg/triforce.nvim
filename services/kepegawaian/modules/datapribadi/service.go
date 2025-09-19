@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -39,7 +38,11 @@ func (s *service) get(ctx context.Context, nip string) (*dataPribadi, error) {
 		return nil, fmt.Errorf("get data pribadi: %w", err)
 	}
 
-	unitOrganisasi := []string{}
+	var (
+		tmtPNS         db.Date
+		statusPNS      string
+		unitOrganisasi = make([]string, 0)
+	)
 	if data.UnorID.Valid {
 		unitOrganisasiRows, err := s.repo.ListUnitKerjaHierarchy(ctx, data.UnorID.String)
 		if err != nil {
@@ -48,10 +51,13 @@ func (s *service) get(ctx context.Context, nip string) (*dataPribadi, error) {
 
 		unitOrganisasi = make([]string, 0, len(unitOrganisasiRows))
 		for _, row := range unitOrganisasiRows {
-			if row.NamaUnor.Valid {
+			if row.NamaUnor.String != "" {
 				unitOrganisasi = append(unitOrganisasi, row.NamaUnor.String)
 			}
 		}
+	}
+	if data.StatusPns.String == "P" || data.StatusPns.String == "PNS" {
+		statusPNS, tmtPNS = "PNS", db.Date(data.TmtPns.Time)
 	}
 
 	return &dataPribadi{
@@ -80,6 +86,7 @@ func (s *service) get(ctx context.Context, nip string) (*dataPribadi, error) {
 		MasaKerjaKeseluruhan:     typeutil.Cast[string](data.MasaKerjaKeseluruhan),
 		MasaKerjaGolongan:        data.MasaKerjaGolongan.String,
 		Jabatan:                  data.Jabatan.String,
+		JenisJabatan:             data.JenisJabatan.String,
 		KelasJabatan:             data.KelasJabatan.String,
 		LokasiKerja:              data.LokasiKerja.String,
 		GolonganRuangAwal:        typeutil.Cast[string](data.GolonganAwal),
@@ -88,8 +95,10 @@ func (s *service) get(ctx context.Context, nip string) (*dataPribadi, error) {
 		TMTGolongan:              db.Date(data.TmtGolongan.Time),
 		TMTASN:                   db.Date(data.TmtAsn.Time),
 		NomorSKASN:               data.NoSkAsn.String,
-		StatusASN:                typeutil.Cast[string](data.StatusAsn),
-		TMTPNS:                   db.Date(typeutil.Cast[time.Time](data.TmtPns)),
+		IsPPPK:                   data.IsPppk.Bool,
+		StatusASN:                data.StatusAsn.String,
+		StatusPNS:                statusPNS,
+		TMTPNS:                   tmtPNS,
 		KartuPegawai:             data.KartuPegawai.String,
 		NomorSuratDokter:         data.NoSuratDokter.String,
 		TanggalSuratDokter:       db.Date(data.TglSuratDokter.Time),

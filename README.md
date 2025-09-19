@@ -20,6 +20,8 @@ Tools tambahan (opsional):
 * [tbls](https://github.com/k1LoW/tbls) - untuk membuat dokumen ERD.
 * [just](https://github.com/casey/just) - untuk menjalankan shell command yang
   berkaitan dengan pengembangan.
+* [sqlc](https://github.com/sqlc-dev/sqlc) - untuk membuat file repository
+  berdasarkan list query.
 
 ### Quick Start
 
@@ -34,10 +36,16 @@ Tools tambahan (opsional):
 ├─services
 │ └─X
 │   ├─config
-│   ├─dbmigrations
+│   ├─db
+|   | ├─migrations
+|   | ├─queries
+|   | └─repository
 │   ├─docs
-│   └─modules
-│     └─Y
+|   | ├─db
+│   | └─openapi.yaml
+│   ├─modules
+│   | └─Y
+│   └─main.go
 └─lib
 ```
 
@@ -49,9 +57,13 @@ Seluruh kode untuk service X. Entrypoint service (`func main()`) ada di sini.
 
 Definisi konfigurasi untuk service X.
 
-**services/X/dbmigrations**
+**services/X/db/migrations**
 
 Daftar database migration (DDL) untuk service X.
+
+**services/X/db/queries**
+
+Daftar query berdasarkan entity / fitur untuk service X.
 
 **services/X/docs**
 

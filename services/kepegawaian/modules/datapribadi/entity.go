@@ -30,6 +30,7 @@ type dataPribadi struct {
 	MasaKerjaKeseluruhan     string   `json:"masa_kerja_keseluruhan"`
 	MasaKerjaGolongan        string   `json:"masa_kerja_golongan"`
 	Jabatan                  string   `json:"jabatan"`
+	JenisJabatan             string   `json:"jenis_jabatan"`
 	KelasJabatan             string   `json:"kelas_jabatan"`
 	LokasiKerja              string   `json:"lokasi_kerja"`
 	GolonganRuangAwal        string   `json:"golongan_ruang_awal"`
@@ -38,7 +39,9 @@ type dataPribadi struct {
 	TMTGolongan              db.Date  `json:"tmt_golongan"`
 	TMTASN                   db.Date  `json:"tmt_asn"`
 	NomorSKASN               string   `json:"nomor_sk_asn"`
+	IsPPPK                   bool     `json:"is_pppk"`
 	StatusASN                string   `json:"status_asn"`
+	StatusPNS                string   `json:"status_pns"`
 	TMTPNS                   db.Date  `json:"tmt_pns"`
 	KartuPegawai             string   `json:"kartu_pegawai"`
 	NomorSuratDokter         string   `json:"nomor_surat_dokter"`

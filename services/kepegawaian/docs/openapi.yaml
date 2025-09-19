@@ -108,6 +108,8 @@ paths:
                         type: string
                       jabatan:
                         type: string
+                      jenis_jabatan:
+                        type: string
                       kelas_jabatan:
                         type: string
                       lokasi_kerja:
@@ -128,7 +130,11 @@ paths:
                         nullable: true
                       nomor_sk_asn:
                         type: string
+                      is_pppk:
+                        type: boolean
                       status_asn:
+                        type: string
+                      status_pns:
                         type: string
                       tmt_pns:
                         type: string
