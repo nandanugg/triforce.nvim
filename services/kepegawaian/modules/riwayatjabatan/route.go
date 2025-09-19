@@ -11,4 +11,5 @@ func RegisterRoutes(e *echo.Echo, repo repository, mwAuth echo.MiddlewareFunc) {
 	h := newHandler(s)
 
 	e.Add(http.MethodGet, "/v1/riwayat-jabatan", h.list, mwAuth)
+	e.Add(http.MethodGet, "/v1/riwayat-jabatan/:id/berkas", h.getBerkas, mwAuth)
 }

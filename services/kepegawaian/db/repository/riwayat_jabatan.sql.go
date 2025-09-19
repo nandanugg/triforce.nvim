@@ -22,6 +22,23 @@ func (q *Queries) CountRiwayatJabatan(ctx context.Context, pnsNip string) (int64
 	return count, err
 }
 
+const getBerkasRiwayatJabatan = `-- name: GetBerkasRiwayatJabatan :one
+select file_base64 from riwayat_jabatan
+where pns_nip = $1 and id = $2 and deleted_at is null
+`
+
+type GetBerkasRiwayatJabatanParams struct {
+	PnsNip pgtype.Text `db:"pns_nip"`
+	ID     int64       `db:"id"`
+}
+
+func (q *Queries) GetBerkasRiwayatJabatan(ctx context.Context, arg GetBerkasRiwayatJabatanParams) (pgtype.Text, error) {
+	row := q.db.QueryRow(ctx, getBerkasRiwayatJabatan, arg.PnsNip, arg.ID)
+	var file_base64 pgtype.Text
+	err := row.Scan(&file_base64)
+	return file_base64, err
+}
+
 const listRiwayatJabatan = `-- name: ListRiwayatJabatan :many
 SELECT
     riwayat_jabatan.id,

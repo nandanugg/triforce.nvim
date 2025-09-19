@@ -674,6 +674,31 @@ paths:
                           format: date
                   meta:
                     $ref: "#/components/schemas/metaPagination"
+  /v1/riwayat-jabatan/{id}/berkas:
+    get:
+      tags:
+        - Riwayat Jabatan
+      summary: Lihat berkas riwayat jabatan.
+      description: >-
+        Lihat berkas riwayat jabatan berdasarkan id.
+      operationId: getBerkasRiwayatJabatan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Berkas riwayat jabatan tidak ditemukan atau User tidak mempunyai akses.
   /v1/riwayat-kenaikan-gaji-berkala:
     get:
       tags:

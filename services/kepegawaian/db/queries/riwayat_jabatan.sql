@@ -26,3 +26,7 @@ LIMIT $1 OFFSET $2;
 SELECT count(1)
 FROM riwayat_jabatan
 WHERE riwayat_jabatan.pns_nip = @pns_nip::varchar and riwayat_jabatan.deleted_at IS NULL;
+
+-- name: GetBerkasRiwayatJabatan :one
+select file_base64 from riwayat_jabatan
+where pns_nip = $1 and id = $2 and deleted_at is null;
