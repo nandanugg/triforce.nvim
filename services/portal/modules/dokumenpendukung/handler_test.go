@@ -65,7 +65,7 @@ func Test_handler_list(t *testing.T) {
 			dbData:           dbData,
 			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1", "bukan_admin")}},
 			wantResponseCode: http.StatusForbidden,
-			wantResponseBody: `{"message": "Forbidden"}`,
+			wantResponseBody: `{"message": "akses ditolak"}`,
 		},
 	}
 

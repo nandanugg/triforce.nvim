@@ -33,10 +33,6 @@ type listResponse struct {
 }
 
 func (h *handler) list(c echo.Context) error {
-	if api.CurrentUser(c).Role != api.RoleAdmin {
-		return echo.NewHTTPError(http.StatusForbidden)
-	}
-
 	var req listRequest
 	if err := c.Bind(&req); err != nil {
 		return err

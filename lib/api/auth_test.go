@@ -36,12 +36,13 @@ func TestNewAuthMiddleware(t *testing.T) {
 		name             string
 		service          string
 		requestHeader    http.Header
+		allowedRoles     []string
 		wantResponseCode int
 		wantResponseBody string
 		wantUser         *User
 	}{
 		{
-			name: "ok: valid auth header with string audience without role",
+			name: "ok: valid auth header with string audience without role and none allowed roles is provided",
 			requestHeader: http.Header{
 				"Authorization": []string{generateHeader(jwt.MapClaims{
 					"nip": "100",
@@ -52,7 +53,19 @@ func TestNewAuthMiddleware(t *testing.T) {
 			wantUser:         &User{NIP: "100"},
 		},
 		{
-			name:    "ok: valid auth header with string audience with service role",
+			name: "error: valid auth header with string audience without role but with allowed role",
+			requestHeader: http.Header{
+				"Authorization": []string{generateHeader(jwt.MapClaims{
+					"nip": "100",
+					"aud": "testing",
+				})},
+			},
+			allowedRoles:     []string{"admin"},
+			wantResponseCode: http.StatusForbidden,
+			wantResponseBody: `{ "message": "akses ditolak" }`,
+		},
+		{
+			name:    "ok: valid auth header with string audience with service role and none allowed roles is provided",
 			service: "portal",
 			requestHeader: http.Header{
 				"Authorization": []string{generateHeader(jwt.MapClaims{
@@ -65,7 +78,35 @@ func TestNewAuthMiddleware(t *testing.T) {
 			wantUser:         &User{NIP: "100", Role: "admin"},
 		},
 		{
-			name:    "ok: valid auth header with string audience with other service role",
+			name:    "ok: valid auth header with string audience with service role and within allowed roles",
+			service: "portal",
+			requestHeader: http.Header{
+				"Authorization": []string{generateHeader(jwt.MapClaims{
+					"nip":   "100",
+					"aud":   "testing",
+					"roles": map[string]any{"portal": "admin"},
+				})},
+			},
+			allowedRoles:     []string{"admin"},
+			wantResponseCode: http.StatusOK,
+			wantUser:         &User{NIP: "100", Role: "admin"},
+		},
+		{
+			name:    "error: valid auth header with string audience with service role and without match allowed roles",
+			service: "portal",
+			requestHeader: http.Header{
+				"Authorization": []string{generateHeader(jwt.MapClaims{
+					"nip":   "100",
+					"aud":   "testing",
+					"roles": map[string]any{"portal": "admin"},
+				})},
+			},
+			allowedRoles:     []string{"pegawai", "tester", "guest"},
+			wantResponseCode: http.StatusForbidden,
+			wantResponseBody: `{ "message": "akses ditolak" }`,
+		},
+		{
+			name:    "ok: valid auth header with string audience with other service role and none allowed roles is provided",
 			service: "kepegawaian",
 			requestHeader: http.Header{
 				"Authorization": []string{generateHeader(jwt.MapClaims{
@@ -78,7 +119,21 @@ func TestNewAuthMiddleware(t *testing.T) {
 			wantUser:         &User{NIP: "100"},
 		},
 		{
-			name:    "ok: valid auth header with string audience with role is array (unsupported)",
+			name:    "error: valid auth header with string audience with other service role and with allowed roles",
+			service: "kepegawaian",
+			requestHeader: http.Header{
+				"Authorization": []string{generateHeader(jwt.MapClaims{
+					"nip":   "100",
+					"aud":   "testing",
+					"roles": map[string]any{"portal": "admin"},
+				})},
+			},
+			allowedRoles:     []string{"admin"},
+			wantResponseCode: http.StatusForbidden,
+			wantResponseBody: `{ "message": "akses ditolak" }`,
+		},
+		{
+			name:    "ok: valid auth header with string audience with role is array (unsupported) and none allowed roles is provided",
 			service: "portal",
 			requestHeader: http.Header{
 				"Authorization": []string{generateHeader(jwt.MapClaims{
@@ -91,7 +146,21 @@ func TestNewAuthMiddleware(t *testing.T) {
 			wantUser:         &User{NIP: "100"},
 		},
 		{
-			name: "ok: valid auth header with list audience with empty role",
+			name:    "error: valid auth header with string audience with role is array (unsupported) and with allowed roles",
+			service: "portal",
+			requestHeader: http.Header{
+				"Authorization": []string{generateHeader(jwt.MapClaims{
+					"nip":   "100",
+					"aud":   "testing",
+					"roles": map[string]any{"portal": []string{"admin", "pegawai"}},
+				})},
+			},
+			allowedRoles:     []string{"admin", "pegawai"},
+			wantResponseCode: http.StatusForbidden,
+			wantResponseBody: `{ "message": "akses ditolak" }`,
+		},
+		{
+			name: "ok: valid auth header with list audience with empty role and none allowed roles is provided",
 			requestHeader: http.Header{
 				"Authorization": []string{generateHeader(jwt.MapClaims{
 					"nip":   "100",
@@ -103,7 +172,20 @@ func TestNewAuthMiddleware(t *testing.T) {
 			wantUser:         &User{NIP: "100"},
 		},
 		{
-			name:    "ok: valid auth header with list audience with multiple service role",
+			name: "error: valid auth header with list audience with empty role and with multiple allowed roles",
+			requestHeader: http.Header{
+				"Authorization": []string{generateHeader(jwt.MapClaims{
+					"nip":   "100",
+					"aud":   []string{"nexus", "testing"},
+					"roles": map[string]any{},
+				})},
+			},
+			allowedRoles:     []string{"admin", "tester", "pegawai"},
+			wantResponseCode: http.StatusForbidden,
+			wantResponseBody: `{ "message": "akses ditolak" }`,
+		},
+		{
+			name:    "ok: valid auth header with list audience with multiple service role and none allowed roles is provided",
 			service: "portal",
 			requestHeader: http.Header{
 				"Authorization": []string{generateHeader(jwt.MapClaims{
@@ -113,6 +195,21 @@ func TestNewAuthMiddleware(t *testing.T) {
 				},
 				)},
 			},
+			wantResponseCode: http.StatusOK,
+			wantUser:         &User{NIP: "100", Role: "pegawai"},
+		},
+		{
+			name:    "ok: valid auth header with list audience with multiple service role and with multiple allowed roles",
+			service: "portal",
+			requestHeader: http.Header{
+				"Authorization": []string{generateHeader(jwt.MapClaims{
+					"nip":   "100",
+					"aud":   []string{"nexus", "testing"},
+					"roles": map[string]any{"kepegawaian": "admin", "portal": "pegawai"},
+				},
+				)},
+			},
+			allowedRoles:     []string{"guest", "teacher", "pegawai", "tester"},
 			wantResponseCode: http.StatusOK,
 			wantUser:         &User{NIP: "100", Role: "pegawai"},
 		},
@@ -191,7 +288,6 @@ func TestNewAuthMiddleware(t *testing.T) {
 			wantResponseBody: `{ "message": "audience tidak valid" }`,
 		},
 	}
-
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
@@ -208,7 +304,7 @@ func TestNewAuthMiddleware(t *testing.T) {
 				return nil
 			}
 			middleware := NewAuthMiddleware(tt.service, keyfunc)
-			e.Add(http.MethodGet, "/", handler, middleware)
+			e.Add(http.MethodGet, "/", handler, middleware(tt.allowedRoles...))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)

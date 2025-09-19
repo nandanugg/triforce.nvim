@@ -43,55 +43,65 @@ func NewAuthKeyfunc(host, realm, audience string) (*Keyfunc, error) {
 	return &Keyfunc{keyfunc.Keyfunc, audience}, nil
 }
 
-func NewAuthMiddleware(service string, keyfunc *Keyfunc) echo.MiddlewareFunc {
-	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			header := c.Request().Header.Get("Authorization")
-			if !strings.HasPrefix(header, "Bearer ") {
-				return echo.NewHTTPError(http.StatusUnauthorized, "token otentikasi tidak valid")
-			}
+// AuthMiddlewareFunc returns Echo middleware for auth and role checks.
+type AuthMiddlewareFunc func(allowedRoles ...string) echo.MiddlewareFunc
 
-			token := strings.TrimPrefix(header, "Bearer ")
-			claims := jwt.MapClaims{}
-			_, err := jwt.ParseWithClaims(token, &claims, keyfunc.Keyfunc)
-			if err != nil {
-				msg := "akses ditolak"
-				switch {
-				case errors.Is(err, jwt.ErrTokenMalformed):
-					msg = "token otentikasi tidak valid"
-				case errors.Is(err, jwt.ErrTokenExpired):
-					msg = "token otentikasi sudah kedaluwarsa"
-				case errors.Is(err, jwt.ErrTokenSignatureInvalid):
-					msg = "signature token otentikasi tidak valid"
+// NewAuthMiddleware creates middleware that allows requests only if the user's
+// role matches one of the given allowedRoles (or any role if none are given).
+func NewAuthMiddleware(service string, keyfunc *Keyfunc) AuthMiddlewareFunc {
+	return func(allowedRoles ...string) echo.MiddlewareFunc {
+		return func(next echo.HandlerFunc) echo.HandlerFunc {
+			return func(c echo.Context) error {
+				header := c.Request().Header.Get("Authorization")
+				if !strings.HasPrefix(header, "Bearer ") {
+					return echo.NewHTTPError(http.StatusUnauthorized, "token otentikasi tidak valid")
 				}
-				return echo.NewHTTPError(http.StatusUnauthorized, msg)
-			}
 
-			switch aud := claims["aud"].(type) {
-			case string:
-				if aud != keyfunc.Audience {
+				token := strings.TrimPrefix(header, "Bearer ")
+				claims := jwt.MapClaims{}
+				_, err := jwt.ParseWithClaims(token, &claims, keyfunc.Keyfunc)
+				if err != nil {
+					msg := "akses ditolak"
+					switch {
+					case errors.Is(err, jwt.ErrTokenMalformed):
+						msg = "token otentikasi tidak valid"
+					case errors.Is(err, jwt.ErrTokenExpired):
+						msg = "token otentikasi sudah kedaluwarsa"
+					case errors.Is(err, jwt.ErrTokenSignatureInvalid):
+						msg = "signature token otentikasi tidak valid"
+					}
+					return echo.NewHTTPError(http.StatusUnauthorized, msg)
+				}
+
+				switch aud := claims["aud"].(type) {
+				case string:
+					if aud != keyfunc.Audience {
+						return echo.NewHTTPError(http.StatusUnauthorized, "audience tidak valid")
+					}
+				case []any:
+					if !slices.Contains(aud, any(keyfunc.Audience)) {
+						return echo.NewHTTPError(http.StatusUnauthorized, "audience tidak valid")
+					}
+				default:
 					return echo.NewHTTPError(http.StatusUnauthorized, "audience tidak valid")
 				}
-			case []any:
-				if !slices.Contains(aud, any(keyfunc.Audience)) {
-					return echo.NewHTTPError(http.StatusUnauthorized, "audience tidak valid")
+
+				nip, ok := claims["nip"].(string)
+				if !ok {
+					return echo.NewHTTPError(http.StatusUnauthorized, "nip tidak valid")
 				}
-			default:
-				return echo.NewHTTPError(http.StatusUnauthorized, "audience tidak valid")
-			}
 
-			nip, ok := claims["nip"].(string)
-			if !ok {
-				return echo.NewHTTPError(http.StatusUnauthorized, "nip tidak valid")
-			}
+				user := User{NIP: nip}
+				if roles, ok := claims["roles"].(map[string]any); ok {
+					user.Role, _ = roles[service].(string)
+				}
+				c.Set(contextKeyUser, &user)
 
-			user := User{NIP: nip}
-			if roles, ok := claims["roles"].(map[string]any); ok {
-				user.Role, _ = roles[service].(string)
+				if len(allowedRoles) == 0 || slices.Contains(allowedRoles, user.Role) {
+					return next(c)
+				}
+				return echo.NewHTTPError(http.StatusForbidden, "akses ditolak")
 			}
-			c.Set(contextKeyUser, &user)
-
-			return next(c)
 		}
 	}
 }

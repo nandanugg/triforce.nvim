@@ -5,8 +5,6 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-
-	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
 )
 
 type handler struct {
@@ -18,10 +16,6 @@ func newHandler(s *service) *handler {
 }
 
 func (h *handler) list(c echo.Context) error {
-	if api.CurrentUser(c).Role != "admin" {
-		return echo.NewHTTPError(http.StatusForbidden)
-	}
-
 	ctx := c.Request().Context()
 	data, err := h.service.list(ctx)
 	if err != nil {
