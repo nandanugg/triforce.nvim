@@ -1405,16 +1405,45 @@ paths:
                           type: integer
                         tipe_jabatan:
                           type: string
+                        nama_jabatan:
+                          type: string
                         deskripsi_jabatan:
                           type: string
                         tanggal_mulai:
                           type: string
                           format: date
+                          nullable: true
                         tanggal_selesai:
                           type: string
                           format: date
+                          nullable: true
                   meta:
                     $ref: "#/components/schemas/metaPagination"
+  /v1/riwayat-penugasan/{id}/berkas:
+    get:
+      tags:
+        - Riwayat Penugasan
+      summary: Lihat berkas riwayat penugasan.
+      description: >-
+        Lihat berkas riwayat penugasan berdasarkan id.
+      operationId: getBerkasRiwayatPenugasan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Berkas riwayat penugasan tidak ditemukan atau User tidak mempunyai akses.
   /v1/riwayat-sertifikasi:
     get:
       tags:
