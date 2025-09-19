@@ -46,5 +46,6 @@ type anak struct {
 	StatusAnak    string     `json:"status_anak"`
 	StatusSekolah string     `json:"status_sekolah"`
 	TanggalLahir  *time.Time `json:"tanggal_lahir"`
+	NamaOrangTua  *string    `json:"nama_orang_tua"`
 	AnakKe        *int64     `json:"anak_ke"`
 }

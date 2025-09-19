@@ -23,7 +23,7 @@ SELECT
             a.tanggal_lahir ASC NULLS LAST,
             a.id ASC  -- tie-breaker for same date or nulls
     ) AS anak_ke,
-    pas.nama AS nama_ibu_bapak
+    pas.nama AS nama_orang_tua
 FROM anak a
 JOIN pegawai pg ON a.pns_id = pg.pns_id AND pg.deleted_at is null
 LEFT JOIN pasangan pas ON a.pasangan_id = pas.id AND pas.deleted_at is null
@@ -40,7 +40,7 @@ type ListAnakByNipRow struct {
 	TanggalLahir pgtype.Date `db:"tanggal_lahir"`
 	StatusAnak   pgtype.Text `db:"status_anak"`
 	AnakKe       int64       `db:"anak_ke"`
-	NamaIbuBapak pgtype.Text `db:"nama_ibu_bapak"`
+	NamaOrangTua pgtype.Text `db:"nama_orang_tua"`
 }
 
 func (q *Queries) ListAnakByNip(ctx context.Context, nipBaru pgtype.Text) ([]ListAnakByNipRow, error) {
@@ -60,7 +60,7 @@ func (q *Queries) ListAnakByNip(ctx context.Context, nipBaru pgtype.Text) ([]Lis
 			&i.TanggalLahir,
 			&i.StatusAnak,
 			&i.AnakKe,
-			&i.NamaIbuBapak,
+			&i.NamaOrangTua,
 		); err != nil {
 			return nil, err
 		}

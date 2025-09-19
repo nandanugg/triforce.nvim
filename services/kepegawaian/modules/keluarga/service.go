@@ -96,8 +96,9 @@ func (s *service) mapListAnak(a repo.ListAnakByNipRow) anak {
 		ID:           a.ID,
 		Nama:         nullStringPtr(a.Nama),
 		Nik:          nullStringPtr(pgtype.Text{Valid: true, String: ""}), // TODO: map actual nik if available
-		JenisKelamin: JenisKelaminToLabel(a.JenisKelamin),
+		JenisKelamin: a.JenisKelamin.String,
 		StatusAnak:   StatusAnakToLabel(a.StatusAnak),
+		NamaOrangTua: nullStringPtr(a.NamaOrangTua),
 		TanggalLahir: &a.TanggalLahir.Time,
 		AnakKe:       &a.AnakKe,
 	}

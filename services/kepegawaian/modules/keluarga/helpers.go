@@ -66,14 +66,3 @@ func StatusPernikahanToString(status pgtype.Int2) string {
 		return "Tidak Diketahui"
 	}
 }
-
-func JenisKelaminToLabel(jk pgtype.Text) string {
-	switch jk.String {
-	case "L":
-		return "Laki-laki"
-	case "P":
-		return "Perempuan"
-	default:
-		return "Tidak Diketahui"
-	}
-}

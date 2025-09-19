@@ -41,8 +41,8 @@ func Test_handler_list(t *testing.T) {
 	VALUES (31, 1, 'Istri A', '2000-01-01', 1, 'pns-1');
 
 	-- anak linked to pegawai
-	INSERT INTO anak (id, nama, jenis_kelamin, tanggal_lahir, status_anak, pns_id)
-	VALUES (11, 'Anak A', 'L', '2000-01-01', '1', 'pns-1');
+	INSERT INTO anak (id, pasangan_id, nama, jenis_kelamin, tanggal_lahir, status_anak, pns_id)
+	VALUES (11, 31, 'Anak A', 'M', '2000-01-01', '1', 'pns-1');
 
 	`
 
@@ -103,11 +103,12 @@ func Test_handler_list(t *testing.T) {
 					{
 						"id": 11,
 						"nama": "Anak A",
-						"jenis_kelamin": "Laki-laki",
+						"jenis_kelamin": "M",
 						"status_anak": "Kandung",
 						"anak_ke": 1,
 						"nik": "",
 						"status_sekolah": "",
+						"nama_orang_tua": "Istri A",
 						"tanggal_lahir": "2000-01-01T00:00:00Z"
 					}
 					]

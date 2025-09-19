@@ -49,7 +49,7 @@ SELECT
             a.tanggal_lahir ASC NULLS LAST,
             a.id ASC  -- tie-breaker for same date or nulls
     ) AS anak_ke,
-    pas.nama AS nama_ibu_bapak
+    pas.nama AS nama_orang_tua
 FROM anak a
 JOIN pegawai pg ON a.pns_id = pg.pns_id AND pg.deleted_at is null
 LEFT JOIN pasangan pas ON a.pasangan_id = pas.id AND pas.deleted_at is null
