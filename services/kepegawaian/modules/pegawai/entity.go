@@ -11,8 +11,3 @@ type pegawai struct {
 	UnitKerja     string `json:"unit_kerja"`
 	StatusPegawai string `json:"status_pegawai"`
 }
-
-type statusPegawai struct {
-	ID   string `json:"id"`
-	Nama string `json:"nama"`
-}

@@ -15,5 +15,4 @@ func RegisterRoutes(e *echo.Echo, db *pgxpool.Pool, mwAuth api.AuthMiddlewareFun
 	h := newHandler(s)
 
 	e.Add(http.MethodGet, "/v1/pegawai", h.list, mwAuth(api.RoleAdmin))
-	e.Add(http.MethodGet, "/v1/status-pegawai", h.listStatusPegawai, mwAuth())
 }

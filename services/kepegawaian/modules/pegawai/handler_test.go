@@ -1,6 +1,7 @@
 package pegawai
 
 // import (
+// 	"context"
 // 	"net/http"
 // 	"net/http/httptest"
 // 	"net/url"
@@ -362,82 +363,15 @@ package pegawai
 // 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
 // 		},
 // 	}
-
 // 	for _, tt := range tests {
 // 		t.Run(tt.name, func(t *testing.T) {
 // 			t.Parallel()
 
 // 			db := dbtest.New(t, dbmigrations.FS)
-// 			_, err := db.Exec(tt.dbData)
+// 			_, err := db.Exec(context.Background(), tt.dbData)
 // 			require.NoError(t, err)
 
 // 			req := httptest.NewRequest(http.MethodGet, "/v1/pegawai", nil)
-// 			req.URL.RawQuery = tt.requestQuery.Encode()
-// 			req.Header = tt.requestHeader
-// 			rec := httptest.NewRecorder()
-
-// 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-// 			require.NoError(t, err)
-// 			RegisterRoutes(e, db, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
-// 			e.ServeHTTP(rec, req)
-
-// 			assert.Equal(t, tt.wantResponseCode, rec.Code)
-// 			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
-// 			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
-// 		})
-// 	}
-// }
-
-// func Test_handler_listStatusPegawai(t *testing.T) {
-// 	t.Parallel()
-
-// 	dbData := `
-// 		insert into jenis_pegawai
-// 			("ID", "NAMA") values
-// 			('1',  'a'),
-// 			('2',  'c'),
-// 			('3',  'b');
-// 	`
-
-// 	tests := []struct {
-// 		name             string
-// 		dbData           string
-// 		requestQuery     url.Values
-// 		requestHeader    http.Header
-// 		wantResponseCode int
-// 		wantResponseBody string
-// 	}{
-// 		{
-// 			name:             "ok",
-// 			dbData:           dbData,
-// 			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "41")}},
-// 			wantResponseCode: http.StatusOK,
-// 			wantResponseBody: `{
-// 				"data": [
-// 					{"id": "1", "nama": "a"},
-// 					{"id": "3", "nama": "b"},
-// 					{"id": "2", "nama": "c"}
-// 				]
-// 			}`,
-// 		},
-// 		{
-// 			name:             "error: auth header tidak valid",
-// 			dbData:           dbData,
-// 			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
-// 			wantResponseCode: http.StatusUnauthorized,
-// 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
-// 		},
-// 	}
-
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			t.Parallel()
-
-// 			db := dbtest.New(t, dbmigrations.FS)
-// 			_, err := db.Exec(tt.dbData)
-// 			require.NoError(t, err)
-
-// 			req := httptest.NewRequest(http.MethodGet, "/v1/status-pegawai", nil)
 // 			req.URL.RawQuery = tt.requestQuery.Encode()
 // 			req.Header = tt.requestHeader
 // 			rec := httptest.NewRecorder()

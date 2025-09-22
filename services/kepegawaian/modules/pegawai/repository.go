@@ -125,28 +125,3 @@ func (r *repository) count(ctx context.Context, opts listOptions) (uint, error) 
 
 	return result, err
 }
-
-func (r *repository) listStatusPegawai(ctx context.Context) ([]statusPegawai, error) {
-	rows, err := r.db.Query(ctx, `select "ID", "NAMA" from jenis_pegawai order by 2 asc`)
-	if err != nil {
-		return nil, fmt.Errorf("sql select: %w", err)
-	}
-	defer rows.Close()
-
-	result := []statusPegawai{}
-	for rows.Next() {
-		var row statusPegawai
-		err := rows.Scan(&row.ID, &row.Nama)
-		if err != nil {
-			return nil, fmt.Errorf("row scan: %w", err)
-		}
-
-		result = append(result, row)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("rows scan: %w", err)
-	}
-
-	return result, nil
-}

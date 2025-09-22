@@ -1,4 +1,4 @@
-package pegawai
+package jenispegawai
 
 import (
 	"log/slog"
@@ -17,37 +17,21 @@ func newHandler(s *service) *handler {
 	return &handler{service: s}
 }
 
-type listRequest struct {
-	Cari       string `query:"cari"`
-	UnitID     string `query:"unit_id"`
-	GolonganID int64  `query:"golongan_id"`
-	JabatanID  string `query:"jabatan_id"`
-	Status     string `query:"status"`
-
-	api.PaginationRequest
-}
-
 type listResponse struct {
-	Data []pegawai          `json:"data"`
+	Data []jenisPegawai     `json:"data"`
 	Meta api.MetaPagination `json:"meta"`
 }
 
 func (h *handler) list(c echo.Context) error {
-	var req listRequest
+	var req api.PaginationRequest
 	if err := c.Bind(&req); err != nil {
 		return err
 	}
 
 	ctx := c.Request().Context()
-	data, total, err := h.service.list(ctx, uint64(req.Limit), uint64(req.Offset), listOptions{
-		cari:       req.Cari,
-		unitID:     req.UnitID,
-		golonganID: req.GolonganID,
-		jabatanID:  req.JabatanID,
-		status:     req.Status,
-	})
+	data, total, err := h.service.list(ctx, req.Limit, req.Offset)
 	if err != nil {
-		slog.ErrorContext(ctx, "Error getting list pegawai.", "error", err)
+		slog.ErrorContext(ctx, "Error getting list jenis pegawai.", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 

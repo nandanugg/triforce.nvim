@@ -13,6 +13,7 @@ tags:
   - name: Jenis Hukuman
   - name: Jenis Jabatan
   - name: Jenis Kenaikan Pangkat
+  - name: Jenis Pegawai
   - name: Jenis Penghargaan
   - name: Keluarga
   - name: Pegawai
@@ -495,6 +496,37 @@ paths:
                           type: string
                   meta:
                     $ref: "#/components/schemas/metaPagination"
+  /v1/jenis-pegawai:
+    get:
+      tags:
+        - Jenis Pegawai
+      summary: Daftar jenis pegawai.
+      description: Daftar jenis pegawai.
+      operationId: listJenisPegawai
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: integer
+                        nama:
+                          type: string
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
   /v1/jenis-penghargaan:
     get:
       tags:
@@ -614,33 +646,6 @@ paths:
                           type: string
                   meta:
                     $ref: "#/components/schemas/metaPagination"
-  /v1/status-pegawai:
-    get:
-      tags:
-        - Pegawai
-      summary: Daftar status pegawai.
-      description: Daftar status pegawai.
-      operationId: listStatusPegawai
-      parameters:
-        - $ref: "#/components/parameters/authRequired"
-      responses:
-        "200":
-          description: Sukses.
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                properties:
-                  data:
-                    type: array
-                    items:
-                      type: object
-                      additionalProperties: false
-                      properties:
-                        id:
-                          type: string
-                        nama:
-                          type: string
   /v1/riwayat-asesmen-nine-box:
     get:
       tags:
