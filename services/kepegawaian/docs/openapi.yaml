@@ -675,7 +675,8 @@ paths:
                         id:
                           type: integer
                         tahun:
-                          type: string
+                          type: integer
+                          nullable: true
                         kesimpulan:
                           type: string
                   meta:

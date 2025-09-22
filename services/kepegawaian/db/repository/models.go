@@ -800,6 +800,30 @@ type RefTingkatPendidikan struct {
 	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 }
 
+// Riwayat asesmen nine box pegawai
+type RiwayatAsesmenNineBox struct {
+	// id data nine box
+	ID int32 `db:"id"`
+	// NIP pegawai
+	PnsNip pgtype.Text `db:"pns_nip"`
+	// Nama pegawai
+	Nama pgtype.Text `db:"nama"`
+	// Nama jabatan pegawai
+	NamaJabatan pgtype.Text `db:"nama_jabatan"`
+	// Kelas jabatan pegawai
+	KelasJabatan pgtype.Int2 `db:"kelas_jabatan"`
+	// Kesimpulan hasil penilaian
+	Kesimpulan pgtype.Text `db:"kesimpulan"`
+	// Tahun penilaian
+	Tahun pgtype.Int2 `db:"tahun"`
+	// Waktu pembuatan data
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir pembaruan data
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
+	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
+}
+
 // Riwayat asesmen pegawai
 type RiwayatAssesman struct {
 	// id data asesmen
@@ -1289,30 +1313,6 @@ type RiwayatKursu struct {
 	DeletedAt        pgtype.Timestamptz `db:"deleted_at"`
 	FileBase64       pgtype.Text        `db:"file_base64"`
 	KeteranganBerkas pgtype.Text        `db:"keterangan_berkas"`
-}
-
-// Riwayat asesmen nine box pegawai
-type RiwayatNineBox struct {
-	// id data nine box
-	ID int32 `db:"id"`
-	// NIP pegawai
-	PnsNip pgtype.Text `db:"pns_nip"`
-	// Nama pegawai
-	Nama pgtype.Text `db:"nama"`
-	// Nama jabatan pegawai
-	NamaJabatan pgtype.Text `db:"nama_jabatan"`
-	// Kelas jabatan pegawai
-	KelasJabatan pgtype.Int2 `db:"kelas_jabatan"`
-	// Kesimpulan hasil penilaian
-	Kesimpulan pgtype.Text `db:"kesimpulan"`
-	// Tahun penilaian
-	Tahun pgtype.Text `db:"tahun"`
-	// Waktu pembuatan data
-	CreatedAt pgtype.Timestamptz `db:"created_at"`
-	// Waktu terakhir pembaruan data
-	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
-	// Waktu penghapusan data
-	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 }
 
 // Riwayat pendidikan pegawai

@@ -1,4 +1,4 @@
-# kepegawaian.riwayat_nine_box
+# kepegawaian.riwayat_asesmen_nine_box
 
 ## Description
 
@@ -14,7 +14,7 @@ Riwayat asesmen nine box pegawai
 | nama_jabatan | varchar(200) |  | true |  |  | Nama jabatan pegawai |
 | kelas_jabatan | smallint |  | true |  |  | Kelas jabatan pegawai |
 | kesimpulan | varchar(200) |  | true |  |  | Kesimpulan hasil penilaian |
-| tahun | varchar(4) |  | true |  |  | Tahun penilaian |
+| tahun | smallint |  | true |  |  | Tahun penilaian |
 | created_at | timestamp with time zone | now() | true |  |  | Waktu pembuatan data |
 | updated_at | timestamp with time zone | now() | true |  |  | Waktu terakhir pembaruan data |
 | deleted_at | timestamp with time zone |  | true |  |  | Waktu penghapusan data |
@@ -29,7 +29,7 @@ Riwayat asesmen nine box pegawai
 
 | Name | Definition |
 | ---- | ---------- |
-| riwayat_nine_box_pkey | CREATE UNIQUE INDEX riwayat_nine_box_pkey ON kepegawaian.riwayat_nine_box USING btree (id) |
+| riwayat_nine_box_pkey | CREATE UNIQUE INDEX riwayat_nine_box_pkey ON kepegawaian.riwayat_asesmen_nine_box USING btree (id) |
 
 ## Relations
 
@@ -37,14 +37,14 @@ Riwayat asesmen nine box pegawai
 erDiagram
 
 
-"kepegawaian.riwayat_nine_box" {
+"kepegawaian.riwayat_asesmen_nine_box" {
   integer id
   varchar_20_ pns_nip
   varchar_200_ nama
   varchar_200_ nama_jabatan
   smallint kelas_jabatan
   varchar_200_ kesimpulan
-  varchar_4_ tahun
+  smallint tahun
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at

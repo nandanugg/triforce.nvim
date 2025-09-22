@@ -1,4 +1,4 @@
-# postgres
+# nexus
 
 ## Tables
 
@@ -38,7 +38,7 @@
 | [kepegawaian.riwayat_kenaikan_gaji_berkala](kepegawaian.riwayat_kenaikan_gaji_berkala.md) | 32 | Riwayat kenaikan gaji berkala pegawai | BASE TABLE |
 | [kepegawaian.riwayat_kinerja](kepegawaian.riwayat_kinerja.md) | 19 | Riwayat kinerja pegawai | BASE TABLE |
 | [kepegawaian.riwayat_kursus](kepegawaian.riwayat_kursus.md) | 17 | Riwayat kursus pegawai | BASE TABLE |
-| [kepegawaian.riwayat_nine_box](kepegawaian.riwayat_nine_box.md) | 10 | Riwayat asesmen nine box pegawai | BASE TABLE |
+| [kepegawaian.riwayat_asesmen_nine_box](kepegawaian.riwayat_asesmen_nine_box.md) | 10 | Riwayat asesmen nine box pegawai | BASE TABLE |
 | [kepegawaian.riwayat_pendidikan](kepegawaian.riwayat_pendidikan.md) | 25 | Riwayat pendidikan pegawai | BASE TABLE |
 | [kepegawaian.riwayat_penghargaan_umum](kepegawaian.riwayat_penghargaan_umum.md) | 11 | Riwayat penghargaan umum pegawai | BASE TABLE |
 | [kepegawaian.riwayat_pindah_unit_kerja](kepegawaian.riwayat_pindah_unit_kerja.md) | 19 | Riwayat pindah unit kerja pegawai | BASE TABLE |
@@ -49,7 +49,7 @@
 | [kepegawaian.riwayat_sertifikasi](kepegawaian.riwayat_sertifikasi.md) | 9 | Riwayat sertifikasi pegawai | BASE TABLE |
 | [kepegawaian.riwayat_penugasan](kepegawaian.riwayat_penugasan.md) | 12 | Riwayat penugasan pegawai | BASE TABLE |
 | [kepegawaian.ref_kelas_jabatan](kepegawaian.ref_kelas_jabatan.md) | 5 | Referensi kelas jabatan | BASE TABLE |
-| [kepegawaian.file_digital_signature](kepegawaian.file_digital_signature.md) | 40 |  | BASE TABLE |
+| [kepegawaian.file_digital_signature](kepegawaian.file_digital_signature.md) | 41 |  | BASE TABLE |
 | [kepegawaian.file_digital_signature_corrector](kepegawaian.file_digital_signature_corrector.md) | 10 |  | BASE TABLE |
 | [kepegawaian.file_digital_signature_riwayat](kepegawaian.file_digital_signature_riwayat.md) | 10 |  | BASE TABLE |
 | [kepegawaian.log_digital_signature](kepegawaian.log_digital_signature.md) | 10 |  | BASE TABLE |
@@ -728,14 +728,14 @@ erDiagram
   text file_base64
   varchar_200_ keterangan_berkas
 }
-"kepegawaian.riwayat_nine_box" {
+"kepegawaian.riwayat_asesmen_nine_box" {
   integer id
   varchar_20_ pns_nip
   varchar_200_ nama
   varchar_200_ nama_jabatan
   smallint kelas_jabatan
   varchar_200_ kesimpulan
-  varchar_4_ tahun
+  smallint tahun
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
@@ -949,6 +949,7 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  smallint status_sk
 }
 "kepegawaian.file_digital_signature_corrector" {
   integer id
