@@ -79,14 +79,14 @@ func (q *Queries) ListUnitKerjaByNamaOrInduk(ctx context.Context, arg ListUnitKe
 const listUnitKerjaHierarchy = `-- name: ListUnitKerjaHierarchy :many
 with recursive unit_kerja_path as (
     -- anchor
-    select uk.id, uk.nama_unor, uk.diatasan_id, uk.is_satker, 1 as depth
+    select uk.id, uk.nama_unor, uk.diatasan_id, 1 as depth
     from unit_kerja uk
     where uk.id = $1 and uk.deleted_at is null
 
     union all
 
     -- recursive
-    select uk.id, uk.nama_unor, uk.diatasan_id, uk.is_satker, ukp.depth + 1
+    select uk.id, uk.nama_unor, uk.diatasan_id, ukp.depth + 1
     from unit_kerja uk
     join unit_kerja_path ukp on uk.id = ukp.diatasan_id
     where ukp.depth < 10 and uk.deleted_at is null
@@ -108,6 +108,49 @@ func (q *Queries) ListUnitKerjaHierarchy(ctx context.Context, id string) ([]List
 	var items []ListUnitKerjaHierarchyRow
 	for rows.Next() {
 		var i ListUnitKerjaHierarchyRow
+		if err := rows.Scan(&i.ID, &i.NamaUnor); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listUnitKerjaHierarchyByNIP = `-- name: ListUnitKerjaHierarchyByNIP :many
+with recursive unit_kerja_path as (
+    -- anchor
+    select uk.id, uk.nama_unor, uk.diatasan_id, 1 as depth
+    from unit_kerja uk
+    where uk.id = (SELECT unor_id FROM pegawai where nip_baru = $1::varchar LIMIT 1) and uk.deleted_at is null
+
+    union all
+
+    -- recursive
+    select uk.id, uk.nama_unor, uk.diatasan_id, ukp.depth + 1
+    from unit_kerja uk
+    join unit_kerja_path ukp on uk.id = ukp.diatasan_id
+    where ukp.depth < 10 and uk.deleted_at is null
+)
+select id, nama_unor from unit_kerja_path
+`
+
+type ListUnitKerjaHierarchyByNIPRow struct {
+	ID       string      `db:"id"`
+	NamaUnor pgtype.Text `db:"nama_unor"`
+}
+
+func (q *Queries) ListUnitKerjaHierarchyByNIP(ctx context.Context, nip string) ([]ListUnitKerjaHierarchyByNIPRow, error) {
+	rows, err := q.db.Query(ctx, listUnitKerjaHierarchyByNIP, nip)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListUnitKerjaHierarchyByNIPRow
+	for rows.Next() {
+		var i ListUnitKerjaHierarchyByNIPRow
 		if err := rows.Scan(&i.ID, &i.NamaUnor); err != nil {
 			return nil, err
 		}

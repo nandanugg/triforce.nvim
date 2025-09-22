@@ -29,6 +29,7 @@ type Querier interface {
 	CountRiwayatPenghargaan(ctx context.Context, nip string) (int64, error)
 	CountRiwayatPenugasan(ctx context.Context, nip pgtype.Text) (int64, error)
 	CountRiwayatSertifikasi(ctx context.Context, nip pgtype.Text) (int64, error)
+	CountSKByNIP(ctx context.Context, arg CountSKByNIPParams) (int64, error)
 	CountUnitKerja(ctx context.Context, arg CountUnitKerjaParams) (int64, error)
 	GetBerkasRiwayatHukumanDisiplin(ctx context.Context, arg GetBerkasRiwayatHukumanDisiplinParams) (pgtype.Text, error)
 	GetBerkasRiwayatJabatan(ctx context.Context, arg GetBerkasRiwayatJabatanParams) (pgtype.Text, error)
@@ -42,6 +43,7 @@ type Querier interface {
 	GetBerkasRiwayatPenugasan(ctx context.Context, arg GetBerkasRiwayatPenugasanParams) (pgtype.Text, error)
 	GetBerkasRiwayatSertifikasi(ctx context.Context, arg GetBerkasRiwayatSertifikasiParams) (pgtype.Text, error)
 	GetDataPribadi(ctx context.Context, arg GetDataPribadiParams) (GetDataPribadiRow, error)
+	GetSKByNIPAndID(ctx context.Context, arg GetSKByNIPAndIDParams) (GetSKByNIPAndIDRow, error)
 	ListAnakByNip(ctx context.Context, nipBaru pgtype.Text) ([]ListAnakByNipRow, error)
 	ListJenisKP(ctx context.Context, arg ListJenisKPParams) ([]ListJenisKPRow, error)
 	ListOrangTuaByNip(ctx context.Context, nipBaru pgtype.Text) ([]ListOrangTuaByNipRow, error)
@@ -65,8 +67,10 @@ type Querier interface {
 	ListRiwayatPenghargaan(ctx context.Context, arg ListRiwayatPenghargaanParams) ([]ListRiwayatPenghargaanRow, error)
 	ListRiwayatPenugasan(ctx context.Context, arg ListRiwayatPenugasanParams) ([]ListRiwayatPenugasanRow, error)
 	ListRiwayatSertifikasi(ctx context.Context, arg ListRiwayatSertifikasiParams) ([]ListRiwayatSertifikasiRow, error)
+	ListSKByNIP(ctx context.Context, arg ListSKByNIPParams) ([]ListSKByNIPRow, error)
 	ListUnitKerjaByNamaOrInduk(ctx context.Context, arg ListUnitKerjaByNamaOrIndukParams) ([]ListUnitKerjaByNamaOrIndukRow, error)
 	ListUnitKerjaHierarchy(ctx context.Context, id string) ([]ListUnitKerjaHierarchyRow, error)
+	ListUnitKerjaHierarchyByNIP(ctx context.Context, nip string) ([]ListUnitKerjaHierarchyByNIPRow, error)
 }
 
 var _ Querier = (*Queries)(nil)
