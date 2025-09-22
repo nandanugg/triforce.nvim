@@ -237,8 +237,6 @@ paths:
                       type: object
                       additionalProperties: false
                       properties:
-                        id:
-                          type: integer
                         kode_jabatan:
                           type: string
                         nama_jabatan:
@@ -791,6 +789,8 @@ paths:
                         id:
                           type: integer
                         jenis_jabatan:
+                          type: string
+                        kode_jabatan:
                           type: string
                         nama_jabatan:
                           type: string

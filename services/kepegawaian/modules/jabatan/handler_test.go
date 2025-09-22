@@ -45,17 +45,14 @@ func Test_handler_list(t *testing.T) {
 			wantResponseBody: `{
 				"data": [
 					{
-						"id":         11,
 						"kode_jabatan": "11h",
 						"nama_jabatan": "11h"
 					},
 					{
-						"id":         12,
 						"kode_jabatan": "12h",
 						"nama_jabatan": "12h"
 					},
 					{
-						"id":         13,
 						"kode_jabatan": "13h",
 						"nama_jabatan": "13h"
 					}
@@ -72,7 +69,6 @@ func Test_handler_list(t *testing.T) {
 			wantResponseBody: `{
 				"data": [
 					{
-						"id":         12,
 						"kode_jabatan": "12h",
 						"nama_jabatan": "12h"
 					}

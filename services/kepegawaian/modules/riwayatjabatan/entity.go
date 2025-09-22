@@ -3,6 +3,7 @@ package riwayatjabatan
 type riwayatJabatan struct {
 	ID                      int64  `json:"id"`
 	JenisJabatan            string `json:"jenis_jabatan"`
+	KodeJabatan             string `json:"kode_jabatan"`
 	NamaJabatan             string `json:"nama_jabatan"`
 	TmtJabatan              string `json:"tmt_jabatan"`
 	NoSk                    string `json:"no_sk"`

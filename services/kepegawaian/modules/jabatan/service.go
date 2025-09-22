@@ -37,7 +37,6 @@ func (s *service) listJabatan(ctx context.Context, limit, offset uint) ([]jabata
 
 	result := typeutil.Map(data, func(row repo.ListRefJabatanRow) jabatan {
 		return jabatan{
-			ID:          row.ID,
 			NamaJabatan: row.NamaJabatan.String,
 			KodeJabatan: row.KodeJabatan,
 		}

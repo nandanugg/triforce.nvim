@@ -2,6 +2,7 @@
 SELECT
     riwayat_jabatan.id,
     ref_jenis_jabatan.nama as jenis_jabatan,
+    ref_jabatan.kode_jabatan,
     ref_jabatan.nama_jabatan,
     tmt_jabatan,
     no_sk,

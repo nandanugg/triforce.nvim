@@ -48,6 +48,7 @@ func (s *service) list(ctx context.Context, nip string, limit, offset uint) ([]r
 			ID:                      row.ID,
 			JenisJabatan:            row.JenisJabatan.String,
 			NamaJabatan:             row.NamaJabatan.String,
+			KodeJabatan:             row.KodeJabatan.String,
 			TmtJabatan:              row.TmtJabatan.Time.Format(time.DateOnly),
 			NoSk:                    row.NoSk.String,
 			TanggalSk:               row.TanggalSk.Time.Format(time.DateOnly),
