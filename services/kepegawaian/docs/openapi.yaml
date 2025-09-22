@@ -598,6 +598,14 @@ paths:
                           type: integer
                         masa_bulan:
                           type: integer
+                        nomor_pp:
+                          type: string
+                        nomor_sk_pembatalan:
+                          type: string
+                        tanggal_sk_pembatalan:
+                          type: string
+                          format: date
+                          nullable: true
                   meta:
                     $ref: "#/components/schemas/metaPagination"
   /v1/riwayat-hukuman-disiplin/{id}/berkas:

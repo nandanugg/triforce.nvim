@@ -47,14 +47,14 @@ func Test_handler_list(t *testing.T) {
 			deleted_at
 		)
 		VALUES
-		('id1','198765432100001','Budi',1,'I/a',1,'Snapshotted Jenis Hukuman 1','SK1','2023-01-15','2023-01-20',0,1,'2023-02-20',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+		('id1','198765432100001','Budi',1,'I/a',1,'Snapshotted Jenis Hukuman 1','SK1','2023-01-15','2023-01-20',0,1,'2023-02-20','PP-1','DEL-1','2023-01-16',NULL,NULL,NULL,NULL),
 		('id1','198765432100001','Budi',1,'I/a',1,NULL,'SK2','2023-03-10','2023-03-15',0,2,'2023-05-15',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 		('id1','198765432100001','Budi',1,'I/a',1,NULL,'SK3','2023-06-01','2023-06-10',1,0,'2024-06-10',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 		('id1','198765432100001','Budi',1,'I/a',1,NULL,'SK4','2023-09-01','2023-09-15',2,0,'2025-09-15',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-		('id1','198765432100001','Budi',1,'I/a',2,NULL,'SK5','2023-12-01','2023-12-10',3,0,'2026-12-10',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+		('id1','198765432100001','Budi',1,'I/a',2,NULL,'SK5','2023-12-01','2023-12-10',3,0,'2026-12-10','PP-5','DEL-5','2023-12-02',NULL,NULL,NULL,NULL),
 		('id1','198765432100001','Budi',1,'I/a',3,NULL,'SK6','2023-12-02','2023-12-11',3,0,'2026-12-11',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 		('id1','198765432100001','Budi',1,'I/a',3,NULL,'SK7','2023-12-03','2023-12-12',3,0,'2026-12-12',NULL,NULL,NULL,NULL,NULL,NULL,'2023-02-20'),
-		('id1','198765432100001','Budi',2,'I/a',1,NULL,'SK8','2023-12-04','2023-12-13',3,0,'2026-12-13',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+		('id1','198765432100001','Budi',2,'I/a',1,NULL,'SK8','2023-12-04','2023-12-13',3,0,'2026-12-13','PP-8','DEL-8',NULL,NULL,NULL,NULL,NULL);
 	`
 
 	tests := []struct {
@@ -83,7 +83,10 @@ func Test_handler_list(t *testing.T) {
 						"nomor_sk": "SK8",
 						"tanggal_akhir": "2026-12-13",
 						"tanggal_mulai": "2023-12-13",
-						"tanggal_sk": "2023-12-04"
+						"tanggal_sk": "2023-12-04",
+						"nomor_pp": "PP-8",
+						"nomor_sk_pembatalan": "DEL-8",
+						"tanggal_sk_pembatalan": null
 					},
 					{
 						"id": 6,
@@ -95,7 +98,10 @@ func Test_handler_list(t *testing.T) {
 						"nomor_sk": "SK6",
 						"tanggal_akhir": "2026-12-11",
 						"tanggal_mulai": "2023-12-11",
-						"tanggal_sk": "2023-12-02"
+						"tanggal_sk": "2023-12-02",
+						"nomor_pp": "",
+						"nomor_sk_pembatalan": "",
+						"tanggal_sk_pembatalan": null
 					},
 					{
 						"id": 5,
@@ -107,7 +113,10 @@ func Test_handler_list(t *testing.T) {
 						"nomor_sk": "SK5",
 						"tanggal_akhir": "2026-12-10",
 						"tanggal_mulai": "2023-12-10",
-						"tanggal_sk": "2023-12-01"
+						"tanggal_sk": "2023-12-01",
+						"nomor_pp": "PP-5",
+						"nomor_sk_pembatalan": "DEL-5",
+						"tanggal_sk_pembatalan": "2023-12-02"
 					},
 					{
 						"id": 4,
@@ -119,7 +128,10 @@ func Test_handler_list(t *testing.T) {
 						"nomor_sk": "SK4",
 						"tanggal_akhir": "2025-09-15",
 						"tanggal_mulai": "2023-09-15",
-						"tanggal_sk": "2023-09-01"
+						"tanggal_sk": "2023-09-01",
+						"nomor_pp": "",
+						"nomor_sk_pembatalan": "",
+						"tanggal_sk_pembatalan": null
 					},
 					{
 						"id": 3,
@@ -131,7 +143,10 @@ func Test_handler_list(t *testing.T) {
 						"nomor_sk": "SK3",
 						"tanggal_akhir": "2024-06-10",
 						"tanggal_mulai": "2023-06-10",
-						"tanggal_sk": "2023-06-01"
+						"tanggal_sk": "2023-06-01",
+						"nomor_pp": "",
+						"nomor_sk_pembatalan": "",
+						"tanggal_sk_pembatalan": null
 					},
 					{
 						"id": 2,
@@ -143,7 +158,10 @@ func Test_handler_list(t *testing.T) {
 						"nomor_sk": "SK2",
 						"tanggal_akhir": "2023-05-15",
 						"tanggal_mulai": "2023-03-15",
-						"tanggal_sk": "2023-03-10"
+						"tanggal_sk": "2023-03-10",
+						"nomor_pp": "",
+						"nomor_sk_pembatalan": "",
+						"tanggal_sk_pembatalan": null
 					},
 					{
 						"id": 1,
@@ -155,7 +173,10 @@ func Test_handler_list(t *testing.T) {
 						"nomor_sk": "SK1",
 						"tanggal_akhir": "2023-02-20",
 						"tanggal_mulai": "2023-01-20",
-						"tanggal_sk": "2023-01-15"
+						"tanggal_sk": "2023-01-15",
+						"nomor_pp": "PP-1",
+						"nomor_sk_pembatalan": "DEL-1",
+						"tanggal_sk_pembatalan": "2023-01-16"
 					}
 			],
 				"meta": {
@@ -183,7 +204,10 @@ func Test_handler_list(t *testing.T) {
 						"nomor_sk": "SK5",
 						"tanggal_akhir": "2026-12-10",
 						"tanggal_mulai": "2023-12-10",
-						"tanggal_sk": "2023-12-01"
+						"tanggal_sk": "2023-12-01",
+						"nomor_pp": "PP-5",
+						"nomor_sk_pembatalan": "DEL-5",
+						"tanggal_sk_pembatalan": "2023-12-02"
 					}
 				],
 				"meta": {
