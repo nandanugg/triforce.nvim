@@ -33,6 +33,7 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/riwayatpenghargaan"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/riwayatpenugasan"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/riwayatsertifikasi"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/statuspernikahan"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/tingkatpendidikan"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/unitkerja"
 )
@@ -80,6 +81,7 @@ func main() {
 	riwayatpenghargaan.RegisterRoutes(e, dbRepository, mwAuth)
 	riwayatpenugasan.RegisterRoutes(e, dbRepository, mwAuth)
 	riwayatsertifikasi.RegisterRoutes(e, dbRepository, mwAuth)
+	statuspernikahan.RegisterRoutes(e, dbRepository, mwAuth)
 	tingkatpendidikan.RegisterRoutes(e, dbRepository, mwAuth)
 	unitkerja.RegisterRoutes(e, dbRepository, mwAuth)
 

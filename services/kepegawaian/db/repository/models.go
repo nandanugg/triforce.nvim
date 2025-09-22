@@ -34,6 +34,104 @@ type Anak struct {
 	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 }
 
+type FileDigitalSignature struct {
+	FileID       string      `db:"file_id"`
+	Kategori     pgtype.Text `db:"kategori"`
+	FileBase64   pgtype.Text `db:"file_base64"`
+	TtdPegawaiID pgtype.Text `db:"ttd_pegawai_id"`
+	StatusTtd    pgtype.Int2 `db:"status_ttd"`
+	NipSk        pgtype.Text `db:"nip_sk"`
+	NoSk         pgtype.Text `db:"no_sk"`
+	TanggalSk    pgtype.Date `db:"tanggal_sk"`
+	TmtSk        pgtype.Date `db:"tmt_sk"`
+	LokasiFile   pgtype.Text `db:"lokasi_file"`
+	// 1 sudah dikoreksi, 0 belum dikoreksi, 3 dikembalikan, 2 siap dikoreksi
+	StatusKoreksi      pgtype.Int2 `db:"status_koreksi"`
+	Catatan            pgtype.Text `db:"catatan"`
+	PegawaiKorektorID  pgtype.Text `db:"pegawai_korektor_id"`
+	AsalSuratSk        pgtype.Text `db:"asal_surat_sk"`
+	StatusKembali      pgtype.Int2 `db:"status_kembali"`
+	NamaPemilikSk      pgtype.Text `db:"nama_pemilik_sk"`
+	JabatanPemilikSk   pgtype.Text `db:"jabatan_pemilik_sk"`
+	FileBase64Sign     pgtype.Text `db:"file_base64_sign"`
+	UnitKerjaPemilikSk pgtype.Text `db:"unit_kerja_pemilik_sk"`
+	NipPemroses        pgtype.Text `db:"nip_pemroses"`
+	// 1 tanda tangan elektronik, 0 tanda tangan manual
+	DsOk      pgtype.Bool `db:"ds_ok"`
+	Arsip     pgtype.Text `db:"arsip"`
+	StatusPns pgtype.Text `db:"status_pns"`
+	// khusus untuk Surat Perintah PLT/PLH
+	TmtSampaiDengan pgtype.Date `db:"tmt_sampai_dengan"`
+	// Jika 1, tampilkan di dikbudHR
+	TelahKirim pgtype.Bool `db:"telah_kirim"`
+	// halaman diletakan tandataangan digital
+	HalamanTtd pgtype.Bool `db:"halaman_ttd"`
+	// 0/null : tidak tampilkan (seperti semula), 1 : tampilkan qrdari bssn
+	ShowQrcode pgtype.Bool `db:"show_qrcode"`
+	// 1:tengah bawah, 2 : kiri Bawah 0: kanan bawah
+	LetakTtd pgtype.Int2 `db:"letak_ttd"`
+	// untuk menampung nama unit kerja internal via kode
+	KodeUnitKerjaInternal pgtype.Text `db:"kode_unit_kerja_internal"`
+	// untuk menampung nama jabatan dengan kode jabatan internal
+	KodeJabatanInternal pgtype.Text `db:"kode_jabatan_internal"`
+	// khusus untuk keperluan laporan rekap
+	KelompokJabatan pgtype.Text `db:"kelompok_jabatan"`
+	// untuk mengetahui tgl tandatangan
+	TanggalTtd pgtype.Timestamptz `db:"tanggal_ttd"`
+	// Untuk menentukan alamat alternatif pengiriman dokumen
+	EmailKirim         pgtype.Text        `db:"email_kirim"`
+	SentToSiasin       pgtype.Text        `db:"sent_to_siasin"`
+	BlockchainIssuerID pgtype.Text        `db:"blockchain_issuer_id"`
+	BlockchainImageUrl pgtype.Text        `db:"blockchain_image_url"`
+	BlockchainHash     pgtype.Text        `db:"blockchain_hash"`
+	CreatedAt          pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt          pgtype.Timestamptz `db:"updated_at"`
+	DeletedAt          pgtype.Timestamptz `db:"deleted_at"`
+}
+
+type FileDigitalSignatureCorrector struct {
+	ID                int32       `db:"id"`
+	KorektorKe        pgtype.Int2 `db:"korektor_ke"`
+	PegawaiKorektorID pgtype.Text `db:"pegawai_korektor_id"`
+	// 1=dikembalikan, 0/null = sudah oke
+	StatusKembali  pgtype.Int2 `db:"status_kembali"`
+	CatatanKoreksi pgtype.Text `db:"catatan_koreksi"`
+	// 1=koreksi ok, 2=siap koreksi, 0/null = masih antrian
+	StatusKoreksi pgtype.Int2        `db:"status_koreksi"`
+	FileID        pgtype.Text        `db:"file_id"`
+	CreatedAt     pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt     pgtype.Timestamptz `db:"updated_at"`
+	DeletedAt     pgtype.Timestamptz `db:"deleted_at"`
+}
+
+type FileDigitalSignatureRiwayat struct {
+	ID              int64              `db:"id"`
+	FileID          pgtype.Text        `db:"file_id"`
+	PemrosesID      pgtype.Text        `db:"pemroses_id"`
+	Tindakan        pgtype.Text        `db:"tindakan"`
+	CatatanTindakan pgtype.Text        `db:"catatan_tindakan"`
+	WaktuTindakan   pgtype.Timestamptz `db:"waktu_tindakan"`
+	AksesPengguna   pgtype.Text        `db:"akses_pengguna"`
+	CreatedAt       pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt       pgtype.Timestamptz `db:"updated_at"`
+	DeletedAt       pgtype.Timestamptz `db:"deleted_at"`
+}
+
+type LogDigitalSignature struct {
+	ID         int32       `db:"id"`
+	FileID     pgtype.Text `db:"file_id"`
+	Nik        pgtype.Text `db:"nik"`
+	Keterangan pgtype.Text `db:"keterangan"`
+	// 1:gagal, 2:berhasil
+	Status pgtype.Int2 `db:"status"`
+	// 0 = belum, 1 = sudah
+	ProsesCron pgtype.Bool        `db:"proses_cron"`
+	CreatedBy  pgtype.Int4        `db:"created_by"`
+	CreatedAt  pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt  pgtype.Timestamptz `db:"updated_at"`
+	DeletedAt  pgtype.Timestamptz `db:"deleted_at"`
+}
+
 // Orang tua pegawai
 type OrangTua struct {
 	// id data orang tua

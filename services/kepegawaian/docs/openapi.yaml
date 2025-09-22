@@ -30,6 +30,7 @@ tags:
   - name: Riwayat Penghargaan
   - name: Riwayat Penugasan
   - name: Riwayat Sertifikasi
+  - name: Status Pernikahan
   - name: Tingkat Pendidikan
   - name: Unit Kerja
 paths:
@@ -1505,6 +1506,37 @@ paths:
                 format: binary
         "404":
           description: Berkas riwayat sertifikasi tidak ditemukan atau User tidak mempunyai akses.
+  /v1/status-pernikahan:
+    get:
+      tags:
+        - Status Pernikahan
+      summary: Daftar status pernikahan.
+      description: Daftar status pernikahan.
+      operationId: listStatusPernikahan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: integer
+                        nama:
+                          type: string
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
   /v1/tingkat-pendidikan:
     get:
       tags:
