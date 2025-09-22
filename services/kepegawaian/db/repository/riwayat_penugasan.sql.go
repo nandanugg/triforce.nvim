@@ -45,7 +45,8 @@ select
   nama_jabatan,
   deskripsi_jabatan,
   tanggal_mulai,
-  tanggal_selesai
+  tanggal_selesai,
+  is_menjabat
 from riwayat_penugasan
 where nip = $1 and deleted_at is null
 order by tanggal_mulai desc
@@ -65,6 +66,7 @@ type ListRiwayatPenugasanRow struct {
 	DeskripsiJabatan pgtype.Text `db:"deskripsi_jabatan"`
 	TanggalMulai     pgtype.Date `db:"tanggal_mulai"`
 	TanggalSelesai   pgtype.Date `db:"tanggal_selesai"`
+	IsMenjabat       pgtype.Bool `db:"is_menjabat"`
 }
 
 func (q *Queries) ListRiwayatPenugasan(ctx context.Context, arg ListRiwayatPenugasanParams) ([]ListRiwayatPenugasanRow, error) {
@@ -83,6 +85,7 @@ func (q *Queries) ListRiwayatPenugasan(ctx context.Context, arg ListRiwayatPenug
 			&i.DeskripsiJabatan,
 			&i.TanggalMulai,
 			&i.TanggalSelesai,
+			&i.IsMenjabat,
 		); err != nil {
 			return nil, err
 		}

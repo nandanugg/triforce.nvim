@@ -9,4 +9,5 @@ type riwayatPenugasan struct {
 	DeskripsiJabatan string  `json:"deskripsi_jabatan"`
 	TanggalMulai     db.Date `json:"tanggal_mulai"`
 	TanggalSelesai   db.Date `json:"tanggal_selesai"`
+	IsMenjabat       bool    `json:"is_menjabat"`
 }

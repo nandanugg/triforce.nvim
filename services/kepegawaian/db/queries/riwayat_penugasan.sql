@@ -5,7 +5,8 @@ select
   nama_jabatan,
   deskripsi_jabatan,
   tanggal_mulai,
-  tanggal_selesai
+  tanggal_selesai,
+  is_menjabat
 from riwayat_penugasan
 where nip = $1 and deleted_at is null
 order by tanggal_mulai desc

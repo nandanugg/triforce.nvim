@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -45,6 +46,7 @@ func (s *service) list(ctx context.Context, nip string, limit, offset uint) ([]r
 	}
 
 	return typeutil.Map(data, func(row sqlc.ListRiwayatPenugasanRow) riwayatPenugasan {
+		isMenjabat := row.IsMenjabat.Bool || row.TanggalSelesai.Time.IsZero() || row.TanggalSelesai.Time.After(time.Now())
 		return riwayatPenugasan{
 			ID:               row.ID,
 			TipeJabatan:      row.TipeJabatan.String,
@@ -52,6 +54,7 @@ func (s *service) list(ctx context.Context, nip string, limit, offset uint) ([]r
 			DeskripsiJabatan: row.DeskripsiJabatan.String,
 			TanggalMulai:     db.Date(row.TanggalMulai.Time),
 			TanggalSelesai:   db.Date(row.TanggalSelesai.Time),
+			IsMenjabat:       isMenjabat,
 		}
 	}), uint(count), nil
 }

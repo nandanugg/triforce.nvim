@@ -27,12 +27,12 @@ func Test_handler_list(t *testing.T) {
 
 	dbData := `
 		insert into riwayat_penugasan
-			(id, nip,  tipe_jabatan, nama_jabatan,         deskripsi_jabatan,     tanggal_mulai, tanggal_selesai, deleted_at) values
-			(1,  '1c', 'Struktural', 'Kepala Bagian',      'Deskripsi Jabatan 1', '2023-01-01',  '2023-12-31',    null),
-			(2,  '1c', 'Fungsional', 'Analis Kepegawaian', 'Deskripsi Jabatan 2', '2024-01-01',  '2024-05-31',    null),
-			(3,  '1c', 'Struktural', 'Kepala Sub Bagian',  'Deskripsi Jabatan 3', '2023-06-01',  '2024-12-31',    null),
-			(4,  '1c', 'Struktural', 'Kepala Sub Bagian',  'Deskripsi Jabatan 4', '2024-01-01',  '2024-12-31',    '2000-01-01'),
-			(5,  '2a', 'Struktural', 'Kepala Bagian',      'Deskripsi Jabatan 5', '2024-01-01',  '2024-12-31',    null);
+			(id, nip,  tipe_jabatan, nama_jabatan,         deskripsi_jabatan,     is_menjabat,  tanggal_mulai, tanggal_selesai, deleted_at) values
+			(1,  '1c', 'Struktural', 'Kepala Bagian',      'Deskripsi Jabatan 1', false, '2023-01-01',  '2023-12-31',    null),
+			(2,  '1c', 'Fungsional', 'Analis Kepegawaian', 'Deskripsi Jabatan 2', false, '2024-01-01',  '2024-05-31',    null),
+			(3,  '1c', 'Struktural', 'Kepala Sub Bagian',  'Deskripsi Jabatan 3', false, '2023-06-01',  '2024-12-31',    null),
+			(4,  '1c', 'Struktural', 'Kepala Sub Bagian',  'Deskripsi Jabatan 4', false, '2024-01-01',  '2024-12-31',    '2000-01-01'),
+			(5,  '2a', 'Struktural', 'Kepala Bagian',      'Deskripsi Jabatan 5', false, '2024-01-01',  '2024-12-31',    null);
 	`
 
 	tests := []struct {
@@ -56,7 +56,8 @@ func Test_handler_list(t *testing.T) {
 						"nama_jabatan": "Analis Kepegawaian",
 						"deskripsi_jabatan": "Deskripsi Jabatan 2",
 						"tanggal_mulai": "2024-01-01",
-						"tanggal_selesai": "2024-05-31"
+						"tanggal_selesai": "2024-05-31",
+						"is_menjabat": false
 					},
 					{
 						"id": 3,
@@ -64,7 +65,8 @@ func Test_handler_list(t *testing.T) {
 						"nama_jabatan": "Kepala Sub Bagian",
 						"deskripsi_jabatan": "Deskripsi Jabatan 3",
 						"tanggal_mulai": "2023-06-01",
-						"tanggal_selesai": "2024-12-31"
+						"tanggal_selesai": "2024-12-31",
+						"is_menjabat": false
 					},
 					{
 						"id": 1,
@@ -72,7 +74,8 @@ func Test_handler_list(t *testing.T) {
 						"nama_jabatan": "Kepala Bagian",
 						"deskripsi_jabatan": "Deskripsi Jabatan 1",
 						"tanggal_mulai": "2023-01-01",
-						"tanggal_selesai": "2023-12-31"
+						"tanggal_selesai": "2023-12-31",
+						"is_menjabat": false
 					}
 				],
 				"meta": {"limit": 10, "offset": 0, "total": 3}
@@ -92,7 +95,8 @@ func Test_handler_list(t *testing.T) {
 						"nama_jabatan": "Kepala Sub Bagian",
 						"deskripsi_jabatan": "Deskripsi Jabatan 3",
 						"tanggal_mulai": "2023-06-01",
-						"tanggal_selesai": "2024-12-31"
+						"tanggal_selesai": "2024-12-31",
+						"is_menjabat": false
 					}
 				],
 				"meta": {"limit": 1, "offset": 1, "total": 3}

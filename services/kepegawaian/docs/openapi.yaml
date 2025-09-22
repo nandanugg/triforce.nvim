@@ -1171,7 +1171,7 @@ paths:
                           type: string
                           format: date
                   meta:
-                     $ref: "#/components/schemas/metaPagination"
+                    $ref: "#/components/schemas/metaPagination"
   /v1/riwayat-pelatihan-fungsional/{id}/berkas:
     get:
       tags:
@@ -1317,7 +1317,7 @@ paths:
                         tipe_pelatihan:
                           type: string
                           description: Tipe pelatihan (Sertifikat/Non-sertifikat/Teknis)
-                          enum: [Sertifikat, Non-sertifikat, Teknis, ""]
+                          enum: [ Sertifikat, Non-sertifikat, Teknis, "" ]
                         jenis_pelatihan:
                           type: string
                           description: Jenis pelatihan (Workshop/Seminar/Kursus/Lainnya)
@@ -1551,6 +1551,8 @@ paths:
                           type: string
                           format: date
                           nullable: true
+                        is_menjabat:
+                          type: boolean
                         tanggal_selesai:
                           type: string
                           format: date
