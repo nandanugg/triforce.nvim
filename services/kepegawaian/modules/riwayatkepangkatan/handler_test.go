@@ -26,7 +26,7 @@ func Test_handler_list(t *testing.T) {
 	t.Parallel()
 
 	dbData := `
-		insert into ref_jenis_kp ("id", "nama", "deleted_at") values
+		insert into ref_jenis_kenaikan_pangkat ("id", "nama", "deleted_at") values
 			('21', 'jenis-kp-1', null),
 			('22', 'jenis-kp-2', null),
 			('23', 'jenis-kp-3', null),

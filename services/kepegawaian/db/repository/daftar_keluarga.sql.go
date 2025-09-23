@@ -77,7 +77,7 @@ SELECT
     ot.id,
     ot.hubungan,
     ot.nama,
-    ot.tgl_meninggal,
+    ot.tanggal_meninggal,
     ot.no_dokumen AS nik,
     ot.agama_id,
     ot.akte_meninggal AS dokumen_pendukung,
@@ -93,7 +93,7 @@ type ListOrangTuaByNipRow struct {
 	ID               int32       `db:"id"`
 	Hubungan         pgtype.Int2 `db:"hubungan"`
 	Nama             pgtype.Text `db:"nama"`
-	TglMeninggal     pgtype.Date `db:"tgl_meninggal"`
+	TanggalMeninggal pgtype.Date `db:"tanggal_meninggal"`
 	Nik              pgtype.Text `db:"nik"`
 	AgamaID          pgtype.Int2 `db:"agama_id"`
 	DokumenPendukung pgtype.Text `db:"dokumen_pendukung"`
@@ -113,7 +113,7 @@ func (q *Queries) ListOrangTuaByNip(ctx context.Context, nipBaru pgtype.Text) ([
 			&i.ID,
 			&i.Hubungan,
 			&i.Nama,
-			&i.TglMeninggal,
+			&i.TanggalMeninggal,
 			&i.Nik,
 			&i.AgamaID,
 			&i.DokumenPendukung,

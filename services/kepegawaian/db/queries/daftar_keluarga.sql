@@ -3,7 +3,7 @@ SELECT
     ot.id,
     ot.hubungan,
     ot.nama,
-    ot.tgl_meninggal,
+    ot.tanggal_meninggal,
     ot.no_dokumen AS nik,
     ot.agama_id,
     ot.akte_meninggal AS dokumen_pendukung,

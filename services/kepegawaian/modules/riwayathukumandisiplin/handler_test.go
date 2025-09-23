@@ -39,7 +39,7 @@ func Test_handler_list(t *testing.T) {
 			(1, 'I/a', 'Juru Muda', 'Ia', 1, 'I', NULL),
 			(2, 'II/a', 'Pengatur Muda', 'IIa', 2, 'II', '2023-02-20');
 
-		INSERT INTO riwayat_hukdis (
+		INSERT INTO riwayat_hukuman_disiplin (
 			pns_id, pns_nip, nama, golongan_id, nama_golongan,
 			jenis_hukuman_id, nama_jenis_hukuman, sk_nomor, sk_tanggal,
 			tanggal_mulai_hukuman, masa_tahun, masa_bulan, tanggal_akhir_hukuman,
@@ -285,7 +285,7 @@ func Test_handler_getBerkas(t *testing.T) {
 		INSERT INTO pegawai (pns_id, nip_baru, nama)
 		VALUES ('id1', '198765432100001', 'Budi');
 
-		INSERT INTO riwayat_hukdis (
+		INSERT INTO riwayat_hukuman_disiplin (
 			id, pns_id, pns_nip, nama, golongan_id, nama_golongan,
 			jenis_hukuman_id, nama_jenis_hukuman, sk_nomor, sk_tanggal,
 			tanggal_mulai_hukuman, masa_tahun, masa_bulan, tanggal_akhir_hukuman,

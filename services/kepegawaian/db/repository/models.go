@@ -142,7 +142,7 @@ type OrangTua struct {
 	// Nomor akte meninggal orang tua
 	AkteMeninggal pgtype.Text `db:"akte_meninggal"`
 	// Tanggal meninggal orang tua
-	TglMeninggal pgtype.Date `db:"tgl_meninggal"`
+	TanggalMeninggal pgtype.Date `db:"tanggal_meninggal"`
 	// Nama lengkap orang tua
 	Nama pgtype.Text `db:"nama"`
 	// Gelar di depan nama orang tua
@@ -232,7 +232,7 @@ type Pegawai struct {
 	// id tempat lahir (rujuk ref_lokasi)
 	TempatLahirID pgtype.Text `db:"tempat_lahir_id"`
 	// Tanggal lahir pegawai
-	TglLahir pgtype.Date `db:"tgl_lahir"`
+	TanggalLahir pgtype.Date `db:"tanggal_lahir"`
 	// Kode jenis kelamin, M: laki-laki, F: perempuan
 	JenisKelamin pgtype.Text `db:"jenis_kelamin"`
 	// Kode agama (rujuk ref_agama)
@@ -264,7 +264,7 @@ type Pegawai struct {
 	// Nomor SK pengangkatan CPNS
 	NoSkCpns pgtype.Text `db:"no_sk_cpns"`
 	// Tanggal SK pengangkatan CPNS
-	TglSkCpns pgtype.Date `db:"tgl_sk_cpns"`
+	TanggalSkCpns pgtype.Date `db:"tanggal_sk_cpns"`
 	// Tanggal mulai tugas (CPNS)
 	TmtCpns pgtype.Date `db:"tmt_cpns"`
 	// Tanggal mulai tugas (PNS)
@@ -318,15 +318,15 @@ type Pegawai struct {
 	// Nomor surat pemeriksaan kesehatan
 	NoSuratDokter pgtype.Text `db:"no_surat_dokter"`
 	// Tanggal surat pemeriksaan kesehatan
-	TglSuratDokter pgtype.Date `db:"tgl_surat_dokter"`
+	TanggalSuratDokter pgtype.Date `db:"tanggal_surat_dokter"`
 	// Nomor Surat Keterangan Bebas Narkoba
 	NoBebasNarkoba pgtype.Text `db:"no_bebas_narkoba"`
 	// Tanggal Surat Keterangan Bebas Narkoba
-	TglBebasNarkoba pgtype.Date `db:"tgl_bebas_narkoba"`
+	TanggalBebasNarkoba pgtype.Date `db:"tanggal_bebas_narkoba"`
 	// Nomor Surat Catatan Kelakukan Baik dari kepolisian
 	NoCatatanPolisi pgtype.Text `db:"no_catatan_polisi"`
 	// Tanggal Surat Catatan Kelakukan Baik dari kepolisian
-	TglCatatanPolisi pgtype.Date `db:"tgl_catatan_polisi"`
+	TanggalCatatanPolisi pgtype.Date `db:"tanggal_catatan_polisi"`
 	// Nomor akte kelahiran
 	AkteKelahiran pgtype.Text `db:"akte_kelahiran"`
 	// Status hidup pegawai
@@ -334,13 +334,13 @@ type Pegawai struct {
 	// Nomor akte meninggal
 	AkteMeninggal pgtype.Text `db:"akte_meninggal"`
 	// Tanggal meninggal pegawai
-	TglMeninggal pgtype.Date `db:"tgl_meninggal"`
+	TanggalMeninggal pgtype.Date `db:"tanggal_meninggal"`
 	// Nomor ASKES (jika tersedia/legacy)
 	NoAskes pgtype.Text `db:"no_askes"`
 	// Nomor Taspen
 	NoTaspen pgtype.Text `db:"no_taspen"`
 	// Tanggal terbit NPWP
-	TglNpwp pgtype.Date `db:"tgl_npwp"`
+	TanggalNpwp pgtype.Date `db:"tanggal_npwp"`
 	// Nama tempat lahir berdasarkan referensi ref_lokasi
 	TempatLahir pgtype.Text `db:"tempat_lahir"`
 	// Tingkat pendidikan terakhir (rujuk tingkat_pendidikan)
@@ -631,7 +631,7 @@ type RefJenisKawin struct {
 }
 
 // Referensi jenis kenaikan pangkat
-type RefJenisKp struct {
+type RefJenisKenaikanPangkat struct {
 	// id jenis kenaikan pangkat
 	ID int32 `db:"id"`
 	// id jenis kenaikan pangkat pada Dikbud HR
@@ -778,7 +778,7 @@ type RefPendidikan struct {
 	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 }
 
-// Referensi referensi pendidikan
+// Referensi tingkat pendidikan
 type RefTingkatPendidikan struct {
 	// Kode/ID tingkat pendidikan
 	ID int32 `db:"id"`
@@ -800,32 +800,8 @@ type RefTingkatPendidikan struct {
 	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 }
 
-// Riwayat asesmen nine box pegawai
-type RiwayatAsesmenNineBox struct {
-	// id data nine box
-	ID int32 `db:"id"`
-	// NIP pegawai
-	PnsNip pgtype.Text `db:"pns_nip"`
-	// Nama pegawai
-	Nama pgtype.Text `db:"nama"`
-	// Nama jabatan pegawai
-	NamaJabatan pgtype.Text `db:"nama_jabatan"`
-	// Kelas jabatan pegawai
-	KelasJabatan pgtype.Int2 `db:"kelas_jabatan"`
-	// Kesimpulan hasil penilaian
-	Kesimpulan pgtype.Text `db:"kesimpulan"`
-	// Tahun penilaian
-	Tahun pgtype.Int2 `db:"tahun"`
-	// Waktu pembuatan data
-	CreatedAt pgtype.Timestamptz `db:"created_at"`
-	// Waktu terakhir pembaruan data
-	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
-	// Waktu penghapusan data
-	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
-}
-
 // Riwayat asesmen pegawai
-type RiwayatAssesman struct {
+type RiwayatAsesman struct {
 	// id data asesmen
 	ID int32 `db:"id"`
 	// id PNS
@@ -867,6 +843,30 @@ type RiwayatAssesman struct {
 	// Waktu perekaman data
 	CreatedAt pgtype.Timestamptz `db:"created_at"`
 	// Waktu terakhir pembaruan
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	// Waktu penghapusan data
+	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
+}
+
+// Riwayat asesmen nine box pegawai
+type RiwayatAsesmenNineBox struct {
+	// id data nine box
+	ID int32 `db:"id"`
+	// NIP pegawai
+	PnsNip pgtype.Text `db:"pns_nip"`
+	// Nama pegawai
+	Nama pgtype.Text `db:"nama"`
+	// Nama jabatan pegawai
+	NamaJabatan pgtype.Text `db:"nama_jabatan"`
+	// Kelas jabatan pegawai
+	KelasJabatan pgtype.Int2 `db:"kelas_jabatan"`
+	// Kesimpulan hasil penilaian
+	Kesimpulan pgtype.Text `db:"kesimpulan"`
+	// Tahun penilaian
+	Tahun pgtype.Int2 `db:"tahun"`
+	// Waktu pembuatan data
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	// Waktu terakhir pembaruan data
 	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
 	// Waktu penghapusan data
 	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
@@ -1043,7 +1043,7 @@ type RiwayatGolongan struct {
 }
 
 // Riwayat hukuman disiplin pegawai
-type RiwayatHukdi struct {
+type RiwayatHukumanDisiplin struct {
 	// id riwayat hukuman disiplin
 	ID int64 `db:"id"`
 	// Referensi pegawai (rujuk pegawai.pns_id)
@@ -1487,7 +1487,7 @@ type RiwayatSertifikasi struct {
 }
 
 // Riwayat uji kompetensi pegawai
-type RiwayatUjikom struct {
+type RiwayatUjiKompetensi struct {
 	// id unik data uji kompetensi
 	ID int64 `db:"id"`
 	// Jenis uji kompetensi

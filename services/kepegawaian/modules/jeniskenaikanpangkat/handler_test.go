@@ -23,7 +23,7 @@ func Test_handler_GetJenisKP(t *testing.T) {
 	t.Parallel()
 
 	dbData := `
-		insert into ref_jenis_kp
+		insert into ref_jenis_kenaikan_pangkat
 		("id", "nama") values
 		(1, 'Kenaikan Pangkat Reguler'),
 		(2, 'Kenaikan Pangkat Pilihan'),

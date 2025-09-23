@@ -18,7 +18,7 @@ select
   pegawai.kk,
   pegawai.jenis_kelamin,
   coalesce(ref_lokasi_tempat_lahir.nama, pegawai.tempat_lahir) as tempat_lahir,
-  pegawai.tgl_lahir,
+  pegawai.tanggal_lahir,
   ref_tingkat_pendidikan.nama as tingkat_pendidikan,
   ref_pendidikan.nama as pendidikan,
   ref_jenis_kawin.nama as jenis_kawin,
@@ -52,15 +52,15 @@ select
   pegawai.tmt_pns,
   pegawai.kartu_pegawai,
   pegawai.no_surat_dokter,
-  pegawai.tgl_surat_dokter,
+  pegawai.tanggal_surat_dokter,
   pegawai.no_bebas_narkoba,
-  pegawai.tgl_bebas_narkoba,
+  pegawai.tanggal_bebas_narkoba,
   pegawai.no_catatan_polisi,
-  pegawai.tgl_catatan_polisi,
+  pegawai.tanggal_catatan_polisi,
   pegawai.akte_kelahiran,
   pegawai.bpjs,
   pegawai.npwp,
-  pegawai.tgl_npwp,
+  pegawai.tanggal_npwp,
   pegawai.no_taspen
 from pegawai
 left join ref_lokasi ref_lokasi_tempat_lahir

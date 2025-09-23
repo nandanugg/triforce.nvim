@@ -65,7 +65,7 @@ func (s *service) mapListOrangTua(ot repo.ListOrangTuaByNipRow) orangTua {
 	return orangTua{
 		ID:          ot.ID,
 		Hubungan:    HubunganToPeran(ot.Hubungan),
-		StatusHidup: StatusHidupFromTanggalMeninggal(ot.TglMeninggal),
+		StatusHidup: StatusHidupFromTanggalMeninggal(ot.TanggalMeninggal),
 		Nama:        nullStringPtr(ot.Nama),
 		Agama:       nullStringPtr(ot.AgamaNama),
 		Nik:         nullStringPtr(ot.Nik),

@@ -1,8 +1,8 @@
 -- name: ListRiwayatKepangkatan :many
 select
     rg.id,
-    ref_jenis_kp.id as jenis_kp_id,
-    ref_jenis_kp.nama as nama_jenis_kp,
+    ref_jenis_kenaikan_pangkat.id as jenis_kp_id,
+    ref_jenis_kenaikan_pangkat.nama as nama_jenis_kp,
     ref_golongan.id as golongan_id,
     ref_golongan.nama as nama_golongan,
     ref_golongan.nama_pangkat as nama_golongan_pangkat,
@@ -16,7 +16,7 @@ select
     rg.jumlah_angka_kredit_tambahan,
     rg.jumlah_angka_kredit_utama
 from riwayat_golongan rg
-LEFT join ref_jenis_kp on rg.jenis_kp_id = ref_jenis_kp.id and ref_jenis_kp.deleted_at is null
+LEFT join ref_jenis_kenaikan_pangkat on rg.jenis_kp_id = ref_jenis_kenaikan_pangkat.id and ref_jenis_kenaikan_pangkat.deleted_at is null
 LEFT join ref_golongan on rg.golongan_id = ref_golongan.id and ref_golongan.deleted_at is null
 where rg.deleted_at is null and rg.pns_nip = @pns_nip::varchar
 order by rg.tmt_golongan desc

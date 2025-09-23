@@ -29,7 +29,7 @@ select
   pegawai.kk,
   pegawai.jenis_kelamin,
   coalesce(ref_lokasi_tempat_lahir.nama, pegawai.tempat_lahir) as tempat_lahir,
-  pegawai.tgl_lahir,
+  pegawai.tanggal_lahir,
   ref_tingkat_pendidikan.nama as tingkat_pendidikan,
   ref_pendidikan.nama as pendidikan,
   ref_jenis_kawin.nama as jenis_kawin,
@@ -63,15 +63,15 @@ select
   pegawai.tmt_pns,
   pegawai.kartu_pegawai,
   pegawai.no_surat_dokter,
-  pegawai.tgl_surat_dokter,
+  pegawai.tanggal_surat_dokter,
   pegawai.no_bebas_narkoba,
-  pegawai.tgl_bebas_narkoba,
+  pegawai.tanggal_bebas_narkoba,
   pegawai.no_catatan_polisi,
-  pegawai.tgl_catatan_polisi,
+  pegawai.tanggal_catatan_polisi,
   pegawai.akte_kelahiran,
   pegawai.bpjs,
   pegawai.npwp,
-  pegawai.tgl_npwp,
+  pegawai.tanggal_npwp,
   pegawai.no_taspen
 from pegawai
 left join ref_lokasi ref_lokasi_tempat_lahir
@@ -127,7 +127,7 @@ type GetDataPribadiRow struct {
 	Kk                   pgtype.Text `db:"kk"`
 	JenisKelamin         pgtype.Text `db:"jenis_kelamin"`
 	TempatLahir          pgtype.Text `db:"tempat_lahir"`
-	TglLahir             pgtype.Date `db:"tgl_lahir"`
+	TanggalLahir         pgtype.Date `db:"tanggal_lahir"`
 	TingkatPendidikan    pgtype.Text `db:"tingkat_pendidikan"`
 	Pendidikan           pgtype.Text `db:"pendidikan"`
 	JenisKawin           pgtype.Text `db:"jenis_kawin"`
@@ -156,15 +156,15 @@ type GetDataPribadiRow struct {
 	TmtPns               pgtype.Date `db:"tmt_pns"`
 	KartuPegawai         pgtype.Text `db:"kartu_pegawai"`
 	NoSuratDokter        pgtype.Text `db:"no_surat_dokter"`
-	TglSuratDokter       pgtype.Date `db:"tgl_surat_dokter"`
+	TanggalSuratDokter   pgtype.Date `db:"tanggal_surat_dokter"`
 	NoBebasNarkoba       pgtype.Text `db:"no_bebas_narkoba"`
-	TglBebasNarkoba      pgtype.Date `db:"tgl_bebas_narkoba"`
+	TanggalBebasNarkoba  pgtype.Date `db:"tanggal_bebas_narkoba"`
 	NoCatatanPolisi      pgtype.Text `db:"no_catatan_polisi"`
-	TglCatatanPolisi     pgtype.Date `db:"tgl_catatan_polisi"`
+	TanggalCatatanPolisi pgtype.Date `db:"tanggal_catatan_polisi"`
 	AkteKelahiran        pgtype.Text `db:"akte_kelahiran"`
 	Bpjs                 pgtype.Text `db:"bpjs"`
 	Npwp                 pgtype.Text `db:"npwp"`
-	TglNpwp              pgtype.Date `db:"tgl_npwp"`
+	TanggalNpwp          pgtype.Date `db:"tanggal_npwp"`
 	NoTaspen             pgtype.Text `db:"no_taspen"`
 }
 
@@ -184,7 +184,7 @@ func (q *Queries) GetDataPribadi(ctx context.Context, arg GetDataPribadiParams) 
 		&i.Kk,
 		&i.JenisKelamin,
 		&i.TempatLahir,
-		&i.TglLahir,
+		&i.TanggalLahir,
 		&i.TingkatPendidikan,
 		&i.Pendidikan,
 		&i.JenisKawin,
@@ -213,15 +213,15 @@ func (q *Queries) GetDataPribadi(ctx context.Context, arg GetDataPribadiParams) 
 		&i.TmtPns,
 		&i.KartuPegawai,
 		&i.NoSuratDokter,
-		&i.TglSuratDokter,
+		&i.TanggalSuratDokter,
 		&i.NoBebasNarkoba,
-		&i.TglBebasNarkoba,
+		&i.TanggalBebasNarkoba,
 		&i.NoCatatanPolisi,
-		&i.TglCatatanPolisi,
+		&i.TanggalCatatanPolisi,
 		&i.AkteKelahiran,
 		&i.Bpjs,
 		&i.Npwp,
-		&i.TglNpwp,
+		&i.TanggalNpwp,
 		&i.NoTaspen,
 	)
 	return i, err
