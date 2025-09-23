@@ -23,7 +23,6 @@ tags:
   - name: Riwayat Kenaikan Gaji Berkala
   - name: Riwayat Kepangkatan
   - name: Riwayat Kinerja
-  - name: Riwayat Pekerjaan
   - name: Riwayat Pelatihan Fungsional
   - name: Riwayat Pelatihan Struktural
   - name: Riwayat Pelatihan Teknis
@@ -958,55 +957,6 @@ paths:
                         perilaku_kerja:
                           type: string
                         kuadran_kinerja:
-                          type: string
-                  meta:
-                    $ref: "#/components/schemas/metaPagination"
-  /v1/riwayat-pekerjaan:
-    get:
-      tags:
-        - Riwayat Pekerjaan
-      summary: Lihat riwayat pekerjaan.
-      description: >-
-        Lihat riwayat pekerjaan dari user yang login, urut berdasarkan tanggal
-        mulai.
-      operationId: listRiwayatPekerjaan
-      parameters:
-        - $ref: "#/components/parameters/authRequired"
-        - $ref: "#/components/parameters/limit"
-        - $ref: "#/components/parameters/offset"
-      responses:
-        "200":
-          description: Sukses.
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                properties:
-                  data:
-                    type: array
-                    items:
-                      type: object
-                      additionalProperties: false
-                      properties:
-                        id:
-                          type: integer
-                        pns_nip:
-                          type: string
-                        jenis_perusahaan:
-                          type: string
-                        nama_perusahaan:
-                          type: string
-                        sebagai:
-                          type: string
-                        dari_tanggal:
-                          type: string
-                          format: date
-                        sampai_tanggal:
-                          type: string
-                          format: date
-                        pns_id:
-                          type: string
-                        keterangan_berkas:
                           type: string
                   meta:
                     $ref: "#/components/schemas/metaPagination"

@@ -17,7 +17,6 @@ const contextKeyUser = "http-auth-user"
 const RoleAdmin = "admin"
 
 type User struct {
-	ID   int64 // @yap TODO: remove later, many logic or unit test depend on this currently
 	NIP  string
 	Role string
 }
