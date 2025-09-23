@@ -75,7 +75,7 @@ func main() {
 	riwayatjabatan.RegisterRoutes(e, dbRepository, mwAuth)
 	riwayatkenaikangajiberkala.RegisterRoutes(e, dbRepository, mwAuth)
 	riwayatkepangkatan.RegisterRoutes(e, dbRepository, mwAuth)
-	riwayatkinerja.RegisterRoutes(e, db, mwAuth)
+	riwayatkinerja.RegisterRoutes(e, dbRepository, mwAuth)
 	riwayatpekerjaan.RegisterRoutes(e, db, mwAuth)
 	riwayatpelatihanfungsional.RegisterRoutes(e, dbRepository, mwAuth)
 	riwayatpelatihanstruktural.RegisterRoutes(e, dbRepository, mwAuth)

@@ -1069,6 +1069,7 @@ paths:
                           type: integer
                         tahun:
                           type: integer
+                          nullable: true
                         hasil_kinerja:
                           type: string
                         perilaku_kerja:
