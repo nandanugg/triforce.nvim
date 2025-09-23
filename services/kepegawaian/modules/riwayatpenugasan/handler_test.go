@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -27,12 +28,13 @@ func Test_handler_list(t *testing.T) {
 
 	dbData := `
 		insert into riwayat_penugasan
-			(id, nip,  tipe_jabatan, nama_jabatan,         deskripsi_jabatan,     is_menjabat,  tanggal_mulai, tanggal_selesai, deleted_at) values
-			(1,  '1c', 'Struktural', 'Kepala Bagian',      'Deskripsi Jabatan 1', false, '2023-01-01',  '2023-12-31',    null),
-			(2,  '1c', 'Fungsional', 'Analis Kepegawaian', 'Deskripsi Jabatan 2', false, '2024-01-01',  '2024-05-31',    null),
-			(3,  '1c', 'Struktural', 'Kepala Sub Bagian',  'Deskripsi Jabatan 3', false, '2023-06-01',  '2024-12-31',    null),
-			(4,  '1c', 'Struktural', 'Kepala Sub Bagian',  'Deskripsi Jabatan 4', false, '2024-01-01',  '2024-12-31',    '2000-01-01'),
-			(5,  '2a', 'Struktural', 'Kepala Bagian',      'Deskripsi Jabatan 5', false, '2024-01-01',  '2024-12-31',    null);
+			(id, nip,  tipe_jabatan, nama_jabatan,         deskripsi_jabatan,     is_menjabat,  tanggal_mulai, tanggal_selesai,                  deleted_at) values
+			(1,  '1c', 'Struktural', 'Kepala Bagian',      'Deskripsi Jabatan 1', false,        '2023-01-01',  '2023-12-31',                     null),
+			(2,  '1c', 'Fungsional', 'Analis Kepegawaian', 'Deskripsi Jabatan 2', false,        '2024-01-01',  null,                             null),
+			(3,  '1c', 'Struktural', 'Kepala Sub Bagian',  'Deskripsi Jabatan 3', true,         '2023-06-01',  '2024-12-31',                     null),
+			(4,  '1c', 'Struktural', 'Kepala Sub Bagian',  'Deskripsi Jabatan 4', false,        '2024-01-01',  '2024-12-31',                     '2000-01-01'),
+			(5,  '2a', 'Struktural', 'Kepala Bagian',      'Deskripsi Jabatan 5', false,        '2024-01-01',  '2024-12-31',                     null),
+			(6,  '1c', 'Struktural', 'Kepala Bagian',      'Deskripsi Jabatan 6', false,        '2022-01-01',  current_date + interval '1 days', null);
 	`
 
 	tests := []struct {
@@ -56,8 +58,8 @@ func Test_handler_list(t *testing.T) {
 						"nama_jabatan": "Analis Kepegawaian",
 						"deskripsi_jabatan": "Deskripsi Jabatan 2",
 						"tanggal_mulai": "2024-01-01",
-						"tanggal_selesai": "2024-05-31",
-						"is_menjabat": false
+						"tanggal_selesai": null,
+						"is_menjabat": true
 					},
 					{
 						"id": 3,
@@ -66,7 +68,7 @@ func Test_handler_list(t *testing.T) {
 						"deskripsi_jabatan": "Deskripsi Jabatan 3",
 						"tanggal_mulai": "2023-06-01",
 						"tanggal_selesai": "2024-12-31",
-						"is_menjabat": false
+						"is_menjabat": true
 					},
 					{
 						"id": 1,
@@ -76,9 +78,18 @@ func Test_handler_list(t *testing.T) {
 						"tanggal_mulai": "2023-01-01",
 						"tanggal_selesai": "2023-12-31",
 						"is_menjabat": false
+					},
+					{
+						"id": 6,
+						"tipe_jabatan": "Struktural",
+						"nama_jabatan": "Kepala Bagian",
+						"deskripsi_jabatan": "Deskripsi Jabatan 6",
+						"tanggal_mulai": "2022-01-01",
+						"tanggal_selesai": "` + time.Now().Add(24*time.Hour).Format(time.DateOnly) + `",
+						"is_menjabat": true
 					}
 				],
-				"meta": {"limit": 10, "offset": 0, "total": 3}
+				"meta": {"limit": 10, "offset": 0, "total": 4}
 			}`,
 		},
 		{
@@ -96,10 +107,10 @@ func Test_handler_list(t *testing.T) {
 						"deskripsi_jabatan": "Deskripsi Jabatan 3",
 						"tanggal_mulai": "2023-06-01",
 						"tanggal_selesai": "2024-12-31",
-						"is_menjabat": false
+						"is_menjabat": true
 					}
 				],
-				"meta": {"limit": 1, "offset": 1, "total": 3}
+				"meta": {"limit": 1, "offset": 1, "total": 4}
 			}`,
 		},
 		{

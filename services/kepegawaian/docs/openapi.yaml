@@ -464,7 +464,6 @@ paths:
                       nama_penandatangan:
                         type: string
                         description: Nama penandatangan SK
-  
   /v1/jenis-kenaikan-pangkat:
     get:
       tags:
@@ -1479,8 +1478,6 @@ paths:
                       additionalProperties: false
                       properties:
                         id:
-                          type: integer
-                        jenis_penghargaan_id:
                           type: integer
                         jenis_penghargaan:
                           type: string

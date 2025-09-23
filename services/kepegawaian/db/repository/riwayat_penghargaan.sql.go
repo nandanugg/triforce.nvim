@@ -44,14 +44,12 @@ func (q *Queries) GetBerkasRiwayatPenghargaan(ctx context.Context, arg GetBerkas
 
 const listRiwayatPenghargaan = `-- name: ListRiwayatPenghargaan :many
 SELECT
-    riwayat_penghargaan_umum.id,
-    ref_jenis_penghargaan.nama as jenis_penghargaan,
-    ref_jenis_penghargaan.id as jenis_penghargaan_id,
+    id,
+    jenis_penghargaan,
     nama_penghargaan,
     deskripsi_penghargaan,
     tanggal_penghargaan
 FROM riwayat_penghargaan_umum
-LEFT JOIN ref_jenis_penghargaan on riwayat_penghargaan_umum.jenis_penghargaan_id = ref_jenis_penghargaan.id and ref_jenis_penghargaan.deleted_at is null
 WHERE nip = $3::varchar and riwayat_penghargaan_umum.deleted_at is null
 ORDER BY tanggal_penghargaan DESC
 LIMIT $1 OFFSET $2
@@ -66,7 +64,6 @@ type ListRiwayatPenghargaanParams struct {
 type ListRiwayatPenghargaanRow struct {
 	ID                   int32       `db:"id"`
 	JenisPenghargaan     pgtype.Text `db:"jenis_penghargaan"`
-	JenisPenghargaanID   pgtype.Int4 `db:"jenis_penghargaan_id"`
 	NamaPenghargaan      pgtype.Text `db:"nama_penghargaan"`
 	DeskripsiPenghargaan pgtype.Text `db:"deskripsi_penghargaan"`
 	TanggalPenghargaan   pgtype.Date `db:"tanggal_penghargaan"`
@@ -84,7 +81,6 @@ func (q *Queries) ListRiwayatPenghargaan(ctx context.Context, arg ListRiwayatPen
 		if err := rows.Scan(
 			&i.ID,
 			&i.JenisPenghargaan,
-			&i.JenisPenghargaanID,
 			&i.NamaPenghargaan,
 			&i.DeskripsiPenghargaan,
 			&i.TanggalPenghargaan,

@@ -22,7 +22,7 @@ func (q *Queries) CountRefJabatan(ctx context.Context) (int64, error) {
 }
 
 const listRefJabatan = `-- name: ListRefJabatan :many
-select id, kode_jabatan, nama_jabatan from ref_jabatan
+select kode_jabatan, nama_jabatan from ref_jabatan
 WHERE deleted_at IS NULL
 LIMIT $1 OFFSET $2
 `
@@ -33,7 +33,6 @@ type ListRefJabatanParams struct {
 }
 
 type ListRefJabatanRow struct {
-	ID          int32       `db:"id"`
 	KodeJabatan string      `db:"kode_jabatan"`
 	NamaJabatan pgtype.Text `db:"nama_jabatan"`
 }
@@ -47,7 +46,7 @@ func (q *Queries) ListRefJabatan(ctx context.Context, arg ListRefJabatanParams) 
 	var items []ListRefJabatanRow
 	for rows.Next() {
 		var i ListRefJabatanRow
-		if err := rows.Scan(&i.ID, &i.KodeJabatan, &i.NamaJabatan); err != nil {
+		if err := rows.Scan(&i.KodeJabatan, &i.NamaJabatan); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

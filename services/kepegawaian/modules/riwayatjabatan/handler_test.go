@@ -102,7 +102,7 @@ func Test_handler_list(t *testing.T) {
 						"id":                         5,
 						"jenis_jabatan":              "",
 						"nama_jabatan":               "",
-						"kode_jabatan": 			  "",
+						"kode_jabatan":               "",
 						"tmt_jabatan":                "2024-02-01",
 						"no_sk":                      "2234567890",
 						"tanggal_sk":                 "2024-02-01",

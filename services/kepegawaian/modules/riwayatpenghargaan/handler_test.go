@@ -25,21 +25,14 @@ func Test_handler_list(t *testing.T) {
 	t.Parallel()
 
 	dbData := `
-		insert into ref_jenis_penghargaan
-			(id, nama, deleted_at)
-			values
-			(11, 'Jenis Penghargaan 1', NULL),
-			(12, 'Jenis Penghargaan 2', NULL),
-			(14, 'Jenis Penghargaan 3', now());
-
 		insert into riwayat_penghargaan_umum
-			(id, jenis_penghargaan_id, nama_penghargaan, deskripsi_penghargaan, tanggal_penghargaan, nip, deleted_at)
+			(id, jenis_penghargaan, nama_penghargaan, deskripsi_penghargaan, tanggal_penghargaan, nip, deleted_at)
 			values
-			(11, 11, 'Penghargaan 1', 'Deskripsi Penghargaan 1', '2000-01-01', '41', NULL),
-			(12, 12, 'Penghargaan 2', 'Deskripsi Penghargaan 2', '2001-01-01', '41', NULL),
-			(13, 14, 'Penghargaan 3', 'Deskripsi Penghargaan 3', '2002-01-01', '41', NULL),
-			(14, 11, 'Penghargaan 4', 'Deskripsi Penghargaan 4', '2003-01-01', '41', now()),
-			(15, 11, 'Penghargaan 5', 'Deskripsi Penghargaan 5', '2004-01-01', '42', NULL);
+			(11, 'Jenis Penghargaan 1', 'Penghargaan 1', 'Deskripsi Penghargaan 1', '2000-01-01', '41', NULL),
+			(12, 'Jenis Penghargaan 2', 'Penghargaan 2', 'Deskripsi Penghargaan 2', '2001-01-01', '41', NULL),
+			(13, 'Jenis Penghargaan 3', 'Penghargaan 3', 'Deskripsi Penghargaan 3', '2002-01-01', '41', NULL),
+			(14, 'Jenis Penghargaan 1', 'Penghargaan 4', 'Deskripsi Penghargaan 4', '2003-01-01', '41', now()),
+			(15, 'Jenis Penghargaan 1', 'Penghargaan 5', 'Deskripsi Penghargaan 5', '2004-01-01', '42', NULL);
 	`
 
 	tests := []struct {
@@ -58,18 +51,16 @@ func Test_handler_list(t *testing.T) {
 			wantResponseBody: `{
 				"data": [
 					{
-						"id": 13,
-						"deskripsi": "Deskripsi Penghargaan 3",
-						"jenis_penghargaan": "",
-						"jenis_penghargaan_id": 0,
-						"nama_penghargaan": "Penghargaan 3",
-						"tanggal": "2002-01-01"
+						"id":                13,
+						"deskripsi":         "Deskripsi Penghargaan 3",
+						"jenis_penghargaan": "Jenis Penghargaan 3",
+						"nama_penghargaan":  "Penghargaan 3",
+						"tanggal":           "2002-01-01"
 					},
 					{
 						"id":                12,
 						"deskripsi":         "Deskripsi Penghargaan 2",
 						"jenis_penghargaan": "Jenis Penghargaan 2",
-						"jenis_penghargaan_id": 12,
 						"nama_penghargaan":  "Penghargaan 2",
 						"tanggal":           "2001-01-01"
 					},
@@ -77,7 +68,6 @@ func Test_handler_list(t *testing.T) {
 						"id":                11,
 						"deskripsi":         "Deskripsi Penghargaan 1",
 						"jenis_penghargaan": "Jenis Penghargaan 1",
-						"jenis_penghargaan_id": 11,
 						"nama_penghargaan":  "Penghargaan 1",
 						"tanggal":           "2000-01-01"
 					}
@@ -98,7 +88,6 @@ func Test_handler_list(t *testing.T) {
 						"id":                12,
 						"deskripsi":         "Deskripsi Penghargaan 2",
 						"jenis_penghargaan": "Jenis Penghargaan 2",
-						"jenis_penghargaan_id": 12,
 						"nama_penghargaan":  "Penghargaan 2",
 						"tanggal":           "2001-01-01"
 					}
@@ -166,19 +155,14 @@ func Test_handler_getBerkas(t *testing.T) {
 	pngBase64 := base64.StdEncoding.EncodeToString(pngBytes)
 
 	dbData := `
-		insert into ref_jenis_penghargaan
-			(id, nama, deleted_at)
-			values
-			(11, 'Jenis Penghargaan 1', NULL);
-
 		insert into riwayat_penghargaan_umum
-			(id, jenis_penghargaan_id, nama_penghargaan, deskripsi_penghargaan, file_base64, tanggal_penghargaan, nip, deleted_at)
+			(id, nama_penghargaan, deskripsi_penghargaan, file_base64, tanggal_penghargaan, nip, deleted_at)
 			values
-			(11, 11, 'Penghargaan 1', 'Deskripsi Penghargaan 1', 'data:image/png;base64,` + pngBase64 + `', '2000-01-01', '41', NULL),
-			(12, 11, 'Penghargaan 2', 'Deskripsi Penghargaan 2', 'data:image/png;base64,invalid', '2001-01-01', '41', NULL),
-			(13, 11, 'Penghargaan 3', 'Deskripsi Penghargaan 3', 'data:image/png;base64,invalid', '2002-01-01', '41', now()),
-			(14, 11, 'Penghargaan 4', 'Deskripsi Penghargaan 4', NULL, '2003-01-01', '41', NULL),
-			(15, 11, 'Penghargaan 5', 'Deskripsi Penghargaan 5', '', '2004-01-01', '41', NULL);
+			(11, 'Penghargaan 1', 'Deskripsi Penghargaan 1', 'data:image/png;base64,` + pngBase64 + `', '2000-01-01', '41', NULL),
+			(12, 'Penghargaan 2', 'Deskripsi Penghargaan 2', 'data:image/png;base64,invalid', '2001-01-01', '41', NULL),
+			(13, 'Penghargaan 3', 'Deskripsi Penghargaan 3', 'data:image/png;base64,invalid', '2002-01-01', '41', now()),
+			(14, 'Penghargaan 4', 'Deskripsi Penghargaan 4', NULL, '2003-01-01', '41', NULL),
+			(15, 'Penghargaan 5', 'Deskripsi Penghargaan 5', '', '2004-01-01', '41', NULL);
 		`
 
 	tests := []struct {

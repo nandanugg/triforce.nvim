@@ -8,7 +8,7 @@ Referensi jenis penghargaan
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| id | integer | nextval('ref_jenis_penghargaan_id_seq'::regclass) | false | [kepegawaian.riwayat_penghargaan_umum](kepegawaian.riwayat_penghargaan_umum.md) |  | id jenis penghargaan |
+| id | integer | nextval('ref_jenis_penghargaan_id_seq'::regclass) | false |  |  | id jenis penghargaan |
 | nama | varchar(100) |  | true |  |  | Nama jenis penghargaan |
 | created_at | timestamp with time zone | now() | true |  |  | Waktu perekaman data |
 | updated_at | timestamp with time zone | now() | true |  |  | Waktu terakhir pembaruan |
@@ -31,7 +31,6 @@ Referensi jenis penghargaan
 ```mermaid
 erDiagram
 
-"kepegawaian.riwayat_penghargaan_umum" }o--o| "kepegawaian.ref_jenis_penghargaan" : "FOREIGN KEY (jenis_penghargaan_id) REFERENCES ref_jenis_penghargaan(id)"
 
 "kepegawaian.ref_jenis_penghargaan" {
   integer id
@@ -39,19 +38,6 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
-}
-"kepegawaian.riwayat_penghargaan_umum" {
-  integer id
-  varchar_100_ deskripsi_penghargaan
-  date tanggal_penghargaan
-  boolean exist
-  text file_base64
-  varchar_20_ nip
-  varchar_200_ nama_penghargaan
-  timestamp_with_time_zone created_at
-  timestamp_with_time_zone updated_at
-  timestamp_with_time_zone deleted_at
-  integer jenis_penghargaan_id FK
 }
 ```
 

@@ -1390,9 +1390,8 @@ type RiwayatPenghargaanUmum struct {
 	// Waktu terakhir pembaruan data
 	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
 	// Waktu penghapusan data
-	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
-	// Jenis atau kategori penghargaan (rujuk ref_jenis_penghargaan)
-	JenisPenghargaanID pgtype.Int4 `db:"jenis_penghargaan_id"`
+	DeletedAt        pgtype.Timestamptz `db:"deleted_at"`
+	JenisPenghargaan pgtype.Text        `db:"jenis_penghargaan"`
 }
 
 // Riwayat penugasan pegawai
