@@ -8,7 +8,7 @@ Referensi jabatan
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| kode_jabatan | varchar(36) |  | false | [kepegawaian.pegawai](kepegawaian.pegawai.md) |  | Kode unik jabatan |
+| kode_jabatan | varchar(36) |  | false | [kepegawaian.pegawai](kepegawaian.pegawai.md) [kepegawaian.riwayat_jabatan](kepegawaian.riwayat_jabatan.md) |  | Kode unik jabatan |
 | id | integer |  | false |  |  | id jabatan |
 | no | integer |  | false |  |  | sama dengan id jabatan |
 | nama_jabatan | varchar(200) |  | true |  |  | Nama jabatan |
@@ -44,6 +44,7 @@ erDiagram
 "kepegawaian.pegawai" }o--o| "kepegawaian.ref_jabatan" : "FOREIGN KEY (jabatan_id) REFERENCES ref_jabatan(kode_jabatan)"
 "kepegawaian.pegawai" }o--o| "kepegawaian.ref_jabatan" : "FOREIGN KEY (jabatan_instansi_id) REFERENCES ref_jabatan(kode_jabatan)"
 "kepegawaian.pegawai" }o--o| "kepegawaian.ref_jabatan" : "FOREIGN KEY (jabatan_instansi_real_id) REFERENCES ref_jabatan(kode_jabatan)"
+"kepegawaian.riwayat_jabatan" }o--o| "kepegawaian.ref_jabatan" : "FOREIGN KEY (jabatan_id) REFERENCES ref_jabatan(kode_jabatan)"
 
 "kepegawaian.ref_jabatan" {
   varchar_36_ kode_jabatan
@@ -71,7 +72,7 @@ erDiagram
   varchar_50_ gelar_depan
   varchar_50_ gelar_belakang
   varchar_50_ tempat_lahir_id
-  date tgl_lahir
+  date tanggal_lahir
   varchar_1_ jenis_kelamin
   smallint agama_id FK
   smallint jenis_kawin_id FK
@@ -87,7 +88,7 @@ erDiagram
   varchar_20_ status_cpns_pns
   varchar_50_ kartu_pegawai
   varchar_100_ no_sk_cpns
-  date tgl_sk_cpns
+  date tanggal_sk_cpns
   date tmt_cpns
   date tmt_pns
   smallint gol_awal_id FK
@@ -114,18 +115,18 @@ erDiagram
   smallint jml_istri
   smallint jml_anak
   varchar_100_ no_surat_dokter
-  date tgl_surat_dokter
+  date tanggal_surat_dokter
   varchar_100_ no_bebas_narkoba
-  date tgl_bebas_narkoba
+  date tanggal_bebas_narkoba
   varchar_100_ no_catatan_polisi
-  date tgl_catatan_polisi
+  date tanggal_catatan_polisi
   varchar_50_ akte_kelahiran
   varchar_15_ status_hidup
   varchar_50_ akte_meninggal
-  date tgl_meninggal
+  date tanggal_meninggal
   varchar_100_ no_askes
   varchar_100_ no_taspen
-  date tgl_npwp
+  date tanggal_npwp
   varchar_100_ tempat_lahir
   smallint tingkat_pendidikan_id FK
   varchar_200_ tempat_lahir_nama
@@ -162,6 +163,47 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+}
+"kepegawaian.riwayat_jabatan" {
+  varchar_36_ bkn_id
+  varchar_36_ pns_id FK
+  varchar_20_ pns_nip
+  varchar_100_ pns_nama
+  varchar_36_ unor_id
+  text unor
+  integer jenis_jabatan_id
+  varchar_250_ jenis_jabatan
+  varchar_36_ jabatan_id FK
+  text nama_jabatan
+  varchar_36_ eselon_id
+  varchar_100_ eselon
+  date tmt_jabatan
+  varchar_100_ no_sk
+  date tanggal_sk
+  varchar_36_ satuan_kerja_id FK
+  date tmt_pelantikan
+  smallint is_active
+  text eselon1
+  text eselon2
+  text eselon3
+  text eselon4
+  bigint id
+  varchar_200_ catatan
+  varchar_100_ jenis_sk
+  integer status_satker
+  integer status_biro
+  varchar_36_ jabatan_id_bkn
+  varchar_36_ unor_id_bkn
+  bigint tabel_mutasi_id
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
+  boolean status_plt
+  integer kelas_jabatan_id FK
+  date periode_jabatan_start_date
+  date periode_jabatan_end_date
+  text file_base64
+  varchar_200_ keterangan_berkas
 }
 ```
 

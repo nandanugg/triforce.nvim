@@ -4,12 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/typeutil"
 	repo "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
 )
@@ -48,16 +48,16 @@ func (s *service) list(ctx context.Context, nip string, limit, offset uint) ([]r
 			ID:                      row.ID,
 			JenisJabatan:            row.JenisJabatan.String,
 			NamaJabatan:             row.NamaJabatan.String,
-			KodeJabatan:             row.KodeJabatan.String,
-			TmtJabatan:              row.TmtJabatan.Time.Format(time.DateOnly),
+			IDJabatan:               row.IDJabatan,
+			TmtJabatan:              db.Date(row.TmtJabatan.Time),
 			NoSk:                    row.NoSk.String,
-			TanggalSk:               row.TanggalSk.Time.Format(time.DateOnly),
+			TanggalSk:               db.Date(row.TanggalSk.Time),
 			SatuanKerja:             row.SatuanKerja.String,
 			UnitOrganisasi:          row.UnitOrganisasi.String,
 			StatusPlt:               row.StatusPlt.Bool,
 			KelasJabatan:            row.KelasJabatan.String,
-			PeriodeJabatanStartDate: row.PeriodeJabatanStartDate.Time.Format(time.DateOnly),
-			PeriodeJabatanEndDate:   row.PeriodeJabatanEndDate.Time.Format(time.DateOnly),
+			PeriodeJabatanStartDate: db.Date(row.PeriodeJabatanStartDate.Time),
+			PeriodeJabatanEndDate:   db.Date(row.PeriodeJabatanEndDate.Time),
 		}
 	})
 

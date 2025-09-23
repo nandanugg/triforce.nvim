@@ -8,7 +8,7 @@ Referensi jenis hukuman disiplin
 
 | Name | Type | Default | Nullable | Extra Definition | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | ---------------- | -------- | ------- | ------- |
-| id | integer | nextval('ref_jenis_hukuman_id_seq'::regclass) | false |  | [kepegawaian.riwayat_hukdis](kepegawaian.riwayat_hukdis.md) |  | id jenis hukuman disiplin |
+| id | integer | nextval('ref_jenis_hukuman_id_seq'::regclass) | false |  | [kepegawaian.riwayat_hukuman_disiplin](kepegawaian.riwayat_hukuman_disiplin.md) |  | id jenis hukuman disiplin |
 | dikbud_hr_id | varchar(2) |  | true | GENERATED ALWAYS AS lpad((id)::text, 2, '0'::text) STORED |  |  | id jenis hukuman disiplin pada Dikbud HR |
 | nama | varchar(100) |  | true |  |  |  | Nama jenis hukuman disiplin |
 | tingkat_hukuman | varchar(1) |  | true |  |  |  | Nama pendek jenis hukuman disiplin, R: Ringan, S: Sedang, B: Berat |
@@ -34,7 +34,7 @@ Referensi jenis hukuman disiplin
 ```mermaid
 erDiagram
 
-"kepegawaian.riwayat_hukdis" }o--o| "kepegawaian.ref_jenis_hukuman" : "FOREIGN KEY (jenis_hukuman_id) REFERENCES ref_jenis_hukuman(id)"
+"kepegawaian.riwayat_hukuman_disiplin" }o--o| "kepegawaian.ref_jenis_hukuman" : "FOREIGN KEY (jenis_hukuman_id) REFERENCES ref_jenis_hukuman(id)"
 
 "kepegawaian.ref_jenis_hukuman" {
   integer id
@@ -46,7 +46,7 @@ erDiagram
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
 }
-"kepegawaian.riwayat_hukdis" {
+"kepegawaian.riwayat_hukuman_disiplin" {
   bigint id
   varchar_36_ pns_id FK
   varchar_20_ pns_nip

@@ -44,14 +44,14 @@ Riwayat golongan pegawai
 | created_at | timestamp with time zone | now() | true |  |  | Waktu perekaman data |
 | updated_at | timestamp with time zone | now() | true |  |  | Waktu terakhir pembaruan |
 | deleted_at | timestamp with time zone |  | true |  |  | Waktu penghapusan data |
-| jenis_kp_id | integer |  | true |  | [kepegawaian.ref_jenis_kp](kepegawaian.ref_jenis_kp.md) | Jenis kp (rujuk ref_jenis_kp) |
+| jenis_kp_id | integer |  | true |  | [kepegawaian.ref_jenis_kenaikan_pangkat](kepegawaian.ref_jenis_kenaikan_pangkat.md) | Jenis kp (rujuk ref_jenis_kp) |
 
 ## Constraints
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
 | fk_riwayat_golongan_golongan | FOREIGN KEY | FOREIGN KEY (golongan_id) REFERENCES ref_golongan(id) |
-| fk_riwayat_golongan_jenis_kp | FOREIGN KEY | FOREIGN KEY (jenis_kp_id) REFERENCES ref_jenis_kp(id) |
+| fk_riwayat_golongan_jenis_kp | FOREIGN KEY | FOREIGN KEY (jenis_kp_id) REFERENCES ref_jenis_kenaikan_pangkat(id) |
 | fk_riwayat_golongan_pns_id | FOREIGN KEY | FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id) |
 | riwayat_golongan_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 
@@ -68,7 +68,7 @@ erDiagram
 
 "kepegawaian.riwayat_golongan" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
 "kepegawaian.riwayat_golongan" }o--o| "kepegawaian.ref_golongan" : "FOREIGN KEY (golongan_id) REFERENCES ref_golongan(id)"
-"kepegawaian.riwayat_golongan" }o--o| "kepegawaian.ref_jenis_kp" : "FOREIGN KEY (jenis_kp_id) REFERENCES ref_jenis_kp(id)"
+"kepegawaian.riwayat_golongan" }o--o| "kepegawaian.ref_jenis_kenaikan_pangkat" : "FOREIGN KEY (jenis_kp_id) REFERENCES ref_jenis_kenaikan_pangkat(id)"
 
 "kepegawaian.riwayat_golongan" {
   integer id
@@ -118,7 +118,7 @@ erDiagram
   varchar_50_ gelar_depan
   varchar_50_ gelar_belakang
   varchar_50_ tempat_lahir_id
-  date tgl_lahir
+  date tanggal_lahir
   varchar_1_ jenis_kelamin
   smallint agama_id FK
   smallint jenis_kawin_id FK
@@ -134,7 +134,7 @@ erDiagram
   varchar_20_ status_cpns_pns
   varchar_50_ kartu_pegawai
   varchar_100_ no_sk_cpns
-  date tgl_sk_cpns
+  date tanggal_sk_cpns
   date tmt_cpns
   date tmt_pns
   smallint gol_awal_id FK
@@ -161,18 +161,18 @@ erDiagram
   smallint jml_istri
   smallint jml_anak
   varchar_100_ no_surat_dokter
-  date tgl_surat_dokter
+  date tanggal_surat_dokter
   varchar_100_ no_bebas_narkoba
-  date tgl_bebas_narkoba
+  date tanggal_bebas_narkoba
   varchar_100_ no_catatan_polisi
-  date tgl_catatan_polisi
+  date tanggal_catatan_polisi
   varchar_50_ akte_kelahiran
   varchar_15_ status_hidup
   varchar_50_ akte_meninggal
-  date tgl_meninggal
+  date tanggal_meninggal
   varchar_100_ no_askes
   varchar_100_ no_taspen
-  date tgl_npwp
+  date tanggal_npwp
   varchar_100_ tempat_lahir
   smallint tingkat_pendidikan_id FK
   varchar_200_ tempat_lahir_nama
@@ -221,7 +221,7 @@ erDiagram
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
 }
-"kepegawaian.ref_jenis_kp" {
+"kepegawaian.ref_jenis_kenaikan_pangkat" {
   integer id
   varchar_4_ dikbud_hr_id
   varchar_50_ nama

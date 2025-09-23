@@ -49,7 +49,7 @@ erDiagram
   text unor
   integer jenis_jabatan_id
   varchar_250_ jenis_jabatan
-  integer jabatan_id
+  varchar_36_ jabatan_id FK
   text nama_jabatan
   varchar_36_ eselon_id
   varchar_100_ eselon

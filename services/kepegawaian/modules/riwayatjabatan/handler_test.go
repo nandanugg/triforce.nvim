@@ -27,9 +27,9 @@ func Test_handler_list(t *testing.T) {
 
 	dbData := `
 		insert into ref_jabatan(id, no, nama_jabatan, kode_jabatan, deleted_at) values
-		(11, 1, '11h', '11h', null),
-		(12, 2, '12h', '12h', null),
-		(13, 3, '13h', '13h', '2000-01-01');
+		(11, 1, '11h', '11', null),
+		(12, 2, '12h', '12', null),
+		(13, 3, '13h', '13', '2000-01-01');
 
 		insert into ref_jenis_jabatan(id, nama, deleted_at) values
 		(1, 'Jabatan Struktural', null),
@@ -46,11 +46,11 @@ func Test_handler_list(t *testing.T) {
 		(2, 'Kelas 2', 2708250);
 
 		insert into riwayat_jabatan(id, pns_nip, jenis_jabatan_id, jabatan_id, tmt_jabatan, no_sk, tanggal_sk, satuan_kerja_id, unor_id, kelas_jabatan_id, periode_jabatan_start_date, periode_jabatan_end_date, deleted_at) values
-		(1, '41', 1, 11, '2025-01-01', '1234567890', '2025-01-01', 1, 1, 1, '2024-01-01', '2024-12-31', null),
-		(2, '41', 2, 12, '2025-02-01', '2234567890', '2025-02-01', 2, 2, 2, '2025-01-01', '2025-12-31', null),
-		(3, '42', 2, 12, '2025-02-01', '2234567890', '2025-02-01', 2, 2, 2, '2025-01-01', '2025-12-31', null),
-		(4, '41', 2, 12, '2025-02-01', '2234567890', '2025-02-01', 2, 2, 2, '2025-01-01', '2025-12-31', '2000-01-01'),
-		(5, '41', 3, 13, '2024-02-01', '2234567890', '2024-02-01', 3, 3, 2, '2025-01-01', '2025-12-31', null);
+		(1, '41', 1, '11', '2025-01-01', '1234567890', '2025-01-01', 1, 1, 1, '2024-01-01', '2024-12-31', null),
+		(2, '41', 2, '12', '2025-02-01', '2234567890', '2025-02-01', 2, 2, 2, '2025-01-01', '2025-12-31', null),
+		(3, '42', 2, '12', '2025-02-01', '2234567890', '2025-02-01', 2, 2, 2, '2025-01-01', '2025-12-31', null),
+		(4, '41', 2, '12', '2025-02-01', '2234567890', '2025-02-01', 2, 2, 2, '2025-01-01', '2025-12-31', '2000-01-01'),
+		(5, '41', 3, '13', '2024-02-01', '2234567890', '2024-02-01', 3, 3, 2, '2025-01-01', '2025-12-31', null);
 	`
 
 	tests := []struct {
@@ -72,7 +72,7 @@ func Test_handler_list(t *testing.T) {
 						"id":         2,
 						"jenis_jabatan": "Jabatan Fungsional",
 						"nama_jabatan": "12h",
-						"kode_jabatan": "12h",
+						"id_jabatan": "12",
 						"tmt_jabatan": "2025-02-01",
 						"no_sk": "2234567890",
 						"tanggal_sk": "2025-02-01",
@@ -87,7 +87,7 @@ func Test_handler_list(t *testing.T) {
 						"id":         1,
 						"jenis_jabatan": "Jabatan Struktural",
 						"nama_jabatan": "11h",
-						"kode_jabatan": "11h",
+						"id_jabatan": "11",
 						"tmt_jabatan": "2025-01-01",
 						"no_sk": "1234567890",
 						"tanggal_sk": "2025-01-01",
@@ -102,7 +102,7 @@ func Test_handler_list(t *testing.T) {
 						"id":                         5,
 						"jenis_jabatan":              "",
 						"nama_jabatan":               "",
-						"kode_jabatan":               "",
+						"id_jabatan":                 "13",
 						"tmt_jabatan":                "2024-02-01",
 						"no_sk":                      "2234567890",
 						"tanggal_sk":                 "2024-02-01",
@@ -130,7 +130,7 @@ func Test_handler_list(t *testing.T) {
 						"jenis_jabatan": "Jabatan Struktural",
 						"nama_jabatan": "11h",
 						"tmt_jabatan": "2025-01-01",
-						"kode_jabatan": "11h",
+						"id_jabatan": "11",
 						"no_sk": "1234567890",
 						"tanggal_sk": "2025-01-01",
 						"satuan_kerja": "Unit 1",

@@ -224,6 +224,11 @@ paths:
         - $ref: "#/components/parameters/authRequired"
         - $ref: "#/components/parameters/limit"
         - $ref: "#/components/parameters/offset"
+        - name: nama
+          in: query
+          description: Pencarian berdasarkan nama jabatan
+          schema:
+            type: string
       responses:
         "200":
           description: Sukses.
@@ -238,9 +243,9 @@ paths:
                       type: object
                       additionalProperties: false
                       properties:
-                        kode_jabatan:
+                        id:
                           type: string
-                        nama_jabatan:
+                        nama:
                           type: string
                   meta:
                     $ref: "#/components/schemas/metaPagination"
@@ -668,18 +673,21 @@ paths:
                           type: integer
                         jenis_jabatan:
                           type: string
-                        kode_jabatan:
+                        id_jabatan:
                           type: string
+                          nullable: true
                         nama_jabatan:
                           type: string
                         tmt_jabatan:
                           type: string
                           format: date
+                          nullable: true
                         no_sk:
                           type: string
                         tanggal_sk:
                           type: string
                           format: date
+                          nullable: true
                         satuan_kerja:
                           type: string
                         unit_organisasi:
@@ -691,9 +699,11 @@ paths:
                         periode_jabatan_start_date:
                           type: string
                           format: date
+                          nullable: true
                         periode_jabatan_end_date:
                           type: string
                           format: date
+                          nullable: true
                   meta:
                     $ref: "#/components/schemas/metaPagination"
   /v1/riwayat-jabatan/{id}/berkas:

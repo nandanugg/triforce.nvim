@@ -4,13 +4,15 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/jackc/pgx/v5/pgtype"
+
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/typeutil"
-	repo "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
+	sqlc "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
 )
 
 type repository interface {
-	ListRefJabatan(ctx context.Context, arg repo.ListRefJabatanParams) ([]repo.ListRefJabatanRow, error)
-	CountRefJabatan(ctx context.Context) (int64, error)
+	ListRefJabatan(ctx context.Context, arg sqlc.ListRefJabatanParams) ([]sqlc.ListRefJabatanRow, error)
+	CountRefJabatan(ctx context.Context, nama pgtype.Text) (int64, error)
 }
 
 type service struct {
@@ -21,8 +23,10 @@ func newService(r repository) *service {
 	return &service{repo: r}
 }
 
-func (s *service) listJabatan(ctx context.Context, limit, offset uint) ([]jabatan, int64, error) {
-	data, err := s.repo.ListRefJabatan(ctx, repo.ListRefJabatanParams{
+func (s *service) listJabatan(ctx context.Context, nama string, limit, offset uint) ([]jabatan, int64, error) {
+	pgNama := pgtype.Text{Valid: nama != "", String: nama}
+	data, err := s.repo.ListRefJabatan(ctx, sqlc.ListRefJabatanParams{
+		Nama:   pgNama,
 		Limit:  int32(limit),
 		Offset: int32(offset),
 	})
@@ -30,15 +34,15 @@ func (s *service) listJabatan(ctx context.Context, limit, offset uint) ([]jabata
 		return nil, 0, fmt.Errorf("repo list: %w", err)
 	}
 
-	count, err := s.repo.CountRefJabatan(ctx)
+	count, err := s.repo.CountRefJabatan(ctx, pgNama)
 	if err != nil {
 		return nil, 0, fmt.Errorf("repo count: %w", err)
 	}
 
-	result := typeutil.Map(data, func(row repo.ListRefJabatanRow) jabatan {
+	result := typeutil.Map(data, func(row sqlc.ListRefJabatanRow) jabatan {
 		return jabatan{
-			NamaJabatan: row.NamaJabatan.String,
-			KodeJabatan: row.KodeJabatan,
+			ID:   row.KodeJabatan,
+			Nama: row.NamaJabatan.String,
 		}
 	})
 

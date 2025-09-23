@@ -1,4 +1,4 @@
-# kepegawaian.riwayat_ujikom
+# kepegawaian.riwayat_uji_kompetensi
 
 ## Description
 
@@ -28,7 +28,7 @@ Riwayat uji kompetensi pegawai
 
 | Name | Definition |
 | ---- | ---------- |
-| riwayat_ujikom_pkey | CREATE UNIQUE INDEX riwayat_ujikom_pkey ON kepegawaian.riwayat_ujikom USING btree (id) |
+| riwayat_ujikom_pkey | CREATE UNIQUE INDEX riwayat_ujikom_pkey ON kepegawaian.riwayat_uji_kompetensi USING btree (id) |
 
 ## Relations
 
@@ -36,7 +36,7 @@ Riwayat uji kompetensi pegawai
 erDiagram
 
 
-"kepegawaian.riwayat_ujikom" {
+"kepegawaian.riwayat_uji_kompetensi" {
   bigint id
   varchar_100_ jenis_ujikom
   varchar_20_ nip_baru

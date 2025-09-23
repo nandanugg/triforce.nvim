@@ -1111,7 +1111,7 @@ type RiwayatJabatan struct {
 	// Nama jenis jabatan
 	JenisJabatan pgtype.Text `db:"jenis_jabatan"`
 	// id jabatan (rujuk ref_jabatan)
-	JabatanID pgtype.Int4 `db:"jabatan_id"`
+	JabatanID pgtype.Text `db:"jabatan_id"`
 	// Nama jabatan (teks)
 	NamaJabatan pgtype.Text `db:"nama_jabatan"`
 	// id eselon jabatan

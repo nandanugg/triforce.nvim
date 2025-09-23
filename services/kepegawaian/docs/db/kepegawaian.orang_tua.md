@@ -11,7 +11,7 @@ Orang tua pegawai
 | id | integer | nextval('orang_tua_id_seq'::regclass) | false |  |  | id data orang tua |
 | hubungan | smallint |  | true |  |  | Kode hubungan, 1: ayah, 2: ibu |
 | akte_meninggal | varchar(255) |  | true |  |  | Nomor akte meninggal orang tua |
-| tgl_meninggal | date |  | true |  |  | Tanggal meninggal orang tua |
+| tanggal_meninggal | date |  | true |  |  | Tanggal meninggal orang tua |
 | nama | varchar(255) |  | true |  |  | Nama lengkap orang tua |
 | gelar_depan | varchar(20) |  | true |  |  | Gelar di depan nama orang tua |
 | gelar_belakang | varchar(50) |  | true |  |  | Gelar di belakang nama orang tua |
@@ -53,7 +53,7 @@ erDiagram
   integer id
   smallint hubungan
   varchar_255_ akte_meninggal
-  date tgl_meninggal
+  date tanggal_meninggal
   varchar_255_ nama
   varchar_20_ gelar_depan
   varchar_50_ gelar_belakang
@@ -85,7 +85,7 @@ erDiagram
   varchar_50_ gelar_depan
   varchar_50_ gelar_belakang
   varchar_50_ tempat_lahir_id
-  date tgl_lahir
+  date tanggal_lahir
   varchar_1_ jenis_kelamin
   smallint agama_id FK
   smallint jenis_kawin_id FK
@@ -101,7 +101,7 @@ erDiagram
   varchar_20_ status_cpns_pns
   varchar_50_ kartu_pegawai
   varchar_100_ no_sk_cpns
-  date tgl_sk_cpns
+  date tanggal_sk_cpns
   date tmt_cpns
   date tmt_pns
   smallint gol_awal_id FK
@@ -128,18 +128,18 @@ erDiagram
   smallint jml_istri
   smallint jml_anak
   varchar_100_ no_surat_dokter
-  date tgl_surat_dokter
+  date tanggal_surat_dokter
   varchar_100_ no_bebas_narkoba
-  date tgl_bebas_narkoba
+  date tanggal_bebas_narkoba
   varchar_100_ no_catatan_polisi
-  date tgl_catatan_polisi
+  date tanggal_catatan_polisi
   varchar_50_ akte_kelahiran
   varchar_15_ status_hidup
   varchar_50_ akte_meninggal
-  date tgl_meninggal
+  date tanggal_meninggal
   varchar_100_ no_askes
   varchar_100_ no_taspen
-  date tgl_npwp
+  date tanggal_npwp
   varchar_100_ tempat_lahir
   smallint tingkat_pendidikan_id FK
   varchar_200_ tempat_lahir_nama

@@ -1,4 +1,4 @@
-# kepegawaian.ref_jenis_kp
+# kepegawaian.ref_jenis_kenaikan_pangkat
 
 ## Description
 
@@ -25,16 +25,16 @@ Referensi jenis kenaikan pangkat
 
 | Name | Definition |
 | ---- | ---------- |
-| ref_jenis_kp_pkey | CREATE UNIQUE INDEX ref_jenis_kp_pkey ON kepegawaian.ref_jenis_kp USING btree (id) |
+| ref_jenis_kp_pkey | CREATE UNIQUE INDEX ref_jenis_kp_pkey ON kepegawaian.ref_jenis_kenaikan_pangkat USING btree (id) |
 
 ## Relations
 
 ```mermaid
 erDiagram
 
-"kepegawaian.riwayat_golongan" }o--o| "kepegawaian.ref_jenis_kp" : "FOREIGN KEY (jenis_kp_id) REFERENCES ref_jenis_kp(id)"
+"kepegawaian.riwayat_golongan" }o--o| "kepegawaian.ref_jenis_kenaikan_pangkat" : "FOREIGN KEY (jenis_kp_id) REFERENCES ref_jenis_kenaikan_pangkat(id)"
 
-"kepegawaian.ref_jenis_kp" {
+"kepegawaian.ref_jenis_kenaikan_pangkat" {
   integer id
   varchar_4_ dikbud_hr_id
   varchar_50_ nama

@@ -9,14 +9,14 @@ Data utama pegawai
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
 | id | integer | nextval('pegawai_id_seq'::regclass) | false |  |  | Identitas numerik unik baris data pegawai |
-| pns_id | varchar(36) |  | false | [kepegawaian.anak](kepegawaian.anak.md) [kepegawaian.pasangan](kepegawaian.pasangan.md) [kepegawaian.orang_tua](kepegawaian.orang_tua.md) [kepegawaian.riwayat_assesmen](kepegawaian.riwayat_assesmen.md) [kepegawaian.riwayat_diklat](kepegawaian.riwayat_diklat.md) [kepegawaian.riwayat_diklat_struktural](kepegawaian.riwayat_diklat_struktural.md) [kepegawaian.riwayat_golongan](kepegawaian.riwayat_golongan.md) [kepegawaian.riwayat_hukdis](kepegawaian.riwayat_hukdis.md) [kepegawaian.riwayat_jabatan](kepegawaian.riwayat_jabatan.md) [kepegawaian.riwayat_kursus](kepegawaian.riwayat_kursus.md) [kepegawaian.riwayat_pendidikan](kepegawaian.riwayat_pendidikan.md) [kepegawaian.riwayat_pindah_unit_kerja](kepegawaian.riwayat_pindah_unit_kerja.md) [kepegawaian.unit_kerja](kepegawaian.unit_kerja.md) [kepegawaian.update_mandiri](kepegawaian.update_mandiri.md) |  | id pegawai negeri sipil (UUID) yang menjadi kunci rujukan antar tabel |
+| pns_id | varchar(36) |  | false | [kepegawaian.anak](kepegawaian.anak.md) [kepegawaian.pasangan](kepegawaian.pasangan.md) [kepegawaian.orang_tua](kepegawaian.orang_tua.md) [kepegawaian.riwayat_asesmen](kepegawaian.riwayat_asesmen.md) [kepegawaian.riwayat_diklat](kepegawaian.riwayat_diklat.md) [kepegawaian.riwayat_diklat_struktural](kepegawaian.riwayat_diklat_struktural.md) [kepegawaian.riwayat_golongan](kepegawaian.riwayat_golongan.md) [kepegawaian.riwayat_hukuman_disiplin](kepegawaian.riwayat_hukuman_disiplin.md) [kepegawaian.riwayat_jabatan](kepegawaian.riwayat_jabatan.md) [kepegawaian.riwayat_kursus](kepegawaian.riwayat_kursus.md) [kepegawaian.riwayat_pendidikan](kepegawaian.riwayat_pendidikan.md) [kepegawaian.riwayat_pindah_unit_kerja](kepegawaian.riwayat_pindah_unit_kerja.md) [kepegawaian.unit_kerja](kepegawaian.unit_kerja.md) [kepegawaian.update_mandiri](kepegawaian.update_mandiri.md) |  | id pegawai negeri sipil (UUID) yang menjadi kunci rujukan antar tabel |
 | nip_lama | varchar(9) |  | true |  |  | Nomor Induk Pegawai format lama |
 | nip_baru | varchar(20) |  | true |  |  | Nomor Induk Pegawai format baru (20 digit) |
 | nama | varchar(100) |  | true |  |  | Nama lengkap pegawai |
 | gelar_depan | varchar(50) |  | true |  |  | Gelar akademik/jabatan di depan nama |
 | gelar_belakang | varchar(50) |  | true |  |  | Gelar akademik/jabatan di belakang nama |
 | tempat_lahir_id | varchar(50) |  | true |  |  | id tempat lahir (rujuk ref_lokasi) |
-| tgl_lahir | date |  | true |  |  | Tanggal lahir pegawai |
+| tanggal_lahir | date |  | true |  |  | Tanggal lahir pegawai |
 | jenis_kelamin | varchar(1) |  | true |  |  | Kode jenis kelamin, M: laki-laki, F: perempuan |
 | agama_id | smallint |  | true |  | [kepegawaian.ref_agama](kepegawaian.ref_agama.md) | Kode agama (rujuk ref_agama) |
 | jenis_kawin_id | smallint |  | true |  | [kepegawaian.ref_jenis_kawin](kepegawaian.ref_jenis_kawin.md) | Status perkawinan (rujuk ref_jenis_kawin) |
@@ -32,7 +32,7 @@ Data utama pegawai
 | status_cpns_pns | varchar(20) |  | true |  |  | Status CPNS/PNS |
 | kartu_pegawai | varchar(50) |  | true |  |  | Nomor kartu pegawai |
 | no_sk_cpns | varchar(100) |  | true |  |  | Nomor SK pengangkatan CPNS |
-| tgl_sk_cpns | date |  | true |  |  | Tanggal SK pengangkatan CPNS |
+| tanggal_sk_cpns | date |  | true |  |  | Tanggal SK pengangkatan CPNS |
 | tmt_cpns | date |  | true |  |  | Tanggal mulai tugas (CPNS) |
 | tmt_pns | date |  | true |  |  | Tanggal mulai tugas (PNS) |
 | gol_awal_id | smallint |  | true |  | [kepegawaian.ref_golongan](kepegawaian.ref_golongan.md) | Golongan awal saat pengangkatan (rujuk ref_golongan) |
@@ -59,18 +59,18 @@ Data utama pegawai
 | jml_istri | smallint |  | true |  |  | Jumlah pasangan |
 | jml_anak | smallint |  | true |  |  | Jumlah anak yang tercatat |
 | no_surat_dokter | varchar(100) |  | true |  |  | Nomor surat pemeriksaan kesehatan |
-| tgl_surat_dokter | date |  | true |  |  | Tanggal surat pemeriksaan kesehatan |
+| tanggal_surat_dokter | date |  | true |  |  | Tanggal surat pemeriksaan kesehatan |
 | no_bebas_narkoba | varchar(100) |  | true |  |  | Nomor Surat Keterangan Bebas Narkoba |
-| tgl_bebas_narkoba | date |  | true |  |  | Tanggal Surat Keterangan Bebas Narkoba |
+| tanggal_bebas_narkoba | date |  | true |  |  | Tanggal Surat Keterangan Bebas Narkoba |
 | no_catatan_polisi | varchar(100) |  | true |  |  | Nomor Surat Catatan Kelakukan Baik dari kepolisian |
-| tgl_catatan_polisi | date |  | true |  |  | Tanggal Surat Catatan Kelakukan Baik dari kepolisian |
+| tanggal_catatan_polisi | date |  | true |  |  | Tanggal Surat Catatan Kelakukan Baik dari kepolisian |
 | akte_kelahiran | varchar(50) |  | true |  |  | Nomor akte kelahiran |
 | status_hidup | varchar(15) |  | true |  |  | Status hidup pegawai |
 | akte_meninggal | varchar(50) |  | true |  |  | Nomor akte meninggal |
-| tgl_meninggal | date |  | true |  |  | Tanggal meninggal pegawai |
+| tanggal_meninggal | date |  | true |  |  | Tanggal meninggal pegawai |
 | no_askes | varchar(100) |  | true |  |  | Nomor ASKES (jika tersedia/legacy) |
 | no_taspen | varchar(100) |  | true |  |  | Nomor Taspen |
-| tgl_npwp | date |  | true |  |  | Tanggal terbit NPWP |
+| tanggal_npwp | date |  | true |  |  | Tanggal terbit NPWP |
 | tempat_lahir | varchar(100) |  | true |  |  | Nama tempat lahir berdasarkan referensi ref_lokasi |
 | tingkat_pendidikan_id | smallint |  | true |  | [kepegawaian.ref_tingkat_pendidikan](kepegawaian.ref_tingkat_pendidikan.md) | Tingkat pendidikan terakhir (rujuk tingkat_pendidikan) |
 | tempat_lahir_nama | varchar(200) |  | true |  |  | Nama tempat lahir (teks bebas) |
@@ -143,11 +143,11 @@ erDiagram
 "kepegawaian.anak" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
 "kepegawaian.pasangan" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
 "kepegawaian.orang_tua" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
-"kepegawaian.riwayat_assesmen" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
+"kepegawaian.riwayat_asesmen" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
 "kepegawaian.riwayat_diklat" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_orang_id) REFERENCES pegawai(pns_id)"
 "kepegawaian.riwayat_diklat_struktural" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
 "kepegawaian.riwayat_golongan" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
-"kepegawaian.riwayat_hukdis" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
+"kepegawaian.riwayat_hukuman_disiplin" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
 "kepegawaian.riwayat_jabatan" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
 "kepegawaian.riwayat_kursus" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
 "kepegawaian.riwayat_pendidikan" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
@@ -177,7 +177,7 @@ erDiagram
   varchar_50_ gelar_depan
   varchar_50_ gelar_belakang
   varchar_50_ tempat_lahir_id
-  date tgl_lahir
+  date tanggal_lahir
   varchar_1_ jenis_kelamin
   smallint agama_id FK
   smallint jenis_kawin_id FK
@@ -193,7 +193,7 @@ erDiagram
   varchar_20_ status_cpns_pns
   varchar_50_ kartu_pegawai
   varchar_100_ no_sk_cpns
-  date tgl_sk_cpns
+  date tanggal_sk_cpns
   date tmt_cpns
   date tmt_pns
   smallint gol_awal_id FK
@@ -220,18 +220,18 @@ erDiagram
   smallint jml_istri
   smallint jml_anak
   varchar_100_ no_surat_dokter
-  date tgl_surat_dokter
+  date tanggal_surat_dokter
   varchar_100_ no_bebas_narkoba
-  date tgl_bebas_narkoba
+  date tanggal_bebas_narkoba
   varchar_100_ no_catatan_polisi
-  date tgl_catatan_polisi
+  date tanggal_catatan_polisi
   varchar_50_ akte_kelahiran
   varchar_15_ status_hidup
   varchar_50_ akte_meninggal
-  date tgl_meninggal
+  date tanggal_meninggal
   varchar_100_ no_askes
   varchar_100_ no_taspen
-  date tgl_npwp
+  date tanggal_npwp
   varchar_100_ tempat_lahir
   smallint tingkat_pendidikan_id FK
   varchar_200_ tempat_lahir_nama
@@ -307,7 +307,7 @@ erDiagram
   integer id
   smallint hubungan
   varchar_255_ akte_meninggal
-  date tgl_meninggal
+  date tanggal_meninggal
   varchar_255_ nama
   varchar_20_ gelar_depan
   varchar_50_ gelar_belakang
@@ -323,7 +323,7 @@ erDiagram
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
 }
-"kepegawaian.riwayat_assesmen" {
+"kepegawaian.riwayat_asesmen" {
   integer id
   varchar_36_ pns_id FK
   varchar_20_ pns_nip
@@ -429,7 +429,7 @@ erDiagram
   timestamp_with_time_zone deleted_at
   integer jenis_kp_id FK
 }
-"kepegawaian.riwayat_hukdis" {
+"kepegawaian.riwayat_hukuman_disiplin" {
   bigint id
   varchar_36_ pns_id FK
   varchar_20_ pns_nip
@@ -463,7 +463,7 @@ erDiagram
   text unor
   integer jenis_jabatan_id
   varchar_250_ jenis_jabatan
-  integer jabatan_id
+  varchar_36_ jabatan_id FK
   text nama_jabatan
   varchar_36_ eselon_id
   varchar_100_ eselon

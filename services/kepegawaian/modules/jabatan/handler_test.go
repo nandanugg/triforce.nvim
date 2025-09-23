@@ -23,10 +23,12 @@ func Test_handler_list(t *testing.T) {
 	t.Parallel()
 
 	dbData := `
-		insert into ref_jabatan(id, no, nama_jabatan, kode_jabatan) values
-		(11, 1, '11h', '11h'),
-		(12, 2, '12h', '12h'),
-		(13, 3, '13h', '13h');
+		insert into ref_jabatan(id, no, nama_jabatan, kode_jabatan, deleted_at) values
+			(11, 1, 'Jabatan 11', '11', null),
+			(12, 2, 'Jabatan 12', '12', null),
+			(13, 3, 'Jabatan 13', '13', null),
+			(14, 4, 'Jabatan 14', '14', '2000-01-01'),
+			(15, 5, 'Nama Jabatan 15', '15', null);
 	`
 
 	tests := []struct {
@@ -45,19 +47,43 @@ func Test_handler_list(t *testing.T) {
 			wantResponseBody: `{
 				"data": [
 					{
-						"kode_jabatan": "11h",
-						"nama_jabatan": "11h"
+						"id": "11",
+						"nama": "Jabatan 11"
 					},
 					{
-						"kode_jabatan": "12h",
-						"nama_jabatan": "12h"
+						"id": "12",
+						"nama": "Jabatan 12"
 					},
 					{
-						"kode_jabatan": "13h",
-						"nama_jabatan": "13h"
+						"id": "13",
+						"nama": "Jabatan 13"
+					},
+					{
+						"id": "15",
+						"nama": "Nama Jabatan 15"
 					}
 				],
-				"meta": {"limit": 10, "offset": 0, "total": 3}
+				"meta": {"limit": 10, "offset": 0, "total": 4}
+			}`,
+		},
+		{
+			name:             "ok: dengan filter nama dan pgination",
+			dbData:           dbData,
+			requestQuery:     url.Values{"nama": []string{"jabatan"}, "limit": []string{"2"}, "offset": []string{"1"}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "41")}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{
+						"id": "12",
+						"nama": "Jabatan 12"
+					},
+					{
+						"id": "13",
+						"nama": "Jabatan 13"
+					}
+				],
+				"meta": {"limit": 2, "offset": 1, "total": 3}
 			}`,
 		},
 		{
@@ -69,11 +95,11 @@ func Test_handler_list(t *testing.T) {
 			wantResponseBody: `{
 				"data": [
 					{
-						"kode_jabatan": "12h",
-						"nama_jabatan": "12h"
+						"id": "12",
+						"nama": "Jabatan 12"
 					}
 				],
-				"meta": {"limit": 1, "offset": 1, "total": 3}
+				"meta": {"limit": 1, "offset": 1, "total": 4}
 			}`,
 		},
 		{

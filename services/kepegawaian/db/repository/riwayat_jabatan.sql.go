@@ -43,7 +43,7 @@ const listRiwayatJabatan = `-- name: ListRiwayatJabatan :many
 SELECT
     riwayat_jabatan.id,
     ref_jenis_jabatan.nama as jenis_jabatan,
-    ref_jabatan.kode_jabatan,
+    riwayat_jabatan.jabatan_id as id_jabatan,
     ref_jabatan.nama_jabatan,
     tmt_jabatan,
     no_sk,
@@ -59,7 +59,7 @@ LEFT JOIN unit_kerja on riwayat_jabatan.satuan_kerja_id = unit_kerja.id AND unit
 LEFT JOIN ref_kelas_jabatan on riwayat_jabatan.kelas_jabatan_id = ref_kelas_jabatan.id
 LEFT JOIN unit_kerja unit_organisasi on riwayat_jabatan.unor_id = unit_organisasi.id AND unit_organisasi.deleted_at IS NULL
 LEFT JOIN ref_jenis_jabatan on riwayat_jabatan.jenis_jabatan_id = ref_jenis_jabatan.id AND ref_jenis_jabatan.deleted_at IS NULL
-LEFT JOIN ref_jabatan on riwayat_jabatan.jabatan_id = ref_jabatan.id AND ref_jabatan.deleted_at IS NULL
+LEFT JOIN ref_jabatan on riwayat_jabatan.jabatan_id = ref_jabatan.kode_jabatan AND ref_jabatan.deleted_at IS NULL
 WHERE riwayat_jabatan.pns_nip = $3::varchar and riwayat_jabatan.deleted_at IS NULL
 ORDER BY tmt_jabatan DESC
 LIMIT $1 OFFSET $2
@@ -74,7 +74,7 @@ type ListRiwayatJabatanParams struct {
 type ListRiwayatJabatanRow struct {
 	ID                      int64       `db:"id"`
 	JenisJabatan            pgtype.Text `db:"jenis_jabatan"`
-	KodeJabatan             pgtype.Text `db:"kode_jabatan"`
+	IDJabatan               pgtype.Text `db:"id_jabatan"`
 	NamaJabatan             pgtype.Text `db:"nama_jabatan"`
 	TmtJabatan              pgtype.Date `db:"tmt_jabatan"`
 	NoSk                    pgtype.Text `db:"no_sk"`
@@ -99,7 +99,7 @@ func (q *Queries) ListRiwayatJabatan(ctx context.Context, arg ListRiwayatJabatan
 		if err := rows.Scan(
 			&i.ID,
 			&i.JenisJabatan,
-			&i.KodeJabatan,
+			&i.IDJabatan,
 			&i.NamaJabatan,
 			&i.TmtJabatan,
 			&i.NoSk,

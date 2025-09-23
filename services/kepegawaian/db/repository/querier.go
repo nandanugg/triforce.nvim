@@ -11,7 +11,7 @@ import (
 type Querier interface {
 	CountJenisKP(ctx context.Context) (int64, error)
 	CountRefGolongan(ctx context.Context) (int64, error)
-	CountRefJabatan(ctx context.Context) (int64, error)
+	CountRefJabatan(ctx context.Context, nama pgtype.Text) (int64, error)
 	CountRefJenisDiklat(ctx context.Context) (int64, error)
 	CountRefJenisHukuman(ctx context.Context) (int64, error)
 	CountRefJenisJabatan(ctx context.Context) (int64, error)

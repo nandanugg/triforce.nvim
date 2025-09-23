@@ -11,11 +11,12 @@ import (
 
 const countRefJabatan = `-- name: CountRefJabatan :one
 SELECT COUNT(1) FROM ref_jabatan
-WHERE deleted_at IS NULL
+WHERE ($1::varchar IS NULL OR nama_jabatan ILIKE $1::varchar || '%')
+  AND deleted_at IS NULL
 `
 
-func (q *Queries) CountRefJabatan(ctx context.Context) (int64, error) {
-	row := q.db.QueryRow(ctx, countRefJabatan)
+func (q *Queries) CountRefJabatan(ctx context.Context, nama pgtype.Text) (int64, error) {
+	row := q.db.QueryRow(ctx, countRefJabatan, nama)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
@@ -23,13 +24,15 @@ func (q *Queries) CountRefJabatan(ctx context.Context) (int64, error) {
 
 const listRefJabatan = `-- name: ListRefJabatan :many
 select kode_jabatan, nama_jabatan from ref_jabatan
-WHERE deleted_at IS NULL
+WHERE ($3::varchar IS NULL OR nama_jabatan ILIKE $3::varchar || '%')
+  AND deleted_at IS NULL
 LIMIT $1 OFFSET $2
 `
 
 type ListRefJabatanParams struct {
-	Limit  int32 `db:"limit"`
-	Offset int32 `db:"offset"`
+	Limit  int32       `db:"limit"`
+	Offset int32       `db:"offset"`
+	Nama   pgtype.Text `db:"nama"`
 }
 
 type ListRefJabatanRow struct {
@@ -38,7 +41,7 @@ type ListRefJabatanRow struct {
 }
 
 func (q *Queries) ListRefJabatan(ctx context.Context, arg ListRefJabatanParams) ([]ListRefJabatanRow, error) {
-	rows, err := q.db.Query(ctx, listRefJabatan, arg.Limit, arg.Offset)
+	rows, err := q.db.Query(ctx, listRefJabatan, arg.Limit, arg.Offset, arg.Nama)
 	if err != nil {
 		return nil, err
 	}
