@@ -18,9 +18,9 @@ func statusSKText(statusSK int16) string {
 	case 0:
 		return "Belum Dikoreksi"
 	case 1:
-		return "Sudah Dikoreksi"
+		return "Sedang Dikoreksi"
 	case 2:
-		return "Siap Dikoreksi"
+		return "Sudah Dikoreksi & Dikembalikan"
 	case 3:
 		return "Sudah dikoreksi dan menunggu TTD"
 	case 4:

@@ -46,7 +46,7 @@ func (h *handler) list(c echo.Context) error {
 	})
 	if err != nil {
 		slog.ErrorContext(ctx, "Error getting list sk pegawai.", "error", err)
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
 	return c.JSON(http.StatusOK, listResponse{
@@ -73,7 +73,7 @@ func (h *handler) get(c echo.Context) error {
 	data, err := h.service.get(ctx, api.CurrentUser(c).NIP, req.ID)
 	if err != nil {
 		slog.ErrorContext(ctx, "Error getting get sk pegawai.", "error", err)
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
 	if data == nil {
@@ -83,4 +83,30 @@ func (h *handler) get(c echo.Context) error {
 	return c.JSON(http.StatusOK, getResponse{
 		Data: *data,
 	})
+}
+
+type getBerkasRequest struct {
+	ID     string `param:"id"`
+	Signed bool   `query:"signed"`
+}
+
+func (h *handler) getBerkas(c echo.Context) error {
+	var req getBerkasRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	ctx := c.Request().Context()
+	mimeType, blob, err := h.service.getBerkas(ctx, api.CurrentUser(c).NIP, req.ID, req.Signed)
+	if err != nil {
+		slog.ErrorContext(ctx, "Error getting berkas SK.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	if blob == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "berkas SK tidak ditemukan")
+	}
+
+	c.Response().Header().Set("Content-Disposition", "inline")
+	return c.Blob(http.StatusOK, mimeType, blob)
 }

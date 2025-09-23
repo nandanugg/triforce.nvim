@@ -45,6 +45,8 @@ type Querier interface {
 	GetBerkasRiwayatPenghargaan(ctx context.Context, arg GetBerkasRiwayatPenghargaanParams) (pgtype.Text, error)
 	GetBerkasRiwayatPenugasan(ctx context.Context, arg GetBerkasRiwayatPenugasanParams) (pgtype.Text, error)
 	GetBerkasRiwayatSertifikasi(ctx context.Context, arg GetBerkasRiwayatSertifikasiParams) (pgtype.Text, error)
+	GetBerkasSKByNIPAndID(ctx context.Context, arg GetBerkasSKByNIPAndIDParams) (pgtype.Text, error)
+	GetBerkasSKSignedByNIPAndID(ctx context.Context, arg GetBerkasSKSignedByNIPAndIDParams) (pgtype.Text, error)
 	GetDataPribadi(ctx context.Context, arg GetDataPribadiParams) (GetDataPribadiRow, error)
 	GetSKByNIPAndID(ctx context.Context, arg GetSKByNIPAndIDParams) (GetSKByNIPAndIDRow, error)
 	ListAnakByNip(ctx context.Context, nipBaru pgtype.Text) ([]ListAnakByNipRow, error)

@@ -9,6 +9,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/typeutil"
 	repo "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
@@ -19,6 +20,8 @@ type repository interface {
 	GetSKByNIPAndID(ctx context.Context, arg repo.GetSKByNIPAndIDParams) (repo.GetSKByNIPAndIDRow, error)
 	CountSKByNIP(ctx context.Context, arg repo.CountSKByNIPParams) (int64, error)
 	ListUnitKerjaHierarchyByNIP(ctx context.Context, nip string) ([]repo.ListUnitKerjaHierarchyByNIPRow, error)
+	GetBerkasSKByNIPAndID(ctx context.Context, arg repo.GetBerkasSKByNIPAndIDParams) (pgtype.Text, error)
+	GetBerkasSKSignedByNIPAndID(ctx context.Context, arg repo.GetBerkasSKSignedByNIPAndIDParams) (pgtype.Text, error)
 }
 
 type service struct {
@@ -126,4 +129,29 @@ func (s *service) getUnorLengkap(listUnor []repo.ListUnitKerjaHierarchyByNIPRow)
 	}
 
 	return strings.Join(unitKerja, " - ")
+}
+
+func (s *service) getBerkas(ctx context.Context, nip, id string, signed bool) (string, []byte, error) {
+	var res pgtype.Text
+	var err error
+	if signed {
+		res, err = s.repo.GetBerkasSKSignedByNIPAndID(ctx, repo.GetBerkasSKSignedByNIPAndIDParams{
+			Nip: nip,
+			ID:  id,
+		})
+	} else {
+		res, err = s.repo.GetBerkasSKByNIPAndID(ctx, repo.GetBerkasSKByNIPAndIDParams{
+			Nip: nip,
+			ID:  id,
+		})
+	}
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+		return "", nil, fmt.Errorf("[suratkeputusan-getBerkas] repo get berkas: %w", err)
+	}
+
+	if len(res.String) == 0 {
+		return "", nil, nil
+	}
+
+	return api.GetMimeTypeAndDecodedData(res.String)
 }

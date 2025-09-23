@@ -38,18 +38,63 @@ func (q *Queries) CountSKByNIP(ctx context.Context, arg CountSKByNIPParams) (int
 	return total, err
 }
 
+const getBerkasSKByNIPAndID = `-- name: GetBerkasSKByNIPAndID :one
+SELECT 
+    file_base64
+FROM 
+    file_digital_signature fds
+WHERE 
+    fds.deleted_at IS NULL
+    AND fds.nip_sk = $1::VARCHAR
+    AND fds.file_id = $2::varchar
+`
+
+type GetBerkasSKByNIPAndIDParams struct {
+	Nip string `db:"nip"`
+	ID  string `db:"id"`
+}
+
+func (q *Queries) GetBerkasSKByNIPAndID(ctx context.Context, arg GetBerkasSKByNIPAndIDParams) (pgtype.Text, error) {
+	row := q.db.QueryRow(ctx, getBerkasSKByNIPAndID, arg.Nip, arg.ID)
+	var file_base64 pgtype.Text
+	err := row.Scan(&file_base64)
+	return file_base64, err
+}
+
+const getBerkasSKSignedByNIPAndID = `-- name: GetBerkasSKSignedByNIPAndID :one
+SELECT 
+    file_base64_sign
+FROM 
+    file_digital_signature fds
+WHERE 
+    fds.deleted_at IS NULL
+    AND fds.nip_sk = $1::VARCHAR
+    AND fds.file_id = $2::varchar
+`
+
+type GetBerkasSKSignedByNIPAndIDParams struct {
+	Nip string `db:"nip"`
+	ID  string `db:"id"`
+}
+
+func (q *Queries) GetBerkasSKSignedByNIPAndID(ctx context.Context, arg GetBerkasSKSignedByNIPAndIDParams) (pgtype.Text, error) {
+	row := q.db.QueryRow(ctx, getBerkasSKSignedByNIPAndID, arg.Nip, arg.ID)
+	var file_base64_sign pgtype.Text
+	err := row.Scan(&file_base64_sign)
+	return file_base64_sign, err
+}
+
 const getSKByNIPAndID = `-- name: GetSKByNIPAndID :one
 SELECT
     fds.kategori as kategori_sk,
     fds.no_sk,
     fds.tanggal_sk,
     fds.status_sk,
-    p.unor_id,
     p.nama as nama_pemilik_sk,
     pemroses.nama as nama_penandatangan
 FROM file_digital_signature fds
-JOIN pegawai p on p.nip_baru = fds.nip_sk
-LEFT JOIN pegawai pemroses on pemroses.nip_baru = fds.nip_pemroses
+JOIN pegawai p on p.nip_baru = fds.nip_sk  and p.deleted_at is null
+LEFT JOIN pegawai pemroses on pemroses.nip_baru = fds.nip_pemroses and pemroses.deleted_at is null
 WHERE fds.deleted_at IS NULL
     AND fds.nip_sk = $1::VARCHAR
     AND fds.file_id = $2::varchar
@@ -65,7 +110,6 @@ type GetSKByNIPAndIDRow struct {
 	NoSk              pgtype.Text `db:"no_sk"`
 	TanggalSk         pgtype.Date `db:"tanggal_sk"`
 	StatusSk          pgtype.Int2 `db:"status_sk"`
-	UnorID            pgtype.Text `db:"unor_id"`
 	NamaPemilikSk     pgtype.Text `db:"nama_pemilik_sk"`
 	NamaPenandatangan pgtype.Text `db:"nama_penandatangan"`
 }
@@ -78,7 +122,6 @@ func (q *Queries) GetSKByNIPAndID(ctx context.Context, arg GetSKByNIPAndIDParams
 		&i.NoSk,
 		&i.TanggalSk,
 		&i.StatusSk,
-		&i.UnorID,
 		&i.NamaPemilikSk,
 		&i.NamaPenandatangan,
 	)
@@ -91,10 +134,8 @@ SELECT
     fds.kategori as kategori_sk,
     fds.no_sk,
     fds.tanggal_sk,
-    fds.status_sk,
-    p.unor_id
+    fds.status_sk
 FROM file_digital_signature fds
-JOIN pegawai p on p.nip_baru = fds.nip_sk
 WHERE fds.deleted_at IS NULL
     AND fds.nip_sk = $3::varchar
     AND ($4::varchar IS NULL OR fds.no_sk ILIKE '%' || $4::varchar || '%')
@@ -119,7 +160,6 @@ type ListSKByNIPRow struct {
 	NoSk       pgtype.Text `db:"no_sk"`
 	TanggalSk  pgtype.Date `db:"tanggal_sk"`
 	StatusSk   pgtype.Int2 `db:"status_sk"`
-	UnorID     pgtype.Text `db:"unor_id"`
 }
 
 func (q *Queries) ListSKByNIP(ctx context.Context, arg ListSKByNIPParams) ([]ListSKByNIPRow, error) {
@@ -144,7 +184,6 @@ func (q *Queries) ListSKByNIP(ctx context.Context, arg ListSKByNIPParams) ([]Lis
 			&i.NoSk,
 			&i.TanggalSk,
 			&i.StatusSk,
-			&i.UnorID,
 		); err != nil {
 			return nil, err
 		}

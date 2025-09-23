@@ -4,10 +4,8 @@ SELECT
     fds.kategori as kategori_sk,
     fds.no_sk,
     fds.tanggal_sk,
-    fds.status_sk,
-    p.unor_id
+    fds.status_sk
 FROM file_digital_signature fds
-JOIN pegawai p on p.nip_baru = fds.nip_sk
 WHERE fds.deleted_at IS NULL
     AND fds.nip_sk = @nip::varchar
     AND (sqlc.narg('no_sk')::varchar IS NULL OR fds.no_sk ILIKE '%' || sqlc.narg('no_sk')::varchar || '%')
@@ -31,12 +29,31 @@ SELECT
     fds.no_sk,
     fds.tanggal_sk,
     fds.status_sk,
-    p.unor_id,
     p.nama as nama_pemilik_sk,
     pemroses.nama as nama_penandatangan
 FROM file_digital_signature fds
-JOIN pegawai p on p.nip_baru = fds.nip_sk
-LEFT JOIN pegawai pemroses on pemroses.nip_baru = fds.nip_pemroses
+JOIN pegawai p on p.nip_baru = fds.nip_sk  and p.deleted_at is null
+LEFT JOIN pegawai pemroses on pemroses.nip_baru = fds.nip_pemroses and pemroses.deleted_at is null
 WHERE fds.deleted_at IS NULL
+    AND fds.nip_sk = @nip::VARCHAR
+    AND fds.file_id = @id::varchar;
+
+-- name: GetBerkasSKByNIPAndID :one
+SELECT 
+    file_base64
+FROM 
+    file_digital_signature fds
+WHERE 
+    fds.deleted_at IS NULL
+    AND fds.nip_sk = @nip::VARCHAR
+    AND fds.file_id = @id::varchar;
+
+-- name: GetBerkasSKSignedByNIPAndID :one
+SELECT 
+    file_base64_sign
+FROM 
+    file_digital_signature fds
+WHERE 
+    fds.deleted_at IS NULL
     AND fds.nip_sk = @nip::VARCHAR
     AND fds.file_id = @id::varchar;
