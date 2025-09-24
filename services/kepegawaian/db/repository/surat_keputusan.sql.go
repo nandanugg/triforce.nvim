@@ -9,7 +9,58 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const countSKByNIP = `-- name: CountSKByNIP :one
+const countSuratKeputusan = `-- name: CountSuratKeputusan :one
+SELECT COUNT(*) as total
+FROM file_digital_signature fds
+JOIN pegawai p ON fds.nip_sk = p.nip_baru AND p.deleted_at IS NULL
+LEFT JOIN unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
+WHERE fds.deleted_at IS NULL
+    AND ($1::VARCHAR IS NULL
+        OR $1::VARCHAR = uk.id
+        OR $1::VARCHAR = uk.eselon_1
+        OR $1::VARCHAR = uk.eselon_2
+        OR $1::VARCHAR = uk.eselon_3
+        OR $1::VARCHAR = uk.eselon_4)
+    AND ($2::VARCHAR IS NULL OR p.nama ILIKE '%' || $2::VARCHAR || '%')
+    AND ($3::VARCHAR IS NULL OR fds.nip_sk = $3::VARCHAR)
+    AND ($4::INTEGER IS NULL OR p.gol_id = $4::INTEGER)
+    AND ($5::VARCHAR IS NULL OR p.jabatan_instansi_id = $5::VARCHAR)
+    AND ($6::VARCHAR is NULL OR fds.kategori ILIKE '%' || $6::VARCHAR || '%')
+    AND ($7::DATE IS NULL OR fds.tanggal_sk >= $7::DATE)
+    AND ($8::DATE IS NULL OR fds.tanggal_sk <= $8::DATE)
+    AND ($9::INTEGER IS NULL OR fds.status_sk = $9::integer)
+`
+
+type CountSuratKeputusanParams struct {
+	UnitKerjaID    pgtype.Text `db:"unit_kerja_id"`
+	NamaPemilik    pgtype.Text `db:"nama_pemilik"`
+	Nip            pgtype.Text `db:"nip"`
+	GolonganID     pgtype.Int4 `db:"golongan_id"`
+	JabatanID      pgtype.Text `db:"jabatan_id"`
+	KategoriSk     pgtype.Text `db:"kategori_sk"`
+	TanggalSkMulai pgtype.Date `db:"tanggal_sk_mulai"`
+	TanggalSkAkhir pgtype.Date `db:"tanggal_sk_akhir"`
+	StatusSk       pgtype.Int4 `db:"status_sk"`
+}
+
+func (q *Queries) CountSuratKeputusan(ctx context.Context, arg CountSuratKeputusanParams) (int64, error) {
+	row := q.db.QueryRow(ctx, countSuratKeputusan,
+		arg.UnitKerjaID,
+		arg.NamaPemilik,
+		arg.Nip,
+		arg.GolonganID,
+		arg.JabatanID,
+		arg.KategoriSk,
+		arg.TanggalSkMulai,
+		arg.TanggalSkAkhir,
+		arg.StatusSk,
+	)
+	var total int64
+	err := row.Scan(&total)
+	return total, err
+}
+
+const countSuratKeputusanByNIP = `-- name: CountSuratKeputusanByNIP :one
 SELECT COUNT(1) as total
 FROM file_digital_signature fds
 WHERE fds.deleted_at IS NULL
@@ -19,15 +70,15 @@ WHERE fds.deleted_at IS NULL
     AND ($4::varchar is null OR fds.kategori ILIKE '%' || $4::varchar || '%')
 `
 
-type CountSKByNIPParams struct {
+type CountSuratKeputusanByNIPParams struct {
 	Nip        string      `db:"nip"`
 	NoSk       pgtype.Text `db:"no_sk"`
 	StatusSk   pgtype.Int4 `db:"status_sk"`
 	KategoriSk pgtype.Text `db:"kategori_sk"`
 }
 
-func (q *Queries) CountSKByNIP(ctx context.Context, arg CountSKByNIPParams) (int64, error) {
-	row := q.db.QueryRow(ctx, countSKByNIP,
+func (q *Queries) CountSuratKeputusanByNIP(ctx context.Context, arg CountSuratKeputusanByNIPParams) (int64, error) {
+	row := q.db.QueryRow(ctx, countSuratKeputusanByNIP,
 		arg.Nip,
 		arg.NoSk,
 		arg.StatusSk,
@@ -38,7 +89,24 @@ func (q *Queries) CountSKByNIP(ctx context.Context, arg CountSKByNIPParams) (int
 	return total, err
 }
 
-const getBerkasSKByNIPAndID = `-- name: GetBerkasSKByNIPAndID :one
+const getBerkasSuratKeputusanByID = `-- name: GetBerkasSuratKeputusanByID :one
+SELECT 
+    file_base64
+FROM 
+    file_digital_signature fds
+WHERE 
+    fds.deleted_at IS NULL
+    AND fds.file_id = $1::varchar
+`
+
+func (q *Queries) GetBerkasSuratKeputusanByID(ctx context.Context, id string) (pgtype.Text, error) {
+	row := q.db.QueryRow(ctx, getBerkasSuratKeputusanByID, id)
+	var file_base64 pgtype.Text
+	err := row.Scan(&file_base64)
+	return file_base64, err
+}
+
+const getBerkasSuratKeputusanByNIPAndID = `-- name: GetBerkasSuratKeputusanByNIPAndID :one
 SELECT 
     file_base64
 FROM 
@@ -49,19 +117,36 @@ WHERE
     AND fds.file_id = $2::varchar
 `
 
-type GetBerkasSKByNIPAndIDParams struct {
+type GetBerkasSuratKeputusanByNIPAndIDParams struct {
 	Nip string `db:"nip"`
 	ID  string `db:"id"`
 }
 
-func (q *Queries) GetBerkasSKByNIPAndID(ctx context.Context, arg GetBerkasSKByNIPAndIDParams) (pgtype.Text, error) {
-	row := q.db.QueryRow(ctx, getBerkasSKByNIPAndID, arg.Nip, arg.ID)
+func (q *Queries) GetBerkasSuratKeputusanByNIPAndID(ctx context.Context, arg GetBerkasSuratKeputusanByNIPAndIDParams) (pgtype.Text, error) {
+	row := q.db.QueryRow(ctx, getBerkasSuratKeputusanByNIPAndID, arg.Nip, arg.ID)
 	var file_base64 pgtype.Text
 	err := row.Scan(&file_base64)
 	return file_base64, err
 }
 
-const getBerkasSKSignedByNIPAndID = `-- name: GetBerkasSKSignedByNIPAndID :one
+const getBerkasSuratKeputusanSignedByID = `-- name: GetBerkasSuratKeputusanSignedByID :one
+SELECT 
+    file_base64_sign
+FROM 
+    file_digital_signature fds
+WHERE 
+    fds.deleted_at IS NULL
+    AND fds.file_id = $1::varchar
+`
+
+func (q *Queries) GetBerkasSuratKeputusanSignedByID(ctx context.Context, id string) (pgtype.Text, error) {
+	row := q.db.QueryRow(ctx, getBerkasSuratKeputusanSignedByID, id)
+	var file_base64_sign pgtype.Text
+	err := row.Scan(&file_base64_sign)
+	return file_base64_sign, err
+}
+
+const getBerkasSuratKeputusanSignedByNIPAndID = `-- name: GetBerkasSuratKeputusanSignedByNIPAndID :one
 SELECT 
     file_base64_sign
 FROM 
@@ -72,19 +157,60 @@ WHERE
     AND fds.file_id = $2::varchar
 `
 
-type GetBerkasSKSignedByNIPAndIDParams struct {
+type GetBerkasSuratKeputusanSignedByNIPAndIDParams struct {
 	Nip string `db:"nip"`
 	ID  string `db:"id"`
 }
 
-func (q *Queries) GetBerkasSKSignedByNIPAndID(ctx context.Context, arg GetBerkasSKSignedByNIPAndIDParams) (pgtype.Text, error) {
-	row := q.db.QueryRow(ctx, getBerkasSKSignedByNIPAndID, arg.Nip, arg.ID)
+func (q *Queries) GetBerkasSuratKeputusanSignedByNIPAndID(ctx context.Context, arg GetBerkasSuratKeputusanSignedByNIPAndIDParams) (pgtype.Text, error) {
+	row := q.db.QueryRow(ctx, getBerkasSuratKeputusanSignedByNIPAndID, arg.Nip, arg.ID)
 	var file_base64_sign pgtype.Text
 	err := row.Scan(&file_base64_sign)
 	return file_base64_sign, err
 }
 
-const getSKByNIPAndID = `-- name: GetSKByNIPAndID :one
+const getSuratKeputusanByID = `-- name: GetSuratKeputusanByID :one
+SELECT
+    fds.kategori as kategori_sk,
+    fds.no_sk,
+    fds.tanggal_sk,
+    fds.status_sk,
+    fds.nip_sk,
+    p.nama as nama_pemilik_sk,
+    pemroses.nama as nama_penandatangan
+FROM file_digital_signature fds
+JOIN pegawai p on p.nip_baru = fds.nip_sk and p.deleted_at is null
+LEFT JOIN pegawai pemroses on pemroses.nip_baru = fds.nip_pemroses and pemroses.deleted_at is null
+WHERE fds.deleted_at IS NULL
+    AND fds.file_id = $1::varchar
+`
+
+type GetSuratKeputusanByIDRow struct {
+	KategoriSk        pgtype.Text `db:"kategori_sk"`
+	NoSk              pgtype.Text `db:"no_sk"`
+	TanggalSk         pgtype.Date `db:"tanggal_sk"`
+	StatusSk          pgtype.Int2 `db:"status_sk"`
+	NipSk             pgtype.Text `db:"nip_sk"`
+	NamaPemilikSk     pgtype.Text `db:"nama_pemilik_sk"`
+	NamaPenandatangan pgtype.Text `db:"nama_penandatangan"`
+}
+
+func (q *Queries) GetSuratKeputusanByID(ctx context.Context, id string) (GetSuratKeputusanByIDRow, error) {
+	row := q.db.QueryRow(ctx, getSuratKeputusanByID, id)
+	var i GetSuratKeputusanByIDRow
+	err := row.Scan(
+		&i.KategoriSk,
+		&i.NoSk,
+		&i.TanggalSk,
+		&i.StatusSk,
+		&i.NipSk,
+		&i.NamaPemilikSk,
+		&i.NamaPenandatangan,
+	)
+	return i, err
+}
+
+const getSuratKeputusanByNIPAndID = `-- name: GetSuratKeputusanByNIPAndID :one
 SELECT
     fds.kategori as kategori_sk,
     fds.no_sk,
@@ -100,12 +226,12 @@ WHERE fds.deleted_at IS NULL
     AND fds.file_id = $2::varchar
 `
 
-type GetSKByNIPAndIDParams struct {
+type GetSuratKeputusanByNIPAndIDParams struct {
 	Nip string `db:"nip"`
 	ID  string `db:"id"`
 }
 
-type GetSKByNIPAndIDRow struct {
+type GetSuratKeputusanByNIPAndIDRow struct {
 	KategoriSk        pgtype.Text `db:"kategori_sk"`
 	NoSk              pgtype.Text `db:"no_sk"`
 	TanggalSk         pgtype.Date `db:"tanggal_sk"`
@@ -114,9 +240,9 @@ type GetSKByNIPAndIDRow struct {
 	NamaPenandatangan pgtype.Text `db:"nama_penandatangan"`
 }
 
-func (q *Queries) GetSKByNIPAndID(ctx context.Context, arg GetSKByNIPAndIDParams) (GetSKByNIPAndIDRow, error) {
-	row := q.db.QueryRow(ctx, getSKByNIPAndID, arg.Nip, arg.ID)
-	var i GetSKByNIPAndIDRow
+func (q *Queries) GetSuratKeputusanByNIPAndID(ctx context.Context, arg GetSuratKeputusanByNIPAndIDParams) (GetSuratKeputusanByNIPAndIDRow, error) {
+	row := q.db.QueryRow(ctx, getSuratKeputusanByNIPAndID, arg.Nip, arg.ID)
+	var i GetSuratKeputusanByNIPAndIDRow
 	err := row.Scan(
 		&i.KategoriSk,
 		&i.NoSk,
@@ -128,7 +254,102 @@ func (q *Queries) GetSKByNIPAndID(ctx context.Context, arg GetSKByNIPAndIDParams
 	return i, err
 }
 
-const listSKByNIP = `-- name: ListSKByNIP :many
+const listSuratKeputusan = `-- name: ListSuratKeputusan :many
+SELECT
+    fds.file_id,
+    p.nama as nama_pemilik_sk,
+    fds.kategori AS kategori_sk,
+    fds.no_sk,
+    fds.tanggal_sk,
+    p.unor_id,
+    fds.status_sk
+FROM file_digital_signature fds
+JOIN pegawai p ON fds.nip_sk = p.nip_baru AND p.deleted_at IS NULL
+LEFT JOIN unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
+WHERE fds.deleted_at IS NULL
+    AND ($3::VARCHAR IS NULL
+        OR $3::VARCHAR = uk.id
+        OR $3::VARCHAR = uk.eselon_1
+        OR $3::VARCHAR = uk.eselon_2
+        OR $3::VARCHAR = uk.eselon_3
+        OR $3::VARCHAR = uk.eselon_4)
+    AND ($4::VARCHAR IS NULL OR p.nama ILIKE '%' || $4::VARCHAR || '%')
+    AND ($5::VARCHAR IS NULL OR fds.nip_sk = $5::VARCHAR)
+    AND ($6::INTEGER IS NULL OR p.gol_id = $6::INTEGER)
+    AND ($7::VARCHAR IS NULL OR p.jabatan_instansi_id = $7::VARCHAR)
+    AND ($8::VARCHAR is NULL OR fds.kategori ILIKE '%' || $8::VARCHAR || '%')
+    AND ($9::DATE IS NULL OR fds.tanggal_sk >= $9::DATE)
+    AND ($10::DATE IS NULL OR fds.tanggal_sk <= $10::DATE)
+    AND ($11::INTEGER IS NULL OR fds.status_sk = $11::integer)
+ORDER BY fds.created_at DESC
+LIMIT $1 OFFSET $2
+`
+
+type ListSuratKeputusanParams struct {
+	Limit          int32       `db:"limit"`
+	Offset         int32       `db:"offset"`
+	UnitKerjaID    pgtype.Text `db:"unit_kerja_id"`
+	NamaPemilik    pgtype.Text `db:"nama_pemilik"`
+	Nip            pgtype.Text `db:"nip"`
+	GolonganID     pgtype.Int4 `db:"golongan_id"`
+	JabatanID      pgtype.Text `db:"jabatan_id"`
+	KategoriSk     pgtype.Text `db:"kategori_sk"`
+	TanggalSkMulai pgtype.Date `db:"tanggal_sk_mulai"`
+	TanggalSkAkhir pgtype.Date `db:"tanggal_sk_akhir"`
+	StatusSk       pgtype.Int4 `db:"status_sk"`
+}
+
+type ListSuratKeputusanRow struct {
+	FileID        string      `db:"file_id"`
+	NamaPemilikSk pgtype.Text `db:"nama_pemilik_sk"`
+	KategoriSk    pgtype.Text `db:"kategori_sk"`
+	NoSk          pgtype.Text `db:"no_sk"`
+	TanggalSk     pgtype.Date `db:"tanggal_sk"`
+	UnorID        pgtype.Text `db:"unor_id"`
+	StatusSk      pgtype.Int2 `db:"status_sk"`
+}
+
+func (q *Queries) ListSuratKeputusan(ctx context.Context, arg ListSuratKeputusanParams) ([]ListSuratKeputusanRow, error) {
+	rows, err := q.db.Query(ctx, listSuratKeputusan,
+		arg.Limit,
+		arg.Offset,
+		arg.UnitKerjaID,
+		arg.NamaPemilik,
+		arg.Nip,
+		arg.GolonganID,
+		arg.JabatanID,
+		arg.KategoriSk,
+		arg.TanggalSkMulai,
+		arg.TanggalSkAkhir,
+		arg.StatusSk,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListSuratKeputusanRow
+	for rows.Next() {
+		var i ListSuratKeputusanRow
+		if err := rows.Scan(
+			&i.FileID,
+			&i.NamaPemilikSk,
+			&i.KategoriSk,
+			&i.NoSk,
+			&i.TanggalSk,
+			&i.UnorID,
+			&i.StatusSk,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listSuratKeputusanByNIP = `-- name: ListSuratKeputusanByNIP :many
 SELECT
     fds.file_id,
     fds.kategori as kategori_sk,
@@ -145,7 +366,7 @@ ORDER BY fds.created_at DESC
 LIMIT $1 OFFSET $2
 `
 
-type ListSKByNIPParams struct {
+type ListSuratKeputusanByNIPParams struct {
 	Limit      int32       `db:"limit"`
 	Offset     int32       `db:"offset"`
 	Nip        string      `db:"nip"`
@@ -154,7 +375,7 @@ type ListSKByNIPParams struct {
 	KategoriSk pgtype.Text `db:"kategori_sk"`
 }
 
-type ListSKByNIPRow struct {
+type ListSuratKeputusanByNIPRow struct {
 	FileID     string      `db:"file_id"`
 	KategoriSk pgtype.Text `db:"kategori_sk"`
 	NoSk       pgtype.Text `db:"no_sk"`
@@ -162,8 +383,8 @@ type ListSKByNIPRow struct {
 	StatusSk   pgtype.Int2 `db:"status_sk"`
 }
 
-func (q *Queries) ListSKByNIP(ctx context.Context, arg ListSKByNIPParams) ([]ListSKByNIPRow, error) {
-	rows, err := q.db.Query(ctx, listSKByNIP,
+func (q *Queries) ListSuratKeputusanByNIP(ctx context.Context, arg ListSuratKeputusanByNIPParams) ([]ListSuratKeputusanByNIPRow, error) {
+	rows, err := q.db.Query(ctx, listSuratKeputusanByNIP,
 		arg.Limit,
 		arg.Offset,
 		arg.Nip,
@@ -175,9 +396,9 @@ func (q *Queries) ListSKByNIP(ctx context.Context, arg ListSKByNIPParams) ([]Lis
 		return nil, err
 	}
 	defer rows.Close()
-	var items []ListSKByNIPRow
+	var items []ListSuratKeputusanByNIPRow
 	for rows.Next() {
-		var i ListSKByNIPRow
+		var i ListSuratKeputusanByNIPRow
 		if err := rows.Scan(
 			&i.FileID,
 			&i.KategoriSk,

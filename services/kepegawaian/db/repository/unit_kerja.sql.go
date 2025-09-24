@@ -161,3 +161,65 @@ func (q *Queries) ListUnitKerjaHierarchyByNIP(ctx context.Context, nip string) (
 	}
 	return items, nil
 }
+
+const listUnitKerjaLengkapByIDs = `-- name: ListUnitKerjaLengkapByIDs :many
+with recursive unit_kerja_path as (
+    -- anchor
+    select 
+        uk.id,
+        uk.id as start_id,
+        uk.diatasan_id,
+        uk.nama_unor::text as path,
+        1 as depth
+    from unit_kerja uk
+    where uk.id = ANY($1::varchar[]) AND uk.deleted_at is null
+
+    union all
+
+    -- recursive
+    select 
+        uk.id,
+        ukp.start_id,
+        uk.diatasan_id,
+        ukp.path || ' - ' || uk.nama_unor, 
+        ukp.depth + 1
+    from unit_kerja uk
+    join unit_kerja_path ukp
+      on uk.id = ukp.diatasan_id
+    where ukp.depth < 10 and uk.deleted_at is null
+)
+
+select 
+    start_id as id,
+    path as nama_unor_lengkap
+from (
+    select id, start_id, diatasan_id, path, depth, row_number() over (partition by start_id order by depth desc) as rn
+    from unit_kerja_path
+) t
+where rn = 1
+`
+
+type ListUnitKerjaLengkapByIDsRow struct {
+	ID              string `db:"id"`
+	NamaUnorLengkap string `db:"nama_unor_lengkap"`
+}
+
+func (q *Queries) ListUnitKerjaLengkapByIDs(ctx context.Context, ids []string) ([]ListUnitKerjaLengkapByIDsRow, error) {
+	rows, err := q.db.Query(ctx, listUnitKerjaLengkapByIDs, ids)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListUnitKerjaLengkapByIDsRow
+	for rows.Next() {
+		var i ListUnitKerjaLengkapByIDsRow
+		if err := rows.Scan(&i.ID, &i.NamaUnorLengkap); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

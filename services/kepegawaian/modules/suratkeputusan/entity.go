@@ -2,7 +2,7 @@ package suratkeputusan
 
 import "gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
 
-type sk struct {
+type suratKeputusan struct {
 	IDSK              string  `json:"id_sk"`
 	KategoriSK        string  `json:"kategori_sk"`
 	NoSK              string  `json:"no_sk"`

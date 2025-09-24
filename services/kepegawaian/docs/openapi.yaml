@@ -6,6 +6,7 @@ info:
 servers:
   - url: http://localhost:8000
 tags:
+  - name: Admin Surat Keputusan Pegawai
   - name: Data Pribadi
   - name: Golongan
   - name: Jabatan
@@ -35,6 +36,142 @@ tags:
   - name: Tingkat Pendidikan
   - name: Unit Kerja
 paths:
+  /v1/admin/surat-keputusan:
+    get:
+      tags:
+        - Admin Surat Keputusan Pegawai
+      summary: Daftar surat keputusan pegawai.
+      description: Daftar surat keputusan pegawai.
+      operationId: listSuratKeputusanAdmin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+        - name: unit_kerja_id
+          in: query
+          description: Unit Kerja ID
+          required: false
+          schema:
+            type: string
+        - name: nama_pemilik
+          in: query
+          description: Nama Pemilik
+          required: false
+          schema:
+            type: string
+        - name: nip
+          in: query
+          description: NIP
+          required: false
+          schema:
+            type: string
+        - name: golongan_id
+          in: query
+          description: Golongan ID
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: jabatan_id
+          in: query
+          description: Jabatan ID
+          required: false
+          schema:
+            type: string
+        - name: kategori_sk
+          in: query
+          description: Kategori SK
+          required: false
+          schema:
+            type: string
+        - name: tanggal_sk_mulai
+          in: query
+          description: Tanggal SK Mulai 
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: tanggal_sk_akhir
+          in: query
+          description: Tanggal SK Akhir
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: status_sk
+          in: query
+          description: Status SK
+          required: false
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/suratKeputusan'
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/admin/surat-keputusan/{id}:
+    get:
+      tags:
+        - Admin Surat Keputusan Pegawai
+      summary: Detail surat keputusan pegawai.
+      description: Detail surat keputusan pegawai berdasarkan ID SK Pegawai.
+      operationId: getSuratKeputusanAdmin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/suratKeputusanPenandatangan"
+  /v1/admin/surat-keputusan/{id}/berkas:
+    get:
+      tags:
+        - Admin Surat Keputusan Pegawai
+      summary: Berkas surat keputusan pegawai.
+      description: Berkas surat keputusan pegawai berdasarkan ID SK Pegawai. Signed=true akan mengembalikan berkas yang sudah disign.
+      operationId: getBerkasSuratKeputusanAdmin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: signed
+          in: query
+          required: false
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Berkas sk tidak ditemukan.
   /v1/data-pribadi:
     get:
       tags:
@@ -1575,36 +1712,7 @@ paths:
                   data:
                     type: array
                     items:
-                      type: object
-                      additionalProperties: false
-                      properties:
-                        id_sk:
-                          type: string
-                          description: ID SK
-                          example: "stringidsk"
-                        kategori_sk:
-                          type: string
-                          description: Kategori surat keputusan
-                          example: "Kenaikan Pangkat"
-                        no_sk:
-                          type: string
-                          description: Nomor surat keputusan
-                          example: "SK-001/2024"
-                        tanggal_sk:
-                          type: string
-                          format: date
-                          description: Tanggal surat keputusan
-                          nullable: true
-                          example: "2024-01-15"
-                        status_sk:
-                          type: string
-                          description: Status koreksi surat keputusan
-                          enum: ["Belum Dikoreksi","Sedang Dikoreksi","Sudah Dikoreksi & Dikembalikan","Sudah dikoreksi dan menunggu TTD","Sudah TTD","Sudah dikirim"]
-                          example: "Sedang Dikoreksi"
-                        unit_kerja:
-                          type: string
-                          description: Nama unit kerja lengkap
-                          example: "Bawah - Tengah - Paling Atas"
+                      $ref: '#/components/schemas/suratKeputusan'
                   meta:
                     $ref: "#/components/schemas/metaPagination"
   /v1/surat-keputusan/{id}:
@@ -1630,42 +1738,7 @@ paths:
                 additionalProperties: false
                 properties:
                   data:
-                    type: object
-                    additionalProperties: false
-                    properties:
-                      id_sk:
-                        type: string
-                        description: ID SK
-                        example: "randomidsk"
-                      kategori_sk:
-                        type: string
-                        description: Kategori surat keputusan
-                        example: "Kenaikan Pangkat"
-                      no_sk:
-                        type: string
-                        description: Nomor surat keputusan
-                        example: "SK-001/2024"
-                      tanggal_sk:
-                        type: string
-                        format: date
-                        description: Tanggal surat keputusan
-                        nullable: true
-                        example: "2024-01-15"
-                      status_sk:
-                        type: string
-                        description: Status koreksi surat keputusan
-                        enum: ["Belum Dikoreksi","Sedang Dikoreksi","Sudah Dikoreksi & Dikembalikan","Sudah dikoreksi dan menunggu TTD","Sudah TTD","Sudah dikirim"]
-                        example: "Sedang Dikoreksi"
-                      unit_kerja:
-                        type: string
-                        description: Nama unit kerja lengkap
-                        example: "Bawah - Tengah - Paling Atas"
-                      nama_pemilik:
-                        type: string
-                        description: Nama pemilik sk
-                      nama_penandatangan:
-                        type: string
-                        description: Nama penandatangan SK
+                    $ref: "#/components/schemas/suratKeputusanPenandatangan"
   /v1/surat-keputusan/{id}/berkas:
     get:
       tags:
@@ -1910,3 +1983,43 @@ components:
         anak_ke:
           type: integer
           nullable: true
+    suratKeputusan:
+      type: object
+      properties:
+        id_sk:
+          type: string
+          description: ID SK
+          example: "stringidsk"
+        nama_pemilik:
+          type: string
+          description: Nama Pemilik
+          example: "Andi"
+        kategori_sk:
+          type: string
+          description: Kategori surat keputusan
+          example: "Kenaikan Pangkat"
+        no_sk:
+          type: string
+          description: Nomor surat keputusan
+          example: "SK-001/2024"
+        tanggal_sk:
+          type: string
+          format: date
+          description: Tanggal surat keputusan
+          example: "2024-01-15"
+          nullable: true
+        unit_kerja:
+          type: string
+          description: Nama unit kerja lengkap
+          example: "Bawah - Tengah - Paling Atas"
+        status_sk:
+          type: string
+          description: Status koreksi surat keputusan
+    suratKeputusanPenandatangan:
+      allOf:
+        - $ref: '#/components/schemas/suratKeputusan'
+        - type: object
+          properties:
+            nama_penandatangan:
+              type: string
+              description: Nama penandatangan SK

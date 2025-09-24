@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
 )
 
 type handler struct {
@@ -18,7 +19,7 @@ func newHandler(s *service) *handler {
 }
 
 type listResponse struct {
-	Data []sk               `json:"data"`
+	Data []suratKeputusan   `json:"data"`
 	Meta api.MetaPagination `json:"meta"`
 }
 
@@ -60,7 +61,7 @@ type getRequest struct {
 }
 
 type getResponse struct {
-	Data sk `json:"data"`
+	Data *suratKeputusan `json:"data"`
 }
 
 func (h *handler) get(c echo.Context) error {
@@ -81,7 +82,7 @@ func (h *handler) get(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, getResponse{
-		Data: *data,
+		Data: data,
 	})
 }
 
@@ -100,6 +101,111 @@ func (h *handler) getBerkas(c echo.Context) error {
 	mimeType, blob, err := h.service.getBerkas(ctx, api.CurrentUser(c).NIP, req.ID, req.Signed)
 	if err != nil {
 		slog.ErrorContext(ctx, "Error getting berkas SK.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	if blob == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "berkas SK tidak ditemukan")
+	}
+
+	c.Response().Header().Set("Content-Disposition", "inline")
+	return c.Blob(http.StatusOK, mimeType, blob)
+}
+
+type listAdminResponse struct {
+	Data []suratKeputusan   `json:"data"`
+	Meta api.MetaPagination `json:"meta"`
+}
+
+type listAdminRequest struct {
+	api.PaginationRequest
+	UnitKerjaID    string  `query:"unit_kerja_id"`
+	NamaPemilik    string  `query:"nama_pemilik"`
+	NIP            string  `query:"nip"`
+	GolonganID     int32   `query:"golongan_id"`
+	JabatanID      string  `query:"jabatan_id"`
+	KategoriSK     string  `query:"kategori_sk"`
+	TanggalSKMulai db.Date `query:"tanggal_sk_mulai"`
+	TanggalSKAkhir db.Date `query:"tanggal_sk_akhir"`
+	StatusSK       *int32  `query:"status_sk"`
+}
+
+func (h *handler) listAdmin(c echo.Context) error {
+	var req listAdminRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	ctx := c.Request().Context()
+	data, total, err := h.service.listAdmin(ctx, listAdminParams{
+		Limit:          req.Limit,
+		Offset:         req.Offset,
+		UnitKerjaID:    req.UnitKerjaID,
+		NamaPemilik:    req.NamaPemilik,
+		NIP:            req.NIP,
+		GolonganID:     req.GolonganID,
+		JabatanID:      req.JabatanID,
+		KategoriSK:     req.KategoriSK,
+		TanggalSKMulai: req.TanggalSKMulai,
+		TanggalSKAkhir: req.TanggalSKAkhir,
+		StatusSK:       req.StatusSK,
+	})
+	if err != nil {
+		slog.ErrorContext(ctx, "Error getting list sk pegawai by admin.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	return c.JSON(http.StatusOK, listAdminResponse{
+		Data: data,
+		Meta: api.MetaPagination{Limit: req.Limit, Offset: req.Offset, Total: total},
+	})
+}
+
+type getAdminRequest struct {
+	ID string `param:"id"`
+}
+
+type getAdminResponse struct {
+	Data *suratKeputusan `json:"data"`
+}
+
+func (h *handler) getAdmin(c echo.Context) error {
+	var req getAdminRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	ctx := c.Request().Context()
+	data, err := h.service.getAdmin(ctx, req.ID)
+	if err != nil {
+		slog.ErrorContext(ctx, "Error getting data sk pegawai by admin.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	if data == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "data tidak ditemukan")
+	}
+
+	return c.JSON(http.StatusOK, getAdminResponse{
+		Data: data,
+	})
+}
+
+type getBerkasAdminRequest struct {
+	ID     string `param:"id"`
+	Signed bool   `query:"signed"`
+}
+
+func (h *handler) getBerkasAdmin(c echo.Context) error {
+	var req getBerkasAdminRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	ctx := c.Request().Context()
+	mimeType, blob, err := h.service.getBerkasAdmin(ctx, req.ID, req.Signed)
+	if err != nil {
+		slog.ErrorContext(ctx, "Error getting berkas SK by admin.", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
