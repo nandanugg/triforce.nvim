@@ -45,8 +45,7 @@ func (s *service) list(ctx context.Context, nip string, limit, offset uint) ([]r
 		return nil, 0, fmt.Errorf("repo count: %w", err)
 	}
 
-	data := make([]riwayatPelatihanTeknis, 0, len(rows))
-	for _, row := range rows {
+	return typeutil.Map(rows, func(row sqlc.ListRiwayatPelatihanTeknisRow) riwayatPelatihanTeknis {
 		var tanggalSelesai time.Time
 		var tahun *int
 		if row.TanggalKursus.Valid {
@@ -54,7 +53,7 @@ func (s *service) list(ctx context.Context, nip string, limit, offset uint) ([]r
 			tahun = typeutil.ToPtr(row.TanggalKursus.Time.Year())
 		}
 
-		data = append(data, riwayatPelatihanTeknis{
+		return riwayatPelatihanTeknis{
 			ID:                     int64(row.ID),
 			TipePelatihan:          row.TipeKursus.String,
 			JenisPelatihan:         row.JenisKursus.String,
@@ -62,12 +61,11 @@ func (s *service) list(ctx context.Context, nip string, limit, offset uint) ([]r
 			TanggalMulai:           db.Date(row.TanggalKursus.Time),
 			TanggalSelesai:         db.Date(tanggalSelesai),
 			Tahun:                  tahun,
-			Durasi:                 int(row.Durasi.Float64),
+			Durasi:                 row.Durasi,
 			InstitusiPenyelenggara: row.InstitusiPenyelenggara.String,
 			NomorSertifikat:        row.NoSertifikat.String,
-		})
-	}
-	return data, uint(count), nil
+		}
+	}), uint(count), nil
 }
 
 func (s *service) getBerkas(ctx context.Context, nip string, id int32) (string, []byte, error) {

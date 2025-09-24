@@ -23,7 +23,7 @@ func Test_handler_list(t *testing.T) {
 
 	dbData := `
 	-- Seed ref_agama
-	INSERT INTO ref_agama (id, nama) VALUES 
+	INSERT INTO ref_agama (id, nama) VALUES
 	(1, 'Islam'),
 	(2, 'Kristen');
 
@@ -63,56 +63,54 @@ func Test_handler_list(t *testing.T) {
 			{
 				"data": {
 					"orang_tua": [
-					{
-						"id": 21,
-						"nama": "Ayah A",
-						"hubungan": "Ayah",
-						"agama": "Islam",
-						"nik": "123",
-						"status_hidup": "Masih Hidup"
-					},
-					{
-						"id": 22,
-						"nama": "Ibu B",
-						"hubungan": "Ibu",
-						"agama": "Kristen",
-						"nik": "456",
-						"status_hidup": "Masih Hidup"
-					}
+						{
+							"id": 21,
+							"nama": "Ayah A",
+							"hubungan": "Ayah",
+							"agama": "Islam",
+							"nik": "123",
+							"status_hidup": "Masih Hidup"
+						},
+						{
+							"id": 22,
+							"nama": "Ibu B",
+							"hubungan": "Ibu",
+							"agama": "Kristen",
+							"nik": "456",
+							"status_hidup": "Masih Hidup"
+						}
 					],
-
 					"pasangan": [
-					{
-						"agama": null,
-						"akte_cerai": null,
-						"akte_meninggal": null,
-						"akte_nikah": null,
-						"id": 31,
-						"karsus": "",
-						"nama": "Istri A",
-						"nik": "",
-						"status_nikah": "Menikah",
-						"status_pns": "PNS",
-						"tanggal_cerai": null,
-						"tanggal_menikah": "2000-01-01",
-						"tanggal_meninggal": null,
-						"tanggal_lahir": null
-					}
+						{
+							"agama": "",
+							"akte_cerai": "",
+							"akte_meninggal": "",
+							"akte_nikah": "",
+							"id": 31,
+							"karsus": "",
+							"nama": "Istri A",
+							"nik": "",
+							"status_nikah": "Menikah",
+							"status_pns": "PNS",
+							"tanggal_cerai": null,
+							"tanggal_menikah": "2000-01-01",
+							"tanggal_meninggal": null,
+							"tanggal_lahir": null
+						}
 					],
 					"anak": [
-					{
-						"id": 11,
-						"nama": "Anak A",
-						"jenis_kelamin": "M",
-						"status_anak": "Kandung",
-						"anak_ke": 1,
-						"nik": "",
-						"status_sekolah": "",
-						"nama_orang_tua": "Istri A",
-						"tanggal_lahir": "2000-01-01T00:00:00Z"
-					}
+						{
+							"id": 11,
+							"nama": "Anak A",
+							"jenis_kelamin": "M",
+							"status_anak": "Kandung",
+							"anak_ke": 1,
+							"nik": "",
+							"status_sekolah": "",
+							"nama_orang_tua": "Istri A",
+							"tanggal_lahir": "2000-01-01"
+						}
 					]
-
 				}
 			}`,
 		},

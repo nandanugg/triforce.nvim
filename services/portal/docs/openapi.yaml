@@ -175,6 +175,7 @@ paths:
                         terakhir_diperbarui:
                           type: string
                           format: date
+                          nullable: true
                         status:
                           type: string
                           enum:

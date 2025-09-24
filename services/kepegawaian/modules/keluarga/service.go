@@ -7,6 +7,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/typeutil"
 	repo "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
 )
 
@@ -26,37 +27,33 @@ func newService(r repository) *service {
 // list returns a structured keluarga containing all family members categorized by type.
 func (s *service) list(ctx context.Context, nip string) (keluarga, error) {
 	var result keluarga
-	result.OrangTua = []orangTua{}
-	result.Pasangan = []pasangan{}
-	result.Anak = []anak{}
 
 	// 1. Orang Tua
 	orangTuaList, err := s.repo.ListOrangTuaByNip(ctx, pgtype.Text{String: nip, Valid: true})
 	if err != nil {
 		return keluarga{}, fmt.Errorf("repo list orang tua: %w", err)
 	}
-
-	for _, orangTua := range orangTuaList {
-		result.OrangTua = append(result.OrangTua, s.mapListOrangTua(orangTua))
-	}
+	result.OrangTua = typeutil.Map(orangTuaList, func(row repo.ListOrangTuaByNipRow) orangTua {
+		return s.mapListOrangTua(row)
+	})
 
 	// 2. Pasangan
 	pasanganList, err := s.repo.ListPasanganByNip(ctx, pgtype.Text{String: nip, Valid: true})
 	if err != nil {
 		return keluarga{}, fmt.Errorf("repo list pasangan: %w", err)
 	}
-	for _, pasangan := range pasanganList {
-		result.Pasangan = append(result.Pasangan, s.mapListPasangan(pasangan))
-	}
+	result.Pasangan = typeutil.Map(pasanganList, func(row repo.ListPasanganByNipRow) pasangan {
+		return s.mapListPasangan(row)
+	})
 
 	// 3. Anak
 	anakList, err := s.repo.ListAnakByNip(ctx, pgtype.Text{String: nip, Valid: true})
 	if err != nil {
 		return keluarga{}, fmt.Errorf("repo list anak: %w", err)
 	}
-	for _, anak := range anakList {
-		result.Anak = append(result.Anak, s.mapListAnak(anak))
-	}
+	result.Anak = typeutil.Map(anakList, func(row repo.ListAnakByNipRow) anak {
+		return s.mapListAnak(row)
+	})
 
 	return result, nil
 }
@@ -64,27 +61,27 @@ func (s *service) list(ctx context.Context, nip string) (keluarga, error) {
 func (s *service) mapListOrangTua(ot repo.ListOrangTuaByNipRow) orangTua {
 	return orangTua{
 		ID:          ot.ID,
-		Hubungan:    HubunganToPeran(ot.Hubungan),
-		StatusHidup: StatusHidupFromTanggalMeninggal(ot.TanggalMeninggal),
-		Nama:        nullStringPtr(ot.Nama),
-		Agama:       nullStringPtr(ot.AgamaNama),
-		Nik:         nullStringPtr(ot.Nik),
+		Hubungan:    hubunganToPeran(ot.Hubungan),
+		StatusHidup: statusHidupFromTanggalMeninggal(ot.TanggalMeninggal),
+		Nama:        ot.Nama.String,
+		Agama:       ot.AgamaNama.String,
+		NIK:         ot.Nik.String,
 	}
 }
 
 func (s *service) mapListPasangan(p repo.ListPasanganByNipRow) pasangan {
 	return pasangan{
 		ID:               p.ID,
-		StatusPNS:        PNSToLabel(p.Pns),
-		Nama:             nullStringPtr(p.Nama),
+		StatusPNS:        pnsToLabel(p.Pns),
+		Nama:             p.Nama.String,
 		TanggalMenikah:   db.Date(p.TanggalMenikah.Time),
-		Karsus:           &p.Karsus.String,
-		StatusNikah:      StatusPernikahanToString(p.Status),
-		Agama:            nullStringPtr(p.Agama),
-		Nik:              nullStringPtr(pgtype.Text{Valid: true, String: ""}), // TODO: map actual nik if available
-		AkteNikah:        nullStringPtr(p.AkteNikah),
-		AkteMeninggal:    nullStringPtr(p.AkteMeninggal),
-		AkteCerai:        nullStringPtr(p.AkteCerai),
+		Karsus:           p.Karsus.String,
+		StatusNikah:      statusPernikahanToString(p.Status),
+		Agama:            p.Agama.String,
+		NIK:              "", // TODO: map actual nik if available
+		AkteNikah:        p.AkteNikah.String,
+		AkteMeninggal:    p.AkteMeninggal.String,
+		AkteCerai:        p.AkteCerai.String,
 		TanggalMeninggal: db.Date(p.TanggalMeninggal.Time),
 		TanggalCerai:     db.Date(p.TanggalCerai.Time),
 		TanggalLahir:     db.Date(p.TanggalLahir.Time),
@@ -94,12 +91,12 @@ func (s *service) mapListPasangan(p repo.ListPasanganByNipRow) pasangan {
 func (s *service) mapListAnak(a repo.ListAnakByNipRow) anak {
 	return anak{
 		ID:           a.ID,
-		Nama:         nullStringPtr(a.Nama),
-		Nik:          nullStringPtr(pgtype.Text{Valid: true, String: ""}), // TODO: map actual nik if available
+		Nama:         a.Nama.String,
+		NIK:          "", // TODO: map actual nik if available
 		JenisKelamin: a.JenisKelamin.String,
-		StatusAnak:   StatusAnakToLabel(a.StatusAnak),
-		NamaOrangTua: nullStringPtr(a.NamaOrangTua),
-		TanggalLahir: &a.TanggalLahir.Time,
-		AnakKe:       &a.AnakKe,
+		StatusAnak:   statusAnakToLabel(a.StatusAnak),
+		NamaOrangTua: a.NamaOrangTua.String,
+		TanggalLahir: db.Date(a.TanggalLahir.Time),
+		AnakKe:       a.AnakKe,
 	}
 }

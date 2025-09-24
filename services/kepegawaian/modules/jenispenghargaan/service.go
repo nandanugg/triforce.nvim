@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/typeutil"
 	sqlc "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
 )
 
@@ -34,12 +35,10 @@ func (s *service) list(ctx context.Context, limit, offset uint) ([]jenisPengharg
 		return nil, 0, fmt.Errorf("repo count: %w", err)
 	}
 
-	data := make([]jenisPenghargaan, 0, len(rows))
-	for _, row := range rows {
-		data = append(data, jenisPenghargaan{
+	return typeutil.Map(rows, func(row sqlc.ListRefJenisPenghargaanRow) jenisPenghargaan {
+		return jenisPenghargaan{
 			ID:   row.ID,
 			Nama: row.Nama.String,
-		})
-	}
-	return data, uint(count), nil
+		}
+	}), uint(count), nil
 }

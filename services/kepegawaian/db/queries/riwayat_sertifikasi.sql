@@ -1,7 +1,7 @@
 -- name: ListRiwayatSertifikasi :many
 select id, nama_sertifikasi, tahun, deskripsi from riwayat_sertifikasi
 where nip = $1 and deleted_at is null
-order by tahun desc
+order by tahun desc nulls last
 limit $2 offset $3;
 
 -- name: CountRiwayatSertifikasi :one

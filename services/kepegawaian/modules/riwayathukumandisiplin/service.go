@@ -10,6 +10,7 @@ import (
 
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/typeutil"
 	sqlc "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
 )
 
@@ -43,9 +44,8 @@ func (s *service) list(ctx context.Context, nip string, limit, offset uint) ([]r
 		return nil, 0, fmt.Errorf("repo count: %w", err)
 	}
 
-	data := make([]riwayatHukumanDisiplin, 0, len(rows))
-	for _, row := range rows {
-		data = append(data, riwayatHukumanDisiplin{
+	return typeutil.Map(rows, func(row sqlc.ListRiwayatHukumanDisiplinRow) riwayatHukumanDisiplin {
+		return riwayatHukumanDisiplin{
 			ID:                  row.ID,
 			JenisHukuman:        row.JenisHukuman.String,
 			NamaGolongan:        row.NamaGolongan.String,
@@ -59,9 +59,8 @@ func (s *service) list(ctx context.Context, nip string, limit, offset uint) ([]r
 			NomorPP:             row.NoPp.String,
 			NomorSKPembatalan:   row.NoSkPembatalan.String,
 			TanggalSKPembatalan: db.Date(row.TanggalSkPembatalan.Time),
-		})
-	}
-	return data, uint(count), nil
+		}
+	}), uint(count), nil
 }
 
 func (s *service) getBerkas(ctx context.Context, nip string, id int64) (string, []byte, error) {

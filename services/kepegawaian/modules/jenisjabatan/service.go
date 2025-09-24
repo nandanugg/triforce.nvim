@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/typeutil"
 	repo "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
 )
 
@@ -34,14 +35,10 @@ func (s *service) listJenisJabatan(ctx context.Context, limit, offset uint) ([]j
 		return nil, 0, fmt.Errorf("repo count: %w", err)
 	}
 
-	result := []jenisJabatan{}
-
-	for _, row := range data {
-		result = append(result, jenisJabatan{
+	return typeutil.Map(data, func(row repo.ListRefJenisJabatanRow) jenisJabatan {
+		return jenisJabatan{
 			ID:   row.ID,
 			Nama: row.Nama.String,
-		})
-	}
-
-	return result, count, nil
+		}
+	}), count, nil
 }

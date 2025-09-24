@@ -77,7 +77,7 @@ func Test_handler_list(t *testing.T) {
 						"tahun": 2022,
 						"tanggal_mulai": "2022-08-15",
 						"tanggal_selesai": "2022-08-15",
-						"durasi": 0
+						"durasi": null
 					},
 					{
 						"id": "uuid-diklat-struktural-003",
@@ -123,7 +123,7 @@ func Test_handler_list(t *testing.T) {
 						"tahun": 2022,
 						"tanggal_mulai": "2022-08-15",
 						"tanggal_selesai": "2022-08-15",
-						"durasi": 0
+						"durasi": null
 					}
 				],
 				"meta": {"limit": 1, "offset": 1, "total": 4}

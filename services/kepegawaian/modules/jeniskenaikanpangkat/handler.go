@@ -17,25 +17,25 @@ func newHandler(s *service) *handler {
 	return &handler{service: s}
 }
 
-type listJenisKPResponse struct {
-	Data []jenisKp          `json:"data"`
-	Meta api.MetaPagination `json:"meta"`
+type listResponse struct {
+	Data []jenisKenaikanPangkat `json:"data"`
+	Meta api.MetaPagination     `json:"meta"`
 }
 
-func (h *handler) listJenisKP(c echo.Context) error {
+func (h *handler) list(c echo.Context) error {
 	var req api.PaginationRequest
 	if err := c.Bind(&req); err != nil {
 		return err
 	}
 	ctx := c.Request().Context()
-	data, total, err := h.service.listJenisKP(ctx, req.Limit, req.Offset)
+	data, total, err := h.service.list(ctx, req.Limit, req.Offset)
 	if err != nil {
 		slog.ErrorContext(ctx, "Error getting list jenis kenaikan pangkat.", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 	return c.JSON(
 		http.StatusOK,
-		listJenisKPResponse{
+		listResponse{
 			Data: data,
 			Meta: api.MetaPagination{
 				Limit:  req.Limit,

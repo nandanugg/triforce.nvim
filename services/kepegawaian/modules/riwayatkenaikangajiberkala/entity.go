@@ -8,7 +8,7 @@ import (
 
 type riwayatKenaikanGajiBerkala struct {
 	ID                     int64       `json:"id"`
-	IDGolongan             int32       `json:"id_golongan"`
+	IDGolongan             pgtype.Int4 `json:"id_golongan"`
 	NamaGolongan           string      `json:"nama_golongan"`
 	NamaGolonganPangkat    string      `json:"nama_golongan_pangkat"`
 	TMTGolongan            db.Date     `json:"tmt_golongan"`

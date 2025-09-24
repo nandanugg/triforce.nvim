@@ -9,7 +9,7 @@ select
   is_menjabat
 from riwayat_penugasan
 where nip = $1 and deleted_at is null
-order by tanggal_mulai desc
+order by tanggal_mulai desc nulls last
 limit $2 offset $3;
 
 -- name: CountRiwayatPenugasan :one

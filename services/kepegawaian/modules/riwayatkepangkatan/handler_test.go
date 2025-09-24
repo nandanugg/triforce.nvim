@@ -66,9 +66,9 @@ func Test_handler_list(t *testing.T) {
 				"data": [
 					{
 						"id":                26,
-						"id_jenis_kp":       0,
+						"id_jenis_kp":       null,
 						"nama_jenis_kp":     "",
-						"id_golongan":       0,
+						"id_golongan":       null,
 						"nama_golongan":     "",
 						"nama_golongan_pangkat": "",
 						"tmt_golongan":      "2005-01-03",

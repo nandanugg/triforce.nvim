@@ -67,7 +67,7 @@ func (s *service) list(ctx context.Context, nip string, limit, offset uint) ([]r
 			TanggalMulai:           db.Date(row.Tanggal.Time),
 			TanggalSelesai:         db.Date(tanggalSelesai),
 			Tahun:                  tahun,
-			Durasi:                 int(row.Lama.Float32),
+			Durasi:                 row.Lama,
 		}
 	}), uint(count), nil
 }

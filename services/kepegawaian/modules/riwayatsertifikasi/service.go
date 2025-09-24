@@ -9,6 +9,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/typeutil"
 	sqlc "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
 )
 
@@ -42,16 +43,14 @@ func (s *service) list(ctx context.Context, nip string, limit, offset uint) ([]r
 		return nil, 0, fmt.Errorf("repo count: %w", err)
 	}
 
-	data := make([]riwayatSertifikasi, 0, len(rows))
-	for _, row := range rows {
-		data = append(data, riwayatSertifikasi{
+	return typeutil.Map(rows, func(row sqlc.ListRiwayatSertifikasiRow) riwayatSertifikasi {
+		return riwayatSertifikasi{
 			ID:              row.ID,
 			NamaSertifikasi: row.NamaSertifikasi.String,
-			Tahun:           row.Tahun.Int64,
+			Tahun:           row.Tahun,
 			Deskripsi:       row.Deskripsi.String,
-		})
-	}
-	return data, uint(count), nil
+		}
+	}), uint(count), nil
 }
 
 func (s *service) getBerkas(ctx context.Context, nip string, id int64) (string, []byte, error) {

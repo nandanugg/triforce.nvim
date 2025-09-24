@@ -47,7 +47,7 @@ func (s *service) list(ctx context.Context, nip string, limit, offset uint) ([]r
 	result := typeutil.Map(data, func(row repo.ListRiwayatKenaikanGajiBerkalaRow) riwayatKenaikanGajiBerkala {
 		return riwayatKenaikanGajiBerkala{
 			ID:                     row.ID,
-			IDGolongan:             row.GolonganID.Int32,
+			IDGolongan:             row.GolonganID,
 			NamaGolongan:           row.GolonganNama.String,
 			NamaGolonganPangkat:    row.GolonganNamaPangkat.String,
 			NomorSK:                row.NoSk.String,

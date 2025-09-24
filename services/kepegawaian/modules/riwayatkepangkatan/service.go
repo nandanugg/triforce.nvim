@@ -46,20 +46,20 @@ func (s *service) list(ctx context.Context, nip string, limit, offset uint) ([]r
 	result := typeutil.Map(data, func(row dbrepo.ListRiwayatKepangkatanRow) riwayatKepangkatan {
 		return riwayatKepangkatan{
 			ID:                        row.ID,
-			IDJenisKP:                 row.JenisKpID.Int32,
+			IDJenisKP:                 row.JenisKpID,
 			NamaJenisKP:               row.NamaJenisKp.String,
-			IDGolongan:                row.GolonganID.Int32,
+			IDGolongan:                row.GolonganID,
 			NamaGolongan:              row.NamaGolongan.String,
 			NamaGolonganPangkat:       row.NamaGolonganPangkat.String,
 			TMTGolongan:               db.Date(row.TmtGolongan.Time),
 			SKNomor:                   row.SkNomor.String,
 			SKTanggal:                 db.Date(row.SkTanggal.Time),
-			MKGolonganTahun:           row.MkGolonganTahun.Int16,
-			MKGolonganBulan:           row.MkGolonganBulan.Int16,
+			MKGolonganTahun:           row.MkGolonganTahun,
+			MKGolonganBulan:           row.MkGolonganBulan,
 			NoBKN:                     row.NoBkn.String,
 			TanggalBKN:                db.Date(row.TanggalBkn.Time),
-			JumlahAngkaKreditTambahan: row.JumlahAngkaKreditTambahan.Int16,
-			JumlahAngkaKreditUtama:    row.JumlahAngkaKreditUtama.Int16,
+			JumlahAngkaKreditTambahan: row.JumlahAngkaKreditTambahan,
+			JumlahAngkaKreditUtama:    row.JumlahAngkaKreditUtama,
 		}
 	})
 

@@ -25,7 +25,7 @@ func (h *handler) list(c echo.Context) error {
 	ctx := c.Request().Context()
 	data, err := h.service.list(ctx, api.CurrentUser(c).NIP)
 	if err != nil {
-		slog.ErrorContext(ctx, "Error getting keluarga data.", "error", err)
+		slog.ErrorContext(ctx, "Error getting data keluarga.", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 

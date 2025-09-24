@@ -11,7 +11,7 @@ SELECT
 FROM riwayat_diklat_fungsional rf
 WHERE rf.nip_baru = $1
 AND rf.deleted_at IS NULL
-ORDER BY rf."tahun" DESC
+ORDER BY rf."tahun" DESC NULLS LAST
 LIMIT $2 OFFSET $3;
 
 -- name: CountRiwayatPelatihanFungsional :one

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/typeutil"
 	repo "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
 )
 
@@ -28,19 +29,16 @@ func (s *service) listRefGolongan(ctx context.Context, limit, offset uint) ([]re
 		return nil, 0, fmt.Errorf("[listRefGolongan] error GetRefGolongan: %w", err)
 	}
 
-	result := []refGolongan{}
-	for _, row := range rows {
-		result = append(result, refGolongan{
-			ID:          row.ID,
-			Nama:        row.Nama.String,
-			NamaPangkat: row.NamaPangkat.String,
-		})
-	}
-
 	total, err := s.repo.CountRefGolongan(ctx)
 	if err != nil {
 		return nil, 0, fmt.Errorf("[listRefGolongan] error CountRefGolongan: %w", err)
 	}
 
-	return result, total, nil
+	return typeutil.Map(rows, func(row repo.ListRefGolonganRow) refGolongan {
+		return refGolongan{
+			ID:          row.ID,
+			Nama:        row.Nama.String,
+			NamaPangkat: row.NamaPangkat.String,
+		}
+	}), total, nil
 }

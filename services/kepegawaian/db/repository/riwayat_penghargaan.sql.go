@@ -51,7 +51,7 @@ SELECT
     tanggal_penghargaan
 FROM riwayat_penghargaan_umum
 WHERE nip = $3::varchar and riwayat_penghargaan_umum.deleted_at is null
-ORDER BY tanggal_penghargaan DESC
+ORDER BY tanggal_penghargaan DESC NULLS LAST
 LIMIT $1 OFFSET $2
 `
 

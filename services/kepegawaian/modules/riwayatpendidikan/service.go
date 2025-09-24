@@ -49,7 +49,7 @@ func (s *service) list(ctx context.Context, nip string, limit, offset uint) ([]r
 			JenjangPendidikan:    row.JenjangPendidikan.String,
 			Pendidikan:           row.Pendidikan.String,
 			NamaSekolah:          row.NamaSekolah.String,
-			TahunLulus:           row.TahunLulus.Int16,
+			TahunLulus:           row.TahunLulus,
 			NomorIjazah:          row.NoIjazah.String,
 			GelarDepan:           row.GelarDepan.String,
 			GelarBelakang:        row.GelarBelakang.String,

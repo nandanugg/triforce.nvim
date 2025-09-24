@@ -39,6 +39,19 @@ func (s *service) list(ctx context.Context, nip string, limit, offset uint) ([]r
 	}
 
 	result := typeutil.Map(data, func(row repo.ListRiwayatPelatihanFungsionalRow) riwayatPelatihanFungsional {
+		var tahun *int16
+		if row.Tahun.Valid {
+			tahun = &row.Tahun.Int16
+		}
+
+		var tanggalSelesai time.Time
+		if row.TanggalKursus.Valid {
+			tanggalSelesai = row.TanggalKursus.Time.Add(time.Duration(row.JumlahJam.Int32) * time.Hour)
+			if tahun == nil {
+				tahun = typeutil.ToPtr(int16(row.TanggalKursus.Time.Year()))
+			}
+		}
+
 		return riwayatPelatihanFungsional{
 			ID:                     row.ID,
 			JenisDiklat:            row.JenisDiklat.String,
@@ -46,9 +59,9 @@ func (s *service) list(ctx context.Context, nip string, limit, offset uint) ([]r
 			InstitusiPenyelenggara: row.InstitusiPenyelenggara.String,
 			NomorSertifikat:        row.NoSertifikat.String,
 			TanggalMulai:           db.Date(row.TanggalKursus.Time),
-			TanggalSelesai:         db.Date(row.TanggalKursus.Time.Add(time.Duration(row.JumlahJam.Int32) * time.Hour)),
-			Durasi:                 row.JumlahJam.Int32,
-			Tahun:                  row.Tahun.Int16,
+			TanggalSelesai:         db.Date(tanggalSelesai),
+			Durasi:                 row.JumlahJam,
+			Tahun:                  tahun,
 		}
 	})
 

@@ -55,7 +55,7 @@ from riwayat_pendidikan rp
 left join ref_tingkat_pendidikan tk on tk.id = rp.tingkat_pendidikan_id and tk.deleted_at is null
 left join ref_pendidikan pend on pend.id = rp.pendidikan_id and pend.deleted_at is null
 where rp.nip = $1 and rp.deleted_at is null
-order by rp.tahun_lulus desc
+order by rp.tahun_lulus desc nulls last
 limit $2 offset $3
 `
 

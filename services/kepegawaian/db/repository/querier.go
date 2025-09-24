@@ -9,7 +9,7 @@ import (
 )
 
 type Querier interface {
-	CountJenisKP(ctx context.Context) (int64, error)
+	CountJenisKenaikanPangkat(ctx context.Context) (int64, error)
 	CountRefGolongan(ctx context.Context) (int64, error)
 	CountRefJabatan(ctx context.Context, nama pgtype.Text) (int64, error)
 	CountRefJenisDiklat(ctx context.Context) (int64, error)
@@ -50,7 +50,7 @@ type Querier interface {
 	GetDataPribadi(ctx context.Context, arg GetDataPribadiParams) (GetDataPribadiRow, error)
 	GetSKByNIPAndID(ctx context.Context, arg GetSKByNIPAndIDParams) (GetSKByNIPAndIDRow, error)
 	ListAnakByNip(ctx context.Context, nipBaru pgtype.Text) ([]ListAnakByNipRow, error)
-	ListJenisKP(ctx context.Context, arg ListJenisKPParams) ([]ListJenisKPRow, error)
+	ListJenisKenaikanPangkat(ctx context.Context, arg ListJenisKenaikanPangkatParams) ([]ListJenisKenaikanPangkatRow, error)
 	ListOrangTuaByNip(ctx context.Context, nipBaru pgtype.Text) ([]ListOrangTuaByNipRow, error)
 	ListPasanganByNip(ctx context.Context, nipBaru pgtype.Text) ([]ListPasanganByNipRow, error)
 	ListRefGolongan(ctx context.Context, arg ListRefGolonganParams) ([]ListRefGolonganRow, error)

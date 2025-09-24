@@ -100,7 +100,7 @@ func Test_handler_list(t *testing.T) {
 						"tanggal_mulai": "2010-01-01",
 						"tanggal_selesai": "2010-01-01",
 						"tahun": 2010,
-						"durasi": 0,
+						"durasi": null,
 						"institusi_penyelenggara": "Institution 18",
 						"nomor_sertifikat": "CERT18"
 					},

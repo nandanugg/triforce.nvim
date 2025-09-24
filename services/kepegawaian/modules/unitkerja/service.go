@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/typeutil"
 	repo "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
 )
 
@@ -38,13 +39,12 @@ func (s *service) listUnitKerja(ctx context.Context, arg listUnitKerjaParams) ([
 		return nil, 0, fmt.Errorf("[listUnitKerja] error getUnitKerjaByNamaOrInduk: %w", err)
 	}
 
-	result := []unitKerja{}
-	for _, row := range rows {
-		result = append(result, unitKerja{
+	result := typeutil.Map(rows, func(row repo.ListUnitKerjaByNamaOrIndukRow) unitKerja {
+		return unitKerja{
 			ID:   row.ID,
 			Nama: row.NamaUnor.String,
-		})
-	}
+		}
+	})
 
 	total, err := s.repo.CountUnitKerja(ctx, repo.CountUnitKerjaParams{
 		Nama:      arg.nama,
