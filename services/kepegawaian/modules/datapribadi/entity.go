@@ -5,6 +5,7 @@ import "gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
 const jenisJabatanStruktural int32 = 1
 
 type dataPribadi struct {
+	PNSID                    string   `json:"pns_id"`
 	Nama                     string   `json:"nama"`
 	GelarDepan               string   `json:"gelar_depan"`
 	GelarBelakang            string   `json:"gelar_belakang"`

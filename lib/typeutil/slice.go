@@ -1,5 +1,19 @@
 package typeutil
 
+// FilterMap returns a slice which obtained after both filtering and mapping using the given callback function.
+// The callback function should return two values:
+//   - the result of the mapping operation and
+//   - whether the result element should be included or not.
+func FilterMap[T any, R any](collection []T, callback func(item T) (R, bool)) []R {
+	result := make([]R, 0, len(collection))
+	for i := range collection {
+		if r, ok := callback(collection[i]); ok {
+			result = append(result, r)
+		}
+	}
+	return result
+}
+
 // Map manipulates a slice and transforms it to a slice of another type.
 func Map[T any, R any](collection []T, iteratee func(item T) R) []R {
 	result := make([]R, 0, len(collection))

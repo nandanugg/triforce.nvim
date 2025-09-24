@@ -11,6 +11,7 @@ import (
 
 const getDataPribadi = `-- name: GetDataPribadi :one
 select
+  pegawai.pns_id,
   pegawai.nama,
   pegawai.gelar_depan,
   pegawai.gelar_belakang,
@@ -115,6 +116,7 @@ type GetDataPribadiParams struct {
 }
 
 type GetDataPribadiRow struct {
+	PnsID                string      `db:"pns_id"`
 	Nama                 pgtype.Text `db:"nama"`
 	GelarDepan           pgtype.Text `db:"gelar_depan"`
 	GelarBelakang        pgtype.Text `db:"gelar_belakang"`
@@ -172,6 +174,7 @@ func (q *Queries) GetDataPribadi(ctx context.Context, arg GetDataPribadiParams) 
 	row := q.db.QueryRow(ctx, getDataPribadi, arg.NipBaru, arg.JenisJabatanStruktural)
 	var i GetDataPribadiRow
 	err := row.Scan(
+		&i.PnsID,
 		&i.Nama,
 		&i.GelarDepan,
 		&i.GelarBelakang,

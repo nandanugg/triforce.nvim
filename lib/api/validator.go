@@ -3,7 +3,6 @@ package api
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -59,8 +58,7 @@ func (b *EchoBinder) Bind(i any, c echo.Context) error {
 func validateRequest(req *http.Request, router routers.Router) error {
 	route, pathParams, err := router.FindRoute(req)
 	if err != nil {
-		slog.Error("Error finding openapi route", "error", err)
-		return echo.NewHTTPError(http.StatusInternalServerError)
+		return echo.NewHTTPError(http.StatusNotFound, "openapi route tidak ditemukan")
 	}
 
 	if err := openapi3filter.ValidateRequest(req.Context(), &openapi3filter.RequestValidationInput{

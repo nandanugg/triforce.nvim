@@ -35,7 +35,7 @@ func (s *service) get(ctx context.Context, nip string) (*dataPribadi, error) {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, nil
 		}
-		return nil, fmt.Errorf("get data pribadi: %w", err)
+		return nil, fmt.Errorf("repo get data pribadi: %w", err)
 	}
 
 	var (
@@ -44,23 +44,21 @@ func (s *service) get(ctx context.Context, nip string) (*dataPribadi, error) {
 		unitOrganisasi = make([]string, 0)
 	)
 	if data.UnorID.Valid {
-		unitOrganisasiRows, err := s.repo.ListUnitKerjaHierarchy(ctx, data.UnorID.String)
+		rows, err := s.repo.ListUnitKerjaHierarchy(ctx, data.UnorID.String)
 		if err != nil {
-			return nil, fmt.Errorf("get unit kerja hierarchy: %w", err)
+			return nil, fmt.Errorf("repo list unit kerja hierarchy: %w", err)
 		}
 
-		unitOrganisasi = make([]string, 0, len(unitOrganisasiRows))
-		for _, row := range unitOrganisasiRows {
-			if row.NamaUnor.String != "" {
-				unitOrganisasi = append(unitOrganisasi, row.NamaUnor.String)
-			}
-		}
+		unitOrganisasi = typeutil.FilterMap(rows, func(row sqlc.ListUnitKerjaHierarchyRow) (string, bool) {
+			return row.NamaUnor.String, row.NamaUnor.String != ""
+		})
 	}
 	if data.StatusPns.String == "P" || data.StatusPns.String == "PNS" {
 		statusPNS, tmtPNS = "PNS", db.Date(data.TmtPns.Time)
 	}
 
 	return &dataPribadi{
+		PNSID:                    data.PnsID,
 		Nama:                     data.Nama.String,
 		GelarDepan:               data.GelarDepan.String,
 		GelarBelakang:            data.GelarBelakang.String,

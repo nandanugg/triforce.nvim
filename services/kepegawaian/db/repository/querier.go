@@ -51,6 +51,7 @@ type Querier interface {
 	GetBerkasSuratKeputusanSignedByID(ctx context.Context, id string) (pgtype.Text, error)
 	GetBerkasSuratKeputusanSignedByNIPAndID(ctx context.Context, arg GetBerkasSuratKeputusanSignedByNIPAndIDParams) (pgtype.Text, error)
 	GetDataPribadi(ctx context.Context, arg GetDataPribadiParams) (GetDataPribadiRow, error)
+	GetProfilePegawaiByPNSID(ctx context.Context, pnsID string) (GetProfilePegawaiByPNSIDRow, error)
 	GetSuratKeputusanByID(ctx context.Context, id string) (GetSuratKeputusanByIDRow, error)
 	GetSuratKeputusanByNIPAndID(ctx context.Context, arg GetSuratKeputusanByNIPAndIDParams) (GetSuratKeputusanByNIPAndIDRow, error)
 	ListAnakByNip(ctx context.Context, nipBaru pgtype.Text) ([]ListAnakByNipRow, error)

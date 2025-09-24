@@ -1,5 +1,6 @@
 -- name: GetDataPribadi :one
 select
+  pegawai.pns_id,
   pegawai.nama,
   pegawai.gelar_depan,
   pegawai.gelar_belakang,

@@ -1,12 +1,12 @@
 package pegawai
 
 import (
+	"encoding/base64"
 	"log/slog"
 	"net/http"
+	"unicode/utf8"
 
 	"github.com/labstack/echo/v4"
-
-	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
 )
 
 type handler struct {
@@ -17,42 +17,38 @@ func newHandler(s *service) *handler {
 	return &handler{service: s}
 }
 
-type listRequest struct {
-	Cari       string `query:"cari"`
-	UnitID     string `query:"unit_id"`
-	GolonganID int64  `query:"golongan_id"`
-	JabatanID  string `query:"jabatan_id"`
-	Status     string `query:"status"`
-
-	api.PaginationRequest
+type profileRequest struct {
+	PNSID string `param:"pns_id"`
 }
 
-type listResponse struct {
-	Data []pegawai          `json:"data"`
-	Meta api.MetaPagination `json:"meta"`
+type profileResponse struct {
+	Data *profile `json:"data"`
 }
 
-func (h *handler) list(c echo.Context) error {
-	var req listRequest
+func (h *handler) getProfile(c echo.Context) error {
+	var req profileRequest
 	if err := c.Bind(&req); err != nil {
 		return err
 	}
 
+	pnsID, err := base64.RawURLEncoding.DecodeString(req.PNSID)
+	if err != nil || !utf8.Valid(pnsID) {
+		// treat as not found
+		return echo.NewHTTPError(http.StatusNotFound, "data tidak ditemukan")
+	}
+
 	ctx := c.Request().Context()
-	data, total, err := h.service.list(ctx, uint64(req.Limit), uint64(req.Offset), listOptions{
-		cari:       req.Cari,
-		unitID:     req.UnitID,
-		golonganID: req.GolonganID,
-		jabatanID:  req.JabatanID,
-		status:     req.Status,
-	})
+	data, err := h.service.getProfileByPNSID(ctx, string(pnsID))
 	if err != nil {
-		slog.ErrorContext(ctx, "Error getting list pegawai.", "error", err)
+		slog.ErrorContext(ctx, "Error getting data profil pegawai.", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
-	return c.JSON(http.StatusOK, listResponse{
+	if data == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "data tidak ditemukan")
+	}
+
+	return c.JSON(http.StatusOK, profileResponse{
 		Data: data,
-		Meta: api.MetaPagination{Limit: req.Limit, Offset: req.Offset, Total: total},
 	})
 }

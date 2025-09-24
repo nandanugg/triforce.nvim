@@ -126,8 +126,8 @@ components:
 			name:               "error: path not found",
 			requestMethod:      http.MethodGet,
 			requestPath:        "/schema-not-found",
-			wantResponseStatus: 500,
-			wantResponseBody:   `{"message": "Internal Server Error"}`,
+			wantResponseStatus: 404,
+			wantResponseBody:   `{"message": "openapi route tidak ditemukan"}`,
 		},
 		{
 			name:          "error: invalid parameter values",

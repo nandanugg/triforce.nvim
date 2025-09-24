@@ -137,6 +137,7 @@ func Test_handler_getDataPribadi(t *testing.T) {
 			wantResponseBody: `
 				{
 					"data": {
+						"pns_id":                      "PNS_1c",
 						"nama":                        "Budi Santoso",
 						"gelar_depan":                 "Dr.",
 						"gelar_belakang":              "M.Sc",
@@ -200,6 +201,7 @@ func Test_handler_getDataPribadi(t *testing.T) {
 			wantResponseBody: `
 				{
 					"data": {
+						"pns_id":                      "PNS_1d",
 						"nama":                        "John Doe",
 						"gelar_depan":                 "",
 						"gelar_belakang":              "",
@@ -263,6 +265,7 @@ func Test_handler_getDataPribadi(t *testing.T) {
 			wantResponseBody: `
 				{
 					"data": {
+						"pns_id":                      "PNS_1e",
 						"nama":                        "John Santoso",
 						"gelar_depan":                 "Dr.",
 						"gelar_belakang":              "M.Sc",
@@ -326,6 +329,7 @@ func Test_handler_getDataPribadi(t *testing.T) {
 			wantResponseBody: `
 				{
 					"data": {
+						"pns_id":                      "PNS001",
 						"nama":                        "Budi John",
 						"gelar_depan":                 "",
 						"gelar_belakang":              "",
@@ -389,6 +393,7 @@ func Test_handler_getDataPribadi(t *testing.T) {
 			wantResponseBody: `
 				{
 					"data": {
+						"pns_id":                      "PNS_1g",
 						"nama":                        "Budi Santoso",
 						"gelar_depan":                 "Dr.",
 						"gelar_belakang":              "M.Sc",
