@@ -1,4 +1,4 @@
-package riwayatpelatihanstruktural
+package riwayatpelatihansiasn
 
 import (
 	"log/slog"
@@ -18,8 +18,8 @@ func newHandler(s *service) *handler {
 }
 
 type listResponse struct {
-	Data []riwayatPelatihanStruktural `json:"data"`
-	Meta api.MetaPagination           `json:"meta"`
+	Data []riwayatPelatihanSIASN `json:"data"`
+	Meta api.MetaPagination      `json:"meta"`
 }
 
 func (h *handler) list(c echo.Context) error {
@@ -30,7 +30,7 @@ func (h *handler) list(c echo.Context) error {
 
 	data, total, err := h.service.list(c.Request().Context(), api.CurrentUser(c).NIP, req.Limit, req.Offset)
 	if err != nil {
-		slog.ErrorContext(c.Request().Context(), "Error getting list riwayat pelatihan struktural.", "error", err)
+		slog.ErrorContext(c.Request().Context(), "Error getting list riwayat pelatihan siasn.", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
@@ -41,7 +41,7 @@ func (h *handler) list(c echo.Context) error {
 }
 
 type getBerkasRequest struct {
-	ID string `param:"id"`
+	ID int64 `param:"id"`
 }
 
 func (h *handler) getBerkas(c echo.Context) error {
@@ -53,12 +53,12 @@ func (h *handler) getBerkas(c echo.Context) error {
 	ctx := c.Request().Context()
 	mimeType, blob, err := h.service.getBerkas(ctx, api.CurrentUser(c).NIP, req.ID)
 	if err != nil {
-		slog.ErrorContext(ctx, "Error getting berkas riwayat pelatihan struktural.", "error", err)
+		slog.ErrorContext(ctx, "Error getting berkas riwayat pelatihan siasn.", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
 	if blob == nil {
-		return echo.NewHTTPError(http.StatusNotFound, "berkas riwayat pelatihan struktural tidak ditemukan")
+		return echo.NewHTTPError(http.StatusNotFound, "berkas riwayat pelatihan siasn tidak ditemukan")
 	}
 
 	c.Response().Header().Set("Content-Disposition", "inline")

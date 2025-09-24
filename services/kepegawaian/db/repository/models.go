@@ -944,24 +944,23 @@ type RiwayatDiklatFungsional struct {
 
 // Riwayat diklat struktural pegawai
 type RiwayatDiklatStruktural struct {
-	ID                     string             `db:"id"`
-	PnsID                  pgtype.Text        `db:"pns_id"`
-	PnsNip                 pgtype.Text        `db:"pns_nip"`
-	PnsNama                pgtype.Text        `db:"pns_nama"`
-	JenisDiklatID          pgtype.Int4        `db:"jenis_diklat_id"`
-	NamaDiklat             pgtype.Text        `db:"nama_diklat"`
-	Nomor                  pgtype.Text        `db:"nomor"`
-	Tanggal                pgtype.Date        `db:"tanggal"`
-	Tahun                  pgtype.Int2        `db:"tahun"`
-	StatusData             pgtype.Text        `db:"status_data"`
-	FileBase64             pgtype.Text        `db:"file_base64"`
-	KeteranganBerkas       pgtype.Text        `db:"keterangan_berkas"`
-	Lama                   pgtype.Float4      `db:"lama"`
-	SiasnID                pgtype.Text        `db:"siasn_id"`
-	CreatedAt              pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt              pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt              pgtype.Timestamptz `db:"deleted_at"`
-	InstitusiPenyelenggara pgtype.Text        `db:"institusi_penyelenggara"`
+	ID               string             `db:"id"`
+	PnsID            pgtype.Text        `db:"pns_id"`
+	PnsNip           pgtype.Text        `db:"pns_nip"`
+	PnsNama          pgtype.Text        `db:"pns_nama"`
+	JenisDiklatID    pgtype.Int4        `db:"jenis_diklat_id"`
+	NamaDiklat       pgtype.Text        `db:"nama_diklat"`
+	Nomor            pgtype.Text        `db:"nomor"`
+	Tanggal          pgtype.Date        `db:"tanggal"`
+	Tahun            pgtype.Int2        `db:"tahun"`
+	StatusData       pgtype.Text        `db:"status_data"`
+	FileBase64       pgtype.Text        `db:"file_base64"`
+	KeteranganBerkas pgtype.Text        `db:"keterangan_berkas"`
+	Lama             pgtype.Float4      `db:"lama"`
+	SiasnID          pgtype.Text        `db:"siasn_id"`
+	CreatedAt        pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt        pgtype.Timestamptz `db:"updated_at"`
+	DeletedAt        pgtype.Timestamptz `db:"deleted_at"`
 }
 
 // Riwayat golongan pegawai

@@ -25,7 +25,6 @@ Riwayat diklat struktural pegawai
 | created_at | timestamp with time zone | now() | true |  |  |  |
 | updated_at | timestamp with time zone | now() | true |  |  |  |
 | deleted_at | timestamp with time zone |  | true |  |  |  |
-| institusi_penyelenggara | varchar(200) |  | true |  |  |  |
 
 ## Constraints
 
@@ -67,7 +66,6 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
-  varchar_200_ institusi_penyelenggara
 }
 "kepegawaian.pegawai" {
   integer id

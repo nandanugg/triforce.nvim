@@ -24,7 +24,7 @@ tags:
   - name: Riwayat Kepangkatan
   - name: Riwayat Kinerja
   - name: Riwayat Pelatihan Fungsional
-  - name: Riwayat Pelatihan Struktural
+  - name: Riwayat Pelatihan SIASN
   - name: Riwayat Pelatihan Teknis
   - name: Riwayat Pendidikan
   - name: Riwayat Penghargaan
@@ -1053,15 +1053,15 @@ paths:
                 format: binary
         "404":
           description: Berkas riwayat pelatihan fungsional tidak ditemukan atau User tidak mempunyai akses.
-  /v1/riwayat-pelatihan-struktural:
+  /v1/riwayat-pelatihan-siasn:
     get:
       tags:
-        - Riwayat Pelatihan Struktural
-      summary: Lihat daftar riwayat pelatihan struktural.
+        - Riwayat Pelatihan SIASN
+      summary: Lihat daftar riwayat pelatihan SIASN.
       description: >-
-        Lihat daftar riwayat pelatihan struktural dari user yang login, urut
+        Lihat daftar riwayat pelatihan SIASN dari user yang login, urut
         berdasarkan tanggal.
-      operationId: listRiwayatPelatihanStruktural
+      operationId: listRiwayatPelatihanSIASN
       parameters:
         - $ref: "#/components/parameters/authRequired"
         - $ref: "#/components/parameters/limit"
@@ -1082,13 +1082,13 @@ paths:
                       additionalProperties: false
                       properties:
                         id:
-                          type: string
+                          type: integer
                         nama_diklat:
                           type: string
                           example: "Pelatihan Kepemimpinan Administrator (PKA)"
                         jenis_diklat:
                           type: string
-                          example: "Struktural"
+                          example: "Diklat SIASN"
                         nomor_sertifikat:
                           type: string
                           example: "LAN-PKA-2023-00123"
@@ -1100,7 +1100,7 @@ paths:
                           example: 2023
                           nullable: true
                         durasi:
-                          type: number
+                          type: integer
                           description: "Durasi pelatihan dalam jam"
                           nullable: true
                           example: 900
@@ -1116,21 +1116,21 @@ paths:
                           example: "2023-06-20"
                   meta:
                     $ref: "#/components/schemas/metaPagination"
-  /v1/riwayat-pelatihan-struktural/{id}/berkas:
+  /v1/riwayat-pelatihan-siasn/{id}/berkas:
     get:
       tags:
-        - Riwayat Pelatihan Struktural
-      summary: Lihat berkas riwayat pelatihan struktural.
+        - Riwayat Pelatihan SIASN
+      summary: Lihat berkas riwayat pelatihan SIASN.
       description: >-
-        Lihat berkas riwayat pelatihan struktural berdasarkan id.
-      operationId: getBerkasRiwayatPelatihanStruktural
+        Lihat berkas riwayat pelatihan SIASN berdasarkan id.
+      operationId: getBerkasRiwayatPelatihanSIASN
       parameters:
         - $ref: "#/components/parameters/authRequired"
         - name: id
           in: path
           required: true
           schema:
-            type: string
+            type: integer
       responses:
         "200":
           description: Sukses.
@@ -1140,7 +1140,7 @@ paths:
                 type: string
                 format: binary
         "404":
-          description: Berkas riwayat pelatihan struktural tidak ditemukan atau User tidak mempunyai akses.
+          description: Berkas riwayat pelatihan SIASN tidak ditemukan atau User tidak mempunyai akses.
   /v1/riwayat-pelatihan-teknis:
     get:
       tags:

@@ -1,4 +1,4 @@
-package riwayatpelatihanstruktural
+package riwayatpelatihansiasn
 
 import (
 	"context"
@@ -26,20 +26,20 @@ func Test_handler_list(t *testing.T) {
 	t.Parallel()
 
 	dbData := `
-	INSERT INTO "ref_jenis_diklat_struktural" (id, nama, deleted_at) VALUES
-		(1, 'Jenis 1', null),
-		(2, 'Jenis 2', null),
-		(3, 'Jenis 3', '2000-01-01');
+	INSERT INTO ref_jenis_diklat (id, jenis_diklat, kode, deleted_at) VALUES
+		(1, 'Jenis 1', '01', null),
+		(2, 'Jenis 2', '02', null),
+		(3, 'Jenis 3', '03', '2000-01-01');
 
-	INSERT INTO "riwayat_diklat_struktural" (
-	    id, pns_nip, pns_nama, jenis_diklat_id, nama_diklat, nomor, tanggal, tahun, lama, institusi_penyelenggara, deleted_at
+	INSERT INTO riwayat_diklat (
+		id, nip_baru, jenis_diklat_id, jenis_diklat, nama_diklat, no_sertifikat, tanggal_mulai, tanggal_selesai, tahun_diklat, durasi_jam, institusi_penyelenggara, deleted_at
 	) VALUES
-	    ('uuid-diklat-struktural-001', '199001012020121001', 'Agus Purnomo', 1, 'Pelatihan Kepemimpinan Administrator (PKA)', 'LAN-PKA-2023-00123', '2023-06-20', 2023, 900, 'Lembaga Administrasi Negara', null),
-	    ('uuid-diklat-struktural-002', '199001012020121001', 'Siti Rahmawati', 2, 'Pelatihan Kepemimpinan Pengawas (PKP)', 'LAN-PKP-2022-00456', '2022-08-15', null, null, 'Badan Diklat Provinsi Jawa Barat', null),
-	    ('uuid-diklat-struktural-003', '199001012020121001', 'Budi Santoso', 3, 'Pelatihan Kepemimpinan Nasional Tingkat II', 'LAN-PKNII-2021-00089', '2021-04-10', 2021, 1200, 'LAN-RI', null),
-	    ('uuid-diklat-struktural-004', '199305202021121002', 'Dewi Kartika', 1, 'Pelatihan Kepemimpinan Administrator (PKA)', 'LAN-PKA-2023-00234', '2023-07-05', 2023, 900, 'Badan Pengembangan Sumber Daya Manusia Daerah (BPSDMD) DKI Jakarta', null),
-	    ('uuid-diklat-struktural-005', '199001012020121001', 'Ahmad Fauzi', 1, 'Pelatihan Kepemimpinan Nasional Tingkat I', 'LAN-PKNI-2020-00077', '2020-09-12', 2020, 1500, 'Lembaga Administrasi Negara', '2000-01-01'),
-			('uuid-diklat-struktural-006', '199001012020121001', 'Ahmad Fauzi', 1, 'Pelatihan Kepemimpinan Nasional Tingkat III', 'LAN-PKNI-2020-00077', null, 2022, 10, 'Lembaga Administrasi Negara', null);
+		(1, '01', 1, 'jenis 1', 'Pelatihan Kepemimpinan Administrator (PKA)', 'LAN-PKA-2023-00123', '2023-06-20', '2023-06-21', 2023, 120, 'Lembaga Administrasi Negara', null),
+		(2, '01', 2, 'jenis 2', 'Pelatihan Kepemimpinan Pengawas (PKP)', 'LAN-PKP-2022-00456', '2022-08-15', '2022-08-16', null, null, 'Badan Diklat Provinsi Jawa Barat', null),
+		(3, '01', 3, 'jenis 3', 'Pelatihan Kepemimpinan Nasional Tingkat II', 'LAN-PKNII-2021-00089', '2021-04-10', '2023-04-11', 2021, 12, 'LAN-RI', null),
+		(4, '02', 1, 'jenis 1', 'Pelatihan Kepemimpinan Administrator (PKA)', 'LAN-PKA-2023-00234', '2023-07-05', '2023-07-6', 2023, 12, 'Badan Pengembangan Sumber Daya Manusia Daerah (BPSDMD) DKI Jakarta', null),
+		(5, '01', 1, 'jenis 1', 'Pelatihan Kepemimpinan Nasional Tingkat I', 'LAN-PKNI-2020-00077', '2020-09-12', '2020-09-13', 2020, 12, 'Lembaga Administrasi Negara', '2000-01-01'),
+		(6, '01', 1, 'jenis 1', 'Pelatihan Kepemimpinan Nasional Tingkat III', 'LAN-PKNI-2020-00077', null, null, 2022, 10, 'Lembaga Administrasi Negara', null);
 	`
 
 	tests := []struct {
@@ -53,45 +53,45 @@ func Test_handler_list(t *testing.T) {
 		{
 			name:             "ok: tanpa parameter apapun",
 			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "199001012020121001")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "01")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
 					{
-						"id": "uuid-diklat-struktural-001",
+						"id": 1,
 						"institusi_penyelenggara": "Lembaga Administrasi Negara",
 						"jenis_diklat": "Jenis 1",
 						"nama_diklat": "Pelatihan Kepemimpinan Administrator (PKA)",
 						"nomor_sertifikat": "LAN-PKA-2023-00123",
 						"tahun": 2023,
 						"tanggal_mulai": "2023-06-20",
-						"tanggal_selesai": "2023-07-27",
-						"durasi": 900
+						"tanggal_selesai": "2023-06-21",
+						"durasi": 120
 					},
 					{
-						"id": "uuid-diklat-struktural-002",
-						"institusi_penyelenggara": "Badan Diklat Provinsi Jawa Barat",
-						"jenis_diklat": "Jenis 2",
-						"nama_diklat": "Pelatihan Kepemimpinan Pengawas (PKP)",
-						"nomor_sertifikat": "LAN-PKP-2022-00456",
-						"tahun": 2022,
-						"tanggal_mulai": "2022-08-15",
-						"tanggal_selesai": "2022-08-15",
-						"durasi": null
-					},
-					{
-						"id": "uuid-diklat-struktural-003",
+						"id": 3,
 						"institusi_penyelenggara": "LAN-RI",
 						"jenis_diklat": "",
 						"nama_diklat": "Pelatihan Kepemimpinan Nasional Tingkat II",
 						"nomor_sertifikat": "LAN-PKNII-2021-00089",
 						"tahun": 2021,
 						"tanggal_mulai": "2021-04-10",
-						"tanggal_selesai": "2021-05-30",
-						"durasi": 1200
+						"tanggal_selesai": "2023-04-11",
+						"durasi": 12
 					},
 					{
-						"id": "uuid-diklat-struktural-006",
+						"id": 2,
+						"institusi_penyelenggara": "Badan Diklat Provinsi Jawa Barat",
+						"jenis_diklat": "Jenis 2",
+						"nama_diklat": "Pelatihan Kepemimpinan Pengawas (PKP)",
+						"nomor_sertifikat": "LAN-PKP-2022-00456",
+						"tahun": 2022,
+						"tanggal_mulai": "2022-08-15",
+						"tanggal_selesai": "2022-08-16",
+						"durasi": null
+					},
+					{
+						"id": 6,
 						"institusi_penyelenggara": "Lembaga Administrasi Negara",
 						"jenis_diklat": "Jenis 1",
 						"nama_diklat": "Pelatihan Kepemimpinan Nasional Tingkat III",
@@ -110,20 +110,20 @@ func Test_handler_list(t *testing.T) {
 			name:             "ok: dengan parameter pagination",
 			dbData:           dbData,
 			requestQuery:     url.Values{"limit": []string{"1"}, "offset": []string{"1"}},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "199001012020121001")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "01")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
 					{
-						"id": "uuid-diklat-struktural-002",
-						"institusi_penyelenggara": "Badan Diklat Provinsi Jawa Barat",
-						"jenis_diklat": "Jenis 2",
-						"nama_diklat": "Pelatihan Kepemimpinan Pengawas (PKP)",
-						"nomor_sertifikat": "LAN-PKP-2022-00456",
-						"tahun": 2022,
-						"tanggal_mulai": "2022-08-15",
-						"tanggal_selesai": "2022-08-15",
-						"durasi": null
+						"id": 3,
+						"institusi_penyelenggara": "LAN-RI",
+						"jenis_diklat": "",
+						"nama_diklat": "Pelatihan Kepemimpinan Nasional Tingkat II",
+						"nomor_sertifikat": "LAN-PKNII-2021-00089",
+						"tahun": 2021,
+						"tanggal_mulai": "2021-04-10",
+						"tanggal_selesai": "2023-04-11",
+						"durasi": 12
 					}
 				],
 				"meta": {"limit": 1, "offset": 1, "total": 4}
@@ -133,7 +133,7 @@ func Test_handler_list(t *testing.T) {
 		{
 			name:             "ok: tidak ada data milik user",
 			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "200")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "20")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{"data": [], "meta": {"limit": 10, "offset": 0, "total": 0}}`,
 		},
@@ -155,7 +155,7 @@ func Test_handler_list(t *testing.T) {
 			_, err := db.Exec(t.Context(), tt.dbData)
 			require.NoError(t, err)
 
-			req := httptest.NewRequest(http.MethodGet, "/v1/riwayat-pelatihan-struktural", nil)
+			req := httptest.NewRequest(http.MethodGet, "/v1/riwayat-pelatihan-siasn", nil)
 			req.URL.RawQuery = tt.requestQuery.Encode()
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
@@ -195,15 +195,15 @@ func Test_handler_getBerkas(t *testing.T) {
 	pngBase64 := base64.StdEncoding.EncodeToString(pngBytes)
 
 	dbData := `
-		insert into riwayat_diklat_struktural
-			(id,  pns_nip, deleted_at,   file_base64) values
-			('a', '1c',     null,         'data:application/pdf;base64,` + pdfBase64 + `'),
-			('2', '1c',     null,         '` + pdfBase64 + `'),
-			('3', '1c',     null,         'data:images/png;base64,` + pngBase64 + `'),
-			('4', '1c',     null,         'data:application/pdf;base64,invalid'),
-			('5', '1c',     '2020-01-02', 'data:application/pdf;base64,` + pdfBase64 + `'),
-			('6', '1c',     null,         null),
-			('7', '1c',     null,         '');
+		insert into riwayat_diklat
+			(id, nip_baru, deleted_at,   file_base64) values
+			(1,  '1c',     null,         'data:application/pdf;base64,` + pdfBase64 + `'),
+			(2,  '1c',     null,         '` + pdfBase64 + `'),
+			(3,  '1c',     null,         'data:images/png;base64,` + pngBase64 + `'),
+			(4,  '1c',     null,         'data:application/pdf;base64,invalid'),
+			(5,  '1c',     '2020-01-02', 'data:application/pdf;base64,` + pdfBase64 + `'),
+			(6,  '1c',     null,         null),
+			(7,  '1c',     null,         '');
 		`
 
 	tests := []struct {
@@ -218,7 +218,7 @@ func Test_handler_getBerkas(t *testing.T) {
 		{
 			name:              "ok: valid pdf with data: prefix",
 			dbData:            dbData,
-			paramID:           "a",
+			paramID:           "1",
 			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1c")}},
 			wantResponseCode:  http.StatusOK,
 			wantContentType:   "application/pdf",
@@ -243,7 +243,7 @@ func Test_handler_getBerkas(t *testing.T) {
 			wantResponseBytes: pngBytes,
 		},
 		{
-			name:              "error: base64 pelatihan struktural tidak valid",
+			name:              "error: base64 pelatihan siasn tidak valid",
 			dbData:            dbData,
 			paramID:           "4",
 			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1c")}},
@@ -251,44 +251,52 @@ func Test_handler_getBerkas(t *testing.T) {
 			wantResponseBytes: []byte(`{"message": "Internal Server Error"}`),
 		},
 		{
-			name:              "error: riwayat pelatihan struktural sudah dihapus",
+			name:              "error: riwayat pelatihan siasn sudah dihapus",
 			dbData:            dbData,
 			paramID:           "5",
 			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1c")}},
 			wantResponseCode:  http.StatusNotFound,
-			wantResponseBytes: []byte(`{"message": "berkas riwayat pelatihan struktural tidak ditemukan"}`),
+			wantResponseBytes: []byte(`{"message": "berkas riwayat pelatihan siasn tidak ditemukan"}`),
 		},
 		{
-			name:              "error: base64 riwayat pelatihan struktural berisi null value",
+			name:              "error: base64 riwayat pelatihan siasn berisi null value",
 			dbData:            dbData,
 			paramID:           "6",
 			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1c")}},
 			wantResponseCode:  http.StatusNotFound,
-			wantResponseBytes: []byte(`{"message": "berkas riwayat pelatihan struktural tidak ditemukan"}`),
+			wantResponseBytes: []byte(`{"message": "berkas riwayat pelatihan siasn tidak ditemukan"}`),
 		},
 		{
-			name:              "error: base64 riwayat pelatihan struktural berupa string kosong",
+			name:              "error: base64 riwayat pelatihan siasn berupa string kosong",
 			dbData:            dbData,
 			paramID:           "7",
 			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1c")}},
 			wantResponseCode:  http.StatusNotFound,
-			wantResponseBytes: []byte(`{"message": "berkas riwayat pelatihan struktural tidak ditemukan"}`),
+			wantResponseBytes: []byte(`{"message": "berkas riwayat pelatihan siasn tidak ditemukan"}`),
 		},
 		{
-			name:              "error: riwayat pelatihan struktural bukan milik user login",
+			name:              "error: riwayat pelatihan siasn bukan milik user login",
 			dbData:            dbData,
 			paramID:           "1",
 			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a")}},
 			wantResponseCode:  http.StatusNotFound,
-			wantResponseBytes: []byte(`{"message": "berkas riwayat pelatihan struktural tidak ditemukan"}`),
+			wantResponseBytes: []byte(`{"message": "berkas riwayat pelatihan siasn tidak ditemukan"}`),
 		},
 		{
-			name:              "error: riwayat pelatihan struktural tidak ditemukan",
+			name:              "error: riwayat pelatihan siasn tidak ditemukan",
 			dbData:            dbData,
 			paramID:           "0",
 			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1c")}},
 			wantResponseCode:  http.StatusNotFound,
-			wantResponseBytes: []byte(`{"message": "berkas riwayat pelatihan struktural tidak ditemukan"}`),
+			wantResponseBytes: []byte(`{"message": "berkas riwayat pelatihan siasn tidak ditemukan"}`),
+		},
+		{
+			name:              "error: invalid id",
+			dbData:            dbData,
+			paramID:           "abc",
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1c")}},
+			wantResponseCode:  http.StatusBadRequest,
+			wantResponseBytes: []byte(`{"message": "parameter \"id\" harus dalam format yang sesuai"}`),
 		},
 		{
 			name:              "error: auth header tidak valid",
@@ -307,7 +315,7 @@ func Test_handler_getBerkas(t *testing.T) {
 			_, err := pgxconn.Exec(context.Background(), tt.dbData)
 			require.NoError(t, err)
 
-			req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/v1/riwayat-pelatihan-struktural/%s/berkas", tt.paramID), nil)
+			req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/v1/riwayat-pelatihan-siasn/%s/berkas", tt.paramID), nil)
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
 

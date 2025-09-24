@@ -1,4 +1,4 @@
-package riwayatpelatihanstruktural
+package riwayatpelatihansiasn
 
 import (
 	"net/http"
@@ -13,6 +13,6 @@ func RegisterRoutes(e *echo.Echo, db dbRepo.Querier, mwAuth api.AuthMiddlewareFu
 	s := newService(db)
 	h := newHandler(s)
 
-	e.Add(http.MethodGet, "/v1/riwayat-pelatihan-struktural", h.list, mwAuth())
-	e.Add(http.MethodGet, "/v1/riwayat-pelatihan-struktural/:id/berkas", h.getBerkas, mwAuth())
+	e.Add(http.MethodGet, "/v1/riwayat-pelatihan-siasn", h.list, mwAuth())
+	e.Add(http.MethodGet, "/v1/riwayat-pelatihan-siasn/:id/berkas", h.getBerkas, mwAuth())
 }
