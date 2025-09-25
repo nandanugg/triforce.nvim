@@ -1,0 +1,104 @@
+# BASIC
+applicationName: kepegawaian-be
+serviceMetadata:
+  app: portal-kemendikdasmen
+  env: production
+  repository: https://gitlab.com/wartek-id/matk/nexus/nexus-be
+  service: kepegawaian-be
+
+# SERVICE ACCOUNT
+serviceAccount:
+  create: true
+  name: kepegawaian-be
+  automountServiceAccountToken: true
+  labels: {}
+  annotations: {}
+
+# PICs
+deploymentAnnotations:
+  pic: pazto
+  slack: "#nexus-eng"
+
+# IMAGE
+containerImage:
+  pullPolicy: IfNotPresent
+
+# ANNOTATIONS
+podAnnotations: {}
+
+# COMMAND ARGS
+containerCommand: [/app/kepegawaian]
+containerArgs: []
+
+# SCALING
+replicaCount: 3
+containerResources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
+horizontalPodAutoscaler:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 5
+  avgCpuUtilization: 80
+  # avgMemoryUtilization: 80
+
+# PROBES
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 8000
+readinessProbe:
+  httpGet:
+    path: /health
+    port: 8000
+
+# PORTS
+containerPorts:
+  http:
+    port: 8000
+    protocol: TCP
+
+# SERVICE
+service:
+  enabled: true
+  annotations: {}
+  ports:
+    http:
+      port: 8000
+      targetPort: 8000
+      protocol: TCP
+
+# SERVICE MONITOR
+serviceMonitor:
+  enabled: true
+  labels: {}
+  endpoints:
+    default:
+      interval: 30s
+      scrapeTimeout: 10s
+      honorLabels: true
+      path: /metrics
+      port: http
+      scheme: http
+      metricRelabelings: []
+      relabelings: []
+
+# INGRESS
+ingress:
+  enabled: true
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: ministry-portal-strip-prefix@kubernetescrd
+    traefik.ingress.kubernetes.io/router.priority: "100"
+  ingressClassName: traefik
+  path: /api/kepegawaian
+  pathType: Prefix
+  servicePort: http
+  hosts:
+    - portal.kemendikdasmen.go.id
+  tls:
+    - hosts:
+        - portal.kemendikdasmen.go.id

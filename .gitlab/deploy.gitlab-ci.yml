@@ -41,3 +41,21 @@ staging-1:
         job: setup-job-deployment
   # variables:
   #   DEBUG: true
+
+production-1:
+  stage: deployment-production
+  extends:
+    - .default
+    - .rules-production
+  needs:
+    - setup-job-deployment
+    - build-image
+  # when: manual
+  allow_failure: false
+  trigger:
+    strategy: depend
+    include:
+      - artifact: artifacts/deployment.production-1.yml
+        job: setup-job-deployment
+  # variables:
+  #   DEBUG: true

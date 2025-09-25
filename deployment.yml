@@ -1,9 +1,15 @@
 .common: &common
   chartName: $CI_REGISTRY_CHARTS/k8s-service
   chartVersion: 0.0.2
-  namespace: ministry-portal
   imageRepo: $CI_REGISTRY_IMAGE
   imageTag: $CI_COMMIT_SHORT_SHA
+
+.common-staging: &common-staging
+  namespace: ministry-portal
+
+.common-production: &common-production
+  namespace: ministry-portal-production
+  deploymentDelay: manual
 
 .hpa_config: &hpa_config
   hpa:
@@ -14,7 +20,7 @@
 
 staging-1:
   kepegawaian-be:
-    <<: *common
+    <<: [*common, *common-staging]
     # deploymentDelay: 1 minutes
     values:
       - .deployment/kepegawaian-be/staging-1/values.yaml
@@ -33,11 +39,48 @@ staging-1:
           <<: *hpa_config
 
   portal-be:
-    <<: *common
+    <<: [*common, *common-staging]
     # deploymentDelay: 1 minutes
     values:
       - .deployment/portal-be/staging-1/values.yaml
       - .deployment/portal-be/staging-1/env.yaml
+    canary:
+      enabled: false
+      configurations:
+        - percent: 1
+          delay: 0 minutes
+          <<: *hpa_config
+        - percent: 2
+          delay: 2 minutes
+          <<: *hpa_config
+        - delay: 2 minutes
+          percent: 10
+          <<: *hpa_config
+
+production-1:
+  kepegawaian-be:
+    <<: [*common, *common-production]
+    values:
+      - .deployment/kepegawaian-be/production-1/values.yaml
+      - .deployment/kepegawaian-be/production-1/env.yaml
+    canary:
+      enabled: false
+      configurations:
+        - percent: 1
+          delay: 0 minutes
+          <<: *hpa_config
+        - percent: 2
+          delay: 2 minutes
+          <<: *hpa_config
+        - delay: 2 minutes
+          percent: 10
+          <<: *hpa_config
+
+  portal-be:
+    <<: [*common, *common-production]
+    values:
+      - .deployment/portal-be/production-1/values.yaml
+      - .deployment/portal-be/production-1/env.yaml
     canary:
       enabled: false
       configurations:
