@@ -7,6 +7,7 @@ servers:
   - url: http://localhost:8000
 tags:
   - name: Admin Surat Keputusan Pegawai
+  - name: Admin Pegawai Aktif
   - name: Data Pribadi
   - name: Golongan
   - name: Jabatan
@@ -172,6 +173,49 @@ paths:
                 format: binary
         "404":
           description: Berkas sk tidak ditemukan.
+  /v1/admin/pegawai:
+    get:
+      tags:
+        - Admin Pegawai Aktif
+      summary: List pegawai aktif
+      description: Listing pegawai aktif dari sisi admin
+      operationId: adminListPegawaiAktif
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        nip:
+                          type: string
+                        nama:
+                          type: string
+                        gelar_depan:
+                          type: string
+                        gelar_belakang:
+                          type: string
+                        golongan:
+                          type: string
+                        jabatan:
+                          type: string
+                        unit_kerja:
+                          type: string
+                        status:
+                          type: string
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
   /v1/data-pribadi:
     get:
       tags:
