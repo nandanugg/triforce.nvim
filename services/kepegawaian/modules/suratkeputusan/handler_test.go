@@ -1232,6 +1232,12 @@ func Test_handler_getAdmin(t *testing.T) {
 			('sk-009', '123456784', 'Mutasi', 'SK-009/2024', '2024-03-15', 5, '123456782', '2024-03-15', NULL),
 			('sk-010', '123456783', 'Mutasi', 'SK-010/2024', '2024-03-16', 5, '123456782', '2024-03-16', NULL),
 			('sk-011', '123456781', 'Kenaikan Pangkat', 'SK-011/2024', '2024-01-17', 1, NULL, '2024-01-15', NULL);
+
+		INSERT INTO file_digital_signature_riwayat
+			("file_id","nip_pemroses","tindakan","created_at","deleted_at") VALUES
+			('sk-010','123456782','Mengkoreksi','2025-09-24T01:02:03',NULL),
+			('sk-010','123456782','Mengkoreksi',NOW(),NOW()),
+			('sk-010','123456781','Mengkoreksi','2025-09-25T01:02:03',NULL);
 	`
 
 	tests := []struct {
@@ -1257,7 +1263,19 @@ func Test_handler_getAdmin(t *testing.T) {
 					"tanggal_sk": "2024-03-16",
 					"unit_kerja": "Tengah - Paling Atas",
 					"status_sk": "Sudah dikirim",
-					"nama_penandatangan": "Hadi"
+					"nama_penandatangan": "Hadi",
+					"logs": [
+						{
+							"log" : "Mengkoreksi",
+							"actor" : "Hadi",
+							"timestamp" : "` + time.Date(2025, time.September, 24, 1, 2, 3, 0, time.UTC).Local().Format(time.RFC3339) + `"
+						},
+						{
+							"log" : "Mengkoreksi",
+							"actor" : "",
+							"timestamp" : "` + time.Date(2025, time.September, 25, 1, 2, 3, 0, time.UTC).Local().Format(time.RFC3339) + `"
+						}
+					]
 				}
 			}`,
 		},
@@ -1275,7 +1293,8 @@ func Test_handler_getAdmin(t *testing.T) {
 					"no_sk": "SK-003/2024",
 					"tanggal_sk": "2024-03-10",
 					"unit_kerja": "Bawah - Tengah - Paling Atas",
-					"status_sk": "Sudah Dikoreksi & Dikembalikan"
+					"status_sk": "Sudah Dikoreksi & Dikembalikan",
+					"logs": []
 				}
 			}`,
 		},
@@ -1293,7 +1312,8 @@ func Test_handler_getAdmin(t *testing.T) {
 					"no_sk": "SK-005/2024",
 					"tanggal_sk": "2024-03-11",
 					"unit_kerja": "",
-					"status_sk": "Sudah dikoreksi dan menunggu TTD"
+					"status_sk": "Sudah dikoreksi dan menunggu TTD",
+					"logs": []
 				}
 			}`,
 		},
@@ -1312,7 +1332,8 @@ func Test_handler_getAdmin(t *testing.T) {
 					"tanggal_sk": "2024-03-12",
 					"unit_kerja": "Bawah 2",
 					"status_sk": "Sudah TTD",
-					"nama_penandatangan": "Hadi"
+					"nama_penandatangan": "Hadi",
+					"logs": []
 				}
 			}`,
 		},

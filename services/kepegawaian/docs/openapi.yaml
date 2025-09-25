@@ -143,7 +143,7 @@ paths:
                 additionalProperties: false
                 properties:
                   data:
-                    $ref: "#/components/schemas/suratKeputusanPenandatangan"
+                    $ref: "#/components/schemas/suratKeputusanWithPenandatanganAndLog"
   /v1/admin/surat-keputusan/{id}/berkas:
     get:
       tags:
@@ -2035,8 +2035,8 @@ components:
           example: "Bawah - Tengah - Paling Atas"
         status_sk:
           type: string
-          description: Status koreksi surat keputusan
-    suratKeputusanPenandatangan:
+          description: Status koreksi surat keputusan            
+    suratKeputusanWithPenandatanganAndLog:
       allOf:
         - $ref: '#/components/schemas/suratKeputusan'
         - type: object
@@ -2044,11 +2044,6 @@ components:
             nama_penandatangan:
               type: string
               description: Nama penandatangan SK
-    suratKeputusanWithPenandatanganAndLog:
-      allOf:
-        - $ref: '#/components/schemas/suratKeputusanPenandatangan'
-        - type: object
-          properties:
             logs:
               type: array
               items:

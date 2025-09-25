@@ -272,6 +272,19 @@ func (s *service) getAdmin(ctx context.Context, id string) (*suratKeputusan, err
 		return nil, fmt.Errorf("[suratkeputusan-getAdmin] repo ListUnitKerjaHierarchyByNIP: %w", err)
 	}
 
+	logs, err := s.repo.ListLogSuratKeputusanByID(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("[suratkeputusan-getAdmin] repo ListLogSuratKeputusanByID: %w", err)
+	}
+
+	logSk := typeutil.Map(logs, func(row repo.ListLogSuratKeputusanByIDRow) logSuratKeputusan {
+		return logSuratKeputusan{
+			Actor:     row.Actor.String,
+			Log:       row.Log.String,
+			Timestamp: row.WaktuTindakan.Time,
+		}
+	})
+
 	return &suratKeputusan{
 		IDSK:              id,
 		KategoriSK:        data.KategoriSk.String,
@@ -281,6 +294,7 @@ func (s *service) getAdmin(ctx context.Context, id string) (*suratKeputusan, err
 		UnitKerja:         s.getUnorLengkap(listUnor),
 		NamaPemilik:       data.NamaPemilikSk.String,
 		NamaPenandaTangan: data.NamaPenandatangan.String,
+		Logs:              &logSk,
 	}, nil
 }
 
