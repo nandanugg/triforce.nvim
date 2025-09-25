@@ -28,6 +28,7 @@ type repository interface {
 	ListSuratKeputusan(ctx context.Context, arg repo.ListSuratKeputusanParams) ([]repo.ListSuratKeputusanRow, error)
 	ListSuratKeputusanByNIP(ctx context.Context, arg repo.ListSuratKeputusanByNIPParams) ([]repo.ListSuratKeputusanByNIPRow, error)
 	ListUnitKerjaHierarchyByNIP(ctx context.Context, nip string) ([]repo.ListUnitKerjaHierarchyByNIPRow, error)
+	ListLogSuratKeputusanByID(ctx context.Context, id string) ([]repo.ListLogSuratKeputusanByIDRow, error)
 	ListUnitKerjaLengkapByIDs(ctx context.Context, ids []string) ([]repo.ListUnitKerjaLengkapByIDsRow, error)
 }
 
@@ -109,9 +110,22 @@ func (s *service) get(ctx context.Context, nip, id string) (*suratKeputusan, err
 	}
 
 	listUnor, err := s.repo.ListUnitKerjaHierarchyByNIP(ctx, nip)
-	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+	if err != nil {
 		return nil, fmt.Errorf("[suratkeputusan-get] repo ListUnitKerjaHierarchyByNIP: %w", err)
 	}
+
+	logs, err := s.repo.ListLogSuratKeputusanByID(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("[suratkeputusan-get] repo ListLogSKBySKID: %w", err)
+	}
+
+	logSk := typeutil.Map(logs, func(row repo.ListLogSuratKeputusanByIDRow) logSuratKeputusan {
+		return logSuratKeputusan{
+			Actor:     row.Actor.String,
+			Log:       row.Log.String,
+			Timestamp: row.WaktuTindakan.Time,
+		}
+	})
 
 	return &suratKeputusan{
 		IDSK:              id,
@@ -122,6 +136,7 @@ func (s *service) get(ctx context.Context, nip, id string) (*suratKeputusan, err
 		UnitKerja:         s.getUnorLengkap(listUnor),
 		NamaPemilik:       data.NamaPemilikSk.String,
 		NamaPenandaTangan: data.NamaPenandatangan.String,
+		Logs:              &logSk,
 	}, nil
 }
 

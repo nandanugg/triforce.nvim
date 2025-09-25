@@ -1,16 +1,26 @@
 package suratkeputusan
 
-import "gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
+import (
+	"time"
 
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
+)
+
+type logSuratKeputusan struct {
+	Log       string    `json:"log"`
+	Actor     string    `json:"actor"`
+	Timestamp time.Time `json:"timestamp"`
+}
 type suratKeputusan struct {
-	IDSK              string  `json:"id_sk"`
-	KategoriSK        string  `json:"kategori_sk"`
-	NoSK              string  `json:"no_sk"`
-	TanggalSK         db.Date `json:"tanggal_sk"`
-	StatusSK          string  `json:"status_sk"`
-	UnitKerja         string  `json:"unit_kerja"`
-	NamaPemilik       string  `json:"nama_pemilik,omitempty"`
-	NamaPenandaTangan string  `json:"nama_penandatangan,omitempty"`
+	IDSK              string               `json:"id_sk"`
+	KategoriSK        string               `json:"kategori_sk"`
+	NoSK              string               `json:"no_sk"`
+	TanggalSK         db.Date              `json:"tanggal_sk"`
+	StatusSK          string               `json:"status_sk"`
+	UnitKerja         string               `json:"unit_kerja"`
+	NamaPemilik       string               `json:"nama_pemilik,omitempty"`
+	NamaPenandaTangan string               `json:"nama_penandatangan,omitempty"`
+	Logs              *[]logSuratKeputusan `json:"logs,omitempty"`
 }
 
 func statusSKText(statusSK int16) string {

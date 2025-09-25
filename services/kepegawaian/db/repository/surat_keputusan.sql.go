@@ -254,6 +254,43 @@ func (q *Queries) GetSuratKeputusanByNIPAndID(ctx context.Context, arg GetSuratK
 	return i, err
 }
 
+const listLogSuratKeputusanByID = `-- name: ListLogSuratKeputusanByID :many
+SELECT 
+    tindakan as log, 
+    pemroses.nama as actor,
+    fdsr.created_at as waktu_tindakan
+FROM 
+    file_digital_signature_riwayat fdsr
+LEFT JOIN pegawai pemroses on pemroses.nip_baru = fdsr.nip_pemroses and pemroses.deleted_at is null
+WHERE fdsr.file_id = $1::varchar and fdsr.deleted_at IS NULL
+`
+
+type ListLogSuratKeputusanByIDRow struct {
+	Log           pgtype.Text        `db:"log"`
+	Actor         pgtype.Text        `db:"actor"`
+	WaktuTindakan pgtype.Timestamptz `db:"waktu_tindakan"`
+}
+
+func (q *Queries) ListLogSuratKeputusanByID(ctx context.Context, id string) ([]ListLogSuratKeputusanByIDRow, error) {
+	rows, err := q.db.Query(ctx, listLogSuratKeputusanByID, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListLogSuratKeputusanByIDRow
+	for rows.Next() {
+		var i ListLogSuratKeputusanByIDRow
+		if err := rows.Scan(&i.Log, &i.Actor, &i.WaktuTindakan); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listSuratKeputusan = `-- name: ListSuratKeputusan :many
 SELECT
     fds.file_id,

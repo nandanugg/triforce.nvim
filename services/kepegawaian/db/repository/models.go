@@ -108,7 +108,7 @@ type FileDigitalSignatureCorrector struct {
 type FileDigitalSignatureRiwayat struct {
 	ID              int64              `db:"id"`
 	FileID          pgtype.Text        `db:"file_id"`
-	PemrosesID      pgtype.Text        `db:"pemroses_id"`
+	NipPemroses     pgtype.Text        `db:"nip_pemroses"`
 	Tindakan        pgtype.Text        `db:"tindakan"`
 	CatatanTindakan pgtype.Text        `db:"catatan_tindakan"`
 	WaktuTindakan   pgtype.Timestamptz `db:"waktu_tindakan"`
@@ -116,6 +116,8 @@ type FileDigitalSignatureRiwayat struct {
 	CreatedAt       pgtype.Timestamptz `db:"created_at"`
 	UpdatedAt       pgtype.Timestamptz `db:"updated_at"`
 	DeletedAt       pgtype.Timestamptz `db:"deleted_at"`
+	ToState         pgtype.Int2        `db:"to_state"`
+	FromState       pgtype.Int2        `db:"from_state"`
 }
 
 type LogDigitalSignature struct {

@@ -1759,10 +1759,12 @@ paths:
           content:
             application/json:
               schema:
+                type: object
                 additionalProperties: false
                 properties:
                   data:
-                    $ref: "#/components/schemas/suratKeputusanPenandatangan"
+                    $ref: "#/components/schemas/suratKeputusanWithPenandatanganAndLog"
+
   /v1/surat-keputusan/{id}/berkas:
     get:
       tags:
@@ -1836,11 +1838,6 @@ paths:
         - $ref: "#/components/parameters/limit"
         - $ref: "#/components/parameters/offset"
         - name: nama
-          in: query
-          description: Pencarian berdasarkan nama unit kerja
-          schema:
-            type: string
-        - name: unor_induk
           in: query
           description: Filter berdasarkan unit induk
           schema:
@@ -2047,3 +2044,23 @@ components:
             nama_penandatangan:
               type: string
               description: Nama penandatangan SK
+    suratKeputusanWithPenandatanganAndLog:
+      allOf:
+        - $ref: '#/components/schemas/suratKeputusanPenandatangan'
+        - type: object
+          properties:
+            logs:
+              type: array
+              items:
+                type: object
+                properties:
+                  log:
+                    type: string
+                    example: "Berhasil tanda tangan"
+                  actor:
+                    type: string
+                    example: "Pak Budi"
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: "2025-09-24T13:00:00Z"

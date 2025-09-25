@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -234,16 +235,21 @@ func Test_handler_get(t *testing.T) {
 			('123456789','123456789','unor-3','pemilik_sk'),
 			('123456788','123456788','unor-4','pemilik_sk_2'),
 			('123456787','123456787','unor-5','pemilik_sk_3'),
-			('12345678','12345678','unor-3','Jane Smith');
+			('12345678','12345678','unor-3','Jane Smith'),
+			('12345677','12345677','unor-3','Korektor');
 
 		INSERT INTO file_digital_signature
-				("file_id", "nip_sk", "kategori", "no_sk", "tanggal_sk", "status_sk","nip_pemroses", "created_at", "deleted_at") VALUES
-				('sk-001', '123456789', 'Kenaikan Pangkat', 'SK-001/2024', '2024-01-15', 1, '12345678', '2024-01-15', NULL),
-				('sk-002', '123456789', 'Mutasi', 'SK-002/2024', '2024-02-20', 0, '12345678', '2024-02-20', NULL),
-				('sk-003', '123456789', 'Kenaikan Gaji', 'SK-003/2024', '2024-03-10', 2,'12345678', '2024-03-10', NULL),
-				('sk-004', '123456789', 'Kenaikan Gaji', 'SK-004/2024', '2024-03-10', 2,'12345678', '2024-03-10', NOW()),
-				('sk-005', '123456788', 'Mutasi', 'SK-005/2024', '2024-03-10', 2,'12345678', '2024-03-10', NULL),
-				('sk-006', '123456787', 'Mutasi', 'SK-006/2024', '2024-03-10', 2,'12345678', '2024-03-10', NULL);
+  			("file_id", "nip_sk", "kategori", "no_sk", "tanggal_sk", "status_sk","nip_pemroses", "created_at", "deleted_at") VALUES
+  			('sk-001', '123456789', 'Kenaikan Pangkat', 'SK-001/2024', '2024-01-15', 1, '12345678', '2024-01-15', NULL),
+  			('sk-002', '123456789', 'Mutasi', 'SK-002/2024', '2024-02-20', 0, '12345678', '2024-02-20', NULL),
+  			('sk-003', '123456789', 'Kenaikan Gaji', 'SK-003/2024', '2024-03-10', 2,'12345678', '2024-03-10', NULL),
+  			('sk-004', '123456789', 'Kenaikan Gaji', 'SK-004/2024', '2024-03-10', 2,'12345678', '2024-03-10', NOW()),
+  			('sk-005', '123456788', 'Mutasi', 'SK-005/2024', '2024-03-10', 2,'12345678', '2024-03-10', NULL),
+  			('sk-006', '123456787', 'Mutasi', 'SK-006/2024', '2024-03-10', 2,'12345678', '2024-03-10', NULL);
+		INSERT INTO file_digital_signature_riwayat
+			("file_id","nip_pemroses","tindakan","created_at","deleted_at") VALUES
+			('sk-002','12345677','Mengkoreksi','2025-09-24T01:02:03',NULL),
+			('sk-002','12345678','Mengkoreksi',NOW(),NOW());
 	`
 
 	tests := []struct {
@@ -269,12 +275,13 @@ func Test_handler_get(t *testing.T) {
 					"status_sk": "Sedang Dikoreksi",
 					"unit_kerja": "Bawah - Tengah - Paling Atas",
 					"nama_pemilik": "pemilik_sk",
-					"nama_penandatangan": "Jane Smith"
+					"nama_penandatangan": "Jane Smith",
+					"logs": []
 				}
 			}`,
 		},
 		{
-			name:             "ok with different sk",
+			name:             "ok with different sk and has logs",
 			dbData:           dbData,
 			requestPath:      "/v1/surat-keputusan/sk-002",
 			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789")}},
@@ -288,7 +295,14 @@ func Test_handler_get(t *testing.T) {
 					"status_sk": "Belum Dikoreksi",
 					"unit_kerja": "Bawah - Tengah - Paling Atas",
 					"nama_pemilik": "pemilik_sk",
-					"nama_penandatangan": "Jane Smith"
+					"nama_penandatangan": "Jane Smith",
+					"logs": [
+						{
+							"log" : "Mengkoreksi",
+							"actor" : "Korektor",
+							"timestamp" : "` + time.Date(2025, time.September, 24, 1, 2, 3, 0, time.UTC).Local().Format(time.RFC3339) + `"
+						}
+					]
 				}
 			}`,
 		},
@@ -307,7 +321,8 @@ func Test_handler_get(t *testing.T) {
 					"status_sk": "Sudah Dikoreksi & Dikembalikan",
 					"unit_kerja": "",
 					"nama_pemilik": "pemilik_sk_2",
-					"nama_penandatangan": "Jane Smith"
+					"nama_penandatangan": "Jane Smith",
+					"logs": []
 				}
 			}`,
 		},
@@ -326,7 +341,8 @@ func Test_handler_get(t *testing.T) {
 					"status_sk": "Sudah Dikoreksi & Dikembalikan",
 					"unit_kerja": "Bawah 2",
 					"nama_pemilik": "pemilik_sk_3",
-					"nama_penandatangan": "Jane Smith"
+					"nama_penandatangan": "Jane Smith",
+					"logs": []
 				}
 			}`,
 		},

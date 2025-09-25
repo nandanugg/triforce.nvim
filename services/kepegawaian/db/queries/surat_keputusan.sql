@@ -58,6 +58,16 @@ WHERE
     AND fds.nip_sk = @nip::VARCHAR
     AND fds.file_id = @id::varchar;
 
+-- name: ListLogSuratKeputusanByID :many
+SELECT 
+    tindakan as log, 
+    pemroses.nama as actor,
+    fdsr.created_at as waktu_tindakan
+FROM 
+    file_digital_signature_riwayat fdsr
+LEFT JOIN pegawai pemroses on pemroses.nip_baru = fdsr.nip_pemroses and pemroses.deleted_at is null
+WHERE fdsr.file_id = @id::varchar and fdsr.deleted_at IS NULL;
+
 -- name: ListSuratKeputusan :many
 SELECT
     fds.file_id,
