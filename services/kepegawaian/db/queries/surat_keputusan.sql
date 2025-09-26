@@ -9,7 +9,7 @@ FROM file_digital_signature fds
 WHERE fds.deleted_at IS NULL
     AND fds.nip_sk = @nip::varchar
     AND (sqlc.narg('no_sk')::varchar IS NULL OR fds.no_sk ILIKE '%' || sqlc.narg('no_sk')::varchar || '%')
-    AND (sqlc.narg('status_sk')::integer IS NULL OR fds.status_sk = sqlc.narg('status_sk')::integer)
+    AND (sqlc.narg('list_status_sk')::integer[] IS NULL OR fds.status_sk = ANY(sqlc.narg('list_status_sk')::integer[]))
     AND (sqlc.narg('kategori_sk')::varchar is null OR fds.kategori ILIKE '%' || sqlc.narg('kategori_sk')::varchar || '%')
 ORDER BY fds.created_at DESC
 LIMIT $1 OFFSET $2;
@@ -20,7 +20,7 @@ FROM file_digital_signature fds
 WHERE fds.deleted_at IS NULL
     AND fds.nip_sk = @nip::VARCHAR
     AND (sqlc.narg('no_sk')::varchar IS NULL OR fds.no_sk ILIKE '%' || sqlc.narg('no_sk')::varchar || '%')
-    AND (sqlc.narg('status_sk')::integer IS NULL OR fds.status_sk = sqlc.narg('status_sk')::integer)
+    AND (sqlc.narg('list_status_sk')::integer[] IS NULL OR fds.status_sk = ANY(sqlc.narg('list_status_sk')::integer[]))
     AND (sqlc.narg('kategori_sk')::varchar is null OR fds.kategori ILIKE '%' || sqlc.narg('kategori_sk')::varchar || '%');
 
 -- name: GetSuratKeputusanByNIPAndID :one

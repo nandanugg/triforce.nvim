@@ -66,22 +66,22 @@ FROM file_digital_signature fds
 WHERE fds.deleted_at IS NULL
     AND fds.nip_sk = $1::VARCHAR
     AND ($2::varchar IS NULL OR fds.no_sk ILIKE '%' || $2::varchar || '%')
-    AND ($3::integer IS NULL OR fds.status_sk = $3::integer)
+    AND ($3::integer[] IS NULL OR fds.status_sk = ANY($3::integer[]))
     AND ($4::varchar is null OR fds.kategori ILIKE '%' || $4::varchar || '%')
 `
 
 type CountSuratKeputusanByNIPParams struct {
-	Nip        string      `db:"nip"`
-	NoSk       pgtype.Text `db:"no_sk"`
-	StatusSk   pgtype.Int4 `db:"status_sk"`
-	KategoriSk pgtype.Text `db:"kategori_sk"`
+	Nip          string      `db:"nip"`
+	NoSk         pgtype.Text `db:"no_sk"`
+	ListStatusSk []int32     `db:"list_status_sk"`
+	KategoriSk   pgtype.Text `db:"kategori_sk"`
 }
 
 func (q *Queries) CountSuratKeputusanByNIP(ctx context.Context, arg CountSuratKeputusanByNIPParams) (int64, error) {
 	row := q.db.QueryRow(ctx, countSuratKeputusanByNIP,
 		arg.Nip,
 		arg.NoSk,
-		arg.StatusSk,
+		arg.ListStatusSk,
 		arg.KategoriSk,
 	)
 	var total int64
@@ -397,19 +397,19 @@ FROM file_digital_signature fds
 WHERE fds.deleted_at IS NULL
     AND fds.nip_sk = $3::varchar
     AND ($4::varchar IS NULL OR fds.no_sk ILIKE '%' || $4::varchar || '%')
-    AND ($5::integer IS NULL OR fds.status_sk = $5::integer)
+    AND ($5::integer[] IS NULL OR fds.status_sk = ANY($5::integer[]))
     AND ($6::varchar is null OR fds.kategori ILIKE '%' || $6::varchar || '%')
 ORDER BY fds.created_at DESC
 LIMIT $1 OFFSET $2
 `
 
 type ListSuratKeputusanByNIPParams struct {
-	Limit      int32       `db:"limit"`
-	Offset     int32       `db:"offset"`
-	Nip        string      `db:"nip"`
-	NoSk       pgtype.Text `db:"no_sk"`
-	StatusSk   pgtype.Int4 `db:"status_sk"`
-	KategoriSk pgtype.Text `db:"kategori_sk"`
+	Limit        int32       `db:"limit"`
+	Offset       int32       `db:"offset"`
+	Nip          string      `db:"nip"`
+	NoSk         pgtype.Text `db:"no_sk"`
+	ListStatusSk []int32     `db:"list_status_sk"`
+	KategoriSk   pgtype.Text `db:"kategori_sk"`
 }
 
 type ListSuratKeputusanByNIPRow struct {
@@ -426,7 +426,7 @@ func (q *Queries) ListSuratKeputusanByNIP(ctx context.Context, arg ListSuratKepu
 		arg.Offset,
 		arg.Nip,
 		arg.NoSk,
-		arg.StatusSk,
+		arg.ListStatusSk,
 		arg.KategoriSk,
 	)
 	if err != nil {

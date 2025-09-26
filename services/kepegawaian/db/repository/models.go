@@ -116,8 +116,6 @@ type FileDigitalSignatureRiwayat struct {
 	CreatedAt       pgtype.Timestamptz `db:"created_at"`
 	UpdatedAt       pgtype.Timestamptz `db:"updated_at"`
 	DeletedAt       pgtype.Timestamptz `db:"deleted_at"`
-	ToState         pgtype.Int2        `db:"to_state"`
-	FromState       pgtype.Int2        `db:"from_state"`
 }
 
 type LogDigitalSignature struct {

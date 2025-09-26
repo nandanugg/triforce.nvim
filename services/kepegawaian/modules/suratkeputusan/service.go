@@ -31,53 +31,47 @@ type repository interface {
 	ListLogSuratKeputusanByID(ctx context.Context, id string) ([]repo.ListLogSuratKeputusanByIDRow, error)
 	ListUnitKerjaLengkapByIDs(ctx context.Context, ids []string) ([]repo.ListUnitKerjaLengkapByIDsRow, error)
 }
-
 type service struct {
 	repo repository
-}
-
-type listParams struct {
-	Limit      uint
-	Offset     uint
-	Nip        string
-	NoSK       string
-	StatusSK   *int32
-	KategoriSK string
 }
 
 func newService(r repository) *service {
 	return &service{repo: r}
 }
 
-func (s *service) list(ctx context.Context, arg listParams) ([]suratKeputusan, uint, error) {
-	statusSkParam := pgtype.Int4{Valid: false}
-	if arg.StatusSK != nil {
-		statusSkParam = pgtype.Int4{Valid: true, Int32: *arg.StatusSK}
-	}
+type listParams struct {
+	limit        uint
+	offset       uint
+	nip          string
+	noSK         string
+	listStatusSK []int32
+	kategoriSK   string
+}
 
+func (s *service) list(ctx context.Context, arg listParams) ([]suratKeputusan, uint, error) {
 	data, err := s.repo.ListSuratKeputusanByNIP(ctx, repo.ListSuratKeputusanByNIPParams{
-		Limit:      int32(arg.Limit),
-		Offset:     int32(arg.Offset),
-		Nip:        arg.Nip,
-		NoSk:       pgtype.Text{Valid: arg.NoSK != "", String: arg.NoSK},
-		StatusSk:   statusSkParam,
-		KategoriSk: pgtype.Text{Valid: arg.KategoriSK != "", String: arg.KategoriSK},
+		Limit:        int32(arg.limit),
+		Offset:       int32(arg.offset),
+		Nip:          arg.nip,
+		NoSk:         pgtype.Text{Valid: arg.noSK != "", String: arg.noSK},
+		ListStatusSk: arg.listStatusSK,
+		KategoriSk:   pgtype.Text{Valid: arg.kategoriSK != "", String: arg.kategoriSK},
 	})
 	if err != nil {
 		return nil, 0, fmt.Errorf("[suratkeputusan-list] repo ListSuratKeputusanByNIP: %w", err)
 	}
 
 	count, err := s.repo.CountSuratKeputusanByNIP(ctx, repo.CountSuratKeputusanByNIPParams{
-		NoSk:       pgtype.Text{Valid: arg.NoSK != "", String: arg.NoSK},
-		StatusSk:   statusSkParam,
-		KategoriSk: pgtype.Text{Valid: arg.KategoriSK != "", String: arg.KategoriSK},
-		Nip:        arg.Nip,
+		NoSk:         pgtype.Text{Valid: arg.noSK != "", String: arg.noSK},
+		ListStatusSk: arg.listStatusSK,
+		KategoriSk:   pgtype.Text{Valid: arg.kategoriSK != "", String: arg.kategoriSK},
+		Nip:          arg.nip,
 	})
 	if err != nil {
 		return nil, 0, fmt.Errorf("[suratkeputusan-list] repo CountSuratKeputusanByNIP: %w", err)
 	}
 
-	listUnor, err := s.repo.ListUnitKerjaHierarchyByNIP(ctx, arg.Nip)
+	listUnor, err := s.repo.ListUnitKerjaHierarchyByNIP(ctx, arg.nip)
 	if err != nil {
 		return nil, 0, fmt.Errorf("[suratkeputusan-list] repo ListUnitKerjaHierarchyByNIP: %w", err)
 	}

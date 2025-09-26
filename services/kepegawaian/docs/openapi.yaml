@@ -1712,9 +1712,11 @@ paths:
         - name: status_sk
           in: query
           schema:
-            type: integer
-            format: int32
-            description: Status surat keputusan
+            type: array
+            items: 
+              type: integer
+              format: int32
+              description: Status surat keputusan
         - name: kategori_sk
           in: query
           schema:

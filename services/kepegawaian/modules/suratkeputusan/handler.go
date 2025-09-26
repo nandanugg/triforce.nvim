@@ -25,9 +25,9 @@ type listResponse struct {
 
 type listRequest struct {
 	api.PaginationRequest
-	StatusSK   *int32 `query:"status_sk"`
-	KategoriSK string `query:"kategori_sk"`
-	NoSK       string `query:"no_sk"`
+	StatusSK   []int32 `query:"status_sk"`
+	KategoriSK string  `query:"kategori_sk"`
+	NoSK       string  `query:"no_sk"`
 }
 
 func (h *handler) list(c echo.Context) error {
@@ -38,12 +38,12 @@ func (h *handler) list(c echo.Context) error {
 
 	ctx := c.Request().Context()
 	data, total, err := h.service.list(ctx, listParams{
-		Nip:        api.CurrentUser(c).NIP,
-		Limit:      req.Limit,
-		Offset:     req.Offset,
-		StatusSK:   req.StatusSK,
-		KategoriSK: req.KategoriSK,
-		NoSK:       req.NoSK,
+		nip:          api.CurrentUser(c).NIP,
+		limit:        req.Limit,
+		offset:       req.Offset,
+		listStatusSK: req.StatusSK,
+		kategoriSK:   req.KategoriSK,
+		noSK:         req.NoSK,
 	})
 	if err != nil {
 		slog.ErrorContext(ctx, "Error getting list sk pegawai.", "error", err)

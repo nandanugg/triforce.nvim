@@ -112,6 +112,20 @@ func Test_handler_list(t *testing.T) {
 			}`,
 		},
 		{
+			name:             "ok with filter multiple status_sk",
+			dbData:           dbData,
+			requestQuery:     url.Values{"status_sk": []string{"1", "2"}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789")}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{"id_sk": "sk-003", "kategori_sk": "Kenaikan Gaji", "no_sk": "SK-003/2024", "tanggal_sk": "2024-03-10", "status_sk": "Sudah Dikoreksi & Dikembalikan", "unit_kerja": "Bawah - Tengah - Paling Atas"},
+					{"id_sk": "sk-001", "kategori_sk": "Kenaikan Pangkat", "no_sk": "SK-001/2024", "tanggal_sk": "2024-01-15", "status_sk": "Sedang Dikoreksi", "unit_kerja": "Bawah - Tengah - Paling Atas"}
+				],
+				"meta": {"limit": 10, "offset": 0, "total": 2}
+			}`,
+		},
+		{
 			name:             "ok with limit 2",
 			dbData:           dbData,
 			requestQuery:     url.Values{"limit": []string{"2"}},
