@@ -7,6 +7,8 @@ import (
 	"unicode/utf8"
 
 	"github.com/labstack/echo/v4"
+
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
 )
 
 type handler struct {
@@ -50,5 +52,50 @@ func (h *handler) getProfile(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, profileResponse{
 		Data: data,
+	})
+}
+
+type listAdminRequest struct {
+	api.PaginationRequest
+	Keyword    string `query:"keyword"`
+	UnitID     string `query:"unit_id"`
+	GolonganID int32  `query:"golongan_id"`
+	JabatanID  string `query:"jabatan_id"`
+	Status     string `query:"status"`
+}
+
+type listAdminResponse struct {
+	Data []pegawai          `json:"data"`
+	Meta api.MetaPagination `json:"meta"`
+}
+
+func (h *handler) listAdmin(c echo.Context) error {
+	var req listAdminRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	ctx := c.Request().Context()
+	data, count, err := h.service.adminListPegawai(ctx, adminListPegawaiParams{
+		limit:      req.Limit,
+		offset:     req.Offset,
+		keyword:    req.Keyword,
+		unitID:     req.UnitID,
+		golonganID: req.GolonganID,
+		jabatanID:  req.JabatanID,
+		status:     req.Status,
+	})
+	if err != nil {
+		slog.ErrorContext(ctx, "Error getting data list pegawai aktif.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, listAdminResponse{
+		Data: data,
+		Meta: api.MetaPagination{
+			Total:  count,
+			Limit:  req.Limit,
+			Offset: req.Offset,
+		},
 	})
 }

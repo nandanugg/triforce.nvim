@@ -9,6 +9,66 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countPegawaiAktif = `-- name: CountPegawaiAktif :one
+SELECT 
+  COUNT(1)
+FROM pegawai
+LEFT JOIN unit_kerja uk 
+    ON pegawai.unor_id = uk.id AND uk.deleted_at IS NULL
+LEFT JOIN ref_kedudukan_hukum
+    ON ref_kedudukan_hukum.id = pegawai.kedudukan_hukum_id AND ref_kedudukan_hukum.deleted_at IS NULL
+WHERE 
+    ref_kedudukan_hukum.nama = ANY($1::varchar[])
+    AND (
+        $2::VARCHAR IS NULL
+        OR (
+            pegawai.nama ILIKE '%' || $2::VARCHAR || '%'
+            OR pegawai.nip_baru ILIKE '%' || $2::VARCHAR || '%'
+        )
+    )
+    AND (
+        $3::VARCHAR IS NULL
+        OR (
+            uk.id is not null AND (
+                $3::VARCHAR = uk.id
+                OR $3::VARCHAR = uk.eselon_1
+                OR $3::VARCHAR = uk.eselon_2
+                OR $3::VARCHAR = uk.eselon_3
+                OR $3::VARCHAR = uk.eselon_4
+            )
+        )
+    )
+    AND ( $4::INTEGER IS NULL OR pegawai.gol_id = $4::INTEGER )
+    AND ( $5::VARCHAR IS NULL OR pegawai.jabatan_instansi_id = $5::VARCHAR )
+    AND ( $1::varchar[] = ARRAY[$6::varchar] OR $7::varchar IS NULL OR pegawai.status_cpns_pns = $7::VARCHAR )
+    AND pegawai.deleted_at IS NULL
+`
+
+type CountPegawaiAktifParams struct {
+	StatusHukum []string    `db:"status_hukum"`
+	Keyword     pgtype.Text `db:"keyword"`
+	UnitKerjaID pgtype.Text `db:"unit_kerja_id"`
+	GolonganID  pgtype.Int4 `db:"golongan_id"`
+	JabatanID   pgtype.Text `db:"jabatan_id"`
+	Mpp         string      `db:"mpp"`
+	StatusPns   pgtype.Text `db:"status_pns"`
+}
+
+func (q *Queries) CountPegawaiAktif(ctx context.Context, arg CountPegawaiAktifParams) (int64, error) {
+	row := q.db.QueryRow(ctx, countPegawaiAktif,
+		arg.StatusHukum,
+		arg.Keyword,
+		arg.UnitKerjaID,
+		arg.GolonganID,
+		arg.JabatanID,
+		arg.Mpp,
+		arg.StatusPns,
+	)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const getProfilePegawaiByPNSID = `-- name: GetProfilePegawaiByPNSID :one
 select
   p.nip_lama,
@@ -54,4 +114,116 @@ func (q *Queries) GetProfilePegawaiByPNSID(ctx context.Context, pnsID string) (G
 		&i.Golongan,
 	)
 	return i, err
+}
+
+const listPegawaiAktif = `-- name: ListPegawaiAktif :many
+SELECT 
+    pegawai.pns_id,
+    pegawai.nip_baru AS nip,
+    pegawai.nama,
+    pegawai.gelar_depan,
+    pegawai.gelar_belakang,
+    ref_golongan_akhir.nama AS golongan,
+    ref_jabatan.nama_jabatan AS jabatan,
+    pegawai.unor_id,
+    CASE WHEN 
+        ref_kedudukan_hukum.nama = $3::varchar then 'MPP'
+    ELSE 
+        pegawai.status_cpns_pns
+    END::text AS status
+FROM pegawai
+LEFT JOIN unit_kerja uk 
+    ON pegawai.unor_id = uk.id AND uk.deleted_at IS NULL
+LEFT JOIN ref_kedudukan_hukum
+    ON ref_kedudukan_hukum.id = pegawai.kedudukan_hukum_id AND ref_kedudukan_hukum.deleted_at IS NULL
+LEFT JOIN ref_jabatan
+    ON ref_jabatan.kode_jabatan = pegawai.jabatan_instansi_id AND ref_jabatan.deleted_at IS NULL
+LEFT JOIN ref_golongan ref_golongan_akhir
+    ON ref_golongan_akhir.id = pegawai.gol_id AND ref_golongan_akhir.deleted_at IS NULL
+WHERE 
+    ref_kedudukan_hukum.nama = ANY($4::varchar[])
+    AND (
+        $5::VARCHAR IS NULL
+        OR (
+            pegawai.nama ILIKE '%' || $5::VARCHAR || '%'
+            OR pegawai.nip_baru ILIKE '%' || $5::VARCHAR || '%'
+        )
+    )
+    AND (
+        $6::VARCHAR IS NULL
+        OR $6::VARCHAR = uk.id
+        OR $6::VARCHAR = uk.eselon_1
+        OR $6::VARCHAR = uk.eselon_2
+        OR $6::VARCHAR = uk.eselon_3
+        OR $6::VARCHAR = uk.eselon_4
+    )
+    AND ( $7::INTEGER IS NULL OR pegawai.gol_id = $7::INTEGER )
+    AND ( $8::VARCHAR IS NULL OR pegawai.jabatan_instansi_id = $8::VARCHAR )
+    AND ( $4::varchar[] = ARRAY[$3::varchar] OR $9::varchar IS NULL OR pegawai.status_cpns_pns = $9::VARCHAR )
+    AND pegawai.deleted_at IS NULL
+LIMIT $1 OFFSET $2
+`
+
+type ListPegawaiAktifParams struct {
+	Limit       int32       `db:"limit"`
+	Offset      int32       `db:"offset"`
+	Mpp         string      `db:"mpp"`
+	StatusHukum []string    `db:"status_hukum"`
+	Keyword     pgtype.Text `db:"keyword"`
+	UnitKerjaID pgtype.Text `db:"unit_kerja_id"`
+	GolonganID  pgtype.Int4 `db:"golongan_id"`
+	JabatanID   pgtype.Text `db:"jabatan_id"`
+	StatusPns   pgtype.Text `db:"status_pns"`
+}
+
+type ListPegawaiAktifRow struct {
+	PnsID         string      `db:"pns_id"`
+	Nip           pgtype.Text `db:"nip"`
+	Nama          pgtype.Text `db:"nama"`
+	GelarDepan    pgtype.Text `db:"gelar_depan"`
+	GelarBelakang pgtype.Text `db:"gelar_belakang"`
+	Golongan      pgtype.Text `db:"golongan"`
+	Jabatan       pgtype.Text `db:"jabatan"`
+	UnorID        pgtype.Text `db:"unor_id"`
+	Status        string      `db:"status"`
+}
+
+func (q *Queries) ListPegawaiAktif(ctx context.Context, arg ListPegawaiAktifParams) ([]ListPegawaiAktifRow, error) {
+	rows, err := q.db.Query(ctx, listPegawaiAktif,
+		arg.Limit,
+		arg.Offset,
+		arg.Mpp,
+		arg.StatusHukum,
+		arg.Keyword,
+		arg.UnitKerjaID,
+		arg.GolonganID,
+		arg.JabatanID,
+		arg.StatusPns,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListPegawaiAktifRow
+	for rows.Next() {
+		var i ListPegawaiAktifRow
+		if err := rows.Scan(
+			&i.PnsID,
+			&i.Nip,
+			&i.Nama,
+			&i.GelarDepan,
+			&i.GelarBelakang,
+			&i.Golongan,
+			&i.Jabatan,
+			&i.UnorID,
+			&i.Status,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

@@ -10,6 +10,7 @@ import (
 
 type Querier interface {
 	CountJenisKenaikanPangkat(ctx context.Context) (int64, error)
+	CountPegawaiAktif(ctx context.Context, arg CountPegawaiAktifParams) (int64, error)
 	CountRefGolongan(ctx context.Context) (int64, error)
 	CountRefJabatan(ctx context.Context, nama pgtype.Text) (int64, error)
 	CountRefJenisDiklat(ctx context.Context) (int64, error)
@@ -59,6 +60,7 @@ type Querier interface {
 	ListLogSuratKeputusanByID(ctx context.Context, id string) ([]ListLogSuratKeputusanByIDRow, error)
 	ListOrangTuaByNip(ctx context.Context, nipBaru pgtype.Text) ([]ListOrangTuaByNipRow, error)
 	ListPasanganByNip(ctx context.Context, nipBaru pgtype.Text) ([]ListPasanganByNipRow, error)
+	ListPegawaiAktif(ctx context.Context, arg ListPegawaiAktifParams) ([]ListPegawaiAktifRow, error)
 	ListRefGolongan(ctx context.Context, arg ListRefGolonganParams) ([]ListRefGolonganRow, error)
 	ListRefJabatan(ctx context.Context, arg ListRefJabatanParams) ([]ListRefJabatanRow, error)
 	ListRefJenisDiklat(ctx context.Context, arg ListRefJenisDiklatParams) ([]ListRefJenisDiklatRow, error)
