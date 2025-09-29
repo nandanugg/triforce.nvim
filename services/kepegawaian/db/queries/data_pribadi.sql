@@ -62,7 +62,8 @@ select
   pegawai.bpjs,
   pegawai.npwp,
   pegawai.tanggal_npwp,
-  pegawai.no_taspen
+  pegawai.no_taspen,
+  pegawai.foto
 from pegawai
 left join ref_lokasi ref_lokasi_tempat_lahir
 	on ref_lokasi_tempat_lahir.id = pegawai.tempat_lahir_id and ref_lokasi_tempat_lahir.deleted_at is null

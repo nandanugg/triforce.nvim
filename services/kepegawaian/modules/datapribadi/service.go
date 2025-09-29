@@ -110,5 +110,6 @@ func (s *service) get(ctx context.Context, nip string) (*dataPribadi, error) {
 		TanggalNPWP:              db.Date(data.TanggalNpwp.Time),
 		NomorTaspen:              data.NoTaspen.String,
 		UnitOrganisasi:           unitOrganisasi,
+		Photo:                    data.Foto,
 	}, nil
 }

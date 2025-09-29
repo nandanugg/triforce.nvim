@@ -98,13 +98,13 @@ func Test_handler_getDataPribadi(t *testing.T) {
 			('G', 'H',         'Unor G',  'Unit Kerja G',  null,            null),
 			('H', '6',         'Unor H',  'Unit Kerja H',  null,            '2000-01-01');
 		insert into pegawai
-			(nip_baru, pns_id, nama, gelar_depan, gelar_belakang, jenis_jabatan_id, tmt_jabatan, unor_id, nik, kk, jenis_kelamin, tempat_lahir, tempat_lahir_id, tanggal_lahir, tingkat_pendidikan_id, pendidikan_id, jenis_kawin_id, agama_id, email_dikbud, email, alamat, no_hp, no_darurat, jenis_pegawai_id, status_pegawai, tmt_cpns, mk_tahun_swasta, mk_bulan_swasta, masa_kerja, jabatan_instansi_id, jabatan_instansi_real_id, lokasi_kerja, lokasi_kerja_id, gol_awal_id, gol_id, tmt_golongan, no_sk_cpns, status_cpns_pns, tmt_pns, kartu_pegawai, no_surat_dokter, tanggal_surat_dokter, no_bebas_narkoba, tanggal_bebas_narkoba, no_catatan_polisi, tanggal_catatan_polisi, akte_kelahiran, bpjs, npwp, tanggal_npwp, no_taspen, kedudukan_hukum_id, terminated_date, deleted_at) values
-			('1c', 'PNS_1c', 'Budi Santoso', 'Dr.', 'M.Sc', 2, '2020-01-01', '0', '3173000000000001', '3173000000000002', 'L', 'DKI Jakarta', 1, '1990-05-20', 1, '1', 1, 1, 'budi@dikbud.go.id', 'budi@gmail.com', 'Jl. Merdeka No. 123', '08123456789', '08198765432', 1, 1, '2015-06-01', 2, 12, '5 Tahun 6 Bulan', 'KJ2', 'KJ3', 'Jakarta HQ', 2, 1, 2, '2018-01-01', 'SK-CPNS-2015', 'PNS', '2017-01-01', 'KARPEG001', 'DOC-HEALTH-001', '2015-05-01', 'BN-001', '2015-05-02', 'SKCK-001', '2015-05-03', 'AKTE-001', 'BPJS-001', 'NPWP-001', '2016-01-01', 'TASPEN-001', 2, null, null),
-			('1d', 'PNS_1d', 'John Doe', null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null),
-			('1e', 'PNS_1e', 'John Santoso', 'Dr.', 'M.Sc', 4, '2020-01-01', 'E', '3173000000000001', '3173000000000002', 'L', 'DKI Jakarta', 3, '1990-05-20', 2, '2', 2, 2, 'budi@dikbud.go.id', 'budi@gmail.com', 'Jl. Merdeka No. 123', '08123456789', '08198765432', 2, 1, null, 2, 12, '5 Tahun 6 Bulan', 'KJ5', 'KJ5', 'Jakarta HQ', 3, 3, 3, '2018-01-01', 'SK-CPNS-2015', 'CPNS', '2017-01-01', 'KARPEG001', 'DOC-HEALTH-001', '2015-05-01', 'BN-001', '2015-05-02', 'SKCK-001', '2015-05-03', 'AKTE-001', 'BPJS-001', 'NPWP-001', '2016-01-01', 'TASPEN-001', 3, null, null),
-			('1f', 'PNS001', 'Budi John', '', '', 1, '2020-01-01', '8', '3173000000000001', '3173000000000002', 'L', 'DKI Jakarta', 1, '1990-05-20', 1, '1', 1, 1, 'budi@dikbud.go.id', 'budi@gmail.com', 'Jl. Merdeka No. 123', '08123456789', '08198765432', 1, 1, '2015-06-01', null, null, '5 Tahun 6 Bulan', 'KJ4', 'KJ6', 'Jakarta HQ', 1, 1, 2, '2018-01-01', 'SK-CPNS-2015', 'C', '2017-01-01', 'KARPEG001', 'DOC-HEALTH-001', '2015-05-01', 'BN-001', '2015-05-02', 'SKCK-001', '2015-05-03', 'AKTE-001', 'BPJS-001', 'NPWP-001', '2016-01-01', 'TASPEN-001', 1, '3000-01-01', null),
-			('1g', 'PNS_1g', 'Budi Santoso', 'Dr.', 'M.Sc', 1, '2020-01-01', 'C', '3173000000000001', '3173000000000002', 'L', 'DKI Jakarta', 1, '1990-05-20', 1, '1', 1, 1, 'budi@dikbud.go.id', 'budi@gmail.com', 'Jl. Merdeka No. 123', '08123456789', '08198765432', 1, 1, '2015-06-01', 2, 4, '5 Tahun 6 Bulan', 'KJ1', 'KJ6', 'Jakarta HQ', 2, 1, 2, '2018-01-01', 'SK-CPNS-2015', 'P', null, 'KARPEG001', 'DOC-HEALTH-001', '2015-05-01', 'BN-001', '2015-05-02', 'SKCK-001', '2015-05-03', 'AKTE-001', 'BPJS-001', 'NPWP-001', '2016-01-01', 'TASPEN-001', 4, '2000-01-01', null),
-			('2c', 'PNS002', 'Budi Santoso', 'Dr.', 'M.Sc', 2, '2020-01-01', '0', '3173000000000001', '3173000000000002', 'L', 'DKI Jakarta', 1, '1990-05-20', 1, '1', 1, 1, 'budi@dikbud.go.id', 'budi@gmail.com', 'Jl. Merdeka No. 123', '08123456789', '08198765432', 1, 1, '2015-06-01', 2, 12, '5 Tahun 6 Bulan', 'KJ2', 'KJ3', 'Jakarta HQ', 1, 1, 2, '2018-01-01', 'SK-CPNS-2015', 'CPNS', '2017-01-01', 'KARPEG001', 'DOC-HEALTH-001', '2015-05-01', 'BN-001', '2015-05-02', 'SKCK-001', '2015-05-03', 'AKTE-001', 'BPJS-001', 'NPWP-001', '2016-01-01', 'TASPEN-001', 2, null, '2000-01-01');
+			(nip_baru, pns_id, nama, gelar_depan, gelar_belakang, jenis_jabatan_id, tmt_jabatan, unor_id, nik, kk, jenis_kelamin, tempat_lahir, tempat_lahir_id, tanggal_lahir, tingkat_pendidikan_id, pendidikan_id, jenis_kawin_id, agama_id, email_dikbud, email, alamat, no_hp, no_darurat, jenis_pegawai_id, status_pegawai, tmt_cpns, mk_tahun_swasta, mk_bulan_swasta, masa_kerja, jabatan_instansi_id, jabatan_instansi_real_id, lokasi_kerja, lokasi_kerja_id, gol_awal_id, gol_id, tmt_golongan, no_sk_cpns, status_cpns_pns, tmt_pns, kartu_pegawai, no_surat_dokter, tanggal_surat_dokter, no_bebas_narkoba, tanggal_bebas_narkoba, no_catatan_polisi, tanggal_catatan_polisi, akte_kelahiran, bpjs, npwp, tanggal_npwp, no_taspen, kedudukan_hukum_id, terminated_date, foto, deleted_at) values
+			('1c', 'PNS_1c', 'Budi Santoso', 'Dr.', 'M.Sc', 2, '2020-01-01', '0', '3173000000000001', '3173000000000002', 'L', 'DKI Jakarta', 1, '1990-05-20', 1, '1', 1, 1, 'budi@dikbud.go.id', 'budi@gmail.com', 'Jl. Merdeka No. 123', '08123456789', '08198765432', 1, 1, '2015-06-01', 2, 12, '5 Tahun 6 Bulan', 'KJ2', 'KJ3', 'Jakarta HQ', 2, 1, 2, '2018-01-01', 'SK-CPNS-2015', 'PNS', '2017-01-01', 'KARPEG001', 'DOC-HEALTH-001', '2015-05-01', 'BN-001', '2015-05-02', 'SKCK-001', '2015-05-03', 'AKTE-001', 'BPJS-001', 'NPWP-001', '2016-01-01', 'TASPEN-001', 2, null, 'foto_1c.png', null),
+			('1d', 'PNS_1d', 'John Doe', null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null),
+			('1e', 'PNS_1e', 'John Santoso', 'Dr.', 'M.Sc', 4, '2020-01-01', 'E', '3173000000000001', '3173000000000002', 'L', 'DKI Jakarta', 3, '1990-05-20', 2, '2', 2, 2, 'budi@dikbud.go.id', 'budi@gmail.com', 'Jl. Merdeka No. 123', '08123456789', '08198765432', 2, 1, null, 2, 12, '5 Tahun 6 Bulan', 'KJ5', 'KJ5', 'Jakarta HQ', 3, 3, 3, '2018-01-01', 'SK-CPNS-2015', 'CPNS', '2017-01-01', 'KARPEG001', 'DOC-HEALTH-001', '2015-05-01', 'BN-001', '2015-05-02', 'SKCK-001', '2015-05-03', 'AKTE-001', 'BPJS-001', 'NPWP-001', '2016-01-01', 'TASPEN-001', 3, null, null, null),
+			('1f', 'PNS001', 'Budi John', '', '', 1, '2020-01-01', '8', '3173000000000001', '3173000000000002', 'L', 'DKI Jakarta', 1, '1990-05-20', 1, '1', 1, 1, 'budi@dikbud.go.id', 'budi@gmail.com', 'Jl. Merdeka No. 123', '08123456789', '08198765432', 1, 1, '2015-06-01', null, null, '5 Tahun 6 Bulan', 'KJ4', 'KJ6', 'Jakarta HQ', 1, 1, 2, '2018-01-01', 'SK-CPNS-2015', 'C', '2017-01-01', 'KARPEG001', 'DOC-HEALTH-001', '2015-05-01', 'BN-001', '2015-05-02', 'SKCK-001', '2015-05-03', 'AKTE-001', 'BPJS-001', 'NPWP-001', '2016-01-01', 'TASPEN-001', 1, '3000-01-01', null, null),
+			('1g', 'PNS_1g', 'Budi Santoso', 'Dr.', 'M.Sc', 1, '2020-01-01', 'C', '3173000000000001', '3173000000000002', 'L', 'DKI Jakarta', 1, '1990-05-20', 1, '1', 1, 1, 'budi@dikbud.go.id', 'budi@gmail.com', 'Jl. Merdeka No. 123', '08123456789', '08198765432', 1, 1, '2015-06-01', 2, 4, '5 Tahun 6 Bulan', 'KJ1', 'KJ6', 'Jakarta HQ', 2, 1, 2, '2018-01-01', 'SK-CPNS-2015', 'P', null, 'KARPEG001', 'DOC-HEALTH-001', '2015-05-01', 'BN-001', '2015-05-02', 'SKCK-001', '2015-05-03', 'AKTE-001', 'BPJS-001', 'NPWP-001', '2016-01-01', 'TASPEN-001', 4, '2000-01-01', null, null),
+			('2c', 'PNS002', 'Budi Santoso', 'Dr.', 'M.Sc', 2, '2020-01-01', '0', '3173000000000001', '3173000000000002', 'L', 'DKI Jakarta', 1, '1990-05-20', 1, '1', 1, 1, 'budi@dikbud.go.id', 'budi@gmail.com', 'Jl. Merdeka No. 123', '08123456789', '08198765432', 1, 1, '2015-06-01', 2, 12, '5 Tahun 6 Bulan', 'KJ2', 'KJ3', 'Jakarta HQ', 1, 1, 2, '2018-01-01', 'SK-CPNS-2015', 'CPNS', '2017-01-01', 'KARPEG001', 'DOC-HEALTH-001', '2015-05-01', 'BN-001', '2015-05-02', 'SKCK-001', '2015-05-03', 'AKTE-001', 'BPJS-001', 'NPWP-001', '2016-01-01', 'TASPEN-001', 2, null, null, '2000-01-01');
 		update unit_kerja set pemimpin_pns_id = 'PNS001' where id = '8';
 	`
 
@@ -188,7 +188,8 @@ func Test_handler_getDataPribadi(t *testing.T) {
 						"npwp":                        "NPWP-001",
 						"tanggal_npwp":                "2016-01-01",
 						"nomor_taspen":                "TASPEN-001",
-						"unit_organisasi":             ["Unor 0", "Unor 1", "Unor 2", "Unor 3", "Unor 4", "Unor 5", "Unor 6", "Unor 7", "Unor 8", "Unor 9"]
+						"unit_organisasi":             ["Unor 0", "Unor 1", "Unor 2", "Unor 3", "Unor 4", "Unor 5", "Unor 6", "Unor 7", "Unor 8", "Unor 9"],
+						"photo":					   "foto_1c.png"
 					}
 				}
 			`,
@@ -252,7 +253,8 @@ func Test_handler_getDataPribadi(t *testing.T) {
 						"npwp":                        "",
 						"tanggal_npwp":                null,
 						"nomor_taspen":                "",
-						"unit_organisasi":             []
+						"unit_organisasi":             [],
+						"photo":					   null
 					}
 				}
 			`,
@@ -316,7 +318,8 @@ func Test_handler_getDataPribadi(t *testing.T) {
 						"npwp":                        "NPWP-001",
 						"tanggal_npwp":                "2016-01-01",
 						"nomor_taspen":                "TASPEN-001",
-						"unit_organisasi":             ["Unor E", "Unor G"]
+						"unit_organisasi":             ["Unor E", "Unor G"],
+						"photo":					   null
 					}
 				}
 			`,
@@ -380,7 +383,8 @@ func Test_handler_getDataPribadi(t *testing.T) {
 						"npwp":                        "NPWP-001",
 						"tanggal_npwp":                "2016-01-01",
 						"nomor_taspen":                "TASPEN-001",
-						"unit_organisasi":             ["Unor 8", "Unor 9", "Unor A", "Unor B", "Unor C", "Unor D"]
+						"unit_organisasi":             ["Unor 8", "Unor 9", "Unor A", "Unor B", "Unor C", "Unor D"],
+						"photo":					   null
 					}
 				}
 			`,
@@ -444,7 +448,8 @@ func Test_handler_getDataPribadi(t *testing.T) {
 						"npwp":                        "NPWP-001",
 						"tanggal_npwp":                "2016-01-01",
 						"nomor_taspen":                "TASPEN-001",
-						"unit_organisasi":             ["Unor C", "Unor D"]
+						"unit_organisasi":             ["Unor C", "Unor D"],
+						"photo":					   null
 					}
 				}
 			`,

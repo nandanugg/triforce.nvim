@@ -73,7 +73,8 @@ select
   pegawai.bpjs,
   pegawai.npwp,
   pegawai.tanggal_npwp,
-  pegawai.no_taspen
+  pegawai.no_taspen,
+  pegawai.foto
 from pegawai
 left join ref_lokasi ref_lokasi_tempat_lahir
 	on ref_lokasi_tempat_lahir.id = pegawai.tempat_lahir_id and ref_lokasi_tempat_lahir.deleted_at is null
@@ -168,6 +169,7 @@ type GetDataPribadiRow struct {
 	Npwp                 pgtype.Text `db:"npwp"`
 	TanggalNpwp          pgtype.Date `db:"tanggal_npwp"`
 	NoTaspen             pgtype.Text `db:"no_taspen"`
+	Foto                 pgtype.Text `db:"foto"`
 }
 
 func (q *Queries) GetDataPribadi(ctx context.Context, arg GetDataPribadiParams) (GetDataPribadiRow, error) {
@@ -226,6 +228,7 @@ func (q *Queries) GetDataPribadi(ctx context.Context, arg GetDataPribadiParams) 
 		&i.Npwp,
 		&i.TanggalNpwp,
 		&i.NoTaspen,
+		&i.Foto,
 	)
 	return i, err
 }
