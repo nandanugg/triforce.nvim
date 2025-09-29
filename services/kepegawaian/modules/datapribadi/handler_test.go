@@ -189,7 +189,7 @@ func Test_handler_getDataPribadi(t *testing.T) {
 						"tanggal_npwp":                "2016-01-01",
 						"nomor_taspen":                "TASPEN-001",
 						"unit_organisasi":             ["Unor 0", "Unor 1", "Unor 2", "Unor 3", "Unor 4", "Unor 5", "Unor 6", "Unor 7", "Unor 8", "Unor 9"],
-						"photo":					   "foto_1c.png"
+						"photo":                       "foto_1c.png"
 					}
 				}
 			`,
@@ -254,7 +254,7 @@ func Test_handler_getDataPribadi(t *testing.T) {
 						"tanggal_npwp":                null,
 						"nomor_taspen":                "",
 						"unit_organisasi":             [],
-						"photo":					   null
+						"photo":                       null
 					}
 				}
 			`,
@@ -319,7 +319,7 @@ func Test_handler_getDataPribadi(t *testing.T) {
 						"tanggal_npwp":                "2016-01-01",
 						"nomor_taspen":                "TASPEN-001",
 						"unit_organisasi":             ["Unor E", "Unor G"],
-						"photo":					   null
+						"photo":                       null
 					}
 				}
 			`,
@@ -384,7 +384,7 @@ func Test_handler_getDataPribadi(t *testing.T) {
 						"tanggal_npwp":                "2016-01-01",
 						"nomor_taspen":                "TASPEN-001",
 						"unit_organisasi":             ["Unor 8", "Unor 9", "Unor A", "Unor B", "Unor C", "Unor D"],
-						"photo":					   null
+						"photo":                       null
 					}
 				}
 			`,
@@ -449,7 +449,7 @@ func Test_handler_getDataPribadi(t *testing.T) {
 						"tanggal_npwp":                "2016-01-01",
 						"nomor_taspen":                "TASPEN-001",
 						"unit_organisasi":             ["Unor C", "Unor D"],
-						"photo":					   null
+						"photo":                       null
 					}
 				}
 			`,

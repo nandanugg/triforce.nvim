@@ -99,3 +99,31 @@ func (h *handler) listAdmin(c echo.Context) error {
 		},
 	})
 }
+
+type getAdminRequest struct {
+	NIP string `param:"nip"`
+}
+
+type getAdminResponse struct {
+	Data pegawaiDetail `json:"data"`
+}
+
+func (h *handler) getAdmin(c echo.Context) error {
+	var req getAdminRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	ctx := c.Request().Context()
+	data, err := h.service.adminGetPegawai(ctx, req.NIP)
+	if err != nil {
+		slog.ErrorContext(ctx, "Error getting data detil pegawai.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	if data == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "data tidak ditemukan")
+	}
+
+	return c.JSON(http.StatusOK, getAdminResponse{Data: *data})
+}

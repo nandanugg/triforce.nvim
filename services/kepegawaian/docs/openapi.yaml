@@ -184,6 +184,33 @@ paths:
         - $ref: "#/components/parameters/authRequired"
         - $ref: "#/components/parameters/limit"
         - $ref: "#/components/parameters/offset"
+        - name: keyword
+          in: query
+          schema:
+            type: string
+            description: Kata kunci untuk pencarian pegawai berdasarkan nama / NIP
+        - name: unit_id
+          in: query
+          schema:
+            type: string
+            description: ID unit kerja untuk memfilter pegawai sesuai unit kerjanya
+        - name: golongan_id
+          in: query
+          schema:
+            type: integer
+            format: int32
+            description: ID golongan untuk memfilter pegawai sesuai golongannya
+        - name: jabatan_id
+          in: query
+          schema:
+            type: string
+            description: ID jabatan untuk memfilter pegawai sesuai jabatannya
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: ["PNS", "CPNS", "MPP"]
+            description: Status pegawai untuk memfilter data
       responses:
         "200":
           description: Sukses.
@@ -216,6 +243,30 @@ paths:
                           type: string
                   meta:
                     $ref: "#/components/schemas/metaPagination"
+  /v1/admin/pegawai/{nip}:
+    get:
+      tags:
+        - Admin Pegawai Aktif
+      summary: Detail pegawai aktif
+      description: Detail pegawai aktif dari sisi admin berdasarkan NIP.
+      operationId: adminDetailPegawaiAktif
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/dataPegawai"
   /v1/data-pribadi:
     get:
       tags:
@@ -234,136 +285,7 @@ paths:
                 additionalProperties: false
                 properties:
                   data:
-                    type: object
-                    additionalProperties: false
-                    properties:
-                      pns_id:
-                        type: string
-                      nama:
-                        type: string
-                      gelar_depan:
-                        type: string
-                      gelar_belakang:
-                        type: string
-                      jabatan_aktual:
-                        type: string
-                      jenis_jabatan_aktual:
-                        type: string
-                      tmt_jabatan:
-                        type: string
-                        format: date
-                        nullable: true
-                      nip:
-                        type: string
-                      nik:
-                        type: string
-                      nomor_kk:
-                        type: string
-                      jenis_kelamin:
-                        type: string
-                      tempat_lahir:
-                        type: string
-                      tanggal_lahir:
-                        type: string
-                        format: date
-                        nullable: true
-                      tingkat_pendidikan:
-                        type: string
-                      pendidikan:
-                        type: string
-                      status_perkawinan:
-                        type: string
-                      agama:
-                        type: string
-                      email_dikbud:
-                        type: string
-                      email_pribadi:
-                        type: string
-                      alamat:
-                        type: string
-                      nomor_hp:
-                        type: string
-                      nomor_kontak_darurat:
-                        type: string
-                      jenis_pegawai:
-                        type: string
-                      masa_kerja_keseluruhan:
-                        type: string
-                      masa_kerja_golongan:
-                        type: string
-                      jabatan:
-                        type: string
-                      jenis_jabatan:
-                        type: string
-                      kelas_jabatan:
-                        type: string
-                      lokasi_kerja:
-                        type: string
-                      golongan_ruang_awal:
-                        type: string
-                      golongan_ruang_akhir:
-                        type: string
-                      pangkat_akhir:
-                        type: string
-                      tmt_golongan:
-                        type: string
-                        format: date
-                        nullable: true
-                      tmt_asn:
-                        type: string
-                        format: date
-                        nullable: true
-                      nomor_sk_asn:
-                        type: string
-                      is_pppk:
-                        type: boolean
-                      status_asn:
-                        type: string
-                      status_pns:
-                        type: string
-                      tmt_pns:
-                        type: string
-                        format: date
-                        nullable: true
-                      kartu_pegawai:
-                        type: string
-                      nomor_surat_dokter:
-                        type: string
-                      tanggal_surat_dokter:
-                        type: string
-                        format: date
-                        nullable: true
-                      nomor_surat_bebas_narkoba:
-                        type: string
-                      tanggal_surat_bebas_narkoba:
-                        type: string
-                        format: date
-                        nullable: true
-                      nomor_catatan_polisi:
-                        type: string
-                      tanggal_catatan_polisi:
-                        type: string
-                        format: date
-                        nullable: true
-                      akte_kelahiran:
-                        type: string
-                      nomor_bpjs:
-                        type: string
-                      npwp:
-                        type: string
-                      tanggal_npwp:
-                        type: string
-                        format: date
-                        nullable: true
-                      nomor_taspen:
-                        type: string
-                      unit_organisasi:
-                        type: array
-                        items:
-                          type: string
-                      photo:
-                        type: string
-                        nullable: true
+                    $ref: "#/components/schemas/dataPegawai"
   /v1/golongan:
     get:
       tags:
@@ -2064,3 +1986,134 @@ components:
                     type: string
                     format: date-time
                     example: "2025-09-24T13:00:00Z"
+    dataPegawai:
+      type: object
+      additionalProperties: false
+      properties:
+        pns_id:
+          type: string
+        nama:
+          type: string
+        gelar_depan:
+          type: string
+        gelar_belakang:
+          type: string
+        jabatan_aktual:
+          type: string
+        jenis_jabatan_aktual:
+          type: string
+        tmt_jabatan:
+          type: string
+          format: date
+          nullable: true
+        nip:
+          type: string
+        nik:
+          type: string
+        nomor_kk:
+          type: string
+        jenis_kelamin:
+          type: string
+        tempat_lahir:
+          type: string
+        tanggal_lahir:
+          type: string
+          format: date
+          nullable: true
+        tingkat_pendidikan:
+          type: string
+        pendidikan:
+          type: string
+        status_perkawinan:
+          type: string
+        agama:
+          type: string
+        email_dikbud:
+          type: string
+        email_pribadi:
+          type: string
+        alamat:
+          type: string
+        nomor_hp:
+          type: string
+        nomor_kontak_darurat:
+          type: string
+        jenis_pegawai:
+          type: string
+        masa_kerja_keseluruhan:
+          type: string
+        masa_kerja_golongan:
+          type: string
+        jabatan:
+          type: string
+        jenis_jabatan:
+          type: string
+        kelas_jabatan:
+          type: string
+        lokasi_kerja:
+          type: string
+        golongan_ruang_awal:
+          type: string
+        golongan_ruang_akhir:
+          type: string
+        pangkat_akhir:
+          type: string
+        tmt_golongan:
+          type: string
+          format: date
+          nullable: true
+        tmt_asn:
+          type: string
+          format: date
+          nullable: true
+        nomor_sk_asn:
+          type: string
+        is_pppk:
+          type: boolean
+        status_asn:
+          type: string
+        status_pns:
+          type: string
+        tmt_pns:
+          type: string
+          format: date
+          nullable: true
+        kartu_pegawai:
+          type: string
+        nomor_surat_dokter:
+          type: string
+        tanggal_surat_dokter:
+          type: string
+          format: date
+          nullable: true
+        nomor_surat_bebas_narkoba:
+          type: string
+        tanggal_surat_bebas_narkoba:
+          type: string
+          format: date
+          nullable: true
+        nomor_catatan_polisi:
+          type: string
+        tanggal_catatan_polisi:
+          type: string
+          format: date
+          nullable: true
+        akte_kelahiran:
+          type: string
+        nomor_bpjs:
+          type: string
+        npwp:
+          type: string
+        tanggal_npwp:
+          type: string
+          format: date
+          nullable: true
+        nomor_taspen:
+          type: string
+        unit_organisasi:
+          type: array
+          items:
+            type: string
+        photo:
+          type: string
+          nullable: true
