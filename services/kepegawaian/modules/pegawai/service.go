@@ -61,6 +61,7 @@ func (s *service) getProfileByPNSID(ctx context.Context, pnsID string) (*profile
 		Golongan:       typeutil.Cast[string](data.Golongan),
 		Jabatan:        data.Jabatan.String,
 		UnitOrganisasi: unitOrganisasi,
+		Photo:          data.Foto,
 	}, nil
 }
 

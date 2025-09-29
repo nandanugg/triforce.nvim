@@ -609,6 +609,9 @@ paths:
                         type: array
                         items:
                           type: string
+                      photo:
+                        type: string
+                        nullable: true
   /v1/riwayat-asesmen-nine-box:
     get:
       tags:

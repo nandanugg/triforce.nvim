@@ -79,7 +79,8 @@ select
   p.unor_id,
   rj.nama_jabatan as jabatan,
   rg.nama_pangkat as pangkat,
-  case when rkh.is_pppk then rg.gol_pppk else rg.nama end as golongan
+  case when rkh.is_pppk then rg.gol_pppk else rg.nama end as golongan,
+  p.foto
 from pegawai p
 left join ref_jabatan rj on rj.kode_jabatan = p.jabatan_instansi_id and rj.deleted_at is null
 left join ref_golongan rg on rg.id = p.gol_id and rg.deleted_at is null
@@ -97,6 +98,7 @@ type GetProfilePegawaiByPNSIDRow struct {
 	Jabatan       pgtype.Text `db:"jabatan"`
 	Pangkat       pgtype.Text `db:"pangkat"`
 	Golongan      interface{} `db:"golongan"`
+	Foto          pgtype.Text `db:"foto"`
 }
 
 func (q *Queries) GetProfilePegawaiByPNSID(ctx context.Context, pnsID string) (GetProfilePegawaiByPNSIDRow, error) {
@@ -112,6 +114,7 @@ func (q *Queries) GetProfilePegawaiByPNSID(ctx context.Context, pnsID string) (G
 		&i.Jabatan,
 		&i.Pangkat,
 		&i.Golongan,
+		&i.Foto,
 	)
 	return i, err
 }

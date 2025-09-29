@@ -58,11 +58,11 @@ func Test_handler_getDataPribadi(t *testing.T) {
 			('E', 'F',         'Unor E',  null),
 			('F', '6',         'Unor F',  '2000-01-01');
 		insert into pegawai
-			(pns_id, nip_lama, nip_baru, nama, gelar_depan, gelar_belakang, unor_id, jabatan_instansi_id, gol_id, kedudukan_hukum_id, deleted_at) values
-			('aa>a', 'nip_l1', 'nip_b1', 'John Doe', 'Dr.', 'S.Kom', '0', 'KJ1', 1, 2, null),
-			('1c', 'nip_l2', 'nip_b2', 'Bob', null, null, 'C', 'KJ1', 1, 1, null),
-			('1d', 'nip_l3', 'nip_b3', 'Jane', '', '', 'F', 'KJ2', 2, 3, null),
-			('1e', 'nip_l3', 'nip_b3', 'John Doe', '', '', '0', 'KJ1', 1, 1, '2000-01-01');
+			(pns_id, nip_lama, nip_baru, nama, gelar_depan, gelar_belakang, unor_id, jabatan_instansi_id, gol_id, kedudukan_hukum_id, foto, deleted_at) values
+			('aa>a', 'nip_l1', 'nip_b1', 'John Doe', 'Dr.', 'S.Kom', '0', 'KJ1', 1, 2, 'Foto_aa_a.jpg', null),
+			('1c', 'nip_l2', 'nip_b2', 'Bob', null, null, 'C', 'KJ1', 1, 1, null, null),
+			('1d', 'nip_l3', 'nip_b3', 'Jane', '', '', 'F', 'KJ2', 2, 3, null, null),
+			('1e', 'nip_l3', 'nip_b3', 'John Doe', '', '', '0', 'KJ1', 1, 1, null, '2000-01-01');
 	`
 
 	tests := []struct {
@@ -88,7 +88,8 @@ func Test_handler_getDataPribadi(t *testing.T) {
 					"golongan":        "I/a",
 					"pangkat":         "Pangkat 1",
 					"jabatan":         "Jabatan 1",
-					"unit_organisasi": [ "Unor 0", "Unor 1", "Unor 2", "Unor 3", "Unor 4", "Unor 5", "Unor 6", "Unor 7", "Unor 8", "Unor 9" ]
+					"unit_organisasi": [ "Unor 0", "Unor 1", "Unor 2", "Unor 3", "Unor 4", "Unor 5", "Unor 6", "Unor 7", "Unor 8", "Unor 9" ],
+					"photo":           "Foto_aa_a.jpg"
 				}
 			}`,
 		},
@@ -108,7 +109,8 @@ func Test_handler_getDataPribadi(t *testing.T) {
 					"golongan":        "I",
 					"pangkat":         "Pangkat 1",
 					"jabatan":         "Jabatan 1",
-					"unit_organisasi": [ "Unor C", "Unor E" ]
+					"unit_organisasi": [ "Unor C", "Unor E" ],
+					"photo":           null
 				}
 			}`,
 		},
@@ -127,7 +129,8 @@ func Test_handler_getDataPribadi(t *testing.T) {
 					"golongan":        "",
 					"pangkat":         "",
 					"jabatan":         "",
-					"unit_organisasi": []
+					"unit_organisasi": [],
+					"photo":           null
 				}
 			}`,
 		},
