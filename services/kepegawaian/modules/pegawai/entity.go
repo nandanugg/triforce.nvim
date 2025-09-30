@@ -1,6 +1,8 @@
 package pegawai
 
 import (
+	"slices"
+
 	"github.com/jackc/pgx/v5/pgtype"
 
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
@@ -31,19 +33,49 @@ type pegawai struct {
 }
 
 const (
-	statusPNSMPP   = "Masa Persiapan Pensiun"
-	statusPNSAktif = "Aktif"
+	statusKedudukanHukumMPP = "Masa Persiapan Pensiun"
+	statusPNSLabel          = "PNS"
+	statusCPNSLabel         = "CPNS"
 )
 
-func getStatusHukum(params string) []string {
+var (
+	statusPNSInDB  = []string{"PNS", "P"}
+	statusCPNSInDB = []string{"CPNS", "C"}
+)
+
+func getStatusHukum(params string) string {
 	switch params {
-	case "PNS", "CPNS":
-		return []string{statusPNSAktif}
 	case "MPP":
-		return []string{statusPNSMPP}
+		return statusKedudukanHukumMPP
 	default:
-		return []string{statusPNSAktif, statusPNSMPP}
+		return ""
 	}
+}
+
+func getStatusPNSDB(params string) []string {
+	switch params {
+	case statusPNSLabel:
+		return statusPNSInDB
+	case statusCPNSLabel:
+		return statusCPNSInDB
+	default:
+		return nil
+	}
+}
+
+func getLabelStatusPNS(namaKedudukuanHukum, statusPNSCPNS string) string {
+	if namaKedudukuanHukum == statusKedudukanHukumMPP {
+		return "MPP"
+	}
+	if slices.Contains(statusPNSInDB, statusPNSCPNS) {
+		return statusPNSLabel
+	}
+	if slices.Contains(statusCPNSInDB, statusPNSCPNS) {
+		return statusCPNSLabel
+	}
+
+	// for other status, return as-is
+	return statusPNSCPNS
 }
 
 const (
@@ -104,4 +136,5 @@ type pegawaiDetail struct {
 	NomorTaspen              string      `json:"nomor_taspen"`
 	UnitOrganisasi           []string    `json:"unit_organisasi"`
 	Photo                    pgtype.Text `json:"photo"`
+	UnorID                   pgtype.Text `json:"unor_id"`
 }

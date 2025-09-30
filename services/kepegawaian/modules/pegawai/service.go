@@ -76,6 +76,7 @@ type adminListPegawaiParams struct {
 }
 
 func (s *service) adminListPegawai(ctx context.Context, arg adminListPegawaiParams) ([]pegawai, uint, error) {
+	statusHukum := getStatusHukum(arg.status)
 	data, err := s.repo.ListPegawaiAktif(ctx, sqlc.ListPegawaiAktifParams{
 		Limit:       int32(arg.limit),
 		Offset:      int32(arg.offset),
@@ -83,9 +84,9 @@ func (s *service) adminListPegawai(ctx context.Context, arg adminListPegawaiPara
 		UnitKerjaID: pgtype.Text{Valid: arg.unitID != "", String: arg.unitID},
 		GolonganID:  pgtype.Int4{Valid: arg.golonganID != 0, Int32: arg.golonganID},
 		JabatanID:   pgtype.Text{Valid: arg.jabatanID != "", String: arg.jabatanID},
-		StatusHukum: getStatusHukum(arg.status),
-		Mpp:         statusPNSMPP,
-		StatusPns:   pgtype.Text{Valid: arg.status != "", String: arg.status},
+		StatusHukum: pgtype.Text{Valid: statusHukum != "", String: statusHukum},
+		StatusPns:   getStatusPNSDB(arg.status),
+		Mpp:         statusKedudukanHukumMPP,
 	})
 	if err != nil {
 		return nil, 0, fmt.Errorf("[pegawai-adminListPegawai] repo ListPegawaiAktif: %w", err)
@@ -108,9 +109,9 @@ func (s *service) adminListPegawai(ctx context.Context, arg adminListPegawaiPara
 		UnitKerjaID: pgtype.Text{Valid: arg.unitID != "", String: arg.unitID},
 		GolonganID:  pgtype.Int4{Valid: arg.golonganID != 0, Int32: arg.golonganID},
 		JabatanID:   pgtype.Text{Valid: arg.jabatanID != "", String: arg.jabatanID},
-		StatusHukum: getStatusHukum(arg.status),
-		StatusPns:   pgtype.Text{Valid: arg.status != "", String: arg.status},
-		Mpp:         statusPNSMPP,
+		StatusHukum: pgtype.Text{Valid: statusHukum != "", String: statusHukum},
+		StatusPns:   getStatusPNSDB(arg.status),
+		Mpp:         statusKedudukanHukumMPP,
 	})
 	if err != nil {
 		return nil, 0, fmt.Errorf("[pegawai-adminListPegawai] repo CountPegawaiAktif: %w", err)
@@ -125,7 +126,7 @@ func (s *service) adminListPegawai(ctx context.Context, arg adminListPegawaiPara
 			Golongan:      row.Golongan.String,
 			Jabatan:       row.Jabatan.String,
 			UnitKerja:     unorLengkapByID[row.UnorID.String],
-			Status:        row.Status,
+			Status:        getLabelStatusPNS(row.NamaKedudukuanHukum.String, row.StatusCpnsPns.String),
 		}
 	})
 
@@ -217,5 +218,6 @@ func (s *service) adminGetPegawai(ctx context.Context, nip string) (*pegawaiDeta
 		NomorTaspen:              data.NoTaspen.String,
 		UnitOrganisasi:           unitOrganisasi,
 		Photo:                    data.Foto,
+		UnorID:                   data.UnorID,
 	}, nil
 }

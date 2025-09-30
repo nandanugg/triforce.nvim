@@ -219,10 +219,11 @@ func Test_handler_listAdmin(t *testing.T) {
 			('unor-3', 'unor-2', 'Bawah', 'Atasan 3', null, null),
 			('unor-4', 'unor-1', 'Tengah deleted', 'Atasan 4', null, now()),
 			('unor-5', 'unor-4', 'Bawah 2', 'Atasan 5', null, null);
-		INSERT INTO ref_kedudukan_hukum (id, nama, deleted_at) VALUES 
-			(1, 'Aktif', NULL),
-			(2, 'Masa Persiapan Pensiun', NULL),
-			(3, 'Aktif deleted', NOW());
+		INSERT INTO ref_kedudukan_hukum (id, nama, is_pegawai_aktif, deleted_at) VALUES 
+			(1, 'Aktif', true, NULL),
+			(2, 'Masa Persiapan Pensiun', true, NULL),
+			(3, 'Aktif deleted', true, NOW()),
+			(4, 'Pensiun', false, NULL);
 
 		INSERT INTO ref_jabatan (id,no,kode_jabatan, nama_jabatan, deleted_at) VALUES
 			(1,1,'JBT-001', 'Analis Kebijakan Madya', NULL),
@@ -237,11 +238,13 @@ func Test_handler_listAdmin(t *testing.T) {
 		INSERT INTO pegawai (pns_id, nip_baru, nama, gelar_depan, gelar_belakang, gol_id, jabatan_instansi_id, unor_id, kedudukan_hukum_id, status_cpns_pns, deleted_at) VALUES
 			(1001, '199001012022031001', 'Budi Santoso', 'Drs.', 'M.Pd.', 10, 'JBT-001', 'unor-1', 1, 'PNS', NULL),
 			(1002, '198903152022041002', 'Siti Aminah', NULL, 'S.Sos.', 11, 'JBT-002', 'unor-2', 1,'CPNS', NULL),
-			(1003, '198812312020121003', 'Andi Rahman', NULL, NULL, 10, 'JBT-001', 'unor-3', 2,'PNS', NULL),
+			(1003, '198812312020121003', 'Andi Rahman', NULL, NULL, 10, 'JBT-001', 'unor-3', 2,'P', NULL),
 			(1004, '199505052022051004', 'Lina Pratiwi', NULL, NULL, 10, 'JBT-001', 'unor-4', 3, 'PNS', NULL),
-			(1005, '199707072022061005', 'Rizky Fauzan', NULL, NULL, 10, 'JBT-003', 'unor-5', 1, 'PNS', NULL),
+			(1005, '199707072022061005', 'Rizky Fauzan', NULL, NULL, 10, 'JBT-003', 'unor-5', 1, 'C', NULL),
 			(1006, '199808082022071006', 'Sari Dewi', NULL, NULL, 12, 'JBT-001', 'unor-1', 1, 'PNS', NULL),
-			(1007, '199709092022081007', 'Agung Herkules', NULL, NULL, 12, 'JBT-001', 'unor-1', 1, 'PNS', NOW());
+			(1007, '199709092022081007', 'Agung Herkules', NULL, NULL, 12, 'JBT-001', 'unor-1', 1, 'PNS', NOW()),
+			(1008, '198710102022081008', 'Rini Sukmawati', NULL, NULL, 12, 'JBT-001', 'unor-1', 1, '1', NULL),
+			(1009, '198810102022081008', 'Sarjo', NULL, NULL, 12, 'JBT-001', 'unor-1', 4, '1', NULL);
 	`
 	tests := []struct {
 		name             string
@@ -296,7 +299,7 @@ func Test_handler_listAdmin(t *testing.T) {
 						"jabatan": "",
 						"nama": "Rizky Fauzan",
 						"nip": "199707072022061005",
-						"status": "PNS",
+						"status": "CPNS",
 						"unit_kerja": "Bawah 2"
 					},
 					{
@@ -308,12 +311,22 @@ func Test_handler_listAdmin(t *testing.T) {
 						"nip": "199808082022071006",
 						"status": "PNS",
 						"unit_kerja": "Paling Atas"
+					},
+					{
+						"gelar_belakang": "",
+						"gelar_depan": "",
+						"golongan": "",
+						"jabatan": "Analis Kebijakan Madya",
+						"nama": "Rini Sukmawati",
+						"nip": "198710102022081008",
+						"status": "1",
+						"unit_kerja": "Paling Atas"
 					}
 				],
 				"meta": {
 					"limit": 10,
 					"offset": 0,
-					"total": 5
+					"total": 6
 				}
 			}`,
 		},
@@ -353,7 +366,7 @@ func Test_handler_listAdmin(t *testing.T) {
 				"meta": {
 					"limit": 2,
 					"offset": 1,
-					"total": 5
+					"total": 6
 				}
 			}`,
 		},
@@ -414,7 +427,7 @@ func Test_handler_listAdmin(t *testing.T) {
 						"jabatan": "",
 						"nama": "Rizky Fauzan",
 						"nip": "199707072022061005",
-						"status": "PNS",
+						"status": "CPNS",
 						"unit_kerja": "Bawah 2"
 					},
 					{
@@ -483,7 +496,7 @@ func Test_handler_listAdmin(t *testing.T) {
 						"jabatan": "",
 						"nama": "Rizky Fauzan",
 						"nip": "199707072022061005",
-						"status": "PNS",
+						"status": "CPNS",
 						"unit_kerja": "Bawah 2"
 					},
 					{
@@ -495,13 +508,22 @@ func Test_handler_listAdmin(t *testing.T) {
 						"nip": "199808082022071006",
 						"status": "PNS",
 						"unit_kerja": "Paling Atas"
+					},
+					{
+						"gelar_belakang": "",
+						"gelar_depan": "",
+						"golongan": "",
+						"jabatan": "Analis Kebijakan Madya",
+						"nama": "Rini Sukmawati",
+						"nip": "198710102022081008",
+						"status": "1",
+						"unit_kerja": "Paling Atas"
 					}
-					
 				],
 				"meta": {
 					"limit": 10,
 					"offset": 0,
-					"total": 5
+					"total": 6
 				}
 			}`,
 		},
@@ -558,16 +580,6 @@ func Test_handler_listAdmin(t *testing.T) {
 					{
 						"gelar_belakang": "",
 						"gelar_depan": "",
-						"golongan": "III/a",
-						"jabatan": "",
-						"nama": "Rizky Fauzan",
-						"nip": "199707072022061005",
-						"status": "PNS",
-						"unit_kerja": "Bawah 2"
-					},
-					{
-						"gelar_belakang": "",
-						"gelar_depan": "",
 						"golongan": "",
 						"jabatan": "Analis Kebijakan Madya",
 						"nama": "Sari Dewi",
@@ -579,7 +591,46 @@ func Test_handler_listAdmin(t *testing.T) {
 				"meta": {
 					"limit": 10,
 					"offset": 0,
-					"total": 3
+					"total": 2
+				}
+			}`,
+		},
+		{
+			name:          "ok with status CPNS",
+			dbData:        dbData,
+			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			requestQuery: url.Values{
+				"status": []string{"CPNS"},
+			},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `
+			{
+				"data": [
+					{
+						"gelar_belakang": "S.Sos.",
+						"gelar_depan": "",
+						"golongan": "III/b",
+						"jabatan": "Kepala Subbagian Perencanaan",
+						"nama": "Siti Aminah",
+						"nip": "198903152022041002",
+						"status": "CPNS",
+						"unit_kerja": "Tengah - Paling Atas"
+					},
+					{
+						"gelar_belakang": "",
+						"gelar_depan": "",
+						"golongan": "III/a",
+						"jabatan": "",
+						"nama": "Rizky Fauzan",
+						"nip": "199707072022061005",
+						"status": "CPNS",
+						"unit_kerja": "Bawah 2"
+					}
+				],
+				"meta": {
+					"limit": 10,
+					"offset": 0,
+					"total": 2
 				}
 			}`,
 		},
@@ -896,7 +947,8 @@ func Test_handler_getAdmin(t *testing.T) {
 						"tanggal_npwp":                "2016-01-01",
 						"nomor_taspen":                "TASPEN-001",
 						"unit_organisasi":             ["Unor 0", "Unor 1", "Unor 2", "Unor 3", "Unor 4", "Unor 5", "Unor 6", "Unor 7", "Unor 8", "Unor 9"],
-						"photo":                       "foto_1c.png"
+						"photo":                       "foto_1c.png",
+						"unor_id":                     "0"
 					}
 				}
 			`,
@@ -962,7 +1014,8 @@ func Test_handler_getAdmin(t *testing.T) {
 						"tanggal_npwp":                null,
 						"nomor_taspen":                "",
 						"unit_organisasi":             [],
-						"photo":                       null
+						"photo":                       null,
+						"unor_id":                     null
 					}
 				}
 			`,
@@ -1028,7 +1081,8 @@ func Test_handler_getAdmin(t *testing.T) {
 						"tanggal_npwp":                "2016-01-01",
 						"nomor_taspen":                "TASPEN-001",
 						"unit_organisasi":             ["Unor E", "Unor G"],
-						"photo":                       null
+						"photo":                       null,
+						"unor_id":                     "E"
 					}
 				}
 			`,
@@ -1094,7 +1148,8 @@ func Test_handler_getAdmin(t *testing.T) {
 						"tanggal_npwp":                "2016-01-01",
 						"nomor_taspen":                "TASPEN-001",
 						"unit_organisasi":             ["Unor 8", "Unor 9", "Unor A", "Unor B", "Unor C", "Unor D"],
-						"photo":                       null
+						"photo":                       null,
+						"unor_id":                     "8"
 					}
 				}
 			`,
@@ -1160,7 +1215,8 @@ func Test_handler_getAdmin(t *testing.T) {
 						"tanggal_npwp":                "2016-01-01",
 						"nomor_taspen":                "TASPEN-001",
 						"unit_organisasi":             ["Unor C", "Unor D"],
-						"photo":                       null
+						"photo":                       null,
+						"unor_id":                     "C"
 					}
 				}
 			`,

@@ -2136,3 +2136,6 @@ components:
         photo:
           type: string
           nullable: true
+        unor_id:
+          type: string
+          nullable: true

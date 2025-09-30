@@ -705,7 +705,8 @@ type RefKedudukanHukum struct {
 	// Waktu penghapusan data
 	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 	// Apakah kedudukan hukum merupakan PPPK
-	IsPppk pgtype.Bool `db:"is_pppk"`
+	IsPppk         pgtype.Bool `db:"is_pppk"`
+	IsPegawaiAktif bool        `db:"is_pegawai_aktif"`
 }
 
 // Referensi kelas jabatan
