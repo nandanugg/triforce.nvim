@@ -235,16 +235,16 @@ func Test_handler_listAdmin(t *testing.T) {
 			(11, 'III/b', NULL),
 			(12, 'III/c', NOW());
 
-		INSERT INTO pegawai (pns_id, nip_baru, nama, gelar_depan, gelar_belakang, gol_id, jabatan_instansi_id, unor_id, kedudukan_hukum_id, status_cpns_pns, deleted_at) VALUES
-			(1001, '199001012022031001', 'Budi Santoso', 'Drs.', 'M.Pd.', 10, 'JBT-001', 'unor-1', 1, 'PNS', NULL),
-			(1002, '198903152022041002', 'Siti Aminah', NULL, 'S.Sos.', 11, 'JBT-002', 'unor-2', 1,'CPNS', NULL),
-			(1003, '198812312020121003', 'Andi Rahman', NULL, NULL, 10, 'JBT-001', 'unor-3', 2,'P', NULL),
-			(1004, '199505052022051004', 'Lina Pratiwi', NULL, NULL, 10, 'JBT-001', 'unor-4', 3, 'PNS', NULL),
-			(1005, '199707072022061005', 'Rizky Fauzan', NULL, NULL, 10, 'JBT-003', 'unor-5', 1, 'C', NULL),
-			(1006, '199808082022071006', 'Sari Dewi', NULL, NULL, 12, 'JBT-001', 'unor-1', 1, 'PNS', NULL),
-			(1007, '199709092022081007', 'Agung Herkules', NULL, NULL, 12, 'JBT-001', 'unor-1', 1, 'PNS', NOW()),
-			(1008, '198710102022081008', 'Rini Sukmawati', NULL, NULL, 12, 'JBT-001', 'unor-1', 1, '1', NULL),
-			(1009, '198810102022081008', 'Sarjo', NULL, NULL, 12, 'JBT-001', 'unor-1', 4, '1', NULL);
+		INSERT INTO pegawai (pns_id, nip_baru, nama, gelar_depan, gelar_belakang, gol_id, jabatan_instansi_id, unor_id, kedudukan_hukum_id, status_cpns_pns, deleted_at, foto) VALUES
+			(1001, '199001012022031001', 'Budi Santoso', 'Drs.', 'M.Pd.', 10, 'JBT-001', 'unor-1', 1, 'PNS', NULL, 'foto.png'),
+			(1002, '198903152022041002', 'Siti Aminah', NULL, 'S.Sos.', 11, 'JBT-002', 'unor-2', 1,'CPNS', NULL, 'foto1.png'),
+			(1003, '198812312020121003', 'Andi Rahman', NULL, NULL, 10, 'JBT-001', 'unor-3', 2,'P', NULL, 'foto2.png'),
+			(1004, '199505052022051004', 'Lina Pratiwi', NULL, NULL, 10, 'JBT-001', 'unor-4', 3, 'PNS', NULL, 'foto3.png'),
+			(1005, '199707072022061005', 'Rizky Fauzan', NULL, NULL, 10, 'JBT-003', 'unor-5', 1, 'C', NULL, NULL),
+			(1006, '199808082022071006', 'Sari Dewi', NULL, NULL, 12, 'JBT-001', 'unor-1', 1, 'PNS', NULL, 'foto4.png'),
+			(1007, '199709092022081007', 'Agung Herkules', NULL, NULL, 12, 'JBT-001', 'unor-1', 1, 'PNS', NOW(), NULL),
+			(1008, '198710102022081008', 'Rini Sukmawati', NULL, NULL, 12, 'JBT-001', 'unor-1', 1, '1', NULL, NULL),
+			(1009, '198810102022081008', 'Sarjo', NULL, NULL, 12, 'JBT-001', 'unor-1', 4, '1', NULL, 'foto5.png');
 	`
 	tests := []struct {
 		name             string
@@ -270,7 +270,8 @@ func Test_handler_listAdmin(t *testing.T) {
 						"nama": "Budi Santoso",
 						"nip": "199001012022031001",
 						"status": "PNS",
-						"unit_kerja": "Paling Atas"
+						"unit_kerja": "Paling Atas",
+						"photo" : "foto.png"
 					},
 					{
 						"gelar_belakang": "S.Sos.",
@@ -280,7 +281,8 @@ func Test_handler_listAdmin(t *testing.T) {
 						"nama": "Siti Aminah",
 						"nip": "198903152022041002",
 						"status": "CPNS",
-						"unit_kerja": "Tengah - Paling Atas"
+						"unit_kerja": "Tengah - Paling Atas",
+						"photo": "foto1.png"
 					},
 					{
 						"gelar_belakang": "",
@@ -290,7 +292,8 @@ func Test_handler_listAdmin(t *testing.T) {
 						"nama": "Andi Rahman",
 						"nip": "198812312020121003",
 						"status": "MPP",
-						"unit_kerja": "Bawah - Tengah - Paling Atas"
+						"unit_kerja": "Bawah - Tengah - Paling Atas",
+						"photo": "foto2.png"
 					},
 					{
 						"gelar_belakang": "",
@@ -300,7 +303,8 @@ func Test_handler_listAdmin(t *testing.T) {
 						"nama": "Rizky Fauzan",
 						"nip": "199707072022061005",
 						"status": "CPNS",
-						"unit_kerja": "Bawah 2"
+						"unit_kerja": "Bawah 2",
+						"photo": null
 					},
 					{
 						"gelar_belakang": "",
@@ -310,7 +314,8 @@ func Test_handler_listAdmin(t *testing.T) {
 						"nama": "Sari Dewi",
 						"nip": "199808082022071006",
 						"status": "PNS",
-						"unit_kerja": "Paling Atas"
+						"unit_kerja": "Paling Atas",
+						"photo": "foto4.png"
 					},
 					{
 						"gelar_belakang": "",
@@ -320,7 +325,8 @@ func Test_handler_listAdmin(t *testing.T) {
 						"nama": "Rini Sukmawati",
 						"nip": "198710102022081008",
 						"status": "1",
-						"unit_kerja": "Paling Atas"
+						"unit_kerja": "Paling Atas",
+						"photo": null
 					}
 				],
 				"meta": {
@@ -350,7 +356,8 @@ func Test_handler_listAdmin(t *testing.T) {
 						"nama": "Siti Aminah",
 						"nip": "198903152022041002",
 						"status": "CPNS",
-						"unit_kerja": "Tengah - Paling Atas"
+						"unit_kerja": "Tengah - Paling Atas",
+						"photo": "foto1.png"
 					},
 					{
 						"gelar_belakang": "",
@@ -360,7 +367,8 @@ func Test_handler_listAdmin(t *testing.T) {
 						"nama": "Andi Rahman",
 						"nip": "198812312020121003",
 						"status": "MPP",
-						"unit_kerja": "Bawah - Tengah - Paling Atas"
+						"unit_kerja": "Bawah - Tengah - Paling Atas",
+						"photo": "foto2.png"
 					}
 				],
 				"meta": {
@@ -389,7 +397,8 @@ func Test_handler_listAdmin(t *testing.T) {
 						"nama": "Siti Aminah",
 						"nip": "198903152022041002",
 						"status": "CPNS",
-						"unit_kerja": "Tengah - Paling Atas"
+						"unit_kerja": "Tengah - Paling Atas",
+						"photo": "foto1.png"
 					}
 				],
 				"meta": {
@@ -418,7 +427,8 @@ func Test_handler_listAdmin(t *testing.T) {
 						"nama": "Budi Santoso",
 						"nip": "199001012022031001",
 						"status": "PNS",
-						"unit_kerja": "Paling Atas"
+						"unit_kerja": "Paling Atas",
+						"photo": "foto.png"
 					},
 					{
 						"gelar_belakang": "",
@@ -428,7 +438,8 @@ func Test_handler_listAdmin(t *testing.T) {
 						"nama": "Rizky Fauzan",
 						"nip": "199707072022061005",
 						"status": "CPNS",
-						"unit_kerja": "Bawah 2"
+						"unit_kerja": "Bawah 2",
+						"photo": null
 					},
 					{
 						"gelar_belakang": "",
@@ -438,7 +449,8 @@ func Test_handler_listAdmin(t *testing.T) {
 						"nama": "Sari Dewi",
 						"nip": "199808082022071006",
 						"status": "PNS",
-						"unit_kerja": "Paling Atas"
+						"unit_kerja": "Paling Atas",
+						"photo": "foto4.png"
 					}
 				],
 				"meta": {
@@ -467,7 +479,8 @@ func Test_handler_listAdmin(t *testing.T) {
 						"nama": "Budi Santoso",
 						"nip": "199001012022031001",
 						"status": "PNS",
-						"unit_kerja": "Paling Atas"
+						"unit_kerja": "Paling Atas",
+						"photo": "foto.png"
 					},
 					{
 						"gelar_belakang": "S.Sos.",
@@ -477,7 +490,8 @@ func Test_handler_listAdmin(t *testing.T) {
 						"nama": "Siti Aminah",
 						"nip": "198903152022041002",
 						"status": "CPNS",
-						"unit_kerja": "Tengah - Paling Atas"
+						"unit_kerja": "Tengah - Paling Atas",
+						"photo": "foto1.png"
 					},
 					{
 						"gelar_belakang": "",
@@ -487,7 +501,8 @@ func Test_handler_listAdmin(t *testing.T) {
 						"nama": "Andi Rahman",
 						"nip": "198812312020121003",
 						"status": "MPP",
-						"unit_kerja": "Bawah - Tengah - Paling Atas"
+						"unit_kerja": "Bawah - Tengah - Paling Atas",
+						"photo": "foto2.png"
 					},
 					{
 						"gelar_belakang": "",
@@ -497,7 +512,8 @@ func Test_handler_listAdmin(t *testing.T) {
 						"nama": "Rizky Fauzan",
 						"nip": "199707072022061005",
 						"status": "CPNS",
-						"unit_kerja": "Bawah 2"
+						"unit_kerja": "Bawah 2",
+						"photo": null
 					},
 					{
 						"gelar_belakang": "",
@@ -507,7 +523,8 @@ func Test_handler_listAdmin(t *testing.T) {
 						"nama": "Sari Dewi",
 						"nip": "199808082022071006",
 						"status": "PNS",
-						"unit_kerja": "Paling Atas"
+						"unit_kerja": "Paling Atas",
+						"photo": "foto4.png"
 					},
 					{
 						"gelar_belakang": "",
@@ -517,7 +534,8 @@ func Test_handler_listAdmin(t *testing.T) {
 						"nama": "Rini Sukmawati",
 						"nip": "198710102022081008",
 						"status": "1",
-						"unit_kerja": "Paling Atas"
+						"unit_kerja": "Paling Atas",
+						"photo": null
 					}
 				],
 				"meta": {
@@ -546,7 +564,8 @@ func Test_handler_listAdmin(t *testing.T) {
 						"nama": "Siti Aminah",
 						"nip": "198903152022041002",
 						"status": "CPNS",
-						"unit_kerja": "Tengah - Paling Atas"
+						"unit_kerja": "Tengah - Paling Atas",
+						"photo": "foto1.png"
 					}
 				],
 				"meta": {
@@ -575,7 +594,8 @@ func Test_handler_listAdmin(t *testing.T) {
 						"nama": "Budi Santoso",
 						"nip": "199001012022031001",
 						"status": "PNS",
-						"unit_kerja": "Paling Atas"
+						"unit_kerja": "Paling Atas",
+						"photo": "foto.png"
 					},
 					{
 						"gelar_belakang": "",
@@ -585,7 +605,8 @@ func Test_handler_listAdmin(t *testing.T) {
 						"nama": "Sari Dewi",
 						"nip": "199808082022071006",
 						"status": "PNS",
-						"unit_kerja": "Paling Atas"
+						"unit_kerja": "Paling Atas",
+						"photo": "foto4.png"
 					}
 				],
 				"meta": {
@@ -614,7 +635,8 @@ func Test_handler_listAdmin(t *testing.T) {
 						"nama": "Siti Aminah",
 						"nip": "198903152022041002",
 						"status": "CPNS",
-						"unit_kerja": "Tengah - Paling Atas"
+						"unit_kerja": "Tengah - Paling Atas",
+						"photo": "foto1.png"
 					},
 					{
 						"gelar_belakang": "",
@@ -624,7 +646,8 @@ func Test_handler_listAdmin(t *testing.T) {
 						"nama": "Rizky Fauzan",
 						"nip": "199707072022061005",
 						"status": "CPNS",
-						"unit_kerja": "Bawah 2"
+						"unit_kerja": "Bawah 2",
+						"photo": null
 					}
 				],
 				"meta": {
@@ -653,7 +676,8 @@ func Test_handler_listAdmin(t *testing.T) {
 						"nama": "Andi Rahman",
 						"nip": "198812312020121003",
 						"status": "MPP",
-						"unit_kerja": "Bawah - Tengah - Paling Atas"
+						"unit_kerja": "Bawah - Tengah - Paling Atas",
+						"photo": "foto2.png"
 					}
 				],
 				"meta": {
@@ -704,7 +728,8 @@ func Test_handler_listAdmin(t *testing.T) {
 						"nama": "Budi Santoso",
 						"nip": "199001012022031001",
 						"status": "PNS",
-						"unit_kerja": "Paling Atas"
+						"unit_kerja": "Paling Atas",
+						"photo": "foto.png"
 					}
 				],
 				"meta": {

@@ -130,7 +130,8 @@ SELECT
     ref_jabatan.nama_jabatan AS jabatan,
     pegawai.unor_id,
     ref_kedudukan_hukum.nama as nama_kedudukuan_hukum,
-    status_cpns_pns
+    status_cpns_pns,
+    pegawai.foto
 FROM pegawai
 LEFT JOIN unit_kerja uk 
     ON pegawai.unor_id = uk.id AND uk.deleted_at IS NULL
@@ -191,6 +192,7 @@ type ListPegawaiAktifRow struct {
 	UnorID              pgtype.Text `db:"unor_id"`
 	NamaKedudukuanHukum pgtype.Text `db:"nama_kedudukuan_hukum"`
 	StatusCpnsPns       pgtype.Text `db:"status_cpns_pns"`
+	Foto                pgtype.Text `db:"foto"`
 }
 
 func (q *Queries) ListPegawaiAktif(ctx context.Context, arg ListPegawaiAktifParams) ([]ListPegawaiAktifRow, error) {
@@ -223,6 +225,7 @@ func (q *Queries) ListPegawaiAktif(ctx context.Context, arg ListPegawaiAktifPara
 			&i.UnorID,
 			&i.NamaKedudukuanHukum,
 			&i.StatusCpnsPns,
+			&i.Foto,
 		); err != nil {
 			return nil, err
 		}

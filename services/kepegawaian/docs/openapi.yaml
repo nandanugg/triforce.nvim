@@ -257,6 +257,9 @@ paths:
                           type: string
                         status:
                           type: string
+                        photo:
+                          type: string
+                          nullable: true
                   meta:
                     $ref: "#/components/schemas/metaPagination"
   /v1/admin/pegawai/{nip}:

@@ -127,6 +127,7 @@ func (s *service) adminListPegawai(ctx context.Context, arg adminListPegawaiPara
 			Jabatan:       row.Jabatan.String,
 			UnitKerja:     unorLengkapByID[row.UnorID.String],
 			Status:        getLabelStatusPNS(row.NamaKedudukuanHukum.String, row.StatusCpnsPns.String),
+			Photo:         row.Foto,
 		}
 	})
 

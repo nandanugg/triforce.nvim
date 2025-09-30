@@ -27,7 +27,8 @@ SELECT
     ref_jabatan.nama_jabatan AS jabatan,
     pegawai.unor_id,
     ref_kedudukan_hukum.nama as nama_kedudukuan_hukum,
-    status_cpns_pns
+    status_cpns_pns,
+    pegawai.foto
 FROM pegawai
 LEFT JOIN unit_kerja uk 
     ON pegawai.unor_id = uk.id AND uk.deleted_at IS NULL

@@ -22,14 +22,15 @@ type profile struct {
 }
 
 type pegawai struct {
-	NIP           string `json:"nip"`
-	GelarDepan    string `json:"gelar_depan"`
-	GelarBelakang string `json:"gelar_belakang"`
-	Nama          string `json:"nama"`
-	Golongan      string `json:"golongan"`
-	Jabatan       string `json:"jabatan"`
-	UnitKerja     string `json:"unit_kerja"`
-	Status        string `json:"status"`
+	NIP           string      `json:"nip"`
+	GelarDepan    string      `json:"gelar_depan"`
+	GelarBelakang string      `json:"gelar_belakang"`
+	Nama          string      `json:"nama"`
+	Golongan      string      `json:"golongan"`
+	Jabatan       string      `json:"jabatan"`
+	UnitKerja     string      `json:"unit_kerja"`
+	Status        string      `json:"status"`
+	Photo         pgtype.Text `json:"photo"`
 }
 
 const (
