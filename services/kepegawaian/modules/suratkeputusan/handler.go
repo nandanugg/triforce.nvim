@@ -127,7 +127,7 @@ type listAdminRequest struct {
 	KategoriSK     string  `query:"kategori_sk"`
 	TanggalSKMulai db.Date `query:"tanggal_sk_mulai"`
 	TanggalSKAkhir db.Date `query:"tanggal_sk_akhir"`
-	StatusSK       *int32  `query:"status_sk"`
+	StatusSK       []int32 `query:"status_sk"`
 }
 
 func (h *handler) listAdmin(c echo.Context) error {
@@ -148,7 +148,7 @@ func (h *handler) listAdmin(c echo.Context) error {
 		KategoriSK:     req.KategoriSK,
 		TanggalSKMulai: req.TanggalSKMulai,
 		TanggalSKAkhir: req.TanggalSKAkhir,
-		StatusSK:       req.StatusSK,
+		ListStatusSK:   req.StatusSK,
 	})
 	if err != nil {
 		slog.ErrorContext(ctx, "Error getting list sk pegawai by admin.", "error", err)

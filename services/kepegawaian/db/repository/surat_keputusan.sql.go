@@ -28,7 +28,7 @@ WHERE fds.deleted_at IS NULL
     AND ($6::VARCHAR is NULL OR fds.kategori ILIKE '%' || $6::VARCHAR || '%')
     AND ($7::DATE IS NULL OR fds.tanggal_sk >= $7::DATE)
     AND ($8::DATE IS NULL OR fds.tanggal_sk <= $8::DATE)
-    AND ($9::INTEGER IS NULL OR fds.status_sk = $9::integer)
+    AND ($9::integer[] IS NULL OR fds.status_sk = ANY($9::integer[]))
 `
 
 type CountSuratKeputusanParams struct {
@@ -40,7 +40,7 @@ type CountSuratKeputusanParams struct {
 	KategoriSk     pgtype.Text `db:"kategori_sk"`
 	TanggalSkMulai pgtype.Date `db:"tanggal_sk_mulai"`
 	TanggalSkAkhir pgtype.Date `db:"tanggal_sk_akhir"`
-	StatusSk       pgtype.Int4 `db:"status_sk"`
+	ListStatusSk   []int32     `db:"list_status_sk"`
 }
 
 func (q *Queries) CountSuratKeputusan(ctx context.Context, arg CountSuratKeputusanParams) (int64, error) {
@@ -53,7 +53,7 @@ func (q *Queries) CountSuratKeputusan(ctx context.Context, arg CountSuratKeputus
 		arg.KategoriSk,
 		arg.TanggalSkMulai,
 		arg.TanggalSkAkhir,
-		arg.StatusSk,
+		arg.ListStatusSk,
 	)
 	var total int64
 	err := row.Scan(&total)
@@ -175,24 +175,27 @@ SELECT
     fds.no_sk,
     fds.tanggal_sk,
     fds.status_sk,
-    fds.nip_sk,
     p.nama as nama_pemilik_sk,
-    pemroses.nama as nama_penandatangan
+    p.nip_baru as nip_pemilik_sk,
+    pemroses.nama as nama_penandatangan,
+    rj.nama_jabatan as jabatan_penandatangan
 FROM file_digital_signature fds
 JOIN pegawai p on p.nip_baru = fds.nip_sk and p.deleted_at is null
 LEFT JOIN pegawai pemroses on pemroses.nip_baru = fds.nip_pemroses and pemroses.deleted_at is null
+LEFT JOIN ref_jabatan rj on pemroses.jabatan_instansi_id = rj.kode_jabatan and rj.deleted_at is null
 WHERE fds.deleted_at IS NULL
     AND fds.file_id = $1::varchar
 `
 
 type GetSuratKeputusanByIDRow struct {
-	KategoriSk        pgtype.Text `db:"kategori_sk"`
-	NoSk              pgtype.Text `db:"no_sk"`
-	TanggalSk         pgtype.Date `db:"tanggal_sk"`
-	StatusSk          pgtype.Int2 `db:"status_sk"`
-	NipSk             pgtype.Text `db:"nip_sk"`
-	NamaPemilikSk     pgtype.Text `db:"nama_pemilik_sk"`
-	NamaPenandatangan pgtype.Text `db:"nama_penandatangan"`
+	KategoriSk           pgtype.Text `db:"kategori_sk"`
+	NoSk                 pgtype.Text `db:"no_sk"`
+	TanggalSk            pgtype.Date `db:"tanggal_sk"`
+	StatusSk             pgtype.Int2 `db:"status_sk"`
+	NamaPemilikSk        pgtype.Text `db:"nama_pemilik_sk"`
+	NipPemilikSk         pgtype.Text `db:"nip_pemilik_sk"`
+	NamaPenandatangan    pgtype.Text `db:"nama_penandatangan"`
+	JabatanPenandatangan pgtype.Text `db:"jabatan_penandatangan"`
 }
 
 func (q *Queries) GetSuratKeputusanByID(ctx context.Context, id string) (GetSuratKeputusanByIDRow, error) {
@@ -203,9 +206,10 @@ func (q *Queries) GetSuratKeputusanByID(ctx context.Context, id string) (GetSura
 		&i.NoSk,
 		&i.TanggalSk,
 		&i.StatusSk,
-		&i.NipSk,
 		&i.NamaPemilikSk,
+		&i.NipPemilikSk,
 		&i.NamaPenandatangan,
+		&i.JabatanPenandatangan,
 	)
 	return i, err
 }
@@ -295,6 +299,7 @@ const listSuratKeputusan = `-- name: ListSuratKeputusan :many
 SELECT
     fds.file_id,
     p.nama as nama_pemilik_sk,
+    p.nip_baru as nip_pemilik_sk,
     fds.kategori AS kategori_sk,
     fds.no_sk,
     fds.tanggal_sk,
@@ -317,7 +322,7 @@ WHERE fds.deleted_at IS NULL
     AND ($8::VARCHAR is NULL OR fds.kategori ILIKE '%' || $8::VARCHAR || '%')
     AND ($9::DATE IS NULL OR fds.tanggal_sk >= $9::DATE)
     AND ($10::DATE IS NULL OR fds.tanggal_sk <= $10::DATE)
-    AND ($11::INTEGER IS NULL OR fds.status_sk = $11::integer)
+    AND ($11::integer[] IS NULL OR fds.status_sk = ANY($11::integer[]))
 ORDER BY fds.created_at DESC
 LIMIT $1 OFFSET $2
 `
@@ -333,12 +338,13 @@ type ListSuratKeputusanParams struct {
 	KategoriSk     pgtype.Text `db:"kategori_sk"`
 	TanggalSkMulai pgtype.Date `db:"tanggal_sk_mulai"`
 	TanggalSkAkhir pgtype.Date `db:"tanggal_sk_akhir"`
-	StatusSk       pgtype.Int4 `db:"status_sk"`
+	ListStatusSk   []int32     `db:"list_status_sk"`
 }
 
 type ListSuratKeputusanRow struct {
 	FileID        string      `db:"file_id"`
 	NamaPemilikSk pgtype.Text `db:"nama_pemilik_sk"`
+	NipPemilikSk  pgtype.Text `db:"nip_pemilik_sk"`
 	KategoriSk    pgtype.Text `db:"kategori_sk"`
 	NoSk          pgtype.Text `db:"no_sk"`
 	TanggalSk     pgtype.Date `db:"tanggal_sk"`
@@ -358,7 +364,7 @@ func (q *Queries) ListSuratKeputusan(ctx context.Context, arg ListSuratKeputusan
 		arg.KategoriSk,
 		arg.TanggalSkMulai,
 		arg.TanggalSkAkhir,
-		arg.StatusSk,
+		arg.ListStatusSk,
 	)
 	if err != nil {
 		return nil, err
@@ -370,6 +376,7 @@ func (q *Queries) ListSuratKeputusan(ctx context.Context, arg ListSuratKeputusan
 		if err := rows.Scan(
 			&i.FileID,
 			&i.NamaPemilikSk,
+			&i.NipPemilikSk,
 			&i.KategoriSk,
 			&i.NoSk,
 			&i.TanggalSk,

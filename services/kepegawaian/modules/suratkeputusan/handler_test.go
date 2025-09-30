@@ -253,13 +253,13 @@ func Test_handler_get(t *testing.T) {
 			('12345677','12345677','unor-3','Korektor');
 
 		INSERT INTO file_digital_signature
-  			("file_id", "nip_sk", "kategori", "no_sk", "tanggal_sk", "status_sk","nip_pemroses", "created_at", "deleted_at") VALUES
-  			('sk-001', '123456789', 'Kenaikan Pangkat', 'SK-001/2024', '2024-01-15', 1, '12345678', '2024-01-15', NULL),
-  			('sk-002', '123456789', 'Mutasi', 'SK-002/2024', '2024-02-20', 0, '12345678', '2024-02-20', NULL),
-  			('sk-003', '123456789', 'Kenaikan Gaji', 'SK-003/2024', '2024-03-10', 2,'12345678', '2024-03-10', NULL),
-  			('sk-004', '123456789', 'Kenaikan Gaji', 'SK-004/2024', '2024-03-10', 2,'12345678', '2024-03-10', NOW()),
-  			('sk-005', '123456788', 'Mutasi', 'SK-005/2024', '2024-03-10', 2,'12345678', '2024-03-10', NULL),
-  			('sk-006', '123456787', 'Mutasi', 'SK-006/2024', '2024-03-10', 2,'12345678', '2024-03-10', NULL);
+				("file_id", "nip_sk", "kategori", "no_sk", "tanggal_sk", "status_sk","nip_pemroses", "created_at", "deleted_at") VALUES
+				('sk-001', '123456789', 'Kenaikan Pangkat', 'SK-001/2024', '2024-01-15', 1, '12345678', '2024-01-15', NULL),
+				('sk-002', '123456789', 'Mutasi', 'SK-002/2024', '2024-02-20', 0, '12345678', '2024-02-20', NULL),
+				('sk-003', '123456789', 'Kenaikan Gaji', 'SK-003/2024', '2024-03-10', 2,'12345678', '2024-03-10', NULL),
+				('sk-004', '123456789', 'Kenaikan Gaji', 'SK-004/2024', '2024-03-10', 2,'12345678', '2024-03-10', NOW()),
+				('sk-005', '123456788', 'Mutasi', 'SK-005/2024', '2024-03-10', 2,'12345678', '2024-03-10', NULL),
+				('sk-006', '123456787', 'Mutasi', 'SK-006/2024', '2024-03-10', 2,'12345678', '2024-03-10', NULL);
 		INSERT INTO file_digital_signature_riwayat
 			("file_id","nip_pemroses","tindakan","created_at","deleted_at") VALUES
 			('sk-002','12345677','Mengkoreksi','2025-09-24T01:02:03',NULL),
@@ -691,6 +691,7 @@ func Test_handler_listAdmin(t *testing.T) {
 					{
 						"id_sk": "sk-010",
 						"nama_pemilik": "Gledi",
+						"nip_pemilik": "123456783",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-010/2024",
 						"tanggal_sk": "2024-03-16",
@@ -700,6 +701,7 @@ func Test_handler_listAdmin(t *testing.T) {
 					{
 						"id_sk": "sk-009",
 						"nama_pemilik": "Fredi",
+						"nip_pemilik": "123456784",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-009/2024",
 						"tanggal_sk": "2024-03-15",
@@ -709,6 +711,7 @@ func Test_handler_listAdmin(t *testing.T) {
 					{
 						"id_sk": "sk-008",
 						"nama_pemilik": "Edi",
+						"nip_pemilik": "123456785",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-008/2024",
 						"tanggal_sk": "2024-03-14",
@@ -718,6 +721,7 @@ func Test_handler_listAdmin(t *testing.T) {
 					{
 						"id_sk": "sk-007",
 						"nama_pemilik": "Dedi",
+						"nip_pemilik": "123456786",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-007/2024",
 						"tanggal_sk": "2024-03-13",
@@ -727,6 +731,7 @@ func Test_handler_listAdmin(t *testing.T) {
 					{
 						"id_sk": "sk-006",
 						"nama_pemilik": "Candi",
+						"nip_pemilik": "123456787",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-006/2024",
 						"tanggal_sk": "2024-03-12",
@@ -736,6 +741,7 @@ func Test_handler_listAdmin(t *testing.T) {
 					{
 						"id_sk": "sk-005",
 						"nama_pemilik": "Budi",
+						"nip_pemilik": "123456788",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-005/2024",
 						"tanggal_sk": "2024-03-11",
@@ -745,6 +751,7 @@ func Test_handler_listAdmin(t *testing.T) {
 					{
 						"id_sk": "sk-003",
 						"nama_pemilik": "Andi",
+						"nip_pemilik": "123456789",
 						"kategori_sk": "Kenaikan Gaji",
 						"no_sk": "SK-003/2024",
 						"tanggal_sk": "2024-03-10",
@@ -754,6 +761,7 @@ func Test_handler_listAdmin(t *testing.T) {
 					{
 						"id_sk": "sk-002",
 						"nama_pemilik": "Andi",
+						"nip_pemilik": "123456789",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-002/2024",
 						"tanggal_sk": "2024-02-20",
@@ -763,6 +771,7 @@ func Test_handler_listAdmin(t *testing.T) {
 					{
 						"id_sk": "sk-001",
 						"nama_pemilik": "Andi",
+						"nip_pemilik": "123456789",
 						"kategori_sk": "Kenaikan Pangkat",
 						"no_sk": "SK-001/2024",
 						"tanggal_sk": "2024-01-15",
@@ -788,6 +797,7 @@ func Test_handler_listAdmin(t *testing.T) {
 					{
 						"id_sk": "sk-010",
 						"nama_pemilik": "Gledi",
+						"nip_pemilik": "123456783",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-010/2024",
 						"tanggal_sk": "2024-03-16",
@@ -797,6 +807,7 @@ func Test_handler_listAdmin(t *testing.T) {
 					{
 						"id_sk": "sk-009",
 						"nama_pemilik": "Fredi",
+						"nip_pemilik": "123456784",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-009/2024",
 						"tanggal_sk": "2024-03-15",
@@ -806,6 +817,7 @@ func Test_handler_listAdmin(t *testing.T) {
 					{
 						"id_sk": "sk-007",
 						"nama_pemilik": "Dedi",
+						"nip_pemilik": "123456786",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-007/2024",
 						"tanggal_sk": "2024-03-13",
@@ -815,6 +827,7 @@ func Test_handler_listAdmin(t *testing.T) {
 					{
 						"id_sk": "sk-006",
 						"nama_pemilik": "Candi",
+						"nip_pemilik": "123456787",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-006/2024",
 						"tanggal_sk": "2024-03-12",
@@ -824,6 +837,7 @@ func Test_handler_listAdmin(t *testing.T) {
 					{
 						"id_sk": "sk-003",
 						"nama_pemilik": "Andi",
+						"nip_pemilik": "123456789",
 						"kategori_sk": "Kenaikan Gaji",
 						"no_sk": "SK-003/2024",
 						"tanggal_sk": "2024-03-10",
@@ -833,6 +847,7 @@ func Test_handler_listAdmin(t *testing.T) {
 					{
 						"id_sk": "sk-002",
 						"nama_pemilik": "Andi",
+						"nip_pemilik": "123456789",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-002/2024",
 						"tanggal_sk": "2024-02-20",
@@ -842,6 +857,7 @@ func Test_handler_listAdmin(t *testing.T) {
 					{
 						"id_sk": "sk-001",
 						"nama_pemilik": "Andi",
+						"nip_pemilik": "123456789",
 						"kategori_sk": "Kenaikan Pangkat",
 						"no_sk": "SK-001/2024",
 						"tanggal_sk": "2024-01-15",
@@ -867,6 +883,7 @@ func Test_handler_listAdmin(t *testing.T) {
 					{
 						"id_sk": "sk-010",
 						"nama_pemilik": "Gledi",
+						"nip_pemilik": "123456783",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-010/2024",
 						"tanggal_sk": "2024-03-16",
@@ -876,6 +893,7 @@ func Test_handler_listAdmin(t *testing.T) {
 					{
 						"id_sk": "sk-009",
 						"nama_pemilik": "Fredi",
+						"nip_pemilik": "123456784",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-009/2024",
 						"tanggal_sk": "2024-03-15",
@@ -885,6 +903,7 @@ func Test_handler_listAdmin(t *testing.T) {
 					{
 						"id_sk": "sk-008",
 						"nama_pemilik": "Edi",
+						"nip_pemilik": "123456785",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-008/2024",
 						"tanggal_sk": "2024-03-14",
@@ -894,6 +913,7 @@ func Test_handler_listAdmin(t *testing.T) {
 					{
 						"id_sk": "sk-007",
 						"nama_pemilik": "Dedi",
+						"nip_pemilik": "123456786",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-007/2024",
 						"tanggal_sk": "2024-03-13",
@@ -919,6 +939,7 @@ func Test_handler_listAdmin(t *testing.T) {
 					{
 						"id_sk": "sk-010",
 						"nama_pemilik": "Gledi",
+						"nip_pemilik": "123456783",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-010/2024",
 						"tanggal_sk": "2024-03-16",
@@ -944,6 +965,7 @@ func Test_handler_listAdmin(t *testing.T) {
 					{
 						"id_sk": "sk-008",
 						"nama_pemilik": "Edi",
+						"nip_pemilik": "123456785",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-008/2024",
 						"tanggal_sk": "2024-03-14",
@@ -969,6 +991,7 @@ func Test_handler_listAdmin(t *testing.T) {
 					{
 						"id_sk": "sk-007",
 						"nama_pemilik": "Dedi",
+						"nip_pemilik": "123456786",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-007/2024",
 						"tanggal_sk": "2024-03-13",
@@ -994,6 +1017,7 @@ func Test_handler_listAdmin(t *testing.T) {
 					{
 						"id_sk": "sk-003",
 						"nama_pemilik": "Andi",
+						"nip_pemilik": "123456789",
 						"kategori_sk": "Kenaikan Gaji",
 						"no_sk": "SK-003/2024",
 						"tanggal_sk": "2024-03-10",
@@ -1019,6 +1043,7 @@ func Test_handler_listAdmin(t *testing.T) {
 					{
 						"id_sk": "sk-008",
 						"nama_pemilik": "Edi",
+						"nip_pemilik": "123456785",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-008/2024",
 						"tanggal_sk": "2024-03-14",
@@ -1028,6 +1053,7 @@ func Test_handler_listAdmin(t *testing.T) {
 					{
 						"id_sk": "sk-007",
 						"nama_pemilik": "Dedi",
+						"nip_pemilik": "123456786",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-007/2024",
 						"tanggal_sk": "2024-03-13",
@@ -1037,6 +1063,7 @@ func Test_handler_listAdmin(t *testing.T) {
 					{
 						"id_sk": "sk-006",
 						"nama_pemilik": "Candi",
+						"nip_pemilik": "123456787",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-006/2024",
 						"tanggal_sk": "2024-03-12",
@@ -1062,6 +1089,7 @@ func Test_handler_listAdmin(t *testing.T) {
 					{
 						"id_sk": "sk-006",
 						"nama_pemilik": "Candi",
+						"nip_pemilik": "123456787",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-006/2024",
 						"tanggal_sk": "2024-03-12",
@@ -1073,6 +1101,42 @@ func Test_handler_listAdmin(t *testing.T) {
 					"limit": 10,
 					"offset": 0,
 					"total": 1
+				}
+			}`,
+		},
+		{
+			name:             "ok with filter multiple status_sk",
+			dbData:           dbData,
+			requestQuery:     url.Values{"status_sk": []string{"3", "4"}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "111", api.RoleAdmin)}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{
+						"id_sk": "sk-006",
+						"nama_pemilik": "Candi",
+						"nip_pemilik": "123456787",
+						"kategori_sk": "Mutasi",
+						"no_sk": "SK-006/2024",
+						"tanggal_sk": "2024-03-12",
+						"unit_kerja": "Bawah 2",
+						"status_sk": "Sudah TTD"
+					},
+					{
+						"id_sk": "sk-005",
+						"nama_pemilik": "Budi",
+						"nip_pemilik": "123456788",
+						"kategori_sk": "Mutasi",
+						"no_sk": "SK-005/2024",
+						"tanggal_sk": "2024-03-11",
+						"unit_kerja": "",
+						"status_sk": "Sudah dikoreksi dan menunggu TTD"
+					}
+				],
+				"meta": {
+					"limit": 10,
+					"offset": 0,
+					"total": 2
 				}
 			}`,
 		},
@@ -1097,6 +1161,7 @@ func Test_handler_listAdmin(t *testing.T) {
 					{
 						"id_sk": "sk-007",
 						"nama_pemilik": "Dedi",
+						"nip_pemilik": "123456786",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-007/2024",
 						"tanggal_sk": "2024-03-13",
@@ -1122,6 +1187,7 @@ func Test_handler_listAdmin(t *testing.T) {
 					{
 						"id_sk": "sk-007",
 						"nama_pemilik": "Dedi",
+						"nip_pemilik": "123456786",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-007/2024",
 						"tanggal_sk": "2024-03-13",
@@ -1131,6 +1197,7 @@ func Test_handler_listAdmin(t *testing.T) {
 					{
 						"id_sk": "sk-006",
 						"nama_pemilik": "Candi",
+						"nip_pemilik": "123456787",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-006/2024",
 						"tanggal_sk": "2024-03-12",
@@ -1272,12 +1339,14 @@ func Test_handler_getAdmin(t *testing.T) {
 				"data": {
 					"id_sk": "sk-010",
 					"nama_pemilik": "Gledi",
+					"nip_pemilik": "123456783",
 					"kategori_sk": "Mutasi",
 					"no_sk": "SK-010/2024",
 					"tanggal_sk": "2024-03-16",
 					"unit_kerja": "Tengah - Paling Atas",
 					"status_sk": "Sudah dikirim",
 					"nama_penandatangan": "Hadi",
+					"jabatan_penandatangan": "Operator",
 					"logs": [
 						{
 							"log" : "Mengkoreksi",
@@ -1303,6 +1372,7 @@ func Test_handler_getAdmin(t *testing.T) {
 				"data": {
 					"id_sk": "sk-003",
 					"nama_pemilik": "Andi",
+					"nip_pemilik": "123456789",
 					"kategori_sk": "Kenaikan Gaji",
 					"no_sk": "SK-003/2024",
 					"tanggal_sk": "2024-03-10",
@@ -1322,6 +1392,7 @@ func Test_handler_getAdmin(t *testing.T) {
 				"data": {
 					"id_sk": "sk-005",
 					"nama_pemilik": "Budi",
+					"nip_pemilik": "123456788",
 					"kategori_sk": "Mutasi",
 					"no_sk": "SK-005/2024",
 					"tanggal_sk": "2024-03-11",
@@ -1341,12 +1412,14 @@ func Test_handler_getAdmin(t *testing.T) {
 				"data": {
 					"id_sk": "sk-006",
 					"nama_pemilik": "Candi",
+					"nip_pemilik": "123456787",
 					"kategori_sk": "Mutasi",
 					"no_sk": "SK-006/2024",
 					"tanggal_sk": "2024-03-12",
 					"unit_kerja": "Bawah 2",
 					"status_sk": "Sudah TTD",
 					"nama_penandatangan": "Hadi",
+					"jabatan_penandatangan": "Operator",
 					"logs": []
 				}
 			}`,

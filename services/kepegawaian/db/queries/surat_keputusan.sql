@@ -72,6 +72,7 @@ WHERE fdsr.file_id = @id::varchar and fdsr.deleted_at IS NULL;
 SELECT
     fds.file_id,
     p.nama as nama_pemilik_sk,
+    p.nip_baru as nip_pemilik_sk,
     fds.kategori AS kategori_sk,
     fds.no_sk,
     fds.tanggal_sk,
@@ -94,7 +95,7 @@ WHERE fds.deleted_at IS NULL
     AND (sqlc.narg('kategori_sk')::VARCHAR is NULL OR fds.kategori ILIKE '%' || sqlc.narg('kategori_sk')::VARCHAR || '%')
     AND (sqlc.narg('tanggal_sk_mulai')::DATE IS NULL OR fds.tanggal_sk >= sqlc.narg('tanggal_sk_mulai')::DATE)
     AND (sqlc.narg('tanggal_sk_akhir')::DATE IS NULL OR fds.tanggal_sk <= sqlc.narg('tanggal_sk_akhir')::DATE)
-    AND (sqlc.narg('status_sk')::INTEGER IS NULL OR fds.status_sk = sqlc.narg('status_sk')::integer)
+    AND (sqlc.narg('list_status_sk')::integer[] IS NULL OR fds.status_sk = ANY(sqlc.narg('list_status_sk')::integer[]))
 ORDER BY fds.created_at DESC
 LIMIT $1 OFFSET $2;
 
@@ -117,7 +118,7 @@ WHERE fds.deleted_at IS NULL
     AND (sqlc.narg('kategori_sk')::VARCHAR is NULL OR fds.kategori ILIKE '%' || sqlc.narg('kategori_sk')::VARCHAR || '%')
     AND (sqlc.narg('tanggal_sk_mulai')::DATE IS NULL OR fds.tanggal_sk >= sqlc.narg('tanggal_sk_mulai')::DATE)
     AND (sqlc.narg('tanggal_sk_akhir')::DATE IS NULL OR fds.tanggal_sk <= sqlc.narg('tanggal_sk_akhir')::DATE)
-    AND (sqlc.narg('status_sk')::INTEGER IS NULL OR fds.status_sk = sqlc.narg('status_sk')::integer);
+    AND (sqlc.narg('list_status_sk')::integer[] IS NULL OR fds.status_sk = ANY(sqlc.narg('list_status_sk')::integer[]));
 
 -- name: GetSuratKeputusanByID :one
 SELECT
@@ -125,12 +126,14 @@ SELECT
     fds.no_sk,
     fds.tanggal_sk,
     fds.status_sk,
-    fds.nip_sk,
     p.nama as nama_pemilik_sk,
-    pemroses.nama as nama_penandatangan
+    p.nip_baru as nip_pemilik_sk,
+    pemroses.nama as nama_penandatangan,
+    rj.nama_jabatan as jabatan_penandatangan
 FROM file_digital_signature fds
 JOIN pegawai p on p.nip_baru = fds.nip_sk and p.deleted_at is null
 LEFT JOIN pegawai pemroses on pemroses.nip_baru = fds.nip_pemroses and pemroses.deleted_at is null
+LEFT JOIN ref_jabatan rj on pemroses.jabatan_instansi_id = rj.kode_jabatan and rj.deleted_at is null
 WHERE fds.deleted_at IS NULL
     AND fds.file_id = @id::varchar;
 

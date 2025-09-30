@@ -101,11 +101,12 @@ paths:
             format: date
         - name: status_sk
           in: query
-          description: Status SK
-          required: false
           schema:
-            type: integer
-            format: int32
+            type: array
+            items: 
+              type: integer
+              format: int32
+              description: Status surat keputusan
       responses:
         "200":
           description: Sukses.
@@ -117,7 +118,13 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/suratKeputusan'
+                      allOf:
+                      - $ref: '#/components/schemas/suratKeputusan'
+                      - type: object
+                        properties:
+                          nip_pemilik:
+                            type: string
+                            description: NIP pemilik SK
                   meta:
                     $ref: "#/components/schemas/metaPagination"
   /v1/admin/surat-keputusan/{id}:
@@ -143,7 +150,16 @@ paths:
                 additionalProperties: false
                 properties:
                   data:
-                    $ref: "#/components/schemas/suratKeputusanWithPenandatanganAndLog"
+                    allOf:
+                      - $ref: '#/components/schemas/suratKeputusanWithPenandatanganAndLog'
+                      - type: object
+                        properties:
+                          nip_pemilik:
+                            type: string
+                            description: NIP pemilik SK
+                          jabatan_penandatangan:
+                            type: string
+                            description: Jabatan Penandantangan
   /v1/admin/surat-keputusan/{id}/berkas:
     get:
       tags:

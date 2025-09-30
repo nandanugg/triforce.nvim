@@ -183,15 +183,10 @@ type listAdminParams struct {
 	KategoriSK     string
 	TanggalSKMulai db.Date
 	TanggalSKAkhir db.Date
-	StatusSK       *int32
+	ListStatusSK   []int32
 }
 
 func (s *service) listAdmin(ctx context.Context, arg listAdminParams) ([]suratKeputusan, uint, error) {
-	statusSkParam := pgtype.Int4{Valid: false}
-	if arg.StatusSK != nil {
-		statusSkParam = pgtype.Int4{Valid: true, Int32: *arg.StatusSK}
-	}
-
 	data, err := s.repo.ListSuratKeputusan(ctx, repo.ListSuratKeputusanParams{
 		Limit:          int32(arg.Limit),
 		Offset:         int32(arg.Offset),
@@ -203,7 +198,7 @@ func (s *service) listAdmin(ctx context.Context, arg listAdminParams) ([]suratKe
 		KategoriSk:     pgtype.Text{String: arg.KategoriSK, Valid: arg.KategoriSK != ""},
 		TanggalSkMulai: pgtype.Date{Time: time.Time(arg.TanggalSKMulai), Valid: !time.Time(arg.TanggalSKMulai).IsZero()},
 		TanggalSkAkhir: pgtype.Date{Time: time.Time(arg.TanggalSKAkhir), Valid: !time.Time(arg.TanggalSKAkhir).IsZero()},
-		StatusSk:       statusSkParam,
+		ListStatusSk:   arg.ListStatusSK,
 	})
 	if err != nil {
 		return nil, 0, fmt.Errorf("[suratkeputusan-listAdmin] repo ListSuratKeputusan: %w", err)
@@ -218,7 +213,7 @@ func (s *service) listAdmin(ctx context.Context, arg listAdminParams) ([]suratKe
 		KategoriSk:     pgtype.Text{String: arg.KategoriSK, Valid: arg.KategoriSK != ""},
 		TanggalSkMulai: pgtype.Date{Time: time.Time(arg.TanggalSKMulai), Valid: !time.Time(arg.TanggalSKMulai).IsZero()},
 		TanggalSkAkhir: pgtype.Date{Time: time.Time(arg.TanggalSKAkhir), Valid: !time.Time(arg.TanggalSKAkhir).IsZero()},
-		StatusSk:       statusSkParam,
+		ListStatusSk:   arg.ListStatusSK,
 	})
 	if err != nil {
 		return nil, 0, fmt.Errorf("[suratkeputusan-listAdmin] repo CountSuratKeputusan: %w", err)
@@ -241,6 +236,7 @@ func (s *service) listAdmin(ctx context.Context, arg listAdminParams) ([]suratKe
 		return suratKeputusan{
 			IDSK:        row.FileID,
 			NamaPemilik: row.NamaPemilikSk.String,
+			NIPPemilik:  row.NipPemilikSk.String,
 			KategoriSK:  row.KategoriSk.String,
 			NoSK:        row.NoSk.String,
 			TanggalSK:   db.Date(row.TanggalSk.Time),
@@ -261,7 +257,7 @@ func (s *service) getAdmin(ctx context.Context, id string) (*suratKeputusan, err
 		return nil, fmt.Errorf("[suratkeputusan-getAdmin] repo GetSuratKeputusanByID: %w", err)
 	}
 
-	listUnor, err := s.repo.ListUnitKerjaHierarchyByNIP(ctx, data.NipSk.String)
+	listUnor, err := s.repo.ListUnitKerjaHierarchyByNIP(ctx, data.NipPemilikSk.String)
 	if err != nil {
 		return nil, fmt.Errorf("[suratkeputusan-getAdmin] repo ListUnitKerjaHierarchyByNIP: %w", err)
 	}
@@ -280,15 +276,17 @@ func (s *service) getAdmin(ctx context.Context, id string) (*suratKeputusan, err
 	})
 
 	return &suratKeputusan{
-		IDSK:              id,
-		KategoriSK:        data.KategoriSk.String,
-		NoSK:              data.NoSk.String,
-		TanggalSK:         db.Date(data.TanggalSk.Time),
-		StatusSK:          statusSKText(data.StatusSk.Int16),
-		UnitKerja:         s.getUnorLengkap(listUnor),
-		NamaPemilik:       data.NamaPemilikSk.String,
-		NamaPenandaTangan: data.NamaPenandatangan.String,
-		Logs:              &logSk,
+		IDSK:                 id,
+		KategoriSK:           data.KategoriSk.String,
+		NoSK:                 data.NoSk.String,
+		TanggalSK:            db.Date(data.TanggalSk.Time),
+		StatusSK:             statusSKText(data.StatusSk.Int16),
+		UnitKerja:            s.getUnorLengkap(listUnor),
+		NamaPemilik:          data.NamaPemilikSk.String,
+		NIPPemilik:           data.NipPemilikSk.String,
+		NamaPenandaTangan:    data.NamaPenandatangan.String,
+		JabatanPenandaTangan: data.JabatanPenandatangan.String,
+		Logs:                 &logSk,
 	}, nil
 }
 

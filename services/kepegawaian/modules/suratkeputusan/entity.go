@@ -12,15 +12,17 @@ type logSuratKeputusan struct {
 	Timestamp time.Time `json:"timestamp"`
 }
 type suratKeputusan struct {
-	IDSK              string               `json:"id_sk"`
-	KategoriSK        string               `json:"kategori_sk"`
-	NoSK              string               `json:"no_sk"`
-	TanggalSK         db.Date              `json:"tanggal_sk"`
-	StatusSK          string               `json:"status_sk"`
-	UnitKerja         string               `json:"unit_kerja"`
-	NamaPemilik       string               `json:"nama_pemilik,omitempty"`
-	NamaPenandaTangan string               `json:"nama_penandatangan,omitempty"`
-	Logs              *[]logSuratKeputusan `json:"logs,omitempty"`
+	IDSK                 string               `json:"id_sk"`
+	KategoriSK           string               `json:"kategori_sk"`
+	NoSK                 string               `json:"no_sk"`
+	TanggalSK            db.Date              `json:"tanggal_sk"`
+	StatusSK             string               `json:"status_sk"`
+	UnitKerja            string               `json:"unit_kerja"`
+	NamaPemilik          string               `json:"nama_pemilik,omitempty"`
+	NIPPemilik           string               `json:"nip_pemilik,omitempty"`
+	NamaPenandaTangan    string               `json:"nama_penandatangan,omitempty"`
+	JabatanPenandaTangan string               `json:"jabatan_penandatangan,omitempty"`
+	Logs                 *[]logSuratKeputusan `json:"logs,omitempty"`
 }
 
 func statusSKText(statusSK int16) string {
