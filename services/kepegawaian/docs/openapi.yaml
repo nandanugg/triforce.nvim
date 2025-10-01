@@ -12,6 +12,8 @@ tags:
   - name: Golongan
   - name: Jabatan
   - name: Jenis Diklat
+  - name: Jenis Diklat Fungsional
+  - name: Jenis Diklat Struktural
   - name: Jenis Hukuman
   - name: Jenis Jabatan
   - name: Jenis Kenaikan Pangkat
@@ -594,6 +596,68 @@ paths:
       summary: Daftar jenis diklat.
       description: Daftar jenis diklat.
       operationId: listJenisDiklat
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: integer
+                        nama:
+                          type: string
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/jenis-diklat-fungsional:
+    get:
+      tags:
+        - Jenis Diklat Fungsional
+      summary: Daftar jenis diklat fungsional.
+      description: Daftar jenis diklat fungsional.
+      operationId: listJenisDiklatFungsional
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: integer
+                        nama:
+                          type: string
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/jenis-diklat-struktural:
+    get:
+      tags:
+        - Jenis Diklat Struktural
+      summary: Daftar jenis diklat struktural.
+      description: Daftar jenis diklat struktural.
+      operationId: listJenisDiklatStruktural
       parameters:
         - $ref: "#/components/parameters/authRequired"
         - $ref: "#/components/parameters/limit"
