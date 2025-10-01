@@ -12,7 +12,10 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-const contextKeyUser = "http-auth-user"
+const (
+	contextKeyUser    = "http-auth-user"
+	contextKeyUserIDs = "http-auth-user-ids"
+)
 
 const RoleAdmin = "admin"
 
@@ -95,6 +98,18 @@ func NewAuthMiddleware(service string, keyfunc *Keyfunc) AuthMiddlewareFunc {
 					user.Role, _ = roles[service].(string)
 				}
 				c.Set(contextKeyUser, &user)
+
+				// set keycloak_id & zimbra_id for logging purpose
+				ids := make(map[string]string)
+				if sub, err := claims.GetSubject(); err == nil {
+					ids["keycloakID"] = sub
+				}
+				if zimbraID, ok := claims["zimbra_id"].(string); ok {
+					ids["zimbraID"] = zimbraID
+				}
+				if len(ids) > 0 {
+					c.Set(contextKeyUserIDs, ids)
+				}
 
 				if len(allowedRoles) == 0 || slices.Contains(allowedRoles, user.Role) {
 					return next(c)

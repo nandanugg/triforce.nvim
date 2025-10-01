@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"log/slog"
+	"net/url"
 	"slices"
 
 	"github.com/labstack/echo/v4"
@@ -22,10 +23,17 @@ func newLogMiddleware() echo.MiddlewareFunc {
 		LogError:     true,
 		LogReferer:   true,
 		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
+			uri, _ := url.Parse(v.URI)
+			q := uri.Query()
+			if val := q.Get("id_token_hint"); val != "" {
+				q.Set("id_token_hint", "filtered")
+				uri.RawQuery = q.Encode()
+			}
+
 			attrs := []slog.Attr{
 				slog.String("latencySec", fmt.Sprintf("%.3fs", v.Latency.Seconds())),
 				slog.String("remoteIp", v.RemoteIP),
-				slog.String("requestUrl", v.Method+" "+v.URI),
+				slog.String("requestUrl", v.Method+" "+uri.String()),
 				slog.String("requestRoute", v.RoutePath),
 				slog.String("userAgent", v.UserAgent),
 				slog.Int("responseCode", v.Status),
@@ -34,6 +42,9 @@ func newLogMiddleware() echo.MiddlewareFunc {
 			}
 			if v.Error != nil {
 				attrs = append(attrs, slog.String("error", v.Error.Error()))
+			}
+			if userIDs, ok := c.Get(contextKeyUserIDs).(map[string]string); ok {
+				attrs = append(attrs, slog.Any("currentUser", userIDs))
 			}
 
 			var l slog.Level
@@ -54,11 +65,9 @@ func newLogMiddleware() echo.MiddlewareFunc {
 				"/metrics",
 			}
 
-			index := slices.IndexFunc(skippedPaths, func(skippedPath string) bool {
+			return slices.ContainsFunc(skippedPaths, func(skippedPath string) bool {
 				return skippedPath == c.Request().URL.Path
 			})
-
-			return index > -1
 		},
 	})
 }
