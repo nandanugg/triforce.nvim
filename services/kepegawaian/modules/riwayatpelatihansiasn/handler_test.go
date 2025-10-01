@@ -337,3 +337,201 @@ func Test_handler_getBerkas(t *testing.T) {
 		})
 	}
 }
+
+func Test_handler_listAdmin(t *testing.T) {
+	t.Parallel()
+
+	dbData := `
+	INSERT INTO ref_jenis_diklat (id, jenis_diklat, kode, deleted_at) VALUES
+		(1, 'Jenis 1', '01', null),
+		(2, 'Jenis 2', '02', null),
+		(3, 'Jenis 3', '03', '2000-01-01');
+
+	INSERT INTO riwayat_diklat (
+		id, nip_baru, jenis_diklat_id, jenis_diklat, nama_diklat, no_sertifikat, tanggal_mulai, tanggal_selesai, tahun_diklat, durasi_jam, institusi_penyelenggara, deleted_at
+	) VALUES
+		(1, '1c', 1, 'jenis 1', 'Pelatihan Kepemimpinan Administrator (PKA)', 'LAN-PKA-2023-00123', '2023-06-20', '2023-06-21', 2023, 120, 'Lembaga Administrasi Negara', null),
+		(2, '1c', 2, 'jenis 2', 'Pelatihan Kepemimpinan Pengawas (PKP)', 'LAN-PKP-2022-00456', '2022-08-15', '2022-08-16', null, null, 'Badan Diklat Provinsi Jawa Barat', null),
+		(3, '1c', 3, 'jenis 3', 'Pelatihan Kepemimpinan Nasional Tingkat II', 'LAN-PKNII-2021-00089', '2021-04-10', '2023-04-11', 2021, 12, 'LAN-RI', null),
+		(4, '2c', 1, 'jenis 1', 'Pelatihan Kepemimpinan Administrator (PKA)', 'LAN-PKA-2023-00234', '2023-07-05', '2023-07-6', 2023, 12, 'Badan Pengembangan Sumber Daya Manusia Daerah (BPSDMD) DKI Jakarta', null),
+		(5, '1c', 1, 'jenis 1', 'Pelatihan Kepemimpinan Nasional Tingkat I', 'LAN-PKNI-2020-00077', '2020-09-12', '2020-09-13', 2020, 12, 'Lembaga Administrasi Negara', '2000-01-01'),
+		(6, '1c', 1, 'jenis 1', 'Pelatihan Kepemimpinan Nasional Tingkat III', 'LAN-PKNI-2020-00077', null, null, 2022, 10, 'Lembaga Administrasi Negara', null),
+		(7, '1d', 1, 'jenis 1', 'Pelatihan Kepemimpinan Administrator (PKA)', 'LAN-PKA-2023-00234', '2023-07-05', '2023-07-6', 2023, 12, 'Badan Pengembangan Sumber Daya Manusia Daerah (BPSDMD) DKI Jakarta', null);
+	`
+
+	tests := []struct {
+		name             string
+		dbData           string
+		nip              string
+		requestQuery     url.Values
+		requestHeader    http.Header
+		wantResponseCode int
+		wantResponseBody string
+	}{
+		{
+			name:             "ok: admin dapat melihat riwayat pelatihan siasn pegawai 1c",
+			dbData:           dbData,
+			nip:              "1c",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{
+						"id": 1,
+						"institusi_penyelenggara": "Lembaga Administrasi Negara",
+						"jenis_diklat": "Jenis 1",
+						"nama_diklat": "Pelatihan Kepemimpinan Administrator (PKA)",
+						"nomor_sertifikat": "LAN-PKA-2023-00123",
+						"tahun": 2023,
+						"tanggal_mulai": "2023-06-20",
+						"tanggal_selesai": "2023-06-21",
+						"durasi": 120
+					},
+					{
+						"id": 3,
+						"institusi_penyelenggara": "LAN-RI",
+						"jenis_diklat": "",
+						"nama_diklat": "Pelatihan Kepemimpinan Nasional Tingkat II",
+						"nomor_sertifikat": "LAN-PKNII-2021-00089",
+						"tahun": 2021,
+						"tanggal_mulai": "2021-04-10",
+						"tanggal_selesai": "2023-04-11",
+						"durasi": 12
+					},
+					{
+						"id": 2,
+						"institusi_penyelenggara": "Badan Diklat Provinsi Jawa Barat",
+						"jenis_diklat": "Jenis 2",
+						"nama_diklat": "Pelatihan Kepemimpinan Pengawas (PKP)",
+						"nomor_sertifikat": "LAN-PKP-2022-00456",
+						"tahun": 2022,
+						"tanggal_mulai": "2022-08-15",
+						"tanggal_selesai": "2022-08-16",
+						"durasi": null
+					},
+					{
+						"id": 6,
+						"institusi_penyelenggara": "Lembaga Administrasi Negara",
+						"jenis_diklat": "Jenis 1",
+						"nama_diklat": "Pelatihan Kepemimpinan Nasional Tingkat III",
+						"nomor_sertifikat": "LAN-PKNI-2020-00077",
+						"tahun": 2022,
+						"tanggal_mulai": null,
+						"tanggal_selesai": null,
+						"durasi": 10
+					}
+				],
+				"meta": {"limit": 10, "offset": 0, "total": 4}
+			}`,
+		},
+		{
+			name:             "ok: admin dapat melihat riwayat pelatihan siasn pegawai 1c dengan pagination",
+			dbData:           dbData,
+			nip:              "1c",
+			requestQuery:     url.Values{"limit": []string{"2"}, "offset": []string{"1"}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{
+						"id": 3,
+						"institusi_penyelenggara": "LAN-RI",
+						"jenis_diklat": "",
+						"nama_diklat": "Pelatihan Kepemimpinan Nasional Tingkat II",
+						"nomor_sertifikat": "LAN-PKNII-2021-00089",
+						"tahun": 2021,
+						"tanggal_mulai": "2021-04-10",
+						"tanggal_selesai": "2023-04-11",
+						"durasi": 12
+					},
+					{
+						"id": 2,
+						"institusi_penyelenggara": "Badan Diklat Provinsi Jawa Barat",
+						"jenis_diklat": "Jenis 2",
+						"nama_diklat": "Pelatihan Kepemimpinan Pengawas (PKP)",
+						"nomor_sertifikat": "LAN-PKP-2022-00456",
+						"tahun": 2022,
+						"tanggal_mulai": "2022-08-15",
+						"tanggal_selesai": "2022-08-16",
+						"durasi": null
+					}
+				],
+				"meta": {"limit": 2, "offset": 1, "total": 4}
+			}`,
+		},
+		{
+			name:             "ok: admin dapat melihat riwayat pelatihan siasn pegawai 1d",
+			dbData:           dbData,
+			nip:              "1d",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{
+						"id": 7,
+						"institusi_penyelenggara": "Badan Pengembangan Sumber Daya Manusia Daerah (BPSDMD) DKI Jakarta",
+						"jenis_diklat": "Jenis 1",
+						"nama_diklat": "Pelatihan Kepemimpinan Administrator (PKA)",
+						"nomor_sertifikat": "LAN-PKA-2023-00234",
+						"tahun": 2023,
+						"tanggal_mulai": "2023-07-05",
+						"tanggal_selesai": "2023-07-06",
+						"durasi": 12
+					}
+				],
+				"meta": {"limit": 10, "offset": 0, "total": 1}
+			}`,
+		},
+		{
+			name:             "ok: admin dapat melihat riwayat pelatihan siasn pegawai yang tidak ada data",
+			dbData:           dbData,
+			nip:              "999",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [],
+				"meta": {"limit": 10, "offset": 0, "total": 0}
+			}`,
+		},
+		{
+			name:             "error: user is not an admin",
+			dbData:           dbData,
+			nip:              "1c",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "987654321")}},
+			wantResponseCode: http.StatusForbidden,
+			wantResponseBody: `{"message": "akses ditolak"}`,
+		},
+		{
+			name:             "error: auth header tidak valid",
+			dbData:           dbData,
+			nip:              "1c",
+			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			db := dbtest.New(t, dbmigrations.FS)
+			_, err := db.Exec(context.Background(), tt.dbData)
+			require.NoError(t, err)
+
+			req := httptest.NewRequest(http.MethodGet, "/v1/admin/pegawai/"+tt.nip+"/riwayat-pelatihan-siasn", nil)
+			req.URL.RawQuery = tt.requestQuery.Encode()
+			req.Header = tt.requestHeader
+			rec := httptest.NewRecorder()
+
+			e, err := api.NewEchoServer(docs.OpenAPIBytes)
+			require.NoError(t, err)
+			RegisterRoutes(e, repo.New(db), api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
+			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+		})
+	}
+}

@@ -286,6 +286,217 @@ paths:
                 properties:
                   data:
                     $ref: "#/components/schemas/dataPegawai"
+  /v1/admin/pegawai/{nip}/keluarga:
+    get:
+      tags:
+        - Keluarga
+      summary: Lihat daftar keluarga.
+      description: >-
+        Lihat daftar keluarga dari pegawai berdasarkan NIP.
+      operationId: adminDetailPegawaiKeluarga
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/keluarga"
+  /v1/admin/pegawai/{nip}/riwayat-kinerja:
+    get:
+      tags:
+        - Riwayat Kinerja
+      summary: Lihat riwayat kinerja pegawai.
+      description: >-
+        Lihat riwayat kinerja dari pegawai berdasarkan NIP, urut berdasarkan tahun.
+      operationId: adminDetailPegawaiKinerja
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/riwayatKinerja"
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/admin/pegawai/{nip}/riwayat-asesmen-nine-box:
+    get:
+      tags:
+        - Riwayat Asesmen Nine Box
+      summary: Lihat riwayat asesmen nine box pegawai.
+      description: >-
+        Lihat riwayat asesmen nine box dari pegawai berdasarkan NIP, urut berdasarkan tahun.
+      operationId: adminDetailPegawaiAsesmenNineBox
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/riwayatAsesmenNineBox"
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/admin/pegawai/{nip}/riwayat-pendidikan:
+    get:
+      tags:
+        - Riwayat Pendidikan
+      summary: Lihat riwayat pendidikan pegawai.
+      description: >-
+        Lihat riwayat pendidikan dari pegawai berdasarkan NIP, urut berdasarkan tahun lulus desc.
+      operationId: adminDetailPegawaiPendidikan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/riwayatPendidikan"
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/admin/pegawai/{nip}/riwayat-pelatihan-teknis:
+    get:
+      tags:
+        - Riwayat Pelatihan Teknis
+      summary: Lihat riwayat pelatihan teknis pegawai.
+      description: >-
+        Lihat riwayat pelatihan teknis/seminar/workshop/kursus dari pegawai berdasarkan NIP, urut berdasarkan tanggal mulai (terbaru di atas).
+      operationId: adminDetailPegawaiPelatihanTeknis
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/riwayatPelatihanTeknis"
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/admin/pegawai/{nip}/riwayat-pelatihan-siasn:
+    get:
+      tags:
+        - Riwayat Pelatihan SIASN
+      summary: Lihat riwayat pelatihan SIASN pegawai.
+      description: >-
+        Lihat riwayat pelatihan SIASN dari pegawai berdasarkan NIP, urut berdasarkan tanggal.
+      operationId: adminDetailPegawaiPelatihanSIASN
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/riwayatPelatihanSIASN"
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/admin/pegawai/{nip}/riwayat-pelatihan-fungsional:
+    get:
+      tags:
+        - Riwayat Pelatihan Fungsional
+      summary: Lihat riwayat pelatihan fungsional pegawai.
+      description: >-
+        Lihat riwayat pelatihan fungsional dari pegawai berdasarkan NIP, urut berdasarkan tanggal.
+      operationId: adminDetailPegawaiPelatihanFungsional
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/riwayatPelatihanFungsional"
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
   /v1/data-pribadi:
     get:
       tags:
@@ -654,16 +865,7 @@ paths:
                   data:
                     type: array
                     items:
-                      type: object
-                      additionalProperties: false
-                      properties:
-                        id:
-                          type: integer
-                        tahun:
-                          type: integer
-                          nullable: true
-                        kesimpulan:
-                          type: string
+                      $ref: "#/components/schemas/riwayatAsesmenNineBox"
                   meta:
                     $ref: "#/components/schemas/metaPagination"
   /v1/riwayat-hukuman-disiplin:
@@ -1066,20 +1268,7 @@ paths:
                   data:
                     type: array
                     items:
-                      type: object
-                      additionalProperties: false
-                      properties:
-                        id:
-                          type: integer
-                        tahun:
-                          type: integer
-                          nullable: true
-                        hasil_kinerja:
-                          type: string
-                        perilaku_kerja:
-                          type: string
-                        kuadran_kinerja:
-                          type: string
+                      $ref: "#/components/schemas/riwayatKinerja"
                   meta:
                     $ref: "#/components/schemas/metaPagination"
   /v1/riwayat-pelatihan-fungsional:
@@ -1106,34 +1295,7 @@ paths:
                   data:
                     type: array
                     items:
-                      type: object
-                      additionalProperties: false
-                      properties:
-                        id:
-                          type: string
-                        jenis_diklat:
-                          type: string
-                        nama_diklat:
-                          type: string
-                        tahun:
-                          type: integer
-                          nullable: true
-                        institusi_penyelenggara:
-                          type: string
-                        nomor_sertifikat:
-                          type: string
-                        durasi:
-                          type: integer
-                          description: Jumlah jam pelatihan
-                          nullable: true
-                        tanggal_mulai:
-                          type: string
-                          format: date
-                          nullable: true
-                        tanggal_selesai:
-                          type: string
-                          format: date
-                          nullable: true
+                      $ref: "#/components/schemas/riwayatPelatihanFungsional"
                   meta:
                     $ref: "#/components/schemas/metaPagination"
   /v1/riwayat-pelatihan-fungsional/{id}/berkas:
@@ -1186,42 +1348,7 @@ paths:
                   data:
                     type: array
                     items:
-                      type: object
-                      additionalProperties: false
-                      properties:
-                        id:
-                          type: integer
-                        nama_diklat:
-                          type: string
-                          example: "Pelatihan Kepemimpinan Administrator (PKA)"
-                        jenis_diklat:
-                          type: string
-                          example: "Diklat SIASN"
-                        nomor_sertifikat:
-                          type: string
-                          example: "LAN-PKA-2023-00123"
-                        institusi_penyelenggara:
-                          type: string
-                          example: "Lembaga Administrasi Negara (LAN)"
-                        tahun:
-                          type: integer
-                          example: 2023
-                          nullable: true
-                        durasi:
-                          type: integer
-                          description: "Durasi pelatihan dalam jam"
-                          nullable: true
-                          example: 900
-                        tanggal_mulai:
-                          type: string
-                          format: date
-                          nullable: true
-                          example: "2023-03-15"
-                        tanggal_selesai:
-                          type: string
-                          format: date
-                          nullable: true
-                          example: "2023-06-20"
+                      $ref: "#/components/schemas/riwayatPelatihanSIASN"
                   meta:
                     $ref: "#/components/schemas/metaPagination"
   /v1/riwayat-pelatihan-siasn/{id}/berkas:
@@ -1273,46 +1400,7 @@ paths:
                   data:
                     type: array
                     items:
-                      type: object
-                      additionalProperties: false
-                      properties:
-                        id:
-                          type: integer
-                          description: ID pelatihan teknis
-                        tipe_pelatihan:
-                          type: string
-                          description: Tipe pelatihan (Sertifikat/Non-sertifikat/Teknis)
-                          enum: [ Sertifikat, Non-sertifikat, Teknis, "" ]
-                        jenis_pelatihan:
-                          type: string
-                          description: Jenis pelatihan (Workshop/Seminar/Kursus/Lainnya)
-                        nama_pelatihan:
-                          type: string
-                          description: Nama pelatihan
-                        tanggal_mulai:
-                          type: string
-                          format: date
-                          description: Tanggal mulai pelatihan
-                          nullable: true
-                        tanggal_selesai:
-                          type: string
-                          format: date
-                          description: Tanggal selesai pelatihan
-                          nullable: true
-                        tahun:
-                          type: integer
-                          description: Tahun pelatihan
-                          nullable: true
-                        durasi:
-                          type: number
-                          description: Durasi pelatihan dalam jam
-                          nullable: true
-                        institusi_penyelenggara:
-                          type: string
-                          description: Institusi penyelenggara
-                        nomor_sertifikat:
-                          type: string
-                          description: Nomor sertifikat (jika ada)
+                      $ref: "#/components/schemas/riwayatPelatihanTeknis"
                   meta:
                     $ref: "#/components/schemas/metaPagination"
   /v1/riwayat-pelatihan-teknis/{id}/berkas:
@@ -1363,30 +1451,7 @@ paths:
                   data:
                     type: array
                     items:
-                      type: object
-                      additionalProperties: false
-                      properties:
-                        id:
-                          type: integer
-                        jenjang_pendidikan:
-                          type: string
-                        nama_sekolah:
-                          type: string
-                        jurusan:
-                          type: string
-                        keterangan_pendidikan:
-                          type: string
-                        tahun_lulus:
-                          type: integer
-                          nullable: true
-                        nomor_ijazah:
-                          type: string
-                        gelar_depan:
-                          type: string
-                        gelar_belakang:
-                          type: string
-                        tugas_belajar:
-                          type: string
+                      $ref: "#/components/schemas/riwayatPendidikan"
                   meta:
                     $ref: "#/components/schemas/metaPagination"
   /v1/riwayat-pendidikan/{id}/berkas:
@@ -1852,6 +1917,143 @@ components:
           type: integer
           example: 100
           minimum: 0
+    riwayatKinerja:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+        tahun:
+          type: integer
+          nullable: true
+        hasil_kinerja:
+          type: string
+        perilaku_kerja:
+          type: string
+        kuadran_kinerja:
+          type: string
+    riwayatAsesmenNineBox:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+        tahun:
+          type: integer
+          nullable: true
+        kesimpulan:
+          type: string
+    riwayatPendidikan:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+        jenjang_pendidikan:
+          type: string
+        jurusan:
+          type: string
+        nama_sekolah:
+          type: string
+        tahun_lulus:
+          type: integer
+          nullable: true
+        nomor_ijazah:
+          type: string
+        gelar_depan:
+          type: string
+        gelar_belakang:
+          type: string
+        tugas_belajar:
+          type: string
+        keterangan_pendidikan:
+          type: string
+    riwayatPelatihanTeknis:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+        tipe_pelatihan:
+          type: string
+        jenis_pelatihan:
+          type: string
+        nama_pelatihan:
+          type: string
+        tanggal_mulai:
+          type: string
+          format: date
+          nullable: true
+        tanggal_selesai:
+          type: string
+          format: date
+          nullable: true
+        tahun:
+          type: integer
+          nullable: true
+        durasi:
+          type: number
+          nullable: true
+        institusi_penyelenggara:
+          type: string
+        nomor_sertifikat:
+          type: string
+    riwayatPelatihanSIASN:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+        jenis_diklat:
+          type: string
+        nama_diklat:
+          type: string
+        institusi_penyelenggara:
+          type: string
+        nomor_sertifikat:
+          type: string
+        tanggal_mulai:
+          type: string
+          format: date
+          nullable: true
+        tanggal_selesai:
+          type: string
+          format: date
+          nullable: true
+        tahun:
+          type: integer
+          nullable: true
+        durasi:
+          type: integer
+          nullable: true
+    riwayatPelatihanFungsional:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        jenis_diklat:
+          type: string
+        nama_diklat:
+          type: string
+        tanggal_selesai:
+          type: string
+          format: date
+          nullable: true
+        tanggal_mulai:
+          type: string
+          format: date
+          nullable: true
+        durasi:
+          type: integer
+          nullable: true
+        institusi_penyelenggara:
+          type: string
+        nomor_sertifikat:
+          type: string
+        tahun:
+          type: integer
+          nullable: true
     keluarga:
       type: object
       additionalProperties: false

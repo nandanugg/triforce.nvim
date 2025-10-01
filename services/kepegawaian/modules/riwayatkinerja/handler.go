@@ -40,3 +40,27 @@ func (h *handler) list(c echo.Context) error {
 		Meta: api.MetaPagination{Limit: req.Limit, Offset: req.Offset, Total: total},
 	})
 }
+
+type listAdminRequest struct {
+	NIP string `param:"nip"`
+	api.PaginationRequest
+}
+
+func (h *handler) listAdmin(c echo.Context) error {
+	var req listAdminRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	ctx := c.Request().Context()
+	data, total, err := h.service.list(ctx, req.NIP, req.Limit, req.Offset)
+	if err != nil {
+		slog.ErrorContext(ctx, "Error getting list riwayat kinerja.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	return c.JSON(http.StatusOK, listResponse{
+		Data: data,
+		Meta: api.MetaPagination{Limit: req.Limit, Offset: req.Offset, Total: total},
+	})
+}

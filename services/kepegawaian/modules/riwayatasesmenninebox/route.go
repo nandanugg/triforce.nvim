@@ -13,4 +13,5 @@ func RegisterRoutes(e *echo.Echo, repo repository, mwAuth api.AuthMiddlewareFunc
 	h := newHandler(s)
 
 	e.Add(http.MethodGet, "/v1/riwayat-asesmen-nine-box", h.list, mwAuth())
+	e.Add(http.MethodGet, "/v1/admin/pegawai/:nip/riwayat-asesmen-nine-box", h.listAdmin, mwAuth(api.RoleAdmin))
 }

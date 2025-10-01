@@ -339,9 +339,204 @@ func Test_handler_getBerkas(t *testing.T) {
 				assert.Equal(t, "inline", rec.Header().Get("Content-Disposition"))
 				assert.Equal(t, tt.wantContentType, rec.Header().Get("Content-Type"))
 				assert.Equal(t, tt.wantResponseBytes, rec.Body.Bytes())
-			} else {
-				assert.JSONEq(t, string(tt.wantResponseBytes), rec.Body.String())
 			}
+		})
+	}
+}
+
+func Test_handler_listAdmin(t *testing.T) {
+	t.Parallel()
+
+	dbData := `
+		insert into ref_tingkat_pendidikan
+			(id, nama,         deleted_at) values
+			(6, 'Diploma III', null),
+			(7, 'Sarjana',     null),
+			(8, 'Magister',    null),
+			(9, 'Deleted',     '2000-01-01');
+		insert into ref_pendidikan
+			(id,       nama,                    deleted_at) values
+			('ed-003', 'Akuntansi',             null),
+			('ed-004', 'Magister Manajemen',    null),
+			('ed-006', 'Diploma III Akuntansi', null),
+			('ed-007', 'Diploma Deleted',       '2000-01-01');
+		insert into riwayat_pendidikan (id, nip, tingkat_pendidikan_id, pendidikan_id, nama_sekolah, tahun_lulus, no_ijazah, gelar_depan, gelar_belakang, tugas_belajar, negara_sekolah, deleted_at) values
+			(1, '1c', 6, 'ed-006', 'Politeknik Negeri Jakarta', '2009', 'PNJ/AK/2009/004', null, 'A.Md.', 0, 'Pendidikan Regular', null),
+			(2, '1c', 7, 'ed-003', 'Universitas Airlangga', '2011', 'UNAIR/AK/2011/004', 'Dr.', null, 2, 'Program Ekstensi', null),
+			(3, '1c', 8, 'ed-004', 'Universitas Airlangga', '2016', 'UNAIR/MM/2016/004', 'Prof.', 'M.M.', 1, 'Beasiswa Institusi', null),
+			(4, '2c', 7, 'ed-003', 'Universitas Airlangga', '2011', 'UNAIR/AK/2011/004', 'Dr.', null, 2, 'Program Ekstensi', null),
+			(5, '1c', 8, 'ed-004', 'Universitas Airlangga', '2016', 'UNAIR/MM/2016/004', 'Prof.', 'M.M.', 3, 'Beasiswa Institusi', '2000-01-01'),
+			(6, '1d', 7, 'ed-003', 'Universitas Airlangga', '2011', 'UNAIR/AK/2011/004', 'Dr.', null, 2, 'Program Ekstensi', null);
+	`
+
+	tests := []struct {
+		name             string
+		dbData           string
+		nip              string
+		requestQuery     url.Values
+		requestHeader    http.Header
+		wantResponseCode int
+		wantResponseBody string
+	}{
+		{
+			name:             "ok: admin dapat melihat riwayat pendidikan pegawai 1c",
+			dbData:           dbData,
+			nip:              "1c",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{
+						"id":                    3,
+						"jenjang_pendidikan":    "Magister",
+						"jurusan":               "Magister Manajemen",
+						"nama_sekolah":          "Universitas Airlangga",
+						"tahun_lulus":           2016,
+						"nomor_ijazah":          "UNAIR/MM/2016/004",
+						"gelar_depan":           "Prof.",
+						"gelar_belakang":        "M.M.",
+						"tugas_belajar":         "Tugas Belajar",
+						"keterangan_pendidikan": "Beasiswa Institusi"
+					},
+					{
+						"id":                    2,
+						"jenjang_pendidikan":    "Sarjana",
+						"jurusan":               "Akuntansi",
+						"nama_sekolah":          "Universitas Airlangga",
+						"tahun_lulus":           2011,
+						"nomor_ijazah":          "UNAIR/AK/2011/004",
+						"gelar_depan":           "Dr.",
+						"gelar_belakang":        "",
+						"tugas_belajar":         "Izin Belajar",
+						"keterangan_pendidikan": "Program Ekstensi"
+					},
+					{
+						"id":                    1,
+						"jenjang_pendidikan":    "Diploma III",
+						"jurusan":               "Diploma III Akuntansi",
+						"nama_sekolah":          "Politeknik Negeri Jakarta",
+						"tahun_lulus":           2009,
+						"nomor_ijazah":          "PNJ/AK/2009/004",
+						"gelar_depan":           "",
+						"gelar_belakang":        "A.Md.",
+						"tugas_belajar":         "",
+						"keterangan_pendidikan": "Pendidikan Regular"
+					}
+				],
+				"meta": {"limit": 10, "offset": 0, "total": 3}
+			}`,
+		},
+		{
+			name:             "ok: admin dapat melihat riwayat pendidikan pegawai 1c dengan pagination",
+			dbData:           dbData,
+			nip:              "1c",
+			requestQuery:     url.Values{"limit": []string{"2"}, "offset": []string{"1"}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{
+						"id":                    2,
+						"jenjang_pendidikan":    "Sarjana",
+						"jurusan":               "Akuntansi",
+						"nama_sekolah":          "Universitas Airlangga",
+						"tahun_lulus":           2011,
+						"nomor_ijazah":          "UNAIR/AK/2011/004",
+						"gelar_depan":           "Dr.",
+						"gelar_belakang":        "",
+						"tugas_belajar":         "Izin Belajar",
+						"keterangan_pendidikan": "Program Ekstensi"
+					},
+					{
+						"id":                    1,
+						"jenjang_pendidikan":    "Diploma III",
+						"jurusan":               "Diploma III Akuntansi",
+						"nama_sekolah":          "Politeknik Negeri Jakarta",
+						"tahun_lulus":           2009,
+						"nomor_ijazah":          "PNJ/AK/2009/004",
+						"gelar_depan":           "",
+						"gelar_belakang":        "A.Md.",
+						"tugas_belajar":         "",
+						"keterangan_pendidikan": "Pendidikan Regular"
+					}
+				],
+				"meta": {"limit": 2, "offset": 1, "total": 3}
+			}`,
+		},
+		{
+			name:             "ok: admin dapat melihat riwayat pendidikan pegawai 1d",
+			dbData:           dbData,
+			nip:              "1d",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{
+						"id":                    6,
+						"jenjang_pendidikan":    "Sarjana",
+						"jurusan":               "Akuntansi",
+						"nama_sekolah":          "Universitas Airlangga",
+						"tahun_lulus":           2011,
+						"nomor_ijazah":          "UNAIR/AK/2011/004",
+						"gelar_depan":           "Dr.",
+						"gelar_belakang":        "",
+						"tugas_belajar":         "Izin Belajar",
+						"keterangan_pendidikan": "Program Ekstensi"
+					}
+				],
+				"meta": {"limit": 10, "offset": 0, "total": 1}
+			}`,
+		},
+		{
+			name:             "ok: admin dapat melihat riwayat pendidikan pegawai yang tidak ada data",
+			dbData:           dbData,
+			nip:              "999",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [],
+				"meta": {"limit": 10, "offset": 0, "total": 0}
+			}`,
+		},
+		{
+			name:             "error: user is not an admin",
+			dbData:           dbData,
+			nip:              "1c",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "987654321")}},
+			wantResponseCode: http.StatusForbidden,
+			wantResponseBody: `{"message": "akses ditolak"}`,
+		},
+		{
+			name:             "error: auth header tidak valid",
+			dbData:           dbData,
+			nip:              "1c",
+			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			db := dbtest.New(t, dbmigrations.FS)
+			_, err := db.Exec(context.Background(), tt.dbData)
+			require.NoError(t, err)
+
+			req := httptest.NewRequest(http.MethodGet, "/v1/admin/pegawai/"+tt.nip+"/riwayat-pendidikan", nil)
+			req.URL.RawQuery = tt.requestQuery.Encode()
+			req.Header = tt.requestHeader
+			rec := httptest.NewRecorder()
+
+			e, err := api.NewEchoServer(docs.OpenAPIBytes)
+			require.NoError(t, err)
+			RegisterRoutes(e, sqlc.New(db), api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
+			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
 		})
 	}
 }

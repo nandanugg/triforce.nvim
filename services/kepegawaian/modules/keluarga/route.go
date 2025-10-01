@@ -14,4 +14,5 @@ func RegisterRoutes(e *echo.Echo, sqlc dbRepo.Querier, mwAuth api.AuthMiddleware
 	h := newHandler(s)
 
 	e.Add(http.MethodGet, "/v1/keluarga", h.list, mwAuth())
+	e.Add(http.MethodGet, "/v1/admin/pegawai/:nip/keluarga", h.listAdmin, mwAuth(api.RoleAdmin))
 }

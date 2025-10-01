@@ -301,3 +301,207 @@ func Test_handler_getBerkas(t *testing.T) {
 		})
 	}
 }
+
+func Test_handler_listAdmin(t *testing.T) {
+	t.Parallel()
+
+	dbData := `
+		INSERT INTO riwayat_diklat_fungsional ( id, nip_baru, nip_lama, jenis_diklat, nama_kursus, jumlah_jam, tahun, institusi_penyelenggara, jenis_kursus_sertifikat, no_sertifikat, instansi, status_data, tanggal_kursus, keterangan_berkas, lama, siasn_id, created_at, updated_at, deleted_at) VALUES
+		( '9159a38e-586c-4338-8915-ab9ee5f6a937', '1c', '123456789', 'Teknis', 'Pelatihan Dasar CPNS', 120, 2020, 'LAN RI', 'A', 'LATSAR-2020-001', 'Kementerian Dalam Negeri', 'valid', '2020-03-15', 'Sertifikat Asli', 1.5, '00000000-0000-0000-0000-000000000001', now(), now(), null),
+		( 'add68305-1993-40e5-9e32-14de553cfd73', '1c', '123456789', 'Teknis II', 'Pelatihan Dasar CPNS II', 120, 2020, 'LAN RI', 'A', 'LATSAR-2020-002', 'Kementerian Dalam Negeri', 'valid', '2020-03-15', 'Sertifikat Asli', 1.5, '00000000-0000-0000-0000-000000000002', now(), now(),null),
+		( '00000000-0000-0000-0000-000000000003', '2c', '987654321', 'Fungsional', 'Diklat Auditor Pertama', 80, 2021, 'BPKP', 'B', 'AUD-2021-014', 'Badan Pengawas Keuangan', 'valid', '2021-07-20', 'Softcopy', 1.0, '00000000-0000-0000-0000-000000000004', now(), now(),null),
+		( '00000000-0000-0000-0000-000000000005', '1c', '112233445', 'Kepemimpinan', 'Diklatpim III', 200, 2022, 'LAN RI', 'C', 'PIM3-2022-045', 'Kementerian Keuangan', 'valid', '2022-09-10', 'Sudah dilegalisir', 2.0, '00000000-0000-0000-0000-000000000006', now(), now(),null),
+		( '00000000-0000-0000-0000-000000000007', '1c', '223344556', 'Teknis', 'Pelatihan Manajemen Proyek IT', 60, 2023, 'Kemenkominfo', 'A', 'IT-2023-089', 'Kementerian Komunikasi & Informatika', 'valid', '2023-04-12', 'Discan warna', 0.5, '00000000-0000-0000-0000-000000000008', now(), now(),null),
+		( '00000000-0000-0000-0000-000000000009', '1c', '334455667', 'Fungsional', 'Pelatihan Arsiparis Ahli', 100, 2024, 'ANRI', 'B', 'ARSIP-2024-122', 'Arsip Nasional RI', 'valid', '2024-06-18', 'Tersimpan di HRD', 1.25, '00000000-0000-0000-0000-000000000010', now(), now(),null),
+		( '00000000-0000-0000-0000-000000000011', '1c', '334455667', 'Fungsional', 'Pelatihan Arsiparis Ahli Deleted', 100, 2024, 'ANRI', 'B', 'ARSIP-2024-122', 'Arsip Nasional RI', 'valid', '2024-06-18', 'Tersimpan di HRD', 1.25, '00000000-0000-0000-0000-000000000012', now(), now(),now()),
+		( '00000000-0000-0000-0000-000000000000', '1d', '445566778', 'Fungsional', 'Pelatihan Arsiparis Ahli', 100, 2024, 'ANRI', 'B', 'ARSIP-2024-123', 'Arsip Nasional RI', 'valid', '2024-06-18', 'Tersimpan di HRD', 1.25, '00000000-0000-0000-0000-000000000013', now(), now(),null);
+
+	`
+
+	tests := []struct {
+		name             string
+		dbData           string
+		nip              string
+		requestQuery     url.Values
+		requestHeader    http.Header
+		wantResponseCode int
+		wantResponseBody string
+	}{
+		{
+			name:             "ok: admin dapat melihat riwayat pelatihan fungsional pegawai 1c",
+			dbData:           dbData,
+			nip:              "1c",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{
+						"id": "00000000-0000-0000-0000-000000000009",
+						"institusi_penyelenggara": "ANRI",
+						"jenis_diklat": "Fungsional",
+						"nama_diklat": "Pelatihan Arsiparis Ahli",
+						"nomor_sertifikat": "ARSIP-2024-122",
+						"tahun": 2024,
+						"durasi": 100,
+						"tanggal_mulai": "2024-06-18",
+						"tanggal_selesai": "2024-06-22"
+					},
+					{
+						"id": "00000000-0000-0000-0000-000000000007",
+						"institusi_penyelenggara": "Kemenkominfo",
+						"jenis_diklat": "Teknis",
+						"nama_diklat": "Pelatihan Manajemen Proyek IT",
+						"nomor_sertifikat": "IT-2023-089",
+						"tahun": 2023,
+						"durasi": 60,
+						"tanggal_mulai": "2023-04-12",
+						"tanggal_selesai": "2023-04-14"
+					},
+					{
+						"id": "00000000-0000-0000-0000-000000000005",
+						"institusi_penyelenggara": "LAN RI",
+						"jenis_diklat": "Kepemimpinan",
+						"nama_diklat": "Diklatpim III",
+						"nomor_sertifikat": "PIM3-2022-045",
+						"tahun": 2022,
+						"durasi": 200,
+						"tanggal_mulai": "2022-09-10",
+						"tanggal_selesai": "2022-09-18"
+					},
+					{
+						"id": "9159a38e-586c-4338-8915-ab9ee5f6a937",
+						"institusi_penyelenggara": "LAN RI",
+						"jenis_diklat": "Teknis",
+						"nama_diklat": "Pelatihan Dasar CPNS",
+						"nomor_sertifikat": "LATSAR-2020-001",
+						"tahun": 2020,
+						"durasi": 120,
+						"tanggal_mulai": "2020-03-15",
+						"tanggal_selesai": "2020-03-20"
+					},
+					{
+						"id": "add68305-1993-40e5-9e32-14de553cfd73",
+						"institusi_penyelenggara": "LAN RI",
+						"jenis_diklat": "Teknis II",
+						"nama_diklat": "Pelatihan Dasar CPNS II",
+						"nomor_sertifikat": "LATSAR-2020-002",
+						"tahun": 2020,
+						"durasi": 120,
+						"tanggal_mulai": "2020-03-15",
+						"tanggal_selesai": "2020-03-20"
+					}
+				],
+				"meta": { "limit": 10, "offset": 0, "total": 5 }
+			}`,
+		},
+		{
+			name:             "ok: admin dapat melihat riwayat pelatihan fungsional pegawai 1c dengan pagination",
+			dbData:           dbData,
+			nip:              "1c",
+			requestQuery:     url.Values{"limit": []string{"2"}, "offset": []string{"1"}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{
+						"id": "00000000-0000-0000-0000-000000000007",
+						"institusi_penyelenggara": "Kemenkominfo",
+						"jenis_diklat": "Teknis",
+						"nama_diklat": "Pelatihan Manajemen Proyek IT",
+						"nomor_sertifikat": "IT-2023-089",
+						"tahun": 2023,
+						"durasi": 60,
+						"tanggal_mulai": "2023-04-12",
+						"tanggal_selesai": "2023-04-14"
+					},
+					{
+						"id": "00000000-0000-0000-0000-000000000005",
+						"institusi_penyelenggara": "LAN RI",
+						"jenis_diklat": "Kepemimpinan",
+						"nama_diklat": "Diklatpim III",
+						"nomor_sertifikat": "PIM3-2022-045",
+						"tahun": 2022,
+						"durasi": 200,
+						"tanggal_mulai": "2022-09-10",
+						"tanggal_selesai": "2022-09-18"
+					}
+				],
+				"meta": {"limit": 2, "offset": 1, "total": 5}
+			}`,
+		},
+		{
+			name:             "ok: admin dapat melihat riwayat pelatihan fungsional pegawai 1d",
+			dbData:           dbData,
+			nip:              "1d",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{
+						"id": "00000000-0000-0000-0000-000000000000",
+						"institusi_penyelenggara": "ANRI",
+						"jenis_diklat": "Fungsional",
+						"nama_diklat": "Pelatihan Arsiparis Ahli",
+						"nomor_sertifikat": "ARSIP-2024-123",
+						"tahun": 2024,
+						"durasi": 100,
+						"tanggal_mulai": "2024-06-18",
+						"tanggal_selesai": "2024-06-22"
+					}
+				],
+				"meta": { "limit": 10, "offset": 0, "total": 1 }
+			}`,
+		},
+		{
+			name:             "ok: admin dapat melihat riwayat pelatihan fungsional pegawai yang tidak ada data",
+			dbData:           dbData,
+			nip:              "999",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [],
+				"meta": {"limit": 10, "offset": 0, "total": 0}
+			}`,
+		},
+		{
+			name:             "error: user is not an admin",
+			dbData:           dbData,
+			nip:              "1c",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "987654321")}},
+			wantResponseCode: http.StatusForbidden,
+			wantResponseBody: `{"message": "akses ditolak"}`,
+		},
+		{
+			name:             "error: auth header tidak valid",
+			dbData:           dbData,
+			nip:              "1c",
+			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			db := dbtest.New(t, dbmigrations.FS)
+			_, err := db.Exec(context.Background(), tt.dbData)
+			require.NoError(t, err)
+
+			req := httptest.NewRequest(http.MethodGet, "/v1/admin/pegawai/"+tt.nip+"/riwayat-pelatihan-fungsional", nil)
+			req.URL.RawQuery = tt.requestQuery.Encode()
+			req.Header = tt.requestHeader
+			rec := httptest.NewRecorder()
+
+			e, err := api.NewEchoServer(docs.OpenAPIBytes)
+			require.NoError(t, err)
+			RegisterRoutes(e, repo.New(db), api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
+			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+		})
+	}
+}
