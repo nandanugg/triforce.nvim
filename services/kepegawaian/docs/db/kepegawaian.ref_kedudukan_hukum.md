@@ -15,6 +15,7 @@ Referensi kedudukan hukum
 | updated_at | timestamp with time zone | now() | true |  |  |  | Waktu terakhir pembaruan |
 | deleted_at | timestamp with time zone |  | true |  |  |  | Waktu penghapusan data |
 | is_pppk | boolean | false | true |  |  |  | Apakah kedudukan hukum merupakan PPPK |
+| is_pegawai_aktif | boolean | true | false |  |  |  |  |
 
 ## Constraints
 
@@ -42,6 +43,7 @@ erDiagram
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
   boolean is_pppk
+  boolean is_pegawai_aktif
 }
 ```
 

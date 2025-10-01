@@ -7,7 +7,7 @@
 | [portal.schema_migrations](portal.schema_migrations.md) | 2 |  | BASE TABLE |
 | [portal.pemberitahuan](portal.pemberitahuan.md) | 6 |  | BASE TABLE |
 | [portal.dokumen_pendukung](portal.dokumen_pendukung.md) | 6 |  | BASE TABLE |
-| [portal.user](portal.user.md) | 6 |  | BASE TABLE |
+| [portal.user](portal.user.md) | 9 |  | BASE TABLE |
 | [portal.role](portal.role.md) | 6 |  | BASE TABLE |
 | [portal.user_role](portal.user_role.md) | 6 |  | BASE TABLE |
 
@@ -45,6 +45,9 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  varchar_255_ email
+  varchar_255_ nama
+  varchar_200_ unit_organisasi
 }
 "portal.role" {
   integer id

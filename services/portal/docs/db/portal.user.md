@@ -12,6 +12,9 @@
 | created_at | timestamp with time zone | now() | true |  |  |  |
 | updated_at | timestamp with time zone | now() | true |  |  |  |
 | deleted_at | timestamp with time zone |  | true |  |  |  |
+| email | varchar(255) |  | true |  |  |  |
+| nama | varchar(255) |  | true |  |  |  |
+| unit_organisasi | varchar(200) |  | true |  |  |  |
 
 ## Constraints
 
@@ -38,6 +41,9 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  varchar_255_ email
+  varchar_255_ nama
+  varchar_200_ unit_organisasi
 }
 ```
 

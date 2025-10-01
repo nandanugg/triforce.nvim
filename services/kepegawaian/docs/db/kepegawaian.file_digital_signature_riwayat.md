@@ -8,7 +8,7 @@
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
 | id | bigint | nextval('file_digital_signature_riwayat_id_seq'::regclass) | false |  |  |  |
 | file_id | varchar(200) |  | true |  |  |  |
-| pemroses_id | varchar(255) |  | true |  |  |  |
+| nip_pemroses | varchar(255) |  | true |  |  |  |
 | tindakan | text |  | true |  |  |  |
 | catatan_tindakan | text |  | true |  |  |  |
 | waktu_tindakan | timestamp with time zone |  | true |  |  |  |
@@ -38,7 +38,7 @@ erDiagram
 "kepegawaian.file_digital_signature_riwayat" {
   bigint id
   varchar_200_ file_id
-  varchar_255_ pemroses_id
+  varchar_255_ nip_pemroses
   text tindakan
   text catatan_tindakan
   timestamp_with_time_zone waktu_tindakan

@@ -18,7 +18,7 @@
 | [kepegawaian.ref_jenis_kenaikan_pangkat](kepegawaian.ref_jenis_kenaikan_pangkat.md) | 6 | Referensi jenis kenaikan pangkat | BASE TABLE |
 | [kepegawaian.ref_jenis_pegawai](kepegawaian.ref_jenis_pegawai.md) | 6 | Referensi jenis pegawai | BASE TABLE |
 | [kepegawaian.ref_jenis_penghargaan](kepegawaian.ref_jenis_penghargaan.md) | 5 | Referensi jenis penghargaan | BASE TABLE |
-| [kepegawaian.ref_kedudukan_hukum](kepegawaian.ref_kedudukan_hukum.md) | 7 | Referensi kedudukan hukum | BASE TABLE |
+| [kepegawaian.ref_kedudukan_hukum](kepegawaian.ref_kedudukan_hukum.md) | 8 | Referensi kedudukan hukum | BASE TABLE |
 | [kepegawaian.ref_kpkn](kepegawaian.ref_kpkn.md) | 5 | Referensi kantor pelayanan kekayaan negara | BASE TABLE |
 | [kepegawaian.ref_lokasi](kepegawaian.ref_lokasi.md) | 11 | Referensi lokasi | BASE TABLE |
 | [kepegawaian.ref_jenis_satker](kepegawaian.ref_jenis_satker.md) | 5 | Referensi jenis satuan kerja | BASE TABLE |
@@ -244,6 +244,7 @@ erDiagram
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
   boolean is_pppk
+  boolean is_pegawai_aktif
 }
 "kepegawaian.ref_kpkn" {
   varchar_36_ id
@@ -965,7 +966,7 @@ erDiagram
 "kepegawaian.file_digital_signature_riwayat" {
   bigint id
   varchar_200_ file_id
-  varchar_255_ pemroses_id
+  varchar_255_ nip_pemroses
   text tindakan
   text catatan_tindakan
   timestamp_with_time_zone waktu_tindakan
