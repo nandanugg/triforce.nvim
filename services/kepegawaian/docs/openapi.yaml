@@ -105,7 +105,7 @@ paths:
           in: query
           schema:
             type: array
-            items: 
+            items:
               type: integer
               format: int32
               description: Status surat keputusan
@@ -121,12 +121,12 @@ paths:
                     type: array
                     items:
                       allOf:
-                      - $ref: '#/components/schemas/suratKeputusan'
-                      - type: object
-                        properties:
-                          nip_pemilik:
-                            type: string
-                            description: NIP pemilik SK
+                        - $ref: "#/components/schemas/suratKeputusan"
+                        - type: object
+                          properties:
+                            nip_pemilik:
+                              type: string
+                              description: NIP pemilik SK
                   meta:
                     $ref: "#/components/schemas/metaPagination"
   /v1/admin/surat-keputusan/{id}:
@@ -153,7 +153,7 @@ paths:
                 properties:
                   data:
                     allOf:
-                      - $ref: '#/components/schemas/suratKeputusanWithPenandatanganAndLog'
+                      - $ref: "#/components/schemas/suratKeputusanWithPenandatanganAndLog"
                       - type: object
                         properties:
                           nip_pemilik:
@@ -499,6 +499,433 @@ paths:
                       $ref: "#/components/schemas/riwayatPelatihanFungsional"
                   meta:
                     $ref: "#/components/schemas/metaPagination"
+  /v1/admin/pegawai/{nip}/riwayat-jabatan:
+    get:
+      tags:
+        - Riwayat Jabatan
+      summary: Lihat riwayat jabatan pegawai.
+      description: >-
+        Lihat riwayat jabatan dari pegawai berdasarkan NIP, urut berdasarkan TMT.
+      operationId: adminDetailPegawaiRiwayatJabatan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/riwayatJabatan"
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/admin/pegawai/{nip}/riwayat-jabatan/{id}/berkas:
+    get:
+      tags:
+        - Riwayat Jabatan
+      summary: Lihat berkas riwayat jabatan pegawai.
+      description: >-
+        Lihat berkas riwayat jabatan berdasarkan id dari pegawai berdasarkan NIP.
+      operationId: adminGetBerkasRiwayatJabatan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Berkas riwayat jabatan tidak ditemukan atau User tidak mempunyai akses.
+  /v1/admin/pegawai/{nip}/riwayat-kenaikan-gaji-berkala:
+    get:
+      tags:
+        - Riwayat Kenaikan Gaji Berkala
+      summary: Lihat riwayat kenaikan gaji berkala pegawai.
+      description: >-
+        Lihat riwayat kenaikan gaji berkala dari pegawai berdasarkan NIP, urut berdasarkan TMT.
+      operationId: adminDetailPegawaiRiwayatKenaikanGajiBerkala
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/riwayatKenaikanGajiBerkala"
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/admin/pegawai/{nip}/riwayat-kenaikan-gaji-berkala/{id}/berkas:
+    get:
+      tags:
+        - Riwayat Kenaikan Gaji Berkala
+      summary: Lihat berkas riwayat kenaikan gaji berkala pegawai.
+      description: >-
+        Lihat berkas riwayat kenaikan gaji berkala berdasarkan id dari pegawai berdasarkan NIP.
+      operationId: adminGetBerkasRiwayatKenaikanGajiBerkala
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Berkas riwayat kenaikan gaji berkala tidak ditemukan atau User tidak mempunyai akses.
+  /v1/admin/pegawai/{nip}/riwayat-hukuman-disiplin:
+    get:
+      tags:
+        - Riwayat Hukuman Disiplin
+      summary: Lihat riwayat hukuman disiplin pegawai.
+      description: >-
+        Lihat riwayat hukuman disiplin dari pegawai berdasarkan NIP, urut berdasarkan tanggal mulai.
+      operationId: adminDetailPegawaiRiwayatHukumanDisiplin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/riwayatHukumanDisiplin"
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/admin/pegawai/{nip}/riwayat-hukuman-disiplin/{id}/berkas:
+    get:
+      tags:
+        - Riwayat Hukuman Disiplin
+      summary: Lihat berkas riwayat hukuman disiplin pegawai.
+      description: >-
+        Lihat berkas riwayat hukuman disiplin berdasarkan id dari pegawai berdasarkan NIP.
+      operationId: adminGetBerkasRiwayatHukumanDisiplin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Berkas riwayat hukuman disiplin tidak ditemukan atau User tidak mempunyai akses.
+  /v1/admin/pegawai/{nip}/riwayat-sertifikasi:
+    get:
+      tags:
+        - Riwayat Sertifikasi
+      summary: Lihat riwayat sertifikasi pegawai.
+      description: >-
+        Lihat riwayat sertifikasi dari pegawai berdasarkan NIP, urut berdasarkan tahun.
+      operationId: adminDetailPegawaiRiwayatSertifikasi
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/riwayatSertifikasi"
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/admin/pegawai/{nip}/riwayat-sertifikasi/{id}/berkas:
+    get:
+      tags:
+        - Riwayat Sertifikasi
+      summary: Lihat berkas riwayat sertifikasi pegawai.
+      description: >-
+        Lihat berkas riwayat sertifikasi berdasarkan id dari pegawai berdasarkan NIP.
+      operationId: adminGetBerkasRiwayatSertifikasi
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Berkas riwayat sertifikasi tidak ditemukan atau User tidak mempunyai akses.
+  /v1/admin/pegawai/{nip}/riwayat-kepangkatan:
+    get:
+      tags:
+        - Riwayat Kepangkatan
+      summary: Lihat riwayat kepangkatan pegawai.
+      description: >-
+        Lihat riwayat kepangkatan dari pegawai berdasarkan NIP, urut berdasarkan TMT.
+      operationId: adminDetailPegawaiRiwayatKepangkatan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/riwayatKepangkatan"
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/admin/pegawai/{nip}/riwayat-kepangkatan/{id}/berkas:
+    get:
+      tags:
+        - Riwayat Kepangkatan
+      summary: Lihat berkas riwayat kepangkatan pegawai.
+      description: >-
+        Lihat berkas riwayat kepangkatan berdasarkan id dari pegawai berdasarkan NIP.
+      operationId: adminGetBerkasRiwayatKepangkatan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Berkas riwayat kepangkatan tidak ditemukan atau User tidak mempunyai akses.
+  /v1/admin/pegawai/{nip}/riwayat-penghargaan:
+    get:
+      tags:
+        - Riwayat Penghargaan
+      summary: Lihat riwayat penghargaan pegawai.
+      description: >-
+        Lihat riwayat penghargaan dari pegawai berdasarkan NIP, urut berdasarkan tahun.
+      operationId: adminDetailPegawaiRiwayatPenghargaan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/riwayatPenghargaan"
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/admin/pegawai/{nip}/riwayat-penghargaan/{id}/berkas:
+    get:
+      tags:
+        - Riwayat Penghargaan
+      summary: Lihat berkas riwayat penghargaan pegawai.
+      description: >-
+        Lihat berkas riwayat penghargaan berdasarkan id dari pegawai berdasarkan NIP.
+      operationId: adminGetBerkasRiwayatPenghargaan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Berkas riwayat penghargaan tidak ditemukan atau User tidak mempunyai akses.
+  /v1/admin/pegawai/{nip}/riwayat-penugasan:
+    get:
+      tags:
+        - Riwayat Penugasan
+      summary: Lihat riwayat penugasan pegawai.
+      description: >-
+        Lihat riwayat penugasan dari pegawai berdasarkan NIP, urut berdasarkan tanggal.
+      operationId: adminDetailPegawaiRiwayatPenugasan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/riwayatPenugasan"
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/admin/pegawai/{nip}/riwayat-penugasan/{id}/berkas:
+    get:
+      tags:
+        - Riwayat Penugasan
+      summary: Lihat berkas riwayat penugasan pegawai.
+      description: >-
+        Lihat berkas riwayat penugasan berdasarkan id dari pegawai berdasarkan NIP.
+      operationId: adminGetBerkasRiwayatPenugasan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Berkas riwayat penugasan tidak ditemukan atau User tidak mempunyai akses.
   /v1/data-pribadi:
     get:
       tags:
@@ -956,43 +1383,7 @@ paths:
                   data:
                     type: array
                     items:
-                      type: object
-                      additionalProperties: false
-                      properties:
-                        id:
-                          type: integer
-                        jenis_hukuman:
-                          type: string
-                        nama_golongan:
-                          type: string
-                        nama_pangkat:
-                          type: string
-                        nomor_sk:
-                          type: string
-                        tanggal_sk:
-                          type: string
-                          format: date
-                          nullable: true
-                        tanggal_mulai:
-                          type: string
-                          format: date
-                          nullable: true
-                        tanggal_akhir:
-                          type: string
-                          format: date
-                          nullable: true
-                        masa_tahun:
-                          type: integer
-                        masa_bulan:
-                          type: integer
-                        nomor_pp:
-                          type: string
-                        nomor_sk_pembatalan:
-                          type: string
-                        tanggal_sk_pembatalan:
-                          type: string
-                          format: date
-                          nullable: true
+                      $ref: "#/components/schemas/riwayatHukumanDisiplin"
                   meta:
                     $ref: "#/components/schemas/metaPagination"
   /v1/riwayat-hukuman-disiplin/{id}/berkas:
@@ -1043,44 +1434,7 @@ paths:
                   data:
                     type: array
                     items:
-                      type: object
-                      additionalProperties: false
-                      properties:
-                        id:
-                          type: integer
-                        jenis_jabatan:
-                          type: string
-                        id_jabatan:
-                          type: string
-                          nullable: true
-                        nama_jabatan:
-                          type: string
-                        tmt_jabatan:
-                          type: string
-                          format: date
-                          nullable: true
-                        no_sk:
-                          type: string
-                        tanggal_sk:
-                          type: string
-                          format: date
-                          nullable: true
-                        satuan_kerja:
-                          type: string
-                        unit_organisasi:
-                          type: string
-                        status_plt:
-                          type: boolean
-                        kelas_jabatan:
-                          type: string
-                        periode_jabatan_start_date:
-                          type: string
-                          format: date
-                          nullable: true
-                        periode_jabatan_end_date:
-                          type: string
-                          format: date
-                          nullable: true
+                      $ref: "#/components/schemas/riwayatJabatan"
                   meta:
                     $ref: "#/components/schemas/metaPagination"
   /v1/riwayat-jabatan/{id}/berkas:
@@ -1132,61 +1486,7 @@ paths:
                   data:
                     type: array
                     items:
-                      type: object
-                      additionalProperties: false
-                      properties:
-                        id:
-                          type: integer
-                        id_golongan:
-                          type: integer
-                          nullable: true
-                        nama_golongan:
-                          type: string
-                        nama_golongan_pangkat:
-                          type: string
-                        tmt_golongan:
-                          type: string
-                          format: date
-                          nullable: true
-                        masa_kerja_golongan_tahun:
-                          type: integer
-                          nullable: true
-                        masa_kerja_golongan_bulan:
-                          type: integer
-                          nullable: true
-                        nomor_sk:
-                          type: string
-                        tanggal_sk:
-                          type: string
-                          format: date
-                          nullable: true
-                        tmt_kenaikan_gaji_berkala:
-                          type: string
-                          format: date
-                          nullable: true
-                        gaji_pokok:
-                          type: integer
-                          nullable: true
-                        jabatan:
-                          type: string
-                        tmt_jabatan:
-                          type: string
-                          format: date
-                          nullable: true
-                        pendidikan:
-                          type: string
-                        tanggal_lulus:
-                          type: string
-                          format: date
-                          nullable: true
-                        kantor_pembayaran:
-                          type: string
-                        unit_kerja_induk_id:
-                          type: string
-                        unit_kerja_induk:
-                          type: string
-                        pejabat:
-                          type: string
+                      $ref: "#/components/schemas/riwayatKenaikanGajiBerkala"
                   meta:
                     $ref: "#/components/schemas/metaPagination"
   /v1/riwayat-kenaikan-gaji-berkala/{id}/berkas:
@@ -1549,8 +1849,7 @@ paths:
         - Riwayat Penghargaan
       summary: Lihat riwayat penghargaan.
       description: >-
-        Lihat riwayat penghargaan dari user yang login, urut berdasarkan
-        tanggal.
+        Lihat riwayat penghargaan dari user yang login, urut berdasarkan tahun.
       operationId: listRiwayatPenghargaan
       parameters:
         - $ref: "#/components/parameters/authRequired"
@@ -1567,21 +1866,7 @@ paths:
                   data:
                     type: array
                     items:
-                      type: object
-                      additionalProperties: false
-                      properties:
-                        id:
-                          type: integer
-                        jenis_penghargaan:
-                          type: string
-                        nama_penghargaan:
-                          type: string
-                        deskripsi:
-                          type: string
-                        tanggal:
-                          type: string
-                          format: date
-                          nullable: true
+                      $ref: "#/components/schemas/riwayatPenghargaan"
                   meta:
                     $ref: "#/components/schemas/metaPagination"
   /v1/riwayat-penghargaan/{id}/berkas:
@@ -1615,8 +1900,7 @@ paths:
         - Riwayat Penugasan
       summary: Lihat riwayat penugasan.
       description: >-
-        Lihat riwayat penugasan dari user yang login, urut berdasarkan tanggal
-        mulai (terbaru di atas).
+        Lihat riwayat penugasan dari user yang login, urut berdasarkan tanggal mulai (terbaru di atas).
       operationId: listRiwayatPenugasan
       parameters:
         - $ref: "#/components/parameters/authRequired"
@@ -1633,27 +1917,7 @@ paths:
                   data:
                     type: array
                     items:
-                      type: object
-                      additionalProperties: false
-                      properties:
-                        id:
-                          type: integer
-                        tipe_jabatan:
-                          type: string
-                        nama_jabatan:
-                          type: string
-                        deskripsi_jabatan:
-                          type: string
-                        tanggal_mulai:
-                          type: string
-                          format: date
-                          nullable: true
-                        is_menjabat:
-                          type: boolean
-                        tanggal_selesai:
-                          type: string
-                          format: date
-                          nullable: true
+                      $ref: "#/components/schemas/riwayatPenugasan"
                   meta:
                     $ref: "#/components/schemas/metaPagination"
   /v1/riwayat-penugasan/{id}/berkas:
@@ -1789,7 +2053,7 @@ paths:
           in: query
           schema:
             type: array
-            items: 
+            items:
               type: integer
               format: int32
               description: Status surat keputusan
@@ -1814,7 +2078,7 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/suratKeputusan'
+                      $ref: "#/components/schemas/suratKeputusan"
                   meta:
                     $ref: "#/components/schemas/metaPagination"
   /v1/surat-keputusan/{id}:
@@ -2250,10 +2514,10 @@ components:
           example: "Bawah - Tengah - Paling Atas"
         status_sk:
           type: string
-          description: Status koreksi surat keputusan            
+          description: Status koreksi surat keputusan
     suratKeputusanWithPenandatanganAndLog:
       allOf:
-        - $ref: '#/components/schemas/suratKeputusan'
+        - $ref: "#/components/schemas/suratKeputusan"
         - type: object
           properties:
             nama_penandatangan:
@@ -2407,4 +2671,235 @@ components:
           nullable: true
         unor_id:
           type: string
+          nullable: true
+    riwayatJabatan:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+        jenis_jabatan:
+          type: string
+        id_jabatan:
+          type: string
+          nullable: true
+        nama_jabatan:
+          type: string
+        tmt_jabatan:
+          type: string
+          format: date
+          nullable: true
+        no_sk:
+          type: string
+        tanggal_sk:
+          type: string
+          format: date
+          nullable: true
+        satuan_kerja:
+          type: string
+        unit_organisasi:
+          type: string
+        status_plt:
+          type: boolean
+        kelas_jabatan:
+          type: string
+        periode_jabatan_start_date:
+          type: string
+          format: date
+          nullable: true
+        periode_jabatan_end_date:
+          type: string
+          format: date
+          nullable: true
+    riwayatKenaikanGajiBerkala:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+        id_golongan:
+          type: integer
+          nullable: true
+        nama_golongan:
+          type: string
+        nama_golongan_pangkat:
+          type: string
+        tmt_golongan:
+          type: string
+          format: date
+          nullable: true
+        masa_kerja_golongan_tahun:
+          type: integer
+          nullable: true
+        masa_kerja_golongan_bulan:
+          type: integer
+          nullable: true
+        nomor_sk:
+          type: string
+        tanggal_sk:
+          type: string
+          format: date
+          nullable: true
+        tmt_kenaikan_gaji_berkala:
+          type: string
+          format: date
+          nullable: true
+        gaji_pokok:
+          type: integer
+          nullable: true
+        jabatan:
+          type: string
+        tmt_jabatan:
+          type: string
+          format: date
+          nullable: true
+        pendidikan:
+          type: string
+        tanggal_lulus:
+          type: string
+          format: date
+          nullable: true
+        kantor_pembayaran:
+          type: string
+        unit_kerja_induk_id:
+          type: string
+        unit_kerja_induk:
+          type: string
+        pejabat:
+          type: string
+    riwayatHukumanDisiplin:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+        jenis_hukuman:
+          type: string
+        nama_golongan:
+          type: string
+        nama_pangkat:
+          type: string
+        nomor_sk:
+          type: string
+        tanggal_sk:
+          type: string
+          format: date
+          nullable: true
+        tanggal_mulai:
+          type: string
+          format: date
+          nullable: true
+        tanggal_akhir:
+          type: string
+          format: date
+          nullable: true
+        masa_tahun:
+          type: integer
+        masa_bulan:
+          type: integer
+        nomor_pp:
+          type: string
+        nomor_sk_pembatalan:
+          type: string
+        tanggal_sk_pembatalan:
+          type: string
+          format: date
+          nullable: true
+    riwayatSertifikasi:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+        nama_sertifikasi:
+          type: string
+        tahun:
+          type: integer
+          nullable: true
+        deskripsi:
+          type: string
+    riwayatKepangkatan:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+        id_jenis_kp:
+          type: integer
+          nullable: true
+        nama_jenis_kp:
+          type: string
+        id_golongan:
+          type: integer
+          nullable: true
+        nama_golongan:
+          type: string
+        nama_golongan_pangkat:
+          type: string
+        tmt_golongan:
+          type: string
+          format: date
+          nullable: true
+        sk_nomor:
+          type: string
+        sk_tanggal:
+          type: string
+          format: date
+          nullable: true
+        mk_golongan_tahun:
+          type: integer
+          nullable: true
+        mk_golongan_bulan:
+          type: integer
+          nullable: true
+        no_bkn:
+          type: string
+        tanggal_bkn:
+          type: string
+          format: date
+          nullable: true
+        jumlah_angka_kredit_tambahan:
+          type: integer
+          nullable: true
+        jumlah_angka_kredit_utama:
+          type: integer
+          nullable: true
+
+    riwayatPenghargaan:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+        jenis_penghargaan:
+          type: string
+        nama_penghargaan:
+          type: string
+        deskripsi:
+          type: string
+        tanggal:
+          type: string
+          format: date
+          nullable: true
+    riwayatPenugasan:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+        tipe_jabatan:
+          type: string
+        nama_jabatan:
+          type: string
+        deskripsi_jabatan:
+          type: string
+        tanggal_mulai:
+          type: string
+          format: date
+          nullable: true
+        is_menjabat:
+          type: boolean
+        tanggal_selesai:
+          type: string
+          format: date
           nullable: true

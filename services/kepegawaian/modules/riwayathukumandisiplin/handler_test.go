@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -392,6 +393,393 @@ func Test_handler_getBerkas(t *testing.T) {
 			require.NoError(t, err)
 
 			req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/v1/riwayat-hukuman-disiplin/%s/berkas", tt.paramID), nil)
+			req.Header = tt.requestHeader
+			rec := httptest.NewRecorder()
+
+			e, err := api.NewEchoServer(docs.OpenAPIBytes)
+			require.NoError(t, err)
+
+			repo := sqlc.New(pgxconn)
+			RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			if tt.wantResponseCode == http.StatusOK {
+				assert.Equal(t, "inline", rec.Header().Get("Content-Disposition"))
+				assert.Equal(t, tt.wantContentType, rec.Header().Get("Content-Type"))
+				assert.Equal(t, tt.wantResponseBytes, rec.Body.Bytes())
+			} else {
+				assert.JSONEq(t, string(tt.wantResponseBytes), rec.Body.String())
+			}
+		})
+	}
+}
+
+func Test_handler_listAdmin(t *testing.T) {
+	t.Parallel()
+
+	dbData := `
+		INSERT INTO ref_jenis_hukuman (id, nama, tingkat_hukuman, nama_tingkat_hukuman, deleted_at)
+		VALUES
+		(1, 'Jenis Hukuman 1', NULL, NULL, NULL),
+		(2, 'Jenis Hukuman 2', NULL, NULL, NULL),
+		(3, 'Jenis Hukuman 2', NULL, NULL, '2023-02-20');
+
+		INSERT INTO pegawai (pns_id, nip_baru, nama, deleted_at)
+		VALUES ('id1', '198765432100001', 'Budi', NULL),
+		('id2', '198765432100002', 'Ani', '2023-02-20');
+
+		INSERT INTO ref_golongan (id, nama, nama_pangkat, nama_2, gol, gol_pppk, deleted_at)
+		VALUES
+			(1, 'I/a', 'Juru Muda', 'Ia', 1, 'I', NULL),
+			(2, 'II/a', 'Pengatur Muda', 'IIa', 2, 'II', '2023-02-20');
+
+		INSERT INTO riwayat_hukuman_disiplin (
+			pns_id, pns_nip, nama, golongan_id, nama_golongan,
+			jenis_hukuman_id, nama_jenis_hukuman, sk_nomor, sk_tanggal,
+			tanggal_mulai_hukuman, masa_tahun, masa_bulan, tanggal_akhir_hukuman,
+			no_pp, no_sk_pembatalan, tanggal_sk_pembatalan, bkn_id, file_base64, keterangan_berkas,
+			deleted_at
+		)
+		VALUES
+		('id1','198765432100001','Budi',1,'I/a',1,'Snapshotted Jenis Hukuman 1','SK1','2023-01-15','2023-01-20',0,1,'2023-02-20','PP-1','DEL-1','2023-01-16',NULL,NULL,NULL,NULL),
+		('id1','198765432100001','Budi',1,'I/a',1,NULL,'SK2','2023-03-10','2023-03-15',0,2,'2023-05-15',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+		('id1','198765432100001','Budi',1,'I/a',1,NULL,'SK3','2023-06-01','2023-06-10',1,0,'2024-06-10',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+		('id1','198765432100001','Budi',1,'I/a',1,NULL,'SK7','2023-12-03','2023-12-12',3,0,'2026-12-12',NULL,NULL,NULL,NULL,NULL,NULL,'2023-02-20');
+	`
+
+	tests := []struct {
+		name             string
+		dbData           string
+		nip              string
+		requestQuery     url.Values
+		requestHeader    http.Header
+		wantResponseCode int
+		wantResponseBody string
+	}{
+		{
+			name:             "ok: nip 198765432100001 data returned",
+			dbData:           dbData,
+			nip:              "198765432100001",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `
+			{
+				"data": [
+					{
+						"id": 3,
+						"jenis_hukuman": "Jenis Hukuman 1",
+						"nama_golongan": "I/a",
+						"nama_pangkat": "Juru Muda",
+						"nomor_sk": "SK3",
+						"tanggal_sk": "2023-06-01",
+						"tanggal_mulai": "2023-06-10",
+						"tanggal_akhir": "2024-06-10",
+						"masa_tahun": 1,
+						"masa_bulan": 0,
+						"nomor_pp": "",
+						"nomor_sk_pembatalan": "",
+						"tanggal_sk_pembatalan": null
+					},
+					{
+						"id": 2,
+						"jenis_hukuman": "Jenis Hukuman 1",
+						"nama_golongan": "I/a",
+						"nama_pangkat": "Juru Muda",
+						"nomor_sk": "SK2",
+						"tanggal_sk": "2023-03-10",
+						"tanggal_mulai": "2023-03-15",
+						"tanggal_akhir": "2023-05-15",
+						"masa_tahun": 0,
+						"masa_bulan": 2,
+						"nomor_pp": "",
+						"nomor_sk_pembatalan": "",
+						"tanggal_sk_pembatalan": null
+					},
+					{
+						"id": 1,
+						"jenis_hukuman": "Snapshotted Jenis Hukuman 1",
+						"nama_golongan": "I/a",
+						"nama_pangkat": "Juru Muda",
+						"nomor_sk": "SK1",
+						"tanggal_sk": "2023-01-15",
+						"tanggal_mulai": "2023-01-20",
+						"tanggal_akhir": "2023-02-20",
+						"masa_tahun": 0,
+						"masa_bulan": 1,
+						"nomor_pp": "PP-1",
+						"nomor_sk_pembatalan": "DEL-1",
+						"tanggal_sk_pembatalan": "2023-01-16"
+					}
+				],
+				"meta": {"limit": 10, "offset": 0, "total": 3}
+			}`,
+		},
+		{
+			name:             "ok: dengan parameter pagination",
+			dbData:           dbData,
+			nip:              "198765432100001",
+			requestQuery:     url.Values{"limit": []string{"1"}, "offset": []string{"1"}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `
+			{
+				"data": [
+					{
+						"id": 2,
+						"jenis_hukuman": "Jenis Hukuman 1",
+						"nama_golongan": "I/a",
+						"nama_pangkat": "Juru Muda",
+						"nomor_sk": "SK2",
+						"tanggal_sk": "2023-03-10",
+						"tanggal_mulai": "2023-03-15",
+						"tanggal_akhir": "2023-05-15",
+						"masa_tahun": 0,
+						"masa_bulan": 2,
+						"nomor_pp": "",
+						"nomor_sk_pembatalan": "",
+						"tanggal_sk_pembatalan": null
+					}
+				],
+				"meta": {"limit": 1, "offset": 1, "total": 3}
+			}`,
+		},
+		{
+			name:             "ok: nip 200 gets empty data",
+			dbData:           dbData,
+			nip:              "200",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{"data": [], "meta": {"limit": 10, "offset": 0, "total": 0}}`,
+		},
+		{
+			name:             "ok: nip 198765432100002 gets empty data (deleted pegawai)",
+			dbData:           dbData,
+			nip:              "198765432100002",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{"data": [], "meta": {"limit": 10, "offset": 0, "total": 0}}`,
+		},
+		{
+			name:             "error: user is not an admin",
+			dbData:           dbData,
+			nip:              "198765432100001",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "987654321")}},
+			wantResponseCode: http.StatusForbidden,
+			wantResponseBody: `{"message": "akses ditolak"}`,
+		},
+		{
+			name:             "error: auth header tidak valid",
+			dbData:           dbData,
+			nip:              "198765432100001",
+			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			db := dbtest.New(t, dbmigrations.FS)
+			_, err := db.Exec(context.Background(), tt.dbData)
+			require.NoError(t, err)
+
+			req := httptest.NewRequest(http.MethodGet, "/v1/admin/pegawai/"+tt.nip+"/riwayat-hukuman-disiplin", nil)
+			req.URL.RawQuery = tt.requestQuery.Encode()
+			req.Header = tt.requestHeader
+			rec := httptest.NewRecorder()
+
+			e, err := api.NewEchoServer(docs.OpenAPIBytes)
+			require.NoError(t, err)
+			repo := sqlc.New(db)
+			RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
+			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+		})
+	}
+}
+
+func Test_handler_getBerkasAdmin(t *testing.T) {
+	t.Parallel()
+
+	filePath := "../../../../lib/api/sample/hello.pdf"
+	pdfBytes, err := os.ReadFile(filePath)
+	require.NoError(t, err)
+
+	pngBytes := []byte{
+		0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+		0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
+		0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+		0x08, 0x06, 0x00, 0x00, 0x00, 0x1f, 0x15, 0xc4,
+		0x89, 0x00, 0x00, 0x00, 0x0a, 0x49, 0x44, 0x41,
+		0x54, 0x78, 0x9c, 0x63, 0xf8, 0xff, 0xff, 0x3f,
+		0x00, 0x05, 0xfe, 0x02, 0xfe, 0xa7, 0x46, 0x90,
+		0x3d, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e,
+		0x44, 0xae, 0x42, 0x60, 0x82,
+	}
+
+	pdfBase64 := base64.StdEncoding.EncodeToString(pdfBytes)
+	pngBase64 := base64.StdEncoding.EncodeToString(pngBytes)
+
+	dbData := `
+		INSERT INTO riwayat_hukuman_disiplin
+			(id, pns_nip, deleted_at, file_base64) VALUES
+			(1, '1c', null, 'data:application/pdf;base64,` + pdfBase64 + `'),
+			(2, '1c', null, '` + pdfBase64 + `'),
+			(3, '1c', null, 'data:images/png;base64,` + pngBase64 + `'),
+			(4, '1c', null, 'data:application/pdf;base64,invalid'),
+			(5, '1c', '2020-01-02', 'data:application/pdf;base64,` + pdfBase64 + `'),
+			(6, '1c', null, null),
+			(7, '1c', null, ''),
+			(8, '2a', null, 'data:application/pdf;base64,` + pdfBase64 + `');
+		`
+
+	tests := []struct {
+		name              string
+		dbData            string
+		nip               string
+		paramID           string
+		requestHeader     http.Header
+		wantResponseCode  int
+		wantContentType   string
+		wantResponseBytes []byte
+	}{
+		{
+			name:              "ok: valid pdf with data: prefix",
+			dbData:            dbData,
+			nip:               "1c",
+			paramID:           "1",
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode:  http.StatusOK,
+			wantContentType:   "application/pdf",
+			wantResponseBytes: pdfBytes,
+		},
+		{
+			name:              "ok: valid pdf without data: prefix",
+			dbData:            dbData,
+			nip:               "1c",
+			paramID:           "2",
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode:  http.StatusOK,
+			wantContentType:   "application/pdf",
+			wantResponseBytes: pdfBytes,
+		},
+		{
+			name:              "ok: valid png with incorrect content-type",
+			dbData:            dbData,
+			nip:               "1c",
+			paramID:           "3",
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode:  http.StatusOK,
+			wantContentType:   "images/png",
+			wantResponseBytes: pngBytes,
+		},
+		{
+			name:              "ok: admin can access other user's berkas",
+			dbData:            dbData,
+			nip:               "2a",
+			paramID:           "8",
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode:  http.StatusOK,
+			wantContentType:   "application/pdf",
+			wantResponseBytes: pdfBytes,
+		},
+		{
+			name:              "error: base64 tidak valid",
+			dbData:            dbData,
+			nip:               "1c",
+			paramID:           "4",
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode:  http.StatusInternalServerError,
+			wantResponseBytes: []byte(`{"message": "Internal Server Error"}`),
+		},
+		{
+			name:              "error: riwayat sudah dihapus",
+			dbData:            dbData,
+			nip:               "1c",
+			paramID:           "5",
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode:  http.StatusNotFound,
+			wantResponseBytes: []byte(`{"message": "berkas riwayat hukuman disiplin tidak ditemukan"}`),
+		},
+		{
+			name:              "error: base64 berisi null value",
+			dbData:            dbData,
+			nip:               "1c",
+			paramID:           "6",
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode:  http.StatusNotFound,
+			wantResponseBytes: []byte(`{"message": "berkas riwayat hukuman disiplin tidak ditemukan"}`),
+		},
+		{
+			name:              "error: base64 berupa string kosong",
+			dbData:            dbData,
+			nip:               "1c",
+			paramID:           "7",
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode:  http.StatusNotFound,
+			wantResponseBytes: []byte(`{"message": "berkas riwayat hukuman disiplin tidak ditemukan"}`),
+		},
+		{
+			name:              "error: riwayat with wrong nip",
+			dbData:            dbData,
+			nip:               "wrong-nip",
+			paramID:           "1",
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode:  http.StatusNotFound,
+			wantResponseBytes: []byte(`{"message": "berkas riwayat hukuman disiplin tidak ditemukan"}`),
+		},
+		{
+			name:              "error: riwayat tidak ditemukan",
+			dbData:            dbData,
+			nip:               "1c",
+			paramID:           "0",
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode:  http.StatusNotFound,
+			wantResponseBytes: []byte(`{"message": "berkas riwayat hukuman disiplin tidak ditemukan"}`),
+		},
+		{
+			name:              "error: invalid id",
+			dbData:            dbData,
+			nip:               "1c",
+			paramID:           "abc",
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode:  http.StatusBadRequest,
+			wantResponseBytes: []byte(`{"message": "parameter \"id\" harus dalam format yang sesuai"}`),
+		},
+		{
+			name:              "error: user is not an admin",
+			dbData:            dbData,
+			nip:               "1c",
+			paramID:           "1",
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "987654321")}},
+			wantResponseCode:  http.StatusForbidden,
+			wantResponseBytes: []byte(`{"message": "akses ditolak"}`),
+		},
+		{
+			name:              "error: auth header tidak valid",
+			dbData:            dbData,
+			nip:               "1c",
+			paramID:           "1",
+			requestHeader:     http.Header{"Authorization": []string{"Bearer some-token"}},
+			wantResponseCode:  http.StatusUnauthorized,
+			wantResponseBytes: []byte(`{"message": "token otentikasi tidak valid"}`),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			pgxconn := dbtest.New(t, dbmigrations.FS)
+			_, err := pgxconn.Exec(context.Background(), tt.dbData)
+			require.NoError(t, err)
+
+			req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/v1/admin/pegawai/%s/riwayat-hukuman-disiplin/%s/berkas", tt.nip, tt.paramID), nil)
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
 

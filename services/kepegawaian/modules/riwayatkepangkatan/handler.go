@@ -65,3 +65,53 @@ func (h *handler) getBerkas(c echo.Context) error {
 	c.Response().Header().Set("Content-Disposition", "inline")
 	return c.Blob(http.StatusOK, mimeType, blob)
 }
+
+type listAdminRequest struct {
+	NIP string `param:"nip"`
+	api.PaginationRequest
+}
+
+func (h *handler) listAdmin(c echo.Context) error {
+	var req listAdminRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	ctx := c.Request().Context()
+	data, total, err := h.service.list(ctx, req.NIP, req.Limit, req.Offset)
+	if err != nil {
+		slog.ErrorContext(ctx, "Error getting list riwayat kepangkatan.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	return c.JSON(http.StatusOK, listResponse{
+		Data: data,
+		Meta: api.MetaPagination{Limit: req.Limit, Offset: req.Offset, Total: total},
+	})
+}
+
+type getBerkasAdminRequest struct {
+	NIP string `param:"nip"`
+	ID  int32  `param:"id"`
+}
+
+func (h *handler) getBerkasAdmin(c echo.Context) error {
+	var req getBerkasAdminRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	ctx := c.Request().Context()
+	mimeType, blob, err := h.service.getBerkas(ctx, req.NIP, req.ID)
+	if err != nil {
+		slog.ErrorContext(ctx, "Error getting berkas riwayat kepangkatan.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	if blob == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "berkas riwayat kepangkatan tidak ditemukan")
+	}
+
+	c.Response().Header().Set("Content-Disposition", "inline")
+	return c.Blob(http.StatusOK, mimeType, blob)
+}

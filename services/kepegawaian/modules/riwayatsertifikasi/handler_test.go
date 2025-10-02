@@ -298,3 +298,324 @@ func Test_handler_getBerkas(t *testing.T) {
 		})
 	}
 }
+
+func Test_handler_listAdmin(t *testing.T) {
+	t.Parallel()
+
+	dbData := `
+		insert into riwayat_sertifikasi
+			(id, nip,  tahun, nama_sertifikasi, file_base64, created_at,   deskripsi, deleted_at) values
+			(11, '1c', 1,     '11a',            '11b',       '2000-01-01', '11c',     null),
+			(12, '1c', 3,     '12a',            '12b',       '2001-01-01', null,      null),
+			(13, '1c', 2,     '13a',            '13b',       '2002-01-01', '13c',     null),
+			(14, '2c', 4,     '14a',            '14b',       '2003-01-01', '14c',     null),
+			(15, '1c', 5,     '15a',            '15b',       '2003-01-01', '15c',     '2020-01-01');
+	`
+
+	tests := []struct {
+		name             string
+		dbData           string
+		nip              string
+		requestQuery     url.Values
+		requestHeader    http.Header
+		wantResponseCode int
+		wantResponseBody string
+	}{
+		{
+			name:             "ok: nip 1c data returned",
+			dbData:           dbData,
+			nip:              "1c",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{
+						"id":               12,
+						"nama_sertifikasi": "12a",
+						"tahun":            3,
+						"deskripsi":        ""
+					},
+					{
+						"id":               13,
+						"nama_sertifikasi": "13a",
+						"tahun":            2,
+						"deskripsi":        "13c"
+					},
+					{
+						"id":               11,
+						"nama_sertifikasi": "11a",
+						"tahun":            1,
+						"deskripsi":        "11c"
+					}
+				],
+				"meta": {"limit": 10, "offset": 0, "total": 3}
+			}`,
+		},
+		{
+			name:             "ok: dengan parameter pagination",
+			dbData:           dbData,
+			nip:              "1c",
+			requestQuery:     url.Values{"limit": []string{"1"}, "offset": []string{"1"}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{
+						"id":               13,
+						"nama_sertifikasi": "13a",
+						"tahun":            2,
+						"deskripsi":        "13c"
+					}
+				],
+				"meta": {"limit": 1, "offset": 1, "total": 3}
+			}`,
+		},
+		{
+			name:             "ok: nip 200 gets empty data",
+			dbData:           dbData,
+			nip:              "200",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{"data": [], "meta": {"limit": 10, "offset": 0, "total": 0}}`,
+		},
+		{
+			name:             "error: user is not an admin",
+			dbData:           dbData,
+			nip:              "1c",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "987654321")}},
+			wantResponseCode: http.StatusForbidden,
+			wantResponseBody: `{"message": "akses ditolak"}`,
+		},
+		{
+			name:             "error: auth header tidak valid",
+			dbData:           dbData,
+			nip:              "1c",
+			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			db := dbtest.New(t, dbmigrations.FS)
+			_, err := db.Exec(context.Background(), tt.dbData)
+			require.NoError(t, err)
+
+			req := httptest.NewRequest(http.MethodGet, "/v1/admin/pegawai/"+tt.nip+"/riwayat-sertifikasi", nil)
+			req.URL.RawQuery = tt.requestQuery.Encode()
+			req.Header = tt.requestHeader
+			rec := httptest.NewRecorder()
+
+			e, err := api.NewEchoServer(docs.OpenAPIBytes)
+			require.NoError(t, err)
+			repo := sqlc.New(db)
+			RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
+			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+		})
+	}
+}
+
+func Test_handler_getBerkasAdmin(t *testing.T) {
+	t.Parallel()
+
+	filePath := "../../../../lib/api/sample/hello.pdf"
+	pdfBytes, err := os.ReadFile(filePath)
+	require.NoError(t, err)
+
+	pngBytes := []byte{
+		0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+		0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
+		0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+		0x08, 0x06, 0x00, 0x00, 0x00, 0x1f, 0x15, 0xc4,
+		0x89, 0x00, 0x00, 0x00, 0x0a, 0x49, 0x44, 0x41,
+		0x54, 0x78, 0x9c, 0x63, 0xf8, 0xff, 0xff, 0x3f,
+		0x00, 0x05, 0xfe, 0x02, 0xfe, 0xa7, 0x46, 0x90,
+		0x3d, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e,
+		0x44, 0xae, 0x42, 0x60, 0x82,
+	}
+
+	pdfBase64 := base64.StdEncoding.EncodeToString(pdfBytes)
+	pngBase64 := base64.StdEncoding.EncodeToString(pngBytes)
+
+	dbData := `
+		insert into riwayat_sertifikasi
+			(id, nip, deleted_at, file_base64) values
+			(1, '1c', null, 'data:application/pdf;base64,` + pdfBase64 + `'),
+			(2, '1c', null, '` + pdfBase64 + `'),
+			(3, '1c', null, 'data:images/png;base64,` + pngBase64 + `'),
+			(4, '1c', null, 'data:application/pdf;base64,invalid'),
+			(5, '1c', '2020-01-02', 'data:application/pdf;base64,` + pdfBase64 + `'),
+			(6, '1c', null, null),
+			(7, '1c', null, ''),
+			(8, '2a', null, 'data:application/pdf;base64,` + pdfBase64 + `');
+		`
+
+	tests := []struct {
+		name              string
+		dbData            string
+		nip               string
+		paramID           string
+		requestHeader     http.Header
+		wantResponseCode  int
+		wantContentType   string
+		wantResponseBytes []byte
+	}{
+		{
+			name:              "ok: valid pdf with data: prefix",
+			dbData:            dbData,
+			nip:               "1c",
+			paramID:           "1",
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode:  http.StatusOK,
+			wantContentType:   "application/pdf",
+			wantResponseBytes: pdfBytes,
+		},
+		{
+			name:              "ok: valid pdf without data: prefix",
+			dbData:            dbData,
+			nip:               "1c",
+			paramID:           "2",
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode:  http.StatusOK,
+			wantContentType:   "application/pdf",
+			wantResponseBytes: pdfBytes,
+		},
+		{
+			name:              "ok: valid png with incorrect content-type",
+			dbData:            dbData,
+			nip:               "1c",
+			paramID:           "3",
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode:  http.StatusOK,
+			wantContentType:   "images/png",
+			wantResponseBytes: pngBytes,
+		},
+		{
+			name:              "ok: admin can access other user's berkas",
+			dbData:            dbData,
+			nip:               "2a",
+			paramID:           "8",
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode:  http.StatusOK,
+			wantContentType:   "application/pdf",
+			wantResponseBytes: pdfBytes,
+		},
+		{
+			name:              "error: base64 tidak valid",
+			dbData:            dbData,
+			nip:               "1c",
+			paramID:           "4",
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode:  http.StatusInternalServerError,
+			wantResponseBytes: []byte(`{"message": "Internal Server Error"}`),
+		},
+		{
+			name:              "error: riwayat sudah dihapus",
+			dbData:            dbData,
+			nip:               "1c",
+			paramID:           "5",
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode:  http.StatusNotFound,
+			wantResponseBytes: []byte(`{"message": "berkas riwayat sertifikasi tidak ditemukan"}`),
+		},
+		{
+			name:              "error: base64 berisi null value",
+			dbData:            dbData,
+			nip:               "1c",
+			paramID:           "6",
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode:  http.StatusNotFound,
+			wantResponseBytes: []byte(`{"message": "berkas riwayat sertifikasi tidak ditemukan"}`),
+		},
+		{
+			name:              "error: base64 berupa string kosong",
+			dbData:            dbData,
+			nip:               "1c",
+			paramID:           "7",
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode:  http.StatusNotFound,
+			wantResponseBytes: []byte(`{"message": "berkas riwayat sertifikasi tidak ditemukan"}`),
+		},
+		{
+			name:              "error: riwayat with wrong nip",
+			dbData:            dbData,
+			nip:               "wrong-nip",
+			paramID:           "1",
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode:  http.StatusNotFound,
+			wantResponseBytes: []byte(`{"message": "berkas riwayat sertifikasi tidak ditemukan"}`),
+		},
+		{
+			name:              "error: riwayat tidak ditemukan",
+			dbData:            dbData,
+			nip:               "1c",
+			paramID:           "0",
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode:  http.StatusNotFound,
+			wantResponseBytes: []byte(`{"message": "berkas riwayat sertifikasi tidak ditemukan"}`),
+		},
+		{
+			name:              "error: invalid id",
+			dbData:            dbData,
+			nip:               "1c",
+			paramID:           "abc",
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode:  http.StatusBadRequest,
+			wantResponseBytes: []byte(`{"message": "parameter \"id\" harus dalam format yang sesuai"}`),
+		},
+		{
+			name:              "error: user is not an admin",
+			dbData:            dbData,
+			nip:               "1c",
+			paramID:           "1",
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "987654321")}},
+			wantResponseCode:  http.StatusForbidden,
+			wantResponseBytes: []byte(`{"message": "akses ditolak"}`),
+		},
+		{
+			name:              "error: auth header tidak valid",
+			dbData:            dbData,
+			nip:               "1c",
+			paramID:           "1",
+			requestHeader:     http.Header{"Authorization": []string{"Bearer some-token"}},
+			wantResponseCode:  http.StatusUnauthorized,
+			wantResponseBytes: []byte(`{"message": "token otentikasi tidak valid"}`),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			pgxconn := dbtest.New(t, dbmigrations.FS)
+			_, err := pgxconn.Exec(context.Background(), tt.dbData)
+			require.NoError(t, err)
+
+			req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/v1/admin/pegawai/%s/riwayat-sertifikasi/%s/berkas", tt.nip, tt.paramID), nil)
+			req.Header = tt.requestHeader
+			rec := httptest.NewRecorder()
+
+			e, err := api.NewEchoServer(docs.OpenAPIBytes)
+			require.NoError(t, err)
+
+			repo := sqlc.New(pgxconn)
+			RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			if tt.wantResponseCode == http.StatusOK {
+				assert.Equal(t, "inline", rec.Header().Get("Content-Disposition"))
+				assert.Equal(t, tt.wantContentType, rec.Header().Get("Content-Type"))
+				assert.Equal(t, tt.wantResponseBytes, rec.Body.Bytes())
+			} else {
+				assert.JSONEq(t, string(tt.wantResponseBytes), rec.Body.String())
+			}
+		})
+	}
+}

@@ -14,4 +14,6 @@ func RegisterRoutes(e *echo.Echo, r repository, mwAuth api.AuthMiddlewareFunc) {
 
 	e.Add(http.MethodGet, "/v1/riwayat-kepangkatan", h.list, mwAuth())
 	e.Add(http.MethodGet, "/v1/riwayat-kepangkatan/:id/berkas", h.getBerkas, mwAuth())
+	e.Add(http.MethodGet, "/v1/admin/pegawai/:nip/riwayat-kepangkatan", h.listAdmin, mwAuth(api.RoleAdmin))
+	e.Add(http.MethodGet, "/v1/admin/pegawai/:nip/riwayat-kepangkatan/:id/berkas", h.getBerkasAdmin, mwAuth(api.RoleAdmin))
 }
