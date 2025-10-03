@@ -9,6 +9,7 @@ tags:
   - name: Authentication
   - name: Dokumen Pendukung
   - name: Pemberitahuan
+  - name: Resource Permission
 paths:
   /v1/auth/login:
     get:
@@ -224,6 +225,68 @@ paths:
                           type: string
                   meta:
                     $ref: "#/components/schemas/metaPagination"
+  /v1/resources:
+    get:
+      tags:
+        - Resource Permission
+      summary: Lihat daftar resources.
+      description: Lihat daftar resources dan resource permissions.
+      operationId: listResources
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        nama:
+                          type: string
+                        resource_permissions:
+                          type: array
+                          items:
+                            type: object
+                            additionalProperties: false
+                            properties:
+                              id:
+                                type: integer
+                              kode:
+                                type: string
+                              nama_permission:
+                                type: string
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/resource-permissions/me:
+    get:
+      tags:
+        - Resource Permission
+      summary: Lihat daftar resource permissions dari user yang login.
+      description: Lihat daftar resource permissions dari user yang login.
+      operationId: listMyResourcePermissions
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: string
 components:
   parameters:
     authRequired:

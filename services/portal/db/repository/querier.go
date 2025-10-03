@@ -4,10 +4,16 @@ package repository
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Querier interface {
+	CountResources(ctx context.Context) (int64, error)
 	GetUserNIPByIDAndSource(ctx context.Context, arg GetUserNIPByIDAndSourceParams) (string, error)
+	ListResourcePermissionsByNip(ctx context.Context, nip string) ([]pgtype.Text, error)
+	ListResourcePermissionsByResourceIDs(ctx context.Context, resourceids []int16) ([]ListResourcePermissionsByResourceIDsRow, error)
+	ListResources(ctx context.Context, arg ListResourcesParams) ([]ListResourcesRow, error)
 	ListUserRoleByNIP(ctx context.Context, nip string) ([]ListUserRoleByNIPRow, error)
 }
 

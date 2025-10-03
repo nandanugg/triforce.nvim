@@ -75,14 +75,15 @@ type RoleResourcePermission struct {
 }
 
 type User struct {
-	ID        pgtype.UUID        `db:"id"`
-	Source    string             `db:"source"`
-	Nip       string             `db:"nip"`
-	CreatedAt pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
-	Nama      pgtype.Text        `db:"nama"`
-	Email     pgtype.Text        `db:"email"`
+	ID             pgtype.UUID        `db:"id"`
+	Source         string             `db:"source"`
+	Nip            string             `db:"nip"`
+	CreatedAt      pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt      pgtype.Timestamptz `db:"updated_at"`
+	DeletedAt      pgtype.Timestamptz `db:"deleted_at"`
+	Email          pgtype.Text        `db:"email"`
+	Nama           pgtype.Text        `db:"nama"`
+	UnitOrganisasi pgtype.Text        `db:"unit_organisasi"`
 }
 
 type UserRole struct {

@@ -46,6 +46,7 @@ func NewAuthKeyfunc(host, realm, audience string) (*Keyfunc, error) {
 }
 
 // AuthMiddlewareFunc returns Echo middleware for auth and role checks.
+// TODO: @yap refactor using resource_permissions
 type AuthMiddlewareFunc func(allowedRoles ...string) echo.MiddlewareFunc
 
 // NewAuthMiddleware creates middleware that allows requests only if the user's
