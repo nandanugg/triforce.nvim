@@ -406,6 +406,36 @@ paths:
                       $ref: "#/components/schemas/riwayatPendidikan"
                   meta:
                     $ref: "#/components/schemas/metaPagination"
+  /v1/admin/pegawai/{nip}/riwayat-pendidikan/{id}/berkas:
+    get:
+      tags:
+        - Riwayat Pendidikan
+      summary: Lihat berkas riwayat pendidikan pegawai.
+      description: >-
+        Lihat berkas riwayat pendidikan berdasarkan id dari pegawai berdasarkan NIP.
+      operationId: adminGetBerkasRiwayatPendidikan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Berkas riwayat pendidikan tidak ditemukan atau User tidak mempunyai akses.
   /v1/admin/pegawai/{nip}/riwayat-pelatihan-teknis:
     get:
       tags:
@@ -437,6 +467,36 @@ paths:
                       $ref: "#/components/schemas/riwayatPelatihanTeknis"
                   meta:
                     $ref: "#/components/schemas/metaPagination"
+  /v1/admin/pegawai/{nip}/riwayat-pelatihan-teknis/{id}/berkas:
+    get:
+      tags:
+        - Riwayat Pelatihan Teknis
+      summary: Lihat berkas riwayat pelatihan teknis pegawai.
+      description: >-
+        Lihat berkas riwayat pelatihan teknis berdasarkan id dari pegawai berdasarkan NIP.
+      operationId: adminGetBerkasRiwayatPelatihanTeknis
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Berkas riwayat pelatihan teknis tidak ditemukan atau User tidak mempunyai akses.
   /v1/admin/pegawai/{nip}/riwayat-pelatihan-siasn:
     get:
       tags:
@@ -468,6 +528,36 @@ paths:
                       $ref: "#/components/schemas/riwayatPelatihanSIASN"
                   meta:
                     $ref: "#/components/schemas/metaPagination"
+  /v1/admin/pegawai/{nip}/riwayat-pelatihan-siasn/{id}/berkas:
+    get:
+      tags:
+        - Riwayat Pelatihan SIASN
+      summary: Lihat berkas riwayat pelatihan SIASN pegawai.
+      description: >-
+        Lihat berkas riwayat pelatihan SIASN berdasarkan id dari pegawai berdasarkan NIP.
+      operationId: adminGetBerkasRiwayatPelatihanSIASN
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Berkas riwayat pelatihan SIASN tidak ditemukan atau User tidak mempunyai akses.
   /v1/admin/pegawai/{nip}/riwayat-pelatihan-fungsional:
     get:
       tags:
@@ -499,6 +589,36 @@ paths:
                       $ref: "#/components/schemas/riwayatPelatihanFungsional"
                   meta:
                     $ref: "#/components/schemas/metaPagination"
+  /v1/admin/pegawai/{nip}/riwayat-pelatihan-fungsional/{id}/berkas:
+    get:
+      tags:
+        - Riwayat Pelatihan Fungsional
+      summary: Lihat berkas riwayat pelatihan fungsional pegawai.
+      description: >-
+        Lihat berkas riwayat pelatihan fungsional berdasarkan id dari pegawai berdasarkan NIP.
+      operationId: adminGetBerkasRiwayatPelatihanFungsional
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Berkas riwayat pelatihan fungsional tidak ditemukan atau User tidak mempunyai akses.
   /v1/admin/pegawai/{nip}/riwayat-jabatan:
     get:
       tags:
