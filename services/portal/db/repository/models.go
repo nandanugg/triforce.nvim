@@ -24,13 +24,54 @@ type Pemberitahuan struct {
 	UpdatedAt       pgtype.Date `db:"updated_at"`
 }
 
-type Role struct {
-	ID        int32              `db:"id"`
-	Service   string             `db:"service"`
+type Permission struct {
+	ID        int16              `db:"id"`
+	Kode      string             `db:"kode"`
 	Nama      string             `db:"nama"`
 	CreatedAt pgtype.Timestamptz `db:"created_at"`
 	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
 	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
+}
+
+type Resource struct {
+	ID        int16              `db:"id"`
+	Service   string             `db:"service"`
+	Kode      string             `db:"kode"`
+	Nama      string             `db:"nama"`
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
+}
+
+type ResourcePermission struct {
+	ID           int32              `db:"id"`
+	Kode         pgtype.Text        `db:"kode"`
+	ResourceID   int16              `db:"resource_id"`
+	PermissionID int16              `db:"permission_id"`
+	CreatedAt    pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt    pgtype.Timestamptz `db:"updated_at"`
+	DeletedAt    pgtype.Timestamptz `db:"deleted_at"`
+}
+
+type Role struct {
+	ID int16 `db:"id"`
+	// deprecated
+	Service   pgtype.Text        `db:"service"`
+	Nama      string             `db:"nama"`
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
+	Deskripsi pgtype.Text        `db:"deskripsi"`
+	IsDefault bool               `db:"is_default"`
+}
+
+type RoleResourcePermission struct {
+	ID                   int32              `db:"id"`
+	RoleID               int16              `db:"role_id"`
+	ResourcePermissionID int32              `db:"resource_permission_id"`
+	CreatedAt            pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt            pgtype.Timestamptz `db:"updated_at"`
+	DeletedAt            pgtype.Timestamptz `db:"deleted_at"`
 }
 
 type User struct {
@@ -40,12 +81,14 @@ type User struct {
 	CreatedAt pgtype.Timestamptz `db:"created_at"`
 	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
 	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
+	Nama      pgtype.Text        `db:"nama"`
+	Email     pgtype.Text        `db:"email"`
 }
 
 type UserRole struct {
 	ID        int32              `db:"id"`
 	Nip       string             `db:"nip"`
-	RoleID    int32              `db:"role_id"`
+	RoleID    int16              `db:"role_id"`
 	CreatedAt pgtype.Timestamptz `db:"created_at"`
 	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
 	DeletedAt pgtype.Timestamptz `db:"deleted_at"`

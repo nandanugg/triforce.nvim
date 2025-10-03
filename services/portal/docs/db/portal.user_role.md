@@ -8,7 +8,7 @@
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
 | id | integer | nextval('user_role_id_seq'::regclass) | false |  |  |  |
 | nip | varchar(20) |  | false |  |  |  |
-| role_id | integer |  | false |  | [portal.role](portal.role.md) |  |
+| role_id | smallint |  | false |  | [portal.role](portal.role.md) |  |
 | created_at | timestamp with time zone | now() | true |  |  |  |
 | updated_at | timestamp with time zone | now() | true |  |  |  |
 | deleted_at | timestamp with time zone |  | true |  |  |  |
@@ -17,8 +17,8 @@
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| user_role_role_id_fkey | FOREIGN KEY | FOREIGN KEY (role_id) REFERENCES role(id) |
 | user_role_pkey | PRIMARY KEY | PRIMARY KEY (id) |
+| user_role_role_id_fkey | FOREIGN KEY | FOREIGN KEY (role_id) REFERENCES role(id) |
 
 ## Indexes
 
@@ -37,18 +37,20 @@ erDiagram
 "portal.user_role" {
   integer id
   varchar_20_ nip
-  integer role_id FK
+  smallint role_id FK
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
 }
 "portal.role" {
-  integer id
+  smallint id
   varchar_50_ service
   varchar_100_ nama
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  varchar_255_ deskripsi
+  boolean is_default
 }
 ```
 

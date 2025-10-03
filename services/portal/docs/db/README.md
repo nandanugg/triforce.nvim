@@ -8,8 +8,20 @@
 | [portal.pemberitahuan](portal.pemberitahuan.md) | 6 |  | BASE TABLE |
 | [portal.dokumen_pendukung](portal.dokumen_pendukung.md) | 6 |  | BASE TABLE |
 | [portal.user](portal.user.md) | 9 |  | BASE TABLE |
-| [portal.role](portal.role.md) | 6 |  | BASE TABLE |
+| [portal.role](portal.role.md) | 8 |  | BASE TABLE |
 | [portal.user_role](portal.user_role.md) | 6 |  | BASE TABLE |
+| [portal.resource](portal.resource.md) | 7 |  | BASE TABLE |
+| [portal.permission](portal.permission.md) | 6 |  | BASE TABLE |
+| [portal.resource_permission](portal.resource_permission.md) | 7 |  | BASE TABLE |
+| [portal.role_resource_permission](portal.role_resource_permission.md) | 6 |  | BASE TABLE |
+
+## Stored procedures and functions
+
+| Name | ReturnType | Arguments | Type |
+| ---- | ------- | ------- | ---- |
+| portal.resource_permission_set_kode | trigger |  | FUNCTION |
+| portal.resource_update_resource_permission_kode | trigger |  | FUNCTION |
+| portal.permission_update_resource_permission_kode | trigger |  | FUNCTION |
 
 ## Relations
 
@@ -17,6 +29,10 @@
 erDiagram
 
 "portal.user_role" }o--|| "portal.role" : "FOREIGN KEY (role_id) REFERENCES role(id)"
+"portal.resource_permission" }o--|| "portal.resource" : "FOREIGN KEY (resource_id) REFERENCES resource(id)"
+"portal.resource_permission" }o--|| "portal.permission" : "FOREIGN KEY (permission_id) REFERENCES permission(id)"
+"portal.role_resource_permission" }o--|| "portal.role" : "FOREIGN KEY (role_id) REFERENCES role(id)"
+"portal.role_resource_permission" }o--|| "portal.resource_permission" : "FOREIGN KEY (resource_permission_id) REFERENCES resource_permission(id)"
 
 "portal.schema_migrations" {
   bigint version
@@ -50,17 +66,53 @@ erDiagram
   varchar_200_ unit_organisasi
 }
 "portal.role" {
-  integer id
+  smallint id
   varchar_50_ service
   varchar_100_ nama
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  varchar_255_ deskripsi
+  boolean is_default
 }
 "portal.user_role" {
   integer id
   varchar_20_ nip
-  integer role_id FK
+  smallint role_id FK
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
+}
+"portal.resource" {
+  smallint id
+  varchar_50_ service
+  varchar_50_ kode
+  varchar_100_ nama
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
+}
+"portal.permission" {
+  smallint id
+  varchar_50_ kode
+  varchar_100_ nama
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
+}
+"portal.resource_permission" {
+  integer id
+  varchar_200_ kode
+  smallint resource_id FK
+  smallint permission_id FK
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
+}
+"portal.role_resource_permission" {
+  integer id
+  smallint role_id FK
+  integer resource_permission_id FK
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at

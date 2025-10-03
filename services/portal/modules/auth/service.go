@@ -224,7 +224,7 @@ func (s *service) getUser(ctx context.Context, id uuid.UUID, source string) (*us
 
 	roles := make(map[string]string, len(rows))
 	for _, row := range rows {
-		roles[row.Service] = row.Nama
+		roles[row.Service.String] = row.Nama
 	}
 
 	return &user{nip: nip, roles: roles}, nil

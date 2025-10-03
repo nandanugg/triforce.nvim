@@ -37,8 +37,8 @@ order by r.service, ur.updated_at desc
 `
 
 type ListUserRoleByNIPRow struct {
-	Service string `db:"service"`
-	Nama    string `db:"nama"`
+	Service pgtype.Text `db:"service"`
+	Nama    string      `db:"nama"`
 }
 
 func (q *Queries) ListUserRoleByNIP(ctx context.Context, nip string) ([]ListUserRoleByNIPRow, error) {

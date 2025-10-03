@@ -6,12 +6,14 @@
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| id | integer | nextval('role_id_seq'::regclass) | false | [portal.user_role](portal.user_role.md) |  |  |
-| service | varchar(50) |  | false |  |  |  |
+| id | smallint | nextval('role_id_seq'::regclass) | false | [portal.user_role](portal.user_role.md) [portal.role_resource_permission](portal.role_resource_permission.md) |  |  |
+| service | varchar(50) |  | true |  |  | deprecated |
 | nama | varchar(100) |  | false |  |  |  |
 | created_at | timestamp with time zone | now() | true |  |  |  |
 | updated_at | timestamp with time zone | now() | true |  |  |  |
 | deleted_at | timestamp with time zone |  | true |  |  |  |
+| deskripsi | varchar(255) |  | true |  |  |  |
+| is_default | boolean | false | false |  |  |  |
 
 ## Constraints
 
@@ -31,19 +33,30 @@
 erDiagram
 
 "portal.user_role" }o--|| "portal.role" : "FOREIGN KEY (role_id) REFERENCES role(id)"
+"portal.role_resource_permission" }o--|| "portal.role" : "FOREIGN KEY (role_id) REFERENCES role(id)"
 
 "portal.role" {
-  integer id
+  smallint id
   varchar_50_ service
   varchar_100_ nama
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  varchar_255_ deskripsi
+  boolean is_default
 }
 "portal.user_role" {
   integer id
   varchar_20_ nip
-  integer role_id FK
+  smallint role_id FK
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
+}
+"portal.role_resource_permission" {
+  integer id
+  smallint role_id FK
+  integer resource_permission_id FK
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
