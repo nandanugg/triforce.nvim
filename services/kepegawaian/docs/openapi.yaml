@@ -29,6 +29,7 @@ tags:
   - name: Riwayat Kinerja
   - name: Riwayat Pelatihan Fungsional
   - name: Riwayat Pelatihan SIASN
+  - name: Riwayat Pelatihan Struktural
   - name: Riwayat Pelatihan Teknis
   - name: Riwayat Pendidikan
   - name: Riwayat Penghargaan
@@ -467,6 +468,67 @@ paths:
                       $ref: "#/components/schemas/riwayatPelatihanTeknis"
                   meta:
                     $ref: "#/components/schemas/metaPagination"
+  /v1/admin/pegawai/{nip}/riwayat-pelatihan-struktural:
+    get:
+      tags:
+        - Riwayat Pelatihan Struktural
+      summary: Lihat riwayat pelatihan struktural pegawai.
+      description: >-
+        Lihat riwayat pelatihan struktural dari pegawai berdasarkan NIP, urut berdasarkan tanggal.
+      operationId: adminDetailPegawaiPelatihanStruktural
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/riwayatPelatihanStruktural"
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/admin/pegawai/{nip}/riwayat-pelatihan-struktural/{id}/berkas:
+    get:
+      tags:
+        - Riwayat Pelatihan Struktural
+      summary: Lihat berkas riwayat pelatihan struktural
+      description: >-
+        Lihat berkas riwayat pelatihan struktural berdasarkan id dari pegawai berdasarkan NIP.
+      operationId: adminGetBerkasRiwayatPelatihanStruktural
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Berkas riwayat pelatihan struktural tidak ditemukan.
   /v1/admin/pegawai/{nip}/riwayat-pelatihan-teknis/{id}/berkas:
     get:
       tags:
@@ -1860,6 +1922,58 @@ paths:
                 format: binary
         "404":
           description: Berkas riwayat pelatihan SIASN tidak ditemukan atau User tidak mempunyai akses.
+  /v1/riwayat-pelatihan-struktural:
+    get:
+      tags:
+        - Riwayat Pelatihan Struktural
+      summary: Lihat daftar riwayat pelatihan struktural.
+      description: >-
+        Lihat daftar riwayat pelatihan struktural dari user yang login, urut
+        berdasarkan tanggal.
+      operationId: listRiwayatPelatihanStruktural
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/offset"
+        - $ref: "#/components/parameters/limit"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/riwayatPelatihanStruktural"
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/riwayat-pelatihan-struktural/{id}/berkas:
+    get:
+      tags:
+        - Riwayat Pelatihan Struktural
+      summary: lihat berkas riwayat pelatihan struktural.
+      description: >-
+        lihat berkas riwayat pelatihan struktural berdasarkan id.
+      operationId: getBerkasRiwayatPelatihanStruktural
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: sukses.
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: berkas riwayat pelatihan struktural tidak ditemukan atau user tidak mempunyai akses.
   /v1/riwayat-pelatihan-teknis:
     get:
       tags:
@@ -2472,6 +2586,26 @@ components:
           type: integer
           nullable: true
         durasi:
+          type: integer
+          nullable: true
+    riwayatPelatihanStruktural:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        nama_diklat:
+          type: string
+        tanggal:
+          type: string
+          format: date
+          nullable: true
+        lama:
+          type: integer
+          nullable: true
+        nomor:
+          type: string
+        tahun:
           type: integer
           nullable: true
     riwayatPelatihanFungsional:
