@@ -84,6 +84,7 @@ type User struct {
 	Email          pgtype.Text        `db:"email"`
 	Nama           pgtype.Text        `db:"nama"`
 	UnitOrganisasi pgtype.Text        `db:"unit_organisasi"`
+	LastLoginAt    pgtype.Timestamptz `db:"last_login_at"`
 }
 
 type UserRole struct {

@@ -15,6 +15,7 @@
 | email | varchar(255) |  | true |  |  |  |
 | nama | varchar(255) |  | true |  |  |  |
 | unit_organisasi | varchar(200) |  | true |  |  |  |
+| last_login_at | timestamp with time zone |  | true |  |  |  |
 
 ## Constraints
 
@@ -27,6 +28,7 @@
 | Name | Definition |
 | ---- | ---------- |
 | user_pkey | CREATE UNIQUE INDEX user_pkey ON portal."user" USING btree (id, source) |
+| user_nip_idx | CREATE INDEX user_nip_idx ON portal."user" USING btree (nip) |
 
 ## Relations
 
@@ -44,6 +46,7 @@ erDiagram
   varchar_255_ email
   varchar_255_ nama
   varchar_200_ unit_organisasi
+  timestamp_with_time_zone last_login_at
 }
 ```
 

@@ -24,11 +24,20 @@ func (q *Queries) CountResources(ctx context.Context) (int64, error) {
 
 const listResourcePermissionsByNip = `-- name: ListResourcePermissionsByNip :many
 select distinct rp.kode
-from user_role ur
-join role r on r.id = ur.role_id and r.deleted_at is null
-join role_resource_permission rrp on rrp.role_id = ur.role_id and rrp.deleted_at is null
+from role_resource_permission rrp
 join resource_permission rp on rp.id = rrp.resource_permission_id and rp.deleted_at is null
-where ur.nip = $1 and ur.deleted_at is null
+where rrp.role_id in (
+  select ur.role_id
+  from user_role ur
+  join role r on r.id = ur.role_id and r.deleted_at is null
+  where ur.nip = $1 and ur.deleted_at is null
+
+  union all
+
+  select r.id
+  from role r
+  where r.is_default and r.deleted_at is null
+) and rrp.deleted_at is null
   and rp.kode is not null -- rp.kode is not null is alias for resource.deleted_at is null and permission.deleted_at is null
 order by rp.kode
 `

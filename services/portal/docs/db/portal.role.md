@@ -26,6 +26,7 @@
 | Name | Definition |
 | ---- | ---------- |
 | role_pkey | CREATE UNIQUE INDEX role_pkey ON portal.role USING btree (id) |
+| role_is_default_idx | CREATE INDEX role_is_default_idx ON portal.role USING btree (is_default) |
 
 ## Relations
 

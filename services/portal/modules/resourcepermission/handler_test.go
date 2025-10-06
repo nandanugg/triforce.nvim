@@ -27,7 +27,8 @@ func Test_handler_listResourcePermissions(t *testing.T) {
 			(id, kode,     nama,     deleted_at) values
 			(1,  'write',  'Write',  null),
 			(2,  'read',   'Read',   null),
-			(3,  'delete', 'Delete', '2000-01-01');
+			(3,  'delete', 'Delete', '2000-01-01'),
+			(4,  'save',   'Save',   null);
 		insert into resource
 			(id, service,  kode,    nama,     deleted_at) values
 			(1,  'portal', 'page2', 'Page 2', null),
@@ -44,13 +45,18 @@ func Test_handler_listResourcePermissions(t *testing.T) {
 			(6,  2,           2,             null),
 			(7,  3,           2,             null),
 			(8,  1,           3,             null),
-			(9,  1,           2,             '2000-01-01');
+			(9,  1,           2,             '2000-01-01'),
+			(10, 1,           4,             null),
+			(11, 2,           4,             null),
+			(12, 3,           4,             null);
 		insert into role
-			(id, nama,      deleted_at) values
-			(1,  'admin',   null),
-			(2,  'pegawai', null),
-			(3,  'guest',   null),
-			(4,  'deleted', '2000-01-01');
+			(id, nama,       is_default, deleted_at) values
+			(1,  'admin',    false,      null),
+			(2,  'pegawai',  false,      null),
+			(3,  'guest',    false,      null),
+			(4,  'deleted',  false,      '2000-01-01'),
+			(5,  'default1', true,       null),
+			(6,  'default2', true,       '2000-01-01');
 		insert into role_resource_permission
 			(role_id, resource_permission_id, deleted_at) values
 			(1,       1,                      null),
@@ -63,7 +69,10 @@ func Test_handler_listResourcePermissions(t *testing.T) {
 			(2,       6,                      null),
 			(2,       9,                      null),
 			(3,       7,                      '2000-01-01'),
-			(3,       8,                      null);
+			(3,       8,                      null),
+			(5,       10,                     null),
+			(5,       11,                     '2000-01-01'),
+			(6,       12,                     null);
 		insert into user_role
 			(nip,  role_id, deleted_at) values
 			('1c', 1,       null),
@@ -71,7 +80,9 @@ func Test_handler_listResourcePermissions(t *testing.T) {
 			('1c', 4,       null),
 			('1d', 3,       null),
 			('1d', 2,       '2000-01-01'),
-			('1e', 1,       null);
+			('1e', 1,       null),
+			('1e', 5,       null),
+			('1e', 6,       null);
 	`
 	tests := []struct {
 		name             string
@@ -90,6 +101,7 @@ func Test_handler_listResourcePermissions(t *testing.T) {
 					"portal.page1.read",
 					"portal.page1.write",
 					"portal.page2.read",
+					"portal.page2.save",
 					"portal.page2.write"
 				]
 			}`,
@@ -99,16 +111,21 @@ func Test_handler_listResourcePermissions(t *testing.T) {
 			dbData:           dbData,
 			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1d")}},
 			wantResponseCode: http.StatusOK,
-			wantResponseBody: `{ "data": [] }`,
+			wantResponseBody: `{
+				"data": [
+					"portal.page2.save"
+				]
+			}`,
 		},
 		{
-			name:             "ok: nip with one roles",
+			name:             "ok: nip with default roles",
 			dbData:           dbData,
 			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1e")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
 					"portal.page1.write",
+					"portal.page2.save",
 					"portal.page2.write"
 				]
 			}`,

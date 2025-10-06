@@ -26,6 +26,7 @@
 | ---- | ---------- |
 | user_role_pkey | CREATE UNIQUE INDEX user_role_pkey ON portal.user_role USING btree (id) |
 | user_role_nip_role_id_unique_idx | CREATE UNIQUE INDEX user_role_nip_role_id_unique_idx ON portal.user_role USING btree (nip, role_id) WHERE (deleted_at IS NULL) |
+| user_role_role_id_idx | CREATE INDEX user_role_role_id_idx ON portal.user_role USING btree (role_id) |
 
 ## Relations
 
