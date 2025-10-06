@@ -39,6 +39,8 @@ type Querier interface {
 	CountSuratKeputusan(ctx context.Context, arg CountSuratKeputusanParams) (int64, error)
 	CountSuratKeputusanByNIP(ctx context.Context, arg CountSuratKeputusanByNIPParams) (int64, error)
 	CountUnitKerja(ctx context.Context, arg CountUnitKerjaParams) (int64, error)
+	CreateRefGolongan(ctx context.Context, arg CreateRefGolonganParams) (CreateRefGolonganRow, error)
+	DeleteRefGolongan(ctx context.Context, id int32) (int64, error)
 	GetBerkasRiwayatHukumanDisiplin(ctx context.Context, arg GetBerkasRiwayatHukumanDisiplinParams) (pgtype.Text, error)
 	GetBerkasRiwayatJabatan(ctx context.Context, arg GetBerkasRiwayatJabatanParams) (pgtype.Text, error)
 	GetBerkasRiwayatKenaikanGajiBerkala(ctx context.Context, arg GetBerkasRiwayatKenaikanGajiBerkalaParams) (pgtype.Text, error)
@@ -57,6 +59,7 @@ type Querier interface {
 	GetBerkasSuratKeputusanSignedByNIPAndID(ctx context.Context, arg GetBerkasSuratKeputusanSignedByNIPAndIDParams) (pgtype.Text, error)
 	GetDataPribadi(ctx context.Context, arg GetDataPribadiParams) (GetDataPribadiRow, error)
 	GetProfilePegawaiByPNSID(ctx context.Context, pnsID string) (GetProfilePegawaiByPNSIDRow, error)
+	GetRefGolongan(ctx context.Context, id int32) (GetRefGolonganRow, error)
 	GetSuratKeputusanByID(ctx context.Context, id string) (GetSuratKeputusanByIDRow, error)
 	GetSuratKeputusanByNIPAndID(ctx context.Context, arg GetSuratKeputusanByNIPAndIDParams) (GetSuratKeputusanByNIPAndIDRow, error)
 	ListAnakByNip(ctx context.Context, nipBaru pgtype.Text) ([]ListAnakByNipRow, error)
@@ -96,6 +99,7 @@ type Querier interface {
 	ListUnitKerjaHierarchy(ctx context.Context, id string) ([]ListUnitKerjaHierarchyRow, error)
 	ListUnitKerjaHierarchyByNIP(ctx context.Context, nip string) ([]ListUnitKerjaHierarchyByNIPRow, error)
 	ListUnitKerjaLengkapByIDs(ctx context.Context, ids []string) ([]ListUnitKerjaLengkapByIDsRow, error)
+	UpdateRefGolongan(ctx context.Context, arg UpdateRefGolonganParams) (UpdateRefGolonganRow, error)
 }
 
 var _ Querier = (*Queries)(nil)

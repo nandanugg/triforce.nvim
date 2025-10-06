@@ -21,8 +21,102 @@ func (q *Queries) CountRefGolongan(ctx context.Context) (int64, error) {
 	return count, err
 }
 
+const createRefGolongan = `-- name: CreateRefGolongan :one
+INSERT INTO ref_golongan (nama, nama_pangkat, nama_2, gol, gol_pppk)
+VALUES ($1::text, $2::text, $3::text, $4::smallint, $5::text)
+RETURNING id, nama, nama_pangkat, nama_2, gol, gol_pppk, created_at, updated_at
+`
+
+type CreateRefGolonganParams struct {
+	Nama        string `db:"nama"`
+	NamaPangkat string `db:"nama_pangkat"`
+	Nama2       string `db:"nama_2"`
+	Gol         int16  `db:"gol"`
+	GolPppk     string `db:"gol_pppk"`
+}
+
+type CreateRefGolonganRow struct {
+	ID          int32              `db:"id"`
+	Nama        pgtype.Text        `db:"nama"`
+	NamaPangkat pgtype.Text        `db:"nama_pangkat"`
+	Nama2       pgtype.Text        `db:"nama_2"`
+	Gol         pgtype.Int2        `db:"gol"`
+	GolPppk     pgtype.Text        `db:"gol_pppk"`
+	CreatedAt   pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `db:"updated_at"`
+}
+
+func (q *Queries) CreateRefGolongan(ctx context.Context, arg CreateRefGolonganParams) (CreateRefGolonganRow, error) {
+	row := q.db.QueryRow(ctx, createRefGolongan,
+		arg.Nama,
+		arg.NamaPangkat,
+		arg.Nama2,
+		arg.Gol,
+		arg.GolPppk,
+	)
+	var i CreateRefGolonganRow
+	err := row.Scan(
+		&i.ID,
+		&i.Nama,
+		&i.NamaPangkat,
+		&i.Nama2,
+		&i.Gol,
+		&i.GolPppk,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const deleteRefGolongan = `-- name: DeleteRefGolongan :execrows
+UPDATE ref_golongan
+SET deleted_at = NOW()
+WHERE id = $1::integer AND deleted_at IS NULL
+`
+
+func (q *Queries) DeleteRefGolongan(ctx context.Context, id int32) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteRefGolongan, id)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
+const getRefGolongan = `-- name: GetRefGolongan :one
+SELECT id, nama, nama_pangkat, nama_2, gol, gol_pppk, created_at, updated_at
+FROM ref_golongan
+WHERE id = $1::integer AND deleted_at IS NULL
+`
+
+type GetRefGolonganRow struct {
+	ID          int32              `db:"id"`
+	Nama        pgtype.Text        `db:"nama"`
+	NamaPangkat pgtype.Text        `db:"nama_pangkat"`
+	Nama2       pgtype.Text        `db:"nama_2"`
+	Gol         pgtype.Int2        `db:"gol"`
+	GolPppk     pgtype.Text        `db:"gol_pppk"`
+	CreatedAt   pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `db:"updated_at"`
+}
+
+func (q *Queries) GetRefGolongan(ctx context.Context, id int32) (GetRefGolonganRow, error) {
+	row := q.db.QueryRow(ctx, getRefGolongan, id)
+	var i GetRefGolonganRow
+	err := row.Scan(
+		&i.ID,
+		&i.Nama,
+		&i.NamaPangkat,
+		&i.Nama2,
+		&i.Gol,
+		&i.GolPppk,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const listRefGolongan = `-- name: ListRefGolongan :many
-SELECT id, nama, nama_pangkat FROM ref_golongan
+SELECT id, nama, nama_pangkat, nama_2, gol_pppk, gol, created_at, updated_at FROM ref_golongan
 WHERE deleted_at IS NULL
 LIMIT $1 OFFSET $2
 `
@@ -33,9 +127,14 @@ type ListRefGolonganParams struct {
 }
 
 type ListRefGolonganRow struct {
-	ID          int32       `db:"id"`
-	Nama        pgtype.Text `db:"nama"`
-	NamaPangkat pgtype.Text `db:"nama_pangkat"`
+	ID          int32              `db:"id"`
+	Nama        pgtype.Text        `db:"nama"`
+	NamaPangkat pgtype.Text        `db:"nama_pangkat"`
+	Nama2       pgtype.Text        `db:"nama_2"`
+	GolPppk     pgtype.Text        `db:"gol_pppk"`
+	Gol         pgtype.Int2        `db:"gol"`
+	CreatedAt   pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `db:"updated_at"`
 }
 
 func (q *Queries) ListRefGolongan(ctx context.Context, arg ListRefGolonganParams) ([]ListRefGolonganRow, error) {
@@ -47,7 +146,16 @@ func (q *Queries) ListRefGolongan(ctx context.Context, arg ListRefGolonganParams
 	var items []ListRefGolonganRow
 	for rows.Next() {
 		var i ListRefGolonganRow
-		if err := rows.Scan(&i.ID, &i.Nama, &i.NamaPangkat); err != nil {
+		if err := rows.Scan(
+			&i.ID,
+			&i.Nama,
+			&i.NamaPangkat,
+			&i.Nama2,
+			&i.GolPppk,
+			&i.Gol,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -56,4 +164,54 @@ func (q *Queries) ListRefGolongan(ctx context.Context, arg ListRefGolonganParams
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateRefGolongan = `-- name: UpdateRefGolongan :one
+UPDATE ref_golongan
+SET nama = $1::text, nama_pangkat = $2::text, nama_2 = $3::text, gol = $4::smallint, gol_pppk = $5::text, updated_at = NOW()
+WHERE id = $6::integer AND deleted_at IS NULL
+RETURNING id, nama, nama_pangkat, nama_2, gol, gol_pppk, created_at, updated_at
+`
+
+type UpdateRefGolonganParams struct {
+	Nama        string `db:"nama"`
+	NamaPangkat string `db:"nama_pangkat"`
+	Nama2       string `db:"nama_2"`
+	Gol         int16  `db:"gol"`
+	GolPppk     string `db:"gol_pppk"`
+	ID          int32  `db:"id"`
+}
+
+type UpdateRefGolonganRow struct {
+	ID          int32              `db:"id"`
+	Nama        pgtype.Text        `db:"nama"`
+	NamaPangkat pgtype.Text        `db:"nama_pangkat"`
+	Nama2       pgtype.Text        `db:"nama_2"`
+	Gol         pgtype.Int2        `db:"gol"`
+	GolPppk     pgtype.Text        `db:"gol_pppk"`
+	CreatedAt   pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `db:"updated_at"`
+}
+
+func (q *Queries) UpdateRefGolongan(ctx context.Context, arg UpdateRefGolonganParams) (UpdateRefGolonganRow, error) {
+	row := q.db.QueryRow(ctx, updateRefGolongan,
+		arg.Nama,
+		arg.NamaPangkat,
+		arg.Nama2,
+		arg.Gol,
+		arg.GolPppk,
+		arg.ID,
+	)
+	var i UpdateRefGolonganRow
+	err := row.Scan(
+		&i.ID,
+		&i.Nama,
+		&i.NamaPangkat,
+		&i.Nama2,
+		&i.Gol,
+		&i.GolPppk,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }

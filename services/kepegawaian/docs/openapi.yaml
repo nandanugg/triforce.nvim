@@ -6,6 +6,7 @@ info:
 servers:
   - url: http://localhost:8000
 tags:
+  - name: Admin Golongan
   - name: Admin Surat Keputusan Pegawai
   - name: Admin Pegawai Aktif
   - name: Data Pribadi
@@ -40,6 +41,215 @@ tags:
   - name: Tingkat Pendidikan
   - name: Unit Kerja
 paths:
+  /v1/admin/golongan:
+    get:
+      tags:
+        - Admin Golongan
+      summary: Daftar golongan.
+      description: Daftar golongan.
+      operationId: adminListGolongan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/golongan"
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+    post:
+      tags:
+        - Admin Golongan
+      summary: Create Golongan.
+      description: Membuat golongan baru.
+      operationId: adminCreateGolongan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                nama:
+                  type: string
+                  description: Nama golongan
+                  example: "III/c"
+                nama_pangkat:
+                  type: string
+                  description: Nama pangkat golongan
+                  example: "Penata"
+                nama_2:
+                  type: string
+                  nullable: true
+                  description: Nama alternatif golongan
+                  example: "3c"
+                gol:
+                  type: integer
+                  format: int16
+                  nullable: true
+                  description: Nomor golongan
+                  example: 3
+                gol_pppk:
+                  type: string
+                  nullable: true
+                  description: Golongan untuk PPPK
+                  example: "Gol III"
+      responses:
+        "201":
+          description: Golongan berhasil dibuat.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/golongan"
+        "400":
+          description: Request tidak valid.
+        "401":
+          description: Token otentikasi tidak valid.
+        "403":
+          description: Tidak memiliki akses admin.
+        "500":
+          description: Error internal server.
+  /v1/admin/golongan/{id}:
+    get:
+      tags:
+        - Admin Golongan
+      summary: Get Golongan by ID.
+      description: Mendapatkan detail golongan berdasarkan ID.
+      operationId: adminGetGolongan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/golongan"
+        "400":
+          description: ID tidak valid.
+        "401":
+          description: Token otentikasi tidak valid.
+        "404":
+          description: Golongan tidak ditemukan.
+        "500":
+          description: Error internal server.
+    put:
+      tags:
+        - Admin Golongan
+      summary: Update Golongan.
+      description: Mengupdate golongan berdasarkan ID.
+      operationId: updateGolongan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                nama:
+                  type: string
+                  description: Nama golongan
+                  example: "III/c"
+                nama_pangkat:
+                  type: string
+                  description: Nama pangkat golongan
+                  example: "Penata"
+                nama_2:
+                  type: string
+                  nullable: true
+                  description: Nama alternatif golongan
+                  example: "3c"
+                gol:
+                  type: integer
+                  format: int16
+                  nullable: true
+                  description: Nomor golongan
+                  example: 3
+                gol_pppk:
+                  type: string
+                  nullable: true
+                  description: Golongan untuk PPPK
+                  example: "Gol III"
+      responses:
+        "200":
+          description: Golongan berhasil diupdate.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/golongan"
+        "400":
+          description: Request tidak valid.
+        "401":
+          description: Token otentikasi tidak valid.
+        "403":
+          description: Tidak memiliki akses admin.
+        "404":
+          description: Golongan tidak ditemukan.
+        "500":
+          description: Error internal server.
+    delete:
+      tags:
+        - Admin Golongan
+      summary: Delete Golongan.
+      description: Menghapus golongan berdasarkan ID.
+      operationId: deleteGolongan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "204":
+          description: Golongan berhasil dihapus.
+        "400":
+          description: ID tidak valid.
+        "401":
+          description: Token otentikasi tidak valid.
+        "403":
+          description: Tidak memiliki akses admin.
+        "404":
+          description: Golongan tidak ditemukan.
+        "500":
+          description: Error internal server.
   /v1/admin/surat-keputusan:
     get:
       tags:
@@ -1149,17 +1359,10 @@ paths:
                   data:
                     type: array
                     items:
-                      type: object
-                      additionalProperties: false
-                      properties:
-                        id:
-                          type: integer
-                        nama:
-                          type: string
-                        nama_pangkat:
-                          type: string
+                      $ref: "#/components/schemas/golongan"
                   meta:
                     $ref: "#/components/schemas/metaPagination"
+    
   /v1/jabatan:
     get:
       tags:
@@ -3156,4 +3359,40 @@ components:
         tanggal_selesai:
           type: string
           format: date
+          nullable: true
+    golongan:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: ID golongan
+        nama:
+          type: string
+          description: Nama golongan
+        nama_pangkat:
+          type: string
+          description: Nama pangkat golongan
+        nama_2:
+          type: string
+          nullable: true
+          description: Nama alternatif golongan
+        gol:
+          type: integer
+          format: int16
+          nullable: true
+          description: Nomor golongan
+        gol_pppk:
+          type: string
+          nullable: true
+          description: Golongan untuk PPPK
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Tanggal dibuat
+        updated_at:
+          type: string
+          format: date-time
           nullable: true
