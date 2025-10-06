@@ -2,6 +2,7 @@ package unitkerja
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -232,6 +233,263 @@ func Test_handler_ListUnitKerja(t *testing.T) {
 			require.NoError(t, err)
 
 			req := httptest.NewRequest(http.MethodGet, "/v1/unit-kerja", nil)
+			req.URL.RawQuery = tt.requestQuery.Encode()
+			req.Header = tt.requestHeader
+			rec := httptest.NewRecorder()
+
+			e, err := api.NewEchoServer(docs.OpenAPIBytes)
+			require.NoError(t, err)
+			repo := repo.New(pgxconn)
+			RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
+			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+		})
+	}
+}
+
+func Test_handler_ListAkarUnitKerja(t *testing.T) {
+	t.Parallel()
+
+	dbData := `
+		insert into unit_kerja
+		("id", "nama_unor", "diatasan_id", deleted_at) values
+		('001', 'Tingkat 1', NULL, NULL),
+		('002', 'Tingkat 2', '001', NULL),
+		('003', 'Tingkat 2 Kedua', '001', NULL),
+		('004', 'Tingkat 2 Deleted', '001', NOW()),
+		('005', 'Tingkat 1 Deleted', NULL, NOW()),
+		('006', 'Tingkat 3', '002', NULL),
+		('007', 'Tingkat 3 Deleted', '002', NOW()),
+		('008', 'Tingkat 1 Kedua', NULL, NULL);
+	`
+
+	tests := []struct {
+		name             string
+		dbData           string
+		requestQuery     url.Values
+		requestHeader    http.Header
+		wantResponseCode int
+		wantResponseBody string
+	}{
+		{
+			name:             "ok: get data with default pagination",
+			dbData:           dbData,
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "41")}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{"id": "001", "nama": "Tingkat 1"},
+					{"id": "008", "nama": "Tingkat 1 Kedua"}
+				],
+				"meta": {
+					"limit": 10,
+					"offset": 0,
+					"total": 2
+				}
+			}`,
+		},
+		{
+			name:   "ok: with pagination limit and offset",
+			dbData: dbData,
+			requestQuery: url.Values{
+				"limit":  []string{"1"},
+				"offset": []string{"1"},
+			},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "41")}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{"id": "008", "nama": "Tingkat 1 Kedua"}
+				],
+				"meta": {
+					"limit": 1,
+					"offset": 1,
+					"total": 2
+				}
+			}`,
+		},
+		{
+			name:             "ok: empty data",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "41")}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{"data": [], "meta": {"limit": 10, "offset": 0, "total": 0}}`,
+		},
+		{
+			name:             "error: auth header tidak valid",
+			dbData:           dbData,
+			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
+		},
+		{
+			name:             "error: missing auth header",
+			dbData:           dbData,
+			requestHeader:    http.Header{},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			pgxconn := dbtest.New(t, dbmigrations.FS)
+
+			_, err := pgxconn.Exec(context.Background(), tt.dbData)
+			require.NoError(t, err)
+
+			req := httptest.NewRequest(http.MethodGet, "/v1/unit-kerja/akar", nil)
+			req.URL.RawQuery = tt.requestQuery.Encode()
+			req.Header = tt.requestHeader
+			rec := httptest.NewRecorder()
+
+			e, err := api.NewEchoServer(docs.OpenAPIBytes)
+			require.NoError(t, err)
+			repo := repo.New(pgxconn)
+			RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
+			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+		})
+	}
+}
+
+func Test_handler_ListAnakUnitKerja(t *testing.T) {
+	t.Parallel()
+
+	dbData := `
+		insert into unit_kerja
+		("id", "nama_unor", "diatasan_id", deleted_at) values
+		('001', 'Tingkat 1', NULL, NULL),
+		('002', 'Tingkat 2', '001', NULL),
+		('003', 'Tingkat 2 Kedua', '001', NULL),
+		('004', 'Tingkat 2 Deleted', '001', NOW()),
+		('005', 'Tingkat 1 Deleted', NULL, NOW()),
+		('006', 'Tingkat 3', '002', NULL),
+		('007', 'Tingkat 3 Deleted', '002', NOW()),
+		('008', 'Tingkat 1 Kedua', NULL, NULL);
+	`
+
+	tests := []struct {
+		name             string
+		dbData           string
+		id               string
+		requestQuery     url.Values
+		requestHeader    http.Header
+		wantResponseCode int
+		wantResponseBody string
+	}{
+		{
+			name:             "ok: get data with default pagination",
+			dbData:           dbData,
+			id:               "001",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "41")}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{"id": "002", "nama": "Tingkat 2", "has_anak": true},
+					{"id": "003", "nama": "Tingkat 2 Kedua", "has_anak": false}
+				],
+				"meta": {
+					"limit": 10,
+					"offset": 0,
+					"total": 2
+				}
+			}`,
+		},
+		{
+			name:             "ok: get data with another id",
+			dbData:           dbData,
+			id:               "002",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "41")}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{"id": "006", "nama": "Tingkat 3", "has_anak": false}
+				],
+				"meta": {
+					"limit": 10,
+					"offset": 0,
+					"total": 1
+				}
+			}`,
+		},
+		{
+			name:   "ok: with pagination limit and offset",
+			dbData: dbData,
+			id:     "001",
+			requestQuery: url.Values{
+				"limit":  []string{"1"},
+				"offset": []string{"1"},
+			},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "41")}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{"id": "003", "nama": "Tingkat 2 Kedua", "has_anak": false}
+				],
+				"meta": {
+					"limit": 1,
+					"offset": 1,
+					"total": 2
+				}
+			}`,
+		},
+		{
+			name:             "ok: leaf data",
+			dbData:           dbData,
+			id:               "003",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "41")}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{"data": [], "meta": {"limit": 10, "offset": 0, "total": 0}}`,
+		},
+		{
+			name:             "ok: deleted data",
+			dbData:           dbData,
+			id:               "004",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "41")}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{"data": [], "meta": {"limit": 10, "offset": 0, "total": 0}}`,
+		},
+		{
+			name:             "ok: empty data",
+			id:               "001",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "41")}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{"data": [], "meta": {"limit": 10, "offset": 0, "total": 0}}`,
+		},
+		{
+			name:             "error: auth header tidak valid",
+			dbData:           dbData,
+			id:               "001",
+			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
+		},
+		{
+			name:             "error: missing auth header",
+			dbData:           dbData,
+			id:               "001",
+			requestHeader:    http.Header{},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			pgxconn := dbtest.New(t, dbmigrations.FS)
+
+			_, err := pgxconn.Exec(context.Background(), tt.dbData)
+			require.NoError(t, err)
+
+			req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/v1/unit-kerja/%s/anak", tt.id), nil)
 			req.URL.RawQuery = tt.requestQuery.Encode()
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()

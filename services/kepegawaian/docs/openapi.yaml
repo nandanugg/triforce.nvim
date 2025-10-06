@@ -2641,6 +2641,75 @@ paths:
                           type: string
                   meta:
                     $ref: "#/components/schemas/metaPagination"
+  /v1/unit-kerja/akar:
+    get:
+      tags:
+        - Unit Kerja
+      summary: Daftar akar unit kerja.
+      description: Daftar akar / tingkat tertinggi dari unit kerja.
+      operationId: listAkarUnitKerja
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: string
+                        nama:
+                          type: string
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/unit-kerja/{id}/anak:
+    get:
+      tags:
+        - Unit Kerja
+      summary: Daftar anak unit kerja.
+      description: Daftar anak unit kerja berdasarkan id induk.
+      operationId: listAnakUnitKerja
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: string
+                        nama:
+                          type: string
+                        has_anak:
+                          type: boolean
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
 components:
   parameters:
     authRequired:

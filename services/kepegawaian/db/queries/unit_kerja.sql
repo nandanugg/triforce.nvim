@@ -83,3 +83,40 @@ from (
     from unit_kerja_path
 ) t
 where rn = 1;
+
+-- name: ListAkarUnitKerja :many
+SELECT id, nama_unor
+FROM unit_kerja
+WHERE
+    diatasan_id IS NULL
+    AND deleted_at IS NULL
+LIMIT $1 OFFSET $2;
+
+-- name: CountAkarUnitKerja :one
+SELECT COUNT(1) FROM unit_kerja
+WHERE
+    diatasan_id IS NULL
+    AND deleted_at IS NULL;
+
+-- name: ListUnitKerjaByDiatasanID :many
+SELECT 
+    uk.id,
+    uk.nama_unor,
+    EXISTS (
+        SELECT 1 
+        FROM unit_kerja uk2
+        WHERE 
+            uk2.diatasan_id = uk.id
+            AND uk2.deleted_at IS NULL
+    ) as has_anak
+FROM unit_kerja uk
+WHERE
+    uk.diatasan_id = sqlc.arg(diatasan_id)
+    AND uk.deleted_at IS NULL
+LIMIT $1 OFFSET $2;
+
+-- name: CountUnitKerjaByDiatasanID :one
+SELECT COUNT(1) FROM unit_kerja
+WHERE
+    diatasan_id = sqlc.arg(diatasan_id)
+    AND deleted_at IS NULL;

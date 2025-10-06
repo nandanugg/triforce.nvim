@@ -9,6 +9,20 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countAkarUnitKerja = `-- name: CountAkarUnitKerja :one
+SELECT COUNT(1) FROM unit_kerja
+WHERE
+    diatasan_id IS NULL
+    AND deleted_at IS NULL
+`
+
+func (q *Queries) CountAkarUnitKerja(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, countAkarUnitKerja)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const countUnitKerja = `-- name: CountUnitKerja :one
 SELECT COUNT(1) FROM unit_kerja
 WHERE
@@ -27,6 +41,109 @@ func (q *Queries) CountUnitKerja(ctx context.Context, arg CountUnitKerjaParams) 
 	var count int64
 	err := row.Scan(&count)
 	return count, err
+}
+
+const countUnitKerjaByDiatasanID = `-- name: CountUnitKerjaByDiatasanID :one
+SELECT COUNT(1) FROM unit_kerja
+WHERE
+    diatasan_id = $1
+    AND deleted_at IS NULL
+`
+
+func (q *Queries) CountUnitKerjaByDiatasanID(ctx context.Context, diatasanID pgtype.Text) (int64, error) {
+	row := q.db.QueryRow(ctx, countUnitKerjaByDiatasanID, diatasanID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const listAkarUnitKerja = `-- name: ListAkarUnitKerja :many
+SELECT id, nama_unor
+FROM unit_kerja
+WHERE
+    diatasan_id IS NULL
+    AND deleted_at IS NULL
+LIMIT $1 OFFSET $2
+`
+
+type ListAkarUnitKerjaParams struct {
+	Limit  int32 `db:"limit"`
+	Offset int32 `db:"offset"`
+}
+
+type ListAkarUnitKerjaRow struct {
+	ID       string      `db:"id"`
+	NamaUnor pgtype.Text `db:"nama_unor"`
+}
+
+func (q *Queries) ListAkarUnitKerja(ctx context.Context, arg ListAkarUnitKerjaParams) ([]ListAkarUnitKerjaRow, error) {
+	rows, err := q.db.Query(ctx, listAkarUnitKerja, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListAkarUnitKerjaRow
+	for rows.Next() {
+		var i ListAkarUnitKerjaRow
+		if err := rows.Scan(&i.ID, &i.NamaUnor); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listUnitKerjaByDiatasanID = `-- name: ListUnitKerjaByDiatasanID :many
+SELECT 
+    uk.id,
+    uk.nama_unor,
+    EXISTS (
+        SELECT 1 
+        FROM unit_kerja uk2
+        WHERE 
+            uk2.diatasan_id = uk.id
+            AND uk2.deleted_at IS NULL
+    ) as has_anak
+FROM unit_kerja uk
+WHERE
+    uk.diatasan_id = $3
+    AND uk.deleted_at IS NULL
+LIMIT $1 OFFSET $2
+`
+
+type ListUnitKerjaByDiatasanIDParams struct {
+	Limit      int32       `db:"limit"`
+	Offset     int32       `db:"offset"`
+	DiatasanID pgtype.Text `db:"diatasan_id"`
+}
+
+type ListUnitKerjaByDiatasanIDRow struct {
+	ID       string      `db:"id"`
+	NamaUnor pgtype.Text `db:"nama_unor"`
+	HasAnak  bool        `db:"has_anak"`
+}
+
+func (q *Queries) ListUnitKerjaByDiatasanID(ctx context.Context, arg ListUnitKerjaByDiatasanIDParams) ([]ListUnitKerjaByDiatasanIDRow, error) {
+	rows, err := q.db.Query(ctx, listUnitKerjaByDiatasanID, arg.Limit, arg.Offset, arg.DiatasanID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListUnitKerjaByDiatasanIDRow
+	for rows.Next() {
+		var i ListUnitKerjaByDiatasanIDRow
+		if err := rows.Scan(&i.ID, &i.NamaUnor, &i.HasAnak); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const listUnitKerjaByNamaOrInduk = `-- name: ListUnitKerjaByNamaOrInduk :many

@@ -9,6 +9,7 @@ import (
 )
 
 type Querier interface {
+	CountAkarUnitKerja(ctx context.Context) (int64, error)
 	CountJenisKenaikanPangkat(ctx context.Context) (int64, error)
 	CountPegawaiAktif(ctx context.Context, arg CountPegawaiAktifParams) (int64, error)
 	CountRefGolongan(ctx context.Context) (int64, error)
@@ -39,6 +40,7 @@ type Querier interface {
 	CountSuratKeputusan(ctx context.Context, arg CountSuratKeputusanParams) (int64, error)
 	CountSuratKeputusanByNIP(ctx context.Context, arg CountSuratKeputusanByNIPParams) (int64, error)
 	CountUnitKerja(ctx context.Context, arg CountUnitKerjaParams) (int64, error)
+	CountUnitKerjaByDiatasanID(ctx context.Context, diatasanID pgtype.Text) (int64, error)
 	CreateRefGolongan(ctx context.Context, arg CreateRefGolonganParams) (CreateRefGolonganRow, error)
 	DeleteRefGolongan(ctx context.Context, id int32) (int64, error)
 	GetBerkasRiwayatHukumanDisiplin(ctx context.Context, arg GetBerkasRiwayatHukumanDisiplinParams) (pgtype.Text, error)
@@ -62,6 +64,7 @@ type Querier interface {
 	GetRefGolongan(ctx context.Context, id int32) (GetRefGolonganRow, error)
 	GetSuratKeputusanByID(ctx context.Context, id string) (GetSuratKeputusanByIDRow, error)
 	GetSuratKeputusanByNIPAndID(ctx context.Context, arg GetSuratKeputusanByNIPAndIDParams) (GetSuratKeputusanByNIPAndIDRow, error)
+	ListAkarUnitKerja(ctx context.Context, arg ListAkarUnitKerjaParams) ([]ListAkarUnitKerjaRow, error)
 	ListAnakByNip(ctx context.Context, nipBaru pgtype.Text) ([]ListAnakByNipRow, error)
 	ListJenisKenaikanPangkat(ctx context.Context, arg ListJenisKenaikanPangkatParams) ([]ListJenisKenaikanPangkatRow, error)
 	ListLogSuratKeputusanByID(ctx context.Context, id string) ([]ListLogSuratKeputusanByIDRow, error)
@@ -95,6 +98,7 @@ type Querier interface {
 	ListRiwayatSertifikasi(ctx context.Context, arg ListRiwayatSertifikasiParams) ([]ListRiwayatSertifikasiRow, error)
 	ListSuratKeputusan(ctx context.Context, arg ListSuratKeputusanParams) ([]ListSuratKeputusanRow, error)
 	ListSuratKeputusanByNIP(ctx context.Context, arg ListSuratKeputusanByNIPParams) ([]ListSuratKeputusanByNIPRow, error)
+	ListUnitKerjaByDiatasanID(ctx context.Context, arg ListUnitKerjaByDiatasanIDParams) ([]ListUnitKerjaByDiatasanIDRow, error)
 	ListUnitKerjaByNamaOrInduk(ctx context.Context, arg ListUnitKerjaByNamaOrIndukParams) ([]ListUnitKerjaByNamaOrIndukRow, error)
 	ListUnitKerjaHierarchy(ctx context.Context, id string) ([]ListUnitKerjaHierarchyRow, error)
 	ListUnitKerjaHierarchyByNIP(ctx context.Context, nip string) ([]ListUnitKerjaHierarchyByNIPRow, error)
