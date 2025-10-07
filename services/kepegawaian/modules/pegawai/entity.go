@@ -22,6 +22,7 @@ type profile struct {
 }
 
 type pegawai struct {
+	PNSID         string      `json:"pns_id"`
 	NIP           string      `json:"nip"`
 	GelarDepan    string      `json:"gelar_depan"`
 	GelarBelakang string      `json:"gelar_belakang"`

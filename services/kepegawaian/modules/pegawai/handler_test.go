@@ -263,6 +263,7 @@ func Test_handler_listAdmin(t *testing.T) {
 			{
 				"data": [
 					{
+						"pns_id": "1001",
 						"gelar_belakang": "M.Pd.",
 						"gelar_depan": "Drs.",
 						"golongan": "III/a",
@@ -274,6 +275,7 @@ func Test_handler_listAdmin(t *testing.T) {
 						"photo" : "foto.png"
 					},
 					{
+						"pns_id": "1002",
 						"gelar_belakang": "S.Sos.",
 						"gelar_depan": "",
 						"golongan": "III/b",
@@ -285,6 +287,7 @@ func Test_handler_listAdmin(t *testing.T) {
 						"photo": "foto1.png"
 					},
 					{
+						"pns_id": "1003",
 						"gelar_belakang": "",
 						"gelar_depan": "",
 						"golongan": "III/a",
@@ -296,6 +299,7 @@ func Test_handler_listAdmin(t *testing.T) {
 						"photo": "foto2.png"
 					},
 					{
+						"pns_id": "1005",
 						"gelar_belakang": "",
 						"gelar_depan": "",
 						"golongan": "III/a",
@@ -307,6 +311,7 @@ func Test_handler_listAdmin(t *testing.T) {
 						"photo": null
 					},
 					{
+						"pns_id": "1006",
 						"gelar_belakang": "",
 						"gelar_depan": "",
 						"golongan": "",
@@ -318,6 +323,7 @@ func Test_handler_listAdmin(t *testing.T) {
 						"photo": "foto4.png"
 					},
 					{
+						"pns_id": "1008",
 						"gelar_belakang": "",
 						"gelar_depan": "",
 						"golongan": "",
@@ -349,6 +355,7 @@ func Test_handler_listAdmin(t *testing.T) {
 			{
 				"data": [
 					{
+						"pns_id": "1002",
 						"gelar_belakang": "S.Sos.",
 						"gelar_depan": "",
 						"golongan": "III/b",
@@ -360,6 +367,7 @@ func Test_handler_listAdmin(t *testing.T) {
 						"photo": "foto1.png"
 					},
 					{
+						"pns_id": "1003",
 						"gelar_belakang": "",
 						"gelar_depan": "",
 						"golongan": "III/a",
@@ -390,6 +398,7 @@ func Test_handler_listAdmin(t *testing.T) {
 			{
 				"data": [
 					{
+						"pns_id": "1002",
 						"gelar_belakang": "S.Sos.",
 						"gelar_depan": "",
 						"golongan": "III/b",
@@ -420,6 +429,7 @@ func Test_handler_listAdmin(t *testing.T) {
 			{
 				"data": [
 					{
+						"pns_id": "1001",
 						"gelar_belakang": "M.Pd.",
 						"gelar_depan": "Drs.",
 						"golongan": "III/a",
@@ -431,6 +441,7 @@ func Test_handler_listAdmin(t *testing.T) {
 						"photo": "foto.png"
 					},
 					{
+						"pns_id": "1005",
 						"gelar_belakang": "",
 						"gelar_depan": "",
 						"golongan": "III/a",
@@ -442,6 +453,7 @@ func Test_handler_listAdmin(t *testing.T) {
 						"photo": null
 					},
 					{
+						"pns_id": "1006",
 						"gelar_belakang": "",
 						"gelar_depan": "",
 						"golongan": "",
@@ -472,6 +484,7 @@ func Test_handler_listAdmin(t *testing.T) {
 			{
 				"data": [
 					{
+						"pns_id": "1001",
 						"gelar_belakang": "M.Pd.",
 						"gelar_depan": "Drs.",
 						"golongan": "III/a",
@@ -483,6 +496,7 @@ func Test_handler_listAdmin(t *testing.T) {
 						"photo": "foto.png"
 					},
 					{
+						"pns_id": "1002",
 						"gelar_belakang": "S.Sos.",
 						"gelar_depan": "",
 						"golongan": "III/b",
@@ -494,6 +508,7 @@ func Test_handler_listAdmin(t *testing.T) {
 						"photo": "foto1.png"
 					},
 					{
+						"pns_id": "1003",
 						"gelar_belakang": "",
 						"gelar_depan": "",
 						"golongan": "III/a",
@@ -505,6 +520,7 @@ func Test_handler_listAdmin(t *testing.T) {
 						"photo": "foto2.png"
 					},
 					{
+						"pns_id": "1005",
 						"gelar_belakang": "",
 						"gelar_depan": "",
 						"golongan": "III/a",
@@ -516,6 +532,7 @@ func Test_handler_listAdmin(t *testing.T) {
 						"photo": null
 					},
 					{
+						"pns_id": "1006",
 						"gelar_belakang": "",
 						"gelar_depan": "",
 						"golongan": "",
@@ -527,6 +544,7 @@ func Test_handler_listAdmin(t *testing.T) {
 						"photo": "foto4.png"
 					},
 					{
+						"pns_id": "1008",
 						"gelar_belakang": "",
 						"gelar_depan": "",
 						"golongan": "",
@@ -557,6 +575,7 @@ func Test_handler_listAdmin(t *testing.T) {
 			{
 				"data": [
 					{
+						"pns_id": "1002",
 						"gelar_belakang": "S.Sos.",
 						"gelar_depan": "",
 						"golongan": "III/b",
@@ -587,6 +606,7 @@ func Test_handler_listAdmin(t *testing.T) {
 			{
 				"data": [
 					{
+						"pns_id": "1001",
 						"gelar_belakang": "M.Pd.",
 						"gelar_depan": "Drs.",
 						"golongan": "III/a",
@@ -598,6 +618,7 @@ func Test_handler_listAdmin(t *testing.T) {
 						"photo": "foto.png"
 					},
 					{
+						"pns_id": "1006",
 						"gelar_belakang": "",
 						"gelar_depan": "",
 						"golongan": "",
@@ -628,6 +649,7 @@ func Test_handler_listAdmin(t *testing.T) {
 			{
 				"data": [
 					{
+						"pns_id": "1002",
 						"gelar_belakang": "S.Sos.",
 						"gelar_depan": "",
 						"golongan": "III/b",
@@ -639,6 +661,7 @@ func Test_handler_listAdmin(t *testing.T) {
 						"photo": "foto1.png"
 					},
 					{
+						"pns_id": "1005",
 						"gelar_belakang": "",
 						"gelar_depan": "",
 						"golongan": "III/a",
@@ -669,6 +692,7 @@ func Test_handler_listAdmin(t *testing.T) {
 			{
 				"data": [
 					{
+						"pns_id": "1003",
 						"gelar_belakang": "",
 						"gelar_depan": "",
 						"golongan": "III/a",
@@ -721,6 +745,7 @@ func Test_handler_listAdmin(t *testing.T) {
 			{
 				"data": [
 					{
+						"pns_id": "1001",
 						"gelar_belakang": "M.Pd.",
 						"gelar_depan": "Drs.",
 						"golongan": "III/a",

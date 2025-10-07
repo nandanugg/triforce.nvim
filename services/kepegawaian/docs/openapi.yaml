@@ -711,6 +711,8 @@ paths:
                       type: object
                       additionalProperties: false
                       properties:
+                        pns_id:
+                          type: string
                         nip:
                           type: string
                         nama:

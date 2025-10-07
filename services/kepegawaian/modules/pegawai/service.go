@@ -119,6 +119,7 @@ func (s *service) adminListPegawai(ctx context.Context, arg adminListPegawaiPara
 
 	result := typeutil.Map(data, func(row sqlc.ListPegawaiAktifRow) pegawai {
 		return pegawai{
+			PNSID:         row.PnsID,
 			NIP:           row.Nip.String,
 			GelarDepan:    row.GelarDepan.String,
 			Nama:          row.Nama.String,
