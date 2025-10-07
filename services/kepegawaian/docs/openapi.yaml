@@ -6,6 +6,7 @@ info:
 servers:
   - url: http://localhost:8000
 tags:
+  - name: Admin Jenis Satker
   - name: Admin Golongan
   - name: Admin Pegawai Aktif
   - name: Admin Surat Keputusan Pegawai
@@ -21,6 +22,7 @@ tags:
   - name: Jenis Kenaikan Pangkat
   - name: Jenis Pegawai
   - name: Jenis Penghargaan
+  - name: Jenis Satker
   - name: Keluarga
   - name: Pegawai
   - name: Riwayat Asesmen Nine Box
@@ -507,6 +509,157 @@ paths:
           description: Jabatan tidak ditemukan.
         "500":
           description: Error internal server.
+  /v1/admin/jenis-satker:
+    get:
+      tags:
+        - Admin Jenis Satker
+      summary: List semua jenis satker
+      description: Mengambil daftar semua jenis satker yang belum dihapus. Dapat difilter berdasarkan nama (case-insensitive, partial match).
+      operationId: listJenisSatkerAdmin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+        - name: nama
+          in: query
+          description: Filter nama jenis satker
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Sukses mengambil daftar jenis satker
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/jenisSatker"
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+    post:
+      tags:
+        - Admin Jenis Satker
+      summary: Tambah jenis satker baru
+      description: Menambahkan satu jenis satker baru ke database.
+      operationId: createJenisSatkerAdmin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: 
+                - nama
+              additionalProperties: false
+              properties:
+                nama:
+                  type: string
+                  description: Nama jenis satker
+                  example: "Satuan Kerja Tipe A"
+      responses:
+        "200":
+          description: Berhasil membuat jenis satker
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/jenisSatker"
+  /v1/admin/jenis-satker/{id}:
+    get:
+      tags:
+        - Admin Jenis Satker
+      summary: Detail jenis satker berdasarkan ID
+      description: Mengambil detail satu jenis satker berdasarkan ID, jika belum dihapus.
+      operationId: getJenisSatkerAdmin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          description: ID jenis satker
+          schema:
+            type: integer
+        - name: nama
+          in: query
+          description: Filter nama jenis satker (optional)
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Sukses mengambil detail jenis satker
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/jenisSatker"
+    put:
+      tags:
+        - Admin Jenis Satker
+      summary: Update jenis satker
+      description: Mengubah data nama jenis satker berdasarkan ID.
+      operationId: updateJenisSatkerAdmin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          description: ID jenis satker yang akan diupdate
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: 
+                - nama
+              additionalProperties: false
+              properties:
+                nama:
+                  type: string
+                  description: Nama baru jenis satker
+                  example: "Satuan Kerja Tipe B"
+      responses:
+        "200":
+          description: Sukses update jenis satker
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/jenisSatker"
+    delete:
+      tags:
+        - Admin Jenis Satker
+      summary: Soft delete jenis satker
+      description: Menghapus jenis satker secara soft delete berdasarkan ID.
+      operationId: deleteJenisSatkerAdmin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          description: ID jenis satker yang akan dihapus
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Berhasil dihapus (soft delete)
   /v1/admin/surat-keputusan:
     get:
       tags:
@@ -2097,6 +2250,37 @@ paths:
                           type: integer
                         nama:
                           type: string
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/jenis-satker:
+    get:
+      tags:
+        - Jenis Satker
+      summary: List semua jenis satker
+      description: Mengambil daftar semua jenis satker yang belum dihapus. Dapat difilter berdasarkan nama (case-insensitive, partial match).
+      operationId: listJenisSatker
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+        - name: nama
+          in: query
+          description: Filter nama jenis satker
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Sukses mengambil daftar jenis satker
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/jenisSatker"
                   meta:
                     $ref: "#/components/schemas/metaPagination"
   /v1/keluarga:
@@ -3971,6 +4155,16 @@ components:
           type: integer
           format: int64
           nullable: true
+    jenisSatker:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          description: ID unik jenis satker
+        nama:
+          type: string
+          description: Nama jenis satker
     unitKerja:
       type: object
       additionalProperties: false
