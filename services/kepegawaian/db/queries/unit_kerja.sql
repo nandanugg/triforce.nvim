@@ -123,7 +123,6 @@ WHERE
     diatasan_id = sqlc.arg(diatasan_id)
     AND deleted_at IS NULL;
 
-
 -- name: GetUnitKerja :one
 SELECT
     id,
@@ -159,3 +158,127 @@ SELECT
     eselon_nama
 FROM unit_kerja
 WHERE id = @id::varchar AND deleted_at IS NULL;
+
+-- name: CreateUnitKerja :one
+INSERT INTO unit_kerja (
+  diatasan_id,
+  id,
+  nama_unor,
+  kode_internal,
+  nama_jabatan,
+  pemimpin_pns_id,
+  nama_pejabat,
+  is_satker,
+  unor_induk,
+  expired_date,
+  keterangan,
+  abbreviation,
+  waktu,
+  jenis_satker,
+  peraturan
+) VALUES (
+  @diatasan_id,
+  @id,
+  @nama,
+  @kode_internal,
+  @nama_jabatan,
+  @pemimpin_pns_id,
+  @nama_pejabat,
+  @is_satker,
+  @unor_induk,
+  @expired_date,
+  @keterangan,
+  @abbreviation,
+  @waktu,
+  @jenis_satker,
+  @peraturan
+)
+RETURNING
+  id,
+  "no",
+  kode_internal,
+  nama_unor as nama,
+  eselon_id,
+  cepat_kode,
+  nama_jabatan,
+  nama_pejabat,
+  diatasan_id,
+  instansi_id,
+  pemimpin_pns_id,
+  jenis_unor_id,
+  unor_induk,
+  jumlah_ideal_staff,
+  "order",
+  is_satker,
+  eselon_1,
+  eselon_2,
+  eselon_3,
+  eselon_4,
+  expired_date,
+  keterangan,
+  jenis_satker,
+  abbreviation,
+  unor_induk_penyetaraan,
+  jabatan_id,
+  waktu,
+  peraturan,
+  remark,
+  aktif,
+  eselon_nama;
+
+-- name: UpdateUnitKerja :one
+UPDATE unit_kerja
+SET
+    diatasan_id = @diatasan_id,
+    nama_unor = @nama,
+    kode_internal = @kode_internal,
+    nama_jabatan = @nama_jabatan,
+    pemimpin_pns_id = @pemimpin_pns_id,
+    nama_pejabat = @nama_pejabat,
+    is_satker = @is_satker,
+    unor_induk = @unor_induk,
+    expired_date = @expired_date,
+    keterangan = @keterangan,
+    abbreviation = @abbreviation,
+    waktu = @waktu,
+    jenis_satker = @jenis_satker,
+    peraturan = @peraturan,
+    updated_at = now()
+WHERE id = @id AND deleted_at IS NULL
+RETURNING
+    id,
+    "no",
+    kode_internal,
+    nama_unor as nama,
+    eselon_id,
+    cepat_kode,
+    nama_jabatan,
+    nama_pejabat,
+    diatasan_id,
+    instansi_id,
+    pemimpin_pns_id,
+    jenis_unor_id,
+    unor_induk,
+    jumlah_ideal_staff,
+    "order",
+    is_satker,
+    eselon_1,
+    eselon_2,
+    eselon_3,
+    eselon_4,
+    expired_date,
+    keterangan,
+    jenis_satker,
+    abbreviation,
+    unor_induk_penyetaraan,
+    jabatan_id,
+    waktu,
+    peraturan,
+    remark,
+    aktif,
+    eselon_nama;
+
+-- name: DeleteUnitKerja :execrows
+UPDATE unit_kerja
+SET deleted_at = NOW()
+WHERE id = $1 AND deleted_at IS NULL;

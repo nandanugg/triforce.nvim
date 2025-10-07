@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
 )
 
 type handler struct {
@@ -131,30 +132,162 @@ func (h *handler) listAnak(c echo.Context) error {
 	)
 }
 
-// type getRequest struct {
-// 	ID int32 `param:"id"`
-// }
+type adminGetRequest struct {
+	ID string `param:"id"`
+}
 
-// type getResponse struct {
-// 	Data *unitKerja `json:"data"`
-// }
+type adminGetResponse struct {
+	Data *unitKerja `json:"data"`
+}
 
-// func (h *handler) get(c echo.Context) error {
-// 	var req getRequest
-// 	if err := c.Bind(&req); err != nil {
-// 		return err
-// 	}
+func (h *handler) adminGet(c echo.Context) error {
+	var req adminGetRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
 
-// 	ctx := c.Request().Context()
-// 	data, err := h.service.get(ctx, req.ID)
-// 	if err != nil {
-// 		slog.ErrorContext(ctx, "Error getting golongan.", "error", err)
-// 		return echo.NewHTTPError(http.StatusInternalServerError)
-// 	}
+	ctx := c.Request().Context()
+	data, err := h.service.get(ctx, req.ID)
+	if err != nil {
+		slog.ErrorContext(ctx, "Error getting unit kerja.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
 
-// 	if data == nil {
-// 		return echo.NewHTTPError(http.StatusNotFound, "data tidak ditemukan")
-// 	}
+	if data == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "data tidak ditemukan")
+	}
 
-// 	return c.JSON(http.StatusOK, getResponse{Data: data})
-// }
+	return c.JSON(http.StatusOK, adminGetResponse{Data: data})
+}
+
+type adminCreateRequest struct {
+	DiatasanID    string  `json:"diatasan_id"`
+	ID            string  `json:"id"`
+	Nama          string  `json:"nama"`
+	KodeInternal  string  `json:"kode_internal"`
+	NamaJabatan   string  `json:"nama_jabatan"`
+	PemimpinPNSID string  `json:"pemimpin_pns_id"`
+	IsSatker      bool    `json:"is_satker"`
+	UnorInduk     string  `json:"unor_induk"`
+	ExpiredDate   db.Date `json:"expired_date"`
+	Keterangan    string  `json:"keterangan"`
+	Abbreviation  string  `json:"abbreviation"`
+	Waktu         string  `json:"waktu"`
+	JenisSatker   string  `json:"jenis_satker"`
+	Peraturan     string  `json:"peraturan"`
+}
+
+type adminCreateResponse struct {
+	Data *unitKerja `json:"data"`
+}
+
+func (h *handler) adminCreate(c echo.Context) error {
+	var req adminCreateRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	ctx := c.Request().Context()
+	data, err := h.service.create(ctx, createParams{
+		diatasanID:    req.DiatasanID,
+		id:            req.ID,
+		nama:          req.Nama,
+		kodeInternal:  req.KodeInternal,
+		namaJabatan:   req.NamaJabatan,
+		pemimpinPNSID: req.PemimpinPNSID,
+		isSatker:      req.IsSatker,
+		unorInduk:     req.UnorInduk,
+		expiredDate:   req.ExpiredDate,
+		keterangan:    req.Keterangan,
+		abbreviation:  req.Abbreviation,
+		waktu:         req.Waktu,
+		jenisSatker:   req.JenisSatker,
+		peraturan:     req.Peraturan,
+	})
+	if err != nil {
+		slog.ErrorContext(ctx, "Error creating unit kerja.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	return c.JSON(http.StatusCreated, adminCreateResponse{Data: data})
+}
+
+type adminUpdateRequest struct {
+	ID            string  `param:"id"`
+	DiatasanID    string  `json:"diatasan_id"`
+	Nama          string  `json:"nama"`
+	KodeInternal  string  `json:"kode_internal"`
+	NamaJabatan   string  `json:"nama_jabatan"`
+	PemimpinPNSID string  `json:"pemimpin_pns_id"`
+	IsSatker      bool    `json:"is_satker"`
+	UnorInduk     string  `json:"unor_induk"`
+	ExpiredDate   db.Date `json:"expired_date"`
+	Keterangan    string  `json:"keterangan"`
+	Abbreviation  string  `json:"abbreviation"`
+	Waktu         string  `json:"waktu"`
+	JenisSatker   string  `json:"jenis_satker"`
+	Peraturan     string  `json:"peraturan"`
+}
+
+type adminUpdateResponse struct {
+	Data *unitKerja `json:"data"`
+}
+
+func (h *handler) adminUpdate(c echo.Context) error {
+	var req adminUpdateRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	ctx := c.Request().Context()
+	data, err := h.service.update(ctx, updateParams{
+		diatasanID:    req.DiatasanID,
+		id:            req.ID,
+		nama:          req.Nama,
+		kodeInternal:  req.KodeInternal,
+		namaJabatan:   req.NamaJabatan,
+		pemimpinPNSID: req.PemimpinPNSID,
+		isSatker:      req.IsSatker,
+		unorInduk:     req.UnorInduk,
+		expiredDate:   req.ExpiredDate,
+		keterangan:    req.Keterangan,
+		abbreviation:  req.Abbreviation,
+		waktu:         req.Waktu,
+		jenisSatker:   req.JenisSatker,
+		peraturan:     req.Peraturan,
+	})
+	if err != nil {
+		slog.ErrorContext(ctx, "Error creating unit kerja.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	if data == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "data tidak ditemukan")
+	}
+
+	return c.JSON(http.StatusOK, adminUpdateResponse{Data: data})
+}
+
+type adminDeleteRequest struct {
+	ID string `param:"id"`
+}
+
+func (h *handler) adminDelete(c echo.Context) error {
+	var req adminDeleteRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	ctx := c.Request().Context()
+	found, err := h.service.delete(ctx, req.ID)
+	if err != nil {
+		slog.ErrorContext(ctx, "Error deleting unit kerja.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	if !found {
+		return echo.NewHTTPError(http.StatusNotFound, "data tidak ditemukan")
+	}
+
+	return c.NoContent(http.StatusNoContent)
+}

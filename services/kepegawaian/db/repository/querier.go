@@ -44,8 +44,10 @@ type Querier interface {
 	CountUnitKerjaByDiatasanID(ctx context.Context, diatasanID pgtype.Text) (int64, error)
 	CreateRefGolongan(ctx context.Context, arg CreateRefGolonganParams) (CreateRefGolonganRow, error)
 	CreateRefJabatan(ctx context.Context, arg CreateRefJabatanParams) (CreateRefJabatanRow, error)
+	CreateUnitKerja(ctx context.Context, arg CreateUnitKerjaParams) (CreateUnitKerjaRow, error)
 	DeleteRefGolongan(ctx context.Context, id int32) (int64, error)
 	DeleteRefJabatan(ctx context.Context, id int32) (int64, error)
+	DeleteUnitKerja(ctx context.Context, id string) (int64, error)
 	GetBerkasRiwayatHukumanDisiplin(ctx context.Context, arg GetBerkasRiwayatHukumanDisiplinParams) (pgtype.Text, error)
 	GetBerkasRiwayatJabatan(ctx context.Context, arg GetBerkasRiwayatJabatanParams) (pgtype.Text, error)
 	GetBerkasRiwayatKenaikanGajiBerkala(ctx context.Context, arg GetBerkasRiwayatKenaikanGajiBerkalaParams) (pgtype.Text, error)
@@ -111,6 +113,7 @@ type Querier interface {
 	ListUnitKerjaLengkapByIDs(ctx context.Context, ids []string) ([]ListUnitKerjaLengkapByIDsRow, error)
 	UpdateRefGolongan(ctx context.Context, arg UpdateRefGolonganParams) (UpdateRefGolonganRow, error)
 	UpdateRefJabatan(ctx context.Context, arg UpdateRefJabatanParams) (UpdateRefJabatanRow, error)
+	UpdateUnitKerja(ctx context.Context, arg UpdateUnitKerjaParams) (UpdateUnitKerjaRow, error)
 }
 
 var _ Querier = (*Queries)(nil)

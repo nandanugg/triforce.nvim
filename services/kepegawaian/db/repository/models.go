@@ -1540,7 +1540,7 @@ type UnitKerja struct {
 	// Urutan tampilan unit kerja
 	Order pgtype.Int4 `db:"order"`
 	// Penanda apakah unit merupakan Satuan Kerja
-	IsSatker int16 `db:"is_satker"`
+	IsSatker bool `db:"is_satker"`
 	// Kode eselon 1 unit kerja
 	Eselon1 pgtype.Text `db:"eselon_1"`
 	// Kode eselon 2 unit kerja

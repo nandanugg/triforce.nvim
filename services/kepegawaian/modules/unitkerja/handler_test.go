@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -20,7 +21,7 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/docs"
 )
 
-func Test_handler_ListUnitKerja(t *testing.T) {
+func Test_handler_List(t *testing.T) {
 	t.Parallel()
 
 	dbData := `
@@ -239,8 +240,8 @@ func Test_handler_ListUnitKerja(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
-			repo := repo.New(pgxconn)
-			RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			r := repo.New(pgxconn)
+			RegisterRoutes(e, r, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -250,7 +251,7 @@ func Test_handler_ListUnitKerja(t *testing.T) {
 	}
 }
 
-func Test_handler_ListAkarUnitKerja(t *testing.T) {
+func Test_handler_ListAkar(t *testing.T) {
 	t.Parallel()
 
 	dbData := `
@@ -359,7 +360,7 @@ func Test_handler_ListAkarUnitKerja(t *testing.T) {
 	}
 }
 
-func Test_handler_ListAnakUnitKerja(t *testing.T) {
+func Test_handler_ListAnak(t *testing.T) {
 	t.Parallel()
 
 	dbData := `
@@ -502,6 +503,876 @@ func Test_handler_ListAnakUnitKerja(t *testing.T) {
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
 			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
+			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+		})
+	}
+}
+
+func Test_handler_adminGet(t *testing.T) {
+	t.Parallel()
+
+	dbData := `
+		INSERT INTO pegawai (
+				pns_id, nama, nip_baru, jabatan_nama, instansi_kerja_nama
+		) VALUES
+		(
+			'PNSROOT', 'Andi Prasetyo', '198501012020031001', 'Kepala Kantor', 'Kantor Pusat'
+		),
+		(
+			'PNS001', 'Budi Santoso', '198701012020031002', 'Kepala Bagian Keuangan', 'Direktorat Keuangan'
+		),
+		(
+			'PNS002', 'Siti Aminah', '198901012020031003', 'Kepala Bagian SDM', 'Direktorat SDM'
+		);
+
+
+		INSERT INTO ref_instansi (
+				id, nama, created_at, updated_at, deleted_at
+		) VALUES
+		(
+			'INSTROOT', 'Kementerian Contoh', now(), now(), NULL
+		),
+		(
+			'INST001', 'Direktorat Keuangan', now(), now(), NULL
+		),
+		(
+			'INST002', 'Direktorat SDM', now(), now(), NULL
+		);
+
+		INSERT INTO unit_kerja (
+				id, "no", kode_internal, nama_unor, eselon_id, cepat_kode, nama_jabatan, nama_pejabat,
+				diatasan_id, instansi_id, pemimpin_pns_id, jenis_unor_id, unor_induk, jumlah_ideal_staff,
+				"order", is_satker, eselon_1, eselon_2, eselon_3, eselon_4, expired_date, keterangan,
+				jenis_satker, abbreviation, unor_induk_penyetaraan, jabatan_id, waktu, peraturan, remark,
+				aktif, eselon_nama, deleted_at
+		) VALUES 
+		(
+			'00000000-0000-0000-0000-000000000001', 0, 'ROOT001', 'Kantor Pusat', 'E0', 'CKROOT', 'Kepala Kantor', 'Andi Prasetyo',
+			NULL, 'INSTROOT', 'PNSROOT', 'JUROOT', NULL, 20,
+			0, true, NULL, NULL, NULL, NULL, '2035-12-31', 'Unit induk pusat',
+			'Satker', 'KP', '', 'JABROOT', '2025', 'Peraturan ROOT 001', 'Unit pusat', true, 'Eselon ROOT', NULL
+		),
+		(
+			'11111111-1111-1111-1111-111111111111', 1, 'KI001', 'Bagian Keuangan', 'E1', 'CK01', 'Kepala Bagian', 'Budi Santoso',
+			'00000000-0000-0000-0000-000000000001', 'INST001', 'PNS001', 'JU001', '00000000-0000-0000-0000-000000000001', 5,
+			1, true, '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', '2030-12-31', 'Bagian pengelola keuangan',
+			'Satker', 'BK', 'PENY001', 'JAB001', '2025', 'Peraturan 123', 'Remark contoh', true, 'Eselon Nama I',
+			NULL
+		),
+		(
+			'22222222-2222-2222-2222-222222222222', 2, 'KI002', 'Bagian SDM', 'E2', 'CK02', 'Kepala Bagian', 'Siti Aminah',
+			'11111111-1111-1111-1111-111111111111', 'INST002', 'PNS002', 'JU002', '11111111-1111-1111-1111-111111111111', 8,
+			2, false, '00000000-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111', '11111111-1111-1111-1111-111111111111', '11111111-1111-1111-1111-111111111111', '2031-06-30', 'Bagian pengelola SDM',
+			'Satker', 'SDM', 'PENY002', 'JAB002', '2026', 'Peraturan 456', 'Remark contoh 2', false, 'Eselon Nama II',
+			'now()'
+		);
+	`
+
+	tests := []struct {
+		name             string
+		dbData           string
+		id               string
+		requestHeader    http.Header
+		wantResponseCode int
+		wantResponseBody string
+	}{
+		{
+			name:             "ok: get unit kerja",
+			dbData:           dbData,
+			id:               "00000000-0000-0000-0000-000000000001",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "111", api.RoleAdmin)}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": {
+					"id": "00000000-0000-0000-0000-000000000001",
+					"no": 0,
+					"kode_internal": "ROOT001",
+					"nama": "Kantor Pusat",
+					"eselon_id": "E0",
+					"cepat_kode": "CKROOT",
+					"nama_jabatan": "Kepala Kantor",
+					"nama_pejabat": "Andi Prasetyo",
+					"diatasan_id": "",
+					"instansi_id": "INSTROOT",
+					"pemimpin_pns_id": "PNSROOT",
+					"jenis_unor_id": "JUROOT",
+					"unor_induk": "",
+					"jumlah_ideal_staff": 20,
+					"order": 0,
+					"is_satker": true,
+					"eselon_1": "",
+					"eselon_2": "",
+					"eselon_3": "",
+					"eselon_4": "",
+					"expired_date": "2035-12-31",
+					"keterangan": "Unit induk pusat",
+					"jenis_satker": "Satker",
+					"abbreviation": "KP",
+					"unor_induk_penyetaraan": "",
+					"jabatan_id": "JABROOT",
+					"waktu": "2025",
+					"peraturan": "Peraturan ROOT 001",
+					"remark": "Unit pusat",
+					"aktif": true,
+					"eselon_nama": "Eselon ROOT"
+				}
+			}`,
+		},
+		{
+			name:             "ok: get unit kerja with another id",
+			dbData:           dbData,
+			id:               "11111111-1111-1111-1111-111111111111",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "111", api.RoleAdmin)}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": {
+					"id": "11111111-1111-1111-1111-111111111111",
+					"no": 1,
+					"kode_internal": "KI001",
+					"nama": "Bagian Keuangan",
+					"eselon_id": "E1",
+					"cepat_kode": "CK01",
+					"nama_jabatan": "Kepala Bagian",
+					"nama_pejabat": "Budi Santoso",
+					"diatasan_id": "00000000-0000-0000-0000-000000000001",
+					"instansi_id": "INST001",
+					"pemimpin_pns_id": "PNS001",
+					"jenis_unor_id": "JU001",
+					"unor_induk": "00000000-0000-0000-0000-000000000001",
+					"jumlah_ideal_staff": 5,
+					"order": 1,
+					"is_satker": true,
+					"eselon_1": "00000000-0000-0000-0000-000000000001",
+					"eselon_2": "00000000-0000-0000-0000-000000000001",
+					"eselon_3": "00000000-0000-0000-0000-000000000001",
+					"eselon_4": "00000000-0000-0000-0000-000000000001",
+					"expired_date": "2030-12-31",
+					"keterangan": "Bagian pengelola keuangan",
+					"jenis_satker": "Satker",
+					"abbreviation": "BK",
+					"unor_induk_penyetaraan": "PENY001",
+					"jabatan_id": "JAB001",
+					"waktu": "2025",
+					"peraturan": "Peraturan 123",
+					"remark": "Remark contoh",
+					"aktif": true,
+					"eselon_nama": "Eselon Nama I"
+				}
+			}`,
+		},
+		{
+			name:             "error: unit kerja not found",
+			dbData:           dbData,
+			id:               "11111111-1111-1111-1111-22222222222",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "111", api.RoleAdmin)}},
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data tidak ditemukan"}`,
+		},
+		{
+			name:             "error: unit kerja deleted",
+			dbData:           dbData,
+			id:               "22222222-2222-2222-2222-222222222222",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "111", api.RoleAdmin)}},
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data tidak ditemukan"}`,
+		},
+		{
+			name:             "error: user is not an admin",
+			dbData:           dbData,
+			id:               "11111111-1111-1111-1111-111111111111",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "987654321")}},
+			wantResponseCode: http.StatusForbidden,
+			wantResponseBody: `{"message": "akses ditolak"}`,
+		},
+		{
+			name:             "error: auth header tidak valid",
+			dbData:           dbData,
+			id:               "11111111-1111-1111-1111-111111111111",
+			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			pgxconn := dbtest.New(t, dbmigrations.FS)
+			_, err := pgxconn.Exec(context.Background(), tt.dbData)
+			require.NoError(t, err)
+
+			req := httptest.NewRequest(http.MethodGet, "/v1/admin/unit-kerja/"+tt.id, nil)
+			req.Header = tt.requestHeader
+			rec := httptest.NewRecorder()
+
+			e, err := api.NewEchoServer(docs.OpenAPIBytes)
+			require.NoError(t, err)
+			repo := repo.New(pgxconn)
+			RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
+			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+		})
+	}
+}
+
+func Test_handler_adminCreate(t *testing.T) {
+	t.Parallel()
+
+	dbData := `
+		INSERT INTO pegawai (
+				pns_id, nama, nip_baru, jabatan_nama, instansi_kerja_nama
+		) VALUES
+		(
+			'PNSROOT', 'Andi Prasetyo', '198501012020031001', 'Kepala Kantor', 'Kantor Pusat'
+		),
+		(
+			'PNS001', 'Budi Santoso', '198701012020031002', 'Kepala Bagian Keuangan', 'Direktorat Keuangan'
+		),
+		(
+			'PNS002', 'Siti Aminah', '198901012020031003', 'Kepala Bagian SDM', 'Direktorat SDM'
+		);
+
+
+		INSERT INTO ref_instansi (
+				id, nama, created_at, updated_at, deleted_at
+		) VALUES
+		(
+			'INSTROOT', 'Kementerian Contoh', now(), now(), NULL
+		),
+		(
+			'INST001', 'Direktorat Keuangan', now(), now(), NULL
+		),
+		(
+			'INST002', 'Direktorat SDM', now(), now(), NULL
+		);
+
+		INSERT INTO unit_kerja (
+				id, "no", kode_internal, nama_unor, eselon_id, cepat_kode, nama_jabatan, nama_pejabat,
+				diatasan_id, instansi_id, pemimpin_pns_id, jenis_unor_id, unor_induk, jumlah_ideal_staff,
+				"order", is_satker, eselon_1, eselon_2, eselon_3, eselon_4, expired_date, keterangan,
+				jenis_satker, abbreviation, unor_induk_penyetaraan, jabatan_id, waktu, peraturan, remark,
+				aktif, eselon_nama, deleted_at
+		) VALUES 
+		(
+			'00000000-0000-0000-0000-000000000001', 0, 'ROOT001', 'Kantor Pusat', 'E0', 'CKROOT', 'Kepala Kantor', 'Andi Prasetyo',
+			NULL, 'INSTROOT', 'PNSROOT', 'JUROOT', NULL, 20,
+			0, true, NULL, NULL, NULL, NULL, '2035-12-31', 'Unit induk pusat',
+			'Satker', 'KP', '', 'JABROOT', '2025', 'Peraturan ROOT 001', 'Unit pusat', true, 'Eselon ROOT', NULL
+		);
+	`
+
+	tests := []struct {
+		name             string
+		dbData           string
+		requestQuery     url.Values
+		requestBody      string
+		requestHeader    http.Header
+		wantResponseCode int
+		wantResponseBody string
+	}{
+		{
+			name:   "ok: create unit kerja only with required value",
+			dbData: dbData,
+			requestBody: `{
+				"id": "11111111-1111-1111-1111-111111111111",
+				"nama": "Bagian Keuangan",
+				"is_satker": true
+			}`,
+			requestHeader: http.Header{
+				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusCreated,
+			wantResponseBody: `{
+				"data": {
+					"id": "11111111-1111-1111-1111-111111111111",
+					"no": 0,
+					"kode_internal": "",
+					"nama": "Bagian Keuangan",
+					"eselon_id": "",
+					"cepat_kode": "",
+					"nama_jabatan": "",
+					"nama_pejabat": "",
+					"diatasan_id": "",
+					"instansi_id": "",
+					"pemimpin_pns_id": "",
+					"jenis_unor_id": "",
+					"unor_induk": "",
+					"jumlah_ideal_staff": 0,
+					"order": 0,
+					"is_satker": true,
+					"eselon_1": "",
+					"eselon_2": "",
+					"eselon_3": "",
+					"eselon_4": "",
+					"expired_date": null,
+					"keterangan": "",
+					"jenis_satker": "",
+					"abbreviation": "",
+					"unor_induk_penyetaraan": "",
+					"jabatan_id": "",
+					"waktu": "",
+					"peraturan": "",
+					"remark": "",
+					"aktif": false,
+					"eselon_nama": ""
+				}
+			}`,
+		},
+		{
+			name:   "ok: create unit kerja",
+			dbData: dbData,
+			requestBody: `{
+				"diatasan_id": "00000000-0000-0000-0000-000000000001",
+				"id": "22222222-2222-2222-2222-222222222222",
+				"nama": "Bagian Keuangan",
+				"kode_internal": "KI001",
+				"nama_jabatan": "Kepala Bagian",
+				"pemimpin_pns_id": "PNS001",
+				"is_satker": true,
+				"unor_induk": "00000000-0000-0000-0000-000000000001",
+				"expired_date": "2030-12-31",
+				"keterangan": "Mengelola anggaran dan administrasi keuangan",
+				"abbreviation": "BK",
+				"waktu": "2025",
+				"jenis_satker": "Satker",
+				"peraturan": "Peraturan 123"
+			}`,
+			requestHeader: http.Header{
+				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusCreated,
+			wantResponseBody: `{
+				"data": {
+					"id": "22222222-2222-2222-2222-222222222222",
+					"no": 0,
+					"kode_internal": "KI001",
+					"nama": "Bagian Keuangan",
+					"eselon_id": "",
+					"cepat_kode": "",
+					"nama_jabatan": "Kepala Bagian",
+					"nama_pejabat": "Budi Santoso",
+					"diatasan_id": "00000000-0000-0000-0000-000000000001",
+					"instansi_id": "",
+					"pemimpin_pns_id": "PNS001",
+					"jenis_unor_id": "",
+					"unor_induk": "00000000-0000-0000-0000-000000000001",
+					"jumlah_ideal_staff": 0,
+					"order": 0,
+					"is_satker": true,
+					"eselon_1": "",
+					"eselon_2": "",
+					"eselon_3": "",
+					"eselon_4": "",
+					"expired_date": "2030-12-31",
+					"keterangan": "Mengelola anggaran dan administrasi keuangan",
+					"jenis_satker": "Satker",
+					"abbreviation": "BK",
+					"unor_induk_penyetaraan": "",
+					"jabatan_id": "",
+					"waktu": "2025",
+					"peraturan": "Peraturan 123",
+					"remark": "",
+					"aktif": false,
+					"eselon_nama": ""
+				}
+			}`,
+		},
+		{
+			name:   "error: auth header tidak valid",
+			dbData: dbData,
+			requestBody: `{
+				"id": "11111111-1111-1111-1111-111111111111",
+				"nama": "Bagian Keuangan",
+				"is_satker": true
+			}`,
+			requestHeader: http.Header{
+				"Authorization": []string{"Bearer some-token"},
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
+		},
+		{
+			name:   "error: user is not an admin",
+			dbData: dbData,
+			requestBody: `{
+				"id": "11111111-1111-1111-1111-111111111111",
+				"nama": "Bagian Keuangan",
+				"is_satker": true
+			}`,
+			requestHeader: http.Header{
+				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "987654321")},
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusForbidden,
+			wantResponseBody: `{"message": "akses ditolak"}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			pgxconn := dbtest.New(t, dbmigrations.FS)
+
+			_, err := pgxconn.Exec(context.Background(), tt.dbData)
+			require.NoError(t, err)
+
+			req := httptest.NewRequest(http.MethodPost, "/v1/admin/unit-kerja", strings.NewReader(tt.requestBody))
+			req.URL.RawQuery = tt.requestQuery.Encode()
+			req.Header = tt.requestHeader
+			rec := httptest.NewRecorder()
+
+			e, err := api.NewEchoServer(docs.OpenAPIBytes)
+			require.NoError(t, err)
+			r := repo.New(pgxconn)
+			RegisterRoutes(e, r, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
+			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+		})
+	}
+}
+
+func Test_handler_adminUpdate(t *testing.T) {
+	t.Parallel()
+
+	dbData := `
+		INSERT INTO pegawai (
+				pns_id, nama, nip_baru, jabatan_nama, instansi_kerja_nama
+		) VALUES
+		(
+			'PNSROOT', 'Andi Prasetyo', '198501012020031001', 'Kepala Kantor', 'Kantor Pusat'
+		),
+		(
+			'PNS001', 'Budi Santoso', '198701012020031002', 'Kepala Bagian Keuangan', 'Direktorat Keuangan'
+		),
+		(
+			'PNS002', 'Siti Aminah', '198901012020031003', 'Kepala Bagian SDM', 'Direktorat SDM'
+		);
+
+
+		INSERT INTO ref_instansi (
+				id, nama, created_at, updated_at, deleted_at
+		) VALUES
+		(
+			'INSTROOT', 'Kementerian Contoh', now(), now(), NULL
+		),
+		(
+			'INST001', 'Direktorat Keuangan', now(), now(), NULL
+		),
+		(
+			'INST002', 'Direktorat SDM', now(), now(), NULL
+		);
+
+		INSERT INTO unit_kerja (
+			id, "no", kode_internal, nama_unor, eselon_id, cepat_kode, nama_jabatan, nama_pejabat,
+			diatasan_id, instansi_id, pemimpin_pns_id, jenis_unor_id, unor_induk, jumlah_ideal_staff,
+			"order", is_satker, eselon_1, eselon_2, eselon_3, eselon_4, expired_date, keterangan,
+			jenis_satker, abbreviation, unor_induk_penyetaraan, jabatan_id, waktu, peraturan, remark,
+			aktif, eselon_nama, deleted_at
+		) VALUES 
+		(
+			'00000000-0000-0000-0000-000000000001', 0, 'ROOT001', 'Kantor Pusat', 'E0', 'CKROOT', 'Kepala Kantor', 'Andi Prasetyo',
+			NULL, 'INSTROOT', 'PNSROOT', 'JUROOT', NULL, 20,
+			0, true, NULL, NULL, NULL, NULL, '2035-12-31', 'Unit induk pusat',
+			'Satker', 'KP', '', 'JABROOT', '2025', 'Peraturan ROOT 001', 'Unit pusat', true, 'Eselon ROOT', NULL
+		),
+		(
+			'11111111-1111-1111-1111-111111111111', 1, 'KI001', 'Bagian Keuangan', 'E1', 'CK01', 'Kepala Bagian', 'Budi Santoso',
+			'00000000-0000-0000-0000-000000000001', 'INST001', 'PNS001', 'JU001', '00000000-0000-0000-0000-000000000001', 5,
+			1, true, '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', '2030-12-31', 'Bagian pengelola keuangan',
+			'Satker', 'BK', 'PENY001', 'JAB001', '2025', 'Peraturan 123', 'Remark contoh', true, 'Eselon Nama I',
+			NULL
+		),
+		(
+			'22222222-2222-2222-2222-222222222222', 2, 'KI002', 'Bagian SDM', 'E2', 'CK02', 'Kepala Bagian', 'Siti Aminah',
+			'11111111-1111-1111-1111-111111111111', 'INST002', 'PNS002', 'JU002', '11111111-1111-1111-1111-111111111111', 8,
+			2, false, '00000000-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111', '11111111-1111-1111-1111-111111111111', '11111111-1111-1111-1111-111111111111', '2031-06-30', 'Bagian pengelola SDM',
+			'Satker', 'SDM', 'PENY002', 'JAB002', '2026', 'Peraturan 456', 'Remark contoh 2', false, 'Eselon Nama II',
+			now()
+		),
+		(
+			'33333333-3333-3333-3333-333333333333', 3, 'KI003', 'Bagian IT', 'E3', 'CK03', 'Kepala Bagian', 'Rina Suryani',
+			'22222222-2222-2222-2222-222222222222', 'INST002', 'PNS001', 'JU003', '22222222-2222-2222-2222-222222222222', 10,
+			3, true, '00000000-0000-0000-0000-000000000001', '22222222-2222-2222-2222-222222222222', '22222222-2222-2222-2222-222222222222', '22222222-2222-2222-2222-222222222222', '2032-03-31', 'Bagian pengelola IT',
+			'Satker', 'IT', 'PENY003', 'JAB003', '2027', 'Peraturan 789', 'Remark IT', true, 'Eselon Nama III',
+			NULL
+		);
+	`
+
+	tests := []struct {
+		name             string
+		dbData           string
+		id               string
+		requestQuery     url.Values
+		requestBody      string
+		requestHeader    http.Header
+		wantResponseCode int
+		wantResponseBody string
+	}{
+		{
+			name:   "ok: update unit kerja only with required value",
+			dbData: dbData,
+			id:     "11111111-1111-1111-1111-111111111111",
+			requestBody: `{
+				"nama": "Bagian Keuangan",
+				"is_satker": true
+			}`,
+			requestHeader: http.Header{
+				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": {
+					"id": "11111111-1111-1111-1111-111111111111",
+					"no": 1,
+					"kode_internal": "",
+					"nama": "Bagian Keuangan",
+					"eselon_id": "E1",
+					"cepat_kode": "CK01",
+					"nama_jabatan": "",
+					"nama_pejabat": "",
+					"diatasan_id": "",
+					"instansi_id": "INST001",
+					"pemimpin_pns_id": "",
+					"jenis_unor_id": "JU001",
+					"unor_induk": "",
+					"jumlah_ideal_staff": 5,
+					"order": 1,
+					"is_satker": true,
+					"eselon_1": "00000000-0000-0000-0000-000000000001",
+					"eselon_2": "00000000-0000-0000-0000-000000000001",
+					"eselon_3": "00000000-0000-0000-0000-000000000001",
+					"eselon_4": "00000000-0000-0000-0000-000000000001",
+					"expired_date": null,
+					"keterangan": "",
+					"jenis_satker": "",
+					"abbreviation": "",
+					"unor_induk_penyetaraan": "PENY001",
+					"jabatan_id": "JAB001",
+					"waktu": "",
+					"peraturan": "",
+					"remark": "Remark contoh",
+					"aktif": true,
+					"eselon_nama": "Eselon Nama I"
+				}
+			}`,
+		},
+		{
+			name:   "ok: update unit kerja",
+			dbData: dbData,
+			id:     "33333333-3333-3333-3333-333333333333",
+			requestBody: `{
+				"diatasan_id": "11111111-1111-1111-1111-111111111111",
+				"nama": "Bagian Legal",
+				"kode_internal": "KL001",
+				"nama_jabatan": "Kepala Legal",
+				"nama_pejabat": "Dewi Lestari",
+				"pemimpin_pns_id": "PNS002",
+				"is_satker": false,
+				"unor_induk": "22222222-2222-2222-2222-222222222222",
+				"expired_date": "2035-05-31",
+				"keterangan": "Bagian pengelola legal dan regulasi",
+				"abbreviation": "BL",
+				"waktu": "2030",
+				"jenis_satker": "Non-Satker",
+				"peraturan": "Peraturan Legal 001"
+			}`,
+			requestHeader: http.Header{
+				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+					"data": {
+						"id": "33333333-3333-3333-3333-333333333333",
+						"no": 3,
+						"kode_internal": "KL001",
+						"nama": "Bagian Legal",
+						"eselon_id": "E3",
+						"cepat_kode": "CK03",
+						"nama_jabatan": "Kepala Legal",
+						"nama_pejabat": "Siti Aminah",
+						"diatasan_id": "11111111-1111-1111-1111-111111111111",
+						"instansi_id": "INST002",
+						"pemimpin_pns_id": "PNS002",
+						"jenis_unor_id": "JU003",
+						"unor_induk": "22222222-2222-2222-2222-222222222222",
+						"jumlah_ideal_staff": 10,
+						"order": 3,
+						"is_satker": false,
+						"eselon_1": "00000000-0000-0000-0000-000000000001",
+						"eselon_2": "22222222-2222-2222-2222-222222222222",
+						"eselon_3": "22222222-2222-2222-2222-222222222222",
+						"eselon_4": "22222222-2222-2222-2222-222222222222",
+						"expired_date": "2035-05-31",
+						"keterangan": "Bagian pengelola legal dan regulasi",
+						"jenis_satker": "Non-Satker",
+						"abbreviation": "BL",
+						"unor_induk_penyetaraan": "PENY003",
+						"jabatan_id": "JAB003",
+						"waktu": "2030",
+						"peraturan": "Peraturan Legal 001",
+						"remark": "Remark IT",
+						"aktif": true,
+						"eselon_nama": "Eselon Nama III"
+					}
+				}`,
+		},
+		{
+			name:   "error: update not found unit kerja",
+			dbData: dbData,
+			id:     "1234",
+			requestBody: `{
+				"nama": "Bagian Keuangan",
+				"is_satker": true
+			}`,
+			requestHeader: http.Header{
+				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data tidak ditemukan"}`,
+		},
+		{
+			name:   "error: update deleted unit kerja",
+			dbData: dbData,
+			id:     "22222222-2222-2222-2222-222222222222",
+			requestBody: `{
+				"nama": "Bagian Keuangan",
+				"is_satker": true
+			}`,
+			requestHeader: http.Header{
+				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data tidak ditemukan"}`,
+		},
+		{
+			name:   "error: auth header tidak valid",
+			dbData: dbData,
+			id:     "11111111-1111-1111-1111-111111111111",
+			requestBody: `{
+				"nama": "Bagian Keuangan",
+				"is_satker": true
+			}`,
+			requestHeader: http.Header{
+				"Authorization": []string{"Bearer some-token"},
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
+		},
+		{
+			name:   "error: user is not an admin",
+			dbData: dbData,
+			id:     "11111111-1111-1111-1111-111111111111",
+			requestBody: `{
+				"nama": "Bagian Keuangan",
+				"is_satker": true
+			}`,
+			requestHeader: http.Header{
+				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "987654321")},
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusForbidden,
+			wantResponseBody: `{"message": "akses ditolak"}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			pgxconn := dbtest.New(t, dbmigrations.FS)
+
+			_, err := pgxconn.Exec(context.Background(), tt.dbData)
+			require.NoError(t, err)
+
+			req := httptest.NewRequest(http.MethodPut, "/v1/admin/unit-kerja/"+tt.id, strings.NewReader(tt.requestBody))
+			req.URL.RawQuery = tt.requestQuery.Encode()
+			req.Header = tt.requestHeader
+			rec := httptest.NewRecorder()
+
+			e, err := api.NewEchoServer(docs.OpenAPIBytes)
+			require.NoError(t, err)
+			r := repo.New(pgxconn)
+			RegisterRoutes(e, r, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
+			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+		})
+	}
+}
+
+func Test_handler_adminDelete(t *testing.T) {
+	t.Parallel()
+
+	dbData := `
+		INSERT INTO pegawai (
+				pns_id, nama, nip_baru, jabatan_nama, instansi_kerja_nama
+		) VALUES
+		(
+			'PNSROOT', 'Andi Prasetyo', '198501012020031001', 'Kepala Kantor', 'Kantor Pusat'
+		),
+		(
+			'PNS001', 'Budi Santoso', '198701012020031002', 'Kepala Bagian Keuangan', 'Direktorat Keuangan'
+		),
+		(
+			'PNS002', 'Siti Aminah', '198901012020031003', 'Kepala Bagian SDM', 'Direktorat SDM'
+		);
+
+
+		INSERT INTO ref_instansi (
+				id, nama, created_at, updated_at, deleted_at
+		) VALUES
+		(
+			'INSTROOT', 'Kementerian Contoh', now(), now(), NULL
+		),
+		(
+			'INST001', 'Direktorat Keuangan', now(), now(), NULL
+		),
+		(
+			'INST002', 'Direktorat SDM', now(), now(), NULL
+		);
+
+		INSERT INTO unit_kerja (
+			id, "no", kode_internal, nama_unor, eselon_id, cepat_kode, nama_jabatan, nama_pejabat,
+			diatasan_id, instansi_id, pemimpin_pns_id, jenis_unor_id, unor_induk, jumlah_ideal_staff,
+			"order", is_satker, eselon_1, eselon_2, eselon_3, eselon_4, expired_date, keterangan,
+			jenis_satker, abbreviation, unor_induk_penyetaraan, jabatan_id, waktu, peraturan, remark,
+			aktif, eselon_nama, deleted_at
+		) VALUES 
+		(
+			'00000000-0000-0000-0000-000000000001', 0, 'ROOT001', 'Kantor Pusat', 'E0', 'CKROOT', 'Kepala Kantor', 'Andi Prasetyo',
+			NULL, 'INSTROOT', 'PNSROOT', 'JUROOT', NULL, 20,
+			0, true, NULL, NULL, NULL, NULL, '2035-12-31', 'Unit induk pusat',
+			'Satker', 'KP', '', 'JABROOT', '2025', 'Peraturan ROOT 001', 'Unit pusat', true, 'Eselon ROOT', NULL
+		),
+		(
+			'11111111-1111-1111-1111-111111111111', 1, 'KI001', 'Bagian Keuangan', 'E1', 'CK01', 'Kepala Bagian', 'Budi Santoso',
+			'00000000-0000-0000-0000-000000000001', 'INST001', 'PNS001', 'JU001', '00000000-0000-0000-0000-000000000001', 5,
+			1, true, '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', '2030-12-31', 'Bagian pengelola keuangan',
+			'Satker', 'BK', 'PENY001', 'JAB001', '2025', 'Peraturan 123', 'Remark contoh', true, 'Eselon Nama I',
+			NULL
+		),
+		(
+			'22222222-2222-2222-2222-222222222222', 2, 'KI002', 'Bagian SDM', 'E2', 'CK02', 'Kepala Bagian', 'Siti Aminah',
+			'11111111-1111-1111-1111-111111111111', 'INST002', 'PNS002', 'JU002', '11111111-1111-1111-1111-111111111111', 8,
+			2, false, '00000000-0000-0000-0000-000000000001', '11111111-1111-1111-1111-111111111111', '11111111-1111-1111-1111-111111111111', '11111111-1111-1111-1111-111111111111', '2031-06-30', 'Bagian pengelola SDM',
+			'Satker', 'SDM', 'PENY002', 'JAB002', '2026', 'Peraturan 456', 'Remark contoh 2', false, 'Eselon Nama II',
+			now()
+		),
+		(
+			'33333333-3333-3333-3333-333333333333', 3, 'KI003', 'Bagian IT', 'E3', 'CK03', 'Kepala Bagian', 'Rina Suryani',
+			'22222222-2222-2222-2222-222222222222', 'INST002', 'PNS001', 'JU003', '22222222-2222-2222-2222-222222222222', 10,
+			3, true, '00000000-0000-0000-0000-000000000001', '22222222-2222-2222-2222-222222222222', '22222222-2222-2222-2222-222222222222', '22222222-2222-2222-2222-222222222222', '2032-03-31', 'Bagian pengelola IT',
+			'Satker', 'IT', 'PENY003', 'JAB003', '2027', 'Peraturan 789', 'Remark IT', true, 'Eselon Nama III',
+			NULL
+		);
+	`
+
+	tests := []struct {
+		name             string
+		dbData           string
+		id               string
+		requestQuery     url.Values
+		requestHeader    http.Header
+		wantResponseCode int
+		wantResponseBody string
+	}{
+		{
+			name:   "ok: delete unit kerja",
+			dbData: dbData,
+			id:     "11111111-1111-1111-1111-111111111111",
+			requestHeader: http.Header{
+				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusNoContent,
+		},
+		{
+			name:   "error: delete not found unit kerja",
+			dbData: dbData,
+			id:     "1234",
+			requestHeader: http.Header{
+				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data tidak ditemukan"}`,
+		},
+		{
+			name:   "error: delete deleted unit kerja",
+			dbData: dbData,
+			id:     "22222222-2222-2222-2222-222222222222",
+			requestHeader: http.Header{
+				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data tidak ditemukan"}`,
+		},
+		{
+			name:   "error: auth header tidak valid",
+			dbData: dbData,
+			id:     "11111111-1111-1111-1111-111111111111",
+			requestHeader: http.Header{
+				"Authorization": []string{"Bearer some-token"},
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
+		},
+		{
+			name:   "error: user is not an admin",
+			dbData: dbData,
+			id:     "11111111-1111-1111-1111-111111111111",
+			requestHeader: http.Header{
+				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "987654321")},
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusForbidden,
+			wantResponseBody: `{"message": "akses ditolak"}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			pgxconn := dbtest.New(t, dbmigrations.FS)
+
+			_, err := pgxconn.Exec(context.Background(), tt.dbData)
+			require.NoError(t, err)
+
+			req := httptest.NewRequest(http.MethodDelete, "/v1/admin/unit-kerja/"+tt.id, nil)
+			req.URL.RawQuery = tt.requestQuery.Encode()
+			req.Header = tt.requestHeader
+			rec := httptest.NewRecorder()
+
+			e, err := api.NewEchoServer(docs.OpenAPIBytes)
+			require.NoError(t, err)
+			r := repo.New(pgxconn)
+			RegisterRoutes(e, r, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			if tt.wantResponseBody != "" {
+				assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
+			} else {
+				assert.Empty(t, rec.Body.String())
+			}
 			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
 		})
 	}

@@ -7,8 +7,9 @@ servers:
   - url: http://localhost:8000
 tags:
   - name: Admin Golongan
-  - name: Admin Surat Keputusan Pegawai
   - name: Admin Pegawai Aktif
+  - name: Admin Surat Keputusan Pegawai
+  - name: Admin Unit Kerja
   - name: Data Pribadi
   - name: Golongan
   - name: Jabatan
@@ -1574,6 +1575,197 @@ paths:
                 format: binary
         "404":
           description: Berkas riwayat penugasan tidak ditemukan atau User tidak mempunyai akses.
+  /v1/admin/unit-kerja:
+    post:
+      tags:
+        - Admin Unit Kerja
+      summary: Buat unit kerja untuk admin.
+      description: Buat subunit kerja untuk admin berdasarkan ID.
+      operationId: createUnitKerjaAdmin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id
+                - nama
+                - is_satker
+              properties:
+                parent_id:
+                  type: string
+                  example: "00000000-0000-0000-0000-000000000001"
+                id:
+                  type: string
+                  example: "11111111-1111-1111-1111-111111111111"
+                nama:
+                  type: string
+                  example: "Bagian Keuangan"
+                kode_internal:
+                  type: string
+                  example: "KI001"
+                nama_jabatan:
+                  type: string
+                  example: "Kepala Bagian"
+                pemimpin_pns_id:
+                  type: string
+                  example: "PNS001"
+                is_satker:
+                  type: boolean
+                  example: false
+                unor_induk:
+                  type: string
+                  example: "00000000-0000-0000-0000-000000000001"
+                expired_date:
+                  type: string
+                  format: date
+                  example: "2030-12-31"
+                keterangan:
+                  type: string
+                  example: "Mengelola anggaran"
+                abbreviation:
+                  type: string
+                  example: "BK"
+                waktu:
+                  type: string
+                  example: "2025"
+                jenis_satker:
+                  type: string
+                  example: "Satker"
+                peraturan:
+                  type: string
+                  example: "Peraturan 123"
+      responses:
+        "201":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/unitKerja"     
+  /v1/admin/unit-kerja/{id}:
+    get:
+      tags:
+        - Admin Unit Kerja
+      summary: Detail unit kerja untuk admin.
+      description: Detail subunit kerja untuk admin berdasarkan ID.
+      operationId: getUnitKerjaAdmin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/unitKerja"
+    put:
+      tags:
+        - Admin Unit Kerja
+      summary: Update unit kerja untuk admin.
+      description: Update unit kerja berdasarkan ID.
+      operationId: updateUnitKerjaAdmin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nama
+                - is_satker
+              properties:
+                parent_id:
+                  type: string
+                  example: "00000000-0000-0000-0000-000000000001"
+                nama_unor:
+                  type: string
+                  example: "Bagian Keuangan"
+                kode_internal:
+                  type: string
+                  example: "KI001"
+                nama_jabatan:
+                  type: string
+                  example: "Kepala Bagian"
+                nama_pejabat:
+                  type: string
+                  example: "Budi Santoso"
+                pemimpin_pns_id:
+                  type: string
+                  example: "PNS001"
+                is_satker:
+                  type: boolean
+                  example: false
+                unor_induk:
+                  type: string
+                  example: "UI001"
+                expired_date:
+                  type: string
+                  format: date
+                  example: "2030-12-31"
+                keterangan:
+                  type: string
+                  example: "Mengelola anggaran dan administrasi keuangan"
+                abbreviation:
+                  type: string
+                  example: "BK"
+                waktu:
+                  type: string
+                  example: "2025"
+                jenis_satker:
+                  type: string
+                  example: "Satker"
+                peraturan:
+                  type: string
+                  example: "Peraturan 123"
+      responses:
+        "200":
+          description: Unit kerja berhasil diperbarui
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/unitKerja"
+    delete:
+      tags:
+        - Admin Unit Kerja
+      summary: Hapus unit kerja (soft delete).
+      description: Menandai unit kerja sebagai dihapus dengan soft delete.
+      operationId: deleteUnitKerjaAdmin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Unit kerja berhasil dihapus (soft delete)
   /v1/data-pribadi:
     get:
       tags:
@@ -3777,3 +3969,103 @@ components:
           type: integer
           format: int64
           nullable: true
+    unitKerja:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          example: "11111111-1111-1111-1111-111111111111"
+        no:
+          type: integer
+          example: 1
+        kode_internal:
+          type: string
+          example: "KI001"
+        nama:
+          type: string
+          example: "Bagian Keuangan"
+        eselon_id:
+          type: string
+          example: "E1"
+        cepat_kode:
+          type: string
+          example: "CK01"
+        nama_jabatan:
+          type: string
+          example: "Kepala Bagian"
+        nama_pejabat:
+          type: string
+          example: "Budi Santoso"
+        diatasan_id:
+          type: string
+          example: "00000000-0000-0000-0000-000000000000"
+        instansi_id:
+          type: string
+          example: "INST001"
+        pemimpin_pns_id:
+          type: string
+          example: "PNS001"
+        jenis_unor_id:
+          type: string
+          example: "JU001"
+        unor_induk:
+          type: string
+          example: "UI001"
+        jumlah_ideal_staff:
+          type: integer
+          format: int32
+          example: 5
+        order:
+          type: integer
+          example: 1
+        is_satker:
+          type: boolean
+          example: false
+        eselon_1:
+          type: string
+          example: "Eselon I"
+        eselon_2:
+          type: string
+          example: "Eselon II"
+        eselon_3:
+          type: string
+          example: "Eselon III"
+        eselon_4:
+          type: string
+          example: "Eselon IV"
+        expired_date:
+          type: string
+          nullable: true
+          format: date
+          example: "2030-12-31"
+        keterangan:
+          type: string
+          example: "Bagian pengelola keuangan"
+        jenis_satker:
+          type: string
+          example: "Satker"
+        abbreviation:
+          type: string
+          example: "BK"
+        unor_induk_penyetaraan:
+          type: string
+          example: "PENY001"
+        jabatan_id:
+          type: string
+          example: "JAB001"
+        waktu:
+          type: string
+          example: "2025"
+        peraturan:
+          type: string
+          example: "Peraturan 123"
+        remark:
+          type: string
+          example: "Remark contoh"
+        aktif:
+          type: boolean
+          example: true
+        eselon_nama:
+          type: string
+          example: "Eselon Nama I"

@@ -57,6 +57,195 @@ func (q *Queries) CountUnitKerjaByDiatasanID(ctx context.Context, diatasanID pgt
 	return count, err
 }
 
+const createUnitKerja = `-- name: CreateUnitKerja :one
+INSERT INTO unit_kerja (
+  diatasan_id,
+  id,
+  nama_unor,
+  kode_internal,
+  nama_jabatan,
+  pemimpin_pns_id,
+  nama_pejabat,
+  is_satker,
+  unor_induk,
+  expired_date,
+  keterangan,
+  abbreviation,
+  waktu,
+  jenis_satker,
+  peraturan
+) VALUES (
+  $1,
+  $2,
+  $3,
+  $4,
+  $5,
+  $6,
+  $7,
+  $8,
+  $9,
+  $10,
+  $11,
+  $12,
+  $13,
+  $14,
+  $15
+)
+RETURNING
+  id,
+  "no",
+  kode_internal,
+  nama_unor as nama,
+  eselon_id,
+  cepat_kode,
+  nama_jabatan,
+  nama_pejabat,
+  diatasan_id,
+  instansi_id,
+  pemimpin_pns_id,
+  jenis_unor_id,
+  unor_induk,
+  jumlah_ideal_staff,
+  "order",
+  is_satker,
+  eselon_1,
+  eselon_2,
+  eselon_3,
+  eselon_4,
+  expired_date,
+  keterangan,
+  jenis_satker,
+  abbreviation,
+  unor_induk_penyetaraan,
+  jabatan_id,
+  waktu,
+  peraturan,
+  remark,
+  aktif,
+  eselon_nama
+`
+
+type CreateUnitKerjaParams struct {
+	DiatasanID    pgtype.Text `db:"diatasan_id"`
+	ID            string      `db:"id"`
+	Nama          pgtype.Text `db:"nama"`
+	KodeInternal  pgtype.Text `db:"kode_internal"`
+	NamaJabatan   pgtype.Text `db:"nama_jabatan"`
+	PemimpinPnsID pgtype.Text `db:"pemimpin_pns_id"`
+	NamaPejabat   pgtype.Text `db:"nama_pejabat"`
+	IsSatker      bool        `db:"is_satker"`
+	UnorInduk     pgtype.Text `db:"unor_induk"`
+	ExpiredDate   pgtype.Date `db:"expired_date"`
+	Keterangan    pgtype.Text `db:"keterangan"`
+	Abbreviation  pgtype.Text `db:"abbreviation"`
+	Waktu         pgtype.Text `db:"waktu"`
+	JenisSatker   pgtype.Text `db:"jenis_satker"`
+	Peraturan     pgtype.Text `db:"peraturan"`
+}
+
+type CreateUnitKerjaRow struct {
+	ID                   string      `db:"id"`
+	No                   pgtype.Int4 `db:"no"`
+	KodeInternal         pgtype.Text `db:"kode_internal"`
+	Nama                 pgtype.Text `db:"nama"`
+	EselonID             pgtype.Text `db:"eselon_id"`
+	CepatKode            pgtype.Text `db:"cepat_kode"`
+	NamaJabatan          pgtype.Text `db:"nama_jabatan"`
+	NamaPejabat          pgtype.Text `db:"nama_pejabat"`
+	DiatasanID           pgtype.Text `db:"diatasan_id"`
+	InstansiID           pgtype.Text `db:"instansi_id"`
+	PemimpinPnsID        pgtype.Text `db:"pemimpin_pns_id"`
+	JenisUnorID          pgtype.Text `db:"jenis_unor_id"`
+	UnorInduk            pgtype.Text `db:"unor_induk"`
+	JumlahIdealStaff     pgtype.Int2 `db:"jumlah_ideal_staff"`
+	Order                pgtype.Int4 `db:"order"`
+	IsSatker             bool        `db:"is_satker"`
+	Eselon1              pgtype.Text `db:"eselon_1"`
+	Eselon2              pgtype.Text `db:"eselon_2"`
+	Eselon3              pgtype.Text `db:"eselon_3"`
+	Eselon4              pgtype.Text `db:"eselon_4"`
+	ExpiredDate          pgtype.Date `db:"expired_date"`
+	Keterangan           pgtype.Text `db:"keterangan"`
+	JenisSatker          pgtype.Text `db:"jenis_satker"`
+	Abbreviation         pgtype.Text `db:"abbreviation"`
+	UnorIndukPenyetaraan pgtype.Text `db:"unor_induk_penyetaraan"`
+	JabatanID            pgtype.Text `db:"jabatan_id"`
+	Waktu                pgtype.Text `db:"waktu"`
+	Peraturan            pgtype.Text `db:"peraturan"`
+	Remark               pgtype.Text `db:"remark"`
+	Aktif                pgtype.Bool `db:"aktif"`
+	EselonNama           pgtype.Text `db:"eselon_nama"`
+}
+
+func (q *Queries) CreateUnitKerja(ctx context.Context, arg CreateUnitKerjaParams) (CreateUnitKerjaRow, error) {
+	row := q.db.QueryRow(ctx, createUnitKerja,
+		arg.DiatasanID,
+		arg.ID,
+		arg.Nama,
+		arg.KodeInternal,
+		arg.NamaJabatan,
+		arg.PemimpinPnsID,
+		arg.NamaPejabat,
+		arg.IsSatker,
+		arg.UnorInduk,
+		arg.ExpiredDate,
+		arg.Keterangan,
+		arg.Abbreviation,
+		arg.Waktu,
+		arg.JenisSatker,
+		arg.Peraturan,
+	)
+	var i CreateUnitKerjaRow
+	err := row.Scan(
+		&i.ID,
+		&i.No,
+		&i.KodeInternal,
+		&i.Nama,
+		&i.EselonID,
+		&i.CepatKode,
+		&i.NamaJabatan,
+		&i.NamaPejabat,
+		&i.DiatasanID,
+		&i.InstansiID,
+		&i.PemimpinPnsID,
+		&i.JenisUnorID,
+		&i.UnorInduk,
+		&i.JumlahIdealStaff,
+		&i.Order,
+		&i.IsSatker,
+		&i.Eselon1,
+		&i.Eselon2,
+		&i.Eselon3,
+		&i.Eselon4,
+		&i.ExpiredDate,
+		&i.Keterangan,
+		&i.JenisSatker,
+		&i.Abbreviation,
+		&i.UnorIndukPenyetaraan,
+		&i.JabatanID,
+		&i.Waktu,
+		&i.Peraturan,
+		&i.Remark,
+		&i.Aktif,
+		&i.EselonNama,
+	)
+	return i, err
+}
+
+const deleteUnitKerja = `-- name: DeleteUnitKerja :execrows
+UPDATE unit_kerja
+SET deleted_at = NOW()
+WHERE id = $1 AND deleted_at IS NULL
+`
+
+func (q *Queries) DeleteUnitKerja(ctx context.Context, id string) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteUnitKerja, id)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const getUnitKerja = `-- name: GetUnitKerja :one
 SELECT
     id,
@@ -110,7 +299,7 @@ type GetUnitKerjaRow struct {
 	UnorInduk            pgtype.Text `db:"unor_induk"`
 	JumlahIdealStaff     pgtype.Int2 `db:"jumlah_ideal_staff"`
 	Order                pgtype.Int4 `db:"order"`
-	IsSatker             int16       `db:"is_satker"`
+	IsSatker             bool        `db:"is_satker"`
 	Eselon1              pgtype.Text `db:"eselon_1"`
 	Eselon2              pgtype.Text `db:"eselon_2"`
 	Eselon3              pgtype.Text `db:"eselon_3"`
@@ -451,4 +640,164 @@ func (q *Queries) ListUnitKerjaLengkapByIDs(ctx context.Context, ids []string) (
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateUnitKerja = `-- name: UpdateUnitKerja :one
+UPDATE unit_kerja
+SET
+    diatasan_id = $1,
+    nama_unor = $2,
+    kode_internal = $3,
+    nama_jabatan = $4,
+    pemimpin_pns_id = $5,
+    nama_pejabat = $6,
+    is_satker = $7,
+    unor_induk = $8,
+    expired_date = $9,
+    keterangan = $10,
+    abbreviation = $11,
+    waktu = $12,
+    jenis_satker = $13,
+    peraturan = $14,
+    updated_at = now()
+WHERE id = $15 AND deleted_at IS NULL
+RETURNING
+    id,
+    "no",
+    kode_internal,
+    nama_unor as nama,
+    eselon_id,
+    cepat_kode,
+    nama_jabatan,
+    nama_pejabat,
+    diatasan_id,
+    instansi_id,
+    pemimpin_pns_id,
+    jenis_unor_id,
+    unor_induk,
+    jumlah_ideal_staff,
+    "order",
+    is_satker,
+    eselon_1,
+    eselon_2,
+    eselon_3,
+    eselon_4,
+    expired_date,
+    keterangan,
+    jenis_satker,
+    abbreviation,
+    unor_induk_penyetaraan,
+    jabatan_id,
+    waktu,
+    peraturan,
+    remark,
+    aktif,
+    eselon_nama
+`
+
+type UpdateUnitKerjaParams struct {
+	DiatasanID    pgtype.Text `db:"diatasan_id"`
+	Nama          pgtype.Text `db:"nama"`
+	KodeInternal  pgtype.Text `db:"kode_internal"`
+	NamaJabatan   pgtype.Text `db:"nama_jabatan"`
+	PemimpinPnsID pgtype.Text `db:"pemimpin_pns_id"`
+	NamaPejabat   pgtype.Text `db:"nama_pejabat"`
+	IsSatker      bool        `db:"is_satker"`
+	UnorInduk     pgtype.Text `db:"unor_induk"`
+	ExpiredDate   pgtype.Date `db:"expired_date"`
+	Keterangan    pgtype.Text `db:"keterangan"`
+	Abbreviation  pgtype.Text `db:"abbreviation"`
+	Waktu         pgtype.Text `db:"waktu"`
+	JenisSatker   pgtype.Text `db:"jenis_satker"`
+	Peraturan     pgtype.Text `db:"peraturan"`
+	ID            string      `db:"id"`
+}
+
+type UpdateUnitKerjaRow struct {
+	ID                   string      `db:"id"`
+	No                   pgtype.Int4 `db:"no"`
+	KodeInternal         pgtype.Text `db:"kode_internal"`
+	Nama                 pgtype.Text `db:"nama"`
+	EselonID             pgtype.Text `db:"eselon_id"`
+	CepatKode            pgtype.Text `db:"cepat_kode"`
+	NamaJabatan          pgtype.Text `db:"nama_jabatan"`
+	NamaPejabat          pgtype.Text `db:"nama_pejabat"`
+	DiatasanID           pgtype.Text `db:"diatasan_id"`
+	InstansiID           pgtype.Text `db:"instansi_id"`
+	PemimpinPnsID        pgtype.Text `db:"pemimpin_pns_id"`
+	JenisUnorID          pgtype.Text `db:"jenis_unor_id"`
+	UnorInduk            pgtype.Text `db:"unor_induk"`
+	JumlahIdealStaff     pgtype.Int2 `db:"jumlah_ideal_staff"`
+	Order                pgtype.Int4 `db:"order"`
+	IsSatker             bool        `db:"is_satker"`
+	Eselon1              pgtype.Text `db:"eselon_1"`
+	Eselon2              pgtype.Text `db:"eselon_2"`
+	Eselon3              pgtype.Text `db:"eselon_3"`
+	Eselon4              pgtype.Text `db:"eselon_4"`
+	ExpiredDate          pgtype.Date `db:"expired_date"`
+	Keterangan           pgtype.Text `db:"keterangan"`
+	JenisSatker          pgtype.Text `db:"jenis_satker"`
+	Abbreviation         pgtype.Text `db:"abbreviation"`
+	UnorIndukPenyetaraan pgtype.Text `db:"unor_induk_penyetaraan"`
+	JabatanID            pgtype.Text `db:"jabatan_id"`
+	Waktu                pgtype.Text `db:"waktu"`
+	Peraturan            pgtype.Text `db:"peraturan"`
+	Remark               pgtype.Text `db:"remark"`
+	Aktif                pgtype.Bool `db:"aktif"`
+	EselonNama           pgtype.Text `db:"eselon_nama"`
+}
+
+func (q *Queries) UpdateUnitKerja(ctx context.Context, arg UpdateUnitKerjaParams) (UpdateUnitKerjaRow, error) {
+	row := q.db.QueryRow(ctx, updateUnitKerja,
+		arg.DiatasanID,
+		arg.Nama,
+		arg.KodeInternal,
+		arg.NamaJabatan,
+		arg.PemimpinPnsID,
+		arg.NamaPejabat,
+		arg.IsSatker,
+		arg.UnorInduk,
+		arg.ExpiredDate,
+		arg.Keterangan,
+		arg.Abbreviation,
+		arg.Waktu,
+		arg.JenisSatker,
+		arg.Peraturan,
+		arg.ID,
+	)
+	var i UpdateUnitKerjaRow
+	err := row.Scan(
+		&i.ID,
+		&i.No,
+		&i.KodeInternal,
+		&i.Nama,
+		&i.EselonID,
+		&i.CepatKode,
+		&i.NamaJabatan,
+		&i.NamaPejabat,
+		&i.DiatasanID,
+		&i.InstansiID,
+		&i.PemimpinPnsID,
+		&i.JenisUnorID,
+		&i.UnorInduk,
+		&i.JumlahIdealStaff,
+		&i.Order,
+		&i.IsSatker,
+		&i.Eselon1,
+		&i.Eselon2,
+		&i.Eselon3,
+		&i.Eselon4,
+		&i.ExpiredDate,
+		&i.Keterangan,
+		&i.JenisSatker,
+		&i.Abbreviation,
+		&i.UnorIndukPenyetaraan,
+		&i.JabatanID,
+		&i.Waktu,
+		&i.Peraturan,
+		&i.Remark,
+		&i.Aktif,
+		&i.EselonNama,
+	)
+	return i, err
 }
