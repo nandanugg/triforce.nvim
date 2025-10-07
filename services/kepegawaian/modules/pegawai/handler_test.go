@@ -27,9 +27,9 @@ func Test_handler_getDataPribadi(t *testing.T) {
 
 	dbData := `
 		insert into ref_jabatan
-			(id, no, kode_jabatan, nama_jabatan, deleted_at) values
-			(1,  1,  'KJ1',        'Jabatan 1',  null),
-			(2,  2,  'KJ2',        'Jabatan 2',  '2000-01-01');
+			(id, kode_jabatan, nama_jabatan, deleted_at) values
+			(1,  'KJ1',        'Jabatan 1',  null),
+			(2,  'KJ2',        'Jabatan 2',  '2000-01-01');
 		insert into ref_kedudukan_hukum
 			(id, nama,  is_pppk, deleted_at) values
 			(1,  'P3K', true,    null),
@@ -225,10 +225,10 @@ func Test_handler_listAdmin(t *testing.T) {
 			(3, 'Aktif deleted', true, NOW()),
 			(4, 'Pensiun', false, NULL);
 
-		INSERT INTO ref_jabatan (id,no,kode_jabatan, nama_jabatan, deleted_at) VALUES
-			(1,1,'JBT-001', 'Analis Kebijakan Madya', NULL),
-			(2,2,'JBT-002', 'Kepala Subbagian Perencanaan', NULL),
-			(3,3,'JBT-003', 'Staf Administrasi Umum', NOW());
+		INSERT INTO ref_jabatan (id,kode_jabatan, nama_jabatan, deleted_at) VALUES
+			(1,'JBT-001', 'Analis Kebijakan Madya', NULL),
+			(2,'JBT-002', 'Kepala Subbagian Perencanaan', NULL),
+			(3,'JBT-003', 'Staf Administrasi Umum', NOW());
 
 		INSERT INTO ref_golongan (id, nama, deleted_at) VALUES
 			(10, 'III/a', NULL),
@@ -815,13 +815,13 @@ func Test_handler_getAdmin(t *testing.T) {
 			(id, kelas_jabatan) values
 			(1, 'Kelas 1');
 		insert into ref_jabatan
-			(id, no, kode_jabatan, jenis_jabatan, kelas, nama_jabatan, deleted_at) values
-			(1,  1,  'KJ1',        1,             1,     'Jabatan 1',  null),
-			(2,  2,  'KJ2',        2,             1,     'Jabatan 2',  null),
-			(3,  3,  'KJ3',        3,             1,     'Jabatan 3',  null),
-			(4,  4,  'KJ4',        null,          null,  'Jabatan 4',  null),
-			(5,  5,  'KJ5',        2,             1,     'Jabatan 5',  '2000-01-01'),
-			(6,  6,  'KJ6',        4,             1,     'Jabatan 6',  null);
+			(id, kode_jabatan, jenis_jabatan, kelas, nama_jabatan, deleted_at) values
+			(1,  'KJ1',        1,             1,     'Jabatan 1',  null),
+			(2,  'KJ2',        2,             1,     'Jabatan 2',  null),
+			(3,  'KJ3',        3,             1,     'Jabatan 3',  null),
+			(4,  'KJ4',        null,          null,  'Jabatan 4',  null),
+			(5,  'KJ5',        2,             1,     'Jabatan 5',  '2000-01-01'),
+			(6,  'KJ6',        4,             1,     'Jabatan 6',  null);
 		insert into ref_jenis_kawin
 			(id, nama,      deleted_at) values
 			(1,  'Menikah', null),

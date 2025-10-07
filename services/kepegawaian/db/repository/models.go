@@ -516,8 +516,6 @@ type RefJabatan struct {
 	KodeJabatan string `db:"kode_jabatan"`
 	// id jabatan
 	ID int32 `db:"id"`
-	// sama dengan id jabatan
-	No int32 `db:"no"`
 	// Nama jabatan
 	NamaJabatan pgtype.Text `db:"nama_jabatan"`
 	// Nama jabatan lengkap
@@ -541,7 +539,8 @@ type RefJabatan struct {
 	// Waktu terakhir pembaruan
 	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
 	// Waktu penghapusan data
-	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
+	DeletedAt        pgtype.Timestamptz `db:"deleted_at"`
+	TunjanganJabatan pgtype.Int8        `db:"tunjangan_jabatan"`
 }
 
 // Referensi jenis diklat

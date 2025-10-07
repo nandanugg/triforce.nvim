@@ -26,10 +26,10 @@ func Test_handler_list(t *testing.T) {
 	t.Parallel()
 
 	dbData := `
-		insert into ref_jabatan(id, no, nama_jabatan, kode_jabatan, deleted_at) values
-		(11, 1, '11h', '11', null),
-		(12, 2, '12h', '12', null),
-		(13, 3, '13h', '13', '2000-01-01');
+		insert into ref_jabatan(id, nama_jabatan, kode_jabatan, deleted_at) values
+		(11, '11h', '11', null),
+		(12, '12h', '12', null),
+		(13, '13h', '13', '2000-01-01');
 
 		insert into ref_jenis_jabatan(id, nama, deleted_at) values
 		(1, 'Jabatan Struktural', null),
@@ -355,10 +355,10 @@ func Test_handler_listAdmin(t *testing.T) {
 	t.Parallel()
 
 	dbData := `
-		insert into ref_jabatan(id, no, nama_jabatan, kode_jabatan, deleted_at) values
-		(11, 1, '11h', '11', null),
-		(12, 2, '12h', '12', null),
-		(13, 3, '13h', '13', '2000-01-01');
+		insert into ref_jabatan(id, nama_jabatan, kode_jabatan, deleted_at) values
+		(11, '11h', '11', null),
+		(12, '12h', '12', null),
+		(13, '13h', '13', '2000-01-01');
 
 		insert into ref_jenis_jabatan(id, nama, deleted_at) values
 		(1, 'Jabatan Struktural', null),

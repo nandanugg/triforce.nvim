@@ -250,6 +250,262 @@ paths:
           description: Golongan tidak ditemukan.
         "500":
           description: Error internal server.
+  /v1/admin/jabatan:
+    get:
+      tags:
+        - Jabatan
+      summary: Daftar jabatan admin.
+      description: Daftar jabatan untuk admin.
+      operationId: adminListJabatan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+        - name: keyword
+          in: query
+          description: Filter berdasarkan nama / kategori jabatan (opsional)
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/jabatan"
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+    post:
+      tags:
+        - Jabatan
+      summary: Create Jabatan.
+      description: Membuat jabatan baru.
+      operationId: adminCreateJabatan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                kode_jabatan:
+                  type: string
+                  description: Kode jabatan
+                  example: "J001"
+                nama_jabatan:
+                  type: string
+                  description: Nama jabatan
+                  example: "Kepala Bagian"
+                nama_jabatan_full:
+                  type: string
+                  description: Nama jabatan lengkap
+                  example: "Kepala Bagian Umum dan Kepegawaian"
+                jenis_jabatan:
+                  type: integer
+                  format: int16
+                  description: Jenis jabatan
+                  example: 1
+                kelas:
+                  type: integer
+                  format: int16
+                  description: Kelas jabatan
+                  example: 3
+                pensiun:
+                  type: integer
+                  format: int16
+                  description: Status pensiun
+                  example: 0
+                kode_bkn:
+                  type: string
+                  description: Kode BKN
+                  example: "BKN001"
+                nama_jabatan_bkn:
+                  type: string
+                  description: Nama jabatan BKN
+                  example: "Kepala Bagian"
+                kategori_jabatan:
+                  type: string
+                  description: Kategori jabatan
+                  example: "Struktural"
+                bkn_id:
+                  type: string
+                  description: ID BKN
+                  example: "BKN123456"
+                tunjangan_jabatan:
+                  type: integer
+                  example: 1000000
+      responses:
+        "201":
+          description: Jabatan berhasil dibuat.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/jabatan"
+        "400":
+          description: Request tidak valid.
+        "401":
+          description: Token otentikasi tidak valid.
+        "403":
+          description: Tidak memiliki akses admin.
+        "500":
+          description: Error internal server.
+  /v1/admin/jabatan/{id}:
+    get:
+      tags:
+        - Jabatan
+      summary: Get Jabatan by ID.
+      description: Mendapatkan detail jabatan berdasarkan ID.
+      operationId: adminGetJabatan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/jabatan"
+        "400":
+          description: ID tidak valid.
+        "401":
+          description: Token otentikasi tidak valid.
+        "404":
+          description: Jabatan tidak ditemukan.
+        "500":
+          description: Error internal server.
+    put:
+      tags:
+        - Jabatan
+      summary: Update Jabatan.
+      description: Mengupdate jabatan berdasarkan ID.
+      operationId: updateJabatan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                kode_jabatan:
+                  type: string
+                  description: ID jabatan
+                  example: "K001"
+                nama_jabatan:
+                  type: string
+                  description: Nama jabatan
+                  example: "Kepala Bagian"
+                nama_jabatan_full:
+                  type: string
+                  description: Nama jabatan lengkap
+                  example: "Kepala Bagian Umum dan Kepegawaian"
+                jenis_jabatan:
+                  type: integer
+                  format: int16
+                  description: Jenis jabatan
+                  example: 1
+                kelas:
+                  type: integer
+                  format: int16
+                  description: Kelas jabatan
+                  example: 3
+                pensiun:
+                  type: integer
+                  format: int16
+                  description: Status pensiun
+                  example: 0
+                kode_bkn:
+                  type: string
+                  description: Kode BKN
+                  example: "BKN001"
+                nama_jabatan_bkn:
+                  type: string
+                  description: Nama jabatan BKN
+                  example: "Kepala Bagian"
+                kategori_jabatan:
+                  type: string
+                  description: Kategori jabatan
+                  example: "Struktural"
+                bkn_id:
+                  type: string
+                  description: ID BKN
+                  example: "BKN123456"
+                tunjangan_jabatan:
+                  type: integer
+                  example: 1000000
+      responses:
+        "200":
+          description: Jabatan berhasil diupdate.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/jabatan"
+        "400":
+          description: Request tidak valid.
+        "401":
+          description: Token otentikasi tidak valid.
+        "403":
+          description: Tidak memiliki akses admin.
+        "404":
+          description: Jabatan tidak ditemukan.
+        "500":
+          description: Error internal server.
+    delete:
+      tags:
+        - Jabatan
+      summary: Delete Jabatan.
+      description: Menghapus jabatan berdasarkan ID.
+      operationId: deleteJabatan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Jabatan berhasil dihapus.
+        "400":
+          description: ID tidak valid.
+        "401":
+          description: Token otentikasi tidak valid.
+        "403":
+          description: Tidak memiliki akses admin.
+        "404":
+          description: Jabatan tidak ditemukan.
+        "500":
+          description: Error internal server.
   /v1/admin/surat-keputusan:
     get:
       tags:
@@ -3464,4 +3720,60 @@ components:
         updated_at:
           type: string
           format: date-time
+          nullable: true
+    jabatan:
+      type: object
+      additionalProperties: false
+      properties:
+        kode:
+          type: string
+          description: Kode jabatan
+        id:
+          type: integer
+          format: int32
+          description: ID jabatan
+        no:
+          type: integer
+          format: int32
+          description: Nomor urut jabatan
+        nama:
+          type: string
+          description: Nama jabatan
+        nama_full:
+          type: string
+          description: Nama jabatan lengkap
+        jenis:
+          type: integer
+          format: int16
+          description: Jenis jabatan
+          nullable: true
+        kelas:
+          type: integer
+          format: int16
+          description: Kelas jabatan
+          nullable: true
+        pensiun:
+          type: integer
+          format: int16
+          description: Status pensiun
+          nullable: true
+        kode_bkn:
+          type: string
+          description: Kode BKN
+          nullable: true
+        nama_bkn:
+          type: string
+          description: Nama jabatan BKN
+          nullable: true
+        kategori:
+          type: string
+          description: Kategori jabatan
+          nullable: true
+        bkn_id:
+          type: string
+          description: ID BKN
+          nullable: true
+        tunjangan:
+          type: integer
+          format: int64
           nullable: true

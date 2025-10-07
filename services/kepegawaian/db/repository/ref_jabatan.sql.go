@@ -22,8 +22,156 @@ func (q *Queries) CountRefJabatan(ctx context.Context, nama pgtype.Text) (int64,
 	return count, err
 }
 
+const countRefJabatanWithKeyword = `-- name: CountRefJabatanWithKeyword :one
+SELECT COUNT(1) FROM ref_jabatan
+WHERE 
+  ($1::varchar IS NULL OR nama_jabatan ILIKE '%' || $1::varchar || '%' OR kategori_jabatan ILIKE '%' || $1::varchar || '%')
+  AND deleted_at IS NULL
+`
+
+func (q *Queries) CountRefJabatanWithKeyword(ctx context.Context, keyword pgtype.Text) (int64, error) {
+	row := q.db.QueryRow(ctx, countRefJabatanWithKeyword, keyword)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const createRefJabatan = `-- name: CreateRefJabatan :one
+INSERT INTO 
+  ref_jabatan (kode_jabatan, nama_jabatan, nama_jabatan_full, jenis_jabatan, kelas, pensiun, kode_bkn, nama_jabatan_bkn, kategori_jabatan, bkn_id, tunjangan_jabatan)
+VALUES 
+  ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+RETURNING 
+  id, kode_jabatan, nama_jabatan, nama_jabatan_full, jenis_jabatan, kelas, pensiun, kode_bkn, nama_jabatan_bkn, kategori_jabatan, bkn_id, tunjangan_jabatan, created_at, updated_at
+`
+
+type CreateRefJabatanParams struct {
+	KodeJabatan      string      `db:"kode_jabatan"`
+	NamaJabatan      pgtype.Text `db:"nama_jabatan"`
+	NamaJabatanFull  pgtype.Text `db:"nama_jabatan_full"`
+	JenisJabatan     pgtype.Int2 `db:"jenis_jabatan"`
+	Kelas            pgtype.Int2 `db:"kelas"`
+	Pensiun          pgtype.Int2 `db:"pensiun"`
+	KodeBkn          pgtype.Text `db:"kode_bkn"`
+	NamaJabatanBkn   pgtype.Text `db:"nama_jabatan_bkn"`
+	KategoriJabatan  pgtype.Text `db:"kategori_jabatan"`
+	BknID            pgtype.Text `db:"bkn_id"`
+	TunjanganJabatan pgtype.Int8 `db:"tunjangan_jabatan"`
+}
+
+type CreateRefJabatanRow struct {
+	ID               int32              `db:"id"`
+	KodeJabatan      string             `db:"kode_jabatan"`
+	NamaJabatan      pgtype.Text        `db:"nama_jabatan"`
+	NamaJabatanFull  pgtype.Text        `db:"nama_jabatan_full"`
+	JenisJabatan     pgtype.Int2        `db:"jenis_jabatan"`
+	Kelas            pgtype.Int2        `db:"kelas"`
+	Pensiun          pgtype.Int2        `db:"pensiun"`
+	KodeBkn          pgtype.Text        `db:"kode_bkn"`
+	NamaJabatanBkn   pgtype.Text        `db:"nama_jabatan_bkn"`
+	KategoriJabatan  pgtype.Text        `db:"kategori_jabatan"`
+	BknID            pgtype.Text        `db:"bkn_id"`
+	TunjanganJabatan pgtype.Int8        `db:"tunjangan_jabatan"`
+	CreatedAt        pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt        pgtype.Timestamptz `db:"updated_at"`
+}
+
+func (q *Queries) CreateRefJabatan(ctx context.Context, arg CreateRefJabatanParams) (CreateRefJabatanRow, error) {
+	row := q.db.QueryRow(ctx, createRefJabatan,
+		arg.KodeJabatan,
+		arg.NamaJabatan,
+		arg.NamaJabatanFull,
+		arg.JenisJabatan,
+		arg.Kelas,
+		arg.Pensiun,
+		arg.KodeBkn,
+		arg.NamaJabatanBkn,
+		arg.KategoriJabatan,
+		arg.BknID,
+		arg.TunjanganJabatan,
+	)
+	var i CreateRefJabatanRow
+	err := row.Scan(
+		&i.ID,
+		&i.KodeJabatan,
+		&i.NamaJabatan,
+		&i.NamaJabatanFull,
+		&i.JenisJabatan,
+		&i.Kelas,
+		&i.Pensiun,
+		&i.KodeBkn,
+		&i.NamaJabatanBkn,
+		&i.KategoriJabatan,
+		&i.BknID,
+		&i.TunjanganJabatan,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const deleteRefJabatan = `-- name: DeleteRefJabatan :execrows
+UPDATE ref_jabatan
+SET deleted_at = NOW()
+WHERE id = $1::int AND deleted_at IS NULL
+`
+
+func (q *Queries) DeleteRefJabatan(ctx context.Context, id int32) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteRefJabatan, id)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
+const getRefJabatan = `-- name: GetRefJabatan :one
+SELECT kode_jabatan, id, nama_jabatan, nama_jabatan_full, jenis_jabatan, kelas, pensiun, kode_bkn, nama_jabatan_bkn, kategori_jabatan, bkn_id, tunjangan_jabatan, created_at, updated_at
+FROM ref_jabatan
+WHERE id = $1::int AND deleted_at IS NULL
+`
+
+type GetRefJabatanRow struct {
+	KodeJabatan      string             `db:"kode_jabatan"`
+	ID               int32              `db:"id"`
+	NamaJabatan      pgtype.Text        `db:"nama_jabatan"`
+	NamaJabatanFull  pgtype.Text        `db:"nama_jabatan_full"`
+	JenisJabatan     pgtype.Int2        `db:"jenis_jabatan"`
+	Kelas            pgtype.Int2        `db:"kelas"`
+	Pensiun          pgtype.Int2        `db:"pensiun"`
+	KodeBkn          pgtype.Text        `db:"kode_bkn"`
+	NamaJabatanBkn   pgtype.Text        `db:"nama_jabatan_bkn"`
+	KategoriJabatan  pgtype.Text        `db:"kategori_jabatan"`
+	BknID            pgtype.Text        `db:"bkn_id"`
+	TunjanganJabatan pgtype.Int8        `db:"tunjangan_jabatan"`
+	CreatedAt        pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt        pgtype.Timestamptz `db:"updated_at"`
+}
+
+func (q *Queries) GetRefJabatan(ctx context.Context, id int32) (GetRefJabatanRow, error) {
+	row := q.db.QueryRow(ctx, getRefJabatan, id)
+	var i GetRefJabatanRow
+	err := row.Scan(
+		&i.KodeJabatan,
+		&i.ID,
+		&i.NamaJabatan,
+		&i.NamaJabatanFull,
+		&i.JenisJabatan,
+		&i.Kelas,
+		&i.Pensiun,
+		&i.KodeBkn,
+		&i.NamaJabatanBkn,
+		&i.KategoriJabatan,
+		&i.BknID,
+		&i.TunjanganJabatan,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const listRefJabatan = `-- name: ListRefJabatan :many
-select kode_jabatan, nama_jabatan from ref_jabatan
+SELECT kode_jabatan, id, nama_jabatan, nama_jabatan_full, jenis_jabatan, kelas, pensiun, kode_bkn, nama_jabatan_bkn, kategori_jabatan, bkn_id, tunjangan_jabatan, created_at, updated_at
+FROM ref_jabatan
 WHERE ($3::varchar IS NULL OR nama_jabatan ILIKE $3::varchar || '%')
   AND deleted_at IS NULL
 LIMIT $1 OFFSET $2
@@ -36,8 +184,20 @@ type ListRefJabatanParams struct {
 }
 
 type ListRefJabatanRow struct {
-	KodeJabatan string      `db:"kode_jabatan"`
-	NamaJabatan pgtype.Text `db:"nama_jabatan"`
+	KodeJabatan      string             `db:"kode_jabatan"`
+	ID               int32              `db:"id"`
+	NamaJabatan      pgtype.Text        `db:"nama_jabatan"`
+	NamaJabatanFull  pgtype.Text        `db:"nama_jabatan_full"`
+	JenisJabatan     pgtype.Int2        `db:"jenis_jabatan"`
+	Kelas            pgtype.Int2        `db:"kelas"`
+	Pensiun          pgtype.Int2        `db:"pensiun"`
+	KodeBkn          pgtype.Text        `db:"kode_bkn"`
+	NamaJabatanBkn   pgtype.Text        `db:"nama_jabatan_bkn"`
+	KategoriJabatan  pgtype.Text        `db:"kategori_jabatan"`
+	BknID            pgtype.Text        `db:"bkn_id"`
+	TunjanganJabatan pgtype.Int8        `db:"tunjangan_jabatan"`
+	CreatedAt        pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt        pgtype.Timestamptz `db:"updated_at"`
 }
 
 func (q *Queries) ListRefJabatan(ctx context.Context, arg ListRefJabatanParams) ([]ListRefJabatanRow, error) {
@@ -49,7 +209,22 @@ func (q *Queries) ListRefJabatan(ctx context.Context, arg ListRefJabatanParams) 
 	var items []ListRefJabatanRow
 	for rows.Next() {
 		var i ListRefJabatanRow
-		if err := rows.Scan(&i.KodeJabatan, &i.NamaJabatan); err != nil {
+		if err := rows.Scan(
+			&i.KodeJabatan,
+			&i.ID,
+			&i.NamaJabatan,
+			&i.NamaJabatanFull,
+			&i.JenisJabatan,
+			&i.Kelas,
+			&i.Pensiun,
+			&i.KodeBkn,
+			&i.NamaJabatanBkn,
+			&i.KategoriJabatan,
+			&i.BknID,
+			&i.TunjanganJabatan,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -58,4 +233,159 @@ func (q *Queries) ListRefJabatan(ctx context.Context, arg ListRefJabatanParams) 
 		return nil, err
 	}
 	return items, nil
+}
+
+const listRefJabatanWithKeyword = `-- name: ListRefJabatanWithKeyword :many
+SELECT kode_jabatan, id, nama_jabatan, nama_jabatan_full, jenis_jabatan, kelas, pensiun, kode_bkn, nama_jabatan_bkn, kategori_jabatan, bkn_id, tunjangan_jabatan, created_at, updated_at
+FROM ref_jabatan
+WHERE 
+  ($3::varchar IS NULL OR nama_jabatan ILIKE '%' || $3::varchar || '%' OR kategori_jabatan ILIKE '%' || $3::varchar || '%')
+  AND deleted_at IS NULL
+LIMIT $1 OFFSET $2
+`
+
+type ListRefJabatanWithKeywordParams struct {
+	Limit   int32       `db:"limit"`
+	Offset  int32       `db:"offset"`
+	Keyword pgtype.Text `db:"keyword"`
+}
+
+type ListRefJabatanWithKeywordRow struct {
+	KodeJabatan      string             `db:"kode_jabatan"`
+	ID               int32              `db:"id"`
+	NamaJabatan      pgtype.Text        `db:"nama_jabatan"`
+	NamaJabatanFull  pgtype.Text        `db:"nama_jabatan_full"`
+	JenisJabatan     pgtype.Int2        `db:"jenis_jabatan"`
+	Kelas            pgtype.Int2        `db:"kelas"`
+	Pensiun          pgtype.Int2        `db:"pensiun"`
+	KodeBkn          pgtype.Text        `db:"kode_bkn"`
+	NamaJabatanBkn   pgtype.Text        `db:"nama_jabatan_bkn"`
+	KategoriJabatan  pgtype.Text        `db:"kategori_jabatan"`
+	BknID            pgtype.Text        `db:"bkn_id"`
+	TunjanganJabatan pgtype.Int8        `db:"tunjangan_jabatan"`
+	CreatedAt        pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt        pgtype.Timestamptz `db:"updated_at"`
+}
+
+func (q *Queries) ListRefJabatanWithKeyword(ctx context.Context, arg ListRefJabatanWithKeywordParams) ([]ListRefJabatanWithKeywordRow, error) {
+	rows, err := q.db.Query(ctx, listRefJabatanWithKeyword, arg.Limit, arg.Offset, arg.Keyword)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListRefJabatanWithKeywordRow
+	for rows.Next() {
+		var i ListRefJabatanWithKeywordRow
+		if err := rows.Scan(
+			&i.KodeJabatan,
+			&i.ID,
+			&i.NamaJabatan,
+			&i.NamaJabatanFull,
+			&i.JenisJabatan,
+			&i.Kelas,
+			&i.Pensiun,
+			&i.KodeBkn,
+			&i.NamaJabatanBkn,
+			&i.KategoriJabatan,
+			&i.BknID,
+			&i.TunjanganJabatan,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateRefJabatan = `-- name: UpdateRefJabatan :one
+UPDATE ref_jabatan
+SET 
+  nama_jabatan = $1,
+  nama_jabatan_full = $2,
+  jenis_jabatan = $3,
+  kelas = $4,
+  pensiun = $5,
+  kode_bkn = $6,
+  nama_jabatan_bkn = $7,
+  kategori_jabatan = $8,
+  bkn_id = $9,
+  updated_at = NOW(),
+  kode_jabatan = $10,
+  tunjangan_jabatan = $11
+WHERE 
+  id = $12::int AND deleted_at IS NULL
+RETURNING 
+  kode_jabatan, id, nama_jabatan, nama_jabatan_full, jenis_jabatan, kelas, pensiun, kode_bkn, nama_jabatan_bkn, kategori_jabatan, bkn_id, tunjangan_jabatan, created_at, updated_at
+`
+
+type UpdateRefJabatanParams struct {
+	NamaJabatan      pgtype.Text `db:"nama_jabatan"`
+	NamaJabatanFull  pgtype.Text `db:"nama_jabatan_full"`
+	JenisJabatan     pgtype.Int2 `db:"jenis_jabatan"`
+	Kelas            pgtype.Int2 `db:"kelas"`
+	Pensiun          pgtype.Int2 `db:"pensiun"`
+	KodeBkn          pgtype.Text `db:"kode_bkn"`
+	NamaJabatanBkn   pgtype.Text `db:"nama_jabatan_bkn"`
+	KategoriJabatan  pgtype.Text `db:"kategori_jabatan"`
+	BknID            pgtype.Text `db:"bkn_id"`
+	KodeJabatan      string      `db:"kode_jabatan"`
+	TunjanganJabatan pgtype.Int8 `db:"tunjangan_jabatan"`
+	ID               int32       `db:"id"`
+}
+
+type UpdateRefJabatanRow struct {
+	KodeJabatan      string             `db:"kode_jabatan"`
+	ID               int32              `db:"id"`
+	NamaJabatan      pgtype.Text        `db:"nama_jabatan"`
+	NamaJabatanFull  pgtype.Text        `db:"nama_jabatan_full"`
+	JenisJabatan     pgtype.Int2        `db:"jenis_jabatan"`
+	Kelas            pgtype.Int2        `db:"kelas"`
+	Pensiun          pgtype.Int2        `db:"pensiun"`
+	KodeBkn          pgtype.Text        `db:"kode_bkn"`
+	NamaJabatanBkn   pgtype.Text        `db:"nama_jabatan_bkn"`
+	KategoriJabatan  pgtype.Text        `db:"kategori_jabatan"`
+	BknID            pgtype.Text        `db:"bkn_id"`
+	TunjanganJabatan pgtype.Int8        `db:"tunjangan_jabatan"`
+	CreatedAt        pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt        pgtype.Timestamptz `db:"updated_at"`
+}
+
+func (q *Queries) UpdateRefJabatan(ctx context.Context, arg UpdateRefJabatanParams) (UpdateRefJabatanRow, error) {
+	row := q.db.QueryRow(ctx, updateRefJabatan,
+		arg.NamaJabatan,
+		arg.NamaJabatanFull,
+		arg.JenisJabatan,
+		arg.Kelas,
+		arg.Pensiun,
+		arg.KodeBkn,
+		arg.NamaJabatanBkn,
+		arg.KategoriJabatan,
+		arg.BknID,
+		arg.KodeJabatan,
+		arg.TunjanganJabatan,
+		arg.ID,
+	)
+	var i UpdateRefJabatanRow
+	err := row.Scan(
+		&i.KodeJabatan,
+		&i.ID,
+		&i.NamaJabatan,
+		&i.NamaJabatanFull,
+		&i.JenisJabatan,
+		&i.Kelas,
+		&i.Pensiun,
+		&i.KodeBkn,
+		&i.NamaJabatanBkn,
+		&i.KategoriJabatan,
+		&i.BknID,
+		&i.TunjanganJabatan,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }

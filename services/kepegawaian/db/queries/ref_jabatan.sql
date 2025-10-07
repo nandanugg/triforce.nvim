@@ -1,5 +1,6 @@
 -- name: ListRefJabatan :many
-select kode_jabatan, nama_jabatan from ref_jabatan
+SELECT kode_jabatan, id, nama_jabatan, nama_jabatan_full, jenis_jabatan, kelas, pensiun, kode_bkn, nama_jabatan_bkn, kategori_jabatan, bkn_id, tunjangan_jabatan, created_at, updated_at
+FROM ref_jabatan
 WHERE (sqlc.narg('nama')::varchar IS NULL OR nama_jabatan ILIKE sqlc.narg('nama')::varchar || '%')
   AND deleted_at IS NULL
 LIMIT $1 OFFSET $2;
@@ -8,3 +9,55 @@ LIMIT $1 OFFSET $2;
 SELECT COUNT(1) FROM ref_jabatan
 WHERE (sqlc.narg('nama')::varchar IS NULL OR nama_jabatan ILIKE sqlc.narg('nama')::varchar || '%')
   AND deleted_at IS NULL;
+
+-- name: ListRefJabatanWithKeyword :many
+SELECT kode_jabatan, id, nama_jabatan, nama_jabatan_full, jenis_jabatan, kelas, pensiun, kode_bkn, nama_jabatan_bkn, kategori_jabatan, bkn_id, tunjangan_jabatan, created_at, updated_at
+FROM ref_jabatan
+WHERE 
+  (sqlc.narg('keyword')::varchar IS NULL OR nama_jabatan ILIKE '%' || sqlc.narg('keyword')::varchar || '%' OR kategori_jabatan ILIKE '%' || sqlc.narg('keyword')::varchar || '%')
+  AND deleted_at IS NULL
+LIMIT $1 OFFSET $2;
+
+-- name: CountRefJabatanWithKeyword :one
+SELECT COUNT(1) FROM ref_jabatan
+WHERE 
+  (sqlc.narg('keyword')::varchar IS NULL OR nama_jabatan ILIKE '%' || sqlc.narg('keyword')::varchar || '%' OR kategori_jabatan ILIKE '%' || sqlc.narg('keyword')::varchar || '%')
+  AND deleted_at IS NULL;
+
+-- name: GetRefJabatan :one
+SELECT kode_jabatan, id, nama_jabatan, nama_jabatan_full, jenis_jabatan, kelas, pensiun, kode_bkn, nama_jabatan_bkn, kategori_jabatan, bkn_id, tunjangan_jabatan, created_at, updated_at
+FROM ref_jabatan
+WHERE id = @id::int AND deleted_at IS NULL;
+
+-- name: CreateRefJabatan :one
+INSERT INTO 
+  ref_jabatan (kode_jabatan, nama_jabatan, nama_jabatan_full, jenis_jabatan, kelas, pensiun, kode_bkn, nama_jabatan_bkn, kategori_jabatan, bkn_id, tunjangan_jabatan)
+VALUES 
+  (@kode_jabatan, @nama_jabatan, @nama_jabatan_full, @jenis_jabatan, @kelas, @pensiun, @kode_bkn, @nama_jabatan_bkn, @kategori_jabatan, @bkn_id, @tunjangan_jabatan)
+RETURNING 
+  id, kode_jabatan, nama_jabatan, nama_jabatan_full, jenis_jabatan, kelas, pensiun, kode_bkn, nama_jabatan_bkn, kategori_jabatan, bkn_id, tunjangan_jabatan, created_at, updated_at;
+
+-- name: UpdateRefJabatan :one
+UPDATE ref_jabatan
+SET 
+  nama_jabatan = @nama_jabatan,
+  nama_jabatan_full = @nama_jabatan_full,
+  jenis_jabatan = @jenis_jabatan,
+  kelas = @kelas,
+  pensiun = @pensiun,
+  kode_bkn = @kode_bkn,
+  nama_jabatan_bkn = @nama_jabatan_bkn,
+  kategori_jabatan = @kategori_jabatan,
+  bkn_id = @bkn_id,
+  updated_at = NOW(),
+  kode_jabatan = @kode_jabatan,
+  tunjangan_jabatan = @tunjangan_jabatan
+WHERE 
+  id = @id::int AND deleted_at IS NULL
+RETURNING 
+  kode_jabatan, id, nama_jabatan, nama_jabatan_full, jenis_jabatan, kelas, pensiun, kode_bkn, nama_jabatan_bkn, kategori_jabatan, bkn_id, tunjangan_jabatan, created_at, updated_at;
+
+-- name: DeleteRefJabatan :execrows
+UPDATE ref_jabatan
+SET deleted_at = NOW()
+WHERE id = @id::int AND deleted_at IS NULL;

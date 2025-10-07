@@ -1,10 +1,11 @@
-package jabatan
+package jabatan_test
 
 import (
 	"context"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -15,20 +16,21 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db/dbtest"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/config"
 	dbmigrations "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/migrations"
-	dbrepository "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/docs"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/jabatan"
 )
 
 func Test_handler_list(t *testing.T) {
 	t.Parallel()
 
 	dbData := `
-		insert into ref_jabatan(id, no, nama_jabatan, kode_jabatan, deleted_at) values
-			(11, 1, 'Jabatan 11', '11', null),
-			(12, 2, 'Jabatan 12', '12', null),
-			(13, 3, 'Jabatan 13', '13', null),
-			(14, 4, 'Jabatan 14', '14', '2000-01-01'),
-			(15, 5, 'Nama Jabatan 15', '15', null);
+		insert into ref_jabatan(id, nama_jabatan, kode_jabatan, deleted_at) values
+			(11, 'Jabatan 11', '11', null),
+			(12, 'Jabatan 12', '12', null),
+			(13, 'Jabatan 13', '13', null),
+			(14, 'Jabatan 14', '14', '2000-01-01'),
+			(15, 'Nama Jabatan 15', '15', null);
 	`
 
 	tests := []struct {
@@ -133,12 +135,499 @@ func Test_handler_list(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
-			repo := dbrepository.New(db)
-			RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			repo := repository.New(db)
+			jabatan.RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
 			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
+			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+		})
+	}
+}
+
+func Test_handler_adminListJabatan(t *testing.T) {
+	t.Parallel()
+
+	dbData := `
+		insert into ref_jabatan
+		(kode_jabatan, id, nama_jabatan, nama_jabatan_full, jenis_jabatan, kelas, pensiun, kode_bkn, nama_jabatan_bkn, kategori_jabatan, bkn_id, tunjangan_jabatan, created_at, updated_at, deleted_at) values
+		('K001', 101, 'Jabatan A', 'Jabatan A Full', 1, 2, 60, 'BKN101', 'Jabatan A BKN', 'Struktural', 'BKNID101', 1000000, '2023-01-01T00:00:00', '2023-01-01T00:00:00', null),
+		('K002', 102, 'Jabatan B', 'Jabatan B Full', 2, 3, 61, 'BKN102', 'Jabatan B BKN', 'Fungsional', 'BKNID102', 1000000, '2023-02-01T00:00:00', '2023-02-01T00:00:00', null),
+		('K003', 103, 'Jabatan C', 'Jabatan C Full', 1, 4, 62, 'BKN103', 'Jabatan C BKN', 'Struktural', 'BKNID103', 1000000, '2023-03-01T00:00:00', '2023-03-01T00:00:00', null),
+		('K004', 104, 'Jabatan D', 'Jabatan D Full', 2, 5, 63, 'BKN104', 'Jabatan D BKN', 'Fungsional', 'BKNID104', 1000000, '2023-04-01T00:00:00', '2023-04-01T00:00:00', null),
+		('K005', 105, 'Jabatan E', 'Jabatan E Full', 1, 6, 64, 'BKN105', 'Jabatan E BKN', 'Struktural', 'BKNID105', 1000000, '2023-05-01T00:00:00', '2023-05-01T00:00:00', null),
+		('K006', 106, 'Jabatan F', 'Jabatan F Full', 1, 6, 64, 'BKN106', 'Jabatan F BKN', 'Struktural', 'BKNID106', 1000000, '2023-05-01T00:00:00', '2023-05-01T00:00:00', now());
+	`
+
+	tests := []struct {
+		name             string
+		dbData           string
+		requestQuery     url.Values
+		requestHeader    http.Header
+		wantResponseCode int
+		wantResponseBody string
+	}{
+		{
+			name:             "ok: get data with default pagination",
+			dbData:           dbData,
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{"kode": "K001", "id": 101, "nama": "Jabatan A", "nama_full": "Jabatan A Full", "jenis": 1, "kelas": 2, "pensiun": 60, "kode_bkn": "BKN101", "nama_bkn": "Jabatan A BKN", "kategori": "Struktural", "bkn_id": "BKNID101", "tunjangan" : 1000000},
+					{"kode": "K002", "id": 102, "nama": "Jabatan B", "nama_full": "Jabatan B Full", "jenis": 2, "kelas": 3, "pensiun": 61, "kode_bkn": "BKN102", "nama_bkn": "Jabatan B BKN", "kategori": "Fungsional", "bkn_id": "BKNID102", "tunjangan" : 1000000},
+					{"kode": "K003", "id": 103, "nama": "Jabatan C", "nama_full": "Jabatan C Full", "jenis": 1, "kelas": 4, "pensiun": 62, "kode_bkn": "BKN103", "nama_bkn": "Jabatan C BKN", "kategori": "Struktural", "bkn_id": "BKNID103", "tunjangan" : 1000000},
+					{"kode": "K004", "id": 104, "nama": "Jabatan D", "nama_full": "Jabatan D Full", "jenis": 2, "kelas": 5, "pensiun": 63, "kode_bkn": "BKN104", "nama_bkn": "Jabatan D BKN", "kategori": "Fungsional", "bkn_id": "BKNID104", "tunjangan" : 1000000},
+					{"kode": "K005", "id": 105, "nama": "Jabatan E", "nama_full": "Jabatan E Full", "jenis": 1, "kelas": 6, "pensiun": 64, "kode_bkn": "BKN105", "nama_bkn": "Jabatan E BKN", "kategori": "Struktural", "bkn_id": "BKNID105", "tunjangan" : 1000000}
+				],
+				"meta": {
+					"limit": 10,
+					"offset": 0,
+					"total": 5
+				}
+			}`,
+		},
+		{
+			name:   "ok: with pagination limit 1 and offset 1",
+			dbData: dbData,
+			requestQuery: url.Values{
+				"limit":  []string{"1"},
+				"offset": []string{"1"},
+			},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{"kode": "K002", "id": 102, "nama": "Jabatan B", "nama_full": "Jabatan B Full", "jenis": 2, "kelas": 3, "pensiun": 61, "kode_bkn": "BKN102", "nama_bkn": "Jabatan B BKN", "kategori": "Fungsional", "bkn_id": "BKNID102", "tunjangan" : 1000000}
+				],
+				"meta": {
+					"limit": 1,
+					"offset": 1,
+					"total": 5
+				}
+			}`,
+		},
+		{
+			name:   "ok: with filter",
+			dbData: dbData,
+			requestQuery: url.Values{
+				"limit":   []string{"10"},
+				"offset":  []string{"0"},
+				"keyword": []string{"C"},
+			},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{"kode": "K003", "id": 103, "nama": "Jabatan C", "nama_full": "Jabatan C Full", "jenis": 1, "kelas": 4, "pensiun": 62, "kode_bkn": "BKN103", "nama_bkn": "Jabatan C BKN", "kategori": "Struktural", "bkn_id": "BKNID103", "tunjangan" : 1000000}
+				],
+				"meta": {
+					"limit": 10,
+					"offset": 0,
+					"total": 1
+				}
+			}`,
+		},
+		{
+			name:             "error: auth header tidak valid",
+			dbData:           dbData,
+			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
+		},
+		{
+			name:             "error: user is not an admin",
+			dbData:           dbData,
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "987654321")}},
+			wantResponseCode: http.StatusForbidden,
+			wantResponseBody: `{"message": "akses ditolak"}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			pgxconn := dbtest.New(t, dbmigrations.FS)
+
+			_, err := pgxconn.Exec(context.Background(), tt.dbData)
+			require.NoError(t, err)
+
+			req := httptest.NewRequest(http.MethodGet, "/v1/admin/jabatan", nil)
+			req.URL.RawQuery = tt.requestQuery.Encode()
+			req.Header = tt.requestHeader
+			rec := httptest.NewRecorder()
+
+			e, err := api.NewEchoServer(docs.OpenAPIBytes)
+			require.NoError(t, err)
+			repo := repository.New(pgxconn)
+			jabatan.RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
+			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+		})
+	}
+}
+
+func Test_handler_adminCreateJabatan(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name             string
+		requestQuery     url.Values
+		requestBody      string
+		requestHeader    http.Header
+		wantResponseCode int
+		wantResponseBody string
+	}{
+		{
+			name:        "ok: create jabatan",
+			requestBody: `{"kode_jabatan": "K001", "nama_jabatan": "Jabatan A", "nama_jabatan_full": "Jabatan A Full", "jenis_jabatan": 1, "kelas": 2, "pensiun": 60, "kode_bkn": "BKN101", "nama_jabatan_bkn": "Jabatan A BKN", "kategori_jabatan": "Struktural", "bkn_id": "BKNID101", "tunjangan_jabatan" : 1000000}`,
+			requestHeader: http.Header{
+				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusCreated,
+			wantResponseBody: `{"data": {"id" : 1, "kode": "K001", "nama": "Jabatan A", "nama_full": "Jabatan A Full", "jenis": 1, "kelas": 2, "pensiun": 60, "kode_bkn": "BKN101", "nama_bkn": "Jabatan A BKN", "kategori": "Struktural", "bkn_id": "BKNID101", "tunjangan" : 1000000}}`,
+		},
+		{
+			name:        "ok: create jabatan with minimalis data",
+			requestBody: `{"kode_jabatan": "K001", "nama_jabatan": "Jabatan A", "nama_jabatan_full": "Jabatan A Full"}`,
+			requestHeader: http.Header{
+				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusCreated,
+			wantResponseBody: `{"data": {"id" : 1, "kode": "K001", "nama": "Jabatan A", "nama_full": "Jabatan A Full", "jenis": null, "kelas": null, "pensiun": null, "kode_bkn": "", "nama_bkn": "", "kategori": "", "bkn_id": "", "tunjangan" : 0}}`,
+		},
+		{
+			name:        "error: auth header tidak valid",
+			requestBody: `{"kode_jabatan": "K001", "nama_jabatan": "Jabatan A", "nama_jabatan_full": "Jabatan A Full", "jenis_jabatan": 1, "kelas": 2, "pensiun": 60, "kode_bkn": "BKN101", "nama_jabatan_bkn": "Jabatan A BKN", "kategori_jabatan": "Struktural", "bkn_id": "BKNID101"}`,
+			requestHeader: http.Header{
+				"Authorization": []string{"Bearer some-token"},
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
+		},
+		{
+			name:        "error: user is not an admin",
+			requestBody: `{"kode_jabatan": "K001", "nama_jabatan": "Jabatan A", "nama_jabatan_full": "Jabatan A Full", "jenis_jabatan": 1, "kelas": 2, "pensiun": 60, "kode_bkn": "BKN101", "nama_jabatan_bkn": "Jabatan A BKN", "kategori_jabatan": "Struktural", "bkn_id": "BKNID101"}`,
+			requestHeader: http.Header{
+				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "987654321")},
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusForbidden,
+			wantResponseBody: `{"message": "akses ditolak"}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			pgxconn := dbtest.New(t, dbmigrations.FS)
+
+			_, err := pgxconn.Exec(context.Background(), "")
+			require.NoError(t, err)
+
+			req := httptest.NewRequest(http.MethodPost, "/v1/admin/jabatan", strings.NewReader(tt.requestBody))
+			req.URL.RawQuery = tt.requestQuery.Encode()
+			req.Header = tt.requestHeader
+			rec := httptest.NewRecorder()
+
+			e, err := api.NewEchoServer(docs.OpenAPIBytes)
+			require.NoError(t, err)
+			repo := repository.New(pgxconn)
+			jabatan.RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
+			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+		})
+	}
+}
+
+func Test_handler_adminGetJabatan(t *testing.T) {
+	t.Parallel()
+
+	dbData := `
+		insert into ref_jabatan
+		("kode_jabatan", "id", "nama_jabatan", "nama_jabatan_full", "jenis_jabatan", "kelas", "pensiun", "kode_bkn", "nama_jabatan_bkn", "kategori_jabatan", "bkn_id", "tunjangan_jabatan", "created_at", "updated_at", "deleted_at") values
+		('K001', 101, 'Jabatan A', 'Jabatan A Full', 1, 2, 60, 'BKN101', 'Jabatan A BKN', 'Struktural', 'BKNID101', 1000000, '2023-01-01T00:00:00', '2023-01-01T00:00:00', null),
+		('K002', 102, 'Jabatan B', 'Jabatan B Full', 2, 3, 61, 'BKN102', 'Jabatan B BKN', 'Fungsional', 'BKNID102', 1000000, '2023-02-01T00:00:00', '2023-02-01T00:00:00', null),
+		('K003', 103, 'Jabatan C', 'Jabatan C Full', 1, 4, 62, 'BKN103', 'Jabatan C BKN', 'Struktural', 'BKNID103', 1000000, '2023-03-01T00:00:00', '2023-03-01T00:00:00', now());
+	`
+
+	tests := []struct {
+		name             string
+		dbData           string
+		requestPath      string
+		requestHeader    http.Header
+		wantResponseCode int
+		wantResponseBody string
+	}{
+		{
+			name:             "ok: get jabatan by id",
+			dbData:           dbData,
+			requestPath:      "/v1/admin/jabatan/101",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{"data": {"kode": "K001", "id": 101, "nama": "Jabatan A", "nama_full": "Jabatan A Full", "jenis": 1, "kelas": 2, "pensiun": 60, "kode_bkn": "BKN101", "nama_bkn": "Jabatan A BKN", "kategori": "Struktural", "bkn_id": "BKNID101", "tunjangan" : 1000000}}`,
+		},
+		{
+			name:             "error: jabatan not found",
+			dbData:           dbData,
+			requestPath:      "/v1/admin/jabatan/999",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data tidak ditemukan"}`,
+		},
+		{
+			name:             "error: jabatan deleted",
+			dbData:           dbData,
+			requestPath:      "/v1/admin/jabatan/103",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data tidak ditemukan"}`,
+		},
+		{
+			name:             "error: auth header tidak valid",
+			dbData:           dbData,
+			requestPath:      "/v1/admin/jabatan/101",
+			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
+		},
+		{
+			name:             "error: user is not an admin",
+			dbData:           dbData,
+			requestPath:      "/v1/admin/jabatan/101",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "987654321")}},
+			wantResponseCode: http.StatusForbidden,
+			wantResponseBody: `{"message": "akses ditolak"}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			pgxconn := dbtest.New(t, dbmigrations.FS)
+
+			_, err := pgxconn.Exec(context.Background(), tt.dbData)
+			require.NoError(t, err)
+
+			req := httptest.NewRequest(http.MethodGet, tt.requestPath, nil)
+			req.Header = tt.requestHeader
+			rec := httptest.NewRecorder()
+
+			e, err := api.NewEchoServer(docs.OpenAPIBytes)
+			require.NoError(t, err)
+			repo := repository.New(pgxconn)
+			jabatan.RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
+			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+		})
+	}
+}
+
+func Test_handler_adminUpdateJabatan(t *testing.T) {
+	t.Parallel()
+
+	dbData := `
+		insert into ref_jabatan
+		("kode_jabatan", "id", "nama_jabatan", "nama_jabatan_full", "jenis_jabatan", "kelas", "pensiun", "kode_bkn", "nama_jabatan_bkn", "kategori_jabatan", "bkn_id", "tunjangan_jabatan", "created_at", "updated_at", "deleted_at") values
+		('K001', 101, 'Jabatan A', 'Jabatan A Full', 1, 2, 60, 'BKN101', 'Jabatan A BKN', 'Struktural', 'BKNID101', 1000000, '2023-01-01T00:00:00', '2023-01-01T00:00:00', null),
+		('K002', 102, 'Jabatan B', 'Jabatan B Full', 2, 3, 61, 'BKN102', 'Jabatan B BKN', 'Fungsional', 'BKNID102', 1000000, '2023-02-01T00:00:00', '2023-02-01T00:00:00', null),
+		('K003', 103, 'Jabatan C', 'Jabatan C Full', 1, 4, 62, 'BKN103', 'Jabatan C BKN', 'Struktural', 'BKNID103', 1000000, '2023-03-01T00:00:00', '2023-03-01T00:00:00', now());
+	`
+
+	tests := []struct {
+		name             string
+		dbData           string
+		requestPath      string
+		requestBody      string
+		requestHeader    http.Header
+		wantResponseCode int
+		wantResponseBody string
+	}{
+		{
+			name:        "ok: update jabatan",
+			dbData:      dbData,
+			requestPath: "/v1/admin/jabatan/101",
+			requestBody: `{"kode_jabatan": "K001", "nama_jabatan": "Jabatan A Updated", "nama_jabatan_full": "Jabatan A Full Updated", "jenis_jabatan": 1, "kelas": 2, "pensiun": 60, "kode_bkn": "BKN101", "nama_jabatan_bkn": "Jabatan A BKN", "kategori_jabatan": "Struktural", "bkn_id": "BKNID101", "tunjangan_jabatan" : 1000001}`,
+			requestHeader: http.Header{
+				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{"data": {"kode": "K001", "id": 101, "nama": "Jabatan A Updated", "nama_full": "Jabatan A Full Updated", "jenis": 1, "kelas": 2, "pensiun": 60, "kode_bkn": "BKN101", "nama_bkn": "Jabatan A BKN", "kategori": "Struktural", "bkn_id": "BKNID101", "tunjangan" : 1000001}}`,
+		},
+		{
+			name:        "error: jabatan not found",
+			dbData:      dbData,
+			requestPath: "/v1/admin/jabatan/999",
+			requestBody: `{"kode_jabatan": "K001", "nama_jabatan": "Jabatan Baru", "nama_jabatan_full": "Jabatan Baru Full", "jenis_jabatan": 1, "kelas": 1, "pensiun": 60, "kode_bkn": "BKN999", "nama_jabatan_bkn": "Jabatan Baru BKN", "kategori_jabatan": "Struktural", "bkn_id": "BKNID999"}`,
+			requestHeader: http.Header{
+				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data tidak ditemukan"}`,
+		},
+		{
+			name:        "error: jabatan deleted",
+			dbData:      dbData,
+			requestPath: "/v1/admin/jabatan/103",
+			requestBody: `{"kode_jabatan": "K003", "nama_jabatan": "Jabatan C Baru", "nama_jabatan_full": "Jabatan C Full Baru", "jenis_jabatan": 1, "kelas": 4, "pensiun": 62, "kode_bkn": "BKN103", "nama_jabatan_bkn": "Jabatan C BKN", "kategori_jabatan": "Struktural", "bkn_id": "BKNID103"}`,
+			requestHeader: http.Header{
+				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data tidak ditemukan"}`,
+		},
+		{
+			name:        "error: auth header tidak valid",
+			dbData:      dbData,
+			requestPath: "/v1/admin/jabatan/101",
+			requestBody: `{"kode_jabatan": "K001", "nama_jabatan": "Jabatan A Updated", "nama_jabatan_full": "Jabatan A Full Updated", "jenis_jabatan": 1, "kelas": 2, "pensiun": 60, "kode_bkn": "BKN101", "nama_jabatan_bkn": "Jabatan A BKN", "kategori_jabatan": "Struktural", "bkn_id": "BKNID101"}`,
+			requestHeader: http.Header{
+				"Authorization": []string{"Bearer some-token"},
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
+		},
+		{
+			name:        "error: user is not an admin",
+			dbData:      dbData,
+			requestPath: "/v1/admin/jabatan/101",
+			requestBody: `{"kode_jabatan": "K001", "nama_jabatan": "Jabatan A Updated", "nama_jabatan_full": "Jabatan A Full Updated", "jenis_jabatan": 1, "kelas": 2, "pensiun": 60, "kode_bkn": "BKN101", "nama_jabatan_bkn": "Jabatan A BKN", "kategori_jabatan": "Struktural", "bkn_id": "BKNID101"}`,
+			requestHeader: http.Header{
+				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "987654321")},
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusForbidden,
+			wantResponseBody: `{"message": "akses ditolak"}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			pgxconn := dbtest.New(t, dbmigrations.FS)
+
+			_, err := pgxconn.Exec(context.Background(), tt.dbData)
+			require.NoError(t, err)
+
+			req := httptest.NewRequest(http.MethodPut, tt.requestPath, strings.NewReader(tt.requestBody))
+			req.Header = tt.requestHeader
+			rec := httptest.NewRecorder()
+
+			e, err := api.NewEchoServer(docs.OpenAPIBytes)
+			require.NoError(t, err)
+			repo := repository.New(pgxconn)
+			jabatan.RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
+			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+		})
+	}
+}
+
+func Test_handler_adminDeleteJabatan(t *testing.T) {
+	t.Parallel()
+
+	dbData := `
+		insert into ref_jabatan
+		("kode_jabatan", "id", "nama_jabatan", "nama_jabatan_full", "jenis_jabatan", "kelas", "pensiun", "kode_bkn", "nama_jabatan_bkn", "kategori_jabatan", "bkn_id", "created_at", "updated_at", "deleted_at") values
+		('K001', 101, 'Jabatan A', 'Jabatan A Full', 1, 2, 60, 'BKN101', 'Jabatan A BKN', 'Struktural', 'BKNID101', '2023-01-01T00:00:00', '2023-01-01T00:00:00', null),
+		('K002', 102, 'Jabatan B', 'Jabatan B Full', 2, 3, 61, 'BKN102', 'Jabatan B BKN', 'Fungsional', 'BKNID102', '2023-02-01T00:00:00', '2023-02-01T00:00:00', null),
+		('K003', 103, 'Jabatan C', 'Jabatan C Full', 1, 4, 62, 'BKN103', 'Jabatan C BKN', 'Struktural', 'BKNID103', '2023-03-01T00:00:00', '2023-03-01T00:00:00', now());
+	`
+
+	tests := []struct {
+		name             string
+		dbData           string
+		requestPath      string
+		requestHeader    http.Header
+		wantResponseCode int
+		wantResponseBody string
+	}{
+		{
+			name:             "ok: delete jabatan",
+			dbData:           dbData,
+			requestPath:      "/v1/admin/jabatan/101",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode: http.StatusNoContent,
+			wantResponseBody: ``,
+		},
+		{
+			name:             "error: jabatan not found",
+			dbData:           dbData,
+			requestPath:      "/v1/admin/jabatan/999",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data tidak ditemukan"}`,
+		},
+		{
+			name:             "error: jabatan already deleted",
+			dbData:           dbData,
+			requestPath:      "/v1/admin/jabatan/103",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data tidak ditemukan"}`,
+		},
+		{
+			name:             "error: auth header tidak valid",
+			dbData:           dbData,
+			requestPath:      "/v1/admin/jabatan/101",
+			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
+		},
+		{
+			name:             "error: user is not an admin",
+			dbData:           dbData,
+			requestPath:      "/v1/admin/jabatan/101",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "987654321")}},
+			wantResponseCode: http.StatusForbidden,
+			wantResponseBody: `{"message": "akses ditolak"}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			pgxconn := dbtest.New(t, dbmigrations.FS)
+
+			_, err := pgxconn.Exec(context.Background(), tt.dbData)
+			require.NoError(t, err)
+
+			req := httptest.NewRequest(http.MethodDelete, tt.requestPath, nil)
+			req.Header = tt.requestHeader
+			rec := httptest.NewRecorder()
+
+			e, err := api.NewEchoServer(docs.OpenAPIBytes)
+			require.NoError(t, err)
+			repo := repository.New(pgxconn)
+			jabatan.RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			if tt.wantResponseBody != "" {
+				assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
+			} else {
+				assert.Empty(t, tt.wantResponseBody)
+			}
 			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
 		})
 	}

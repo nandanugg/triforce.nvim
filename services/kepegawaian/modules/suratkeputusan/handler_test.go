@@ -637,15 +637,15 @@ func Test_handler_listAdmin(t *testing.T) {
 			(6, 'III/b', 'Penata Muda Tingkat I', 'III/b', 6, 'III/b'),
 			(7, 'IV/a', 'Pembina', 'IV/a', 7, 'IV/a');
 
-		INSERT INTO ref_jabatan (kode_jabatan, id, no, nama_jabatan, nama_jabatan_full, jenis_jabatan, kelas, pensiun, kode_bkn, nama_jabatan_bkn, kategori_jabatan, bkn_id)
+		INSERT INTO ref_jabatan (kode_jabatan, id, nama_jabatan, nama_jabatan_full, jenis_jabatan, kelas, pensiun, kode_bkn, nama_jabatan_bkn, kategori_jabatan, bkn_id)
 		VALUES
-			('JAB-01', 1, 1, 'Kepala Bagian', 'Kepala Bagian Administrasi', 1, 3, 60, 'BKN-01', 'Kepala Bagian BKN', 'Struktural', 'BKN-01'),
-			('JAB-02', 2, 2, 'Kepala Subbag', 'Kepala Subbag Umum', 1, 2, 60, 'BKN-02', 'Kepala Subbag BKN', 'Struktural', 'BKN-02'),
-			('JAB-03', 3, 3, 'Pengawas', 'Pengawas Pelayanan', 2, 2, 58, 'BKN-03', 'Pengawas BKN', 'Fungsional', 'BKN-03'),
-			('JAB-04', 4, 4, 'Staf Ahli', 'Staf Ahli Bidang Kepegawaian', 2, 3, 58, 'BKN-04', 'Staf Ahli BKN', 'Fungsional', 'BKN-04'),
-			('JAB-05', 5, 5, 'Kepala Seksi', 'Kepala Seksi Administrasi', 1, 2, 60, 'BKN-05', 'Kepala Seksi BKN', 'Struktural', 'BKN-05'),
-			('JAB-06', 6, 6, 'Analis', 'Analis Kepegawaian', 2, 1, 58, 'BKN-06', 'Analis BKN', 'Fungsional', 'BKN-06'),
-			('JAB-07', 7, 7, 'Operator', 'Operator Sistem', 2, 1, 58, 'BKN-07', 'Operator BKN', 'Fungsional', 'BKN-07');
+			('JAB-01', 1, 'Kepala Bagian', 'Kepala Bagian Administrasi', 1, 3, 60, 'BKN-01', 'Kepala Bagian BKN', 'Struktural', 'BKN-01'),
+			('JAB-02', 2, 'Kepala Subbag', 'Kepala Subbag Umum', 1, 2, 60, 'BKN-02', 'Kepala Subbag BKN', 'Struktural', 'BKN-02'),
+			('JAB-03', 3, 'Pengawas', 'Pengawas Pelayanan', 2, 2, 58, 'BKN-03', 'Pengawas BKN', 'Fungsional', 'BKN-03'),
+			('JAB-04', 4, 'Staf Ahli', 'Staf Ahli Bidang Kepegawaian', 2, 3, 58, 'BKN-04', 'Staf Ahli BKN', 'Fungsional', 'BKN-04'),
+			('JAB-05', 5, 'Kepala Seksi', 'Kepala Seksi Administrasi', 1, 2, 60, 'BKN-05', 'Kepala Seksi BKN', 'Struktural', 'BKN-05'),
+			('JAB-06', 6, 'Analis', 'Analis Kepegawaian', 2, 1, 58, 'BKN-06', 'Analis BKN', 'Fungsional', 'BKN-06'),
+			('JAB-07', 7, 'Operator', 'Operator Sistem', 2, 1, 58, 'BKN-07', 'Operator BKN', 'Fungsional', 'BKN-07');
 
 		INSERT INTO pegawai ("nip_baru", "pns_id", "unor_id", "nama", "gol_id", "jabatan_instansi_id", deleted_at) 
 		VALUES
@@ -1278,15 +1278,15 @@ func Test_handler_getAdmin(t *testing.T) {
 			(6, 'III/b', 'Penata Muda Tingkat I', 'III/b', 6, 'III/b'),
 			(7, 'IV/a', 'Pembina', 'IV/a', 7, 'IV/a');
 
-		INSERT INTO ref_jabatan (kode_jabatan, id, no, nama_jabatan, nama_jabatan_full, jenis_jabatan, kelas, pensiun, kode_bkn, nama_jabatan_bkn, kategori_jabatan, bkn_id)
+		INSERT INTO ref_jabatan (kode_jabatan, id, nama_jabatan, nama_jabatan_full, jenis_jabatan, kelas, pensiun, kode_bkn, nama_jabatan_bkn, kategori_jabatan, bkn_id)
 		VALUES
-			('JAB-01', 1, 1, 'Kepala Bagian', 'Kepala Bagian Administrasi', 1, 3, 60, 'BKN-01', 'Kepala Bagian BKN', 'Struktural', 'BKN-01'),
-			('JAB-02', 2, 2, 'Kepala Subbag', 'Kepala Subbag Umum', 1, 2, 60, 'BKN-02', 'Kepala Subbag BKN', 'Struktural', 'BKN-02'),
-			('JAB-03', 3, 3, 'Pengawas', 'Pengawas Pelayanan', 2, 2, 58, 'BKN-03', 'Pengawas BKN', 'Fungsional', 'BKN-03'),
-			('JAB-04', 4, 4, 'Staf Ahli', 'Staf Ahli Bidang Kepegawaian', 2, 3, 58, 'BKN-04', 'Staf Ahli BKN', 'Fungsional', 'BKN-04'),
-			('JAB-05', 5, 5, 'Kepala Seksi', 'Kepala Seksi Administrasi', 1, 2, 60, 'BKN-05', 'Kepala Seksi BKN', 'Struktural', 'BKN-05'),
-			('JAB-06', 6, 6, 'Analis', 'Analis Kepegawaian', 2, 1, 58, 'BKN-06', 'Analis BKN', 'Fungsional', 'BKN-06'),
-			('JAB-07', 7, 7, 'Operator', 'Operator Sistem', 2, 1, 58, 'BKN-07', 'Operator BKN', 'Fungsional', 'BKN-07');
+			('JAB-01', 1, 'Kepala Bagian', 'Kepala Bagian Administrasi', 1, 3, 60, 'BKN-01', 'Kepala Bagian BKN', 'Struktural', 'BKN-01'),
+			('JAB-02', 2, 'Kepala Subbag', 'Kepala Subbag Umum', 1, 2, 60, 'BKN-02', 'Kepala Subbag BKN', 'Struktural', 'BKN-02'),
+			('JAB-03', 3, 'Pengawas', 'Pengawas Pelayanan', 2, 2, 58, 'BKN-03', 'Pengawas BKN', 'Fungsional', 'BKN-03'),
+			('JAB-04', 4, 'Staf Ahli', 'Staf Ahli Bidang Kepegawaian', 2, 3, 58, 'BKN-04', 'Staf Ahli BKN', 'Fungsional', 'BKN-04'),
+			('JAB-05', 5, 'Kepala Seksi', 'Kepala Seksi Administrasi', 1, 2, 60, 'BKN-05', 'Kepala Seksi BKN', 'Struktural', 'BKN-05'),
+			('JAB-06', 6, 'Analis', 'Analis Kepegawaian', 2, 1, 58, 'BKN-06', 'Analis BKN', 'Fungsional', 'BKN-06'),
+			('JAB-07', 7, 'Operator', 'Operator Sistem', 2, 1, 58, 'BKN-07', 'Operator BKN', 'Fungsional', 'BKN-07');
 
 		INSERT INTO pegawai ("nip_baru", "pns_id", "unor_id", "nama", "gol_id", "jabatan_instansi_id", deleted_at) 
 		VALUES
