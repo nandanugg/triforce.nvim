@@ -6,9 +6,10 @@ info:
 servers:
   - url: http://localhost:8000
 tags:
-  - name: Admin Jenis Satker
-  - name: Admin Golongan
   - name: Admin Pegawai Aktif
+  - name: Admin Ref Golongan
+  - name: Admin Ref Jabatan
+  - name: Admin Ref Jenis Satker
   - name: Admin Surat Keputusan Pegawai
   - name: Admin Unit Kerja
   - name: Data Pribadi
@@ -47,7 +48,7 @@ paths:
   /v1/admin/golongan:
     get:
       tags:
-        - Admin Golongan
+        - Admin Ref Golongan
       summary: Daftar golongan.
       description: Daftar golongan.
       operationId: adminListGolongan
@@ -71,7 +72,7 @@ paths:
                     $ref: "#/components/schemas/metaPagination"
     post:
       tags:
-        - Admin Golongan
+        - Admin Ref Golongan
       summary: Create Golongan.
       description: Membuat golongan baru.
       operationId: adminCreateGolongan
@@ -130,7 +131,7 @@ paths:
   /v1/admin/golongan/{id}:
     get:
       tags:
-        - Admin Golongan
+        - Admin Ref Golongan
       summary: Get Golongan by ID.
       description: Mendapatkan detail golongan berdasarkan ID.
       operationId: adminGetGolongan
@@ -162,7 +163,7 @@ paths:
           description: Error internal server.
     put:
       tags:
-        - Admin Golongan
+        - Admin Ref Golongan
       summary: Update Golongan.
       description: Mengupdate golongan berdasarkan ID.
       operationId: updateGolongan
@@ -228,7 +229,7 @@ paths:
           description: Error internal server.
     delete:
       tags:
-        - Admin Golongan
+        - Admin Ref Golongan
       summary: Delete Golongan.
       description: Menghapus golongan berdasarkan ID.
       operationId: deleteGolongan
@@ -256,7 +257,7 @@ paths:
   /v1/admin/jabatan:
     get:
       tags:
-        - Jabatan
+        - Admin Ref Jabatan
       summary: Daftar jabatan admin.
       description: Daftar jabatan untuk admin.
       operationId: adminListJabatan
@@ -286,7 +287,7 @@ paths:
                     $ref: "#/components/schemas/metaPagination"
     post:
       tags:
-        - Jabatan
+        - Admin Ref Jabatan
       summary: Create Jabatan.
       description: Membuat jabatan baru.
       operationId: adminCreateJabatan
@@ -367,7 +368,7 @@ paths:
   /v1/admin/jabatan/{id}:
     get:
       tags:
-        - Jabatan
+        - Admin Ref Jabatan
       summary: Get Jabatan by ID.
       description: Mendapatkan detail jabatan berdasarkan ID.
       operationId: adminGetJabatan
@@ -398,7 +399,7 @@ paths:
           description: Error internal server.
     put:
       tags:
-        - Jabatan
+        - Admin Ref Jabatan
       summary: Update Jabatan.
       description: Mengupdate jabatan berdasarkan ID.
       operationId: updateJabatan
@@ -485,7 +486,7 @@ paths:
           description: Error internal server.
     delete:
       tags:
-        - Jabatan
+        - Admin Ref Jabatan
       summary: Delete Jabatan.
       description: Menghapus jabatan berdasarkan ID.
       operationId: deleteJabatan
@@ -512,7 +513,7 @@ paths:
   /v1/admin/jenis-satker:
     get:
       tags:
-        - Admin Jenis Satker
+        - Admin Ref Jenis Satker
       summary: List semua jenis satker
       description: Mengambil daftar semua jenis satker yang belum dihapus. Dapat difilter berdasarkan nama (case-insensitive, partial match).
       operationId: listJenisSatkerAdmin
@@ -542,7 +543,7 @@ paths:
                     $ref: "#/components/schemas/metaPagination"
     post:
       tags:
-        - Admin Jenis Satker
+        - Admin Ref Jenis Satker
       summary: Tambah jenis satker baru
       description: Menambahkan satu jenis satker baru ke database.
       operationId: createJenisSatkerAdmin
@@ -576,7 +577,7 @@ paths:
   /v1/admin/jenis-satker/{id}:
     get:
       tags:
-        - Admin Jenis Satker
+        - Admin Ref Jenis Satker
       summary: Detail jenis satker berdasarkan ID
       description: Mengambil detail satu jenis satker berdasarkan ID, jika belum dihapus.
       operationId: getJenisSatkerAdmin
@@ -606,7 +607,7 @@ paths:
                     $ref: "#/components/schemas/jenisSatker"
     put:
       tags:
-        - Admin Jenis Satker
+        - Admin Ref Jenis Satker
       summary: Update jenis satker
       description: Mengubah data nama jenis satker berdasarkan ID.
       operationId: updateJenisSatkerAdmin
@@ -645,7 +646,7 @@ paths:
                     $ref: "#/components/schemas/jenisSatker"
     delete:
       tags:
-        - Admin Jenis Satker
+        - Admin Ref Jenis Satker
       summary: Soft delete jenis satker
       description: Menghapus jenis satker secara soft delete berdasarkan ID.
       operationId: deleteJenisSatkerAdmin
