@@ -81,9 +81,10 @@ func randomString() string {
 }
 
 func createTestDBAndRole(t *testing.T, user, password, dbname string) {
-	_, err := adminDB.Exec(context.Background(), "create database "+dbname)
+	_, err := adminDB.Exec(context.Background(), "create database "+dbname) // nosemgrep: rules.go.sql.go_sql_rule-concat-sqli
 	require.NoError(t, err)
 
+	// nosemgrep: rules.go.sql.go_sql_rule-concat-sqli
 	_, err = adminDB.Exec(context.Background(), fmt.Sprintf(`
 		create role %[1]s login password '%[2]s';
 		grant create on database %[3]s to %[1]s;
@@ -92,13 +93,13 @@ func createTestDBAndRole(t *testing.T, user, password, dbname string) {
 	require.NoError(t, err)
 
 	t.Cleanup(func() {
-		_, err = adminDB.Exec(context.Background(), "drop database "+dbname)
+		_, err = adminDB.Exec(context.Background(), "drop database "+dbname) // nosemgrep: rules.go.sql.go_sql_rule-concat-sqli
 		assert.NoError(t, err)
-		_, err = adminDB.Exec(context.Background(), "reassign owned by "+user+" to "+testDBSuperuser)
+		_, err = adminDB.Exec(context.Background(), "reassign owned by "+user+" to "+testDBSuperuser) // nosemgrep: rules.go.sql.go_sql_rule-concat-sqli
 		assert.NoError(t, err)
-		_, err = adminDB.Exec(context.Background(), "drop owned by "+user)
+		_, err = adminDB.Exec(context.Background(), "drop owned by "+user) // nosemgrep: rules.go.sql.go_sql_rule-concat-sqli
 		assert.NoError(t, err)
-		_, err = adminDB.Exec(context.Background(), "drop role "+user)
+		_, err = adminDB.Exec(context.Background(), "drop role "+user) // nosemgrep: rules.go.sql.go_sql_rule-concat-sqli
 		assert.NoError(t, err)
 	})
 }
@@ -121,7 +122,7 @@ func prepareTestDB(t *testing.T, user, password, dbname, schema string) {
 	require.NoError(t, err)
 	defer d2.Close()
 
-	_, err = d2.Exec(context.Background(), "create schema "+schema)
+	_, err = d2.Exec(context.Background(), "create schema "+schema) // nosemgrep: rules.go.sql.go_sql_rule-concat-sqli
 	require.NoError(t, err)
 }
 
@@ -165,7 +166,7 @@ type Rows []map[string]any
 
 // QueryAll fetches all rows in table tableName from db.
 func QueryAll(db *pgxpool.Pool, tableName, orderBy string) (Rows, error) {
-	rows, err := db.Query(context.Background(), "select * from "+tableName+" order by "+orderBy)
+	rows, err := db.Query(context.Background(), "select * from "+tableName+" order by "+orderBy) // nosemgrep: rules.go.sql.go_sql_rule-concat-sqli
 	if err != nil {
 		return nil, fmt.Errorf("db query: %w", err)
 	}

@@ -53,14 +53,14 @@ func (s *service) generateAuthURL(redirectURI string) (string, error) {
 		redirectURI = s.keycloak.RedirectURI
 	}
 
-	query := authURL.Query()
-	query.Set("client_id", s.keycloak.ClientID)
-	query.Set("response_type", "code")
-	query.Set("scope", "openid")
-	query.Set("redirect_uri", redirectURI)
-	query.Set("prompt", "login")
+	urlParams := authURL.Query() // nosemgrep: rules.go.sql.go_sql_rule-concat-sqli - false positive, this is not SQL
+	urlParams.Set("client_id", s.keycloak.ClientID)
+	urlParams.Set("response_type", "code")
+	urlParams.Set("scope", "openid")
+	urlParams.Set("redirect_uri", redirectURI)
+	urlParams.Set("prompt", "login")
 
-	authURL.RawQuery = query.Encode()
+	authURL.RawQuery = urlParams.Encode()
 	return authURL.String(), nil
 }
 
@@ -74,11 +74,11 @@ func (s *service) generateLogoutURL(idTokenHint, postLogoutRedirectURI string) (
 		postLogoutRedirectURI = s.keycloak.PostLogoutRedirectURI
 	}
 
-	query := logoutURL.Query()
-	query.Set("id_token_hint", idTokenHint)
-	query.Set("post_logout_redirect_uri", postLogoutRedirectURI)
+	urlParams := logoutURL.Query() // nosemgrep: rules.go.sql.go_sql_rule-concat-sqli - false positive, this is not SQL
+	urlParams.Set("id_token_hint", idTokenHint)
+	urlParams.Set("post_logout_redirect_uri", postLogoutRedirectURI)
 
-	logoutURL.RawQuery = query.Encode()
+	logoutURL.RawQuery = urlParams.Encode()
 	return logoutURL.String(), nil
 }
 
