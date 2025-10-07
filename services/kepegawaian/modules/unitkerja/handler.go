@@ -17,25 +17,25 @@ func newHandler(s *service) *handler {
 	return &handler{service: s}
 }
 
-type listUnitKerjaResponse struct {
-	Data []unitKerja        `json:"data"`
+type listResponse struct {
+	Data []unitKerjaPublic  `json:"data"`
 	Meta api.MetaPagination `json:"meta"`
 }
 
-type listUnitKerjaRequest struct {
+type listRequest struct {
 	Nama      string `query:"nama"`
 	UnorInduk string `query:"unor_induk"`
 	api.PaginationRequest
 }
 
-func (h *handler) listUnitKerja(c echo.Context) error {
+func (h *handler) list(c echo.Context) error {
 	ctx := c.Request().Context()
-	var req listUnitKerjaRequest
+	var req listRequest
 	if err := c.Bind(&req); err != nil {
 		return err
 	}
 
-	data, total, err := h.service.listUnitKerja(ctx, listUnitKerjaParams{
+	data, total, err := h.service.list(ctx, listParams{
 		nama:      req.Nama,
 		unorInduk: req.UnorInduk,
 		limit:     req.Limit,
@@ -46,7 +46,7 @@ func (h *handler) listUnitKerja(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 	return c.JSON(http.StatusOK,
-		listUnitKerjaResponse{
+		listResponse{
 			Data: data,
 			Meta: api.MetaPagination{
 				Limit:  req.Limit,
@@ -57,23 +57,23 @@ func (h *handler) listUnitKerja(c echo.Context) error {
 	)
 }
 
-type listAkarUnitKerjaResponse struct {
-	Data []unitKerja        `json:"data"`
+type listAkarResponse struct {
+	Data []unitKerjaPublic  `json:"data"`
 	Meta api.MetaPagination `json:"meta"`
 }
 
-type listAkarUnitKerjaRequest struct {
+type listAkarRequest struct {
 	api.PaginationRequest
 }
 
-func (h *handler) listAkarUnitKerja(c echo.Context) error {
+func (h *handler) listAkar(c echo.Context) error {
 	ctx := c.Request().Context()
-	var req listAkarUnitKerjaRequest
+	var req listAkarRequest
 	if err := c.Bind(&req); err != nil {
 		return err
 	}
 
-	data, total, err := h.service.listAkarUnitKerja(ctx, listAkarUnitKerjaParams{
+	data, total, err := h.service.listAkar(ctx, listAkarParams{
 		limit:  req.Limit,
 		offset: req.Offset,
 	})
@@ -82,7 +82,7 @@ func (h *handler) listAkarUnitKerja(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 	return c.JSON(http.StatusOK,
-		listAkarUnitKerjaResponse{
+		listAkarResponse{
 			Data: data,
 			Meta: api.MetaPagination{
 				Limit:  req.Limit,
@@ -93,24 +93,24 @@ func (h *handler) listAkarUnitKerja(c echo.Context) error {
 	)
 }
 
-type listAnakUnitKerjaResponse struct {
+type listAnakResponse struct {
 	Data []anakUnitKerja    `json:"data"`
 	Meta api.MetaPagination `json:"meta"`
 }
 
-type listAnakUnitKerjaRequest struct {
+type listAnakRequest struct {
 	ID string `param:"id"`
 	api.PaginationRequest
 }
 
-func (h *handler) listAnakUnitKerja(c echo.Context) error {
+func (h *handler) listAnak(c echo.Context) error {
 	ctx := c.Request().Context()
-	var req listAnakUnitKerjaRequest
+	var req listAnakRequest
 	if err := c.Bind(&req); err != nil {
 		return err
 	}
 
-	data, total, err := h.service.listAnakUnitKerja(ctx, listAnakUnitKerjaParams{
+	data, total, err := h.service.listAnak(ctx, listAnakParams{
 		limit:  req.Limit,
 		offset: req.Offset,
 		id:     req.ID,
@@ -120,7 +120,7 @@ func (h *handler) listAnakUnitKerja(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 	return c.JSON(http.StatusOK,
-		listAnakUnitKerjaResponse{
+		listAnakResponse{
 			Data: data,
 			Meta: api.MetaPagination{
 				Limit:  req.Limit,
@@ -130,3 +130,31 @@ func (h *handler) listAnakUnitKerja(c echo.Context) error {
 		},
 	)
 }
+
+// type getRequest struct {
+// 	ID int32 `param:"id"`
+// }
+
+// type getResponse struct {
+// 	Data *unitKerja `json:"data"`
+// }
+
+// func (h *handler) get(c echo.Context) error {
+// 	var req getRequest
+// 	if err := c.Bind(&req); err != nil {
+// 		return err
+// 	}
+
+// 	ctx := c.Request().Context()
+// 	data, err := h.service.get(ctx, req.ID)
+// 	if err != nil {
+// 		slog.ErrorContext(ctx, "Error getting golongan.", "error", err)
+// 		return echo.NewHTTPError(http.StatusInternalServerError)
+// 	}
+
+// 	if data == nil {
+// 		return echo.NewHTTPError(http.StatusNotFound, "data tidak ditemukan")
+// 	}
+
+// 	return c.JSON(http.StatusOK, getResponse{Data: data})
+// }

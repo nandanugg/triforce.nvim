@@ -1,6 +1,6 @@
 package unitkerja
 
-type unitKerja struct {
+type unitKerjaPublic struct {
 	ID   string `json:"id"`
 	Nama string `json:"nama"`
 }

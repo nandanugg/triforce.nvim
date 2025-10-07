@@ -64,6 +64,7 @@ type Querier interface {
 	GetRefGolongan(ctx context.Context, id int32) (GetRefGolonganRow, error)
 	GetSuratKeputusanByID(ctx context.Context, id string) (GetSuratKeputusanByIDRow, error)
 	GetSuratKeputusanByNIPAndID(ctx context.Context, arg GetSuratKeputusanByNIPAndIDParams) (GetSuratKeputusanByNIPAndIDRow, error)
+	GetUnitKerja(ctx context.Context, id string) (GetUnitKerjaRow, error)
 	ListAkarUnitKerja(ctx context.Context, arg ListAkarUnitKerjaParams) ([]ListAkarUnitKerjaRow, error)
 	ListAnakByNip(ctx context.Context, nipBaru pgtype.Text) ([]ListAnakByNipRow, error)
 	ListJenisKenaikanPangkat(ctx context.Context, arg ListJenisKenaikanPangkatParams) ([]ListJenisKenaikanPangkatRow, error)

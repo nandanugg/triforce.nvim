@@ -27,14 +27,14 @@ func newService(repo repository) *service {
 	return &service{repo: repo}
 }
 
-type listUnitKerjaParams struct {
+type listParams struct {
 	nama      string
 	unorInduk string
 	limit     uint
 	offset    uint
 }
 
-func (s *service) listUnitKerja(ctx context.Context, arg listUnitKerjaParams) ([]unitKerja, int64, error) {
+func (s *service) list(ctx context.Context, arg listParams) ([]unitKerjaPublic, int64, error) {
 	rows, err := s.repo.ListUnitKerjaByNamaOrInduk(ctx, repo.ListUnitKerjaByNamaOrIndukParams{
 		UnorInduk: arg.unorInduk,
 		Limit:     int32(arg.limit),
@@ -42,11 +42,11 @@ func (s *service) listUnitKerja(ctx context.Context, arg listUnitKerjaParams) ([
 		Nama:      arg.nama,
 	})
 	if err != nil {
-		return nil, 0, fmt.Errorf("[listUnitKerja] error getUnitKerjaByNamaOrInduk: %w", err)
+		return nil, 0, fmt.Errorf("[list] error getUnitKerjaByNamaOrInduk: %w", err)
 	}
 
-	result := typeutil.Map(rows, func(row repo.ListUnitKerjaByNamaOrIndukRow) unitKerja {
-		return unitKerja{
+	result := typeutil.Map(rows, func(row repo.ListUnitKerjaByNamaOrIndukRow) unitKerjaPublic {
+		return unitKerjaPublic{
 			ID:   row.ID,
 			Nama: row.NamaUnor.String,
 		}
@@ -57,27 +57,27 @@ func (s *service) listUnitKerja(ctx context.Context, arg listUnitKerjaParams) ([
 		UnorInduk: arg.unorInduk,
 	})
 	if err != nil {
-		return nil, 0, fmt.Errorf("[listUnitKerja] error countUnitKerja: %w", err)
+		return nil, 0, fmt.Errorf("[list] error countUnitKerja: %w", err)
 	}
 	return result, total, nil
 }
 
-type listAkarUnitKerjaParams struct {
+type listAkarParams struct {
 	limit  uint
 	offset uint
 }
 
-func (s *service) listAkarUnitKerja(ctx context.Context, arg listAkarUnitKerjaParams) ([]unitKerja, int64, error) {
+func (s *service) listAkar(ctx context.Context, arg listAkarParams) ([]unitKerjaPublic, int64, error) {
 	rows, err := s.repo.ListAkarUnitKerja(ctx, repo.ListAkarUnitKerjaParams{
 		Limit:  int32(arg.limit),
 		Offset: int32(arg.offset),
 	})
 	if err != nil {
-		return nil, 0, fmt.Errorf("[listAkarUnitKerja] error listAkarUnitKerja: %w", err)
+		return nil, 0, fmt.Errorf("[listAkar] error listAkarUnitKerja: %w", err)
 	}
 
-	result := typeutil.Map(rows, func(row repo.ListAkarUnitKerjaRow) unitKerja {
-		return unitKerja{
+	result := typeutil.Map(rows, func(row repo.ListAkarUnitKerjaRow) unitKerjaPublic {
+		return unitKerjaPublic{
 			ID:   row.ID,
 			Nama: row.NamaUnor.String,
 		}
@@ -85,18 +85,18 @@ func (s *service) listAkarUnitKerja(ctx context.Context, arg listAkarUnitKerjaPa
 
 	total, err := s.repo.CountAkarUnitKerja(ctx)
 	if err != nil {
-		return nil, 0, fmt.Errorf("[listAkarUnitKerja] error countAkarUnitKerja: %w", err)
+		return nil, 0, fmt.Errorf("[listAkar] error countAkarUnitKerja: %w", err)
 	}
 	return result, total, nil
 }
 
-type listAnakUnitKerjaParams struct {
+type listAnakParams struct {
 	limit  uint
 	offset uint
 	id     string
 }
 
-func (s *service) listAnakUnitKerja(ctx context.Context, arg listAnakUnitKerjaParams) ([]anakUnitKerja, int64, error) {
+func (s *service) listAnak(ctx context.Context, arg listAnakParams) ([]anakUnitKerja, int64, error) {
 	pgID := pgtype.Text{Valid: arg.id != "", String: arg.id}
 	rows, err := s.repo.ListUnitKerjaByDiatasanID(ctx, repo.ListUnitKerjaByDiatasanIDParams{
 		Limit:      int32(arg.limit),
@@ -104,7 +104,7 @@ func (s *service) listAnakUnitKerja(ctx context.Context, arg listAnakUnitKerjaPa
 		DiatasanID: pgID,
 	})
 	if err != nil {
-		return nil, 0, fmt.Errorf("[listAnakUnitKerja] error listUnitKerjaByDiatasanID: %w", err)
+		return nil, 0, fmt.Errorf("[listAnak] error listByDiatasanID: %w", err)
 	}
 
 	result := typeutil.Map(rows, func(row repo.ListUnitKerjaByDiatasanIDRow) anakUnitKerja {
@@ -117,7 +117,7 @@ func (s *service) listAnakUnitKerja(ctx context.Context, arg listAnakUnitKerjaPa
 
 	total, err := s.repo.CountUnitKerjaByDiatasanID(ctx, pgID)
 	if err != nil {
-		return nil, 0, fmt.Errorf("[listAkarUnitKerja] error countUnitKerjaByDiatasanID: %w", err)
+		return nil, 0, fmt.Errorf("[listAkar] error countUnitKerjaByDiatasanID: %w", err)
 	}
 	return result, total, nil
 }

@@ -90,6 +90,7 @@ FROM unit_kerja
 WHERE
     diatasan_id IS NULL
     AND deleted_at IS NULL
+ORDER BY "order"
 LIMIT $1 OFFSET $2;
 
 -- name: CountAkarUnitKerja :one
@@ -113,6 +114,7 @@ FROM unit_kerja uk
 WHERE
     uk.diatasan_id = sqlc.arg(diatasan_id)
     AND uk.deleted_at IS NULL
+ORDER BY "order"
 LIMIT $1 OFFSET $2;
 
 -- name: CountUnitKerjaByDiatasanID :one
@@ -120,3 +122,40 @@ SELECT COUNT(1) FROM unit_kerja
 WHERE
     diatasan_id = sqlc.arg(diatasan_id)
     AND deleted_at IS NULL;
+
+
+-- name: GetUnitKerja :one
+SELECT
+    id,
+    "no",
+    kode_internal,
+    nama_unor as nama,
+    eselon_id,
+    cepat_kode,
+    nama_jabatan,
+    nama_pejabat,
+    diatasan_id,
+    instansi_id,
+    pemimpin_pns_id,
+    jenis_unor_id,
+    unor_induk,
+    jumlah_ideal_staff,
+    "order",
+    is_satker,
+    eselon_1,
+    eselon_2,
+    eselon_3,
+    eselon_4,
+    expired_date,
+    keterangan,
+    jenis_satker,
+    abbreviation,
+    unor_induk_penyetaraan,
+    jabatan_id,
+    waktu,
+    peraturan,
+    remark,
+    aktif,
+    eselon_nama
+FROM unit_kerja
+WHERE id = @id::varchar AND deleted_at IS NULL;

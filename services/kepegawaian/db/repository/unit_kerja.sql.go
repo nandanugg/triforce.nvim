@@ -57,12 +57,123 @@ func (q *Queries) CountUnitKerjaByDiatasanID(ctx context.Context, diatasanID pgt
 	return count, err
 }
 
+const getUnitKerja = `-- name: GetUnitKerja :one
+SELECT
+    id,
+    "no",
+    kode_internal,
+    nama_unor as nama,
+    eselon_id,
+    cepat_kode,
+    nama_jabatan,
+    nama_pejabat,
+    diatasan_id,
+    instansi_id,
+    pemimpin_pns_id,
+    jenis_unor_id,
+    unor_induk,
+    jumlah_ideal_staff,
+    "order",
+    is_satker,
+    eselon_1,
+    eselon_2,
+    eselon_3,
+    eselon_4,
+    expired_date,
+    keterangan,
+    jenis_satker,
+    abbreviation,
+    unor_induk_penyetaraan,
+    jabatan_id,
+    waktu,
+    peraturan,
+    remark,
+    aktif,
+    eselon_nama
+FROM unit_kerja
+WHERE id = $1::varchar AND deleted_at IS NULL
+`
+
+type GetUnitKerjaRow struct {
+	ID                   string      `db:"id"`
+	No                   pgtype.Int4 `db:"no"`
+	KodeInternal         pgtype.Text `db:"kode_internal"`
+	Nama                 pgtype.Text `db:"nama"`
+	EselonID             pgtype.Text `db:"eselon_id"`
+	CepatKode            pgtype.Text `db:"cepat_kode"`
+	NamaJabatan          pgtype.Text `db:"nama_jabatan"`
+	NamaPejabat          pgtype.Text `db:"nama_pejabat"`
+	DiatasanID           pgtype.Text `db:"diatasan_id"`
+	InstansiID           pgtype.Text `db:"instansi_id"`
+	PemimpinPnsID        pgtype.Text `db:"pemimpin_pns_id"`
+	JenisUnorID          pgtype.Text `db:"jenis_unor_id"`
+	UnorInduk            pgtype.Text `db:"unor_induk"`
+	JumlahIdealStaff     pgtype.Int2 `db:"jumlah_ideal_staff"`
+	Order                pgtype.Int4 `db:"order"`
+	IsSatker             int16       `db:"is_satker"`
+	Eselon1              pgtype.Text `db:"eselon_1"`
+	Eselon2              pgtype.Text `db:"eselon_2"`
+	Eselon3              pgtype.Text `db:"eselon_3"`
+	Eselon4              pgtype.Text `db:"eselon_4"`
+	ExpiredDate          pgtype.Date `db:"expired_date"`
+	Keterangan           pgtype.Text `db:"keterangan"`
+	JenisSatker          pgtype.Text `db:"jenis_satker"`
+	Abbreviation         pgtype.Text `db:"abbreviation"`
+	UnorIndukPenyetaraan pgtype.Text `db:"unor_induk_penyetaraan"`
+	JabatanID            pgtype.Text `db:"jabatan_id"`
+	Waktu                pgtype.Text `db:"waktu"`
+	Peraturan            pgtype.Text `db:"peraturan"`
+	Remark               pgtype.Text `db:"remark"`
+	Aktif                pgtype.Bool `db:"aktif"`
+	EselonNama           pgtype.Text `db:"eselon_nama"`
+}
+
+func (q *Queries) GetUnitKerja(ctx context.Context, id string) (GetUnitKerjaRow, error) {
+	row := q.db.QueryRow(ctx, getUnitKerja, id)
+	var i GetUnitKerjaRow
+	err := row.Scan(
+		&i.ID,
+		&i.No,
+		&i.KodeInternal,
+		&i.Nama,
+		&i.EselonID,
+		&i.CepatKode,
+		&i.NamaJabatan,
+		&i.NamaPejabat,
+		&i.DiatasanID,
+		&i.InstansiID,
+		&i.PemimpinPnsID,
+		&i.JenisUnorID,
+		&i.UnorInduk,
+		&i.JumlahIdealStaff,
+		&i.Order,
+		&i.IsSatker,
+		&i.Eselon1,
+		&i.Eselon2,
+		&i.Eselon3,
+		&i.Eselon4,
+		&i.ExpiredDate,
+		&i.Keterangan,
+		&i.JenisSatker,
+		&i.Abbreviation,
+		&i.UnorIndukPenyetaraan,
+		&i.JabatanID,
+		&i.Waktu,
+		&i.Peraturan,
+		&i.Remark,
+		&i.Aktif,
+		&i.EselonNama,
+	)
+	return i, err
+}
+
 const listAkarUnitKerja = `-- name: ListAkarUnitKerja :many
 SELECT id, nama_unor
 FROM unit_kerja
 WHERE
     diatasan_id IS NULL
     AND deleted_at IS NULL
+ORDER BY "order"
 LIMIT $1 OFFSET $2
 `
 
@@ -111,6 +222,7 @@ FROM unit_kerja uk
 WHERE
     uk.diatasan_id = $3
     AND uk.deleted_at IS NULL
+ORDER BY "order"
 LIMIT $1 OFFSET $2
 `
 

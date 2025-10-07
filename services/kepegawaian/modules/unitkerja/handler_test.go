@@ -255,15 +255,15 @@ func Test_handler_ListAkarUnitKerja(t *testing.T) {
 
 	dbData := `
 		insert into unit_kerja
-		("id", "nama_unor", "diatasan_id", deleted_at) values
-		('001', 'Tingkat 1', NULL, NULL),
-		('002', 'Tingkat 2', '001', NULL),
-		('003', 'Tingkat 2 Kedua', '001', NULL),
-		('004', 'Tingkat 2 Deleted', '001', NOW()),
-		('005', 'Tingkat 1 Deleted', NULL, NOW()),
-		('006', 'Tingkat 3', '002', NULL),
-		('007', 'Tingkat 3 Deleted', '002', NOW()),
-		('008', 'Tingkat 1 Kedua', NULL, NULL);
+		("id", "nama_unor", "order", "diatasan_id", deleted_at) values
+		('001', 'Tingkat 1', 8, NULL, NULL),
+		('002', 'Tingkat 2', 3, '001', NULL),
+		('003', 'Tingkat 2 Kedua', 2, '001', NULL),
+		('004', 'Tingkat 2 Deleted', 4, '001', NOW()),
+		('005', 'Tingkat 1 Deleted', 5, NULL, NOW()),
+		('006', 'Tingkat 3', 6, '002', NULL),
+		('007', 'Tingkat 3 Deleted', 7, '002', NOW()),
+		('008', 'Tingkat 1 Kedua', 1, NULL, NULL);
 	`
 
 	tests := []struct {
@@ -281,8 +281,8 @@ func Test_handler_ListAkarUnitKerja(t *testing.T) {
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
-					{"id": "001", "nama": "Tingkat 1"},
-					{"id": "008", "nama": "Tingkat 1 Kedua"}
+					{"id": "008", "nama": "Tingkat 1 Kedua"},
+					{"id": "001", "nama": "Tingkat 1"}
 				],
 				"meta": {
 					"limit": 10,
@@ -302,7 +302,7 @@ func Test_handler_ListAkarUnitKerja(t *testing.T) {
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
-					{"id": "008", "nama": "Tingkat 1 Kedua"}
+					{"id": "001", "nama": "Tingkat 1"}
 				],
 				"meta": {
 					"limit": 1,
@@ -364,15 +364,15 @@ func Test_handler_ListAnakUnitKerja(t *testing.T) {
 
 	dbData := `
 		insert into unit_kerja
-		("id", "nama_unor", "diatasan_id", deleted_at) values
-		('001', 'Tingkat 1', NULL, NULL),
-		('002', 'Tingkat 2', '001', NULL),
-		('003', 'Tingkat 2 Kedua', '001', NULL),
-		('004', 'Tingkat 2 Deleted', '001', NOW()),
-		('005', 'Tingkat 1 Deleted', NULL, NOW()),
-		('006', 'Tingkat 3', '002', NULL),
-		('007', 'Tingkat 3 Deleted', '002', NOW()),
-		('008', 'Tingkat 1 Kedua', NULL, NULL);
+		("id", "nama_unor", "order", "diatasan_id", deleted_at) values
+		('001', 'Tingkat 1', 8, NULL, NULL),
+		('002', 'Tingkat 2', 3, '001', NULL),
+		('003', 'Tingkat 2 Kedua', 2, '001', NULL),
+		('004', 'Tingkat 2 Deleted', 4, '001', NOW()),
+		('005', 'Tingkat 1 Deleted', 5, NULL, NOW()),
+		('006', 'Tingkat 3', 6, '002', NULL),
+		('007', 'Tingkat 3 Deleted', 7, '002', NOW()),
+		('008', 'Tingkat 1 Kedua', 1, NULL, NULL);
 	`
 
 	tests := []struct {
@@ -392,8 +392,8 @@ func Test_handler_ListAnakUnitKerja(t *testing.T) {
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
-					{"id": "002", "nama": "Tingkat 2", "has_anak": true},
-					{"id": "003", "nama": "Tingkat 2 Kedua", "has_anak": false}
+					{"id": "003", "nama": "Tingkat 2 Kedua", "has_anak": false},
+					{"id": "002", "nama": "Tingkat 2", "has_anak": true}
 				],
 				"meta": {
 					"limit": 10,
@@ -431,7 +431,7 @@ func Test_handler_ListAnakUnitKerja(t *testing.T) {
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
-					{"id": "003", "nama": "Tingkat 2 Kedua", "has_anak": false}
+					{"id": "002", "nama": "Tingkat 2", "has_anak": true}
 				],
 				"meta": {
 					"limit": 1,
