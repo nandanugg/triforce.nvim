@@ -9,12 +9,12 @@ Riwayat penghargaan umum pegawai
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
 | id | integer | nextval('riwayat_penghargaan_umum_id_seq'::regclass) | false |  |  | ID unik data penghargaan |
-| deskripsi_penghargaan | varchar(100) |  | true |  |  | Deskripsi lengkap penghargaan yang diterima |
+| deskripsi_penghargaan | varchar(1300) |  | true |  |  | Deskripsi lengkap penghargaan yang diterima |
 | tanggal_penghargaan | date |  | true |  |  | Tanggal penerimaan penghargaan |
 | exist | boolean | true | true |  |  | Penanda keberadaan data |
 | file_base64 | text |  | true |  |  | Berkas bukti penghargaan dalam format base64 |
 | nip | varchar(20) |  | true |  |  | NIP pegawai |
-| nama_penghargaan | varchar(200) |  | true |  |  | Nama penghargaan yang diterima |
+| nama_penghargaan | varchar(300) |  | true |  |  | Nama penghargaan yang diterima |
 | created_at | timestamp with time zone | now() | true |  |  | Waktu pembuatan data |
 | updated_at | timestamp with time zone | now() | true |  |  | Waktu terakhir pembaruan data |
 | deleted_at | timestamp with time zone |  | true |  |  | Waktu penghapusan data |
@@ -40,12 +40,12 @@ erDiagram
 
 "kepegawaian.riwayat_penghargaan_umum" {
   integer id
-  varchar_100_ deskripsi_penghargaan
+  varchar_1300_ deskripsi_penghargaan
   date tanggal_penghargaan
   boolean exist
   text file_base64
   varchar_20_ nip
-  varchar_200_ nama_penghargaan
+  varchar_300_ nama_penghargaan
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at

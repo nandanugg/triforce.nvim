@@ -6,8 +6,6 @@ info:
 servers:
   - url: http://localhost:8000
 tags:
-  - name: Admin Jenis Satker
-  - name: Admin Golongan
   - name: Admin Pegawai Aktif
   - name: Admin Ref Golongan
   - name: Admin Ref Jabatan
@@ -555,7 +553,7 @@ paths:
           application/json:
             schema:
               type: object
-              required: 
+              required:
                 - nama
               additionalProperties: false
               properties:
@@ -625,7 +623,7 @@ paths:
           application/json:
             schema:
               type: object
-              required: 
+              required:
                 - nama
               additionalProperties: false
               properties:
@@ -712,7 +710,7 @@ paths:
           application/json:
             schema:
               type: object
-              required: 
+              required:
                 - nama
               properties:
                 nama:
@@ -836,7 +834,7 @@ paths:
           application/json:
             schema:
               type: object
-              required: 
+              required:
                 - nama
               additionalProperties: false
               properties:
@@ -906,7 +904,7 @@ paths:
           application/json:
             schema:
               type: object
-              required: 
+              required:
                 - nama
               additionalProperties: false
               properties:
@@ -987,7 +985,7 @@ paths:
           application/json:
             schema:
               type: object
-              required: 
+              required:
                 - nama
               additionalProperties: false
               properties:
@@ -1057,7 +1055,7 @@ paths:
           application/json:
             schema:
               type: object
-              required: 
+              required:
                 - nama
               additionalProperties: false
               properties:
@@ -2030,7 +2028,7 @@ paths:
           in: path
           required: true
           schema:
-            type: integer
+            type: string
       responses:
         "200":
           description: Sukses.
@@ -2236,7 +2234,7 @@ paths:
                 additionalProperties: false
                 properties:
                   data:
-                    $ref: "#/components/schemas/unitKerja"     
+                    $ref: "#/components/schemas/unitKerja"
   /v1/admin/unit-kerja/{id}:
     get:
       tags:
@@ -2398,7 +2396,7 @@ paths:
                       $ref: "#/components/schemas/golongan"
                   meta:
                     $ref: "#/components/schemas/metaPagination"
-    
+
   /v1/jabatan:
     get:
       tags:
@@ -2993,7 +2991,7 @@ paths:
                       additionalProperties: false
                       properties:
                         id:
-                          type: integer
+                          type: string
                         id_jenis_kp:
                           type: integer
                           nullable: true
@@ -3050,7 +3048,7 @@ paths:
           in: path
           required: true
           schema:
-            type: integer
+            type: string
       responses:
         "200":
           description: Sukses.
@@ -4416,7 +4414,7 @@ components:
       additionalProperties: false
       properties:
         id:
-          type: integer
+          type: string
         id_jenis_kp:
           type: integer
           nullable: true

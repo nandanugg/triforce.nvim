@@ -152,19 +152,19 @@ erDiagram
   timestamp_with_time_zone deleted_at
 }
 "kepegawaian.riwayat_golongan" {
-  integer id
+  varchar_36_ id
   varchar_36_ pns_id FK
   varchar_20_ pns_nip
   varchar_100_ pns_nama
   varchar_4_ kode_jenis_kp
-  varchar_50_ jenis_kp
+  varchar_100_ jenis_kp
   smallint golongan_id FK
   varchar_10_ golongan_nama
-  varchar_50_ pangkat_nama
-  varchar_50_ sk_nomor
+  varchar_100_ pangkat_nama
+  varchar_100_ sk_nomor
   varchar_100_ no_bkn
-  smallint jumlah_angka_kredit_utama
-  smallint jumlah_angka_kredit_tambahan
+  integer jumlah_angka_kredit_utama
+  integer jumlah_angka_kredit_tambahan
   smallint mk_golongan_tahun
   smallint mk_golongan_bulan
   date sk_tanggal

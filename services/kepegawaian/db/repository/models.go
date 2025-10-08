@@ -541,6 +541,7 @@ type RefJabatan struct {
 	// Waktu penghapusan data
 	DeletedAt        pgtype.Timestamptz `db:"deleted_at"`
 	TunjanganJabatan pgtype.Int8        `db:"tunjangan_jabatan"`
+	No               int32              `db:"no"`
 }
 
 // Referensi jenis diklat
@@ -827,7 +828,7 @@ type RiwayatAsesman struct {
 	// Hasil penilaian kinerja
 	NilaiKinerja pgtype.Float4 `db:"nilai_kinerja"`
 	// id tahun penilaian
-	TahunPenilaianID pgtype.Int2 `db:"tahun_penilaian_id"`
+	TahunPenilaianID pgtype.Text `db:"tahun_penilaian_id"`
 	// Judul tahun pada laporan hasil asesmen
 	TahunPenilaianTitle pgtype.Text `db:"tahun_penilaian_title"`
 	// Nama lengkap pegawai yang diases
@@ -899,9 +900,9 @@ type RiwayatDiklat struct {
 	// Tanggal selesai diklat
 	TanggalSelesai pgtype.Date `db:"tanggal_selesai"`
 	// Tahun pelaksanaan diklat
-	TahunDiklat pgtype.Int2 `db:"tahun_diklat"`
+	TahunDiklat pgtype.Int4 `db:"tahun_diklat"`
 	// Durasi pelatihan dalam jam
-	DurasiJam pgtype.Int2 `db:"durasi_jam"`
+	DurasiJam pgtype.Int4 `db:"durasi_jam"`
 	// Referensi pegawai (rujuk pegawai.pns_id)
 	PnsOrangID pgtype.Text `db:"pns_orang_id"`
 	// NIP pegawai
@@ -976,7 +977,7 @@ type RiwayatDiklatStruktural struct {
 // Riwayat golongan pegawai
 type RiwayatGolongan struct {
 	// id riwayat golongan
-	ID int32 `db:"id"`
+	ID string `db:"id"`
 	// Referensi pegawai (rujuk pegawai)
 	PnsID pgtype.Text `db:"pns_id"`
 	// NIP pegawai
@@ -998,9 +999,9 @@ type RiwayatGolongan struct {
 	// Nomor BKN
 	NoBkn pgtype.Text `db:"no_bkn"`
 	// Jumlah angka kredit utama
-	JumlahAngkaKreditUtama pgtype.Int2 `db:"jumlah_angka_kredit_utama"`
+	JumlahAngkaKreditUtama pgtype.Int4 `db:"jumlah_angka_kredit_utama"`
 	// Jumlah angka kredit tambahan
-	JumlahAngkaKreditTambahan pgtype.Int2 `db:"jumlah_angka_kredit_tambahan"`
+	JumlahAngkaKreditTambahan pgtype.Int4 `db:"jumlah_angka_kredit_tambahan"`
 	// Tahun pemberian golongan
 	MkGolonganTahun pgtype.Int2 `db:"mk_golongan_tahun"`
 	// Bulan pemberian golongan

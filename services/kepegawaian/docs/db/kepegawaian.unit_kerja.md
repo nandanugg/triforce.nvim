@@ -8,32 +8,32 @@ Referensi referensi unit kerja
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| id | varchar(36) |  | false | [kepegawaian.pegawai](kepegawaian.pegawai.md) [kepegawaian.pindah_unit](kepegawaian.pindah_unit.md) [kepegawaian.riwayat_asesmen](kepegawaian.riwayat_asesmen.md) [kepegawaian.riwayat_jabatan](kepegawaian.riwayat_jabatan.md) [kepegawaian.unit_kerja](kepegawaian.unit_kerja.md) |  | id unit organisasi (UUID) |
+| id | varchar(60) |  | false | [kepegawaian.pegawai](kepegawaian.pegawai.md) [kepegawaian.pindah_unit](kepegawaian.pindah_unit.md) [kepegawaian.riwayat_asesmen](kepegawaian.riwayat_asesmen.md) [kepegawaian.riwayat_jabatan](kepegawaian.riwayat_jabatan.md) [kepegawaian.unit_kerja](kepegawaian.unit_kerja.md) |  | id unit organisasi (UUID) |
 | no | integer |  | true |  |  | Nomor urut unit kerja |
-| kode_internal | varchar(36) |  | true |  |  | Kode internal unit organisasi |
+| kode_internal | varchar(60) |  | true |  |  | Kode internal unit organisasi |
 | nama_unor | varchar(200) |  | true |  |  | Nama unit organisasi |
-| eselon_id | varchar(36) |  | true |  |  | id eselon unit (bila berlaku) |
-| cepat_kode | varchar(36) |  | true |  |  | Kode cepat untuk pencarian unit kerja |
+| eselon_id | varchar(60) |  | true |  |  | id eselon unit (bila berlaku) |
+| cepat_kode | varchar(60) |  | true |  |  | Kode cepat untuk pencarian unit kerja |
 | nama_jabatan | varchar(200) |  | true |  |  | Nama jabatan dalam unit kerja |
 | nama_pejabat | varchar(200) |  | true |  |  | Nama pejabat yang menjabat |
-| diatasan_id | varchar(36) |  | true |  | [kepegawaian.unit_kerja](kepegawaian.unit_kerja.md) | Unit atasan langsung (self-reference ke unit_kerja) |
-| instansi_id | varchar(36) |  | true |  | [kepegawaian.ref_instansi](kepegawaian.ref_instansi.md) | id instansi pemilik unit (rujuk ref_instansi) |
-| pemimpin_pns_id | varchar(36) |  | true |  | [kepegawaian.pegawai](kepegawaian.pegawai.md) | ID PNS yang memimpin unit kerja |
-| jenis_unor_id | varchar(36) |  | true |  |  | Jenis unit organisasi (bila digunakan) |
-| unor_induk | varchar(36) |  | true |  |  | Unit organisasi induk |
+| diatasan_id | varchar(60) |  | true |  | [kepegawaian.unit_kerja](kepegawaian.unit_kerja.md) | Unit atasan langsung (self-reference ke unit_kerja) |
+| instansi_id | varchar(60) |  | true |  | [kepegawaian.ref_instansi](kepegawaian.ref_instansi.md) | id instansi pemilik unit (rujuk ref_instansi) |
+| pemimpin_pns_id | varchar(60) |  | true |  | [kepegawaian.pegawai](kepegawaian.pegawai.md) | ID PNS yang memimpin unit kerja |
+| jenis_unor_id | varchar(60) |  | true |  |  | Jenis unit organisasi (bila digunakan) |
+| unor_induk | varchar(60) |  | true |  |  | Unit organisasi induk |
 | jumlah_ideal_staff | smallint |  | true |  |  | Jumlah ideal staf dalam unit kerja |
 | order | integer |  | true |  |  | Urutan tampilan unit kerja |
-| is_satker | smallint | 0 | false |  |  | Penanda apakah unit merupakan Satuan Kerja |
-| eselon_1 | varchar(36) |  | true |  |  | Kode eselon 1 unit kerja |
-| eselon_2 | varchar(36) |  | true |  |  | Kode eselon 2 unit kerja |
-| eselon_3 | varchar(36) |  | true |  |  | Kode eselon 3 unit kerja |
-| eselon_4 | varchar(36) |  | true |  |  | Kode eselon 4 unit kerja |
+| is_satker | boolean | false | false |  |  | Penanda apakah unit merupakan Satuan Kerja |
+| eselon_1 | varchar(60) |  | true |  |  | Kode eselon 1 unit kerja |
+| eselon_2 | varchar(60) |  | true |  |  | Kode eselon 2 unit kerja |
+| eselon_3 | varchar(60) |  | true |  |  | Kode eselon 3 unit kerja |
+| eselon_4 | varchar(60) |  | true |  |  | Kode eselon 4 unit kerja |
 | expired_date | date |  | true |  |  | Tanggal kedaluwarsa unit kerja |
 | keterangan | varchar(200) |  | true |  |  | Keterangan tambahan untuk unit kerja |
 | jenis_satker | varchar(200) |  | true |  |  | Jenis satuan kerja |
 | abbreviation | varchar(200) |  | true |  |  | Singkatan unit organisasi |
 | unor_induk_penyetaraan | varchar(200) |  | true |  |  | Penyetaraan unit organisasi induk |
-| jabatan_id | varchar(32) |  | true |  |  | ID jabatan yang terkait dengan unit kerja |
+| jabatan_id | varchar(60) |  | true |  |  | ID jabatan yang terkait dengan unit kerja |
 | waktu | varchar(4) |  | true |  |  | Waktu pencatatan data unit kerja |
 | peraturan | varchar(100) |  | true |  |  | Peraturan yang mendasari unit kerja |
 | remark | varchar(50) |  | true |  |  | Catatan tambahan untuk unit kerja |
@@ -73,32 +73,32 @@ erDiagram
 "kepegawaian.unit_kerja" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pemimpin_pns_id) REFERENCES pegawai(pns_id)"
 
 "kepegawaian.unit_kerja" {
-  varchar_36_ id
+  varchar_60_ id
   integer no
-  varchar_36_ kode_internal
+  varchar_60_ kode_internal
   varchar_200_ nama_unor
-  varchar_36_ eselon_id
-  varchar_36_ cepat_kode
+  varchar_60_ eselon_id
+  varchar_60_ cepat_kode
   varchar_200_ nama_jabatan
   varchar_200_ nama_pejabat
-  varchar_36_ diatasan_id FK
-  varchar_36_ instansi_id FK
-  varchar_36_ pemimpin_pns_id FK
-  varchar_36_ jenis_unor_id
-  varchar_36_ unor_induk
+  varchar_60_ diatasan_id FK
+  varchar_60_ instansi_id FK
+  varchar_60_ pemimpin_pns_id FK
+  varchar_60_ jenis_unor_id
+  varchar_60_ unor_induk
   smallint jumlah_ideal_staff
   integer order
-  smallint is_satker
-  varchar_36_ eselon_1
-  varchar_36_ eselon_2
-  varchar_36_ eselon_3
-  varchar_36_ eselon_4
+  boolean is_satker
+  varchar_60_ eselon_1
+  varchar_60_ eselon_2
+  varchar_60_ eselon_3
+  varchar_60_ eselon_4
   date expired_date
   varchar_200_ keterangan
   varchar_200_ jenis_satker
   varchar_200_ abbreviation
   varchar_200_ unor_induk_penyetaraan
-  varchar_32_ jabatan_id
+  varchar_60_ jabatan_id
   varchar_4_ waktu
   varchar_100_ peraturan
   varchar_50_ remark
@@ -211,7 +211,7 @@ erDiagram
 }
 "kepegawaian.pindah_unit" {
   integer id
-  varchar_20_ nip
+  varchar_36_ nip
   varchar_200_ surat_permohonan_pindah
   varchar_36_ unit_asal FK
   varchar_36_ unit_tujuan FK
@@ -242,7 +242,7 @@ erDiagram
   varchar_200_ file_upload
   real nilai
   real nilai_kinerja
-  smallint tahun_penilaian_id
+  varchar_10_ tahun_penilaian_id
   varchar_50_ tahun_penilaian_title
   varchar_100_ nama_lengkap
   varchar_20_ posisi_id
@@ -282,7 +282,7 @@ erDiagram
   text eselon3
   text eselon4
   bigint id
-  varchar_200_ catatan
+  varchar_250_ catatan
   varchar_100_ jenis_sk
   integer status_satker
   integer status_biro

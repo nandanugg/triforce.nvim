@@ -12,17 +12,17 @@ Riwayat diklat fungsional pegawai
 | nip_baru | varchar(20) |  | true |  |  |  |
 | nip_lama | varchar(9) |  | true |  |  |  |
 | jenis_diklat | varchar(200) |  | true |  |  |  |
-| nama_kursus | varchar(200) |  | true |  |  |  |
+| nama_kursus | varchar(300) |  | true |  |  |  |
 | jumlah_jam | integer |  | true |  |  |  |
 | tahun | smallint |  | true |  |  |  |
-| institusi_penyelenggara | varchar(200) |  | true |  |  |  |
+| institusi_penyelenggara | varchar(300) |  | true |  |  |  |
 | jenis_kursus_sertifikat | varchar(1) |  | true |  |  |  |
-| no_sertifikat | varchar(100) |  | true |  |  |  |
-| instansi | varchar(200) |  | true |  |  |  |
+| no_sertifikat | varchar(200) |  | true |  |  |  |
+| instansi | varchar(300) |  | true |  |  |  |
 | status_data | varchar(50) |  | true |  |  |  |
 | tanggal_kursus | date |  | true |  |  |  |
 | file_base64 | text |  | true |  |  |  |
-| keterangan_berkas | varchar(200) |  | true |  |  |  |
+| keterangan_berkas | varchar(300) |  | true |  |  |  |
 | lama | real |  | true |  |  |  |
 | siasn_id | varchar(36) |  | true |  |  |  |
 | created_at | timestamp with time zone | now() | true |  |  |  |
@@ -52,17 +52,17 @@ erDiagram
   varchar_20_ nip_baru
   varchar_9_ nip_lama
   varchar_200_ jenis_diklat
-  varchar_200_ nama_kursus
+  varchar_300_ nama_kursus
   integer jumlah_jam
   smallint tahun
-  varchar_200_ institusi_penyelenggara
+  varchar_300_ institusi_penyelenggara
   varchar_1_ jenis_kursus_sertifikat
-  varchar_100_ no_sertifikat
-  varchar_200_ instansi
+  varchar_200_ no_sertifikat
+  varchar_300_ instansi
   varchar_50_ status_data
   date tanggal_kursus
   text file_base64
-  varchar_200_ keterangan_berkas
+  varchar_300_ keterangan_berkas
   real lama
   varchar_36_ siasn_id
   timestamp_with_time_zone created_at

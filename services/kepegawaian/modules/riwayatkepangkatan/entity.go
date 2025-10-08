@@ -7,7 +7,7 @@ import (
 )
 
 type riwayatKepangkatan struct {
-	ID                        int32       `json:"id"`
+	ID                        string      `json:"id"`
 	IDJenisKP                 pgtype.Int4 `json:"id_jenis_kp"`
 	NamaJenisKP               string      `json:"nama_jenis_kp"`
 	IDGolongan                pgtype.Int4 `json:"id_golongan"`
@@ -20,6 +20,6 @@ type riwayatKepangkatan struct {
 	MKGolonganBulan           pgtype.Int2 `json:"mk_golongan_bulan"`
 	NoBKN                     string      `json:"no_bkn"`
 	TanggalBKN                db.Date     `json:"tanggal_bkn"`
-	JumlahAngkaKreditTambahan pgtype.Int2 `json:"jumlah_angka_kredit_tambahan"`
-	JumlahAngkaKreditUtama    pgtype.Int2 `json:"jumlah_angka_kredit_utama"`
+	JumlahAngkaKreditTambahan pgtype.Int4 `json:"jumlah_angka_kredit_tambahan"`
+	JumlahAngkaKreditUtama    pgtype.Int4 `json:"jumlah_angka_kredit_utama"`
 }

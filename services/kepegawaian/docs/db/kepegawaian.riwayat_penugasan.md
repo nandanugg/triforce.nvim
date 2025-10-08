@@ -10,12 +10,12 @@ Riwayat penugasan pegawai
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
 | id | integer | nextval('riwayat_penugasan_id_seq'::regclass) | false |  |  | ID unik data penugasan |
 | tipe_jabatan | varchar(200) |  | true |  |  | Tipe jabatan |
-| deskripsi_jabatan | varchar(200) |  | true |  |  | Deskripsi jabatan |
+| deskripsi_jabatan | varchar(3000) |  | true |  |  | Deskripsi jabatan |
 | tanggal_mulai | date |  | true |  |  | Tanggal mulai penugasan |
 | tanggal_selesai | date |  | true |  |  | Tanggal selesai penugasan |
 | file_base64 | text |  | true |  |  | Berkas bukti penugasan dalam format base64 |
 | nip | varchar(20) |  | true |  |  | NIP pegawai |
-| nama_jabatan | varchar(200) |  | true |  |  | Nama jabatan |
+| nama_jabatan | varchar(400) |  | true |  |  | Nama jabatan |
 | is_menjabat | boolean |  | true |  |  | Penanda apakah pegawai masih menjabat |
 | created_at | timestamp with time zone | now() | true |  |  | Waktu perekaman data |
 | updated_at | timestamp with time zone | now() | true |  |  | Waktu terakhir pembaruan data |
@@ -42,12 +42,12 @@ erDiagram
 "kepegawaian.riwayat_penugasan" {
   integer id
   varchar_200_ tipe_jabatan
-  varchar_200_ deskripsi_jabatan
+  varchar_3000_ deskripsi_jabatan
   date tanggal_mulai
   date tanggal_selesai
   text file_base64
   varchar_20_ nip
-  varchar_200_ nama_jabatan
+  varchar_400_ nama_jabatan
   boolean is_menjabat
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at

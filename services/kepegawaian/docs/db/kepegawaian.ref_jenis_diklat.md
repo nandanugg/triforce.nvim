@@ -50,16 +50,16 @@ erDiagram
   bigint id
   varchar_200_ jenis_diklat
   smallint jenis_diklat_id FK
-  varchar_200_ institusi_penyelenggara
-  varchar_100_ no_sertifikat
+  varchar_600_ institusi_penyelenggara
+  varchar_600_ no_sertifikat
   date tanggal_mulai
   date tanggal_selesai
-  smallint tahun_diklat
-  smallint durasi_jam
+  integer tahun_diklat
+  integer durasi_jam
   varchar_36_ pns_orang_id FK
   varchar_20_ nip_baru
   varchar_36_ diklat_struktural_id
-  varchar_200_ nama_diklat
+  varchar_700_ nama_diklat
   text file_base64
   varchar_200_ rumpun_diklat_nama
   varchar_36_ rumpun_diklat_id

@@ -9,20 +9,21 @@ Referensi jabatan
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
 | kode_jabatan | varchar(36) |  | false | [kepegawaian.pegawai](kepegawaian.pegawai.md) [kepegawaian.riwayat_jabatan](kepegawaian.riwayat_jabatan.md) |  | Kode unik jabatan |
-| id | integer |  | false |  |  | id jabatan |
-| no | integer |  | false |  |  | sama dengan id jabatan |
-| nama_jabatan | varchar(200) |  | true |  |  | Nama jabatan |
-| nama_jabatan_full | varchar(200) |  | true |  |  | Nama jabatan lengkap |
+| id | integer | nextval('ref_jabatan_id_seq'::regclass) | false |  |  | id jabatan |
+| nama_jabatan | varchar(400) |  | true |  |  | Nama jabatan |
+| nama_jabatan_full | varchar(400) |  | true |  |  | Nama jabatan lengkap |
 | jenis_jabatan | smallint |  | true |  |  | Kode jenis jabatan |
 | kelas | smallint |  | true |  |  | Kelas jabatan |
 | pensiun | smallint |  | true |  |  | Usia pensiun jabatan terkait |
 | kode_bkn | varchar(36) |  | true |  |  | Kode pada sistem BKN |
-| nama_jabatan_bkn | varchar(200) |  | true |  |  | Nama jabatan pada sistem BKN |
+| nama_jabatan_bkn | varchar(400) |  | true |  |  | Nama jabatan pada sistem BKN |
 | kategori_jabatan | varchar(100) |  | true |  |  | Nama kategori jabatan |
 | bkn_id | varchar(36) |  | true |  |  | id pada sistem BKN |
 | created_at | timestamp with time zone | now() | true |  |  | Waktu perekaman data |
 | updated_at | timestamp with time zone | now() | true |  |  | Waktu terakhir pembaruan |
 | deleted_at | timestamp with time zone |  | true |  |  | Waktu penghapusan data |
+| tunjangan_jabatan | bigint |  | true |  |  |  |
+| no | integer | nextval('ref_jabatan_no_seq'::regclass) | false |  |  |  |
 
 ## Constraints
 
@@ -49,19 +50,20 @@ erDiagram
 "kepegawaian.ref_jabatan" {
   varchar_36_ kode_jabatan
   integer id
-  integer no
-  varchar_200_ nama_jabatan
-  varchar_200_ nama_jabatan_full
+  varchar_400_ nama_jabatan
+  varchar_400_ nama_jabatan_full
   smallint jenis_jabatan
   smallint kelas
   smallint pensiun
   varchar_36_ kode_bkn
-  varchar_200_ nama_jabatan_bkn
+  varchar_400_ nama_jabatan_bkn
   varchar_100_ kategori_jabatan
   varchar_36_ bkn_id
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  bigint tunjangan_jabatan
+  integer no
 }
 "kepegawaian.pegawai" {
   integer id
@@ -188,7 +190,7 @@ erDiagram
   text eselon3
   text eselon4
   bigint id
-  varchar_200_ catatan
+  varchar_250_ catatan
   varchar_100_ jenis_sk
   integer status_satker
   integer status_biro

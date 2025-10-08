@@ -144,32 +144,32 @@ erDiagram
   timestamp_with_time_zone deleted_at
 }
 "kepegawaian.unit_kerja" {
-  varchar_36_ id
+  varchar_60_ id
   integer no
-  varchar_36_ kode_internal
+  varchar_60_ kode_internal
   varchar_200_ nama_unor
-  varchar_36_ eselon_id
-  varchar_36_ cepat_kode
+  varchar_60_ eselon_id
+  varchar_60_ cepat_kode
   varchar_200_ nama_jabatan
   varchar_200_ nama_pejabat
-  varchar_36_ diatasan_id FK
-  varchar_36_ instansi_id FK
-  varchar_36_ pemimpin_pns_id FK
-  varchar_36_ jenis_unor_id
-  varchar_36_ unor_induk
+  varchar_60_ diatasan_id FK
+  varchar_60_ instansi_id FK
+  varchar_60_ pemimpin_pns_id FK
+  varchar_60_ jenis_unor_id
+  varchar_60_ unor_induk
   smallint jumlah_ideal_staff
   integer order
-  smallint is_satker
-  varchar_36_ eselon_1
-  varchar_36_ eselon_2
-  varchar_36_ eselon_3
-  varchar_36_ eselon_4
+  boolean is_satker
+  varchar_60_ eselon_1
+  varchar_60_ eselon_2
+  varchar_60_ eselon_3
+  varchar_60_ eselon_4
   date expired_date
   varchar_200_ keterangan
   varchar_200_ jenis_satker
   varchar_200_ abbreviation
   varchar_200_ unor_induk_penyetaraan
-  varchar_32_ jabatan_id
+  varchar_60_ jabatan_id
   varchar_4_ waktu
   varchar_100_ peraturan
   varchar_50_ remark

@@ -8,19 +8,19 @@ Riwayat golongan pegawai
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| id | integer | nextval('riwayat_golongan_id_seq'::regclass) | false |  |  | id riwayat golongan |
+| id | varchar(36) |  | false |  |  | id riwayat golongan |
 | pns_id | varchar(36) |  | true |  | [kepegawaian.pegawai](kepegawaian.pegawai.md) | Referensi pegawai (rujuk pegawai) |
 | pns_nip | varchar(20) |  | true |  |  | NIP pegawai |
 | pns_nama | varchar(100) |  | true |  |  | Nama pegawai |
 | kode_jenis_kp | varchar(4) |  | true |  |  | Kode jenis kp |
-| jenis_kp | varchar(50) |  | true |  |  | Jenis kp |
+| jenis_kp | varchar(100) |  | true |  |  | Jenis kp |
 | golongan_id | smallint |  | true |  | [kepegawaian.ref_golongan](kepegawaian.ref_golongan.md) | id golongan pegawai |
 | golongan_nama | varchar(10) |  | true |  |  | Nama golongan pegawai |
-| pangkat_nama | varchar(50) |  | true |  |  | Nama pangkat |
-| sk_nomor | varchar(50) |  | true |  |  | Nomor SK pemberian golongan |
+| pangkat_nama | varchar(100) |  | true |  |  | Nama pangkat |
+| sk_nomor | varchar(100) |  | true |  |  | Nomor SK pemberian golongan |
 | no_bkn | varchar(100) |  | true |  |  | Nomor BKN |
-| jumlah_angka_kredit_utama | smallint |  | true |  |  | Jumlah angka kredit utama |
-| jumlah_angka_kredit_tambahan | smallint |  | true |  |  | Jumlah angka kredit tambahan |
+| jumlah_angka_kredit_utama | integer |  | true |  |  | Jumlah angka kredit utama |
+| jumlah_angka_kredit_tambahan | integer |  | true |  |  | Jumlah angka kredit tambahan |
 | mk_golongan_tahun | smallint |  | true |  |  | Tahun pemberian golongan |
 | mk_golongan_bulan | smallint |  | true |  |  | Bulan pemberian golongan |
 | sk_tanggal | date |  | true |  |  | Tanggal SK pemberian golongan |
@@ -71,19 +71,19 @@ erDiagram
 "kepegawaian.riwayat_golongan" }o--o| "kepegawaian.ref_jenis_kenaikan_pangkat" : "FOREIGN KEY (jenis_kp_id) REFERENCES ref_jenis_kenaikan_pangkat(id)"
 
 "kepegawaian.riwayat_golongan" {
-  integer id
+  varchar_36_ id
   varchar_36_ pns_id FK
   varchar_20_ pns_nip
   varchar_100_ pns_nama
   varchar_4_ kode_jenis_kp
-  varchar_50_ jenis_kp
+  varchar_100_ jenis_kp
   smallint golongan_id FK
   varchar_10_ golongan_nama
-  varchar_50_ pangkat_nama
-  varchar_50_ sk_nomor
+  varchar_100_ pangkat_nama
+  varchar_100_ sk_nomor
   varchar_100_ no_bkn
-  smallint jumlah_angka_kredit_utama
-  smallint jumlah_angka_kredit_tambahan
+  integer jumlah_angka_kredit_utama
+  integer jumlah_angka_kredit_tambahan
   smallint mk_golongan_tahun
   smallint mk_golongan_bulan
   date sk_tanggal
@@ -224,7 +224,7 @@ erDiagram
 "kepegawaian.ref_jenis_kenaikan_pangkat" {
   integer id
   varchar_4_ dikbud_hr_id
-  varchar_50_ nama
+  varchar_100_ nama
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at

@@ -45,7 +45,7 @@ func (s *service) list(ctx context.Context, nip string, limit, offset uint) ([]r
 
 	return typeutil.Map(data, func(row sqlc.ListRiwayatPelatihanSIASNRow) riwayatPelatihanSIASN {
 		if !row.TahunDiklat.Valid && row.TanggalSelesai.Valid {
-			row.TahunDiklat = pgtype.Int2{Int16: int16(row.TanggalSelesai.Time.Year()), Valid: true}
+			row.TahunDiklat = pgtype.Int4{Int32: int32(row.TanggalSelesai.Time.Year()), Valid: true}
 		}
 
 		return riwayatPelatihanSIASN{

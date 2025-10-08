@@ -42,7 +42,7 @@ func (h *handler) list(c echo.Context) error {
 }
 
 type getBerkasRequest struct {
-	ID int32 `param:"id"`
+	ID string `param:"id"`
 }
 
 func (h *handler) getBerkas(c echo.Context) error {
@@ -92,7 +92,7 @@ func (h *handler) listAdmin(c echo.Context) error {
 
 type getBerkasAdminRequest struct {
 	NIP string `param:"nip"`
-	ID  int32  `param:"id"`
+	ID  string `param:"id"`
 }
 
 func (h *handler) getBerkasAdmin(c echo.Context) error {

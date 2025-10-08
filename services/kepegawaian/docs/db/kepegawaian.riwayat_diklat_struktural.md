@@ -14,7 +14,7 @@ Riwayat diklat struktural pegawai
 | pns_nama | varchar(100) |  | true |  |  |  |
 | jenis_diklat_id | integer |  | true |  | [kepegawaian.ref_jenis_diklat_struktural](kepegawaian.ref_jenis_diklat_struktural.md) |  |
 | nama_diklat | varchar(200) |  | true |  |  |  |
-| nomor | varchar(100) |  | true |  |  |  |
+| nomor | varchar(300) |  | true |  |  |  |
 | tanggal | date |  | true |  |  |  |
 | tahun | smallint |  | true |  |  |  |
 | status_data | varchar(10) |  | true |  |  |  |
@@ -55,7 +55,7 @@ erDiagram
   varchar_100_ pns_nama
   integer jenis_diklat_id FK
   varchar_200_ nama_diklat
-  varchar_100_ nomor
+  varchar_300_ nomor
   date tanggal
   smallint tahun
   varchar_10_ status_data

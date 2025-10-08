@@ -69,8 +69,8 @@ type ListRiwayatPelatihanSIASNRow struct {
 	NoSertifikat           pgtype.Text `db:"no_sertifikat"`
 	TanggalMulai           pgtype.Date `db:"tanggal_mulai"`
 	TanggalSelesai         pgtype.Date `db:"tanggal_selesai"`
-	TahunDiklat            pgtype.Int2 `db:"tahun_diklat"`
-	DurasiJam              pgtype.Int2 `db:"durasi_jam"`
+	TahunDiklat            pgtype.Int4 `db:"tahun_diklat"`
+	DurasiJam              pgtype.Int4 `db:"durasi_jam"`
 	InstitusiPenyelenggara pgtype.Text `db:"institusi_penyelenggara"`
 }
 

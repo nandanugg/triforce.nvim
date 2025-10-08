@@ -47,7 +47,7 @@ erDiagram
   varchar_100_ pns_nama
   integer jenis_diklat_id FK
   varchar_200_ nama_diklat
-  varchar_100_ nomor
+  varchar_300_ nomor
   date tanggal
   smallint tahun
   varchar_10_ status_data

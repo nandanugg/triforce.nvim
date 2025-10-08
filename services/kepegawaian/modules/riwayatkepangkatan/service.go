@@ -66,7 +66,7 @@ func (s *service) list(ctx context.Context, nip string, limit, offset uint) ([]r
 	return result, uint(count), nil
 }
 
-func (s *service) getBerkas(ctx context.Context, nip string, id int32) (string, []byte, error) {
+func (s *service) getBerkas(ctx context.Context, nip string, id string) (string, []byte, error) {
 	res, err := s.repo.GetBerkasRiwayatKepangkatan(ctx, dbrepo.GetBerkasRiwayatKepangkatanParams{
 		PnsNip: pgtype.Text{String: nip, Valid: true},
 		ID:     id,

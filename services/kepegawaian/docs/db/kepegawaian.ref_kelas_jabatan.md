@@ -64,7 +64,7 @@ erDiagram
   text eselon3
   text eselon4
   bigint id
-  varchar_200_ catatan
+  varchar_250_ catatan
   varchar_100_ jenis_sk
   integer status_satker
   integer status_biro

@@ -65,7 +65,7 @@ func Test_handler_list(t *testing.T) {
 			wantResponseBody: `{
 				"data": [
 					{
-						"id":                26,
+						"id":                "26",
 						"id_jenis_kp":       null,
 						"nama_jenis_kp":     "",
 						"id_golongan":       null,
@@ -82,7 +82,7 @@ func Test_handler_list(t *testing.T) {
 						"jumlah_angka_kredit_utama":    2
 					},
 					{
-						"id":                23,
+						"id":                "23",
 						"id_jenis_kp":       23,
 						"nama_jenis_kp":     "jenis-kp-3",
 						"id_golongan":       23,
@@ -99,7 +99,7 @@ func Test_handler_list(t *testing.T) {
 						"jumlah_angka_kredit_utama":    2
 					},
 					{
-						"id":                22,
+						"id":                "22",
 						"id_jenis_kp":       22,
 						"nama_jenis_kp":     "jenis-kp-2",
 						"id_golongan":       22,
@@ -116,7 +116,7 @@ func Test_handler_list(t *testing.T) {
 						"jumlah_angka_kredit_utama":    2
 					},
 					{
-						"id":                21,
+						"id":                "21",
 						"id_jenis_kp":       21,
 						"nama_jenis_kp":     "jenis-kp-1",
 						"id_golongan":       21,
@@ -145,7 +145,7 @@ func Test_handler_list(t *testing.T) {
 			wantResponseBody: `{
 				"data": [
 					{
-						"id":                           23,
+						"id":                           "23",
 						"id_jenis_kp":                  23,
 						"nama_jenis_kp":                "jenis-kp-3",
 						"id_golongan":                  23,
@@ -231,14 +231,14 @@ func Test_handler_getBerkas(t *testing.T) {
 
 	dbData := `
 		insert into riwayat_golongan
-			(id, pns_nip, deleted_at,   file_base64) values
-			(1, '1c',     null,         'data:application/pdf;base64,` + pdfBase64 + `'),
-			(2, '1c',     null,         '` + pdfBase64 + `'),
-			(3, '1c',     null,         'data:images/png;base64,` + pngBase64 + `'),
-			(4, '1c',     null,         'data:application/pdf;base64,invalid'),
-			(5, '1c',     '2020-01-02', 'data:application/pdf;base64,` + pdfBase64 + `'),
-			(6, '1c',     null,         null),
-			(7, '1c',     null,         '');
+			(id,   pns_nip, deleted_at,   file_base64) values
+			('1a', '1c',     null,         'data:application/pdf;base64,` + pdfBase64 + `'),
+			('2',  '1c',     null,         '` + pdfBase64 + `'),
+			('3',  '1c',     null,         'data:images/png;base64,` + pngBase64 + `'),
+			('4',  '1c',     null,         'data:application/pdf;base64,invalid'),
+			('5',  '1c',     '2020-01-02', 'data:application/pdf;base64,` + pdfBase64 + `'),
+			('6',  '1c',     null,         null),
+			('7',  '1c',     null,         '');
 		`
 
 	tests := []struct {
@@ -253,7 +253,7 @@ func Test_handler_getBerkas(t *testing.T) {
 		{
 			name:              "ok: valid pdf with data: prefix",
 			dbData:            dbData,
-			paramID:           "1",
+			paramID:           "1a",
 			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1c")}},
 			wantResponseCode:  http.StatusOK,
 			wantContentType:   "application/pdf",
@@ -324,14 +324,6 @@ func Test_handler_getBerkas(t *testing.T) {
 			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1c")}},
 			wantResponseCode:  http.StatusNotFound,
 			wantResponseBytes: []byte(`{"message": "berkas riwayat kepangkatan tidak ditemukan"}`),
-		},
-		{
-			name:              "error: invalid id",
-			dbData:            dbData,
-			paramID:           "abc",
-			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1c")}},
-			wantResponseCode:  http.StatusBadRequest,
-			wantResponseBytes: []byte(`{"message": "parameter \"id\" harus dalam format yang sesuai"}`),
 		},
 		{
 			name:              "error: auth header tidak valid",
@@ -418,7 +410,7 @@ func Test_handler_listAdmin(t *testing.T) {
 			wantResponseBody: `{
 				"data": [
 					{
-						"id":                26,
+						"id":                "26",
 						"id_jenis_kp":       null,
 						"nama_jenis_kp":     "",
 						"id_golongan":       null,
@@ -435,7 +427,7 @@ func Test_handler_listAdmin(t *testing.T) {
 						"jumlah_angka_kredit_utama":    2
 					},
 					{
-						"id":                23,
+						"id":                "23",
 						"id_jenis_kp":       23,
 						"nama_jenis_kp":     "jenis-kp-3",
 						"id_golongan":       23,
@@ -452,7 +444,7 @@ func Test_handler_listAdmin(t *testing.T) {
 						"jumlah_angka_kredit_utama":    2
 					},
 					{
-						"id":                22,
+						"id":                "22",
 						"id_jenis_kp":       22,
 						"nama_jenis_kp":     "jenis-kp-2",
 						"id_golongan":       22,
@@ -469,7 +461,7 @@ func Test_handler_listAdmin(t *testing.T) {
 						"jumlah_angka_kredit_utama":    2
 					},
 					{
-						"id":                21,
+						"id":                "21",
 						"id_jenis_kp":       21,
 						"nama_jenis_kp":     "jenis-kp-1",
 						"id_golongan":       21,
@@ -499,7 +491,7 @@ func Test_handler_listAdmin(t *testing.T) {
 			wantResponseBody: `{
 				"data": [
 					{
-						"id":                           23,
+						"id":                           "23",
 						"id_jenis_kp":                  23,
 						"nama_jenis_kp":                "jenis-kp-3",
 						"id_golongan":                  23,
@@ -595,14 +587,14 @@ func Test_handler_getBerkasAdmin(t *testing.T) {
 
 	dbData := `
 		insert into riwayat_golongan
-			(id, pns_nip, deleted_at,   file_base64) values
-			(1, '1c',     null,         'data:application/pdf;base64,` + pdfBase64 + `'),
-			(2, '1c',     null,         '` + pdfBase64 + `'),
-			(3, '1c',     null,         'data:images/png;base64,` + pngBase64 + `'),
-			(4, '1c',     null,         'data:application/pdf;base64,invalid'),
-			(5, '1c',     '2020-01-02', 'data:application/pdf;base64,` + pdfBase64 + `'),
-			(6, '1c',     null,         null),
-			(7, '1c',     null,         '');
+			(id,   pns_nip, deleted_at,   file_base64) values
+			('1a', '1c',     null,         'data:application/pdf;base64,` + pdfBase64 + `'),
+			('2',  '1c',     null,         '` + pdfBase64 + `'),
+			('3',  '1c',     null,         'data:images/png;base64,` + pngBase64 + `'),
+			('4',  '1c',     null,         'data:application/pdf;base64,invalid'),
+			('5',  '1c',     '2020-01-02', 'data:application/pdf;base64,` + pdfBase64 + `'),
+			('6',  '1c',     null,         null),
+			('7',  '1c',     null,         '');
 		`
 
 	tests := []struct {
@@ -619,7 +611,7 @@ func Test_handler_getBerkasAdmin(t *testing.T) {
 			name:              "ok: valid pdf with data: prefix",
 			dbData:            dbData,
 			nip:               "1c",
-			paramID:           "1",
+			paramID:           "1a",
 			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
 			wantResponseCode:  http.StatusOK,
 			wantContentType:   "application/pdf",
@@ -689,15 +681,6 @@ func Test_handler_getBerkasAdmin(t *testing.T) {
 			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
 			wantResponseCode:  http.StatusNotFound,
 			wantResponseBytes: []byte(`{"message": "berkas riwayat kepangkatan tidak ditemukan"}`),
-		},
-		{
-			name:              "error: invalid id",
-			dbData:            dbData,
-			nip:               "1c",
-			paramID:           "abc",
-			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
-			wantResponseCode:  http.StatusBadRequest,
-			wantResponseBytes: []byte(`{"message": "parameter \"id\" harus dalam format yang sesuai"}`),
 		},
 		{
 			name:              "error: user is not an admin",

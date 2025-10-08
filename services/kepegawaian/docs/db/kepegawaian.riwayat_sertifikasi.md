@@ -11,7 +11,7 @@ Riwayat sertifikasi pegawai
 | id | bigint | nextval('riwayat_sertifikasi_id_seq'::regclass) | false |  |  | id unik data sertifikasi |
 | nip | varchar(20) |  | true |  |  | NIP pegawai |
 | tahun | bigint |  | true |  |  | Tahun sertifikasi |
-| nama_sertifikasi | varchar(255) |  | true |  |  | Nama sertifikasi |
+| nama_sertifikasi | varchar(300) |  | true |  |  | Nama sertifikasi |
 | file_base64 | text |  | true |  |  | Berkas bukti sertifikasi dalam format base64 |
 | deskripsi | text |  | true |  |  | Deskripsi sertifikasi |
 | created_at | timestamp with time zone | now() | true |  |  | Waktu perekaman data |
@@ -28,7 +28,7 @@ erDiagram
   bigint id
   varchar_20_ nip
   bigint tahun
-  varchar_255_ nama_sertifikasi
+  varchar_300_ nama_sertifikasi
   text file_base64
   text deskripsi
   timestamp_with_time_zone created_at

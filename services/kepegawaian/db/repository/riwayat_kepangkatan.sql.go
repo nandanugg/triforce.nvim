@@ -28,7 +28,7 @@ where pns_nip = $1 and id = $2 and deleted_at is null
 
 type GetBerkasRiwayatKepangkatanParams struct {
 	PnsNip pgtype.Text `db:"pns_nip"`
-	ID     int32       `db:"id"`
+	ID     string      `db:"id"`
 }
 
 func (q *Queries) GetBerkasRiwayatKepangkatan(ctx context.Context, arg GetBerkasRiwayatKepangkatanParams) (pgtype.Text, error) {
@@ -70,7 +70,7 @@ type ListRiwayatKepangkatanParams struct {
 }
 
 type ListRiwayatKepangkatanRow struct {
-	ID                        int32       `db:"id"`
+	ID                        string      `db:"id"`
 	JenisKpID                 pgtype.Int4 `db:"jenis_kp_id"`
 	NamaJenisKp               pgtype.Text `db:"nama_jenis_kp"`
 	GolonganID                pgtype.Int4 `db:"golongan_id"`
@@ -83,8 +83,8 @@ type ListRiwayatKepangkatanRow struct {
 	MkGolonganBulan           pgtype.Int2 `db:"mk_golongan_bulan"`
 	NoBkn                     pgtype.Text `db:"no_bkn"`
 	TanggalBkn                pgtype.Date `db:"tanggal_bkn"`
-	JumlahAngkaKreditTambahan pgtype.Int2 `db:"jumlah_angka_kredit_tambahan"`
-	JumlahAngkaKreditUtama    pgtype.Int2 `db:"jumlah_angka_kredit_utama"`
+	JumlahAngkaKreditTambahan pgtype.Int4 `db:"jumlah_angka_kredit_tambahan"`
+	JumlahAngkaKreditUtama    pgtype.Int4 `db:"jumlah_angka_kredit_utama"`
 }
 
 func (q *Queries) ListRiwayatKepangkatan(ctx context.Context, arg ListRiwayatKepangkatanParams) ([]ListRiwayatKepangkatanRow, error) {

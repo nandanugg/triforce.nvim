@@ -31,7 +31,7 @@ Riwayat jabatan pegawai
 | eselon3 | text |  | true |  |  | Unit eselon 3 terkait jabatan |
 | eselon4 | text |  | true |  |  | Unit eselon 4 terkait jabatan |
 | id | bigint | nextval('riwayat_jabatan_id_seq'::regclass) | false |  |  | id riwayat jabatan |
-| catatan | varchar(200) |  | true |  |  | Catatan atas riwayat jabatan |
+| catatan | varchar(250) |  | true |  |  | Catatan atas riwayat jabatan |
 | jenis_sk | varchar(100) |  | true |  |  | Kategori/jenis SK jabatan |
 | status_satker | integer |  | true |  |  | Status persetujuan satuan kerja |
 | status_biro | integer |  | true |  |  | Status persetujuan biro kepegawaian |
@@ -55,8 +55,8 @@ Riwayat jabatan pegawai
 | fk_riwayat_jabatan_jabatan_id | FOREIGN KEY | FOREIGN KEY (jabatan_id) REFERENCES ref_jabatan(kode_jabatan) |
 | fk_riwayat_jabatan_pns_id | FOREIGN KEY | FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id) |
 | riwayat_jabatan_pkey | PRIMARY KEY | PRIMARY KEY (id) |
-| fk_riwayat_jabatan_satuan_kerja | FOREIGN KEY | FOREIGN KEY (satuan_kerja_id) REFERENCES unit_kerja(id) |
 | riwayat_jabatan_kelas_jabatan_id_fkey | FOREIGN KEY | FOREIGN KEY (kelas_jabatan_id) REFERENCES ref_kelas_jabatan(id) |
+| fk_riwayat_jabatan_satuan_kerja | FOREIGN KEY | FOREIGN KEY (satuan_kerja_id) REFERENCES unit_kerja(id) |
 
 ## Indexes
 
@@ -98,7 +98,7 @@ erDiagram
   text eselon3
   text eselon4
   bigint id
-  varchar_200_ catatan
+  varchar_250_ catatan
   varchar_100_ jenis_sk
   integer status_satker
   integer status_biro
@@ -219,47 +219,48 @@ erDiagram
 "kepegawaian.ref_jabatan" {
   varchar_36_ kode_jabatan
   integer id
-  integer no
-  varchar_200_ nama_jabatan
-  varchar_200_ nama_jabatan_full
+  varchar_400_ nama_jabatan
+  varchar_400_ nama_jabatan_full
   smallint jenis_jabatan
   smallint kelas
   smallint pensiun
   varchar_36_ kode_bkn
-  varchar_200_ nama_jabatan_bkn
+  varchar_400_ nama_jabatan_bkn
   varchar_100_ kategori_jabatan
   varchar_36_ bkn_id
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  bigint tunjangan_jabatan
+  integer no
 }
 "kepegawaian.unit_kerja" {
-  varchar_36_ id
+  varchar_60_ id
   integer no
-  varchar_36_ kode_internal
+  varchar_60_ kode_internal
   varchar_200_ nama_unor
-  varchar_36_ eselon_id
-  varchar_36_ cepat_kode
+  varchar_60_ eselon_id
+  varchar_60_ cepat_kode
   varchar_200_ nama_jabatan
   varchar_200_ nama_pejabat
-  varchar_36_ diatasan_id FK
-  varchar_36_ instansi_id FK
-  varchar_36_ pemimpin_pns_id FK
-  varchar_36_ jenis_unor_id
-  varchar_36_ unor_induk
+  varchar_60_ diatasan_id FK
+  varchar_60_ instansi_id FK
+  varchar_60_ pemimpin_pns_id FK
+  varchar_60_ jenis_unor_id
+  varchar_60_ unor_induk
   smallint jumlah_ideal_staff
   integer order
-  smallint is_satker
-  varchar_36_ eselon_1
-  varchar_36_ eselon_2
-  varchar_36_ eselon_3
-  varchar_36_ eselon_4
+  boolean is_satker
+  varchar_60_ eselon_1
+  varchar_60_ eselon_2
+  varchar_60_ eselon_3
+  varchar_60_ eselon_4
   date expired_date
   varchar_200_ keterangan
   varchar_200_ jenis_satker
   varchar_200_ abbreviation
   varchar_200_ unor_induk_penyetaraan
-  varchar_32_ jabatan_id
+  varchar_60_ jabatan_id
   varchar_4_ waktu
   varchar_100_ peraturan
   varchar_50_ remark

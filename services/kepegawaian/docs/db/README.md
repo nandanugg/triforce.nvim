@@ -8,7 +8,7 @@
 | [kepegawaian.ref_agama](kepegawaian.ref_agama.md) | 5 | Referensi agama | BASE TABLE |
 | [kepegawaian.ref_golongan](kepegawaian.ref_golongan.md) | 9 | Referensi golongan | BASE TABLE |
 | [kepegawaian.ref_instansi](kepegawaian.ref_instansi.md) | 5 | Referensi instansi | BASE TABLE |
-| [kepegawaian.ref_jabatan](kepegawaian.ref_jabatan.md) | 15 | Referensi jabatan | BASE TABLE |
+| [kepegawaian.ref_jabatan](kepegawaian.ref_jabatan.md) | 16 | Referensi jabatan | BASE TABLE |
 | [kepegawaian.ref_jenis_diklat](kepegawaian.ref_jenis_diklat.md) | 8 | Referensi jenis diklat | BASE TABLE |
 | [kepegawaian.ref_jenis_diklat_fungsional](kepegawaian.ref_jenis_diklat_fungsional.md) | 5 | Referensi jenis diklat fungsional | BASE TABLE |
 | [kepegawaian.ref_jenis_diklat_struktural](kepegawaian.ref_jenis_diklat_struktural.md) | 5 | Referensi jenis diklat struktural | BASE TABLE |
@@ -107,8 +107,8 @@ erDiagram
 "kepegawaian.riwayat_hukuman_disiplin" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
 "kepegawaian.riwayat_jabatan" }o--o| "kepegawaian.ref_jabatan" : "FOREIGN KEY (jabatan_id) REFERENCES ref_jabatan(kode_jabatan)"
 "kepegawaian.riwayat_jabatan" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
-"kepegawaian.riwayat_jabatan" }o--o| "kepegawaian.unit_kerja" : "FOREIGN KEY (satuan_kerja_id) REFERENCES unit_kerja(id)"
 "kepegawaian.riwayat_jabatan" }o--o| "kepegawaian.ref_kelas_jabatan" : "FOREIGN KEY (kelas_jabatan_id) REFERENCES ref_kelas_jabatan(id)"
+"kepegawaian.riwayat_jabatan" }o--o| "kepegawaian.unit_kerja" : "FOREIGN KEY (satuan_kerja_id) REFERENCES unit_kerja(id)"
 "kepegawaian.riwayat_kursus" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
 "kepegawaian.riwayat_pendidikan" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
 "kepegawaian.riwayat_pendidikan" }o--o| "kepegawaian.ref_pendidikan" : "FOREIGN KEY (pendidikan_id) REFERENCES ref_pendidikan(id)"
@@ -151,19 +151,20 @@ erDiagram
 "kepegawaian.ref_jabatan" {
   varchar_36_ kode_jabatan
   integer id
-  integer no
-  varchar_200_ nama_jabatan
-  varchar_200_ nama_jabatan_full
+  varchar_400_ nama_jabatan
+  varchar_400_ nama_jabatan_full
   smallint jenis_jabatan
   smallint kelas
   smallint pensiun
   varchar_36_ kode_bkn
-  varchar_200_ nama_jabatan_bkn
+  varchar_400_ nama_jabatan_bkn
   varchar_100_ kategori_jabatan
   varchar_36_ bkn_id
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  bigint tunjangan_jabatan
+  integer no
 }
 "kepegawaian.ref_jenis_diklat" {
   integer id
@@ -216,7 +217,7 @@ erDiagram
 "kepegawaian.ref_jenis_kenaikan_pangkat" {
   integer id
   varchar_4_ dikbud_hr_id
-  varchar_50_ nama
+  varchar_100_ nama
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
@@ -438,7 +439,7 @@ erDiagram
 }
 "kepegawaian.pindah_unit" {
   integer id
-  varchar_20_ nip
+  varchar_36_ nip
   varchar_200_ surat_permohonan_pindah
   varchar_36_ unit_asal FK
   varchar_36_ unit_tujuan FK
@@ -469,7 +470,7 @@ erDiagram
   varchar_200_ file_upload
   real nilai
   real nilai_kinerja
-  smallint tahun_penilaian_id
+  varchar_10_ tahun_penilaian_id
   varchar_50_ tahun_penilaian_title
   varchar_100_ nama_lengkap
   varchar_20_ posisi_id
@@ -489,16 +490,16 @@ erDiagram
   bigint id
   varchar_200_ jenis_diklat
   smallint jenis_diklat_id FK
-  varchar_200_ institusi_penyelenggara
-  varchar_100_ no_sertifikat
+  varchar_600_ institusi_penyelenggara
+  varchar_600_ no_sertifikat
   date tanggal_mulai
   date tanggal_selesai
-  smallint tahun_diklat
-  smallint durasi_jam
+  integer tahun_diklat
+  integer durasi_jam
   varchar_36_ pns_orang_id FK
   varchar_20_ nip_baru
   varchar_36_ diklat_struktural_id
-  varchar_200_ nama_diklat
+  varchar_700_ nama_diklat
   text file_base64
   varchar_200_ rumpun_diklat_nama
   varchar_36_ rumpun_diklat_id
@@ -513,17 +514,17 @@ erDiagram
   varchar_20_ nip_baru
   varchar_9_ nip_lama
   varchar_200_ jenis_diklat
-  varchar_200_ nama_kursus
+  varchar_300_ nama_kursus
   integer jumlah_jam
   smallint tahun
-  varchar_200_ institusi_penyelenggara
+  varchar_300_ institusi_penyelenggara
   varchar_1_ jenis_kursus_sertifikat
-  varchar_100_ no_sertifikat
-  varchar_200_ instansi
+  varchar_200_ no_sertifikat
+  varchar_300_ instansi
   varchar_50_ status_data
   date tanggal_kursus
   text file_base64
-  varchar_200_ keterangan_berkas
+  varchar_300_ keterangan_berkas
   real lama
   varchar_36_ siasn_id
   timestamp_with_time_zone created_at
@@ -537,7 +538,7 @@ erDiagram
   varchar_100_ pns_nama
   integer jenis_diklat_id FK
   varchar_200_ nama_diklat
-  varchar_100_ nomor
+  varchar_300_ nomor
   date tanggal
   smallint tahun
   varchar_10_ status_data
@@ -550,19 +551,19 @@ erDiagram
   timestamp_with_time_zone deleted_at
 }
 "kepegawaian.riwayat_golongan" {
-  integer id
+  varchar_36_ id
   varchar_36_ pns_id FK
   varchar_20_ pns_nip
   varchar_100_ pns_nama
   varchar_4_ kode_jenis_kp
-  varchar_50_ jenis_kp
+  varchar_100_ jenis_kp
   smallint golongan_id FK
   varchar_10_ golongan_nama
-  varchar_50_ pangkat_nama
-  varchar_50_ sk_nomor
+  varchar_100_ pangkat_nama
+  varchar_100_ sk_nomor
   varchar_100_ no_bkn
-  smallint jumlah_angka_kredit_utama
-  smallint jumlah_angka_kredit_tambahan
+  integer jumlah_angka_kredit_utama
+  integer jumlah_angka_kredit_tambahan
   smallint mk_golongan_tahun
   smallint mk_golongan_bulan
   date sk_tanggal
@@ -637,7 +638,7 @@ erDiagram
   text eselon3
   text eselon4
   bigint id
-  varchar_200_ catatan
+  varchar_250_ catatan
   varchar_100_ jenis_sk
   integer status_satker
   integer status_biro
@@ -769,12 +770,12 @@ erDiagram
 }
 "kepegawaian.riwayat_penghargaan_umum" {
   integer id
-  varchar_100_ deskripsi_penghargaan
+  varchar_1300_ deskripsi_penghargaan
   date tanggal_penghargaan
   boolean exist
   text file_base64
   varchar_20_ nip
-  varchar_200_ nama_penghargaan
+  varchar_300_ nama_penghargaan
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
@@ -824,32 +825,32 @@ erDiagram
   timestamp_with_time_zone deleted_at
 }
 "kepegawaian.unit_kerja" {
-  varchar_36_ id
+  varchar_60_ id
   integer no
-  varchar_36_ kode_internal
+  varchar_60_ kode_internal
   varchar_200_ nama_unor
-  varchar_36_ eselon_id
-  varchar_36_ cepat_kode
+  varchar_60_ eselon_id
+  varchar_60_ cepat_kode
   varchar_200_ nama_jabatan
   varchar_200_ nama_pejabat
-  varchar_36_ diatasan_id FK
-  varchar_36_ instansi_id FK
-  varchar_36_ pemimpin_pns_id FK
-  varchar_36_ jenis_unor_id
-  varchar_36_ unor_induk
+  varchar_60_ diatasan_id FK
+  varchar_60_ instansi_id FK
+  varchar_60_ pemimpin_pns_id FK
+  varchar_60_ jenis_unor_id
+  varchar_60_ unor_induk
   smallint jumlah_ideal_staff
   integer order
-  smallint is_satker
-  varchar_36_ eselon_1
-  varchar_36_ eselon_2
-  varchar_36_ eselon_3
-  varchar_36_ eselon_4
+  boolean is_satker
+  varchar_60_ eselon_1
+  varchar_60_ eselon_2
+  varchar_60_ eselon_3
+  varchar_60_ eselon_4
   date expired_date
   varchar_200_ keterangan
   varchar_200_ jenis_satker
   varchar_200_ abbreviation
   varchar_200_ unor_induk_penyetaraan
-  varchar_32_ jabatan_id
+  varchar_60_ jabatan_id
   varchar_4_ waktu
   varchar_100_ peraturan
   varchar_50_ remark
@@ -880,7 +881,7 @@ erDiagram
   bigint id
   varchar_20_ nip
   bigint tahun
-  varchar_255_ nama_sertifikasi
+  varchar_300_ nama_sertifikasi
   text file_base64
   text deskripsi
   timestamp_with_time_zone created_at
@@ -890,12 +891,12 @@ erDiagram
 "kepegawaian.riwayat_penugasan" {
   integer id
   varchar_200_ tipe_jabatan
-  varchar_200_ deskripsi_jabatan
+  varchar_3000_ deskripsi_jabatan
   date tanggal_mulai
   date tanggal_selesai
   text file_base64
   varchar_20_ nip
-  varchar_200_ nama_jabatan
+  varchar_400_ nama_jabatan
   boolean is_menjabat
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at

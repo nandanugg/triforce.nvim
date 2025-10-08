@@ -14,6 +14,6 @@ type riwayatPelatihanSIASN struct {
 	NomorSertifikat        string      `json:"nomor_sertifikat"`
 	TanggalMulai           db.Date     `json:"tanggal_mulai"`
 	TanggalSelesai         db.Date     `json:"tanggal_selesai"`
-	Tahun                  pgtype.Int2 `json:"tahun"`
-	Durasi                 pgtype.Int2 `json:"durasi"` // hour
+	Tahun                  pgtype.Int4 `json:"tahun"`
+	Durasi                 pgtype.Int4 `json:"durasi"` // hour
 }

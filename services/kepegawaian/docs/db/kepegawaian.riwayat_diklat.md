@@ -11,16 +11,16 @@ Riwayat diklat pegawai
 | id | bigint | nextval('riwayat_diklat_id_seq'::regclass) | false |  |  | id riwayat diklat |
 | jenis_diklat | varchar(200) |  | true |  |  | Nama jenis diklat |
 | jenis_diklat_id | smallint |  | true |  | [kepegawaian.ref_jenis_diklat](kepegawaian.ref_jenis_diklat.md) | Jenis diklat (rujuk ref_jenis_diklat) |
-| institusi_penyelenggara | varchar(200) |  | true |  |  | Nama lembaga penyelenggara diklat |
-| no_sertifikat | varchar(100) |  | true |  |  | Nomor sertifikat diklat |
+| institusi_penyelenggara | varchar(600) |  | true |  |  | Nama lembaga penyelenggara diklat |
+| no_sertifikat | varchar(600) |  | true |  |  | Nomor sertifikat diklat |
 | tanggal_mulai | date |  | true |  |  | Tanggal mulai diklat |
 | tanggal_selesai | date |  | true |  |  | Tanggal selesai diklat |
-| tahun_diklat | smallint |  | true |  |  | Tahun pelaksanaan diklat |
-| durasi_jam | smallint |  | true |  |  | Durasi pelatihan dalam jam |
+| tahun_diklat | integer |  | true |  |  | Tahun pelaksanaan diklat |
+| durasi_jam | integer |  | true |  |  | Durasi pelatihan dalam jam |
 | pns_orang_id | varchar(36) |  | true |  | [kepegawaian.pegawai](kepegawaian.pegawai.md) | Referensi pegawai (rujuk pegawai.pns_id) |
 | nip_baru | varchar(20) |  | true |  |  | NIP pegawai |
 | diklat_struktural_id | varchar(36) |  | true |  |  | id referensi diklat struktural |
-| nama_diklat | varchar(200) |  | true |  |  | Nama diklat |
+| nama_diklat | varchar(700) |  | true |  |  | Nama diklat |
 | file_base64 | text |  | true |  |  | Berkas sertifikat diklat dalam format base64 |
 | rumpun_diklat_nama | varchar(200) |  | true |  |  | Nama rumpun diklat |
 | rumpun_diklat_id | varchar(36) |  | true |  |  | id rumpun diklat |
@@ -56,16 +56,16 @@ erDiagram
   bigint id
   varchar_200_ jenis_diklat
   smallint jenis_diklat_id FK
-  varchar_200_ institusi_penyelenggara
-  varchar_100_ no_sertifikat
+  varchar_600_ institusi_penyelenggara
+  varchar_600_ no_sertifikat
   date tanggal_mulai
   date tanggal_selesai
-  smallint tahun_diklat
-  smallint durasi_jam
+  integer tahun_diklat
+  integer durasi_jam
   varchar_36_ pns_orang_id FK
   varchar_20_ nip_baru
   varchar_36_ diklat_struktural_id
-  varchar_200_ nama_diklat
+  varchar_700_ nama_diklat
   text file_base64
   varchar_200_ rumpun_diklat_nama
   varchar_36_ rumpun_diklat_id
