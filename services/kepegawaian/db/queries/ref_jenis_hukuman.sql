@@ -1,14 +1,16 @@
 -- name: CreateRefJenisHukuman :one
-INSERT INTO ref_jenis_hukuman (nama)
-VALUES ($1)
-RETURNING id, nama;
+INSERT INTO ref_jenis_hukuman (nama, tingkat_hukuman)
+VALUES (@nama, @tingkat)
+RETURNING id, nama, tingkat_hukuman as tingkat;
 
 -- name: UpdateRefJenisHukuman :one
 UPDATE ref_jenis_hukuman
-SET nama = $2
+SET 
+  nama = @nama,
+  tingkat_hukuman = @tingkat
 WHERE id = $1
   AND deleted_at IS NULL
-RETURNING id, nama;
+RETURNING id, nama, tingkat_hukuman as tingkat;
 
 -- name: DeleteRefJenisHukuman :execrows
 UPDATE ref_jenis_hukuman
@@ -17,7 +19,7 @@ WHERE id = $1
   AND deleted_at IS NULL;
 
 -- name: GetRefJenisHukuman :one
-SELECT id, nama
+SELECT id, nama, tingkat_hukuman as tingkat
 FROM ref_jenis_hukuman
 WHERE id = $1
   AND deleted_at IS NULL;
@@ -25,7 +27,8 @@ WHERE id = $1
 -- name: ListRefJenisHukuman :many
 SELECT 
   id, 
-  nama 
+  nama,
+  tingkat_hukuman as tingkat
 FROM ref_jenis_hukuman
 WHERE deleted_at IS NULL
 LIMIT $1 OFFSET $2;

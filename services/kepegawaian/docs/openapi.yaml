@@ -555,12 +555,17 @@ paths:
               type: object
               required:
                 - nama
+                - tingkat
               additionalProperties: false
               properties:
                 nama:
                   type: string
-                  description: Nama jenis hukuman
-                  example: "Satuan Kerja Tipe A"
+                  description: Nama baru jenis hukuman
+                  example: "Hukuman A"
+                tingkat:
+                  type: string
+                  description: Tingkat jenis hukuman
+                  example: "B"
       responses:
         "200":
           description: Berhasil membuat jenis hukuman
@@ -625,12 +630,18 @@ paths:
               type: object
               required:
                 - nama
+                - tingkat
               additionalProperties: false
               properties:
                 nama:
                   type: string
                   description: Nama baru jenis hukuman
-                  example: "Satuan Kerja Tipe B"
+                  example: "Hukuman A"
+                tingkat:
+                  type: string
+                  description: Tingkat jenis hukuman
+                  example: "B"
+                
       responses:
         "200":
           description: Sukses update jenis hukuman
@@ -2549,13 +2560,7 @@ paths:
                   data:
                     type: array
                     items:
-                      type: object
-                      additionalProperties: false
-                      properties:
-                        id:
-                          type: integer
-                        nama:
-                          type: string
+                      $ref: "#/components/schemas/jenisHukuman"
                   meta:
                     $ref: "#/components/schemas/metaPagination"
   /v1/jenis-jabatan:
@@ -4601,6 +4606,9 @@ components:
         nama:
           type: string
           description: Nama jenis hukuman
+        tingkat:
+          type: string
+          description: Tingkat hukuman
     jenisKenaikanPangkat:
       type: object
       properties:

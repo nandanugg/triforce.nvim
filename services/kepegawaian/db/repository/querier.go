@@ -46,7 +46,7 @@ type Querier interface {
 	CreateJenisKenaikanPangkat(ctx context.Context, nama pgtype.Text) (CreateJenisKenaikanPangkatRow, error)
 	CreateRefGolongan(ctx context.Context, arg CreateRefGolonganParams) (CreateRefGolonganRow, error)
 	CreateRefJabatan(ctx context.Context, arg CreateRefJabatanParams) (CreateRefJabatanRow, error)
-	CreateRefJenisHukuman(ctx context.Context, nama pgtype.Text) (CreateRefJenisHukumanRow, error)
+	CreateRefJenisHukuman(ctx context.Context, arg CreateRefJenisHukumanParams) (CreateRefJenisHukumanRow, error)
 	CreateRefJenisPenghargaan(ctx context.Context, nama pgtype.Text) (CreateRefJenisPenghargaanRow, error)
 	CreateRefJenisSatker(ctx context.Context, nama pgtype.Text) (CreateRefJenisSatkerRow, error)
 	CreateUnitKerja(ctx context.Context, arg CreateUnitKerjaParams) (CreateUnitKerjaRow, error)

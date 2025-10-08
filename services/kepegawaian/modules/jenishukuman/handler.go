@@ -70,7 +70,8 @@ func (h *handler) adminGet(c echo.Context) error {
 }
 
 type adminCreateRequest struct {
-	Nama string `json:"nama"`
+	Nama    string `json:"nama"`
+	Tingkat string `json:"tingkat"`
 }
 
 type adminCreateResponse struct {
@@ -85,7 +86,8 @@ func (h *handler) adminCreate(c echo.Context) error {
 
 	ctx := c.Request().Context()
 	data, err := h.service.create(ctx, createParams{
-		nama: req.Nama,
+		nama:    req.Nama,
+		tingkat: req.Tingkat,
 	})
 	if err != nil {
 		slog.ErrorContext(ctx, "Error creating jenis satker.", "error", err)
@@ -96,8 +98,9 @@ func (h *handler) adminCreate(c echo.Context) error {
 }
 
 type adminUpdateRequest struct {
-	ID   int32  `param:"id"`
-	Nama string `json:"nama"`
+	ID      int32  `param:"id"`
+	Nama    string `json:"nama"`
+	Tingkat string `json:"tingkat"`
 }
 
 type adminUpdateResponse struct {
@@ -112,8 +115,9 @@ func (h *handler) adminUpdate(c echo.Context) error {
 
 	ctx := c.Request().Context()
 	data, err := h.service.update(ctx, updateParams{
-		id:   req.ID,
-		nama: req.Nama,
+		id:      req.ID,
+		nama:    req.Nama,
+		tingkat: req.Tingkat,
 	})
 	if err != nil {
 		slog.ErrorContext(ctx, "Error creating jenis satker.", "error", err)

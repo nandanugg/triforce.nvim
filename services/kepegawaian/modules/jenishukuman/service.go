@@ -15,7 +15,7 @@ import (
 type repository interface {
 	ListRefJenisHukuman(ctx context.Context, arg sqlc.ListRefJenisHukumanParams) ([]sqlc.ListRefJenisHukumanRow, error)
 	CountRefJenisHukuman(ctx context.Context) (int64, error)
-	CreateRefJenisHukuman(ctx context.Context, nama pgtype.Text) (sqlc.CreateRefJenisHukumanRow, error)
+	CreateRefJenisHukuman(ctx context.Context, arg sqlc.CreateRefJenisHukumanParams) (sqlc.CreateRefJenisHukumanRow, error)
 	DeleteRefJenisHukuman(ctx context.Context, id int32) (int64, error)
 	GetRefJenisHukuman(ctx context.Context, id int32) (sqlc.GetRefJenisHukumanRow, error)
 	UpdateRefJenisHukuman(ctx context.Context, arg sqlc.UpdateRefJenisHukumanParams) (sqlc.UpdateRefJenisHukumanRow, error)
@@ -45,8 +45,9 @@ func (s *service) list(ctx context.Context, limit, offset uint) ([]jenisHukuman,
 
 	data := typeutil.Map(rows, func(row sqlc.ListRefJenisHukumanRow) jenisHukuman {
 		return jenisHukuman{
-			ID:   row.ID,
-			Nama: row.Nama.String,
+			ID:      row.ID,
+			Nama:    row.Nama.String,
+			Tingkat: row.Tingkat.String,
 		}
 	})
 	return data, uint(count), nil
@@ -62,40 +63,48 @@ func (s *service) get(ctx context.Context, id int32) (*jenisHukuman, error) {
 	}
 
 	result := &jenisHukuman{
-		ID:   row.ID,
-		Nama: row.Nama.String,
+		ID:      row.ID,
+		Nama:    row.Nama.String,
+		Tingkat: row.Tingkat.String,
 	}
 
 	return result, nil
 }
 
 type createParams struct {
-	nama string
+	nama    string
+	tingkat string
 }
 
 func (s *service) create(ctx context.Context, params createParams) (*jenisHukuman, error) {
-	row, err := s.repo.CreateRefJenisHukuman(ctx, pgtype.Text{String: params.nama, Valid: params.nama != ""})
+	row, err := s.repo.CreateRefJenisHukuman(ctx, sqlc.CreateRefJenisHukumanParams{
+		Nama:    pgtype.Text{String: params.nama, Valid: params.nama != ""},
+		Tingkat: pgtype.Text{String: params.tingkat, Valid: params.tingkat != ""},
+	})
 	if err != nil {
 		return nil, fmt.Errorf("[create] error createJenisHukuman: %w", err)
 	}
 
 	result := &jenisHukuman{
-		ID:   row.ID,
-		Nama: row.Nama.String,
+		ID:      row.ID,
+		Nama:    row.Nama.String,
+		Tingkat: row.Tingkat.String,
 	}
 
 	return result, nil
 }
 
 type updateParams struct {
-	id   int32
-	nama string
+	id      int32
+	nama    string
+	tingkat string
 }
 
 func (s *service) update(ctx context.Context, params updateParams) (*jenisHukuman, error) {
 	row, err := s.repo.UpdateRefJenisHukuman(ctx, sqlc.UpdateRefJenisHukumanParams{
-		ID:   params.id,
-		Nama: pgtype.Text{String: params.nama, Valid: params.nama != ""},
+		ID:      params.id,
+		Nama:    pgtype.Text{String: params.nama, Valid: params.nama != ""},
+		Tingkat: pgtype.Text{String: params.tingkat, Valid: params.tingkat != ""},
 	})
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -105,8 +114,9 @@ func (s *service) update(ctx context.Context, params updateParams) (*jenisHukuma
 	}
 
 	result := &jenisHukuman{
-		ID:   row.ID,
-		Nama: row.Nama.String,
+		ID:      row.ID,
+		Nama:    row.Nama.String,
+		Tingkat: row.Tingkat.String,
 	}
 
 	return result, nil

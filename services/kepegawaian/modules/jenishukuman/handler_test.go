@@ -24,11 +24,11 @@ func Test_handler_list(t *testing.T) {
 	t.Parallel()
 
 	dbData := `
-		INSERT INTO ref_jenis_hukuman (id, nama, deleted_at)
+		INSERT INTO ref_jenis_hukuman (id, nama, tingkat_hukuman, deleted_at)
 		VALUES
-		(1, 'Jenis Hukuman 1', NULL),
-		(2, 'Jenis Hukuman 2', NULL),
-		(3, 'Jenis Hukuman 3', '2023-02-20');
+		(1, 'Jenis Hukuman 1', 'B', NULL),
+		(2, 'Jenis Hukuman 2', 'S', NULL),
+		(3, 'Jenis Hukuman 3', 'R', '2023-02-20');
 	`
 
 	tests := []struct {
@@ -49,11 +49,13 @@ func Test_handler_list(t *testing.T) {
 				"data": [
 					{
 						"id": 1,
-						"nama": "Jenis Hukuman 1"
+						"nama": "Jenis Hukuman 1",
+						"tingkat": "B"
 					},
 					{
 						"id": 2,
-						"nama": "Jenis Hukuman 2"
+						"nama": "Jenis Hukuman 2",
+						"tingkat": "S"
 					}
 				],
 				"meta": {
@@ -73,7 +75,8 @@ func Test_handler_list(t *testing.T) {
 				"data": [
 					{
 						"id": 2,
-						"nama": "Jenis Hukuman 2"
+						"nama": "Jenis Hukuman 2",
+						"tingkat": "S"
 					}
 				],
 				"meta": {
@@ -123,11 +126,11 @@ func Test_handler_adminGetJenisHukuman(t *testing.T) {
 	t.Parallel()
 
 	dbData := `
-		INSERT INTO ref_jenis_hukuman (id, nama, created_at, updated_at, deleted_at)
+		INSERT INTO ref_jenis_hukuman (id, nama, tingkat_hukuman, deleted_at)
 		VALUES
-			(1, 'Jenis Hukuman 1', now(), now(), NULL),
-			(2, 'Jenis Hukuman 2', now(), now(), NULL),
-			(3, 'Jenis Hukuman 3', now(), now(), now());
+		(1, 'Jenis Hukuman 1', 'B', NULL),
+		(2, 'Jenis Hukuman 2', 'S', NULL),
+		(3, 'Jenis Hukuman 3', 'R', '2023-02-20');
 	`
 
 	tests := []struct {
@@ -147,7 +150,8 @@ func Test_handler_adminGetJenisHukuman(t *testing.T) {
 			wantResponseBody: `{
 				"data": {
 					"id": 1,
-					"nama": "Jenis Hukuman 1"
+					"nama": "Jenis Hukuman 1",
+					"tingkat": "B"
 				}
 			}`,
 		},
@@ -160,7 +164,8 @@ func Test_handler_adminGetJenisHukuman(t *testing.T) {
 			wantResponseBody: `{
 				"data": {
 					"id": 2,
-					"nama": "Jenis Hukuman 2"
+					"nama": "Jenis Hukuman 2",
+					"tingkat": "S"
 				}
 			}`,
 		},
@@ -228,10 +233,10 @@ func Test_handler_adminCreateJenisHukuman(t *testing.T) {
 	t.Parallel()
 
 	dbData := `
-		INSERT INTO ref_jenis_hukuman (nama, created_at, updated_at, deleted_at)
+		INSERT INTO ref_jenis_hukuman (nama, tingkat_hukuman, deleted_at)
 		VALUES
-			('Jenis Hukuman 1', now(), now(), NULL),
-			('Jenis Hukuman 2', now(), now(), NULL);
+		('Jenis Hukuman 1', 'B', NULL),
+		('Jenis Hukuman 2', 'S', NULL);
 	`
 
 	tests := []struct {
@@ -246,7 +251,8 @@ func Test_handler_adminCreateJenisHukuman(t *testing.T) {
 			name:   "ok: create jenis hukuman with required field",
 			dbData: dbData,
 			requestBody: `{
-				"nama": "Jenis Hukuman 3"
+				"nama": "Jenis Hukuman 3",
+				"tingkat": "R"
 			}`,
 			requestHeader: http.Header{
 				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
@@ -256,14 +262,15 @@ func Test_handler_adminCreateJenisHukuman(t *testing.T) {
 			wantResponseBody: `{
 				"data": {
 					"id": 3,
-					"nama": "Jenis Hukuman 3"
+					"nama": "Jenis Hukuman 3",
+					"tingkat": "R"
 				}
 			}`,
 		},
 		{
 			name:        "error: missing required field nama",
 			dbData:      dbData,
-			requestBody: `{}`,
+			requestBody: `{"tingkat": "R"}`,
 			requestHeader: http.Header{
 				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
 				"Content-Type":  []string{"application/json"},
@@ -272,10 +279,22 @@ func Test_handler_adminCreateJenisHukuman(t *testing.T) {
 			wantResponseBody: `{"message": "parameter \"nama\" harus diisi"}`,
 		},
 		{
+			name:        "error: missing required field tingkat",
+			dbData:      dbData,
+			requestBody: `{"nama": "Jenis Hukuman 3"}`,
+			requestHeader: http.Header{
+				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "parameter \"tingkat\" harus diisi"}`,
+		},
+		{
 			name:   "error: auth header tidak valid",
 			dbData: dbData,
 			requestBody: `{
-				"nama": "Hukuman Percobaan"
+				"nama": "Hukuman Percobaan",
+				"tingkat": "R"
 			}`,
 			requestHeader: http.Header{
 				"Authorization": []string{"Bearer some-token"},
@@ -288,7 +307,8 @@ func Test_handler_adminCreateJenisHukuman(t *testing.T) {
 			name:   "error: user is not an admin",
 			dbData: dbData,
 			requestBody: `{
-				"nama": "Hukuman Percobaan"
+				"nama": "Hukuman Percobaan",
+				"tingkat": "R"
 			}`,
 			requestHeader: http.Header{
 				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "987654321")},
@@ -330,12 +350,12 @@ func Test_handler_adminUpdateJenisHukuman(t *testing.T) {
 
 	dbData := `
 		INSERT INTO ref_jenis_hukuman (
-			id, nama, created_at, updated_at, deleted_at
+			id, nama, tingkat_hukuman, deleted_at
 		) VALUES
-		(1, 'Jenis Hukuman 1', now(), now(), NULL),
-		(2, 'Jenis Hukuman 2', now(), now(), NULL),
-		(3, 'Jenis Hukuman 3', now(), now(), now()),
-		(4, 'Jenis Hukuman 4', now(), now(), NULL);
+		(1, 'Jenis Hukuman 1', 'B', NULL),
+		(2, 'Jenis Hukuman 2', 'S', NULL),
+		(3, 'Jenis Hukuman 3', 'R', now()),
+		(4, 'Jenis Hukuman 4', 'R', NULL);
 	`
 
 	tests := []struct {
@@ -352,7 +372,8 @@ func Test_handler_adminUpdateJenisHukuman(t *testing.T) {
 			dbData: dbData,
 			id:     "2",
 			requestBody: `{
-				"nama": "Jenis Hukuman 2 Diperbarui"
+				"nama": "Jenis Hukuman 2 Diperbarui",
+				"tingkat": "R"
 			}`,
 			requestHeader: http.Header{
 				"Authorization": []string{
@@ -364,16 +385,50 @@ func Test_handler_adminUpdateJenisHukuman(t *testing.T) {
 			wantResponseBody: `{
 				"data": {
 					"id": 2,
-					"nama": "Jenis Hukuman 2 Diperbarui"
+					"nama": "Jenis Hukuman 2 Diperbarui",
+					"tingkat": "R"
 				}
 			}`,
+		},
+		{
+			name:   "error: missing required field nama",
+			dbData: dbData,
+			id:     "2",
+			requestBody: `{
+				"tingkat": "R"
+			}`,
+			requestHeader: http.Header{
+				"Authorization": []string{
+					apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin),
+				},
+				"Content-Type": []string{"application/json"},
+			},
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "parameter \"nama\" harus diisi"}`,
+		},
+		{
+			name:   "ok: missing required field tingkat",
+			dbData: dbData,
+			id:     "2",
+			requestBody: `{
+				"nama": "Jenis Hukuman 2 Diperbarui"
+			}`,
+			requestHeader: http.Header{
+				"Authorization": []string{
+					apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin),
+				},
+				"Content-Type": []string{"application/json"},
+			},
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "parameter \"tingkat\" harus diisi"}`,
 		},
 		{
 			name:   "error: update not found",
 			dbData: dbData,
 			id:     "99",
 			requestBody: `{
-				"nama": "Tidak Ada"
+				"nama": "Tidak Ada",
+				"tingkat": "R"
 			}`,
 			requestHeader: http.Header{
 				"Authorization": []string{
@@ -389,7 +444,8 @@ func Test_handler_adminUpdateJenisHukuman(t *testing.T) {
 			dbData: dbData,
 			id:     "3",
 			requestBody: `{
-				"nama": "Tidak Boleh Diperbarui"
+				"nama": "Tidak Boleh Diperbarui",
+				"tingkat": "R"
 			}`,
 			requestHeader: http.Header{
 				"Authorization": []string{

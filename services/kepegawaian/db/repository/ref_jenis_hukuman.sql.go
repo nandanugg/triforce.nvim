@@ -23,20 +23,26 @@ func (q *Queries) CountRefJenisHukuman(ctx context.Context) (int64, error) {
 }
 
 const createRefJenisHukuman = `-- name: CreateRefJenisHukuman :one
-INSERT INTO ref_jenis_hukuman (nama)
-VALUES ($1)
-RETURNING id, nama
+INSERT INTO ref_jenis_hukuman (nama, tingkat_hukuman)
+VALUES ($1, $2)
+RETURNING id, nama, tingkat_hukuman as tingkat
 `
 
-type CreateRefJenisHukumanRow struct {
-	ID   int32       `db:"id"`
-	Nama pgtype.Text `db:"nama"`
+type CreateRefJenisHukumanParams struct {
+	Nama    pgtype.Text `db:"nama"`
+	Tingkat pgtype.Text `db:"tingkat"`
 }
 
-func (q *Queries) CreateRefJenisHukuman(ctx context.Context, nama pgtype.Text) (CreateRefJenisHukumanRow, error) {
-	row := q.db.QueryRow(ctx, createRefJenisHukuman, nama)
+type CreateRefJenisHukumanRow struct {
+	ID      int32       `db:"id"`
+	Nama    pgtype.Text `db:"nama"`
+	Tingkat pgtype.Text `db:"tingkat"`
+}
+
+func (q *Queries) CreateRefJenisHukuman(ctx context.Context, arg CreateRefJenisHukumanParams) (CreateRefJenisHukumanRow, error) {
+	row := q.db.QueryRow(ctx, createRefJenisHukuman, arg.Nama, arg.Tingkat)
 	var i CreateRefJenisHukumanRow
-	err := row.Scan(&i.ID, &i.Nama)
+	err := row.Scan(&i.ID, &i.Nama, &i.Tingkat)
 	return i, err
 }
 
@@ -56,28 +62,30 @@ func (q *Queries) DeleteRefJenisHukuman(ctx context.Context, id int32) (int64, e
 }
 
 const getRefJenisHukuman = `-- name: GetRefJenisHukuman :one
-SELECT id, nama
+SELECT id, nama, tingkat_hukuman as tingkat
 FROM ref_jenis_hukuman
 WHERE id = $1
   AND deleted_at IS NULL
 `
 
 type GetRefJenisHukumanRow struct {
-	ID   int32       `db:"id"`
-	Nama pgtype.Text `db:"nama"`
+	ID      int32       `db:"id"`
+	Nama    pgtype.Text `db:"nama"`
+	Tingkat pgtype.Text `db:"tingkat"`
 }
 
 func (q *Queries) GetRefJenisHukuman(ctx context.Context, id int32) (GetRefJenisHukumanRow, error) {
 	row := q.db.QueryRow(ctx, getRefJenisHukuman, id)
 	var i GetRefJenisHukumanRow
-	err := row.Scan(&i.ID, &i.Nama)
+	err := row.Scan(&i.ID, &i.Nama, &i.Tingkat)
 	return i, err
 }
 
 const listRefJenisHukuman = `-- name: ListRefJenisHukuman :many
 SELECT 
   id, 
-  nama 
+  nama,
+  tingkat_hukuman as tingkat
 FROM ref_jenis_hukuman
 WHERE deleted_at IS NULL
 LIMIT $1 OFFSET $2
@@ -89,8 +97,9 @@ type ListRefJenisHukumanParams struct {
 }
 
 type ListRefJenisHukumanRow struct {
-	ID   int32       `db:"id"`
-	Nama pgtype.Text `db:"nama"`
+	ID      int32       `db:"id"`
+	Nama    pgtype.Text `db:"nama"`
+	Tingkat pgtype.Text `db:"tingkat"`
 }
 
 func (q *Queries) ListRefJenisHukuman(ctx context.Context, arg ListRefJenisHukumanParams) ([]ListRefJenisHukumanRow, error) {
@@ -102,7 +111,7 @@ func (q *Queries) ListRefJenisHukuman(ctx context.Context, arg ListRefJenisHukum
 	var items []ListRefJenisHukumanRow
 	for rows.Next() {
 		var i ListRefJenisHukumanRow
-		if err := rows.Scan(&i.ID, &i.Nama); err != nil {
+		if err := rows.Scan(&i.ID, &i.Nama, &i.Tingkat); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -115,25 +124,29 @@ func (q *Queries) ListRefJenisHukuman(ctx context.Context, arg ListRefJenisHukum
 
 const updateRefJenisHukuman = `-- name: UpdateRefJenisHukuman :one
 UPDATE ref_jenis_hukuman
-SET nama = $2
+SET 
+  nama = $2,
+  tingkat_hukuman = $3
 WHERE id = $1
   AND deleted_at IS NULL
-RETURNING id, nama
+RETURNING id, nama, tingkat_hukuman as tingkat
 `
 
 type UpdateRefJenisHukumanParams struct {
-	ID   int32       `db:"id"`
-	Nama pgtype.Text `db:"nama"`
+	ID      int32       `db:"id"`
+	Nama    pgtype.Text `db:"nama"`
+	Tingkat pgtype.Text `db:"tingkat"`
 }
 
 type UpdateRefJenisHukumanRow struct {
-	ID   int32       `db:"id"`
-	Nama pgtype.Text `db:"nama"`
+	ID      int32       `db:"id"`
+	Nama    pgtype.Text `db:"nama"`
+	Tingkat pgtype.Text `db:"tingkat"`
 }
 
 func (q *Queries) UpdateRefJenisHukuman(ctx context.Context, arg UpdateRefJenisHukumanParams) (UpdateRefJenisHukumanRow, error) {
-	row := q.db.QueryRow(ctx, updateRefJenisHukuman, arg.ID, arg.Nama)
+	row := q.db.QueryRow(ctx, updateRefJenisHukuman, arg.ID, arg.Nama, arg.Tingkat)
 	var i UpdateRefJenisHukumanRow
-	err := row.Scan(&i.ID, &i.Nama)
+	err := row.Scan(&i.ID, &i.Nama, &i.Tingkat)
 	return i, err
 }
