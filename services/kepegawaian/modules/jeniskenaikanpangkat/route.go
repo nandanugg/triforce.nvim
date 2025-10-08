@@ -13,4 +13,10 @@ func RegisterRoutes(e *echo.Echo, repo repository, mwAuth api.AuthMiddlewareFunc
 	h := newHandler(s)
 
 	e.Add(http.MethodGet, "/v1/jenis-kenaikan-pangkat", h.list, mwAuth())
+
+	e.Add(http.MethodGet, "/v1/admin/jenis-kenaikan-pangkat", h.list, mwAuth(api.RoleAdmin))
+	e.Add(http.MethodPost, "/v1/admin/jenis-kenaikan-pangkat", h.adminCreate, mwAuth(api.RoleAdmin))
+	e.Add(http.MethodGet, "/v1/admin/jenis-kenaikan-pangkat/:id", h.adminGet, mwAuth(api.RoleAdmin))
+	e.Add(http.MethodPut, "/v1/admin/jenis-kenaikan-pangkat/:id", h.adminUpdate, mwAuth(api.RoleAdmin))
+	e.Add(http.MethodDelete, "/v1/admin/jenis-kenaikan-pangkat/:id", h.adminDelete, mwAuth(api.RoleAdmin))
 }

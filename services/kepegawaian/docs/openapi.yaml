@@ -10,6 +10,7 @@ tags:
   - name: Admin Ref Golongan
   - name: Admin Ref Jabatan
   - name: Admin Ref Jenis Hukuman
+  - name: Admin Ref Jenis Kenaikan Pangkat
   - name: Admin Ref Jenis Satker
   - name: Admin Surat Keputusan Pegawai
   - name: Admin Unit Kerja
@@ -657,6 +658,141 @@ paths:
       responses:
         "204":
           description: Berhasil dihapus (soft delete)
+  /v1/admin/jenis-kenaikan-pangkat:
+    get:
+      tags:
+        - Admin Ref Jenis Kenaikan Pangkat
+      summary: Daftar jenis kenaikan pangkat.
+      description: Menampilkan daftar seluruh jenis kenaikan pangkat yang belum dihapus.
+      operationId: listJenisKenaikanPangkatAdmin
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          description: Page number (for pagination)
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+          description: Number of records per page
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Filter by name (partial match)
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/jenisKenaikanPangkat"
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+    post:
+      tags:
+        - Admin Ref Jenis Kenaikan Pangkat
+      summary: Tambah jenis kenaikan pangkat.
+      description: Membuat data baru jenis kenaikan pangkat.
+      operationId: createJenisKenaikanPangkatAdmin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: 
+                - nama
+              properties:
+                nama:
+                  type: string
+                  description: Nama jenis kenaikan pangkat
+                  example: Kenaikan Reguler
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/jenisKenaikanPangkat"
+  /v1/admin/jenis-kenaikan-pangkat/{id}:
+    get:
+      tags:
+        - Admin Ref Jenis Kenaikan Pangkat
+      summary: Detail jenis kenaikan pangkat.
+      description: Menampilkan detail data jenis kenaikan pangkat berdasarkan ID.
+      operationId: getJenisKenaikanPangkatAdmin
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID of the record
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/jenisKenaikanPangkat"
+        "404":
+          description: Not Found
+    put:
+      tags:
+        - Admin Ref Jenis Kenaikan Pangkat
+      summary: Ubah jenis kenaikan pangkat.
+      description: Memperbarui data jenis kenaikan pangkat berdasarkan ID.
+      operationId: updateJenisKenaikanPangkatAdmin
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nama]
+              properties:
+                nama:
+                  type: string
+                  description: Nama jenis kenaikan pangkat
+                  example: Kenaikan Pilihan
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/jenisKenaikanPangkat"
+
+    delete:
+      tags:
+        - Admin Ref Jenis Kenaikan Pangkat
+      summary: Hapus jenis kenaikan pangkat (soft delete).
+      description: Menghapus data jenis kenaikan pangkat dengan menandai tanggal penghapusan.
+      operationId: deleteJenisKenaikanPangkatAdmin
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: No Content
   /v1/admin/jenis-satker:
     get:
       tags:
@@ -4313,6 +4449,15 @@ components:
         nama:
           type: string
           description: Nama jenis hukuman
+    jenisKenaikanPangkat:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        nama:
+          type: string
+          example: "Kenaikan Reguler"
     jenisSatker:
       type: object
       additionalProperties: false

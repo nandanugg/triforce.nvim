@@ -21,6 +21,65 @@ func (q *Queries) CountJenisKenaikanPangkat(ctx context.Context) (int64, error) 
 	return count, err
 }
 
+const createJenisKenaikanPangkat = `-- name: CreateJenisKenaikanPangkat :one
+INSERT INTO ref_jenis_kenaikan_pangkat (
+    nama
+) VALUES (
+    $1
+)
+RETURNING id, nama
+`
+
+type CreateJenisKenaikanPangkatRow struct {
+	ID   int32       `db:"id"`
+	Nama pgtype.Text `db:"nama"`
+}
+
+func (q *Queries) CreateJenisKenaikanPangkat(ctx context.Context, nama pgtype.Text) (CreateJenisKenaikanPangkatRow, error) {
+	row := q.db.QueryRow(ctx, createJenisKenaikanPangkat, nama)
+	var i CreateJenisKenaikanPangkatRow
+	err := row.Scan(&i.ID, &i.Nama)
+	return i, err
+}
+
+const deleteJenisKenaikanPangkat = `-- name: DeleteJenisKenaikanPangkat :execrows
+UPDATE ref_jenis_kenaikan_pangkat
+SET 
+    deleted_at = now(),
+    updated_at = now()
+WHERE id = $1
+  AND deleted_at IS NULL
+`
+
+func (q *Queries) DeleteJenisKenaikanPangkat(ctx context.Context, id int32) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteJenisKenaikanPangkat, id)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
+const getJenisKenaikanPangkat = `-- name: GetJenisKenaikanPangkat :one
+SELECT 
+    id,
+    nama
+FROM ref_jenis_kenaikan_pangkat
+WHERE id = $1
+  AND deleted_at IS NULL
+`
+
+type GetJenisKenaikanPangkatRow struct {
+	ID   int32       `db:"id"`
+	Nama pgtype.Text `db:"nama"`
+}
+
+func (q *Queries) GetJenisKenaikanPangkat(ctx context.Context, id int32) (GetJenisKenaikanPangkatRow, error) {
+	row := q.db.QueryRow(ctx, getJenisKenaikanPangkat, id)
+	var i GetJenisKenaikanPangkatRow
+	err := row.Scan(&i.ID, &i.Nama)
+	return i, err
+}
+
 const listJenisKenaikanPangkat = `-- name: ListJenisKenaikanPangkat :many
 SELECT id, nama FROM ref_jenis_kenaikan_pangkat
 WHERE deleted_at IS NULL
@@ -55,4 +114,31 @@ func (q *Queries) ListJenisKenaikanPangkat(ctx context.Context, arg ListJenisKen
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateJenisKenaikanPangkat = `-- name: UpdateJenisKenaikanPangkat :one
+UPDATE ref_jenis_kenaikan_pangkat
+SET 
+    nama = $1,
+    updated_at = now()
+WHERE id = $2
+  AND deleted_at IS NULL
+RETURNING id, nama
+`
+
+type UpdateJenisKenaikanPangkatParams struct {
+	Nama pgtype.Text `db:"nama"`
+	ID   int32       `db:"id"`
+}
+
+type UpdateJenisKenaikanPangkatRow struct {
+	ID   int32       `db:"id"`
+	Nama pgtype.Text `db:"nama"`
+}
+
+func (q *Queries) UpdateJenisKenaikanPangkat(ctx context.Context, arg UpdateJenisKenaikanPangkatParams) (UpdateJenisKenaikanPangkatRow, error) {
+	row := q.db.QueryRow(ctx, updateJenisKenaikanPangkat, arg.Nama, arg.ID)
+	var i UpdateJenisKenaikanPangkatRow
+	err := row.Scan(&i.ID, &i.Nama)
+	return i, err
 }
