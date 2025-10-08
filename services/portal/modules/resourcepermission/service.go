@@ -13,7 +13,7 @@ import (
 type repository interface {
 	ListResources(ctx context.Context, arg sqlc.ListResourcesParams) ([]sqlc.ListResourcesRow, error)
 	CountResources(ctx context.Context) (int64, error)
-	ListResourcePermissionsByResourceIDs(ctx context.Context, resourceids []int16) ([]sqlc.ListResourcePermissionsByResourceIDsRow, error)
+	ListResourcePermissionsByResourceIDs(ctx context.Context, resourceIDs []int16) ([]sqlc.ListResourcePermissionsByResourceIDsRow, error)
 	ListResourcePermissionsByNip(ctx context.Context, nip string) ([]pgtype.Text, error)
 }
 

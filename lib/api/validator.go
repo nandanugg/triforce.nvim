@@ -121,7 +121,7 @@ func requestMultiErrorMessage(merr openapi3.MultiError) string {
 	return strings.Join(msgs, " | ")
 }
 
-var quotedRegexp = regexp.MustCompile(`".+?"`)
+var quotedRegexp = regexp.MustCompile(`"(.+?)"`)
 
 func schemaErrorMessage(err *openapi3.SchemaError) string {
 	var msg string
@@ -147,16 +147,24 @@ func schemaErrorMessage(err *openapi3.SchemaError) string {
 		msg = fmt.Sprintf("harus %d item atau lebih", err.Schema.MinItems)
 	case "maxItems":
 		msg = fmt.Sprintf("harus %d item atau kurang", *err.Schema.MaxItems)
+	case "uniqueItems":
+		msg = "item tidak boleh duplikat"
 	case "required":
 		msg = "harus diisi"
 	case "properties":
 		if strings.HasSuffix(err.Reason, "is unsupported") {
-			msg = fmt.Sprintf("parameter %s tidak didukung", quotedRegexp.FindString(err.Reason))
-		} else {
-			return err.Error()
+			field := append(err.JSONPointer(), quotedRegexp.FindStringSubmatch(err.Reason)[1])
+			return fmt.Sprintf(`parameter "%s" tidak didukung`, strings.Join(field, "."))
 		}
+		return err.Error()
+	case "minProperties":
+		msg = fmt.Sprintf("harus %d property atau lebih", err.Schema.MinProps)
+	case "maxProperties":
+		msg = fmt.Sprintf("harus %d property atau kurang", *err.Schema.MaxProps)
 	case "type":
 		msg = "harus dalam tipe " + strings.Join(*err.Schema.Type, ", ")
+	case "nullable":
+		msg = "tidak boleh null"
 	case "allOf", "anyOf", "oneOf":
 		msg = "parameter tidak valid"
 	default:
@@ -165,6 +173,8 @@ func schemaErrorMessage(err *openapi3.SchemaError) string {
 
 	if field := err.JSONPointer(); len(field) > 0 {
 		msg = fmt.Sprintf(`parameter "%s" %s`, strings.Join(field, "."), msg)
+	} else if err.SchemaField == "minProperties" || err.SchemaField == "maxProperties" {
+		msg = "request body " + msg
 	}
 	return msg
 }

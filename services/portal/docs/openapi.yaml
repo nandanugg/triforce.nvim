@@ -10,6 +10,7 @@ tags:
   - name: Dokumen Pendukung
   - name: Pemberitahuan
   - name: Resource Permission
+  - name: Role
 paths:
   /v1/auth/login:
     get:
@@ -103,6 +104,13 @@ paths:
                     $ref: "#/components/schemas/tokenResponse"
         "422":
           description: User tidak ditemukan.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  message:
+                    type: string
   /v1/auth/refresh-token:
     post:
       tags:
@@ -142,6 +150,13 @@ paths:
                     $ref: "#/components/schemas/tokenResponse"
         "422":
           description: User tidak ditemukan.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  message:
+                    type: string
   /v1/dokumen-pendukung:
     get:
       tags:
@@ -287,6 +302,186 @@ paths:
                     type: array
                     items:
                       type: string
+  /v1/roles:
+    get:
+      tags:
+        - Role
+      summary: Lihat daftar roles.
+      description: Lihat daftar roles.
+      operationId: listRoles
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: integer
+                        nama:
+                          type: string
+                        deskripsi:
+                          type: string
+                        jumlah_user:
+                          type: integer
+                        is_default:
+                          type: boolean
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+    post:
+      tags:
+        - Role
+      summary: Tambah role.
+      description: Tambah role baru.
+      operationId: createRole
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              properties:
+                nama:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+                deskripsi:
+                  type: string
+                  maxLength: 255
+                is_default:
+                  type: boolean
+                resource_permission_ids:
+                  type: array
+                  items:
+                    type: integer
+                  uniqueItems: true
+              required:
+                - nama
+      responses:
+        "201":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: false
+                    properties:
+                      id:
+                        type: integer
+        "400":
+          $ref: "#/components/responses/badRequest"
+  /v1/roles/{id}:
+    get:
+      tags:
+        - Role
+      summary: Detail role.
+      description: Detail role berdasarkan id.
+      operationId: getRole
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: false
+                    properties:
+                      id:
+                        type: integer
+                      nama:
+                        type: string
+                      deskripsi:
+                        type: string
+                      jumlah_user:
+                        type: integer
+                      is_default:
+                        type: boolean
+                      resource_permissions:
+                        type: array
+                        items:
+                          type: object
+                          additionalProperties: false
+                          properties:
+                            id:
+                              type: integer
+                            kode:
+                              type: string
+                            nama_resource:
+                              type: string
+                            nama_permission:
+                              type: string
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "404":
+          $ref: "#/components/responses/notFound"
+    patch:
+      tags:
+        - Role
+      summary: Update role.
+      description: Update role.
+      operationId: updateRole
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              minProperties: 1
+              properties:
+                nama:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+                deskripsi:
+                  type: string
+                  maxLength: 255
+                is_default:
+                  type: boolean
+                resource_permission_ids:
+                  type: array
+                  items:
+                    type: integer
+                  uniqueItems: true
+      responses:
+        "204":
+          description: Sukses.
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "404":
+          $ref: "#/components/responses/notFound"
 components:
   parameters:
     authRequired:
@@ -310,6 +505,25 @@ components:
         type: integer
         default: 0
         minimum: 0
+  responses:
+    badRequest:
+      description: Request dari client tidak valid.
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              message:
+                type: string
+    notFound:
+      description: Data tidak ditemukan.
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              message:
+                type: string
   schemas:
     metaPagination:
       type: object

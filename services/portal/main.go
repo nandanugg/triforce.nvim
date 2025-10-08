@@ -13,6 +13,7 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/modules/dokumenpendukung"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/modules/pemberitahuan"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/modules/resourcepermission"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/modules/role"
 )
 
 func main() {
@@ -41,6 +42,7 @@ func main() {
 	dokumenpendukung.RegisterRoutes(e, db, mwAuth)
 	pemberitahuan.RegisterRoutes(e, db, mwAuth)
 	resourcepermission.RegisterRoutes(e, dbRepository, mwAuth)
+	role.RegisterRoutes(e, db, dbRepository, mwAuth)
 
 	port := uint(c.Server.Port)
 	exitIfError("Error parsing server port.", err)

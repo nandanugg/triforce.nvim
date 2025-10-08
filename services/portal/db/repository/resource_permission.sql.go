@@ -9,6 +9,20 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countActiveResourcePermissionsByIDs = `-- name: CountActiveResourcePermissionsByIDs :one
+select count(1)
+from resource_permission
+where id = any($1::int4[]) and deleted_at is null
+  and kode is not null -- kode is not null is alias for resource.deleted_at is null and permission.deleted_at is null
+`
+
+func (q *Queries) CountActiveResourcePermissionsByIDs(ctx context.Context, ids []int32) (int64, error) {
+	row := q.db.QueryRow(ctx, countActiveResourcePermissionsByIDs, ids)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const countResources = `-- name: CountResources :one
 select count(1)
 from resource
@@ -81,8 +95,8 @@ type ListResourcePermissionsByResourceIDsRow struct {
 	NamaPermission string      `db:"nama_permission"`
 }
 
-func (q *Queries) ListResourcePermissionsByResourceIDs(ctx context.Context, resourceids []int16) ([]ListResourcePermissionsByResourceIDsRow, error) {
-	rows, err := q.db.Query(ctx, listResourcePermissionsByResourceIDs, resourceids)
+func (q *Queries) ListResourcePermissionsByResourceIDs(ctx context.Context, resourceIds []int16) ([]ListResourcePermissionsByResourceIDsRow, error) {
+	rows, err := q.db.Query(ctx, listResourcePermissionsByResourceIDs, resourceIds)
 	if err != nil {
 		return nil, err
 	}
@@ -94,6 +108,52 @@ func (q *Queries) ListResourcePermissionsByResourceIDs(ctx context.Context, reso
 			&i.ResourceID,
 			&i.ID,
 			&i.Kode,
+			&i.NamaPermission,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listResourcePermissionsByRoleID = `-- name: ListResourcePermissionsByRoleID :many
+select
+  rp.id,
+  rp.kode,
+  r.nama as nama_resource,
+  p.nama as nama_permission
+from role_resource_permission rrp
+join resource_permission rp on rp.id = rrp.resource_permission_id and rp.deleted_at is null
+join resource r on r.id = rp.resource_id and r.deleted_at is null
+join permission p on p.id = rp.permission_id and p.deleted_at is null
+where rrp.role_id = $1 and rrp.deleted_at is null
+order by rp.kode
+`
+
+type ListResourcePermissionsByRoleIDRow struct {
+	ID             int32       `db:"id"`
+	Kode           pgtype.Text `db:"kode"`
+	NamaResource   string      `db:"nama_resource"`
+	NamaPermission string      `db:"nama_permission"`
+}
+
+func (q *Queries) ListResourcePermissionsByRoleID(ctx context.Context, roleID int16) ([]ListResourcePermissionsByRoleIDRow, error) {
+	rows, err := q.db.Query(ctx, listResourcePermissionsByRoleID, roleID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListResourcePermissionsByRoleIDRow
+	for rows.Next() {
+		var i ListResourcePermissionsByRoleIDRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Kode,
+			&i.NamaResource,
 			&i.NamaPermission,
 		); err != nil {
 			return nil, err

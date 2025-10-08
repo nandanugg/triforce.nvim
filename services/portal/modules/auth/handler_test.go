@@ -347,10 +347,10 @@ func Test_handler_exchangeToken(t *testing.T) {
 		{
 			name:             "error exchange token, keycloak return status 4xx",
 			requestBody:      `{"code": "my-code", "redirect_uri": "http://localhost:5173/callback"}`,
-			keycloakRespCode: 422,
+			keycloakRespCode: 409,
 			keycloakRespBody: []byte(`{"error": "invalid code"}`),
 			wantRedirectURI:  "http://localhost:5173/callback",
-			wantResponseCode: 422,
+			wantResponseCode: 409,
 			wantResponseBody: `{"error": "invalid code"}`,
 		},
 		{
@@ -639,9 +639,9 @@ func Test_handler_refreshToken(t *testing.T) {
 		{
 			name:             "error refresh token, keycloak return status 4xx",
 			requestBody:      `{"refresh_token": "my-code"}`,
-			keycloakRespCode: 422,
+			keycloakRespCode: 409,
 			keycloakRespBody: []byte(`{"error": "invalid code"}`),
-			wantResponseCode: 422,
+			wantResponseCode: 409,
 			wantResponseBody: `{"error": "invalid code"}`,
 		},
 		{

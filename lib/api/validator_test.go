@@ -72,11 +72,42 @@ paths:
                   type: array
                   items:
                     type: string
+                  uniqueItems: true
                   minItems: 1
                   maxItems: 2
               required:
                 - string_empat
                 - enum_lima
+      responses:
+        "200":
+          description: Sukses.
+        "400":
+          $ref: "#/components/responses/badRequest"
+  /optional-endpoint:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              minProperties: 1
+              maxProperties: 2
+              properties:
+                var1:
+                  type: string
+                var2:
+                  type: object
+                  additionalProperties: false
+                  properties:
+                    var0:
+                      type: string
+                var3:
+                  type: object
+                  minProperties: 1
+                  properties:
+                    var0:
+                      type: string
       responses:
         "200":
           description: Sukses.
@@ -268,7 +299,7 @@ components:
 				` | parameter \"string_empat\" harus 1 karakter atau lebih"}`,
 		},
 		{
-			name:          "error: string & array size too big",
+			name:          "error: string & array size too big & duplicate",
 			requestMethod: http.MethodPost,
 			requestPath:   "/other-endpoint",
 			requestHeader: http.Header{
@@ -277,10 +308,11 @@ components:
 			requestBody: strings.NewReader(`{
 				"string_empat": "This is a long title",
 				"enum_lima": "enum_value_dua",
-				"array_tiga": ["Testing", "Baru", "Lama"]
+				"array_tiga": ["Testing", "Baru", "Baru"]
 			}`),
 			wantResponseStatus: 400,
 			wantResponseBody: `{"message": "parameter \"array_tiga\" harus 2 item atau kurang` +
+				` | parameter \"array_tiga\" item tidak boleh duplikat` +
 				` | parameter \"string_empat\" harus 10 karakter atau kurang"}`,
 		},
 		{
@@ -297,6 +329,35 @@ components:
 			}`),
 			wantResponseStatus: 400,
 			wantResponseBody:   `{"message": "parameter \"jenis\" tidak didukung"}`,
+		},
+		{
+			name:          "error: non nullable params, exceed maxProperties, and below minProperties",
+			requestMethod: http.MethodPost,
+			requestPath:   "/optional-endpoint",
+			requestHeader: http.Header{
+				"Content-Type": []string{"application/json"},
+			},
+			requestBody: strings.NewReader(`{
+				"var1": null,
+				"var2": { "var1": "abc" },
+				"var3": {}
+			}`),
+			wantResponseStatus: 400,
+			wantResponseBody: `{"message": "request body harus 2 property atau kurang` +
+				` | parameter \"var1\" tidak boleh null` +
+				` | parameter \"var2.var1\" tidak didukung` +
+				` | parameter \"var3\" harus 1 property atau lebih"}`,
+		},
+		{
+			name:          "error: empty property",
+			requestMethod: http.MethodPost,
+			requestPath:   "/optional-endpoint",
+			requestHeader: http.Header{
+				"Content-Type": []string{"application/json"},
+			},
+			requestBody:        strings.NewReader(`{}`),
+			wantResponseStatus: 400,
+			wantResponseBody:   `{"message": "request body harus 1 property atau lebih"}`,
 		},
 	}
 	for _, tt := range tests {
