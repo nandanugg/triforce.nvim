@@ -137,7 +137,7 @@ type adminGetRequest struct {
 }
 
 type adminGetResponse struct {
-	Data *unitKerja `json:"data"`
+	Data *unitKerjaWithInduk `json:"data"`
 }
 
 func (h *handler) adminGet(c echo.Context) error {

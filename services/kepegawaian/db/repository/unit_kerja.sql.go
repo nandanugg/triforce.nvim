@@ -248,39 +248,43 @@ func (q *Queries) DeleteUnitKerja(ctx context.Context, id string) (int64, error)
 
 const getUnitKerja = `-- name: GetUnitKerja :one
 SELECT
-    id,
-    "no",
-    kode_internal,
-    nama_unor as nama,
-    eselon_id,
-    cepat_kode,
-    nama_jabatan,
-    nama_pejabat,
-    diatasan_id,
-    instansi_id,
-    pemimpin_pns_id,
-    jenis_unor_id,
-    unor_induk,
-    jumlah_ideal_staff,
-    "order",
-    is_satker,
-    eselon_1,
-    eselon_2,
-    eselon_3,
-    eselon_4,
-    expired_date,
-    keterangan,
-    jenis_satker,
-    abbreviation,
-    unor_induk_penyetaraan,
-    jabatan_id,
-    waktu,
-    peraturan,
-    remark,
-    aktif,
-    eselon_nama
-FROM unit_kerja
-WHERE id = $1::varchar AND deleted_at IS NULL
+    uk.id,
+    uk."no",
+    uk.kode_internal,
+    uk.nama_unor as nama,
+    uk.eselon_id,
+    uk.cepat_kode,
+    uk.nama_jabatan,
+    uk.nama_pejabat,
+    uk.diatasan_id,
+    uk.instansi_id,
+    uk.pemimpin_pns_id,
+    uk.jenis_unor_id,
+    uk.unor_induk,
+    uk.jumlah_ideal_staff,
+    uk."order",
+    uk.is_satker,
+    uk.eselon_1,
+    uk.eselon_2,
+    uk.eselon_3,
+    uk.eselon_4,
+    uk.expired_date,
+    uk.keterangan,
+    uk.jenis_satker,
+    uk.abbreviation,
+    uk.unor_induk_penyetaraan,
+    uk.jabatan_id,
+    uk.waktu,
+    uk.peraturan,
+    uk.remark,
+    uk.aktif,
+    uk.eselon_nama,
+    ukd.nama_unor as nama_diatasan,
+    ukui.nama_unor as nama_unor_induk
+FROM unit_kerja uk
+LEFT JOIN unit_kerja ukd ON uk.diatasan_id = ukd.id AND ukd.deleted_at IS NULL
+LEFT JOIN unit_kerja ukui ON uk.unor_induk = ukui.id AND ukui.deleted_at IS NULL
+WHERE uk.id = $1::varchar AND uk.deleted_at IS NULL
 `
 
 type GetUnitKerjaRow struct {
@@ -315,6 +319,8 @@ type GetUnitKerjaRow struct {
 	Remark               pgtype.Text `db:"remark"`
 	Aktif                pgtype.Bool `db:"aktif"`
 	EselonNama           pgtype.Text `db:"eselon_nama"`
+	NamaDiatasan         pgtype.Text `db:"nama_diatasan"`
+	NamaUnorInduk        pgtype.Text `db:"nama_unor_induk"`
 }
 
 func (q *Queries) GetUnitKerja(ctx context.Context, id string) (GetUnitKerjaRow, error) {
@@ -352,6 +358,8 @@ func (q *Queries) GetUnitKerja(ctx context.Context, id string) (GetUnitKerjaRow,
 		&i.Remark,
 		&i.Aktif,
 		&i.EselonNama,
+		&i.NamaDiatasan,
+		&i.NamaUnorInduk,
 	)
 	return i, err
 }

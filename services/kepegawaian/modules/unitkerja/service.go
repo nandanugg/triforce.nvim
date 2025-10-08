@@ -131,16 +131,16 @@ func (s *service) listAnak(ctx context.Context, arg listAnakParams) ([]anakUnitK
 	return result, total, nil
 }
 
-func (s *service) get(ctx context.Context, id string) (*unitKerja, error) {
+func (s *service) get(ctx context.Context, id string) (*unitKerjaWithInduk, error) {
 	row, err := s.repo.GetUnitKerja(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, nil
 		}
-		return nil, fmt.Errorf("[get] error GetRefGolongan: %w", err)
+		return nil, fmt.Errorf("[get] error getUnitKerja: %w", err)
 	}
 
-	result := &unitKerja{
+	result := &unitKerjaWithInduk{
 		ID:                   row.ID,
 		No:                   row.No.Int32,
 		KodeInternal:         row.KodeInternal.String,
@@ -172,6 +172,8 @@ func (s *service) get(ctx context.Context, id string) (*unitKerja, error) {
 		Remark:               row.Remark.String,
 		Aktif:                row.Aktif.Bool,
 		EselonNama:           row.EselonNama.String,
+		NamaDiatasan:         row.NamaDiatasan.String,
+		NamaUnorInduk:        row.NamaUnorInduk.String,
 	}
 
 	return result, nil
@@ -200,7 +202,7 @@ func (s *service) create(ctx context.Context, params createParams) (*unitKerja, 
 	if params.pemimpinPNSID != "" {
 		pejabat, err := s.repo.GetProfilePegawaiByPNSID(ctx, params.pemimpinPNSID)
 		if err != nil {
-			return nil, fmt.Errorf("[create] error GetRefGetProfilePegawaiByPNSIDGolongan: %w", err)
+			return nil, fmt.Errorf("[create] error getProfilePegawaiByPNSID: %w", err)
 		}
 
 		namaPejabat = pejabat.Nama.String
@@ -287,7 +289,7 @@ func (s *service) update(ctx context.Context, params updateParams) (*unitKerja, 
 	if params.pemimpinPNSID != "" {
 		pejabat, err := s.repo.GetProfilePegawaiByPNSID(ctx, params.pemimpinPNSID)
 		if err != nil {
-			return nil, fmt.Errorf("[update] error GetRefGetProfilePegawaiByPNSIDGolongan: %w", err)
+			return nil, fmt.Errorf("[update] error getProfilePegawaiByPNSID: %w", err)
 		}
 
 		namaPejabat = pejabat.Nama.String

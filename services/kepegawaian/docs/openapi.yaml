@@ -2261,7 +2261,7 @@ paths:
                 additionalProperties: false
                 properties:
                   data:
-                    $ref: "#/components/schemas/unitKerja"
+                    $ref: "#/components/schemas/unitKerjaWithInduk"
     put:
       tags:
         - Admin Unit Kerja
@@ -4629,7 +4629,6 @@ components:
           description: Nama jenis satker
     unitKerja:
       type: object
-      additionalProperties: false
       properties:
         id:
           type: string
@@ -4727,3 +4726,14 @@ components:
         eselon_nama:
           type: string
           example: "Eselon Nama I"
+    unitKerjaWithInduk:
+      allOf:
+        - $ref: "#/components/schemas/unitKerja"
+        - type: object
+          properties:
+            nama_unor_induk:
+              type: string
+              example: "unit kerja induk"
+            nama_diatasan:
+              type: string
+              example: "unit kerja teratas"

@@ -614,7 +614,9 @@ func Test_handler_adminGet(t *testing.T) {
 					"peraturan": "Peraturan ROOT 001",
 					"remark": "Unit pusat",
 					"aktif": true,
-					"eselon_nama": "Eselon ROOT"
+					"eselon_nama": "Eselon ROOT",
+					"nama_diatasan": "",
+					"nama_unor_induk": ""
 				}
 			}`,
 		},
@@ -656,7 +658,9 @@ func Test_handler_adminGet(t *testing.T) {
 					"peraturan": "Peraturan 123",
 					"remark": "Remark contoh",
 					"aktif": true,
-					"eselon_nama": "Eselon Nama I"
+					"eselon_nama": "Eselon Nama I",
+					"nama_unor_induk": "Kantor Pusat",
+					"nama_diatasan": "Kantor Pusat"
 				}
 			}`,
 		},
