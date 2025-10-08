@@ -6,11 +6,14 @@ info:
 servers:
   - url: http://localhost:8000
 tags:
+  - name: Admin Jenis Satker
+  - name: Admin Golongan
   - name: Admin Pegawai Aktif
   - name: Admin Ref Golongan
   - name: Admin Ref Jabatan
   - name: Admin Ref Jenis Hukuman
   - name: Admin Ref Jenis Kenaikan Pangkat
+  - name: Admin Ref Jenis Penghargaan
   - name: Admin Ref Jenis Satker
   - name: Admin Surat Keputusan Pegawai
   - name: Admin Unit Kerja
@@ -793,6 +796,152 @@ paths:
       responses:
         "204":
           description: No Content
+  /v1/admin/jenis-penghargaan:
+    get:
+      tags:
+        - Admin Ref Jenis Penghargaan
+      summary: List semua jenis penghargaan
+      description: Mengambil daftar semua jenis penghargaan yang belum dihapus. Dapat difilter berdasarkan nama (case-insensitive, partial match).
+      operationId: listJenisPenghargaanAdmin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses mengambil daftar jenis penghargaan
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/jenisPenghargaan"
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+    post:
+      tags:
+        - Admin Ref Jenis Penghargaan
+      summary: Tambah jenis penghargaan baru
+      description: Menambahkan satu jenis penghargaan baru ke database.
+      operationId: createJenisPenghargaanAdmin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: 
+                - nama
+              additionalProperties: false
+              properties:
+                nama:
+                  type: string
+                  description: Nama jenis penghargaan
+                  example: "Satuan Kerja Tipe A"
+      responses:
+        "200":
+          description: Berhasil membuat jenis penghargaan
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/jenisPenghargaan"
+  /v1/admin/jenis-penghargaan/{id}:
+    get:
+      tags:
+        - Admin Ref Jenis Penghargaan
+      summary: Detail jenis penghargaan berdasarkan ID
+      description: Mengambil detail satu jenis penghargaan berdasarkan ID, jika belum dihapus.
+      operationId: getJenisPenghargaanAdmin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          description: ID jenis penghargaan
+          schema:
+            type: integer
+        - name: nama
+          in: query
+          description: Filter nama jenis penghargaan (optional)
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Sukses mengambil detail jenis penghargaan
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/jenisPenghargaan"
+    put:
+      tags:
+        - Admin Ref Jenis Penghargaan
+      summary: Update jenis penghargaan
+      description: Mengubah data nama jenis penghargaan berdasarkan ID.
+      operationId: updateJenisPenghargaanAdmin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          description: ID jenis penghargaan yang akan diupdate
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: 
+                - nama
+              additionalProperties: false
+              properties:
+                nama:
+                  type: string
+                  description: Nama baru jenis penghargaan
+                  example: "Satuan Kerja Tipe B"
+      responses:
+        "200":
+          description: Sukses update jenis penghargaan
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/jenisPenghargaan"
+    delete:
+      tags:
+        - Admin Ref Jenis Penghargaan
+      summary: Soft delete jenis penghargaan
+      description: Menghapus jenis penghargaan secara soft delete berdasarkan ID.
+      operationId: deleteJenisPenghargaanAdmin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          description: ID jenis penghargaan yang akan dihapus
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Berhasil dihapus (soft delete)
   /v1/admin/jenis-satker:
     get:
       tags:
@@ -4458,6 +4607,16 @@ components:
         nama:
           type: string
           example: "Kenaikan Reguler"
+    jenisPenghargaan:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          description: ID unik jenis penghargaan
+        nama:
+          type: string
+          description: Nama jenis penghargaan
     jenisSatker:
       type: object
       additionalProperties: false

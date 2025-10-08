@@ -22,6 +22,58 @@ func (q *Queries) CountRefJenisPenghargaan(ctx context.Context) (int64, error) {
 	return count, err
 }
 
+const createRefJenisPenghargaan = `-- name: CreateRefJenisPenghargaan :one
+INSERT INTO ref_jenis_penghargaan (nama)
+VALUES ($1)
+RETURNING id, nama
+`
+
+type CreateRefJenisPenghargaanRow struct {
+	ID   int32       `db:"id"`
+	Nama pgtype.Text `db:"nama"`
+}
+
+func (q *Queries) CreateRefJenisPenghargaan(ctx context.Context, nama pgtype.Text) (CreateRefJenisPenghargaanRow, error) {
+	row := q.db.QueryRow(ctx, createRefJenisPenghargaan, nama)
+	var i CreateRefJenisPenghargaanRow
+	err := row.Scan(&i.ID, &i.Nama)
+	return i, err
+}
+
+const deleteRefJenisPenghargaan = `-- name: DeleteRefJenisPenghargaan :execrows
+UPDATE ref_jenis_penghargaan
+SET deleted_at = now()
+WHERE id = $1
+  AND deleted_at IS NULL
+`
+
+func (q *Queries) DeleteRefJenisPenghargaan(ctx context.Context, id int32) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteRefJenisPenghargaan, id)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
+const getRefJenisPenghargaan = `-- name: GetRefJenisPenghargaan :one
+SELECT id, nama
+FROM ref_jenis_penghargaan
+WHERE id = $1
+  AND deleted_at IS NULL
+`
+
+type GetRefJenisPenghargaanRow struct {
+	ID   int32       `db:"id"`
+	Nama pgtype.Text `db:"nama"`
+}
+
+func (q *Queries) GetRefJenisPenghargaan(ctx context.Context, id int32) (GetRefJenisPenghargaanRow, error) {
+	row := q.db.QueryRow(ctx, getRefJenisPenghargaan, id)
+	var i GetRefJenisPenghargaanRow
+	err := row.Scan(&i.ID, &i.Nama)
+	return i, err
+}
+
 const listRefJenisPenghargaan = `-- name: ListRefJenisPenghargaan :many
 SELECT 
   id, 
@@ -59,4 +111,29 @@ func (q *Queries) ListRefJenisPenghargaan(ctx context.Context, arg ListRefJenisP
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateRefJenisPenghargaan = `-- name: UpdateRefJenisPenghargaan :one
+UPDATE ref_jenis_penghargaan
+SET nama = $2
+WHERE id = $1
+  AND deleted_at IS NULL
+RETURNING id, nama
+`
+
+type UpdateRefJenisPenghargaanParams struct {
+	ID   int32       `db:"id"`
+	Nama pgtype.Text `db:"nama"`
+}
+
+type UpdateRefJenisPenghargaanRow struct {
+	ID   int32       `db:"id"`
+	Nama pgtype.Text `db:"nama"`
+}
+
+func (q *Queries) UpdateRefJenisPenghargaan(ctx context.Context, arg UpdateRefJenisPenghargaanParams) (UpdateRefJenisPenghargaanRow, error) {
+	row := q.db.QueryRow(ctx, updateRefJenisPenghargaan, arg.ID, arg.Nama)
+	var i UpdateRefJenisPenghargaanRow
+	err := row.Scan(&i.ID, &i.Nama)
+	return i, err
 }
