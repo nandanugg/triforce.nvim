@@ -9,6 +9,7 @@ tags:
   - name: Admin Pegawai Aktif
   - name: Admin Ref Golongan
   - name: Admin Ref Jabatan
+  - name: Admin Ref Jenis Hukuman
   - name: Admin Ref Jenis Satker
   - name: Admin Surat Keputusan Pegawai
   - name: Admin Unit Kerja
@@ -510,6 +511,152 @@ paths:
           description: Jabatan tidak ditemukan.
         "500":
           description: Error internal server.
+  /v1/admin/jenis-hukuman:
+    get:
+      tags:
+        - Admin Ref Jenis Hukuman
+      summary: List semua jenis hukuman
+      description: Mengambil daftar semua jenis hukuman yang belum dihapus.
+      operationId: listJenisHukumanAdmin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses mengambil daftar jenis hukuman
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/jenisHukuman"
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+    post:
+      tags:
+        - Admin Ref Jenis Hukuman
+      summary: Tambah jenis hukuman baru
+      description: Menambahkan satu jenis hukuman baru ke database.
+      operationId: createJenisHukumanAdmin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: 
+                - nama
+              additionalProperties: false
+              properties:
+                nama:
+                  type: string
+                  description: Nama jenis hukuman
+                  example: "Satuan Kerja Tipe A"
+      responses:
+        "200":
+          description: Berhasil membuat jenis hukuman
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/jenisHukuman"
+  /v1/admin/jenis-hukuman/{id}:
+    get:
+      tags:
+        - Admin Ref Jenis Hukuman
+      summary: Detail jenis hukuman berdasarkan ID
+      description: Mengambil detail satu jenis hukuman berdasarkan ID, jika belum dihapus.
+      operationId: getJenisHukumanAdmin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          description: ID jenis hukuman
+          schema:
+            type: integer
+        - name: nama
+          in: query
+          description: Filter nama jenis hukuman (optional)
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Sukses mengambil detail jenis hukuman
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/jenisHukuman"
+    put:
+      tags:
+        - Admin Ref Jenis Hukuman
+      summary: Update jenis hukuman
+      description: Mengubah data nama jenis hukuman berdasarkan ID.
+      operationId: updateJenisHukumanAdmin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          description: ID jenis hukuman yang akan diupdate
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: 
+                - nama
+              additionalProperties: false
+              properties:
+                nama:
+                  type: string
+                  description: Nama baru jenis hukuman
+                  example: "Satuan Kerja Tipe B"
+      responses:
+        "200":
+          description: Sukses update jenis hukuman
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/jenisHukuman"
+    delete:
+      tags:
+        - Admin Ref Jenis Hukuman
+      summary: Soft delete jenis hukuman
+      description: Menghapus jenis hukuman secara soft delete berdasarkan ID.
+      operationId: deleteJenisHukumanAdmin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          description: ID jenis hukuman yang akan dihapus
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Berhasil dihapus (soft delete)
   /v1/admin/jenis-satker:
     get:
       tags:
@@ -4156,6 +4303,16 @@ components:
           type: integer
           format: int64
           nullable: true
+    jenisHukuman:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          description: ID unik jenis hukuman
+        nama:
+          type: string
+          description: Nama jenis hukuman
     jenisSatker:
       type: object
       additionalProperties: false
