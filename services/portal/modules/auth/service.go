@@ -12,7 +12,6 @@ import (
 	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 
@@ -23,6 +22,7 @@ import (
 type repository interface {
 	GetUserNIPByIDAndSource(ctx context.Context, arg sqlc.GetUserNIPByIDAndSourceParams) (string, error)
 	ListUserRoleByNIP(ctx context.Context, nip string) ([]sqlc.ListUserRoleByNIPRow, error)
+	UpdateLastLoginAt(ctx context.Context, arg sqlc.UpdateLastLoginAtParams) error
 }
 
 type service struct {
@@ -117,8 +117,16 @@ func (s *service) exchangeToken(ctx context.Context, code, redirectURI string) (
 		return nil, fmt.Errorf("json decode: %w", err)
 	}
 
-	if token.AccessToken, err = s.enrichTokenWithAdditionalUserData(ctx, token.AccessToken); err != nil {
+	var user *user
+	if token.AccessToken, user, err = s.enrichTokenWithAdditionalUserData(ctx, token.AccessToken); err != nil {
 		return nil, fmt.Errorf("enrich token: %w", err)
+	}
+
+	if err := s.repo.UpdateLastLoginAt(ctx, sqlc.UpdateLastLoginAtParams{
+		ID:     user.id,
+		Source: user.source,
+	}); err != nil {
+		return nil, fmt.Errorf("update last login: %w", err)
 	}
 
 	return token, nil
@@ -154,24 +162,25 @@ func (s *service) refreshToken(ctx context.Context, refreshToken string) (*token
 		return nil, fmt.Errorf("json decode: %w", err)
 	}
 
-	if token.AccessToken, err = s.enrichTokenWithAdditionalUserData(ctx, token.AccessToken); err != nil {
+	if token.AccessToken, _, err = s.enrichTokenWithAdditionalUserData(ctx, token.AccessToken); err != nil {
 		return nil, fmt.Errorf("enrich token: %w", err)
 	}
 
 	return token, nil
 }
 
-func (s *service) enrichTokenWithAdditionalUserData(ctx context.Context, accessToken string) (string, error) {
+func (s *service) enrichTokenWithAdditionalUserData(ctx context.Context, accessToken string) (string, *user, error) {
 	claims := jwt.MapClaims{}
 	if _, err := jwt.ParseWithClaims(accessToken, &claims, s.keyfunc); err != nil {
-		return "", fmt.Errorf("parse jwt: %w", err)
+		return "", nil, fmt.Errorf("parse jwt: %w", err)
 	}
 
+	var id pgtype.UUID
 	var user *user
 	if zimbraID, ok := claims["zimbra_id"].(string); ok {
-		if id, err := uuid.Parse(zimbraID); err == nil {
+		if err := id.Scan(zimbraID); err == nil {
 			if user, err = s.getUser(ctx, id, sourceZimbra); err != nil {
-				return "", fmt.Errorf("get user zimbra: %w", err)
+				return "", nil, fmt.Errorf("get user zimbra: %w", err)
 			}
 		}
 	}
@@ -179,16 +188,16 @@ func (s *service) enrichTokenWithAdditionalUserData(ctx context.Context, accessT
 	// fallback using keycloak_id
 	if user == nil {
 		if keycloakID, err := claims.GetSubject(); err == nil {
-			if id, err := uuid.Parse(keycloakID); err == nil {
+			if err := id.Scan(keycloakID); err == nil {
 				if user, err = s.getUser(ctx, id, sourceKeycloak); err != nil {
-					return "", fmt.Errorf("get user keycloak: %w", err)
+					return "", nil, fmt.Errorf("get user keycloak: %w", err)
 				}
 			}
 		}
 	}
 
 	if user == nil {
-		return "", errUserNotFound
+		return "", nil, errUserNotFound
 	}
 
 	claims["nip"] = user.nip
@@ -200,14 +209,14 @@ func (s *service) enrichTokenWithAdditionalUserData(ctx context.Context, accessT
 
 	signed, err := token.SignedString(s.privateKey)
 	if err != nil {
-		return "", fmt.Errorf("sign token: %w", err)
+		return "", nil, fmt.Errorf("sign token: %w", err)
 	}
-	return signed, nil
+	return signed, user, nil
 }
 
-func (s *service) getUser(ctx context.Context, id uuid.UUID, source string) (*user, error) {
+func (s *service) getUser(ctx context.Context, id pgtype.UUID, source string) (*user, error) {
 	nip, err := s.repo.GetUserNIPByIDAndSource(ctx, sqlc.GetUserNIPByIDAndSourceParams{
-		ID:     pgtype.UUID{Bytes: id, Valid: true},
+		ID:     id,
 		Source: source,
 	})
 	if err != nil {
@@ -227,5 +236,10 @@ func (s *service) getUser(ctx context.Context, id uuid.UUID, source string) (*us
 		roles[row.Service.String] = row.Nama
 	}
 
-	return &user{nip: nip, roles: roles}, nil
+	return &user{
+		id:     id,
+		source: source,
+		nip:    nip,
+		roles:  roles,
+	}, nil
 }

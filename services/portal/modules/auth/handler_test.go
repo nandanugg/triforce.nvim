@@ -7,8 +7,10 @@ import (
 	"net/url"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -166,12 +168,15 @@ func Test_handler_exchangeToken(t *testing.T) {
 		wantRedirectURI  string
 		wantResponseCode int
 		wantResponseBody string
+		wantDBRows       dbtest.Rows
 	}{
 		{
 			name: "success exchange token user without roles using keycloak_id without forwarded header",
 			dbData: `
-				insert into "user" (id, source, nip) values
-					('00000000-0000-0000-0000-000000000001', 'keycloak', '1c');
+				insert into "user" (id, source, nip, created_at, updated_at) values
+					('00000000-0000-0000-0000-000000000001', 'keycloak', '1c', '2000-01-01', '2000-01-01'),
+					('00000000-0000-0000-0000-000000000002', 'keycloak', '1a', '2000-01-01', '2000-01-01'),
+					('00000000-0000-0000-0000-000000000001', 'zimbra', '1b', '2000-01-01', '2000-01-01');
 			`,
 			requestBody:      `{"code": "my-code", "redirect_uri": "http://localhost:5173/callback"}`,
 			keycloakRespCode: 200,
@@ -197,13 +202,51 @@ func Test_handler_exchangeToken(t *testing.T) {
 					"refresh_expires_in": 300
 				}
 			}`,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":              [16]byte(uuid.MustParse("00000000-0000-0000-0000-000000000001")),
+					"source":          "keycloak",
+					"nip":             "1c",
+					"nama":            nil,
+					"email":           nil,
+					"unit_organisasi": nil,
+					"last_login_at":   "{last_login_at}",
+					"created_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":      nil,
+				},
+				{
+					"id":              [16]byte(uuid.MustParse("00000000-0000-0000-0000-000000000001")),
+					"source":          "zimbra",
+					"nip":             "1b",
+					"nama":            nil,
+					"email":           nil,
+					"unit_organisasi": nil,
+					"last_login_at":   nil,
+					"created_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":      nil,
+				},
+				{
+					"id":              [16]byte(uuid.MustParse("00000000-0000-0000-0000-000000000002")),
+					"source":          "keycloak",
+					"nip":             "1a",
+					"nama":            nil,
+					"email":           nil,
+					"unit_organisasi": nil,
+					"last_login_at":   nil,
+					"created_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":      nil,
+				},
+			},
 		},
 		{
 			name: "success exchange token user without deleted roles using zimbra_id as priority with forwarded header without redirect_uri",
 			dbData: `
-				insert into "user" (id, source, nip) values
-					('00000000-0000-0000-0000-000000000001', 'keycloak', '1c'),
-					('00000000-0000-0000-0000-000000000002', 'zimbra', '1b');
+				insert into "user" (id, source, nip, created_at, updated_at) values
+					('00000000-0000-0000-0000-000000000001', 'keycloak', '1c', '2000-01-01', '2000-01-01'),
+					('00000000-0000-0000-0000-000000000002', 'zimbra', '1b', '2000-01-01', '2000-01-01');
 				insert into role (id, service, nama, deleted_at) values
 					(1, 'portal', 'admin', '2000-01-01'),
 					(2, 'portal', 'admin', null);
@@ -236,12 +279,38 @@ func Test_handler_exchangeToken(t *testing.T) {
 					"refresh_expires_in": 300
 				}
 			}`,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":              [16]byte(uuid.MustParse("00000000-0000-0000-0000-000000000001")),
+					"source":          "keycloak",
+					"nip":             "1c",
+					"nama":            nil,
+					"email":           nil,
+					"unit_organisasi": nil,
+					"last_login_at":   nil,
+					"created_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":      nil,
+				},
+				{
+					"id":              [16]byte(uuid.MustParse("00000000-0000-0000-0000-000000000002")),
+					"source":          "zimbra",
+					"nip":             "1b",
+					"nama":            nil,
+					"email":           nil,
+					"unit_organisasi": nil,
+					"last_login_at":   "{last_login_at}",
+					"created_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":      nil,
+				},
+			},
 		},
 		{
 			name: "success exchange token user with multiple roles order by updated_at fallback using keycloak_id when user zimbra is not found with forwarded host only and with redirect_uri",
 			dbData: `
-				insert into "user" (id, source, nip) values
-					('00000000-0000-0000-0000-000000000001', 'keycloak', '1c');
+				insert into "user" (id, source, nip, created_at, updated_at, last_login_at) values
+					('00000000-0000-0000-0000-000000000001', 'keycloak', '1c', '2000-01-01', '2000-01-01', '2000-01-01');
 				insert into role (id, service, nama) values
 					(1, 'portal', 'admin'),
 					(2, 'portal', 'pegawai'),
@@ -279,15 +348,29 @@ func Test_handler_exchangeToken(t *testing.T) {
 					"refresh_expires_in": 300
 				}
 			}`,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":              [16]byte(uuid.MustParse("00000000-0000-0000-0000-000000000001")),
+					"source":          "keycloak",
+					"nip":             "1c",
+					"nama":            nil,
+					"email":           nil,
+					"unit_organisasi": nil,
+					"last_login_at":   "{last_login_at}",
+					"created_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":      nil,
+				},
+			},
 		},
 		{
 			name: "error exchange token, user keycloak or zimbra not found",
 			dbData: `
-				insert into "user" (id, source, nip, deleted_at) values
-					('00000000-0000-0000-0000-000000000001', 'keycloak', '1a', '2000-02-02'),
-					('00000000-0000-0000-0000-000000000002', 'zimbra', '1b', '2000-01-01'),
-					('00000000-0000-0000-0000-000000000002', 'keycloak', '1a', null),
-					('00000000-0000-0000-0000-000000000001', 'zimbra', '1b', null);
+				insert into "user" (id, source, nip, created_at, updated_at, deleted_at) values
+					('00000000-0000-0000-0000-000000000001', 'keycloak', '1a', '2000-01-01', '2000-01-01', '2000-02-02'),
+					('00000000-0000-0000-0000-000000000002', 'zimbra', '1b', '2000-01-01', '2000-01-01', '2000-01-01'),
+					('00000000-0000-0000-0000-000000000002', 'keycloak', '1a', '2000-01-01', '2000-01-01', null),
+					('00000000-0000-0000-0000-000000000001', 'zimbra', '1b', '2000-01-01', '2000-01-01', null);
 			`,
 			requestBody:      `{"code": "my-code", "redirect_uri": "http://localhost:5173/callback"}`,
 			keycloakRespCode: 200,
@@ -305,6 +388,56 @@ func Test_handler_exchangeToken(t *testing.T) {
 			wantRedirectURI:  "http://localhost:5173/callback",
 			wantResponseCode: 422,
 			wantResponseBody: `{"message": "user tidak ditemukan"}`,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":              [16]byte(uuid.MustParse("00000000-0000-0000-0000-000000000001")),
+					"source":          "keycloak",
+					"nip":             "1a",
+					"nama":            nil,
+					"email":           nil,
+					"unit_organisasi": nil,
+					"last_login_at":   nil,
+					"created_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":      time.Date(2000, 2, 2, 0, 0, 0, 0, time.UTC).Local(),
+				},
+				{
+					"id":              [16]byte(uuid.MustParse("00000000-0000-0000-0000-000000000001")),
+					"source":          "zimbra",
+					"nip":             "1b",
+					"nama":            nil,
+					"email":           nil,
+					"unit_organisasi": nil,
+					"last_login_at":   nil,
+					"created_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":      nil,
+				},
+				{
+					"id":              [16]byte(uuid.MustParse("00000000-0000-0000-0000-000000000002")),
+					"source":          "keycloak",
+					"nip":             "1a",
+					"nama":            nil,
+					"email":           nil,
+					"unit_organisasi": nil,
+					"last_login_at":   nil,
+					"created_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":      nil,
+				},
+				{
+					"id":              [16]byte(uuid.MustParse("00000000-0000-0000-0000-000000000002")),
+					"source":          "zimbra",
+					"nip":             "1b",
+					"nama":            nil,
+					"email":           nil,
+					"unit_organisasi": nil,
+					"last_login_at":   nil,
+					"created_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+				},
+			},
 		},
 		{
 			name:             "error exchange token, user keycloak or zimbra is not uuid",
@@ -324,6 +457,7 @@ func Test_handler_exchangeToken(t *testing.T) {
 			wantRedirectURI:  "https://portal.local/callback",
 			wantResponseCode: 422,
 			wantResponseBody: `{"message": "user tidak ditemukan"}`,
+			wantDBRows:       dbtest.Rows{},
 		},
 		{
 			name:             "error exchange token, invalid access_token from keycloak",
@@ -343,6 +477,7 @@ func Test_handler_exchangeToken(t *testing.T) {
 			wantRedirectURI:  "http://localhost:5173/callback",
 			wantResponseCode: 500,
 			wantResponseBody: `{"message": "Internal Server Error"}`,
+			wantDBRows:       dbtest.Rows{},
 		},
 		{
 			name:             "error exchange token, keycloak return status 4xx",
@@ -352,6 +487,7 @@ func Test_handler_exchangeToken(t *testing.T) {
 			wantRedirectURI:  "http://localhost:5173/callback",
 			wantResponseCode: 409,
 			wantResponseBody: `{"error": "invalid code"}`,
+			wantDBRows:       dbtest.Rows{},
 		},
 		{
 			name:             "error exchange token, keycloak return status 5xx",
@@ -361,23 +497,27 @@ func Test_handler_exchangeToken(t *testing.T) {
 			wantRedirectURI:  "https://portal.local/callback",
 			wantResponseCode: 500,
 			wantResponseBody: `{"message": "Internal Server Error"}`,
+			wantDBRows:       dbtest.Rows{},
 		},
 		{
 			name:             "missing request body",
 			wantResponseCode: 400,
 			wantResponseBody: `{"message": "request body harus diisi"}`,
+			wantDBRows:       dbtest.Rows{},
 		},
 		{
 			name:             "missing `code` in request body, and request body have additional parameter",
 			requestBody:      `{"token": "my-code"}`,
 			wantResponseCode: 400,
 			wantResponseBody: `{"message": "parameter \"token\" tidak didukung | parameter \"code\" harus diisi"}`,
+			wantDBRows:       dbtest.Rows{},
 		},
 		{
 			name:             "keycloak is unreachable",
 			requestBody:      `{"code": "my-code"}`,
 			wantResponseCode: 500,
 			wantResponseBody: `{"message": "Internal Server Error"}`,
+			wantDBRows:       dbtest.Rows{},
 		},
 	}
 	for _, tt := range tests {
@@ -436,6 +576,18 @@ func Test_handler_exchangeToken(t *testing.T) {
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
 			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
 			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
+
+			actualRows, err := dbtest.QueryAll(db, `"user"`, "id, source")
+			require.NoError(t, err)
+			if len(tt.wantDBRows) == len(actualRows) {
+				for i, row := range actualRows {
+					if tt.wantDBRows[i]["last_login_at"] == "{last_login_at}" {
+						assert.WithinDuration(t, time.Now(), row["last_login_at"].(time.Time), 10*time.Second)
+						tt.wantDBRows[i]["last_login_at"] = row["last_login_at"]
+					}
+				}
+			}
+			assert.Equal(t, tt.wantDBRows, actualRows)
 		})
 	}
 }
@@ -724,6 +876,15 @@ func Test_handler_refreshToken(t *testing.T) {
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
 			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
 			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
+
+			// should not update last_login_at
+			actualRows, err := dbtest.QueryAll(db, `"user"`, "id, source")
+			require.NoError(t, err)
+			for _, row := range actualRows {
+				lastLoginAt, ok := row["last_login_at"]
+				assert.True(t, ok)
+				assert.Nil(t, lastLoginAt)
+			}
 		})
 	}
 }

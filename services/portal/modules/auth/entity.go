@@ -1,5 +1,7 @@
 package auth
 
+import "github.com/jackc/pgx/v5/pgtype"
+
 const (
 	sourceZimbra   = "zimbra"
 	sourceKeycloak = "keycloak"
@@ -14,6 +16,8 @@ type token struct {
 }
 
 type user struct {
-	nip   string
-	roles map[string]string
+	id     pgtype.UUID
+	source string
+	nip    string
+	roles  map[string]string
 }

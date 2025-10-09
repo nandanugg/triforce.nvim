@@ -24,6 +24,7 @@ type Querier interface {
 	ListRoleResourcePermissionsByRoleID(ctx context.Context, roleID int16) ([]ListRoleResourcePermissionsByRoleIDRow, error)
 	ListRoles(ctx context.Context, arg ListRolesParams) ([]ListRolesRow, error)
 	ListUserRoleByNIP(ctx context.Context, nip string) ([]ListUserRoleByNIPRow, error)
+	UpdateLastLoginAt(ctx context.Context, arg UpdateLastLoginAtParams) error
 	UpdateRole(ctx context.Context, arg UpdateRoleParams) (int16, error)
 }
 

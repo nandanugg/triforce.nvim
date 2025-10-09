@@ -60,3 +60,19 @@ func (q *Queries) ListUserRoleByNIP(ctx context.Context, nip string) ([]ListUser
 	}
 	return items, nil
 }
+
+const updateLastLoginAt = `-- name: UpdateLastLoginAt :exec
+update "user"
+set last_login_at = now()
+where id = $1 and source = $2
+`
+
+type UpdateLastLoginAtParams struct {
+	ID     pgtype.UUID `db:"id"`
+	Source string      `db:"source"`
+}
+
+func (q *Queries) UpdateLastLoginAt(ctx context.Context, arg UpdateLastLoginAtParams) error {
+	_, err := q.db.Exec(ctx, updateLastLoginAt, arg.ID, arg.Source)
+	return err
+}

@@ -10,3 +10,8 @@ from user_role ur
 join role r on r.id = ur.role_id and r.deleted_at is null
 where ur.nip = $1 and ur.deleted_at is null
 order by r.service, ur.updated_at desc;
+
+-- name: UpdateLastLoginAt :exec
+update "user"
+set last_login_at = now()
+where id = $1 and source = $2;

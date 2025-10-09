@@ -779,16 +779,6 @@ type RefPendidikan struct {
 	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 }
 
-type RefTemplate struct {
-	ID           int32              `db:"id"`
-	Name         pgtype.Text        `db:"name"`
-	TemplateFile pgtype.Text        `db:"template_file"`
-	FileBase64   pgtype.Text        `db:"file_base64"`
-	CreatedAt    pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt    pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt    pgtype.Timestamptz `db:"deleted_at"`
-}
-
 // Referensi tingkat pendidikan
 type RefTingkatPendidikan struct {
 	// Kode/ID tingkat pendidikan
