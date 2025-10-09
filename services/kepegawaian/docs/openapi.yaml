@@ -11,6 +11,7 @@ tags:
   - name: Admin Ref Golongan
   - name: Admin Ref Jabatan
   - name: Admin Ref Jenis Hukuman
+  - name: Admin Ref Jenis Jabatan
   - name: Admin Ref Jenis Kenaikan Pangkat
   - name: Admin Ref Jenis Penghargaan
   - name: Admin Ref Jenis Satker
@@ -693,6 +694,152 @@ paths:
           description: Jabatan tidak ditemukan.
         "500":
           description: Error internal server.
+  /v1/admin/jenis-jabatan:
+    get:
+      tags:
+        - Admin Ref Jenis Jabatan
+      summary: List semua jenis jabatan
+      description: Mengambil daftar semua jenis jabatan yang belum dihapus.
+      operationId: listJenisJabatanAdmin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses mengambil daftar jenis jabatan
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/jenisJabatan"
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+    post:
+      tags:
+        - Admin Ref Jenis Jabatan
+      summary: Tambah jenis jabatan baru
+      description: Menambahkan satu jenis jabatan baru ke database.
+      operationId: createJenisJabatanAdmin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: 
+                - nama
+              additionalProperties: false
+              properties:
+                nama:
+                  type: string
+                  description: Nama jenis jabatan
+                  example: "Satuan Kerja Tipe A"
+      responses:
+        "200":
+          description: Berhasil membuat jenis jabatan
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/jenisJabatan"
+  /v1/admin/jenis-jabatan/{id}:
+    get:
+      tags:
+        - Admin Ref Jenis Jabatan
+      summary: Detail jenis jabatan berdasarkan ID
+      description: Mengambil detail satu jenis jabatan berdasarkan ID, jika belum dihapus.
+      operationId: getJenisJabatanAdmin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          description: ID jenis jabatan
+          schema:
+            type: integer
+        - name: nama
+          in: query
+          description: Filter nama jenis jabatan (optional)
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Sukses mengambil detail jenis jabatan
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/jenisJabatan"
+    put:
+      tags:
+        - Admin Ref Jenis Jabatan
+      summary: Update jenis jabatan
+      description: Mengubah data nama jenis jabatan berdasarkan ID.
+      operationId: updateJenisJabatanAdmin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          description: ID jenis jabatan yang akan diupdate
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: 
+                - nama
+              additionalProperties: false
+              properties:
+                nama:
+                  type: string
+                  description: Nama baru jenis jabatan
+                  example: "Satuan Kerja Tipe B"
+      responses:
+        "200":
+          description: Sukses update jenis jabatan
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/jenisJabatan"
+    delete:
+      tags:
+        - Admin Ref Jenis Jabatan
+      summary: Soft delete jenis jabatan
+      description: Menghapus jenis jabatan secara soft delete berdasarkan ID.
+      operationId: deleteJenisJabatanAdmin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          description: ID jenis jabatan yang akan dihapus
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Berhasil dihapus (soft delete)
   /v1/admin/jenis-hukuman:
     get:
       tags:
@@ -4994,6 +5141,16 @@ components:
         tingkat:
           type: string
           description: Tingkat hukuman
+    jenisJabatan:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          description: ID unik jenis jabatan
+        nama:
+          type: string
+          description: Nama jenis jabatan
     jenisKenaikanPangkat:
       type: object
       properties:

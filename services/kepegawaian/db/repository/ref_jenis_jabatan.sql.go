@@ -21,6 +21,58 @@ func (q *Queries) CountRefJenisJabatan(ctx context.Context) (int64, error) {
 	return count, err
 }
 
+const createRefJenisJabatan = `-- name: CreateRefJenisJabatan :one
+INSERT INTO ref_jenis_jabatan (nama)
+VALUES ($1)
+RETURNING id, nama
+`
+
+type CreateRefJenisJabatanRow struct {
+	ID   int32       `db:"id"`
+	Nama pgtype.Text `db:"nama"`
+}
+
+func (q *Queries) CreateRefJenisJabatan(ctx context.Context, nama pgtype.Text) (CreateRefJenisJabatanRow, error) {
+	row := q.db.QueryRow(ctx, createRefJenisJabatan, nama)
+	var i CreateRefJenisJabatanRow
+	err := row.Scan(&i.ID, &i.Nama)
+	return i, err
+}
+
+const deleteRefJenisJabatan = `-- name: DeleteRefJenisJabatan :execrows
+UPDATE ref_jenis_jabatan
+SET deleted_at = now()
+WHERE id = $1
+  AND deleted_at IS NULL
+`
+
+func (q *Queries) DeleteRefJenisJabatan(ctx context.Context, id int32) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteRefJenisJabatan, id)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
+const getRefJenisJabatan = `-- name: GetRefJenisJabatan :one
+SELECT id, nama
+FROM ref_jenis_jabatan
+WHERE id = $1
+  AND deleted_at IS NULL
+`
+
+type GetRefJenisJabatanRow struct {
+	ID   int32       `db:"id"`
+	Nama pgtype.Text `db:"nama"`
+}
+
+func (q *Queries) GetRefJenisJabatan(ctx context.Context, id int32) (GetRefJenisJabatanRow, error) {
+	row := q.db.QueryRow(ctx, getRefJenisJabatan, id)
+	var i GetRefJenisJabatanRow
+	err := row.Scan(&i.ID, &i.Nama)
+	return i, err
+}
+
 const listRefJenisJabatan = `-- name: ListRefJenisJabatan :many
 SELECT id, nama FROM ref_jenis_jabatan
 WHERE deleted_at IS NULL
@@ -55,4 +107,29 @@ func (q *Queries) ListRefJenisJabatan(ctx context.Context, arg ListRefJenisJabat
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateRefJenisJabatan = `-- name: UpdateRefJenisJabatan :one
+UPDATE ref_jenis_jabatan
+SET nama = $2
+WHERE id = $1
+  AND deleted_at IS NULL
+RETURNING id, nama
+`
+
+type UpdateRefJenisJabatanParams struct {
+	ID   int32       `db:"id"`
+	Nama pgtype.Text `db:"nama"`
+}
+
+type UpdateRefJenisJabatanRow struct {
+	ID   int32       `db:"id"`
+	Nama pgtype.Text `db:"nama"`
+}
+
+func (q *Queries) UpdateRefJenisJabatan(ctx context.Context, arg UpdateRefJenisJabatanParams) (UpdateRefJenisJabatanRow, error) {
+	row := q.db.QueryRow(ctx, updateRefJenisJabatan, arg.ID, arg.Nama)
+	var i UpdateRefJenisJabatanRow
+	err := row.Scan(&i.ID, &i.Nama)
+	return i, err
 }
