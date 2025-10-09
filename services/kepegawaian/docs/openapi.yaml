@@ -6,6 +6,7 @@ info:
 servers:
   - url: http://localhost:8000
 tags:
+  - name: Admin Ref Agama
   - name: Admin Pegawai Aktif
   - name: Admin Ref Golongan
   - name: Admin Ref Jabatan
@@ -17,6 +18,7 @@ tags:
   - name: Admin Surat Keputusan Pegawai
   - name: Admin Unit Kerja
   - name: Data Pribadi
+  - name: Agama
   - name: Golongan
   - name: Jabatan
   - name: Jenis Diklat
@@ -49,6 +51,183 @@ tags:
   - name: Tingkat Pendidikan
   - name: Unit Kerja
 paths:
+  /v1/admin/agama:
+    get:
+      tags:
+        - Admin Ref Agama
+      summary: Daftar Agama.
+      description: Menampilkan daftar agama dengan pagination.
+      operationId: adminListAgama
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/agama"
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+        "401":
+          description: Token otentikasi tidak valid.
+        "403":
+          description: Tidak memiliki akses admin.
+        "500":
+          description: Error internal server.
+    post:
+      tags:
+        - Admin Ref Agama
+      summary: Create Agama.
+      description: Membuat data agama baru.
+      operationId: adminCreateAgama
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nama]
+              additionalProperties: false
+              properties:
+                nama:
+                  type: string
+                  description: Nama agama
+                  example: "Islam"
+      responses:
+        "201":
+          description: Agama berhasil dibuat.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/agama"
+        "400":
+          description: Request tidak valid.
+        "401":
+          description: Token otentikasi tidak valid.
+        "403":
+          description: Tidak memiliki akses admin.
+        "500":
+          description: Error internal server.
+  /v1/admin/agama/{id}:
+    get:
+      tags:
+        - Admin Ref Agama
+      summary: Get Agama by ID.
+      description: Mendapatkan detail agama berdasarkan ID.
+      operationId: adminGetAgama
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/agama"
+        "400":
+          description: ID tidak valid.
+        "401":
+          description: Token otentikasi tidak valid.
+        "403":
+          description: Tidak memiliki akses admin.
+        "404":
+          description: Agama tidak ditemukan.
+        "500":
+          description: Error internal server.
+    put:
+      tags:
+        - Admin Ref Agama
+      summary: Update Agama.
+      description: Mengupdate data agama berdasarkan ID.
+      operationId: adminUpdateAgama
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nama]
+              additionalProperties: false
+              properties:
+                nama:
+                  type: string
+                  description: Nama agama
+                  example: "Kristen Protestan"
+      responses:
+        "200":
+          description: Agama berhasil diupdate.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/agama"
+        "400":
+          description: Request tidak valid.
+        "401":
+          description: Token otentikasi tidak valid.
+        "403":
+          description: Tidak memiliki akses admin.
+        "404":
+          description: Agama tidak ditemukan.
+        "500":
+          description: Error internal server.
+    delete:
+      tags:
+        - Admin Ref Agama
+      summary: Delete Agama.
+      description: Menghapus data agama berdasarkan ID.
+      operationId: adminDeleteAgama
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "204":
+          description: Agama berhasil dihapus.
+        "400":
+          description: ID tidak valid.
+        "401":
+          description: Token otentikasi tidak valid.
+        "403":
+          description: Tidak memiliki akses admin.
+        "500":
+          description: Error internal server.
   /v1/admin/golongan:
     get:
       tags:
@@ -2528,6 +2707,31 @@ paths:
                 properties:
                   data:
                     $ref: "#/components/schemas/dataPegawai"
+  /v1/agama:
+    get:
+      tags:
+        - Agama
+      summary: List Agama.
+      description: List agama yang tersedia.
+      operationId: listAgama
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/agama"
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
   /v1/golongan:
     get:
       tags:
@@ -4647,6 +4851,28 @@ components:
           type: string
           format: date
           nullable: true
+    agama:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: ID agama
+        nama:
+          type: string
+          description: Nama agama
+          example: "Islam"
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Tanggal dibuat
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Tanggal diperbarui
     golongan:
       type: object
       additionalProperties: false
