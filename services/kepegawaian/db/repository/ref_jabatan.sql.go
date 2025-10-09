@@ -236,11 +236,12 @@ func (q *Queries) ListRefJabatan(ctx context.Context, arg ListRefJabatanParams) 
 }
 
 const listRefJabatanWithKeyword = `-- name: ListRefJabatanWithKeyword :many
-SELECT kode_jabatan, id, nama_jabatan, nama_jabatan_full, jenis_jabatan, kelas, pensiun, kode_bkn, nama_jabatan_bkn, kategori_jabatan, bkn_id, tunjangan_jabatan, created_at, updated_at
-FROM ref_jabatan
+SELECT j.kode_jabatan, j.id, j.nama_jabatan, j.nama_jabatan_full, j.jenis_jabatan, rj.nama as jenis_jabatan_nama, j.kelas, j.pensiun, j.kode_bkn, j.nama_jabatan_bkn, j.kategori_jabatan, j.bkn_id, j.tunjangan_jabatan, j.created_at, j.updated_at
+FROM ref_jabatan j
+LEFT JOIN ref_jenis_jabatan rj ON rj.id = j.jenis_jabatan and rj.deleted_at IS NULL
 WHERE 
   ($3::varchar IS NULL OR nama_jabatan ILIKE '%' || $3::varchar || '%' OR kategori_jabatan ILIKE '%' || $3::varchar || '%')
-  AND deleted_at IS NULL
+  AND j.deleted_at IS NULL
 LIMIT $1 OFFSET $2
 `
 
@@ -256,6 +257,7 @@ type ListRefJabatanWithKeywordRow struct {
 	NamaJabatan      pgtype.Text        `db:"nama_jabatan"`
 	NamaJabatanFull  pgtype.Text        `db:"nama_jabatan_full"`
 	JenisJabatan     pgtype.Int2        `db:"jenis_jabatan"`
+	JenisJabatanNama pgtype.Text        `db:"jenis_jabatan_nama"`
 	Kelas            pgtype.Int2        `db:"kelas"`
 	Pensiun          pgtype.Int2        `db:"pensiun"`
 	KodeBkn          pgtype.Text        `db:"kode_bkn"`
@@ -282,6 +284,7 @@ func (q *Queries) ListRefJabatanWithKeyword(ctx context.Context, arg ListRefJaba
 			&i.NamaJabatan,
 			&i.NamaJabatanFull,
 			&i.JenisJabatan,
+			&i.JenisJabatanNama,
 			&i.Kelas,
 			&i.Pensiun,
 			&i.KodeBkn,

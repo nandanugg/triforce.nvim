@@ -4551,6 +4551,10 @@ components:
         nama_full:
           type: string
           description: Nama jabatan lengkap
+        nama_jenis:
+          type: string
+          description: Nama jenis jabatan
+          nullable: true
         jenis:
           type: integer
           format: int16

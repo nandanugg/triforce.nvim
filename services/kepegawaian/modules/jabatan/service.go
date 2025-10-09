@@ -74,12 +74,18 @@ func (s *service) listAdmin(ctx context.Context, keyword string, limit, offset u
 	}
 
 	result := typeutil.Map(data, func(row sqlc.ListRefJabatanWithKeywordRow) jabatan {
+		namaJenis := new(string)
+		*namaJenis = ""
+		if row.JenisJabatan.Valid {
+			namaJenis = &row.JenisJabatanNama.String
+		}
 		return jabatan{
 			Kode:      row.KodeJabatan,
 			ID:        row.ID,
 			Nama:      row.NamaJabatan.String,
 			NamaFull:  row.NamaJabatanFull.String,
 			Jenis:     typeutil.ValueOrNil(row.JenisJabatan.Int16, row.JenisJabatan.Valid),
+			NamaJenis: namaJenis,
 			Kelas:     typeutil.ValueOrNil(row.Kelas.Int16, row.Kelas.Valid),
 			Pensiun:   typeutil.ValueOrNil(row.Pensiun.Int16, row.Pensiun.Valid),
 			KodeBkn:   row.KodeBkn.String,

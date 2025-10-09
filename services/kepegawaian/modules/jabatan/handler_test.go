@@ -150,13 +150,18 @@ func Test_handler_adminListJabatan(t *testing.T) {
 	t.Parallel()
 
 	dbData := `
+		insert into ref_jenis_jabatan(id, nama, deleted_at) values
+		(1, 'Jabatan Struktural', null),
+		(2, 'Jabatan Fungsional', null),
+		(3, 'Jabatan Deleted', '2000-01-01');
+
 		insert into ref_jabatan
 		(kode_jabatan, id, nama_jabatan, nama_jabatan_full, jenis_jabatan, kelas, pensiun, kode_bkn, nama_jabatan_bkn, kategori_jabatan, bkn_id, tunjangan_jabatan, created_at, updated_at, deleted_at) values
 		('K001', 101, 'Jabatan A', 'Jabatan A Full', 1, 2, 60, 'BKN101', 'Jabatan A BKN', 'Struktural', 'BKNID101', 1000000, '2023-01-01T00:00:00', '2023-01-01T00:00:00', null),
 		('K002', 102, 'Jabatan B', 'Jabatan B Full', 2, 3, 61, 'BKN102', 'Jabatan B BKN', 'Fungsional', 'BKNID102', 1000000, '2023-02-01T00:00:00', '2023-02-01T00:00:00', null),
 		('K003', 103, 'Jabatan C', 'Jabatan C Full', 1, 4, 62, 'BKN103', 'Jabatan C BKN', 'Struktural', 'BKNID103', 1000000, '2023-03-01T00:00:00', '2023-03-01T00:00:00', null),
 		('K004', 104, 'Jabatan D', 'Jabatan D Full', 2, 5, 63, 'BKN104', 'Jabatan D BKN', 'Fungsional', 'BKNID104', 1000000, '2023-04-01T00:00:00', '2023-04-01T00:00:00', null),
-		('K005', 105, 'Jabatan E', 'Jabatan E Full', 1, 6, 64, 'BKN105', 'Jabatan E BKN', 'Struktural', 'BKNID105', 1000000, '2023-05-01T00:00:00', '2023-05-01T00:00:00', null),
+		('K005', 105, 'Jabatan E', 'Jabatan E Full', 3, 6, 64, 'BKN105', 'Jabatan E BKN', 'Struktural', 'BKNID105', 1000000, '2023-05-01T00:00:00', '2023-05-01T00:00:00', null),
 		('K006', 106, 'Jabatan F', 'Jabatan F Full', 1, 6, 64, 'BKN106', 'Jabatan F BKN', 'Struktural', 'BKNID106', 1000000, '2023-05-01T00:00:00', '2023-05-01T00:00:00', now());
 	`
 
@@ -175,11 +180,11 @@ func Test_handler_adminListJabatan(t *testing.T) {
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
-					{"kode": "K001", "id": 101, "nama": "Jabatan A", "nama_full": "Jabatan A Full", "jenis": 1, "kelas": 2, "pensiun": 60, "kode_bkn": "BKN101", "nama_bkn": "Jabatan A BKN", "kategori": "Struktural", "bkn_id": "BKNID101", "tunjangan" : 1000000},
-					{"kode": "K002", "id": 102, "nama": "Jabatan B", "nama_full": "Jabatan B Full", "jenis": 2, "kelas": 3, "pensiun": 61, "kode_bkn": "BKN102", "nama_bkn": "Jabatan B BKN", "kategori": "Fungsional", "bkn_id": "BKNID102", "tunjangan" : 1000000},
-					{"kode": "K003", "id": 103, "nama": "Jabatan C", "nama_full": "Jabatan C Full", "jenis": 1, "kelas": 4, "pensiun": 62, "kode_bkn": "BKN103", "nama_bkn": "Jabatan C BKN", "kategori": "Struktural", "bkn_id": "BKNID103", "tunjangan" : 1000000},
-					{"kode": "K004", "id": 104, "nama": "Jabatan D", "nama_full": "Jabatan D Full", "jenis": 2, "kelas": 5, "pensiun": 63, "kode_bkn": "BKN104", "nama_bkn": "Jabatan D BKN", "kategori": "Fungsional", "bkn_id": "BKNID104", "tunjangan" : 1000000},
-					{"kode": "K005", "id": 105, "nama": "Jabatan E", "nama_full": "Jabatan E Full", "jenis": 1, "kelas": 6, "pensiun": 64, "kode_bkn": "BKN105", "nama_bkn": "Jabatan E BKN", "kategori": "Struktural", "bkn_id": "BKNID105", "tunjangan" : 1000000}
+					{"kode": "K001", "id": 101, "nama": "Jabatan A", "nama_full": "Jabatan A Full", "jenis": 1, "nama_jenis" : "Jabatan Struktural", "kelas": 2, "pensiun": 60, "kode_bkn": "BKN101", "nama_bkn": "Jabatan A BKN", "kategori": "Struktural", "bkn_id": "BKNID101", "tunjangan" : 1000000},
+					{"kode": "K002", "id": 102, "nama": "Jabatan B", "nama_full": "Jabatan B Full", "jenis": 2, "nama_jenis" : "Jabatan Fungsional", "kelas": 3, "pensiun": 61, "kode_bkn": "BKN102", "nama_bkn": "Jabatan B BKN", "kategori": "Fungsional", "bkn_id": "BKNID102", "tunjangan" : 1000000},
+					{"kode": "K003", "id": 103, "nama": "Jabatan C", "nama_full": "Jabatan C Full", "jenis": 1, "nama_jenis" : "Jabatan Struktural", "kelas": 4, "pensiun": 62, "kode_bkn": "BKN103", "nama_bkn": "Jabatan C BKN", "kategori": "Struktural", "bkn_id": "BKNID103", "tunjangan" : 1000000},
+					{"kode": "K004", "id": 104, "nama": "Jabatan D", "nama_full": "Jabatan D Full", "jenis": 2, "nama_jenis" : "Jabatan Fungsional", "kelas": 5, "pensiun": 63, "kode_bkn": "BKN104", "nama_bkn": "Jabatan D BKN", "kategori": "Fungsional", "bkn_id": "BKNID104", "tunjangan" : 1000000},
+					{"kode": "K005", "id": 105, "nama": "Jabatan E", "nama_full": "Jabatan E Full", "jenis": 3, "nama_jenis" : "", "kelas": 6, "pensiun": 64, "kode_bkn": "BKN105", "nama_bkn": "Jabatan E BKN", "kategori": "Struktural", "bkn_id": "BKNID105", "tunjangan" : 1000000}
 				],
 				"meta": {
 					"limit": 10,
@@ -199,7 +204,7 @@ func Test_handler_adminListJabatan(t *testing.T) {
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
-					{"kode": "K002", "id": 102, "nama": "Jabatan B", "nama_full": "Jabatan B Full", "jenis": 2, "kelas": 3, "pensiun": 61, "kode_bkn": "BKN102", "nama_bkn": "Jabatan B BKN", "kategori": "Fungsional", "bkn_id": "BKNID102", "tunjangan" : 1000000}
+					{"kode": "K002", "id": 102, "nama": "Jabatan B", "nama_full": "Jabatan B Full", "jenis": 2, "nama_jenis" : "Jabatan Fungsional", "kelas": 3, "pensiun": 61, "kode_bkn": "BKN102", "nama_bkn": "Jabatan B BKN", "kategori": "Fungsional", "bkn_id": "BKNID102", "tunjangan" : 1000000}
 				],
 				"meta": {
 					"limit": 1,
@@ -220,7 +225,7 @@ func Test_handler_adminListJabatan(t *testing.T) {
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
-					{"kode": "K003", "id": 103, "nama": "Jabatan C", "nama_full": "Jabatan C Full", "jenis": 1, "kelas": 4, "pensiun": 62, "kode_bkn": "BKN103", "nama_bkn": "Jabatan C BKN", "kategori": "Struktural", "bkn_id": "BKNID103", "tunjangan" : 1000000}
+					{"kode": "K003", "id": 103, "nama": "Jabatan C", "nama_full": "Jabatan C Full", "jenis": 1, "nama_jenis" : "Jabatan Struktural", "kelas": 4, "pensiun": 62, "kode_bkn": "BKN103", "nama_bkn": "Jabatan C BKN", "kategori": "Struktural", "bkn_id": "BKNID103", "tunjangan" : 1000000}
 				],
 				"meta": {
 					"limit": 10,
