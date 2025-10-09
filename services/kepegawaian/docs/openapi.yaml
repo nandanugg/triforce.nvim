@@ -13,6 +13,7 @@ tags:
   - name: Admin Ref Jenis Kenaikan Pangkat
   - name: Admin Ref Jenis Penghargaan
   - name: Admin Ref Jenis Satker
+  - name: Admin Ref Pendidikan
   - name: Admin Surat Keputusan Pegawai
   - name: Admin Unit Kerja
   - name: Data Pribadi
@@ -2172,6 +2173,152 @@ paths:
                 format: binary
         "404":
           description: Berkas riwayat penugasan tidak ditemukan atau User tidak mempunyai akses.
+  /v1/admin/pendidikan:
+    get:
+      tags:
+        - Admin Ref Pendidikan
+      summary: Lihat pendidikan.
+      description: Lihat pendidikan.
+      operationId: adminListPendidikan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+        - name: nama
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/pendidikan"
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+    post:
+      tags:
+        - Admin Ref Pendidikan
+      summary: Buat pendidikan.
+      description: Buat pendidikan.
+      operationId: createPendidikan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nama
+                - tingkat_pendidikan_id
+              properties:
+                nama:
+                  type: string
+                  example: "Pendidikan 1"
+                tingkat_pendidikan_id:
+                  type: integer
+                  example: 1
+      responses:
+        "201":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/pendidikan"
+  /v1/admin/pendidikan/{id}:
+    get:
+      tags:
+        - Admin Ref Pendidikan
+      summary: Lihat pendidikan.
+      description: Lihat pendidikan.
+      operationId: adminGetPendidikan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/pendidikan"
+    put:
+      tags:
+        - Admin Ref Pendidikan
+      summary: Update pendidikan.
+      description: Update pendidikan.
+      operationId: updatePendidikan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nama
+                - tingkat_pendidikan_id
+              properties:
+                nama:
+                  type: string
+                  example: "Pendidikan 1"
+                tingkat_pendidikan_id:
+                  type: integer
+                  example: 1
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/pendidikan"
+    delete:
+      tags:
+        - Admin Ref Pendidikan
+      summary: Hapus pendidikan.
+      description: Hapus pendidikan.
+      operationId: deletePendidikan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Sukses.
   /v1/admin/unit-kerja:
     post:
       tags:
@@ -4737,6 +4884,28 @@ components:
         eselon_nama:
           type: string
           example: "Eselon Nama I"
+    pendidikan:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          description: ID pendidikan
+          example: "4028488e4490b070014490f995d80003"
+        nama:
+          type: string
+          description: Nama pendidikan
+          example: "S1 Program Studi Ilmu Ekonomi"
+        tingkat_pendidikan:
+          type: string
+          description: Tingkat Pendidikan
+          example: "S1"
+          nullable: true
+        tingkat_pendidikan_id:
+          type: integer
+          description: ID tingkat pendidikan
+          example: 1
+          nullable: true
     unitKerjaWithInduk:
       allOf:
         - $ref: "#/components/schemas/unitKerja"
