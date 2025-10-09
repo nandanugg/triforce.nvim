@@ -76,7 +76,7 @@ type listAkarParams struct {
 	offset uint
 }
 
-func (s *service) listAkar(ctx context.Context, arg listAkarParams) ([]unitKerjaPublic, int64, error) {
+func (s *service) listAkar(ctx context.Context, arg listAkarParams) ([]anakUnitKerja, int64, error) {
 	rows, err := s.repo.ListAkarUnitKerja(ctx, repo.ListAkarUnitKerjaParams{
 		Limit:  int32(arg.limit),
 		Offset: int32(arg.offset),
@@ -85,10 +85,11 @@ func (s *service) listAkar(ctx context.Context, arg listAkarParams) ([]unitKerja
 		return nil, 0, fmt.Errorf("[listAkar] error listAkarUnitKerja: %w", err)
 	}
 
-	result := typeutil.Map(rows, func(row repo.ListAkarUnitKerjaRow) unitKerjaPublic {
-		return unitKerjaPublic{
-			ID:   row.ID,
-			Nama: row.NamaUnor.String,
+	result := typeutil.Map(rows, func(row repo.ListAkarUnitKerjaRow) anakUnitKerja {
+		return anakUnitKerja{
+			ID:      row.ID,
+			Nama:    row.NamaUnor.String,
+			HasAnak: row.HasAnak,
 		}
 	})
 

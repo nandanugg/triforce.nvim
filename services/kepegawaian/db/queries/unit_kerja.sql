@@ -85,11 +85,20 @@ from (
 where rn = 1;
 
 -- name: ListAkarUnitKerja :many
-SELECT id, nama_unor
-FROM unit_kerja
+SELECT 
+    uk.id, 
+    uk.nama_unor,
+    EXISTS (
+        SELECT 1 
+        FROM unit_kerja uk2
+        WHERE 
+            uk2.diatasan_id = uk.id
+            AND uk2.deleted_at IS NULL
+    ) as has_anak
+FROM unit_kerja uk
 WHERE
-    diatasan_id IS NULL
-    AND deleted_at IS NULL
+    uk.diatasan_id IS NULL
+    AND uk.deleted_at IS NULL
 ORDER BY "order"
 LIMIT $1 OFFSET $2;
 

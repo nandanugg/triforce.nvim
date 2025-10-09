@@ -59,7 +59,7 @@ func (h *handler) list(c echo.Context) error {
 }
 
 type listAkarResponse struct {
-	Data []unitKerjaPublic  `json:"data"`
+	Data []anakUnitKerja    `json:"data"`
 	Meta api.MetaPagination `json:"meta"`
 }
 

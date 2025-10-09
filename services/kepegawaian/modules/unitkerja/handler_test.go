@@ -282,8 +282,8 @@ func Test_handler_ListAkar(t *testing.T) {
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
-					{"id": "008", "nama": "Tingkat 1 Kedua"},
-					{"id": "001", "nama": "Tingkat 1"}
+					{"id": "008", "nama": "Tingkat 1 Kedua", "has_anak": false},
+					{"id": "001", "nama": "Tingkat 1", "has_anak": true}
 				],
 				"meta": {
 					"limit": 10,
@@ -303,7 +303,7 @@ func Test_handler_ListAkar(t *testing.T) {
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
-					{"id": "001", "nama": "Tingkat 1"}
+					{"id": "001", "nama": "Tingkat 1", "has_anak": true}
 				],
 				"meta": {
 					"limit": 1,
@@ -888,6 +888,56 @@ func Test_handler_adminCreate(t *testing.T) {
 			}`,
 		},
 		{
+			name:   "ok: create unit kerja only with required value and expired date is null",
+			dbData: dbData,
+			requestBody: `{
+				"id": "11111111-1111-1111-1111-111111111111",
+				"nama": "Bagian Keuangan",
+				"is_satker": true,
+				"expired_date": null
+			}`,
+			requestHeader: http.Header{
+				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusCreated,
+			wantResponseBody: `{
+				"data": {
+					"id": "11111111-1111-1111-1111-111111111111",
+					"no": 0,
+					"kode_internal": "",
+					"nama": "Bagian Keuangan",
+					"eselon_id": "",
+					"cepat_kode": "",
+					"nama_jabatan": "",
+					"nama_pejabat": "",
+					"diatasan_id": "",
+					"instansi_id": "",
+					"pemimpin_pns_id": "",
+					"jenis_unor_id": "",
+					"unor_induk": "",
+					"jumlah_ideal_staff": 0,
+					"order": 0,
+					"is_satker": true,
+					"eselon_1": "",
+					"eselon_2": "",
+					"eselon_3": "",
+					"eselon_4": "",
+					"expired_date": null,
+					"keterangan": "",
+					"jenis_satker": "",
+					"abbreviation": "",
+					"unor_induk_penyetaraan": "",
+					"jabatan_id": "",
+					"waktu": "",
+					"peraturan": "",
+					"remark": "",
+					"aktif": false,
+					"eselon_nama": ""
+				}
+			}`,
+		},
+		{
 			name:   "error: auth header tidak valid",
 			dbData: dbData,
 			requestBody: `{
@@ -1080,7 +1130,6 @@ func Test_handler_adminUpdate(t *testing.T) {
 				"nama": "Bagian Legal",
 				"kode_internal": "KL001",
 				"nama_jabatan": "Kepala Legal",
-				"nama_pejabat": "Dewi Lestari",
 				"pemimpin_pns_id": "PNS002",
 				"is_satker": false,
 				"unor_induk": "22222222-2222-2222-2222-222222222222",
@@ -1131,6 +1180,56 @@ func Test_handler_adminUpdate(t *testing.T) {
 						"eselon_nama": "Eselon Nama III"
 					}
 				}`,
+		},
+		{
+			name:   "ok: update unit kerja only with required value and expired date is null",
+			dbData: dbData,
+			id:     "11111111-1111-1111-1111-111111111111",
+			requestBody: `{
+				"nama": "Bagian Keuangan",
+				"is_satker": true,
+				"expired_date": null
+			}`,
+			requestHeader: http.Header{
+				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": {
+					"id": "11111111-1111-1111-1111-111111111111",
+					"no": 1,
+					"kode_internal": "",
+					"nama": "Bagian Keuangan",
+					"eselon_id": "E1",
+					"cepat_kode": "CK01",
+					"nama_jabatan": "",
+					"nama_pejabat": "",
+					"diatasan_id": "",
+					"instansi_id": "INST001",
+					"pemimpin_pns_id": "",
+					"jenis_unor_id": "JU001",
+					"unor_induk": "",
+					"jumlah_ideal_staff": 5,
+					"order": 1,
+					"is_satker": true,
+					"eselon_1": "00000000-0000-0000-0000-000000000001",
+					"eselon_2": "00000000-0000-0000-0000-000000000001",
+					"eselon_3": "00000000-0000-0000-0000-000000000001",
+					"eselon_4": "00000000-0000-0000-0000-000000000001",
+					"expired_date": null,
+					"keterangan": "",
+					"jenis_satker": "",
+					"abbreviation": "",
+					"unor_induk_penyetaraan": "PENY001",
+					"jabatan_id": "JAB001",
+					"waktu": "",
+					"peraturan": "",
+					"remark": "Remark contoh",
+					"aktif": true,
+					"eselon_nama": "Eselon Nama I"
+				}
+			}`,
 		},
 		{
 			name:   "error: update not found unit kerja",

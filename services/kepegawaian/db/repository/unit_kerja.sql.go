@@ -365,11 +365,20 @@ func (q *Queries) GetUnitKerja(ctx context.Context, id string) (GetUnitKerjaRow,
 }
 
 const listAkarUnitKerja = `-- name: ListAkarUnitKerja :many
-SELECT id, nama_unor
-FROM unit_kerja
+SELECT 
+    uk.id, 
+    uk.nama_unor,
+    EXISTS (
+        SELECT 1 
+        FROM unit_kerja uk2
+        WHERE 
+            uk2.diatasan_id = uk.id
+            AND uk2.deleted_at IS NULL
+    ) as has_anak
+FROM unit_kerja uk
 WHERE
-    diatasan_id IS NULL
-    AND deleted_at IS NULL
+    uk.diatasan_id IS NULL
+    AND uk.deleted_at IS NULL
 ORDER BY "order"
 LIMIT $1 OFFSET $2
 `
@@ -382,6 +391,7 @@ type ListAkarUnitKerjaParams struct {
 type ListAkarUnitKerjaRow struct {
 	ID       string      `db:"id"`
 	NamaUnor pgtype.Text `db:"nama_unor"`
+	HasAnak  bool        `db:"has_anak"`
 }
 
 func (q *Queries) ListAkarUnitKerja(ctx context.Context, arg ListAkarUnitKerjaParams) ([]ListAkarUnitKerjaRow, error) {
@@ -393,7 +403,7 @@ func (q *Queries) ListAkarUnitKerja(ctx context.Context, arg ListAkarUnitKerjaPa
 	var items []ListAkarUnitKerjaRow
 	for rows.Next() {
 		var i ListAkarUnitKerjaRow
-		if err := rows.Scan(&i.ID, &i.NamaUnor); err != nil {
+		if err := rows.Scan(&i.ID, &i.NamaUnor, &i.HasAnak); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

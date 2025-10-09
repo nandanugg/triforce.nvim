@@ -2181,7 +2181,7 @@ paths:
                 - nama
                 - is_satker
               properties:
-                parent_id:
+                diatasan_id:
                   type: string
                   example: "00000000-0000-0000-0000-000000000001"
                 id:
@@ -2209,6 +2209,7 @@ paths:
                   type: string
                   format: date
                   example: "2030-12-31"
+                  nullable: true
                 keterangan:
                   type: string
                   example: "Mengelola anggaran"
@@ -2283,10 +2284,10 @@ paths:
                 - nama
                 - is_satker
               properties:
-                parent_id:
+                diatasan_id:
                   type: string
                   example: "00000000-0000-0000-0000-000000000001"
-                nama_unor:
+                nama:
                   type: string
                   example: "Bagian Keuangan"
                 kode_internal:
@@ -2295,9 +2296,6 @@ paths:
                 nama_jabatan:
                   type: string
                   example: "Kepala Bagian"
-                nama_pejabat:
-                  type: string
-                  example: "Budi Santoso"
                 pemimpin_pns_id:
                   type: string
                   example: "PNS001"
@@ -2311,6 +2309,7 @@ paths:
                   type: string
                   format: date
                   example: "2030-12-31"
+                  nullable: true
                 keterangan:
                   type: string
                   example: "Mengelola anggaran dan administrasi keuangan"
@@ -3735,6 +3734,8 @@ paths:
                           type: string
                         nama:
                           type: string
+                        has_anak:
+                          type: boolean
                   meta:
                     $ref: "#/components/schemas/metaPagination"
   /v1/unit-kerja/{id}/anak:
