@@ -2573,6 +2573,18 @@ paths:
                 properties:
                   data:
                     $ref: "#/components/schemas/unitKerja"
+        "409":
+          description: Konflik.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  message:
+                    type: string
+                    example: Data dengan ID ini sudah terdaftar
+                    description: Pesan kesalahan dalam Bahasa Indonesia
   /v1/admin/unit-kerja/{id}:
     get:
       tags:

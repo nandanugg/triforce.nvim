@@ -205,6 +205,9 @@ func (h *handler) adminCreate(c echo.Context) error {
 		peraturan:     req.Peraturan,
 	})
 	if err != nil {
+		if db.IsPgErrorCode(err, db.PgErrUniqueViolation) {
+			return echo.NewHTTPError(http.StatusConflict, "Data dengan ID ini sudah terdaftar")
+		}
 		slog.ErrorContext(ctx, "Error creating unit kerja.", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}

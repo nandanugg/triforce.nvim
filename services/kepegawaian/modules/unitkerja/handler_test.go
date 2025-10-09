@@ -938,6 +938,21 @@ func Test_handler_adminCreate(t *testing.T) {
 			}`,
 		},
 		{
+			name:   "error: create unit kerja with existed id",
+			dbData: dbData,
+			requestBody: `{
+				"id": "00000000-0000-0000-0000-000000000001",
+				"nama": "Bagian Keuangan",
+				"is_satker": true
+			}`,
+			requestHeader: http.Header{
+				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusConflict,
+			wantResponseBody: `{"message": "Data dengan ID ini sudah terdaftar"}`,
+		},
+		{
 			name:   "error: auth header tidak valid",
 			dbData: dbData,
 			requestBody: `{
