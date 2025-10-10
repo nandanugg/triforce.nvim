@@ -22,10 +22,106 @@ func (q *Queries) CountRefTingkatPendidikan(ctx context.Context) (int64, error) 
 	return count, err
 }
 
+const createRefTingkatPendidikan = `-- name: CreateRefTingkatPendidikan :one
+INSERT INTO ref_tingkat_pendidikan (nama, abbreviation, golongan_id, golongan_awal_id, tingkat)
+VALUES ($1, $2, $3, $4, $5)
+RETURNING id, nama, abbreviation, golongan_id, golongan_awal_id, tingkat
+`
+
+type CreateRefTingkatPendidikanParams struct {
+	Nama           pgtype.Text `db:"nama"`
+	Abbreviation   pgtype.Text `db:"abbreviation"`
+	GolonganID     pgtype.Int4 `db:"golongan_id"`
+	GolonganAwalID pgtype.Int4 `db:"golongan_awal_id"`
+	Tingkat        pgtype.Int2 `db:"tingkat"`
+}
+
+type CreateRefTingkatPendidikanRow struct {
+	ID             int32       `db:"id"`
+	Nama           pgtype.Text `db:"nama"`
+	Abbreviation   pgtype.Text `db:"abbreviation"`
+	GolonganID     pgtype.Int4 `db:"golongan_id"`
+	GolonganAwalID pgtype.Int4 `db:"golongan_awal_id"`
+	Tingkat        pgtype.Int2 `db:"tingkat"`
+}
+
+func (q *Queries) CreateRefTingkatPendidikan(ctx context.Context, arg CreateRefTingkatPendidikanParams) (CreateRefTingkatPendidikanRow, error) {
+	row := q.db.QueryRow(ctx, createRefTingkatPendidikan,
+		arg.Nama,
+		arg.Abbreviation,
+		arg.GolonganID,
+		arg.GolonganAwalID,
+		arg.Tingkat,
+	)
+	var i CreateRefTingkatPendidikanRow
+	err := row.Scan(
+		&i.ID,
+		&i.Nama,
+		&i.Abbreviation,
+		&i.GolonganID,
+		&i.GolonganAwalID,
+		&i.Tingkat,
+	)
+	return i, err
+}
+
+const deleteRefTingkatPendidikan = `-- name: DeleteRefTingkatPendidikan :execrows
+UPDATE ref_tingkat_pendidikan
+SET deleted_at = NOW()
+WHERE id = $1 AND deleted_at IS NULL
+`
+
+func (q *Queries) DeleteRefTingkatPendidikan(ctx context.Context, id int32) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteRefTingkatPendidikan, id)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
+const getRefTingkatPendidikan = `-- name: GetRefTingkatPendidikan :one
+SELECT
+    tp.id,
+    tp.nama,
+    tp.golongan_id,
+    tp.golongan_awal_id,
+    tp.abbreviation,
+    tp.tingkat
+FROM ref_tingkat_pendidikan tp
+WHERE tp.deleted_at IS NULL AND tp.id = $1::integer
+`
+
+type GetRefTingkatPendidikanRow struct {
+	ID             int32       `db:"id"`
+	Nama           pgtype.Text `db:"nama"`
+	GolonganID     pgtype.Int4 `db:"golongan_id"`
+	GolonganAwalID pgtype.Int4 `db:"golongan_awal_id"`
+	Abbreviation   pgtype.Text `db:"abbreviation"`
+	Tingkat        pgtype.Int2 `db:"tingkat"`
+}
+
+func (q *Queries) GetRefTingkatPendidikan(ctx context.Context, id int32) (GetRefTingkatPendidikanRow, error) {
+	row := q.db.QueryRow(ctx, getRefTingkatPendidikan, id)
+	var i GetRefTingkatPendidikanRow
+	err := row.Scan(
+		&i.ID,
+		&i.Nama,
+		&i.GolonganID,
+		&i.GolonganAwalID,
+		&i.Abbreviation,
+		&i.Tingkat,
+	)
+	return i, err
+}
+
 const listRefTingkatPendidikan = `-- name: ListRefTingkatPendidikan :many
 SELECT
     tp.id,
-    tp.nama
+    tp.nama,
+    tp.golongan_id,
+    tp.golongan_awal_id,
+    tp.abbreviation,
+    tp.tingkat
 FROM ref_tingkat_pendidikan tp
 WHERE tp.deleted_at IS NULL
 LIMIT $1 OFFSET $2
@@ -37,8 +133,12 @@ type ListRefTingkatPendidikanParams struct {
 }
 
 type ListRefTingkatPendidikanRow struct {
-	ID   int32       `db:"id"`
-	Nama pgtype.Text `db:"nama"`
+	ID             int32       `db:"id"`
+	Nama           pgtype.Text `db:"nama"`
+	GolonganID     pgtype.Int4 `db:"golongan_id"`
+	GolonganAwalID pgtype.Int4 `db:"golongan_awal_id"`
+	Abbreviation   pgtype.Text `db:"abbreviation"`
+	Tingkat        pgtype.Int2 `db:"tingkat"`
 }
 
 func (q *Queries) ListRefTingkatPendidikan(ctx context.Context, arg ListRefTingkatPendidikanParams) ([]ListRefTingkatPendidikanRow, error) {
@@ -50,7 +150,14 @@ func (q *Queries) ListRefTingkatPendidikan(ctx context.Context, arg ListRefTingk
 	var items []ListRefTingkatPendidikanRow
 	for rows.Next() {
 		var i ListRefTingkatPendidikanRow
-		if err := rows.Scan(&i.ID, &i.Nama); err != nil {
+		if err := rows.Scan(
+			&i.ID,
+			&i.Nama,
+			&i.GolonganID,
+			&i.GolonganAwalID,
+			&i.Abbreviation,
+			&i.Tingkat,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -59,4 +166,50 @@ func (q *Queries) ListRefTingkatPendidikan(ctx context.Context, arg ListRefTingk
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateRefTingkatPendidikan = `-- name: UpdateRefTingkatPendidikan :one
+UPDATE ref_tingkat_pendidikan
+SET nama = $1, abbreviation = $2, golongan_id = $3, golongan_awal_id = $4, tingkat = $5
+WHERE id = $6 AND deleted_at IS NULL
+RETURNING id, nama, abbreviation, golongan_id, golongan_awal_id, tingkat
+`
+
+type UpdateRefTingkatPendidikanParams struct {
+	Nama           pgtype.Text `db:"nama"`
+	Abbreviation   pgtype.Text `db:"abbreviation"`
+	GolonganID     pgtype.Int4 `db:"golongan_id"`
+	GolonganAwalID pgtype.Int4 `db:"golongan_awal_id"`
+	Tingkat        pgtype.Int2 `db:"tingkat"`
+	ID             int32       `db:"id"`
+}
+
+type UpdateRefTingkatPendidikanRow struct {
+	ID             int32       `db:"id"`
+	Nama           pgtype.Text `db:"nama"`
+	Abbreviation   pgtype.Text `db:"abbreviation"`
+	GolonganID     pgtype.Int4 `db:"golongan_id"`
+	GolonganAwalID pgtype.Int4 `db:"golongan_awal_id"`
+	Tingkat        pgtype.Int2 `db:"tingkat"`
+}
+
+func (q *Queries) UpdateRefTingkatPendidikan(ctx context.Context, arg UpdateRefTingkatPendidikanParams) (UpdateRefTingkatPendidikanRow, error) {
+	row := q.db.QueryRow(ctx, updateRefTingkatPendidikan,
+		arg.Nama,
+		arg.Abbreviation,
+		arg.GolonganID,
+		arg.GolonganAwalID,
+		arg.Tingkat,
+		arg.ID,
+	)
+	var i UpdateRefTingkatPendidikanRow
+	err := row.Scan(
+		&i.ID,
+		&i.Nama,
+		&i.Abbreviation,
+		&i.GolonganID,
+		&i.GolonganAwalID,
+		&i.Tingkat,
+	)
+	return i, err
 }

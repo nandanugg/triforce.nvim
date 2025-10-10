@@ -16,6 +16,7 @@ tags:
   - name: Admin Ref Jenis Penghargaan
   - name: Admin Ref Jenis Satker
   - name: Admin Ref Pendidikan
+  - name: Admin Ref Tingkat Pendidikan
   - name: Admin Surat Keputusan Pegawai
   - name: Admin Unit Kerja
   - name: Data Pribadi
@@ -1429,158 +1430,6 @@ paths:
       responses:
         "204":
           description: Berhasil dihapus (soft delete)
-  /v1/admin/surat-keputusan:
-    get:
-      tags:
-        - Admin Surat Keputusan Pegawai
-      summary: Daftar surat keputusan pegawai.
-      description: Daftar surat keputusan pegawai.
-      operationId: listSuratKeputusanAdmin
-      parameters:
-        - $ref: "#/components/parameters/authRequired"
-        - $ref: "#/components/parameters/limit"
-        - $ref: "#/components/parameters/offset"
-        - name: unit_kerja_id
-          in: query
-          description: Unit Kerja ID
-          required: false
-          schema:
-            type: string
-        - name: nama_pemilik
-          in: query
-          description: Nama Pemilik
-          required: false
-          schema:
-            type: string
-        - name: nip
-          in: query
-          description: NIP
-          required: false
-          schema:
-            type: string
-        - name: golongan_id
-          in: query
-          description: Golongan ID
-          required: false
-          schema:
-            type: integer
-            format: int32
-        - name: jabatan_id
-          in: query
-          description: Jabatan ID
-          required: false
-          schema:
-            type: string
-        - name: kategori_sk
-          in: query
-          description: Kategori SK
-          required: false
-          schema:
-            type: string
-        - name: tanggal_sk_mulai
-          in: query
-          description: Tanggal SK Mulai
-          required: false
-          schema:
-            type: string
-            format: date
-        - name: tanggal_sk_akhir
-          in: query
-          description: Tanggal SK Akhir
-          required: false
-          schema:
-            type: string
-            format: date
-        - name: status_sk
-          in: query
-          schema:
-            type: array
-            items:
-              type: integer
-              format: int32
-              description: Status surat keputusan
-      responses:
-        "200":
-          description: Sukses.
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                properties:
-                  data:
-                    type: array
-                    items:
-                      allOf:
-                        - $ref: "#/components/schemas/suratKeputusan"
-                        - type: object
-                          properties:
-                            nip_pemilik:
-                              type: string
-                              description: NIP pemilik SK
-                  meta:
-                    $ref: "#/components/schemas/metaPagination"
-  /v1/admin/surat-keputusan/{id}:
-    get:
-      tags:
-        - Admin Surat Keputusan Pegawai
-      summary: Detail surat keputusan pegawai.
-      description: Detail surat keputusan pegawai berdasarkan ID SK Pegawai.
-      operationId: getSuratKeputusanAdmin
-      parameters:
-        - $ref: "#/components/parameters/authRequired"
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: Sukses.
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                properties:
-                  data:
-                    allOf:
-                      - $ref: "#/components/schemas/suratKeputusanWithPenandatanganAndLog"
-                      - type: object
-                        properties:
-                          nip_pemilik:
-                            type: string
-                            description: NIP pemilik SK
-                          jabatan_penandatangan:
-                            type: string
-                            description: Jabatan Penandantangan
-  /v1/admin/surat-keputusan/{id}/berkas:
-    get:
-      tags:
-        - Admin Surat Keputusan Pegawai
-      summary: Berkas surat keputusan pegawai.
-      description: Berkas surat keputusan pegawai berdasarkan ID SK Pegawai. Signed=true akan mengembalikan berkas yang sudah disign.
-      operationId: getBerkasSuratKeputusanAdmin
-      parameters:
-        - $ref: "#/components/parameters/authRequired"
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: signed
-          in: query
-          required: false
-          schema:
-            type: boolean
-      responses:
-        "200":
-          description: Sukses.
-          content:
-            "*/*":
-              schema:
-                type: string
-                format: binary
-        "404":
-          description: Berkas sk tidak ditemukan.
   /v1/admin/pegawai:
     get:
       tags:
@@ -2645,6 +2494,330 @@ paths:
       responses:
         "204":
           description: Sukses.
+  /v1/admin/surat-keputusan:
+    get:
+      tags:
+        - Admin Surat Keputusan Pegawai
+      summary: Daftar surat keputusan pegawai.
+      description: Daftar surat keputusan pegawai.
+      operationId: listSuratKeputusanAdmin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+        - name: unit_kerja_id
+          in: query
+          description: Unit Kerja ID
+          required: false
+          schema:
+            type: string
+        - name: nama_pemilik
+          in: query
+          description: Nama Pemilik
+          required: false
+          schema:
+            type: string
+        - name: nip
+          in: query
+          description: NIP
+          required: false
+          schema:
+            type: string
+        - name: golongan_id
+          in: query
+          description: Golongan ID
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: jabatan_id
+          in: query
+          description: Jabatan ID
+          required: false
+          schema:
+            type: string
+        - name: kategori_sk
+          in: query
+          description: Kategori SK
+          required: false
+          schema:
+            type: string
+        - name: tanggal_sk_mulai
+          in: query
+          description: Tanggal SK Mulai
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: tanggal_sk_akhir
+          in: query
+          description: Tanggal SK Akhir
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: status_sk
+          in: query
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int32
+              description: Status surat keputusan
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: "#/components/schemas/suratKeputusan"
+                        - type: object
+                          properties:
+                            nip_pemilik:
+                              type: string
+                              description: NIP pemilik SK
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/admin/surat-keputusan/{id}:
+    get:
+      tags:
+        - Admin Surat Keputusan Pegawai
+      summary: Detail surat keputusan pegawai.
+      description: Detail surat keputusan pegawai berdasarkan ID SK Pegawai.
+      operationId: getSuratKeputusanAdmin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    allOf:
+                      - $ref: "#/components/schemas/suratKeputusanWithPenandatanganAndLog"
+                      - type: object
+                        properties:
+                          nip_pemilik:
+                            type: string
+                            description: NIP pemilik SK
+                          jabatan_penandatangan:
+                            type: string
+                            description: Jabatan Penandantangan
+  /v1/admin/surat-keputusan/{id}/berkas:
+    get:
+      tags:
+        - Admin Surat Keputusan Pegawai
+      summary: Berkas surat keputusan pegawai.
+      description: Berkas surat keputusan pegawai berdasarkan ID SK Pegawai. Signed=true akan mengembalikan berkas yang sudah disign.
+      operationId: getBerkasSuratKeputusanAdmin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: signed
+          in: query
+          required: false
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Berkas sk tidak ditemukan.
+  /v1/admin/tingkat-pendidikan:
+    get:
+      tags:
+        - Admin Ref Tingkat Pendidikan
+      summary: Lihat tingkat pendidikan.
+      description: >-
+        Lihat semua tingkat pendidikan.
+      operationId: listTingkatPendidikanAdmin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/tingkatPendidikan"
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+    post:
+      tags:
+        - Admin Ref Tingkat Pendidikan
+      summary: Buat tingkat pendidikan.
+      description: Buat tingkat pendidikan.
+      operationId: createTingkatPendidikanAdmin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nama
+              properties:
+                nama:
+                  type: string
+                  example: "S1"
+                abbreviation:
+                  type: string
+                  example: "S1"
+                  nullable: true
+                golongan_id:
+                  type: integer
+                  format: int32
+                  example: 1
+                  nullable: true
+                golongan_awal_id:
+                  type: integer
+                  format: int32
+                  example: 1
+                  nullable: true
+                tingkat:
+                  type: integer
+                  format: int16
+                  example: 1
+                  nullable: true
+      responses:
+        "201":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/tingkatPendidikan"
+  /v1/admin/tingkat-pendidikan/{id}:
+    get:
+      tags:
+        - Admin Ref Tingkat Pendidikan
+      summary: Detail tingkat pendidikan.
+      description: Detail tingkat pendidikan berdasarkan ID.
+      operationId: getTingkatPendidikanAdmin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/tingkatPendidikan"
+    put:
+      tags:
+        - Admin Ref Tingkat Pendidikan
+      summary: Update tingkat pendidikan.
+      description: Update tingkat pendidikan berdasarkan ID.
+      operationId: updateTingkatPendidikanAdmin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nama
+              properties:
+                nama:
+                  type: string
+                  example: "S1"
+                abbreviation:
+                  type: string
+                  example: "S1"
+                  nullable: true
+                golongan_id:
+                  type: integer
+                  format: int32
+                  example: 1
+                  nullable: true
+                golongan_awal_id:
+                  type: integer
+                  format: int32
+                  example: 1
+                  nullable: true
+                tingkat:
+                  type: integer
+                  format: int16
+                  example: 1
+                  nullable: true
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/tingkatPendidikan"
+    delete:
+      tags:
+        - Admin Ref Tingkat Pendidikan
+      summary: Hapus tingkat pendidikan.
+      description: Hapus tingkat pendidikan berdasarkan ID.
+      operationId: deleteTingkatPendidikanAdmin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Tingkat pendidikan berhasil dihapus
   /v1/admin/unit-kerja:
     post:
       tags:
@@ -5299,6 +5472,38 @@ components:
         tingkat_pendidikan_id:
           type: integer
           description: ID tingkat pendidikan
+          example: 1
+          nullable: true
+    tingkatPendidikan:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          description: ID unik tingkat pendidikan
+          example: 1
+        nama:
+          type: string
+          description: Nama tingkat pendidikan
+          example: "Sarjana I"
+        abbreviation:
+          type: string
+          description: Abbreviation tingkat pendidikan
+          nullable: true
+          example: "S1"
+        golongan_id:
+          type: integer
+          description: ID golongan
+          example: 1
+          nullable: true
+        golongan_awal_id:
+          type: integer
+          description: ID golongan awal
+          example: 1
+          nullable: true
+        tingkat:
+          type: integer
+          description: Tingkat pendidikan
           example: 1
           nullable: true
     unitKerjaWithInduk:

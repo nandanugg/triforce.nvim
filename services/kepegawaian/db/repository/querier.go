@@ -54,6 +54,7 @@ type Querier interface {
 	CreateRefJenisPenghargaan(ctx context.Context, nama pgtype.Text) (CreateRefJenisPenghargaanRow, error)
 	CreateRefJenisSatker(ctx context.Context, nama pgtype.Text) (CreateRefJenisSatkerRow, error)
 	CreateRefPendidikan(ctx context.Context, arg CreateRefPendidikanParams) (string, error)
+	CreateRefTingkatPendidikan(ctx context.Context, arg CreateRefTingkatPendidikanParams) (CreateRefTingkatPendidikanRow, error)
 	CreateUnitKerja(ctx context.Context, arg CreateUnitKerjaParams) (CreateUnitKerjaRow, error)
 	DeleteJenisKenaikanPangkat(ctx context.Context, id int32) (int64, error)
 	DeleteRefAgama(ctx context.Context, id int32) (int64, error)
@@ -64,6 +65,7 @@ type Querier interface {
 	DeleteRefJenisPenghargaan(ctx context.Context, id int32) (int64, error)
 	DeleteRefJenisSatker(ctx context.Context, id int32) (int64, error)
 	DeleteRefPendidikan(ctx context.Context, id string) (int64, error)
+	DeleteRefTingkatPendidikan(ctx context.Context, id int32) (int64, error)
 	DeleteUnitKerja(ctx context.Context, id string) (int64, error)
 	GetBerkasRiwayatHukumanDisiplin(ctx context.Context, arg GetBerkasRiwayatHukumanDisiplinParams) (pgtype.Text, error)
 	GetBerkasRiwayatJabatan(ctx context.Context, arg GetBerkasRiwayatJabatanParams) (pgtype.Text, error)
@@ -92,6 +94,7 @@ type Querier interface {
 	GetRefJenisPenghargaan(ctx context.Context, id int32) (GetRefJenisPenghargaanRow, error)
 	GetRefJenisSatker(ctx context.Context, id int32) (GetRefJenisSatkerRow, error)
 	GetRefPendidikan(ctx context.Context, id string) (GetRefPendidikanRow, error)
+	GetRefTingkatPendidikan(ctx context.Context, id int32) (GetRefTingkatPendidikanRow, error)
 	GetSuratKeputusanByID(ctx context.Context, id string) (GetSuratKeputusanByIDRow, error)
 	GetSuratKeputusanByNIPAndID(ctx context.Context, arg GetSuratKeputusanByNIPAndIDParams) (GetSuratKeputusanByNIPAndIDRow, error)
 	GetUnitKerja(ctx context.Context, id string) (GetUnitKerjaRow, error)
@@ -147,6 +150,7 @@ type Querier interface {
 	UpdateRefJenisPenghargaan(ctx context.Context, arg UpdateRefJenisPenghargaanParams) (UpdateRefJenisPenghargaanRow, error)
 	UpdateRefJenisSatker(ctx context.Context, arg UpdateRefJenisSatkerParams) (UpdateRefJenisSatkerRow, error)
 	UpdateRefPendidikan(ctx context.Context, arg UpdateRefPendidikanParams) (string, error)
+	UpdateRefTingkatPendidikan(ctx context.Context, arg UpdateRefTingkatPendidikanParams) (UpdateRefTingkatPendidikanRow, error)
 	UpdateUnitKerja(ctx context.Context, arg UpdateUnitKerjaParams) (UpdateUnitKerjaRow, error)
 }
 
