@@ -67,12 +67,14 @@ func (s *service) list(ctx context.Context, limit, offset uint) ([]tingkatPendid
 
 	return typeutil.Map(rows, func(row sqlc.ListRefTingkatPendidikanRow) tingkatPendidikan {
 		return tingkatPendidikan{
-			ID:             row.ID,
-			Nama:           row.Nama.String,
-			Abbreviation:   row.Abbreviation,
-			GolonganID:     row.GolonganID,
-			GolonganAwalID: row.GolonganAwalID,
-			Tingkat:        row.Tingkat,
+			ID:               row.ID,
+			Nama:             row.Nama.String,
+			Abbreviation:     row.Abbreviation,
+			GolonganID:       row.GolonganID,
+			GolonganAwalID:   row.GolonganAwalID,
+			Tingkat:          row.Tingkat,
+			NamaGolongan:     &row.NamaGolongan,
+			NamaGolonganAwal: &row.NamaGolonganAwal,
 		}
 	}), uint(count), nil
 }

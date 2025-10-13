@@ -115,11 +115,17 @@ func Test_handler_listAdmin(t *testing.T) {
 	t.Parallel()
 
 	dbData := `
+		INSERT INTO ref_golongan (id, nama, nama_pangkat, deleted_at)
+		VALUES
+		(1, 'Golongan 1', 'Pangkat 1', NULL),
+		(2, 'Golongan 2', 'Pangkat 2', NULL),
+		(3, 'Golongan 3', 'Pangkat 3', '2023-02-20');
+
 		INSERT INTO ref_tingkat_pendidikan (id, nama, abbreviation, golongan_id, golongan_awal_id, tingkat, deleted_at)
 		VALUES
-		(1, 'Jenis Pendidikan 1', 'J1', 1, 1, 1, NULL),
-		(2, 'Jenis Pendidikan 2', 'J2', 2, 2, 2, NULL),
-		(3, 'Jenis Pendidikan 3', 'J3', 3, 3, 3, '2023-02-20'),
+		(1, 'Jenis Pendidikan 1', 'J1', 1, NULL, 1, NULL),
+		(2, 'Jenis Pendidikan 2', 'J2', 1, 2, 2, NULL),
+		(3, 'Jenis Pendidikan 3', 'J3', 1, 3, 3, '2023-02-20'),
 		(4, 'Jenis Pendidikan 4', NULL, NULL, NULL, NULL, NULL);
 	`
 
@@ -144,16 +150,20 @@ func Test_handler_listAdmin(t *testing.T) {
 						"nama": "Jenis Pendidikan 1",
 						"abbreviation": "J1",
 						"golongan_id": 1,
-						"golongan_awal_id": 1,
-						"tingkat": 1
+						"golongan_awal_id": null,
+						"tingkat": 1,
+						"nama_golongan": "Golongan 1",
+						"nama_golongan_awal": null
 					},
 					{
 						"id": 2,
 						"nama": "Jenis Pendidikan 2",
 						"abbreviation": "J2",
-						"golongan_id": 2,
+						"golongan_id": 1,
 						"golongan_awal_id": 2,
-						"tingkat": 2
+						"tingkat": 2,
+						"nama_golongan": "Golongan 1",
+						"nama_golongan_awal": "Golongan 2"
 					},
 					{
 						"id": 4,
@@ -161,7 +171,9 @@ func Test_handler_listAdmin(t *testing.T) {
 						"abbreviation": null,
 						"golongan_id": null,
 						"golongan_awal_id": null,
-						"tingkat": null
+						"tingkat": null,
+						"nama_golongan": null,
+						"nama_golongan_awal": null
 					}
 				],
 				"meta": {"limit": 10, "offset": 0, "total": 3}
@@ -180,9 +192,11 @@ func Test_handler_listAdmin(t *testing.T) {
 						"id": 2,
 						"nama": "Jenis Pendidikan 2",
 						"abbreviation": "J2",
-						"golongan_id": 2,
+						"golongan_id": 1,
 						"golongan_awal_id": 2,
-						"tingkat": 2
+						"tingkat": 2,
+						"nama_golongan": "Golongan 1",
+						"nama_golongan_awal": "Golongan 2"
 					}
 				],
 				"meta": {"limit": 1, "offset": 1, "total": 3}

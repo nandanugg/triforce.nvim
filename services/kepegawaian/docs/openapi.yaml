@@ -5496,10 +5496,20 @@ components:
           description: ID golongan
           example: 1
           nullable: true
+        nama_golongan:
+          type: string
+          description: Nama golongan
+          example: "Golongan 1"
+          nullable: true
         golongan_awal_id:
           type: integer
           description: ID golongan awal
           example: 1
+          nullable: true
+        nama_golongan_awal:
+          type: string
+          description: Nama golongan awal
+          example: "Golongan 1"
           nullable: true
         tingkat:
           type: integer

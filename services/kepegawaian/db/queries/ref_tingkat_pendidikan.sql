@@ -5,8 +5,12 @@ SELECT
     tp.golongan_id,
     tp.golongan_awal_id,
     tp.abbreviation,
-    tp.tingkat
+    tp.tingkat,
+    g.nama as nama_golongan,
+    g2.nama as nama_golongan_awal
 FROM ref_tingkat_pendidikan tp
+LEFT JOIN ref_golongan g ON g.id = tp.golongan_id and g.deleted_at IS NULL
+LEFT JOIN ref_golongan g2 ON g2.id = tp.golongan_awal_id and g2.deleted_at IS NULL
 WHERE tp.deleted_at IS NULL
 LIMIT $1 OFFSET $2;
 
