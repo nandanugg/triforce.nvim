@@ -28,17 +28,18 @@ func Test_handler_ListRefAgama(t *testing.T) {
 
 	dbData := `
 		insert into ref_agama ("id", "nama", "created_at", "updated_at", "deleted_at") values
-		(1, 'Islam', '2024-01-01T07:00:00Z', '2024-01-01T07:00:00Z', null),
-		(2, 'Kristen', '2024-01-01T07:00:00Z', '2024-01-01T07:00:00Z', null),
-		(3, 'Katolik', '2024-01-01T07:00:00Z', '2024-01-01T07:00:00Z', null),
-		(4, 'Hindu', '2024-01-01T07:00:00Z', '2024-01-01T07:00:00Z', null),
-		(5, 'Budha', '2024-01-01T07:00:00Z', '2024-01-01T07:00:00Z', null),
-		(6, 'Konghucu', '2024-01-01T07:00:00Z', '2024-01-01T07:00:00Z', null),
-		(7, 'Kepercayaan', '2024-01-01T07:00:00Z', '2024-01-01T07:00:00Z', null),
-		(8, 'Lainnya', '2024-01-01T07:00:00Z', '2024-01-01T07:00:00Z', null),
-		(9, 'Test', '2024-01-01T07:00:00Z', '2024-01-01T07:00:00Z', now());
+		(1, 'Islam', '2024-01-01', '2024-01-01', null),
+		(2, 'Kristen', '2024-01-01', '2024-01-01', null),
+		(3, 'Katolik', '2024-01-01', '2024-01-01', null),
+		(4, 'Hindu', '2024-01-01', '2024-01-01', null),
+		(5, 'Budha', '2024-01-01', '2024-01-01', null),
+		(6, 'Konghucu', '2024-01-01', '2024-01-01', null),
+		(7, 'Kepercayaan', '2024-01-01', '2024-01-01', null),
+		(8, 'Lainnya', '2024-01-01', '2024-01-01', null),
+		(9, 'Test', '2024-01-01', '2024-01-01', now());
 	`
 
+	defaulTimestamptz := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC).Local().Format(time.RFC3339)
 	tests := []struct {
 		name             string
 		dbData           string
@@ -54,14 +55,14 @@ func Test_handler_ListRefAgama(t *testing.T) {
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
-					{"id": 1, "nama": "Islam", "created_at": "2024-01-01T07:00:00Z", "updated_at": "2024-01-01T07:00:00Z"},
-					{"id": 2, "nama": "Kristen", "created_at": "2024-01-01T07:00:00Z", "updated_at": "2024-01-01T07:00:00Z"},
-					{"id": 3, "nama": "Katolik", "created_at": "2024-01-01T07:00:00Z", "updated_at": "2024-01-01T07:00:00Z"},
-					{"id": 4, "nama": "Hindu", "created_at": "2024-01-01T07:00:00Z", "updated_at": "2024-01-01T07:00:00Z"},
-					{"id": 5, "nama": "Budha", "created_at": "2024-01-01T07:00:00Z", "updated_at": "2024-01-01T07:00:00Z"},
-					{"id": 6, "nama": "Konghucu", "created_at": "2024-01-01T07:00:00Z", "updated_at": "2024-01-01T07:00:00Z"},
-					{"id": 7, "nama": "Kepercayaan", "created_at": "2024-01-01T07:00:00Z", "updated_at": "2024-01-01T07:00:00Z"},
-					{"id": 8, "nama": "Lainnya", "created_at": "2024-01-01T07:00:00Z", "updated_at": "2024-01-01T07:00:00Z"}
+					{"id": 1, "nama": "Islam", "created_at": "` + defaulTimestamptz + `", "updated_at": "` + defaulTimestamptz + `"},
+					{"id": 2, "nama": "Kristen", "created_at": "` + defaulTimestamptz + `", "updated_at": "` + defaulTimestamptz + `"},
+					{"id": 3, "nama": "Katolik", "created_at": "` + defaulTimestamptz + `", "updated_at": "` + defaulTimestamptz + `"},
+					{"id": 4, "nama": "Hindu", "created_at": "` + defaulTimestamptz + `", "updated_at": "` + defaulTimestamptz + `"},
+					{"id": 5, "nama": "Budha", "created_at": "` + defaulTimestamptz + `", "updated_at": "` + defaulTimestamptz + `"},
+					{"id": 6, "nama": "Konghucu", "created_at": "` + defaulTimestamptz + `", "updated_at": "` + defaulTimestamptz + `"},
+					{"id": 7, "nama": "Kepercayaan", "created_at": "` + defaulTimestamptz + `", "updated_at": "` + defaulTimestamptz + `"},
+					{"id": 8, "nama": "Lainnya", "created_at": "` + defaulTimestamptz + `", "updated_at": "` + defaulTimestamptz + `"}
 				],
 				"meta": {"limit": 10, "offset": 0, "total": 8}
 			}`,
@@ -77,9 +78,9 @@ func Test_handler_ListRefAgama(t *testing.T) {
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
-					{"id": 3, "nama": "Katolik", "created_at": "2024-01-01T07:00:00Z", "updated_at": "2024-01-01T07:00:00Z"},
-					{"id": 4, "nama": "Hindu", "created_at": "2024-01-01T07:00:00Z", "updated_at": "2024-01-01T07:00:00Z"},
-					{"id": 5, "nama": "Budha", "created_at": "2024-01-01T07:00:00Z", "updated_at": "2024-01-01T07:00:00Z"}
+					{"id": 3, "nama": "Katolik", "created_at": "` + defaulTimestamptz + `", "updated_at": "` + defaulTimestamptz + `"},
+					{"id": 4, "nama": "Hindu", "created_at": "` + defaulTimestamptz + `", "updated_at": "` + defaulTimestamptz + `"},
+					{"id": 5, "nama": "Budha", "created_at": "` + defaulTimestamptz + `", "updated_at": "` + defaulTimestamptz + `"}
 				],
 				"meta": {"limit": 3, "offset": 2, "total": 8}
 			}`,
@@ -123,17 +124,18 @@ func Test_handler_adminListRefAgama(t *testing.T) {
 
 	dbData := `
 		insert into ref_agama ("id", "nama", "created_at", "updated_at", "deleted_at") values
-		(1, 'Islam', '2024-01-01T07:00:00Z', '2024-01-01T07:00:00Z', null),
-		(2, 'Kristen', '2024-01-01T07:00:00Z', '2024-01-01T07:00:00Z', null),
-		(3, 'Katolik', '2024-01-01T07:00:00Z', '2024-01-01T07:00:00Z', null),
-		(4, 'Hindu', '2024-01-01T07:00:00Z', '2024-01-01T07:00:00Z', null),
-		(5, 'Budha', '2024-01-01T07:00:00Z', '2024-01-01T07:00:00Z', null),
-		(6, 'Konghucu', '2024-01-01T07:00:00Z', '2024-01-01T07:00:00Z', null),
-		(7, 'Kepercayaan', '2024-01-01T07:00:00Z', '2024-01-01T07:00:00Z', null),
-		(8, 'Lainnya', '2024-01-01T07:00:00Z', '2024-01-01T07:00:00Z', null),
-		(9, 'Test', '2024-01-01T07:00:00Z', '2024-01-01T07:00:00Z', now());
+		(1, 'Islam', '2024-01-01', '2024-01-01', null),
+		(2, 'Kristen', '2024-01-01', '2024-01-01', null),
+		(3, 'Katolik', '2024-01-01', '2024-01-01', null),
+		(4, 'Hindu', '2024-01-01', '2024-01-01', null),
+		(5, 'Budha', '2024-01-01', '2024-01-01', null),
+		(6, 'Konghucu', '2024-01-01', '2024-01-01', null),
+		(7, 'Kepercayaan', '2024-01-01', '2024-01-01', null),
+		(8, 'Lainnya', '2024-01-01', '2024-01-01', null),
+		(9, 'Test', '2024-01-01', '2024-01-01', now());
 	`
 
+	defaulTimestamptz := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC).Local().Format(time.RFC3339)
 	tests := []struct {
 		name             string
 		dbData           string
@@ -149,14 +151,14 @@ func Test_handler_adminListRefAgama(t *testing.T) {
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
-					{"id": 1, "nama": "Islam", "created_at": "2024-01-01T07:00:00Z", "updated_at": "2024-01-01T07:00:00Z"},
-					{"id": 2, "nama": "Kristen", "created_at": "2024-01-01T07:00:00Z", "updated_at": "2024-01-01T07:00:00Z"},
-					{"id": 3, "nama": "Katolik", "created_at": "2024-01-01T07:00:00Z", "updated_at": "2024-01-01T07:00:00Z"},
-					{"id": 4, "nama": "Hindu", "created_at": "2024-01-01T07:00:00Z", "updated_at": "2024-01-01T07:00:00Z"},
-					{"id": 5, "nama": "Budha", "created_at": "2024-01-01T07:00:00Z", "updated_at": "2024-01-01T07:00:00Z"},
-					{"id": 6, "nama": "Konghucu", "created_at": "2024-01-01T07:00:00Z", "updated_at": "2024-01-01T07:00:00Z"},
-					{"id": 7, "nama": "Kepercayaan", "created_at": "2024-01-01T07:00:00Z", "updated_at": "2024-01-01T07:00:00Z"},
-					{"id": 8, "nama": "Lainnya", "created_at": "2024-01-01T07:00:00Z", "updated_at": "2024-01-01T07:00:00Z"}
+					{"id": 1, "nama": "Islam", "created_at": "` + defaulTimestamptz + `", "updated_at": "` + defaulTimestamptz + `"},
+					{"id": 2, "nama": "Kristen", "created_at": "` + defaulTimestamptz + `", "updated_at": "` + defaulTimestamptz + `"},
+					{"id": 3, "nama": "Katolik", "created_at": "` + defaulTimestamptz + `", "updated_at": "` + defaulTimestamptz + `"},
+					{"id": 4, "nama": "Hindu", "created_at": "` + defaulTimestamptz + `", "updated_at": "` + defaulTimestamptz + `"},
+					{"id": 5, "nama": "Budha", "created_at": "` + defaulTimestamptz + `", "updated_at": "` + defaulTimestamptz + `"},
+					{"id": 6, "nama": "Konghucu", "created_at": "` + defaulTimestamptz + `", "updated_at": "` + defaulTimestamptz + `"},
+					{"id": 7, "nama": "Kepercayaan", "created_at": "` + defaulTimestamptz + `", "updated_at": "` + defaulTimestamptz + `"},
+					{"id": 8, "nama": "Lainnya", "created_at": "` + defaulTimestamptz + `", "updated_at": "` + defaulTimestamptz + `"}
 				],
 				"meta": {"limit": 10, "offset": 0, "total": 8}
 			}`,
@@ -172,9 +174,9 @@ func Test_handler_adminListRefAgama(t *testing.T) {
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
-					{"id": 3, "nama": "Katolik", "created_at": "2024-01-01T07:00:00Z", "updated_at": "2024-01-01T07:00:00Z"},
-					{"id": 4, "nama": "Hindu", "created_at": "2024-01-01T07:00:00Z", "updated_at": "2024-01-01T07:00:00Z"},
-					{"id": 5, "nama": "Budha", "created_at": "2024-01-01T07:00:00Z", "updated_at": "2024-01-01T07:00:00Z"}
+					{"id": 3, "nama": "Katolik", "created_at": "` + defaulTimestamptz + `", "updated_at": "` + defaulTimestamptz + `"},
+					{"id": 4, "nama": "Hindu", "created_at": "` + defaulTimestamptz + `", "updated_at": "` + defaulTimestamptz + `"},
+					{"id": 5, "nama": "Budha", "created_at": "` + defaulTimestamptz + `", "updated_at": "` + defaulTimestamptz + `"}
 				],
 				"meta": {"limit": 3, "offset": 2, "total": 8}
 			}`,
@@ -225,10 +227,11 @@ func Test_handler_adminGetRefAgama(t *testing.T) {
 
 	dbData := `
 		insert into ref_agama ("id", "nama", "created_at", "updated_at", "deleted_at") values
-		(1, 'Islam', '2024-01-01T07:00:00Z', '2024-01-01T07:00:00Z', null),
-		(2, 'Kristen', '2024-01-01T07:00:00Z', '2024-01-01T07:00:00Z', now());
+		(1, 'Islam', '2024-01-01', '2024-01-01', null),
+		(2, 'Kristen', '2024-01-01', '2024-01-01', now());
 	`
 
+	defaulTimestamptz := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC).Local().Format(time.RFC3339)
 	tests := []struct {
 		name             string
 		id               string
@@ -249,8 +252,8 @@ func Test_handler_adminGetRefAgama(t *testing.T) {
 				"data": {
 					"id": 1,
 					"nama": "Islam",
-					"created_at": "2024-01-01T07:00:00Z",
-					"updated_at": "2024-01-01T07:00:00Z"
+					"created_at": "` + defaulTimestamptz + `",
+					"updated_at": "` + defaulTimestamptz + `"
 				}
 			}`,
 		},
@@ -415,10 +418,11 @@ func Test_handler_adminUpdateRefAgama(t *testing.T) {
 
 	dbData := `
 		insert into ref_agama ("id", "nama", "created_at", "updated_at", "deleted_at") values
-		(1, 'Islam', '2024-01-01T07:00:00Z', now(), null),
-		(2, 'Kristen', '2024-01-01T07:00:00Z', now(), now());
+		(1, 'Islam', '2024-01-01', now(), null),
+		(2, 'Kristen', '2024-01-01', now(), now());
 	`
 
+	defaulTimestamptz := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC).Local().Format(time.RFC3339)
 	tests := []struct {
 		name             string
 		id               string
@@ -436,8 +440,8 @@ func Test_handler_adminUpdateRefAgama(t *testing.T) {
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusOK,
-			wantResponseBody: `{"data": 
-				{"id": 1, "nama": "Islam Updated", "created_at": "2024-01-01T07:00:00Z", "updated_at":"{updated_at}"}
+			wantResponseBody: `{"data":
+				{"id": 1, "nama": "Islam Updated", "created_at": "` + defaulTimestamptz + `", "updated_at":"{updated_at}"}
 			}`,
 		},
 		{

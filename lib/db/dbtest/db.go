@@ -111,9 +111,7 @@ func prepareTestDB(t *testing.T, user, password, dbname, schema string) {
 	require.NoError(t, err)
 	defer d.Close()
 
-	// NOTE: 'update pg_language' dibutuhkan di DB kepegawaian (search
-	// "LANGUAGE c" di file migrations).
-	_, err = d.Exec(context.Background(), "update pg_language set lanpltrusted = true where lanname = 'c'")
+	_, err = d.Exec(context.Background(), "grant usage, create on schema public to "+user) // nosemgrep: rules.go.sql.go_sql_rule-concat-sqli
 	require.NoError(t, err)
 
 	d2, err := db.New(testDBHost, testDBPort, user, password, dbname, schema, db.Options{
@@ -137,7 +135,7 @@ func applyMigrations(t *testing.T, user, password, dbname, schema string, migrat
 	require.NoError(t, err)
 
 	_, err = db.Exec(context.Background(), strings.Join(sqls, "\n"))
-	require.NoError(t, err, "Error running SQL:\n%s")
+	require.NoError(t, err, "Error running SQL")
 
 	return db
 }

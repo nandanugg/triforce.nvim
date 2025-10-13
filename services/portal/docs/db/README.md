@@ -22,6 +22,7 @@
 | portal.resource_permission_set_kode | trigger |  | FUNCTION |
 | portal.resource_update_resource_permission_kode | trigger |  | FUNCTION |
 | portal.permission_update_resource_permission_kode | trigger |  | FUNCTION |
+| public.is_user_has_access | bool | p_nip text, p_kode text | FUNCTION |
 
 ## Relations
 

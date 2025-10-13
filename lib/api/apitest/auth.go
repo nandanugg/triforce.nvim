@@ -1,6 +1,7 @@
 package apitest
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 
@@ -25,6 +26,7 @@ func init() {
 	}
 }
 
+// @yap TODO delete after migrate to use simple header
 func GenerateAuthHeader(service, nip string, role ...string) string {
 	claims := jwt.MapClaims{"nip": nip, "aud": "testing"}
 	if len(role) > 0 {
@@ -36,4 +38,23 @@ func GenerateAuthHeader(service, nip string, role ...string) string {
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 	tokenString, _ := token.SignedString(JwtPrivateKey)
 	return "Bearer " + tokenString
+}
+
+func GenerateSimpleAuthHeader(nip string) string {
+	claims := jwt.MapClaims{"nip": nip, "aud": "testing"}
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	tokenString, _ := token.SignedString(JwtPrivateKey)
+	return "Bearer " + tokenString
+}
+
+type AuthResourcePermissionService struct {
+	kode string
+}
+
+func NewAuthResourcePermissionService(kode string) *AuthResourcePermissionService {
+	return &AuthResourcePermissionService{kode}
+}
+
+func (s *AuthResourcePermissionService) IsUserHasAccess(_ context.Context, _, kode string) (bool, error) {
+	return s.kode == kode, nil
 }
