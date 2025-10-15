@@ -114,6 +114,7 @@ type updateRequest struct {
 	Nama                  *string  `json:"nama"`
 	Deskripsi             *string  `json:"deskripsi"`
 	IsDefault             *bool    `json:"is_default"`
+	IsAktif               *bool    `json:"is_aktif"`
 	ResourcePermissionIDs *[]int32 `json:"resource_permission_ids"`
 }
 
@@ -127,6 +128,7 @@ func (h *handler) update(c echo.Context) error {
 		nama:                  req.Nama,
 		deskripsi:             req.Deskripsi,
 		isDefault:             req.IsDefault,
+		isAktif:               req.IsAktif,
 		resourcePermissionIDs: req.ResourcePermissionIDs,
 	})
 	if err != nil {

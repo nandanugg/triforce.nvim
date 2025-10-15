@@ -14,6 +14,7 @@
 | deleted_at | timestamp with time zone |  | true |  |  |  |
 | deskripsi | varchar(255) |  | true |  |  |  |
 | is_default | boolean | false | false |  |  |  |
+| is_aktif | boolean | true | false |  |  |  |
 
 ## Constraints
 
@@ -45,6 +46,7 @@ erDiagram
   timestamp_with_time_zone deleted_at
   varchar_255_ deskripsi
   boolean is_default
+  boolean is_aktif
 }
 "portal.user_role" {
   integer id

@@ -91,6 +91,7 @@ select
   r.nama,
   r.deskripsi,
   r.is_default,
+  r.is_aktif,
   case
     when r.is_default then
       (
@@ -113,6 +114,7 @@ type GetRoleRow struct {
 	Nama       string      `db:"nama"`
 	Deskripsi  pgtype.Text `db:"deskripsi"`
 	IsDefault  bool        `db:"is_default"`
+	IsAktif    bool        `db:"is_aktif"`
 	JumlahUser int32       `db:"jumlah_user"`
 }
 
@@ -124,6 +126,7 @@ func (q *Queries) GetRole(ctx context.Context, id int16) (GetRoleRow, error) {
 		&i.Nama,
 		&i.Deskripsi,
 		&i.IsDefault,
+		&i.IsAktif,
 		&i.JumlahUser,
 	)
 	return i, err
@@ -168,6 +171,7 @@ select
   r.nama,
   r.deskripsi,
   r.is_default,
+  r.is_aktif,
   case
     when r.is_default then
       (
@@ -197,6 +201,7 @@ type ListRolesRow struct {
 	Nama       string      `db:"nama"`
 	Deskripsi  pgtype.Text `db:"deskripsi"`
 	IsDefault  bool        `db:"is_default"`
+	IsAktif    bool        `db:"is_aktif"`
 	JumlahUser int32       `db:"jumlah_user"`
 }
 
@@ -214,6 +219,7 @@ func (q *Queries) ListRoles(ctx context.Context, arg ListRolesParams) ([]ListRol
 			&i.Nama,
 			&i.Deskripsi,
 			&i.IsDefault,
+			&i.IsAktif,
 			&i.JumlahUser,
 		); err != nil {
 			return nil, err
@@ -229,9 +235,10 @@ func (q *Queries) ListRoles(ctx context.Context, arg ListRolesParams) ([]ListRol
 const updateRole = `-- name: UpdateRole :one
 update role
 set
-  nama = coalesce($2::varchar, nama),
-  deskripsi = coalesce($3::varchar, deskripsi),
-  is_default = coalesce($4::boolean, is_default),
+  nama = coalesce($2, nama),
+  deskripsi = coalesce($3, deskripsi),
+  is_default = coalesce($4, is_default),
+  is_aktif = coalesce($5, is_aktif),
   updated_at = now()
 where id = $1 and deleted_at is null
 returning id
@@ -242,6 +249,7 @@ type UpdateRoleParams struct {
 	Nama      pgtype.Text `db:"nama"`
 	Deskripsi pgtype.Text `db:"deskripsi"`
 	IsDefault pgtype.Bool `db:"is_default"`
+	IsAktif   pgtype.Bool `db:"is_aktif"`
 }
 
 func (q *Queries) UpdateRole(ctx context.Context, arg UpdateRoleParams) (int16, error) {
@@ -250,6 +258,7 @@ func (q *Queries) UpdateRole(ctx context.Context, arg UpdateRoleParams) (int16, 
 		arg.Nama,
 		arg.Deskripsi,
 		arg.IsDefault,
+		arg.IsAktif,
 	)
 	var id int16
 	err := row.Scan(&id)

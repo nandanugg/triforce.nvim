@@ -41,7 +41,7 @@ const listResourcePermissionsByNip = `-- name: ListResourcePermissionsByNip :man
 select distinct rp.kode
 from role_resource_permission rrp
 join resource_permission rp on rp.id = rrp.resource_permission_id and rp.deleted_at is null
-join role r on r.id = rrp.role_id and r.deleted_at is null
+join role r on r.id = rrp.role_id and r.is_aktif is true and r.deleted_at is null
 where rp.kode is not null -- rp.kode is not null is alias for resource.deleted_at is null and permission.deleted_at is null
   and (r.is_default or rrp.role_id in (
     select role_id from user_role where nip = $1 and deleted_at is null

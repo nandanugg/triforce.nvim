@@ -4,6 +4,7 @@ select
   r.nama,
   r.deskripsi,
   r.is_default,
+  r.is_aktif,
   case
     when r.is_default then
       (
@@ -33,6 +34,7 @@ select
   r.nama,
   r.deskripsi,
   r.is_default,
+  r.is_aktif,
   case
     when r.is_default then
       (
@@ -57,9 +59,10 @@ returning id;
 -- name: UpdateRole :one
 update role
 set
-  nama = coalesce(sqlc.narg('nama')::varchar, nama),
-  deskripsi = coalesce(sqlc.narg('deskripsi')::varchar, deskripsi),
-  is_default = coalesce(sqlc.narg('is_default')::boolean, is_default),
+  nama = coalesce(sqlc.narg('nama'), nama),
+  deskripsi = coalesce(sqlc.narg('deskripsi'), deskripsi),
+  is_default = coalesce(sqlc.narg('is_default'), is_default),
+  is_aktif = coalesce(sqlc.narg('is_aktif'), is_aktif),
   updated_at = now()
 where id = $1 and deleted_at is null
 returning id;

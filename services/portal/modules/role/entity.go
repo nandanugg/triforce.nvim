@@ -5,6 +5,7 @@ type role struct {
 	Nama                string                `json:"nama"`
 	Deskripsi           string                `json:"deskripsi"`
 	IsDefault           bool                  `json:"is_default"`
+	IsAktif             bool                  `json:"is_aktif"`
 	JumlahUser          int32                 `json:"jumlah_user"`
 	ResourcePermissions *[]resourcePermission `json:"resource_permissions,omitempty"`
 }

@@ -58,10 +58,11 @@ func TestNewAuthMiddleware(t *testing.T) {
 			(6,  1,           3,             null),
 			(7,  3,           1,             null);
 		insert into role
-			(id, nama,      is_default, deleted_at) values
-			(1,  'admin',   false,      null),
-			(2,  'pegawai', true,       null),
-			(3,  'del',     true,       '2000-01-01');
+			(id, nama,       is_default, is_aktif, deleted_at) values
+			(1,  'admin',    false,      true,     null),
+			(2,  'pegawai',  true,       true,     null),
+			(3,  'delete',   true,       true,     '2000-01-01'),
+			(4,  'inactive', true,       false,    null);
 		insert into role_resource_permission
 			(role_id, resource_permission_id, deleted_at) values
 			(1,       1,                      null),
@@ -70,7 +71,8 @@ func TestNewAuthMiddleware(t *testing.T) {
 			(2,       2,                      null),
 			(2,       5,                      null),
 			(2,       7,                      null),
-			(3,       3,                      null);
+			(3,       3,                      null),
+			(4,       3,                      null);
 	`
 	tests := []struct {
 		name                   string
@@ -197,7 +199,7 @@ func TestNewAuthMiddleware(t *testing.T) {
 			wantIDs:          map[string]string{"keycloakID": "1"},
 		},
 		{
-			name:                   "error: valid auth header with string audience and nip with deleted default role",
+			name:                   "error: valid auth header with string audience and nip with deleted default role and default inactive role",
 			dbData:                 seedData,
 			resourcePermissionKode: "portal.page2.write",
 			requestHeader: http.Header{
@@ -213,9 +215,9 @@ func TestNewAuthMiddleware(t *testing.T) {
 			wantIDs:          map[string]string{"zimbraID": "1"},
 		},
 		{
-			name: "error: valid auth header with string audience and nip with deleted role",
+			name: "error: valid auth header with string audience and nip with deleted role and inactive role",
 			dbData: seedData + `
-				insert into user_role (nip, role_id) values ('100', 3);
+				insert into user_role (nip, role_id) values ('100', 3), ('100', 4);
 			`,
 			resourcePermissionKode: "portal.page2.write",
 			requestHeader: http.Header{

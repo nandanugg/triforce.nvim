@@ -63,6 +63,7 @@ type Role struct {
 	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 	Deskripsi pgtype.Text        `db:"deskripsi"`
 	IsDefault bool               `db:"is_default"`
+	IsAktif   bool               `db:"is_aktif"`
 }
 
 type RoleResourcePermission struct {

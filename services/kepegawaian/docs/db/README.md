@@ -53,6 +53,7 @@
 | [kepegawaian.file_digital_signature_corrector](kepegawaian.file_digital_signature_corrector.md) | 10 |  | BASE TABLE |
 | [kepegawaian.file_digital_signature_riwayat](kepegawaian.file_digital_signature_riwayat.md) | 10 |  | BASE TABLE |
 | [kepegawaian.log_digital_signature](kepegawaian.log_digital_signature.md) | 10 |  | BASE TABLE |
+| [kepegawaian.ref_template](kepegawaian.ref_template.md) | 6 |  | BASE TABLE |
 
 ## Stored procedures and functions
 
@@ -984,6 +985,14 @@ erDiagram
   smallint status
   boolean proses_cron
   integer created_by
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
+}
+"kepegawaian.ref_template" {
+  integer id
+  varchar_255_ nama
+  text file_base64
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at

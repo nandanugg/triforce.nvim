@@ -8,7 +8,7 @@
 | [portal.pemberitahuan](portal.pemberitahuan.md) | 6 |  | BASE TABLE |
 | [portal.dokumen_pendukung](portal.dokumen_pendukung.md) | 6 |  | BASE TABLE |
 | [portal.user](portal.user.md) | 10 |  | BASE TABLE |
-| [portal.role](portal.role.md) | 8 |  | BASE TABLE |
+| [portal.role](portal.role.md) | 9 |  | BASE TABLE |
 | [portal.user_role](portal.user_role.md) | 6 |  | BASE TABLE |
 | [portal.resource](portal.resource.md) | 7 |  | BASE TABLE |
 | [portal.permission](portal.permission.md) | 6 |  | BASE TABLE |
@@ -76,6 +76,7 @@ erDiagram
   timestamp_with_time_zone deleted_at
   varchar_255_ deskripsi
   boolean is_default
+  boolean is_aktif
 }
 "portal.user_role" {
   integer id

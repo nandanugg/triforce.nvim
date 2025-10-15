@@ -337,6 +337,8 @@ paths:
                           type: integer
                         is_default:
                           type: boolean
+                        is_aktif:
+                          type: boolean
                   meta:
                     $ref: "#/components/schemas/metaPagination"
     post:
@@ -422,6 +424,8 @@ paths:
                         type: integer
                       is_default:
                         type: boolean
+                      is_aktif:
+                        type: boolean
                       resource_permissions:
                         type: array
                         items:
@@ -469,6 +473,8 @@ paths:
                   type: string
                   maxLength: 255
                 is_default:
+                  type: boolean
+                is_aktif:
                   type: boolean
                 resource_permission_ids:
                   type: array

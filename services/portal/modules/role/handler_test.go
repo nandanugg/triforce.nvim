@@ -26,11 +26,11 @@ func Test_handler_list(t *testing.T) {
 
 	dbData := `
 		insert into role
-			(id, nama,      deskripsi,     is_default, deleted_at) values
-			(1,  'admin',   'deskripsi 1', false,      null),
-			(2,  'pegawai', 'deskripsi 2', true,       null),
-			(3,  'guest',   'deskripsi 3', false,      '2000-01-01'),
-			(4,  'dokter',  'deskripsi 4', false,      null);
+			(id, nama,      deskripsi,     is_default, is_aktif, deleted_at) values
+			(1,  'admin',   'deskripsi 1', false,      true,     null),
+			(2,  'pegawai', 'deskripsi 2', true,       true,     null),
+			(3,  'guest',   'deskripsi 3', false,      true,     '2000-01-01'),
+			(4,  'dokter',  'deskripsi 4', false,      false,    null);
 		insert into user_role
 			(role_id, nip,  deleted_at) values
 			(1,       '1a', null),
@@ -73,21 +73,24 @@ func Test_handler_list(t *testing.T) {
 						"nama": "admin",
 						"deskripsi": "deskripsi 1",
 						"jumlah_user": 3,
-						"is_default": false
+						"is_default": false,
+						"is_aktif": true
 					},
 					{
 						"id": 4,
 						"nama": "dokter",
 						"deskripsi": "deskripsi 4",
 						"jumlah_user": 0,
-						"is_default": false
+						"is_default": false,
+						"is_aktif": false
 					},
 					{
 						"id": 2,
 						"nama": "pegawai",
 						"deskripsi": "deskripsi 2",
 						"jumlah_user": 6,
-						"is_default": true
+						"is_default": true,
+						"is_aktif": true
 					}
 				],
 				"meta": {
@@ -113,14 +116,16 @@ func Test_handler_list(t *testing.T) {
 						"nama": "dokter",
 						"deskripsi": "deskripsi 4",
 						"jumlah_user": 0,
-						"is_default": false
+						"is_default": false,
+						"is_aktif": false
 					},
 					{
 						"id": 2,
 						"nama": "pegawai",
 						"deskripsi": "deskripsi 2",
 						"jumlah_user": 6,
-						"is_default": true
+						"is_default": true,
+						"is_aktif": true
 					}
 				],
 				"meta": {
@@ -170,20 +175,11 @@ func Test_handler_get(t *testing.T) {
 
 	dbData := `
 		insert into role
-			(id, nama,      deskripsi,     is_default, deleted_at) values
-			(1,  'admin',   'deskripsi 1', false,      null),
-			(2,  'pegawai', 'deskripsi 2', true,       null),
-			(3,  'guest',   'deskripsi 3', false,      '2000-01-01'),
-			(4,  'dokter',  'deskripsi 4', false,      null);
-		insert into user_role
-			(role_id, nip,  deleted_at) values
-			(1,       '1a', null),
-			(1,       '1b', null),
-			(1,       '1c', null),
-			(1,       '1d', '2000-01-01'),
-			(1,       '1e', null),
-			(2,       '1a', null),
-			(3,       '1a', null);
+			(id, nama,      deskripsi,     is_default, is_aktif, deleted_at) values
+			(1,  'admin',   'deskripsi 1', false,      true,     null),
+			(2,  'pegawai', 'deskripsi 2', true,       false,    null),
+			(3,  'guest',   'deskripsi 3', false,      true,     '2000-01-01'),
+			(4,  'dokter',  'deskripsi 4', false,      true,     null);
 		insert into resource
 			(id, service,  kode,    nama,     deleted_at) values
 			(1,  'portal', 'page1', 'Page 1', null),
@@ -222,6 +218,15 @@ func Test_handler_get(t *testing.T) {
 			(2,       3,                      null),
 			(2,       8,                      null),
 			(3,       1,                      null);
+		insert into user_role
+			(role_id, nip,  deleted_at) values
+			(1,       '1a', null),
+			(1,       '1b', null),
+			(1,       '1c', null),
+			(1,       '1d', '2000-01-01'),
+			(1,       '1e', null),
+			(2,       '1a', null),
+			(3,       '1a', null);
 		insert into "user"
 			(id,                                     source,     nip,  deleted_at) values
 			('00000000-0000-0000-0000-000000000001', 'zimbra',   '1a', null),
@@ -256,6 +261,7 @@ func Test_handler_get(t *testing.T) {
 					"deskripsi": "deskripsi 1",
 					"jumlah_user": 3,
 					"is_default": false,
+					"is_aktif": true,
 					"resource_permissions": [
 						{
 							"id": 5,
@@ -304,6 +310,7 @@ func Test_handler_get(t *testing.T) {
 					"deskripsi": "deskripsi 2",
 					"jumlah_user": 6,
 					"is_default": true,
+					"is_aktif": false,
 					"resource_permissions": [
 						{
 							"id": 5,
@@ -334,6 +341,7 @@ func Test_handler_get(t *testing.T) {
 					"deskripsi": "deskripsi 4",
 					"jumlah_user": 0,
 					"is_default": false,
+					"is_aktif": true,
 					"resource_permissions": []
 				}
 			}`,
@@ -446,6 +454,7 @@ func Test_handler_create(t *testing.T) {
 					"nama":       "Super Admin",
 					"deskripsi":  "Deskripsi 1",
 					"is_default": false,
+					"is_aktif":   true,
 					"created_at": "{created_at}",
 					"updated_at": "{updated_at}",
 					"deleted_at": nil,
@@ -517,6 +526,7 @@ func Test_handler_create(t *testing.T) {
 					"nama":       "admin",
 					"deskripsi":  nil,
 					"is_default": false,
+					"is_aktif":   true,
 					"created_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
 					"updated_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
 					"deleted_at": nil,
@@ -527,6 +537,7 @@ func Test_handler_create(t *testing.T) {
 					"nama":       "Pegawai",
 					"deskripsi":  "deskripsi",
 					"is_default": true,
+					"is_aktif":   true,
 					"created_at": "{created_at}",
 					"updated_at": "{updated_at}",
 					"deleted_at": nil,
@@ -579,6 +590,7 @@ func Test_handler_create(t *testing.T) {
 					"nama":       "Admin Kepegawaian",
 					"deskripsi":  "",
 					"is_default": false,
+					"is_aktif":   true,
 					"created_at": "{created_at}",
 					"updated_at": "{updated_at}",
 					"deleted_at": nil,
@@ -656,9 +668,10 @@ func Test_handler_create(t *testing.T) {
 		{
 			name:             "error: have additional and missing required params, duplicate resource permission ids",
 			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
-			requestBody:      `{"id": 1, "resource_permission_ids": [ 1,2,3,2 ]}`,
+			requestBody:      `{"id": 1, "is_aktif": false, "resource_permission_ids": [ 1,2,3,2 ]}`,
 			wantResponseCode: http.StatusBadRequest,
 			wantResponseBody: `{"message": "parameter \"id\" tidak didukung` +
+				` | parameter \"is_aktif\" tidak didukung` +
 				` | parameter \"resource_permission_ids\" item tidak boleh duplikat` +
 				` | parameter \"nama\" harus diisi"}`,
 			wantDBRoles:                   dbtest.Rows{},
@@ -801,8 +814,8 @@ func Test_handler_update(t *testing.T) {
 			name: "ok: with all params",
 			dbData: seedData + `
 				insert into role
-					(nama,    created_at,   updated_at) values
-					('admin', '2000-01-01', '2000-01-01');
+					(nama,    created_at,   is_aktif, updated_at) values
+					('admin', '2000-01-01', false,    '2000-01-01');
 			`,
 			paramID:       "1",
 			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
@@ -810,6 +823,7 @@ func Test_handler_update(t *testing.T) {
 				"nama": "super_admin",
 				"deskripsi": "new deskripsi",
 				"is_default": true,
+				"is_aktif": true,
 				"resource_permission_ids": [ 1, 2 ]
 			}`,
 			wantResponseCode: http.StatusNoContent,
@@ -821,6 +835,7 @@ func Test_handler_update(t *testing.T) {
 					"nama":       "super_admin",
 					"deskripsi":  "new deskripsi",
 					"is_default": true,
+					"is_aktif":   true,
 					"created_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
 					"updated_at": "{updated_at}",
 					"deleted_at": nil,
@@ -863,6 +878,7 @@ func Test_handler_update(t *testing.T) {
 				"nama": "new_admin",
 				"deskripsi": "new desc",
 				"is_default": false,
+				"is_aktif": false,
 				"resource_permission_ids": []
 			}`,
 			wantResponseCode: http.StatusNoContent,
@@ -874,6 +890,7 @@ func Test_handler_update(t *testing.T) {
 					"nama":       "new_admin",
 					"deskripsi":  "new desc",
 					"is_default": false,
+					"is_aktif":   false,
 					"created_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
 					"updated_at": "{updated_at}",
 					"deleted_at": nil,
@@ -910,9 +927,9 @@ func Test_handler_update(t *testing.T) {
 			name: "ok: partial update role and create & delete resource permissions",
 			dbData: seedData + `
 				insert into role
-					(nama,      deskripsi, is_default, created_at,   updated_at) values
-					('admin',   'desc',    false,      '2000-01-01', '2000-01-01'),
-					('pegawai', 'desc',    true,       '2000-01-01', '2000-01-01');
+					(nama,      deskripsi, is_default, is_aktif, created_at,   updated_at) values
+					('admin',   'desc',    false,      false,    '2000-01-01', '2000-01-01'),
+					('pegawai', 'desc',    true,       true,     '2000-01-01', '2000-01-01');
 				insert into role_resource_permission
 					(role_id, resource_permission_id, created_at,   updated_at) values
 					(1,       1,                      '2000-01-01', '2000-01-01'),
@@ -936,6 +953,7 @@ func Test_handler_update(t *testing.T) {
 					"nama":       "admin",
 					"deskripsi":  "desc",
 					"is_default": false,
+					"is_aktif":   false,
 					"created_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
 					"updated_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
 					"deleted_at": nil,
@@ -946,6 +964,7 @@ func Test_handler_update(t *testing.T) {
 					"nama":       "pegawai",
 					"deskripsi":  "new desc",
 					"is_default": true,
+					"is_aktif":   true,
 					"created_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
 					"updated_at": "{updated_at}",
 					"deleted_at": nil,
@@ -1006,8 +1025,8 @@ func Test_handler_update(t *testing.T) {
 			name: "ok: without updating any data",
 			dbData: seedData + `
 				insert into role
-					(nama,      deskripsi, is_default, created_at,   updated_at) values
-					('admin',   'desc',    false,      '2000-01-01', '2000-01-01');
+					(nama,      deskripsi, is_default, is_aktif, created_at,   updated_at) values
+					('admin',   'desc',    false,      true,     '2000-01-01', '2000-01-01');
 				insert into role_resource_permission
 					(role_id, resource_permission_id, created_at,   updated_at) values
 					(1,       1,                      '2000-01-01', '2000-01-01'),
@@ -1020,6 +1039,7 @@ func Test_handler_update(t *testing.T) {
 				"nama": "admin",
 				"deskripsi": "desc",
 				"is_default": false,
+				"is_aktif": true,
 				"resource_permission_ids": [ 1, 2, 3 ]
 			}`,
 			wantResponseCode: http.StatusNoContent,
@@ -1031,6 +1051,7 @@ func Test_handler_update(t *testing.T) {
 					"nama":       "admin",
 					"deskripsi":  "desc",
 					"is_default": false,
+					"is_aktif":   true,
 					"created_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
 					"updated_at": "{updated_at}",
 					"deleted_at": nil,
@@ -1064,7 +1085,7 @@ func Test_handler_update(t *testing.T) {
 			},
 		},
 		{
-			name: "ok: success create resource permission that previously being deleted",
+			name: "ok: success create resource permission that previously being deleted and only update resource permission",
 			dbData: seedData + `
 				insert into role
 					(nama,    created_at,   updated_at) values
@@ -1090,6 +1111,7 @@ func Test_handler_update(t *testing.T) {
 					"nama":       "admin",
 					"deskripsi":  nil,
 					"is_default": false,
+					"is_aktif":   true,
 					"created_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
 					"updated_at": "{updated_at}",
 					"deleted_at": nil,
@@ -1150,8 +1172,8 @@ func Test_handler_update(t *testing.T) {
 			name: "ok: without resource permissions",
 			dbData: seedData + `
 				insert into role
-					(nama,    created_at,   updated_at) values
-					('admin', '2000-01-01', '2000-01-01');
+					(nama,    created_at,   is_aktif, updated_at) values
+					('admin', '2000-01-01', false,    '2000-01-01');
 				insert into role_resource_permission
 					(role_id, resource_permission_id, created_at,   updated_at) values
 					(1,       1,                      '2000-01-01', '2000-01-01'),
@@ -1162,7 +1184,8 @@ func Test_handler_update(t *testing.T) {
 			requestBody: `{
 				"nama": "super_admin",
 				"deskripsi": "new desc",
-				"is_default": false
+				"is_default": false,
+				"is_aktif": false
 			}`,
 			wantResponseCode: http.StatusNoContent,
 			wantResponseBody: `null`,
@@ -1173,6 +1196,7 @@ func Test_handler_update(t *testing.T) {
 					"nama":       "super_admin",
 					"deskripsi":  "new desc",
 					"is_default": false,
+					"is_aktif":   false,
 					"created_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
 					"updated_at": "{updated_at}",
 					"deleted_at": nil,
@@ -1191,6 +1215,170 @@ func Test_handler_update(t *testing.T) {
 					"id":                     int32(2),
 					"role_id":                int16(1),
 					"resource_permission_id": int32(2),
+					"created_at":             time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":             time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":             nil,
+				},
+			},
+		},
+		{
+			name: "ok: only update nama",
+			dbData: seedData + `
+				insert into role
+					(nama,    deskripsi, is_default, created_at,   updated_at) values
+					('admin', 'desc',    true,       '2000-01-01', '2000-01-01');
+				insert into role_resource_permission
+					(role_id, resource_permission_id, created_at,   updated_at) values
+					(1,       1,                      '2000-01-01', '2000-01-01');
+			`,
+			paramID:       "1",
+			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
+			requestBody: `{
+				"nama": "super_admin"
+			}`,
+			wantResponseCode: http.StatusNoContent,
+			wantResponseBody: `null`,
+			wantDBRoles: dbtest.Rows{
+				{
+					"id":         int16(1),
+					"service":    nil,
+					"nama":       "super_admin",
+					"deskripsi":  "desc",
+					"is_default": true,
+					"is_aktif":   true,
+					"created_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at": "{updated_at}",
+					"deleted_at": nil,
+				},
+			},
+			wantDBRoleResourcePermissions: dbtest.Rows{
+				{
+					"id":                     int32(1),
+					"role_id":                int16(1),
+					"resource_permission_id": int32(1),
+					"created_at":             time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":             time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":             nil,
+				},
+			},
+		},
+		{
+			name: "ok: only update deskripsi",
+			dbData: seedData + `
+				insert into role
+					(nama,    deskripsi, is_aktif, created_at,   updated_at) values
+					('admin', 'desc',    false,    '2000-01-01', '2000-01-01');
+				insert into role_resource_permission
+					(role_id, resource_permission_id, created_at,   updated_at) values
+					(1,       1,                      '2000-01-01', '2000-01-01');
+			`,
+			paramID:       "1",
+			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
+			requestBody: `{
+				"deskripsi": "new desc"
+			}`,
+			wantResponseCode: http.StatusNoContent,
+			wantResponseBody: `null`,
+			wantDBRoles: dbtest.Rows{
+				{
+					"id":         int16(1),
+					"service":    nil,
+					"nama":       "admin",
+					"deskripsi":  "new desc",
+					"is_default": false,
+					"is_aktif":   false,
+					"created_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at": "{updated_at}",
+					"deleted_at": nil,
+				},
+			},
+			wantDBRoleResourcePermissions: dbtest.Rows{
+				{
+					"id":                     int32(1),
+					"role_id":                int16(1),
+					"resource_permission_id": int32(1),
+					"created_at":             time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":             time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":             nil,
+				},
+			},
+		},
+		{
+			name: "ok: only update is_default",
+			dbData: seedData + `
+				insert into role
+					(nama,    deskripsi, is_default, created_at,   updated_at) values
+					('admin', '',        true,       '2000-01-01', '2000-01-01');
+				insert into role_resource_permission
+					(role_id, resource_permission_id, created_at,   updated_at) values
+					(1,       1,                      '2000-01-01', '2000-01-01');
+			`,
+			paramID:       "1",
+			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
+			requestBody: `{
+				"is_default": false
+			}`,
+			wantResponseCode: http.StatusNoContent,
+			wantResponseBody: `null`,
+			wantDBRoles: dbtest.Rows{
+				{
+					"id":         int16(1),
+					"service":    nil,
+					"nama":       "admin",
+					"deskripsi":  "",
+					"is_default": false,
+					"is_aktif":   true,
+					"created_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at": "{updated_at}",
+					"deleted_at": nil,
+				},
+			},
+			wantDBRoleResourcePermissions: dbtest.Rows{
+				{
+					"id":                     int32(1),
+					"role_id":                int16(1),
+					"resource_permission_id": int32(1),
+					"created_at":             time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":             time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":             nil,
+				},
+			},
+		},
+		{
+			name: "ok: only update is_aktif",
+			dbData: seedData + `
+				insert into role
+					(nama,    is_default, created_at,   updated_at) values
+					('admin', true,       '2000-01-01', '2000-01-01');
+				insert into role_resource_permission
+					(role_id, resource_permission_id, created_at,   updated_at) values
+					(1,       1,                      '2000-01-01', '2000-01-01');
+			`,
+			paramID:       "1",
+			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
+			requestBody: `{
+				"is_aktif": false
+			}`,
+			wantResponseCode: http.StatusNoContent,
+			wantResponseBody: `null`,
+			wantDBRoles: dbtest.Rows{
+				{
+					"id":         int16(1),
+					"service":    nil,
+					"nama":       "admin",
+					"deskripsi":  nil,
+					"is_default": true,
+					"is_aktif":   false,
+					"created_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at": "{updated_at}",
+					"deleted_at": nil,
+				},
+			},
+			wantDBRoleResourcePermissions: dbtest.Rows{
+				{
+					"id":                     int32(1),
+					"role_id":                int16(1),
+					"resource_permission_id": int32(1),
 					"created_at":             time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
 					"updated_at":             time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
 					"deleted_at":             nil,
@@ -1222,8 +1410,8 @@ func Test_handler_update(t *testing.T) {
 					(8,  2,           3),
 					(9,  1,           3);
 				insert into role
-					(nama,    is_default, created_at,   updated_at) values
-					('admin', true,       '2000-01-01', '2000-01-01');
+					(nama,    is_default, is_aktif, created_at,   updated_at) values
+					('admin', true,       false,    '2000-01-01', '2000-01-01');
 				insert into role_resource_permission
 					(role_id, resource_permission_id, created_at,   updated_at) values
 					(1,       1,                      '2000-01-01', '2000-01-01'),
@@ -1250,6 +1438,7 @@ func Test_handler_update(t *testing.T) {
 					"nama":       "admin",
 					"deskripsi":  nil,
 					"is_default": true,
+					"is_aktif":   false,
 					"created_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
 					"updated_at": "{updated_at}",
 					"deleted_at": nil,
@@ -1349,12 +1538,127 @@ func Test_handler_update(t *testing.T) {
 					"nama":       "admin",
 					"deskripsi":  nil,
 					"is_default": false,
+					"is_aktif":   true,
 					"created_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
 					"updated_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
 					"deleted_at": nil,
 				},
 			},
 			wantDBRoleResourcePermissions: dbtest.Rows{},
+		},
+		{
+			name: "error: have active, deleted and not exists resource permission",
+			dbData: seedData + `
+				insert into role
+					(nama,    created_at,   updated_at) values
+					('admin', '2000-01-01', '2000-01-01');
+			`,
+			paramID:       "1",
+			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
+			requestBody: `{
+				"nama": "Pegawai",
+				"deskripsi": "desc",
+				"is_default": true,
+				"is_aktif": false,
+				"resource_permission_ids": [1,2,3,4,5,6,7,8]
+			}`,
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "data resource permission tidak ditemukan"}`,
+			wantDBRoles: dbtest.Rows{
+				{
+					"id":         int16(1),
+					"service":    nil,
+					"nama":       "admin",
+					"deskripsi":  nil,
+					"is_default": false,
+					"is_aktif":   true,
+					"created_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at": nil,
+				},
+			},
+			wantDBRoleResourcePermissions: dbtest.Rows{},
+		},
+		{
+			name: "error: role is deleted",
+			dbData: seedData + `
+				insert into role
+					(nama,    created_at,   updated_at,   deleted_at) values
+					('admin', '2000-01-01', '2000-01-01', '2000-01-01');
+			`,
+			paramID:       "1",
+			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
+			requestBody: `{
+				"nama": "super_admin",
+				"deskripsi": "desc",
+				"is_default": true,
+				"is_aktif": false,
+				"resource_permission_ids": [ 1, 2 ]
+			}`,
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data tidak ditemukan"}`,
+			wantDBRoles: dbtest.Rows{
+				{
+					"id":         int16(1),
+					"service":    nil,
+					"nama":       "admin",
+					"deskripsi":  nil,
+					"is_default": false,
+					"is_aktif":   true,
+					"created_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+				},
+			},
+			wantDBRoleResourcePermissions: dbtest.Rows{},
+		},
+		{
+			name: "error: don't allow empty json",
+			dbData: seedData + `
+				insert into role
+					(nama,    created_at,   updated_at) values
+					('admin', '2000-01-01', '2000-01-01');
+				insert into role_resource_permission
+					(role_id, resource_permission_id, created_at,   updated_at) values
+					(1,       1,                      '2000-01-01', '2000-01-01'),
+					(1,       2,                      '2000-01-01', '2000-01-01');
+			`,
+			paramID:          "1",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
+			requestBody:      `{}`,
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "request body harus 1 property atau lebih"}`,
+			wantDBRoles: dbtest.Rows{
+				{
+					"id":         int16(1),
+					"service":    nil,
+					"nama":       "admin",
+					"deskripsi":  nil,
+					"is_default": false,
+					"is_aktif":   true,
+					"created_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at": nil,
+				},
+			},
+			wantDBRoleResourcePermissions: dbtest.Rows{
+				{
+					"id":                     int32(1),
+					"role_id":                int16(1),
+					"resource_permission_id": int32(1),
+					"created_at":             time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":             time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":             nil,
+				},
+				{
+					"id":                     int32(2),
+					"role_id":                int16(1),
+					"resource_permission_id": int32(2),
+					"created_at":             time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":             time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":             nil,
+				},
+			},
 		},
 		{
 			name:                          "error: deleted resource",
@@ -1401,115 +1705,6 @@ func Test_handler_update(t *testing.T) {
 			wantDBRoleResourcePermissions: dbtest.Rows{},
 		},
 		{
-			name: "error: active, deleted and not exists resource permission",
-			dbData: seedData + `
-				insert into role
-					(nama,    created_at,   updated_at) values
-					('admin', '2000-01-01', '2000-01-01');
-			`,
-			paramID:       "1",
-			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
-			requestBody: `{
-				"nama": "Pegawai",
-				"deskripsi": "desc",
-				"is_default": true,
-				"resource_permission_ids": [1,2,3,4,5,6,7,8]
-			}`,
-			wantResponseCode: http.StatusBadRequest,
-			wantResponseBody: `{"message": "data resource permission tidak ditemukan"}`,
-			wantDBRoles: dbtest.Rows{
-				{
-					"id":         int16(1),
-					"service":    nil,
-					"nama":       "admin",
-					"deskripsi":  nil,
-					"is_default": false,
-					"created_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at": nil,
-				},
-			},
-			wantDBRoleResourcePermissions: dbtest.Rows{},
-		},
-		{
-			name: "error: role is deleted",
-			dbData: seedData + `
-				insert into role
-					(nama,    created_at,   updated_at,   deleted_at) values
-					('admin', '2000-01-01', '2000-01-01', '2000-01-01');
-			`,
-			paramID:       "1",
-			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
-			requestBody: `{
-				"nama": "super_admin",
-				"deskripsi": "desc",
-				"is_default": true,
-				"resource_permission_ids": [ 1, 2 ]
-			}`,
-			wantResponseCode: http.StatusNotFound,
-			wantResponseBody: `{"message": "data tidak ditemukan"}`,
-			wantDBRoles: dbtest.Rows{
-				{
-					"id":         int16(1),
-					"service":    nil,
-					"nama":       "admin",
-					"deskripsi":  nil,
-					"is_default": false,
-					"created_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-				},
-			},
-			wantDBRoleResourcePermissions: dbtest.Rows{},
-		},
-		{
-			name: "error: don't allow empty json",
-			dbData: seedData + `
-				insert into role
-					(nama,    created_at,   updated_at) values
-					('admin', '2000-01-01', '2000-01-01');
-				insert into role_resource_permission
-					(role_id, resource_permission_id, created_at,   updated_at) values
-					(1,       1,                      '2000-01-01', '2000-01-01'),
-					(1,       2,                      '2000-01-01', '2000-01-01');
-			`,
-			paramID:          "1",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
-			requestBody:      `{}`,
-			wantResponseCode: http.StatusBadRequest,
-			wantResponseBody: `{"message": "request body harus 1 property atau lebih"}`,
-			wantDBRoles: dbtest.Rows{
-				{
-					"id":         int16(1),
-					"service":    nil,
-					"nama":       "admin",
-					"deskripsi":  nil,
-					"is_default": false,
-					"created_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at": nil,
-				},
-			},
-			wantDBRoleResourcePermissions: dbtest.Rows{
-				{
-					"id":                     int32(1),
-					"role_id":                int16(1),
-					"resource_permission_id": int32(1),
-					"created_at":             time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":             time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":             nil,
-				},
-				{
-					"id":                     int32(2),
-					"role_id":                int16(1),
-					"resource_permission_id": int32(2),
-					"created_at":             time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":             time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":             nil,
-				},
-			},
-		},
-		{
 			name:          "error: invalid id, have additional params, and have null values",
 			paramID:       "1a",
 			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
@@ -1518,11 +1713,13 @@ func Test_handler_update(t *testing.T) {
 				"nama": null,
 				"deskripsi": null,
 				"is_default": null,
+				"is_aktif": null,
 				"resource_permission_ids": null
 			}`,
 			wantResponseCode: http.StatusBadRequest,
 			wantResponseBody: `{"message": "parameter \"id\" harus dalam format yang sesuai` +
 				` | parameter \"deskripsi\" tidak boleh null` +
+				` | parameter \"is_aktif\" tidak boleh null` +
 				` | parameter \"is_default\" tidak boleh null` +
 				` | parameter \"nama\" tidak boleh null` +
 				` | parameter \"resource_permission_ids\" tidak boleh null` +

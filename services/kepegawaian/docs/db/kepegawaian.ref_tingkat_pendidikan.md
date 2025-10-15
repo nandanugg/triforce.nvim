@@ -8,7 +8,7 @@ Referensi tingkat pendidikan
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| id | integer |  | false | [kepegawaian.pegawai](kepegawaian.pegawai.md) [kepegawaian.ref_pendidikan](kepegawaian.ref_pendidikan.md) [kepegawaian.riwayat_pendidikan](kepegawaian.riwayat_pendidikan.md) |  | Kode/ID tingkat pendidikan |
+| id | integer | nextval('ref_tingkat_pendidikan_id_seq'::regclass) | false | [kepegawaian.pegawai](kepegawaian.pegawai.md) [kepegawaian.ref_pendidikan](kepegawaian.ref_pendidikan.md) [kepegawaian.riwayat_pendidikan](kepegawaian.riwayat_pendidikan.md) |  | Kode/ID tingkat pendidikan |
 | golongan_id | integer |  | true |  |  | Kaitan ke golongan awal/rujukan (jika relevan) |
 | nama | varchar(200) |  | true |  |  | Nama tingkat pendidikan (mis. S1, S2) |
 | golongan_awal_id | integer |  | true |  |  | id golongan awal |

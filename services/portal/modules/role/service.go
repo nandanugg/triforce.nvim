@@ -39,6 +39,7 @@ func (s *service) list(ctx context.Context, limit, offset uint) ([]role, uint, e
 			Nama:       row.Nama,
 			Deskripsi:  row.Deskripsi.String,
 			IsDefault:  row.IsDefault,
+			IsAktif:    row.IsAktif,
 			JumlahUser: row.JumlahUser,
 		}
 	}), uint(count), nil
@@ -72,6 +73,7 @@ func (s *service) get(ctx context.Context, id int16) (*role, error) {
 		Nama:                data.Nama,
 		Deskripsi:           data.Deskripsi.String,
 		IsDefault:           data.IsDefault,
+		IsAktif:             data.IsAktif,
 		JumlahUser:          data.JumlahUser,
 		ResourcePermissions: &resourcePermissions,
 	}, nil
@@ -100,6 +102,7 @@ type updateOptions struct {
 	nama                  *string
 	deskripsi             *string
 	isDefault             *bool
+	isAktif               *bool
 	resourcePermissionIDs *[]int32
 }
 

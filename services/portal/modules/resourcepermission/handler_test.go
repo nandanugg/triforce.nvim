@@ -49,13 +49,14 @@ func Test_handler_listMyResourcePermissions(t *testing.T) {
 			(11, 2,           4,             null),
 			(12, 3,           4,             null);
 		insert into role
-			(id, nama,       is_default, deleted_at) values
-			(1,  'admin',    false,      null),
-			(2,  'pegawai',  false,      null),
-			(3,  'guest',    false,      null),
-			(4,  'deleted',  false,      '2000-01-01'),
-			(5,  'default1', true,       null),
-			(6,  'default2', true,       '2000-01-01');
+			(id, nama,       is_default, is_aktif, deleted_at) values
+			(1,  'admin',    false,      true,     null),
+			(2,  'pegawai',  false,      true,     null),
+			(3,  'guest',    false,      true,     null),
+			(4,  'deleted',  false,      true,     '2000-01-01'),
+			(5,  'default1', true,       true,     null),
+			(6,  'default2', true,       true,     '2000-01-01'),
+			(7,  'inactive', true,       false,    null);
 		insert into role_resource_permission
 			(role_id, resource_permission_id, deleted_at) values
 			(1,       1,                      null),
@@ -71,7 +72,8 @@ func Test_handler_listMyResourcePermissions(t *testing.T) {
 			(3,       8,                      null),
 			(5,       10,                     null),
 			(5,       11,                     '2000-01-01'),
-			(6,       12,                     null);
+			(6,       12,                     null),
+			(7,       12,                     null);
 		insert into user_role
 			(nip,  role_id, deleted_at) values
 			('1c', 1,       null),
@@ -81,7 +83,8 @@ func Test_handler_listMyResourcePermissions(t *testing.T) {
 			('1d', 2,       '2000-01-01'),
 			('1e', 1,       null),
 			('1e', 5,       null),
-			('1e', 6,       null);
+			('1e', 6,       null),
+			('1c', 7,       null);
 	`
 	tests := []struct {
 		name             string

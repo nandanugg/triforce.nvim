@@ -52,6 +52,7 @@ erDiagram
   timestamp_with_time_zone deleted_at
   varchar_255_ deskripsi
   boolean is_default
+  boolean is_aktif
 }
 ```
 

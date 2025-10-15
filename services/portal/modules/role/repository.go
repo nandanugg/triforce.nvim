@@ -78,6 +78,7 @@ func (r *repository) update(ctx context.Context, id int16, opts updateOptions) e
 		Nama:      pgtype.Text{String: typeutil.FromPtr(opts.nama), Valid: opts.nama != nil},
 		Deskripsi: pgtype.Text{String: typeutil.FromPtr(opts.deskripsi), Valid: opts.deskripsi != nil},
 		IsDefault: pgtype.Bool{Bool: typeutil.FromPtr(opts.isDefault), Valid: opts.isDefault != nil},
+		IsAktif:   pgtype.Bool{Bool: typeutil.FromPtr(opts.isAktif), Valid: opts.isAktif != nil},
 	}); err != nil {
 		_ = tx.Rollback(ctx)
 		return fmt.Errorf("update role: %w", err)
