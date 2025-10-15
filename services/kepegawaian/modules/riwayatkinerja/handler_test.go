@@ -13,7 +13,6 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api/apitest"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db/dbtest"
-	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/config"
 	dbmigrations "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/migrations"
 	sqlc "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/docs"
@@ -43,7 +42,7 @@ func Test_handler_list(t *testing.T) {
 		{
 			name:             "ok: tanpa parameter apapun",
 			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1c")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1c")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -76,7 +75,7 @@ func Test_handler_list(t *testing.T) {
 			name:             "ok: dengan parameter pagination",
 			dbData:           dbData,
 			requestQuery:     url.Values{"limit": []string{"1"}, "offset": []string{"1"}},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1c")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1c")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -94,7 +93,7 @@ func Test_handler_list(t *testing.T) {
 		{
 			name:             "ok: tidak ada data milik user",
 			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{"data": [], "meta": {"limit": 10, "offset": 0, "total": 0}}`,
 		},
@@ -122,7 +121,9 @@ func Test_handler_list(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
-			RegisterRoutes(e, sqlc.New(db), api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+
+			authSvc := apitest.NewAuthService(api.Kode_Pegawai_Self)
+			RegisterRoutes(e, sqlc.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -159,7 +160,7 @@ func Test_handler_listAdmin(t *testing.T) {
 			name:             "ok: admin dapat melihat riwayat kinerja pegawai 1c",
 			dbData:           dbData,
 			nip:              "1c",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -192,7 +193,7 @@ func Test_handler_listAdmin(t *testing.T) {
 			name:             "ok: admin dapat melihat riwayat kinerja pegawai 1d",
 			dbData:           dbData,
 			nip:              "1d",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -211,7 +212,7 @@ func Test_handler_listAdmin(t *testing.T) {
 			name:             "ok: admin dapat melihat riwayat kinerja pegawai 2c",
 			dbData:           dbData,
 			nip:              "2c",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -231,7 +232,7 @@ func Test_handler_listAdmin(t *testing.T) {
 			dbData:           dbData,
 			nip:              "1c",
 			requestQuery:     url.Values{"limit": []string{"1"}, "offset": []string{"1"}},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -250,17 +251,9 @@ func Test_handler_listAdmin(t *testing.T) {
 			name:             "ok: admin melihat pegawai yang tidak memiliki riwayat kinerja",
 			dbData:           dbData,
 			nip:              "999",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{"data": [], "meta": {"limit": 10, "offset": 0, "total": 0}}`,
-		},
-		{
-			name:             "error: user bukan admin",
-			dbData:           dbData,
-			nip:              "1c",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "987654321")}},
-			wantResponseCode: http.StatusForbidden,
-			wantResponseBody: `{"message": "akses ditolak"}`,
 		},
 		{
 			name:             "error: auth header tidak valid",
@@ -287,7 +280,9 @@ func Test_handler_listAdmin(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
-			RegisterRoutes(e, sqlc.New(db), api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+
+			authSvc := apitest.NewAuthService(api.Kode_Pegawai_Read)
+			RegisterRoutes(e, sqlc.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)

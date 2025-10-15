@@ -13,7 +13,6 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api/apitest"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db/dbtest"
-	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/config"
 	dbmigrations "gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/db/migrations"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/docs"
 )
@@ -40,7 +39,7 @@ func Test_handler_list(t *testing.T) {
 		{
 			name:             "ok: tanpa parameter apapun",
 			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1", "admin")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -76,7 +75,7 @@ func Test_handler_list(t *testing.T) {
 			name:             "ok: dengan parameter pagination",
 			dbData:           dbData,
 			requestQuery:     url.Values{"limit": []string{"1"}, "offset": []string{"1"}},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1", "admin")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -96,7 +95,7 @@ func Test_handler_list(t *testing.T) {
 			name:             "ok: cari judul",
 			dbData:           dbData,
 			requestQuery:     url.Values{"cari": []string{"12a"}},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1", "admin")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -116,7 +115,7 @@ func Test_handler_list(t *testing.T) {
 			name:             "ok: cari deskripsi",
 			dbData:           dbData,
 			requestQuery:     url.Values{"cari": []string{"11b"}},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1", "admin")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -136,16 +135,9 @@ func Test_handler_list(t *testing.T) {
 			name:             "ok: tidak ada data ditemukan",
 			dbData:           dbData,
 			requestQuery:     url.Values{"cari": []string{"22"}},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1", "admin")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{"data": [], "meta": {"limit": 10, "offset": 0, "total": 0}}`,
-		},
-		{
-			name:             "error: user bukan admin",
-			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1", "bukan_admin")}},
-			wantResponseCode: http.StatusForbidden,
-			wantResponseBody: `{"message": "akses ditolak"}`,
 		},
 	}
 
@@ -164,7 +156,9 @@ func Test_handler_list(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
-			RegisterRoutes(e, db, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+
+			authSvc := apitest.NewAuthService(api.Kode_Informasi_Read)
+			RegisterRoutes(e, db, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)

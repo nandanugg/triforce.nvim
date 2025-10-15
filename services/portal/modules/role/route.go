@@ -14,8 +14,9 @@ func RegisterRoutes(e *echo.Echo, db *pgxpool.Pool, repo sqlcRepository, mwAuth 
 	s := newService(r)
 	h := newHandler(s)
 
-	e.Add(http.MethodGet, "/v1/roles", h.list, mwAuth(api.RoleAdmin))
-	e.Add(http.MethodGet, "/v1/roles/:id", h.get, mwAuth(api.RoleAdmin))
-	e.Add(http.MethodPost, "/v1/roles", h.create, mwAuth(api.RoleAdmin))
-	e.Add(http.MethodPatch, "/v1/roles/:id", h.update, mwAuth(api.RoleAdmin))
+	e.Add(http.MethodGet, "/v1/roles", h.list, mwAuth(api.Kode_ManajemenAkses_Read))
+	e.Add(http.MethodGet, "/v1/roles/:id", h.get, mwAuth(api.Kode_ManajemenAkses_Read))
+
+	e.Add(http.MethodPost, "/v1/roles", h.create, mwAuth(api.Kode_ManajemenAkses_Write))
+	e.Add(http.MethodPatch, "/v1/roles/:id", h.update, mwAuth(api.Kode_ManajemenAkses_Write))
 }

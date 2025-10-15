@@ -16,7 +16,6 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api/apitest"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db/dbtest"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/typeutil"
-	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/config"
 	dbmigrations "gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/db/migrations"
 	sqlc "gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/db/repository"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/docs"
@@ -65,7 +64,7 @@ func Test_handler_list(t *testing.T) {
 		{
 			name:             "ok",
 			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a", api.RoleAdmin)}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -101,7 +100,7 @@ func Test_handler_list(t *testing.T) {
 		{
 			name:          "ok: with limit offset",
 			dbData:        dbData,
-			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1c", api.RoleAdmin)}},
+			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1c")}},
 			requestQuery: url.Values{
 				"limit":  []string{"2"},
 				"offset": []string{"1"},
@@ -132,13 +131,6 @@ func Test_handler_list(t *testing.T) {
 			}`,
 		},
 		{
-			name:             "error: user bukan admin",
-			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1c")}},
-			wantResponseCode: http.StatusForbidden,
-			wantResponseBody: `{"message": "akses ditolak"}`,
-		},
-		{
 			name:             "error: invalid token",
 			dbData:           dbData,
 			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
@@ -161,7 +153,9 @@ func Test_handler_list(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
-			RegisterRoutes(e, db, sqlc.New(db), api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+
+			authSvc := apitest.NewAuthService(api.Kode_ManajemenAkses_Read)
+			RegisterRoutes(e, db, sqlc.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -253,7 +247,7 @@ func Test_handler_get(t *testing.T) {
 			name:             "ok: with role resource permissions",
 			dbData:           dbData,
 			paramID:          "1",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a", api.RoleAdmin)}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": {
@@ -301,7 +295,7 @@ func Test_handler_get(t *testing.T) {
 			name:             "ok: default role and without deleted role resource permissions",
 			dbData:           dbData,
 			paramID:          "2",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a", api.RoleAdmin)}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": {
@@ -331,7 +325,7 @@ func Test_handler_get(t *testing.T) {
 			name:             "ok: without role resource permissions",
 			dbData:           dbData,
 			paramID:          "4",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a", api.RoleAdmin)}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": {
@@ -348,7 +342,7 @@ func Test_handler_get(t *testing.T) {
 			name:             "error: roles deleted",
 			dbData:           dbData,
 			paramID:          "3",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a", api.RoleAdmin)}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			wantResponseCode: http.StatusNotFound,
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
 		},
@@ -356,17 +350,9 @@ func Test_handler_get(t *testing.T) {
 			name:             "error: invalid param id",
 			dbData:           dbData,
 			paramID:          "1a",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a", api.RoleAdmin)}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			wantResponseCode: http.StatusBadRequest,
 			wantResponseBody: `{"message": "parameter \"id\" harus dalam format yang sesuai"}`,
-		},
-		{
-			name:             "error: user bukan admin",
-			dbData:           dbData,
-			paramID:          "1",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1c")}},
-			wantResponseCode: http.StatusForbidden,
-			wantResponseBody: `{"message": "akses ditolak"}`,
 		},
 		{
 			name:             "error: invalid token",
@@ -391,7 +377,9 @@ func Test_handler_get(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
-			RegisterRoutes(e, db, sqlc.New(db), api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+
+			authSvc := apitest.NewAuthService(api.Kode_ManajemenAkses_Read)
+			RegisterRoutes(e, db, sqlc.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -438,7 +426,7 @@ func Test_handler_create(t *testing.T) {
 		{
 			name:          "ok: with resource permissions",
 			dbData:        seedData,
-			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a", api.RoleAdmin)}},
+			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			requestBody: `{
 				"nama": "Super Admin",
 				"deskripsi": "Deskripsi 1",
@@ -509,7 +497,7 @@ func Test_handler_create(t *testing.T) {
 					(1,       1,                      '2000-01-01', '2000-01-01'),
 					(1,       2,                      '2000-01-01', '2000-01-01');
 			`,
-			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a", api.RoleAdmin)}},
+			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			requestBody: `{
 				"nama": "Pegawai",
 				"deskripsi": "deskripsi",
@@ -574,7 +562,7 @@ func Test_handler_create(t *testing.T) {
 		{
 			name:          "ok: required params only and without resource permissions",
 			dbData:        seedData,
-			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a", api.RoleAdmin)}},
+			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			requestBody: `{
 				"nama": "Admin Kepegawaian"
 			}`,
@@ -601,7 +589,7 @@ func Test_handler_create(t *testing.T) {
 		{
 			name:          "error: deleted resource",
 			dbData:        seedData,
-			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a", api.RoleAdmin)}},
+			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			requestBody: `{
 				"nama": "Admin",
 				"resource_permission_ids": [5]
@@ -614,7 +602,7 @@ func Test_handler_create(t *testing.T) {
 		{
 			name:          "error: deleted permission",
 			dbData:        seedData,
-			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a", api.RoleAdmin)}},
+			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			requestBody: `{
 				"nama": "Admin",
 				"resource_permission_ids": [6]
@@ -627,7 +615,7 @@ func Test_handler_create(t *testing.T) {
 		{
 			name:          "error: deleted resource permission",
 			dbData:        seedData,
-			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a", api.RoleAdmin)}},
+			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			requestBody: `{
 				"nama": "Admin",
 				"resource_permission_ids": [7]
@@ -640,7 +628,7 @@ func Test_handler_create(t *testing.T) {
 		{
 			name:          "error: resource permission not exists",
 			dbData:        seedData,
-			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a", api.RoleAdmin)}},
+			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			requestBody: `{
 				"nama": "Admin",
 				"resource_permission_ids": [8]
@@ -653,7 +641,7 @@ func Test_handler_create(t *testing.T) {
 		{
 			name:          "error: active, deleted and not exists resource permission",
 			dbData:        seedData,
-			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a", api.RoleAdmin)}},
+			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			requestBody: `{
 				"nama": "Admin",
 				"deskripsi": "desc",
@@ -667,7 +655,7 @@ func Test_handler_create(t *testing.T) {
 		},
 		{
 			name:             "error: have additional and missing required params, duplicate resource permission ids",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a", api.RoleAdmin)}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			requestBody:      `{"id": 1, "resource_permission_ids": [ 1,2,3,2 ]}`,
 			wantResponseCode: http.StatusBadRequest,
 			wantResponseBody: `{"message": "parameter \"id\" tidak didukung` +
@@ -678,7 +666,7 @@ func Test_handler_create(t *testing.T) {
 		},
 		{
 			name:                          "error: nama is empty string",
-			requestHeader:                 http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a", api.RoleAdmin)}},
+			requestHeader:                 http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			requestBody:                   `{"nama": ""}`,
 			wantResponseCode:              http.StatusBadRequest,
 			wantResponseBody:              `{"message": "parameter \"nama\" harus 1 karakter atau lebih"}`,
@@ -687,7 +675,7 @@ func Test_handler_create(t *testing.T) {
 		},
 		{
 			name:          "error: nama & deskripsi exceed character length",
-			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a", api.RoleAdmin)}},
+			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			requestBody: `{
 				"nama": "` + strings.Repeat(".", 101) + `",
 				"deskripsi": "` + strings.Repeat(".", 256) + `"
@@ -699,17 +687,9 @@ func Test_handler_create(t *testing.T) {
 		},
 		{
 			name:                          "error: body is empty",
-			requestHeader:                 http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a", api.RoleAdmin)}},
+			requestHeader:                 http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			wantResponseCode:              http.StatusBadRequest,
 			wantResponseBody:              `{"message": "request body harus diisi"}`,
-			wantDBRoles:                   dbtest.Rows{},
-			wantDBRoleResourcePermissions: dbtest.Rows{},
-		},
-		{
-			name:                          "error: user bukan admin",
-			requestHeader:                 http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1c")}},
-			wantResponseCode:              http.StatusForbidden,
-			wantResponseBody:              `{"message": "akses ditolak"}`,
 			wantDBRoles:                   dbtest.Rows{},
 			wantDBRoleResourcePermissions: dbtest.Rows{},
 		},
@@ -737,7 +717,9 @@ func Test_handler_create(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
-			RegisterRoutes(e, db, sqlc.New(db), api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+
+			authSvc := apitest.NewAuthService(api.Kode_ManajemenAkses_Write)
+			RegisterRoutes(e, db, sqlc.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -823,7 +805,7 @@ func Test_handler_update(t *testing.T) {
 					('admin', '2000-01-01', '2000-01-01');
 			`,
 			paramID:       "1",
-			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a", api.RoleAdmin)}},
+			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			requestBody: `{
 				"nama": "super_admin",
 				"deskripsi": "new deskripsi",
@@ -876,7 +858,7 @@ func Test_handler_update(t *testing.T) {
 					(1,       2,                      '2000-01-01', '2000-01-01', '2000-01-01');
 			`,
 			paramID:       "1",
-			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a", api.RoleAdmin)}},
+			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			requestBody: `{
 				"nama": "new_admin",
 				"deskripsi": "new desc",
@@ -940,7 +922,7 @@ func Test_handler_update(t *testing.T) {
 					(2,       4,                      '2000-01-01', '2000-01-01');
 			`,
 			paramID:       "2",
-			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a", api.RoleAdmin)}},
+			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			requestBody: `{
 				"deskripsi": "new desc",
 				"resource_permission_ids": [ 1, 3 ]
@@ -1033,7 +1015,7 @@ func Test_handler_update(t *testing.T) {
 					(1,       3,                      '2000-01-01', '2000-01-01');
 			`,
 			paramID:       "1",
-			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a", api.RoleAdmin)}},
+			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			requestBody: `{
 				"nama": "admin",
 				"deskripsi": "desc",
@@ -1095,7 +1077,7 @@ func Test_handler_update(t *testing.T) {
 					(1,       4,                      '2000-01-01', '2000-01-01', '2000-01-01');
 			`,
 			paramID:       "1",
-			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a", api.RoleAdmin)}},
+			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			requestBody: `{
 				"resource_permission_ids": [ 1, 4 ]
 			}`,
@@ -1176,7 +1158,7 @@ func Test_handler_update(t *testing.T) {
 					(1,       2,                      '2000-01-01', '2000-01-01');
 			`,
 			paramID:       "1",
-			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a", api.RoleAdmin)}},
+			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			requestBody: `{
 				"nama": "super_admin",
 				"deskripsi": "new desc",
@@ -1254,7 +1236,7 @@ func Test_handler_update(t *testing.T) {
 					(1,       8,                      '2000-01-01', '2000-01-01');
 			`,
 			paramID:       "1",
-			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a", api.RoleAdmin)}},
+			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			requestBody: `{
 				"is_default": true,
 				"resource_permission_ids": [ 1, 2, 3, 4, 5, 6, 7, 8, 9 ]
@@ -1356,7 +1338,7 @@ func Test_handler_update(t *testing.T) {
 					('admin', '2000-01-01', '2000-01-01');
 			`,
 			paramID:          "0",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a", api.RoleAdmin)}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			requestBody:      `{"nama": "super_admin"}`,
 			wantResponseCode: http.StatusNotFound,
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
@@ -1378,7 +1360,7 @@ func Test_handler_update(t *testing.T) {
 			name:                          "error: deleted resource",
 			dbData:                        seedData,
 			paramID:                       "1",
-			requestHeader:                 http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a", api.RoleAdmin)}},
+			requestHeader:                 http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			requestBody:                   `{"resource_permission_ids": [5]}`,
 			wantResponseCode:              http.StatusBadRequest,
 			wantResponseBody:              `{"message": "data resource permission tidak ditemukan"}`,
@@ -1389,7 +1371,7 @@ func Test_handler_update(t *testing.T) {
 			name:                          "error: deleted permission",
 			dbData:                        seedData,
 			paramID:                       "1",
-			requestHeader:                 http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a", api.RoleAdmin)}},
+			requestHeader:                 http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			requestBody:                   `{"resource_permission_ids": [6]}`,
 			wantResponseCode:              http.StatusBadRequest,
 			wantResponseBody:              `{"message": "data resource permission tidak ditemukan"}`,
@@ -1400,7 +1382,7 @@ func Test_handler_update(t *testing.T) {
 			name:                          "error: deleted resource permission",
 			dbData:                        seedData,
 			paramID:                       "1",
-			requestHeader:                 http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a", api.RoleAdmin)}},
+			requestHeader:                 http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			requestBody:                   `{"resource_permission_ids": [7]}`,
 			wantResponseCode:              http.StatusBadRequest,
 			wantResponseBody:              `{"message": "data resource permission tidak ditemukan"}`,
@@ -1411,7 +1393,7 @@ func Test_handler_update(t *testing.T) {
 			name:                          "error: resource permission not exists",
 			dbData:                        seedData,
 			paramID:                       "1",
-			requestHeader:                 http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a", api.RoleAdmin)}},
+			requestHeader:                 http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			requestBody:                   `{"resource_permission_ids": [8]}`,
 			wantResponseCode:              http.StatusBadRequest,
 			wantResponseBody:              `{"message": "data resource permission tidak ditemukan"}`,
@@ -1426,7 +1408,7 @@ func Test_handler_update(t *testing.T) {
 					('admin', '2000-01-01', '2000-01-01');
 			`,
 			paramID:       "1",
-			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a", api.RoleAdmin)}},
+			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			requestBody: `{
 				"nama": "Pegawai",
 				"deskripsi": "desc",
@@ -1457,7 +1439,7 @@ func Test_handler_update(t *testing.T) {
 					('admin', '2000-01-01', '2000-01-01', '2000-01-01');
 			`,
 			paramID:       "1",
-			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a", api.RoleAdmin)}},
+			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			requestBody: `{
 				"nama": "super_admin",
 				"deskripsi": "desc",
@@ -1492,7 +1474,7 @@ func Test_handler_update(t *testing.T) {
 					(1,       2,                      '2000-01-01', '2000-01-01');
 			`,
 			paramID:          "1",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a", api.RoleAdmin)}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			requestBody:      `{}`,
 			wantResponseCode: http.StatusBadRequest,
 			wantResponseBody: `{"message": "request body harus 1 property atau lebih"}`,
@@ -1530,7 +1512,7 @@ func Test_handler_update(t *testing.T) {
 		{
 			name:          "error: invalid id, have additional params, and have null values",
 			paramID:       "1a",
-			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a", api.RoleAdmin)}},
+			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			requestBody: `{
 				"role_id": 1,
 				"nama": null,
@@ -1551,7 +1533,7 @@ func Test_handler_update(t *testing.T) {
 		{
 			name:                          "error: nama is empty string and duplicate resource permission ids",
 			paramID:                       "1",
-			requestHeader:                 http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a", api.RoleAdmin)}},
+			requestHeader:                 http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			requestBody:                   `{"nama": "", "resource_permission_ids": [ 1,1 ]}`,
 			wantResponseCode:              http.StatusBadRequest,
 			wantResponseBody:              `{"message": "parameter \"nama\" harus 1 karakter atau lebih | parameter \"resource_permission_ids\" item tidak boleh duplikat"}`,
@@ -1561,7 +1543,7 @@ func Test_handler_update(t *testing.T) {
 		{
 			name:          "error: nama & deskripsi exceed character length",
 			paramID:       "1",
-			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a", api.RoleAdmin)}},
+			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			requestBody: `{
 				"nama": "` + strings.Repeat(".", 101) + `",
 				"deskripsi": "` + strings.Repeat(".", 256) + `"
@@ -1574,18 +1556,9 @@ func Test_handler_update(t *testing.T) {
 		{
 			name:                          "error: body is empty",
 			paramID:                       "1",
-			requestHeader:                 http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a", api.RoleAdmin)}},
+			requestHeader:                 http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			wantResponseCode:              http.StatusBadRequest,
 			wantResponseBody:              `{"message": "request body harus diisi"}`,
-			wantDBRoles:                   dbtest.Rows{},
-			wantDBRoleResourcePermissions: dbtest.Rows{},
-		},
-		{
-			name:                          "error: user bukan admin",
-			paramID:                       "1",
-			requestHeader:                 http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1c")}},
-			wantResponseCode:              http.StatusForbidden,
-			wantResponseBody:              `{"message": "akses ditolak"}`,
 			wantDBRoles:                   dbtest.Rows{},
 			wantDBRoleResourcePermissions: dbtest.Rows{},
 		},
@@ -1614,7 +1587,9 @@ func Test_handler_update(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
-			RegisterRoutes(e, db, sqlc.New(db), api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+
+			authSvc := apitest.NewAuthService(api.Kode_ManajemenAkses_Write)
+			RegisterRoutes(e, db, sqlc.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)

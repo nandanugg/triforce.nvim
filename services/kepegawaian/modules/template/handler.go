@@ -84,12 +84,12 @@ func (h *handler) getBerkas(c echo.Context) error {
 	ctx := c.Request().Context()
 	mimeType, blob, err := h.service.getBerkas(ctx, req.ID)
 	if err != nil {
-		slog.ErrorContext(ctx, "Error getting berkas master template.", "error", err)
+		slog.ErrorContext(ctx, "Error getting berkas template.", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
 	if len(blob) == 0 {
-		return echo.NewHTTPError(http.StatusNotFound, "berkas master template tidak ditemukan")
+		return echo.NewHTTPError(http.StatusNotFound, "berkas template tidak ditemukan")
 	}
 
 	c.Response().Header().Set("Content-Disposition", "inline")

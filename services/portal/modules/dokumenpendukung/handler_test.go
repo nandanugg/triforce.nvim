@@ -13,7 +13,6 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api/apitest"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db/dbtest"
-	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/config"
 	dbmigrations "gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/db/migrations"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/docs"
 )
@@ -39,7 +38,7 @@ func Test_handler_list(t *testing.T) {
 		{
 			name:             "ok",
 			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1", "admin")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -60,13 +59,6 @@ func Test_handler_list(t *testing.T) {
 				]
 			}`,
 		},
-		{
-			name:             "error: user bukan admin",
-			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1", "bukan_admin")}},
-			wantResponseCode: http.StatusForbidden,
-			wantResponseBody: `{"message": "akses ditolak"}`,
-		},
 	}
 
 	for _, tt := range tests {
@@ -84,7 +76,9 @@ func Test_handler_list(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
-			RegisterRoutes(e, db, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+
+			authSvc := apitest.NewAuthService(api.Kode_Informasi_Read)
+			RegisterRoutes(e, db, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)

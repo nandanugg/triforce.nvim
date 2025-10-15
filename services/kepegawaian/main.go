@@ -62,8 +62,7 @@ func main() {
 	exitIfError("Error connecting to database with pgx.", err)
 
 	dbRepository := repository.New(db)
-
-	mwAuth := api.NewAuthMiddleware(config.Service, keyfunc)
+	mwAuth := api.NewAuthMiddleware(api.NewAuthService(db), keyfunc)
 
 	agama.RegisterRoutes(e, dbRepository, mwAuth)
 	datapribadi.RegisterRoutes(e, dbRepository, mwAuth)

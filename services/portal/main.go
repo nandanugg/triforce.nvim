@@ -36,7 +36,7 @@ func main() {
 	exitIfError("Error loading rsa private key.", err)
 
 	dbRepository := repository.New(db)
-	mwAuth := api.NewAuthMiddleware(config.Service, keyfunc)
+	mwAuth := api.NewAuthMiddleware(api.NewAuthService(db), keyfunc)
 
 	auth.RegisterRoutes(e, dbRepository, c.Keycloak, client, privateKey, keyfunc.Keyfunc)
 	dokumenpendukung.RegisterRoutes(e, db, mwAuth)

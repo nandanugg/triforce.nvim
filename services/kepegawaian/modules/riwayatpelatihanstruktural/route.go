@@ -13,8 +13,9 @@ func RegisterRoutes(e *echo.Echo, repo sqlc.Querier, mwAuth api.AuthMiddlewareFu
 	s := newService(repo)
 	h := newHandler(s)
 
-	e.Add(http.MethodGet, "/v1/riwayat-pelatihan-struktural", h.list, mwAuth())
-	e.Add(http.MethodGet, "/v1/riwayat-pelatihan-struktural/:id/berkas", h.getBerkas, mwAuth())
-	e.Add(http.MethodGet, "/v1/admin/pegawai/:nip/riwayat-pelatihan-struktural", h.listAdmin, mwAuth(api.RoleAdmin))
-	e.Add(http.MethodGet, "/v1/admin/pegawai/:nip/riwayat-pelatihan-struktural/:id/berkas", h.getBerkasAdmin, mwAuth(api.RoleAdmin))
+	e.Add(http.MethodGet, "/v1/riwayat-pelatihan-struktural", h.list, mwAuth(api.Kode_Pegawai_Self))
+	e.Add(http.MethodGet, "/v1/riwayat-pelatihan-struktural/:id/berkas", h.getBerkas, mwAuth(api.Kode_Pegawai_Self))
+
+	e.Add(http.MethodGet, "/v1/admin/pegawai/:nip/riwayat-pelatihan-struktural", h.listAdmin, mwAuth(api.Kode_Pegawai_Read))
+	e.Add(http.MethodGet, "/v1/admin/pegawai/:nip/riwayat-pelatihan-struktural/:id/berkas", h.getBerkasAdmin, mwAuth(api.Kode_Pegawai_Read))
 }

@@ -26,35 +26,21 @@ func init() {
 	}
 }
 
-// @yap TODO delete after migrate to use simple header
-func GenerateAuthHeader(service, nip string, role ...string) string {
-	claims := jwt.MapClaims{"nip": nip, "aud": "testing"}
-	if len(role) > 0 {
-		claims["roles"] = map[string]string{
-			service: role[0],
-		}
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
-	tokenString, _ := token.SignedString(JwtPrivateKey)
-	return "Bearer " + tokenString
-}
-
-func GenerateSimpleAuthHeader(nip string) string {
+func GenerateAuthHeader(nip string) string {
 	claims := jwt.MapClaims{"nip": nip, "aud": "testing"}
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 	tokenString, _ := token.SignedString(JwtPrivateKey)
 	return "Bearer " + tokenString
 }
 
-type AuthResourcePermissionService struct {
+type AuthService struct {
 	kode string
 }
 
-func NewAuthResourcePermissionService(kode string) *AuthResourcePermissionService {
-	return &AuthResourcePermissionService{kode}
+func NewAuthService(kode string) *AuthService {
+	return &AuthService{kode}
 }
 
-func (s *AuthResourcePermissionService) IsUserHasAccess(_ context.Context, _, kode string) (bool, error) {
+func (s *AuthService) IsUserHasAccess(_ context.Context, _, kode string) (bool, error) {
 	return s.kode == kode, nil
 }

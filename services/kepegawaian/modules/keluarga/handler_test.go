@@ -12,7 +12,6 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api/apitest"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db/dbtest"
-	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/config"
 	dbmigrations "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/migrations"
 	repo "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/docs"
@@ -57,7 +56,7 @@ func Test_handler_list(t *testing.T) {
 		{
 			name:             "ok: only nip 1c data returned",
 			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1c")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1c")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `
 			{
@@ -117,7 +116,7 @@ func Test_handler_list(t *testing.T) {
 		{
 			name:             "ok: nip 200 gets empty data",
 			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "200")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("200")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{"data": {"orang_tua":[],"pasangan":[],"anak":[]}}`,
 		},
@@ -146,7 +145,9 @@ func Test_handler_list(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
-			RegisterRoutes(e, dbRepo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+
+			authSvc := apitest.NewAuthService(api.Kode_Pegawai_Self)
+			RegisterRoutes(e, dbRepo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -202,7 +203,7 @@ func Test_handler_listAdmin(t *testing.T) {
 			name:             "ok: only nip 1c data returned",
 			dbData:           dbData,
 			nip:              "1c",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `
 			{
@@ -274,7 +275,7 @@ func Test_handler_listAdmin(t *testing.T) {
 			name:             "ok: nip 200 gets empty data",
 			dbData:           dbData,
 			nip:              "200",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{"data": {"orang_tua":[],"pasangan":[],"anak":[]}}`,
 		},
@@ -282,17 +283,9 @@ func Test_handler_listAdmin(t *testing.T) {
 			name:             "ok: nip 1d gets empty data",
 			dbData:           dbData,
 			nip:              "1d",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{"data": {"orang_tua":[],"pasangan":[],"anak":[]}}`,
-		},
-		{
-			name:             "error: user is not an admin",
-			dbData:           dbData,
-			nip:              "123456789",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "987654321")}},
-			wantResponseCode: http.StatusForbidden,
-			wantResponseBody: `{"message": "akses ditolak"}`,
 		},
 		{
 			name:             "error: auth header tidak valid",
@@ -319,7 +312,9 @@ func Test_handler_listAdmin(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
-			RegisterRoutes(e, dbRepo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+
+			authSvc := apitest.NewAuthService(api.Kode_Pegawai_Read)
+			RegisterRoutes(e, dbRepo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)

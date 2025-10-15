@@ -6,9 +6,8 @@ info:
 servers:
   - url: http://localhost:8000
 tags:
-  - name: Admin Ref Template
-  - name: Admin Ref Agama
   - name: Admin Pegawai Aktif
+  - name: Admin Ref Agama
   - name: Admin Ref Golongan
   - name: Admin Ref Jabatan
   - name: Admin Ref Jenis Hukuman
@@ -17,25 +16,28 @@ tags:
   - name: Admin Ref Jenis Penghargaan
   - name: Admin Ref Jenis Satker
   - name: Admin Ref Pendidikan
+  - name: Admin Ref Template
   - name: Admin Ref Tingkat Pendidikan
   - name: Admin Surat Keputusan Pegawai
   - name: Admin Unit Kerja
   - name: Data Pribadi
-  - name: Agama
-  - name: Golongan
-  - name: Jabatan
-  - name: Jenis Diklat
-  - name: Jenis Diklat Fungsional
-  - name: Jenis Diklat Struktural
-  - name: Jenis Hukuman
-  - name: Jenis Jabatan
-  - name: Jenis Kenaikan Pangkat
-  - name: Jenis Pegawai
-  - name: Jenis Penghargaan
-  - name: Jenis Satker
   - name: Keluarga
-  - name: Ref Template
   - name: Pegawai
+  - name: Ref Agama
+  - name: Ref Golongan
+  - name: Ref Jabatan
+  - name: Ref Jenis Diklat
+  - name: Ref Jenis Diklat Fungsional
+  - name: Ref Jenis Diklat Struktural
+  - name: Ref Jenis Hukuman
+  - name: Ref Jenis Jabatan
+  - name: Ref Jenis Kenaikan Pangkat
+  - name: Ref Jenis Pegawai
+  - name: Ref Jenis Penghargaan
+  - name: Ref Jenis Satker
+  - name: Ref Status Pernikahan
+  - name: Ref Template
+  - name: Ref Tingkat Pendidikan
   - name: Riwayat Asesmen Nine Box
   - name: Riwayat Hukuman Disiplin
   - name: Riwayat Jabatan
@@ -50,17 +52,15 @@ tags:
   - name: Riwayat Penghargaan
   - name: Riwayat Penugasan
   - name: Riwayat Sertifikasi
-  - name: Status Pernikahan
   - name: Surat Keputusan Pegawai
-  - name: Tingkat Pendidikan
   - name: Unit Kerja
 paths:
   /v1/admin/template:
     get:
       tags:
         - Admin Ref Template
-      summary: Daftar Ref Template.
-      description: Menampilkan daftar master template dengan pagination.
+      summary: Daftar Template.
+      description: Menampilkan daftar template dengan pagination.
       operationId: adminListTemplate
       parameters:
         - $ref: "#/components/parameters/authRequired"
@@ -89,8 +89,8 @@ paths:
     post:
       tags:
         - Admin Ref Template
-      summary: Create Ref Template.
-      description: Membuat data Ref Template baru.
+      summary: Create Template.
+      description: Membuat data template baru.
       operationId: adminCreateTemplate
       parameters:
         - $ref: "#/components/parameters/authRequired"
@@ -135,8 +135,8 @@ paths:
     get:
       tags:
         - Admin Ref Template
-      summary: Get Ref Template by ID.
-      description: Mendapatkan detail Ref Template berdasarkan ID.
+      summary: Get Template by ID.
+      description: Mendapatkan detail template berdasarkan ID.
       operationId: adminGetTemplate
       parameters:
         - $ref: "#/components/parameters/authRequired"
@@ -169,8 +169,8 @@ paths:
     put:
       tags:
         - Admin Ref Template
-      summary: Update Ref Template.
-      description: Mengupdate master template berdasarkan ID.
+      summary: Update Template.
+      description: Mengupdate template berdasarkan ID.
       operationId: adminUpdateTemplate
       parameters:
         - $ref: "#/components/parameters/authRequired"
@@ -222,8 +222,8 @@ paths:
     delete:
       tags:
         - Admin Ref Template
-      summary: Delete Ref Template.
-      description: Menghapus data master template berdasarkan ID.
+      summary: Delete Template.
+      description: Menghapus data template berdasarkan ID.
       operationId: adminDeleteTemplate
       parameters:
         - $ref: "#/components/parameters/authRequired"
@@ -248,8 +248,8 @@ paths:
     get:
       tags:
         - Admin Ref Template
-      summary: Get Ref Template Berkas by ID.
-      description: Mendapatkan berkas Ref Template berdasarkan ID.
+      summary: Get Berkas Template by ID.
+      description: Mendapatkan berkas template berdasarkan ID.
       operationId: adminGetBerkasTemplate
       parameters:
         - $ref: "#/components/parameters/authRequired"
@@ -983,7 +983,7 @@ paths:
           application/json:
             schema:
               type: object
-              required: 
+              required:
                 - nama
               additionalProperties: false
               properties:
@@ -1054,7 +1054,7 @@ paths:
           application/json:
             schema:
               type: object
-              required: 
+              required:
                 - nama
               additionalProperties: false
               properties:
@@ -1223,7 +1223,6 @@ paths:
                   description: Tingkat jenis hukuman
                   maxLength: 1
                   example: "B"
-                
       responses:
         "200":
           description: Sukses update jenis hukuman
@@ -3332,8 +3331,8 @@ paths:
     get:
       tags:
         - Ref Template
-      summary: Daftar Ref Template.
-      description: Menampilkan daftar master template dengan pagination.
+      summary: Daftar Template.
+      description: Menampilkan daftar template dengan pagination.
       operationId: listTemplate
       parameters:
         - $ref: "#/components/parameters/authRequired"
@@ -3361,8 +3360,8 @@ paths:
     get:
       tags:
         - Ref Template
-      summary: Get Ref Template Berkas by ID.
-      description: Mendapatkan berkas Ref Template berdasarkan ID.
+      summary: Get Berkas Template by ID.
+      description: Mendapatkan berkas template berdasarkan ID.
       operationId: getBerkasTemplate
       parameters:
         - $ref: "#/components/parameters/authRequired"
@@ -3391,7 +3390,7 @@ paths:
   /v1/agama:
     get:
       tags:
-        - Agama
+        - Ref Agama
       summary: List Agama.
       description: List agama yang tersedia.
       operationId: listAgama
@@ -3416,7 +3415,7 @@ paths:
   /v1/golongan:
     get:
       tags:
-        - Golongan
+        - Ref Golongan
       summary: List Golongan.
       description: List golongan yang tersedia.
       operationId: listGolongan
@@ -3442,7 +3441,7 @@ paths:
   /v1/jabatan:
     get:
       tags:
-        - Jabatan
+        - Ref Jabatan
       summary: Daftar jabatan yang tersedia.
       description: >-
         Daftar jabatan untuk form-form yang menggunakan pilihan jabatan.
@@ -3480,7 +3479,7 @@ paths:
   /v1/jenis-diklat:
     get:
       tags:
-        - Jenis Diklat
+        - Ref Jenis Diklat
       summary: Daftar jenis diklat.
       description: Daftar jenis diklat.
       operationId: listJenisDiklat
@@ -3511,7 +3510,7 @@ paths:
   /v1/jenis-diklat-fungsional:
     get:
       tags:
-        - Jenis Diklat Fungsional
+        - Ref Jenis Diklat Fungsional
       summary: Daftar jenis diklat fungsional.
       description: Daftar jenis diklat fungsional.
       operationId: listJenisDiklatFungsional
@@ -3542,7 +3541,7 @@ paths:
   /v1/jenis-diklat-struktural:
     get:
       tags:
-        - Jenis Diklat Struktural
+        - Ref Jenis Diklat Struktural
       summary: Daftar jenis diklat struktural.
       description: Daftar jenis diklat struktural.
       operationId: listJenisDiklatStruktural
@@ -3573,7 +3572,7 @@ paths:
   /v1/jenis-hukuman:
     get:
       tags:
-        - Jenis Hukuman
+        - Ref Jenis Hukuman
       summary: Daftar jenis hukuman.
       description: Daftar jenis hukuman.
       operationId: listJenisHukuman
@@ -3598,7 +3597,7 @@ paths:
   /v1/jenis-jabatan:
     get:
       tags:
-        - Jenis Jabatan
+        - Ref Jenis Jabatan
       summary: Daftar jenis jabatan.
       description: Daftar jenis jabatan.
       operationId: listJenisJabatan
@@ -3629,7 +3628,7 @@ paths:
   /v1/jenis-kenaikan-pangkat:
     get:
       tags:
-        - Jenis Kenaikan Pangkat
+        - Ref Jenis Kenaikan Pangkat
       summary: List jenis kenaikan pangkat.
       description: List jenis kenaikan pangkat.
       operationId: listJenisKenaikanPangkat
@@ -3660,7 +3659,7 @@ paths:
   /v1/jenis-pegawai:
     get:
       tags:
-        - Jenis Pegawai
+        - Ref Jenis Pegawai
       summary: Daftar jenis pegawai.
       description: Daftar jenis pegawai.
       operationId: listJenisPegawai
@@ -3691,7 +3690,7 @@ paths:
   /v1/jenis-penghargaan:
     get:
       tags:
-        - Jenis Penghargaan
+        - Ref Jenis Penghargaan
       summary: Daftar jenis penghargaan.
       description: Daftar jenis penghargaan.
       operationId: listJenisPenghargaan
@@ -3722,7 +3721,7 @@ paths:
   /v1/jenis-satker:
     get:
       tags:
-        - Jenis Satker
+        - Ref Jenis Satker
       summary: List semua jenis satker
       description: Mengambil daftar semua jenis satker yang belum dihapus. Dapat difilter berdasarkan nama (case-insensitive, partial match).
       operationId: listJenisSatker
@@ -4548,7 +4547,7 @@ paths:
   /v1/status-pernikahan:
     get:
       tags:
-        - Status Pernikahan
+        - Ref Status Pernikahan
       summary: Daftar status pernikahan.
       description: Daftar status pernikahan.
       operationId: listStatusPernikahan
@@ -4677,7 +4676,7 @@ paths:
   /v1/tingkat-pendidikan:
     get:
       tags:
-        - Tingkat Pendidikan
+        - Ref Tingkat Pendidikan
       summary: Lihat tingkat pendidikan.
       description: >-
         Lihat semua tingkat pendidikan.

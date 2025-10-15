@@ -16,7 +16,6 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api/apitest"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db/dbtest"
-	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/config"
 	dbmigrations "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/migrations"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/docs"
@@ -51,7 +50,7 @@ func Test_handler_ListRefAgama(t *testing.T) {
 		{
 			name:             "ok: admin get all agama with default pagination",
 			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -74,7 +73,7 @@ func Test_handler_ListRefAgama(t *testing.T) {
 				"limit":  []string{"3"},
 				"offset": []string{"2"},
 			},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -108,8 +107,10 @@ func Test_handler_ListRefAgama(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
+
 			repo := repository.New(pgx)
-			agama.RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Public)
+			agama.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -147,7 +148,7 @@ func Test_handler_adminListRefAgama(t *testing.T) {
 		{
 			name:             "ok: admin get all agama with default pagination",
 			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -170,7 +171,7 @@ func Test_handler_adminListRefAgama(t *testing.T) {
 				"limit":  []string{"3"},
 				"offset": []string{"2"},
 			},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -188,13 +189,6 @@ func Test_handler_adminListRefAgama(t *testing.T) {
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
 		},
-		{
-			name:             "error: user is not an admin",
-			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "41")}},
-			wantResponseCode: http.StatusForbidden,
-			wantResponseBody: `{"message": "akses ditolak"}`,
-		},
 	}
 
 	for _, tt := range tests {
@@ -211,8 +205,10 @@ func Test_handler_adminListRefAgama(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
+
 			repo := repository.New(pgx)
-			agama.RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Read)
+			agama.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -245,7 +241,7 @@ func Test_handler_adminGetRefAgama(t *testing.T) {
 			id:     "1",
 			dbData: dbData,
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
 			},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
@@ -262,7 +258,7 @@ func Test_handler_adminGetRefAgama(t *testing.T) {
 			id:     "99",
 			dbData: dbData,
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
 			},
 			wantResponseCode: http.StatusNotFound,
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
@@ -272,20 +268,10 @@ func Test_handler_adminGetRefAgama(t *testing.T) {
 			id:     "2",
 			dbData: dbData,
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
 			},
 			wantResponseCode: http.StatusNotFound,
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
-		},
-		{
-			name:   "error: user not admin",
-			id:     "1",
-			dbData: dbData,
-			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "41")},
-			},
-			wantResponseCode: http.StatusForbidden,
-			wantResponseBody: `{"message": "akses ditolak"}`,
 		},
 		{
 			name:   "error: invalid token",
@@ -311,8 +297,10 @@ func Test_handler_adminGetRefAgama(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
+
 			repo := repository.New(pgx)
-			agama.RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Read)
+			agama.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -338,7 +326,7 @@ func Test_handler_adminCreateRefAgama(t *testing.T) {
 			name:        "ok: admin create agama",
 			requestBody: `{"nama": "Zoroastrian"}`,
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusCreated,
@@ -354,16 +342,6 @@ func Test_handler_adminCreateRefAgama(t *testing.T) {
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
 		},
-		{
-			name:        "error: user is not admin",
-			requestBody: `{"nama": "Zoroastrian"}`,
-			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "99999")},
-				"Content-Type":  []string{"application/json"},
-			},
-			wantResponseCode: http.StatusForbidden,
-			wantResponseBody: `{"message": "akses ditolak"}`,
-		},
 	}
 
 	for _, tt := range tests {
@@ -376,8 +354,10 @@ func Test_handler_adminCreateRefAgama(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
+
 			repo := repository.New(pgx)
-			agama.RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Write)
+			agama.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -436,7 +416,7 @@ func Test_handler_adminUpdateRefAgama(t *testing.T) {
 			id:          "1",
 			requestBody: `{"nama": "Islam Updated"}`,
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusOK,
@@ -449,7 +429,7 @@ func Test_handler_adminUpdateRefAgama(t *testing.T) {
 			id:          "2",
 			requestBody: `{"nama": "Unknown"}`,
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusNotFound,
@@ -459,21 +439,10 @@ func Test_handler_adminUpdateRefAgama(t *testing.T) {
 			id:          "100",
 			requestBody: `{"nama": "Unknown"}`,
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusNotFound,
-		},
-		{
-			name:        "error: user is not admin",
-			id:          "1",
-			requestBody: `{"nama": "Islam Updated"}`,
-			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "88888")},
-				"Content-Type":  []string{"application/json"},
-			},
-			wantResponseCode: http.StatusForbidden,
-			wantResponseBody: `{"message": "akses ditolak"}`,
 		},
 	}
 
@@ -489,8 +458,10 @@ func Test_handler_adminUpdateRefAgama(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
+
 			repo := repository.New(pgx)
-			agama.RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Write)
+			agama.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -546,7 +517,7 @@ func Test_handler_adminDeleteRefAgama(t *testing.T) {
 			name: "ok: admin delete agama",
 			id:   "1",
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
 			},
 			wantResponseCode: http.StatusNoContent,
 			wantResponseBody: `{}`,
@@ -555,7 +526,7 @@ func Test_handler_adminDeleteRefAgama(t *testing.T) {
 			name: "error: id not found if deleted",
 			id:   "2",
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusNotFound,
@@ -565,20 +536,11 @@ func Test_handler_adminDeleteRefAgama(t *testing.T) {
 			name: "error: id not found if not exists",
 			id:   "100",
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusNotFound,
 			wantResponseBody: `{"message":"data tidak ditemukan"}`,
-		},
-		{
-			name: "error: user not admin",
-			id:   "1",
-			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "99999")},
-			},
-			wantResponseCode: http.StatusForbidden,
-			wantResponseBody: `{"message": "akses ditolak"}`,
 		},
 		{
 			name: "error: invalid token",
@@ -603,8 +565,10 @@ func Test_handler_adminDeleteRefAgama(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
+
 			repo := repository.New(pgx)
-			agama.RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Write)
+			agama.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)

@@ -12,5 +12,5 @@ func RegisterRoutes(e *echo.Echo, repo repository, mwAuth api.AuthMiddlewareFunc
 	s := newService(repo)
 	h := newHandler(s)
 
-	e.Add(http.MethodGet, "/v1/data-pribadi", h.getDataPribadi, mwAuth())
+	e.Add(http.MethodGet, "/v1/data-pribadi", h.getDataPribadi, mwAuth(api.Kode_Pegawai_Self))
 }

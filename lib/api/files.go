@@ -28,6 +28,7 @@ func GetFileBase64(c echo.Context) (string, error) {
 		return "", echo.NewHTTPError(http.StatusBadRequest, "failed to open uploaded file")
 	}
 	defer src.Close()
+
 	dst, err := io.ReadAll(src)
 	if err != nil {
 		return "", echo.NewHTTPError(http.StatusBadRequest, "failed to read uploaded file")
@@ -35,8 +36,7 @@ func GetFileBase64(c echo.Context) (string, error) {
 
 	mimeType := http.DetectContentType(dst)
 	if mimeType == "application/octet-stream" {
-		ext := filepath.Ext(file.Filename)
-		if ext != "" {
+		if ext := filepath.Ext(file.Filename); ext != "" {
 			if typ := mime.TypeByExtension(ext); typ != "" {
 				mimeType = typ
 			}

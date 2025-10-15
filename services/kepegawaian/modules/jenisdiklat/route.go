@@ -12,5 +12,5 @@ func RegisterRoutes(e *echo.Echo, repo repository, mwAuth api.AuthMiddlewareFunc
 	s := newService(repo)
 	h := newHandler(s)
 
-	e.Add(http.MethodGet, "/v1/jenis-diklat", h.list, mwAuth())
+	e.Add(http.MethodGet, "/v1/jenis-diklat", h.list, mwAuth(api.Kode_DataMaster_Public))
 }

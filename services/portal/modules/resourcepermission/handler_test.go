@@ -13,13 +13,12 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api/apitest"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db/dbtest"
-	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/config"
 	dbmigrations "gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/db/migrations"
 	sqlc "gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/db/repository"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/docs"
 )
 
-func Test_handler_listResourcePermissions(t *testing.T) {
+func Test_handler_listMyResourcePermissions(t *testing.T) {
 	t.Parallel()
 
 	dbData := `
@@ -94,7 +93,7 @@ func Test_handler_listResourcePermissions(t *testing.T) {
 		{
 			name:             "ok: nip with multiple roles",
 			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1c")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1c")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -109,7 +108,7 @@ func Test_handler_listResourcePermissions(t *testing.T) {
 		{
 			name:             "ok: nip with empty roles",
 			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1d")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1d")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -120,7 +119,7 @@ func Test_handler_listResourcePermissions(t *testing.T) {
 		{
 			name:             "ok: nip with default roles",
 			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1e")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1e")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -152,7 +151,9 @@ func Test_handler_listResourcePermissions(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
-			RegisterRoutes(e, sqlc.New(db), api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+
+			authSvc := apitest.NewAuthService(api.Kode_ManajemenAkses_Self)
+			RegisterRoutes(e, sqlc.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -162,7 +163,7 @@ func Test_handler_listResourcePermissions(t *testing.T) {
 	}
 }
 
-func Test_handler_listResourcesAdmin(t *testing.T) {
+func Test_handler_listResources(t *testing.T) {
 	t.Parallel()
 
 	dbData := `
@@ -200,7 +201,7 @@ func Test_handler_listResourcesAdmin(t *testing.T) {
 		{
 			name:             "ok",
 			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1c", api.RoleAdmin)}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1c")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -260,7 +261,7 @@ func Test_handler_listResourcesAdmin(t *testing.T) {
 		{
 			name:          "ok: with limit offset",
 			dbData:        dbData,
-			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1c", api.RoleAdmin)}},
+			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1c")}},
 			requestQuery: url.Values{
 				"limit":  []string{"2"},
 				"offset": []string{"1"},
@@ -307,13 +308,6 @@ func Test_handler_listResourcesAdmin(t *testing.T) {
 			}`,
 		},
 		{
-			name:             "error: user bukan admin",
-			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1c")}},
-			wantResponseCode: http.StatusForbidden,
-			wantResponseBody: `{"message": "akses ditolak"}`,
-		},
-		{
 			name:             "error: invalid token",
 			dbData:           dbData,
 			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
@@ -336,7 +330,9 @@ func Test_handler_listResourcesAdmin(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
-			RegisterRoutes(e, sqlc.New(db), api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+
+			authSvc := apitest.NewAuthService(api.Kode_ManajemenAkses_Read)
+			RegisterRoutes(e, sqlc.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)

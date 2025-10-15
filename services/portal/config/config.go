@@ -6,8 +6,6 @@ import (
 	"github.com/caarlos0/env/v11"
 )
 
-const Service = "portal"
-
 type Config struct {
 	Server   Server   `envPrefix:"NEXUS_PORTAL_SERVER_"`
 	DB       Database `envPrefix:"NEXUS_PORTAL_DB_"`

@@ -20,11 +20,8 @@ const (
 	contextKeyUserIDs = "http-auth-user-ids"
 )
 
-const RoleAdmin = "admin" // @yap remove later
-
 type User struct {
-	NIP  string
-	Role string // @yap remove later
+	NIP string
 }
 
 func CurrentUser(c echo.Context) *User {
@@ -48,56 +45,29 @@ func NewAuthKeyfunc(host, realm, audience string) (*Keyfunc, error) {
 	return &Keyfunc{keyfunc.Keyfunc, audience}, nil
 }
 
-// AuthMiddlewareFunc returns Echo middleware for auth and role checks.
-type AuthMiddlewareFunc func(allowedRoles ...string) echo.MiddlewareFunc
-
-// NewAuthMiddleware creates middleware that allows requests only if the user's
-// role matches one of the given allowedRoles (or any role if none are given).
-func NewAuthMiddleware(service string, keyfunc *Keyfunc) AuthMiddlewareFunc {
-	return func(allowedRoles ...string) echo.MiddlewareFunc {
-		return func(next echo.HandlerFunc) echo.HandlerFunc {
-			return func(c echo.Context) error {
-				claims, err := validateRequestToken(c, keyfunc)
-				if err != nil {
-					return err
-				}
-
-				user := User{NIP: claims["nip"].(string)}
-				if roles, ok := claims["roles"].(map[string]any); ok {
-					user.Role, _ = roles[service].(string)
-				}
-
-				if len(allowedRoles) == 0 || slices.Contains(allowedRoles, user.Role) {
-					c.Set(contextKeyUser, &user)
-					return next(c)
-				}
-				return echo.NewHTTPError(http.StatusForbidden, "akses ditolak")
-			}
-		}
-	}
-}
-
-type AuthResourcePermissionService struct {
+type AuthService struct {
 	db *pgxpool.Pool
 }
 
-func NewAuthResourcePermissionService(db *pgxpool.Pool) *AuthResourcePermissionService {
-	return &AuthResourcePermissionService{db: db}
+func NewAuthService(db *pgxpool.Pool) *AuthService {
+	return &AuthService{db: db}
 }
 
-func (s *AuthResourcePermissionService) IsUserHasAccess(ctx context.Context, nip, kode string) (bool, error) {
+func (s *AuthService) IsUserHasAccess(ctx context.Context, nip, kode string) (bool, error) {
 	var ok bool
 	err := s.db.QueryRow(ctx, "select public.is_user_has_access($1, $2)", nip, kode).Scan(&ok)
 	return ok, err
 }
 
-type AuthResourcePermissionInterface interface {
+type AuthInterface interface {
 	IsUserHasAccess(ctx context.Context, nip, kode string) (bool, error)
 }
 
-type AuthResourcePermissionMiddlewareFunc func(kode string) echo.MiddlewareFunc
+// AuthMiddlewareFunc returns Echo middleware for auth and permission checks.
+type AuthMiddlewareFunc func(kodeResourcePermission string) echo.MiddlewareFunc
 
-func NewAuthResourcePermissionMiddleware(svc AuthResourcePermissionInterface, keyfunc *Keyfunc) AuthResourcePermissionMiddlewareFunc {
+// NewAuthMiddleware creates middleware that allows requests only if the user have permission.
+func NewAuthMiddleware(svc AuthInterface, keyfunc *Keyfunc) AuthMiddlewareFunc {
 	return func(kode string) echo.MiddlewareFunc {
 		return func(next echo.HandlerFunc) echo.HandlerFunc {
 			return func(c echo.Context) error {

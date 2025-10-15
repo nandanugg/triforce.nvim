@@ -14,7 +14,6 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api/apitest"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db/dbtest"
-	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/config"
 	dbmigrations "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/migrations"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/docs"
@@ -57,7 +56,7 @@ func Test_handler_ListRefGolongan(t *testing.T) {
 		{
 			name:             "ok: get data with default pagination",
 			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "41")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("41")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -85,7 +84,7 @@ func Test_handler_ListRefGolongan(t *testing.T) {
 			requestQuery: url.Values{
 				"limit": []string{"5"},
 			},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "41")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("41")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -109,7 +108,7 @@ func Test_handler_ListRefGolongan(t *testing.T) {
 				"limit":  []string{"3"},
 				"offset": []string{"5"},
 			},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "41")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("41")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -126,7 +125,7 @@ func Test_handler_ListRefGolongan(t *testing.T) {
 		},
 		{
 			name:             "ok: empty data",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "41")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("41")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{"data": [], "meta": {"limit": 10, "offset": 0, "total": 0}}`,
 		},
@@ -161,8 +160,10 @@ func Test_handler_ListRefGolongan(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
+
 			repo := repository.New(pgxconn)
-			golongan.RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Public)
+			golongan.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -195,7 +196,7 @@ func Test_handler_adminListRefGolongan(t *testing.T) {
 		{
 			name:             "ok: get data with default pagination",
 			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -217,7 +218,7 @@ func Test_handler_adminListRefGolongan(t *testing.T) {
 				"limit":  []string{"1"},
 				"offset": []string{"1"},
 			},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -237,13 +238,6 @@ func Test_handler_adminListRefGolongan(t *testing.T) {
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
 		},
-		{
-			name:             "error: user is not an admin",
-			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "987654321")}},
-			wantResponseCode: http.StatusForbidden,
-			wantResponseBody: `{"message": "akses ditolak"}`,
-		},
 	}
 
 	for _, tt := range tests {
@@ -261,8 +255,10 @@ func Test_handler_adminListRefGolongan(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
+
 			repo := repository.New(pgxconn)
-			golongan.RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Read)
+			golongan.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -287,7 +283,7 @@ func Test_handler_adminCreateRefGolongan(t *testing.T) {
 			name:        "ok: create golongan",
 			requestBody: `{"nama": "I/a", "nama_pangkat": "Juru Muda", "nama_2": "1a", "gol": 1, "gol_pppk": "1a"}`,
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusCreated,
@@ -302,16 +298,6 @@ func Test_handler_adminCreateRefGolongan(t *testing.T) {
 			},
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
-		},
-		{
-			name:        "error: user is not an admin",
-			requestBody: `{"nama": "I/a", "nama_pangkat": "Juru Muda", "nama_2": "1a", "gol": 1, "gol_pppk": "1a"}`,
-			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "987654321")},
-				"Content-Type":  []string{"application/json"},
-			},
-			wantResponseCode: http.StatusForbidden,
-			wantResponseBody: `{"message": "akses ditolak"}`,
 		},
 	}
 
@@ -330,8 +316,10 @@ func Test_handler_adminCreateRefGolongan(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
+
 			repo := repository.New(pgxconn)
-			golongan.RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Write)
+			golongan.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -367,7 +355,7 @@ func Test_handler_adminUpdateRefGolongan(t *testing.T) {
 			id:          "1",
 			requestBody: `{"nama": "II/a", "nama_pangkat": "Juru Muda", "nama_2": "1a", "gol": 1, "gol_pppk": "1a"}`,
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusOK,
@@ -378,7 +366,7 @@ func Test_handler_adminUpdateRefGolongan(t *testing.T) {
 			id:          "4",
 			requestBody: `{"nama": "II/a", "nama_pangkat": "Juru Muda", "nama_2": "1a", "gol": 1, "gol_pppk": "1a"}`,
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusNotFound,
@@ -389,7 +377,7 @@ func Test_handler_adminUpdateRefGolongan(t *testing.T) {
 			id:          "100",
 			requestBody: `{"nama": "II/a", "nama_pangkat": "Juru Muda", "nama_2": "1a", "gol": 1, "gol_pppk": "1a"}`,
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusNotFound,
@@ -405,17 +393,6 @@ func Test_handler_adminUpdateRefGolongan(t *testing.T) {
 			},
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
-		},
-		{
-			name:        "error: user is not an admin",
-			id:          "1",
-			requestBody: `{"nama": "II/a", "nama_pangkat": "Juru Muda", "nama_2": "1a", "gol": 1, "gol_pppk": "1a"}`,
-			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "987654321")},
-				"Content-Type":  []string{"application/json"},
-			},
-			wantResponseCode: http.StatusForbidden,
-			wantResponseBody: `{"message": "akses ditolak"}`,
 		},
 	}
 
@@ -434,8 +411,10 @@ func Test_handler_adminUpdateRefGolongan(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
+
 			repo := repository.New(pgxconn)
-			golongan.RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Write)
+			golongan.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -470,7 +449,7 @@ func Test_handler_adminDeleteRefGolongan(t *testing.T) {
 			name: "ok: delete golongan",
 			id:   "1",
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusNoContent,
@@ -480,7 +459,7 @@ func Test_handler_adminDeleteRefGolongan(t *testing.T) {
 			name: "error: data sudah dihapus",
 			id:   "4",
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusNotFound,
@@ -491,7 +470,7 @@ func Test_handler_adminDeleteRefGolongan(t *testing.T) {
 			id:          "100",
 			requestBody: `{"nama": "II/a", "nama_pangkat": "Juru Muda", "nama_2": "1a", "gol": 1, "gol_pppk": "1a"}`,
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusNotFound,
@@ -507,17 +486,6 @@ func Test_handler_adminDeleteRefGolongan(t *testing.T) {
 			},
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
-		},
-		{
-			name:        "error: user is not an admin",
-			id:          "1",
-			requestBody: `{"nama": "II/a", "nama_pangkat": "Juru Muda", "nama_2": "1a", "gol": 1, "gol_pppk": "1a"}`,
-			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "987654321")},
-				"Content-Type":  []string{"application/json"},
-			},
-			wantResponseCode: http.StatusForbidden,
-			wantResponseBody: `{"message": "akses ditolak"}`,
 		},
 	}
 
@@ -536,8 +504,10 @@ func Test_handler_adminDeleteRefGolongan(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
+
 			repo := repository.New(pgxconn)
-			golongan.RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Write)
+			golongan.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)

@@ -14,7 +14,6 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api/apitest"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db/dbtest"
-	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/config"
 	dbmigrations "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/migrations"
 	sqlc "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/docs"
@@ -132,7 +131,7 @@ func Test_handler_getDataPribadi(t *testing.T) {
 		{
 			name:             "ok: non pppk with status_pns & tmt_pns",
 			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1c")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1c")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `
 				{
@@ -197,7 +196,7 @@ func Test_handler_getDataPribadi(t *testing.T) {
 		{
 			name:             "ok: most data is null",
 			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1d")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1d")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `
 				{
@@ -262,7 +261,7 @@ func Test_handler_getDataPribadi(t *testing.T) {
 		{
 			name:             "ok: references record is deleted with empty tmt_cpns without status_pns",
 			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1e")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1e")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `
 				{
@@ -327,7 +326,7 @@ func Test_handler_getDataPribadi(t *testing.T) {
 		{
 			name:             "ok: pppk with terminated date later than today",
 			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1f")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1f")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `
 				{
@@ -392,7 +391,7 @@ func Test_handler_getDataPribadi(t *testing.T) {
 		{
 			name:             "ok: status_pns without tmt_pns and another case with edge case",
 			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "1g")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1g")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `
 				{
@@ -457,14 +456,14 @@ func Test_handler_getDataPribadi(t *testing.T) {
 		{
 			name:             "error: data pegawai deleted",
 			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2c")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2c")}},
 			wantResponseCode: http.StatusNotFound,
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
 		},
 		{
 			name:             "error: tidak ada data pegawai milik user",
 			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "2a")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			wantResponseCode: http.StatusNotFound,
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
 		},
@@ -493,7 +492,8 @@ func Test_handler_getDataPribadi(t *testing.T) {
 			require.NoError(t, err)
 
 			repo := sqlc.New(pgxconn)
-			RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			authSvc := apitest.NewAuthService(api.Kode_Pegawai_Self)
+			RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)

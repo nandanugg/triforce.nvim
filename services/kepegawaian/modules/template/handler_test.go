@@ -21,7 +21,6 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api/apitest"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db/dbtest"
-	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/config"
 	dbmigrations "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/migrations"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/docs"
@@ -64,7 +63,7 @@ func Test_handler_ListTemplate(t *testing.T) {
 		{
 			name:             "ok: get data with default pagination",
 			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "41")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("41")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -95,7 +94,7 @@ func Test_handler_ListTemplate(t *testing.T) {
 				"limit":  []string{"1"},
 				"offset": []string{"1"},
 			},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -144,8 +143,10 @@ func Test_handler_ListTemplate(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
+
 			repo := repository.New(pgxconn)
-			RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Public)
+			RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -203,7 +204,7 @@ func Test_handler_GetBerkasTemplate(t *testing.T) {
 			name:              "ok: valid pdf with data: prefix",
 			dbData:            dbData,
 			paramID:           "12",
-			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
 			wantResponseCode:  http.StatusOK,
 			wantContentType:   "application/pdf",
 			wantResponseBytes: pdfBytes,
@@ -212,7 +213,7 @@ func Test_handler_GetBerkasTemplate(t *testing.T) {
 			name:              "ok: valid png with incorrect content-type",
 			dbData:            dbData,
 			paramID:           "11",
-			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
 			wantResponseCode:  http.StatusOK,
 			wantContentType:   "images/png",
 			wantResponseBytes: pngBytes,
@@ -221,7 +222,7 @@ func Test_handler_GetBerkasTemplate(t *testing.T) {
 			name:              "error: base64 tidak valid",
 			dbData:            dbData,
 			paramID:           "98",
-			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
 			wantResponseCode:  http.StatusInternalServerError,
 			wantResponseBytes: []byte(`{"message": "Internal Server Error"}`),
 		},
@@ -229,39 +230,39 @@ func Test_handler_GetBerkasTemplate(t *testing.T) {
 			name:              "error: sudah dihapus",
 			dbData:            dbData,
 			paramID:           "97",
-			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
 			wantResponseCode:  http.StatusNotFound,
-			wantResponseBytes: []byte(`{"message": "berkas master template tidak ditemukan"}`),
+			wantResponseBytes: []byte(`{"message": "berkas template tidak ditemukan"}`),
 		},
 		{
 			name:              "error: base64 berisi null value",
 			dbData:            dbData,
 			paramID:           "96",
-			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
 			wantResponseCode:  http.StatusNotFound,
-			wantResponseBytes: []byte(`{"message": "berkas master template tidak ditemukan"}`),
+			wantResponseBytes: []byte(`{"message": "berkas template tidak ditemukan"}`),
 		},
 		{
 			name:              "error: base64 berupa string kosong",
 			dbData:            dbData,
 			paramID:           "95",
-			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
 			wantResponseCode:  http.StatusNotFound,
-			wantResponseBytes: []byte(`{"message": "berkas master template tidak ditemukan"}`),
+			wantResponseBytes: []byte(`{"message": "berkas template tidak ditemukan"}`),
 		},
 		{
 			name:              "error: template tidak ditemukan",
 			dbData:            dbData,
 			paramID:           "0",
-			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
 			wantResponseCode:  http.StatusNotFound,
-			wantResponseBytes: []byte(`{"message": "berkas master template tidak ditemukan"}`),
+			wantResponseBytes: []byte(`{"message": "berkas template tidak ditemukan"}`),
 		},
 		{
 			name:              "error: invalid id",
 			dbData:            dbData,
 			paramID:           "abc",
-			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
 			wantResponseCode:  http.StatusBadRequest,
 			wantResponseBytes: []byte(`{"message": "parameter \"id\" harus dalam format yang sesuai"}`),
 		},
@@ -290,7 +291,8 @@ func Test_handler_GetBerkasTemplate(t *testing.T) {
 			require.NoError(t, err)
 
 			queries := repository.New(pgxconn)
-			RegisterRoutes(e, queries, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Public)
+			RegisterRoutes(e, queries, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -342,7 +344,7 @@ func Test_handler_adminListTemplate(t *testing.T) {
 		{
 			name:             "ok: get data with default pagination",
 			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "41", api.RoleAdmin)}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("41")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -373,7 +375,7 @@ func Test_handler_adminListTemplate(t *testing.T) {
 				"limit":  []string{"1"},
 				"offset": []string{"1"},
 			},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -399,13 +401,6 @@ func Test_handler_adminListTemplate(t *testing.T) {
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
 		},
 		{
-			name:             "error: user is not an admin",
-			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "987654321")}},
-			wantResponseCode: http.StatusForbidden,
-			wantResponseBody: `{"message": "akses ditolak"}`,
-		},
-		{
 			name:             "error: missing auth header",
 			dbData:           dbData,
 			requestHeader:    http.Header{},
@@ -429,8 +424,10 @@ func Test_handler_adminListTemplate(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
+
 			repo := repository.New(pgxconn)
-			RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Read)
+			RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -479,7 +476,7 @@ func Test_handler_adminGetTemplate(t *testing.T) {
 			name:             "ok: get data",
 			dbData:           dbData,
 			paramID:          "11",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "41", api.RoleAdmin)}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("41")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": {
@@ -487,14 +484,14 @@ func Test_handler_adminGetTemplate(t *testing.T) {
 						"nama": "Penghargaan 1",
 						"created_at": "` + defaultTimestamptz + `",
 						"updated_at": "` + defaultTimestamptz + `"
-					}				
+					}
 			}`,
 		},
 		{
 			name:             "error: not found",
 			dbData:           dbData,
 			paramID:          "1",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "41", api.RoleAdmin)}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("41")}},
 			wantResponseCode: http.StatusNotFound,
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
 		},
@@ -505,14 +502,6 @@ func Test_handler_adminGetTemplate(t *testing.T) {
 			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
-		},
-		{
-			name:             "error: user is not an admin",
-			dbData:           dbData,
-			paramID:          "11",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "987654321")}},
-			wantResponseCode: http.StatusForbidden,
-			wantResponseBody: `{"message": "akses ditolak"}`,
 		},
 		{
 			name:             "error: missing auth header",
@@ -539,8 +528,10 @@ func Test_handler_adminGetTemplate(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
+
 			repo := repository.New(pgxconn)
-			RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Read)
+			RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -598,7 +589,7 @@ func Test_handler_adminGetBerkasTemplate(t *testing.T) {
 			name:              "ok: valid pdf with data: prefix",
 			dbData:            dbData,
 			paramID:           "12",
-			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
 			wantResponseCode:  http.StatusOK,
 			wantContentType:   "application/pdf",
 			wantResponseBytes: pdfBytes,
@@ -607,7 +598,7 @@ func Test_handler_adminGetBerkasTemplate(t *testing.T) {
 			name:              "ok: valid png with incorrect content-type",
 			dbData:            dbData,
 			paramID:           "11",
-			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
 			wantResponseCode:  http.StatusOK,
 			wantContentType:   "images/png",
 			wantResponseBytes: pngBytes,
@@ -616,7 +607,7 @@ func Test_handler_adminGetBerkasTemplate(t *testing.T) {
 			name:              "error: base64 tidak valid",
 			dbData:            dbData,
 			paramID:           "98",
-			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
 			wantResponseCode:  http.StatusInternalServerError,
 			wantResponseBytes: []byte(`{"message": "Internal Server Error"}`),
 		},
@@ -624,49 +615,41 @@ func Test_handler_adminGetBerkasTemplate(t *testing.T) {
 			name:              "error: sudah dihapus",
 			dbData:            dbData,
 			paramID:           "97",
-			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
 			wantResponseCode:  http.StatusNotFound,
-			wantResponseBytes: []byte(`{"message": "berkas master template tidak ditemukan"}`),
+			wantResponseBytes: []byte(`{"message": "berkas template tidak ditemukan"}`),
 		},
 		{
 			name:              "error: base64 berisi null value",
 			dbData:            dbData,
 			paramID:           "96",
-			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
 			wantResponseCode:  http.StatusNotFound,
-			wantResponseBytes: []byte(`{"message": "berkas master template tidak ditemukan"}`),
+			wantResponseBytes: []byte(`{"message": "berkas template tidak ditemukan"}`),
 		},
 		{
 			name:              "error: base64 berupa string kosong",
 			dbData:            dbData,
 			paramID:           "95",
-			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
 			wantResponseCode:  http.StatusNotFound,
-			wantResponseBytes: []byte(`{"message": "berkas master template tidak ditemukan"}`),
+			wantResponseBytes: []byte(`{"message": "berkas template tidak ditemukan"}`),
 		},
 		{
 			name:              "error: template tiiak ditemukan",
 			dbData:            dbData,
 			paramID:           "0",
-			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
 			wantResponseCode:  http.StatusNotFound,
-			wantResponseBytes: []byte(`{"message": "berkas master template tidak ditemukan"}`),
+			wantResponseBytes: []byte(`{"message": "berkas template tidak ditemukan"}`),
 		},
 		{
 			name:              "error: invalid id",
 			dbData:            dbData,
 			paramID:           "abc",
-			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
 			wantResponseCode:  http.StatusBadRequest,
 			wantResponseBytes: []byte(`{"message": "parameter \"id\" harus dalam format yang sesuai"}`),
-		},
-		{
-			name:              "error: user is not an admin",
-			dbData:            dbData,
-			paramID:           "1",
-			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "987654321")}},
-			wantResponseCode:  http.StatusForbidden,
-			wantResponseBytes: []byte(`{"message": "akses ditolak"}`),
 		},
 		{
 			name:              "error: auth header tidak valid",
@@ -693,7 +676,8 @@ func Test_handler_adminGetBerkasTemplate(t *testing.T) {
 			require.NoError(t, err)
 
 			queries := repository.New(pgxconn)
-			RegisterRoutes(e, queries, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Read)
+			RegisterRoutes(e, queries, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -739,7 +723,7 @@ func Test_handler_adminCreateTemplate(t *testing.T) {
 			files: map[string][]byte{
 				"file": pngBytes,
 			},
-			authHeader:       apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin),
+			authHeader:       apitest.GenerateAuthHeader("123456789"),
 			wantResponseCode: http.StatusCreated,
 			wantResponseBody: `{"data": {
 				"id": 1,
@@ -754,7 +738,7 @@ func Test_handler_adminCreateTemplate(t *testing.T) {
 				"nama": "no file",
 			},
 			files:            nil,
-			authHeader:       apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin),
+			authHeader:       apitest.GenerateAuthHeader("123456789"),
 			wantResponseCode: http.StatusBadRequest,
 			wantResponseBody: `{"message": "parameter \"file\" harus diisi"}`,
 		},
@@ -769,18 +753,6 @@ func Test_handler_adminCreateTemplate(t *testing.T) {
 			authHeader:       "Bearer some-token",
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
-		},
-		{
-			name: "error: user is not an admin",
-			formFields: map[string]string{
-				"nama": "bad",
-			},
-			files: map[string][]byte{
-				"file": pngBytes,
-			},
-			authHeader:       apitest.GenerateAuthHeader(config.Service, "123456789"),
-			wantResponseCode: http.StatusForbidden,
-			wantResponseBody: `{"message": "akses ditolak"}`,
 		},
 	}
 
@@ -818,9 +790,8 @@ func Test_handler_adminCreateTemplate(t *testing.T) {
 			require.NoError(t, err)
 
 			repo := repository.New(pgxconn)
-			RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
-
-			// --- Execute request ---
+			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Write)
+			RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			// --- Assertions ---
@@ -897,7 +868,7 @@ func Test_handler_adminUpdateTemplate(t *testing.T) {
 			files: map[string][]byte{
 				"file": pngBytes,
 			},
-			authHeader:       apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin),
+			authHeader:       apitest.GenerateAuthHeader("123456789"),
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{"data": {
 				"id": 11,
@@ -916,7 +887,7 @@ func Test_handler_adminUpdateTemplate(t *testing.T) {
 			files: map[string][]byte{
 				"file": pngBytes,
 			},
-			authHeader:       apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin),
+			authHeader:       apitest.GenerateAuthHeader("123456789"),
 			wantResponseCode: http.StatusNotFound,
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
 		},
@@ -930,7 +901,7 @@ func Test_handler_adminUpdateTemplate(t *testing.T) {
 			files: map[string][]byte{
 				"file": pngBytes,
 			},
-			authHeader:       apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin),
+			authHeader:       apitest.GenerateAuthHeader("123456789"),
 			wantResponseCode: http.StatusNotFound,
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
 		},
@@ -942,7 +913,7 @@ func Test_handler_adminUpdateTemplate(t *testing.T) {
 				"nama": "no file",
 			},
 			files:            nil,
-			authHeader:       apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin),
+			authHeader:       apitest.GenerateAuthHeader("123456789"),
 			wantResponseCode: http.StatusBadRequest,
 			wantResponseBody: `{"message": "parameter \"file\" harus diisi"}`,
 		},
@@ -959,20 +930,6 @@ func Test_handler_adminUpdateTemplate(t *testing.T) {
 			authHeader:       "Bearer some-token",
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
-		},
-		{
-			name:    "error: user is not an admin",
-			dbData:  dbData,
-			paramID: "11",
-			formFields: map[string]string{
-				"nama": "bad",
-			},
-			files: map[string][]byte{
-				"file": pngBytes,
-			},
-			authHeader:       apitest.GenerateAuthHeader(config.Service, "123456789"),
-			wantResponseCode: http.StatusForbidden,
-			wantResponseBody: `{"message": "akses ditolak"}`,
 		},
 	}
 
@@ -1011,9 +968,8 @@ func Test_handler_adminUpdateTemplate(t *testing.T) {
 			require.NoError(t, err)
 
 			repo := repository.New(pgxconn)
-			RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
-
-			// --- Execute request ---
+			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Write)
+			RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			// --- Assertions ---
@@ -1081,7 +1037,7 @@ func Test_handler_adminDeleteTemplate(t *testing.T) {
 			name:    "ok: delete",
 			paramID: "11",
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusNoContent,
@@ -1091,7 +1047,7 @@ func Test_handler_adminDeleteTemplate(t *testing.T) {
 			name:    "error: data sudah dihapus",
 			paramID: "12",
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusNotFound,
@@ -1101,7 +1057,7 @@ func Test_handler_adminDeleteTemplate(t *testing.T) {
 			name:    "error: id tidak valid",
 			paramID: "100",
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusNotFound,
@@ -1116,16 +1072,6 @@ func Test_handler_adminDeleteTemplate(t *testing.T) {
 			},
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
-		},
-		{
-			name:    "error: user is not an admin",
-			paramID: "1",
-			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "987654321")},
-				"Content-Type":  []string{"application/json"},
-			},
-			wantResponseCode: http.StatusForbidden,
-			wantResponseBody: `{"message": "akses ditolak"}`,
 		},
 	}
 
@@ -1145,8 +1091,10 @@ func Test_handler_adminDeleteTemplate(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
+
 			repo := repository.New(pgxconn)
-			RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Write)
+			RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)

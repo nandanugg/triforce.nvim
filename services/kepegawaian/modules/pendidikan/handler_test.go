@@ -17,7 +17,6 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api/apitest"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db/dbtest"
-	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/config"
 	dbmigrations "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/migrations"
 	dbrepo "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/docs"
@@ -32,7 +31,7 @@ func Test_handler_list(t *testing.T) {
 			(1, 'Jenis Pendidikan 1', null),
 			(2, 'Jenis Pendidikan 2', null),
 			(3, 'Jenis Pendidikan 3', now());
-		
+
 		insert into ref_pendidikan (id, nama, tingkat_pendidikan_id, deleted_at) values
 			('id-1', 'Pendidikan 1', 1, null),
 			('id-2', 'Pendidikan 2', 2, null),
@@ -51,7 +50,7 @@ func Test_handler_list(t *testing.T) {
 		{
 			name:             "ok: sucess without parameter",
 			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -85,7 +84,7 @@ func Test_handler_list(t *testing.T) {
 			name:             "ok: with parameter pagination",
 			dbData:           dbData,
 			requestQuery:     url.Values{"limit": []string{"1"}, "offset": []string{"1"}},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -107,7 +106,7 @@ func Test_handler_list(t *testing.T) {
 			name:             "ok: with parameter nama",
 			dbData:           dbData,
 			requestQuery:     url.Values{"nama": []string{"1"}},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -139,13 +138,6 @@ func Test_handler_list(t *testing.T) {
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
 		},
-		{
-			name:             "error: user is not an admin",
-			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "987654321")}},
-			wantResponseCode: http.StatusForbidden,
-			wantResponseBody: `{"message": "akses ditolak"}`,
-		},
 	}
 
 	for _, tt := range tests {
@@ -163,8 +155,10 @@ func Test_handler_list(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
+
 			repo := dbrepo.New(db)
-			pendidikan.RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Read)
+			pendidikan.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -182,7 +176,7 @@ func Test_handler_get(t *testing.T) {
 			(1, 'Jenis Pendidikan 1', null),
 			(2, 'Jenis Pendidikan 2', null),
 			(3, 'Jenis Pendidikan 3', now());
-		
+
 		insert into ref_pendidikan (id, nama, tingkat_pendidikan_id, deleted_at) values
 			('id-1', 'Pendidikan 1', 1, null),
 			('id-2', 'Pendidikan 2', 2, null),
@@ -202,7 +196,7 @@ func Test_handler_get(t *testing.T) {
 			name:             "ok: sucess",
 			dbData:           dbData,
 			id:               "id-1",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": {
@@ -217,7 +211,7 @@ func Test_handler_get(t *testing.T) {
 			name:             "ok: get another pendidikan",
 			dbData:           dbData,
 			id:               "id-4",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": {
@@ -237,18 +231,10 @@ func Test_handler_get(t *testing.T) {
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
 		},
 		{
-			name:             "error: user is not an admin",
-			dbData:           dbData,
-			id:               "id-1",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "987654321")}},
-			wantResponseCode: http.StatusForbidden,
-			wantResponseBody: `{"message": "akses ditolak"}`,
-		},
-		{
 			name:             "error: data tidak ditemukan",
 			dbData:           dbData,
 			id:               "id-5",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
 			wantResponseCode: http.StatusNotFound,
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
 		},
@@ -268,8 +254,10 @@ func Test_handler_get(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
+
 			repo := dbrepo.New(db)
-			pendidikan.RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Read)
+			pendidikan.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -303,7 +291,7 @@ func Test_handler_create(t *testing.T) {
 			dbData:      dbData,
 			requestBody: `{"nama": "Pendidikan 1", "tingkat_pendidikan_id": 1}`,
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusCreated,
@@ -315,7 +303,7 @@ func Test_handler_create(t *testing.T) {
 			dbData:      dbData,
 			requestBody: `{"tingkat_pendidikan_id": 1}`,
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusBadRequest,
@@ -328,14 +316,6 @@ func Test_handler_create(t *testing.T) {
 			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
-		},
-		{
-			name:             "error: user is not an admin",
-			dbData:           dbData,
-			requestBody:      `{"nama": "Pendidikan 1", "tingkat_pendidikan_id": 1}`,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "987654321")}},
-			wantResponseCode: http.StatusForbidden,
-			wantResponseBody: `{"message": "akses ditolak"}`,
 		},
 	}
 
@@ -354,8 +334,10 @@ func Test_handler_create(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
+
 			repo := dbrepo.New(db)
-			pendidikan.RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Write)
+			pendidikan.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			responseBody := rec.Body.String()
@@ -400,7 +382,7 @@ func Test_handler_update(t *testing.T) {
 			id:          "id-1",
 			requestBody: `{"nama": "Pendidikan 1 Updated", "tingkat_pendidikan_id": 2}`,
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusOK,
@@ -412,7 +394,7 @@ func Test_handler_update(t *testing.T) {
 			id:          "id-1",
 			requestBody: `{"tingkat_pendidikan_id": 2}`,
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusBadRequest,
@@ -431,24 +413,12 @@ func Test_handler_update(t *testing.T) {
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
 		},
 		{
-			name:        "error: user is not an admin",
-			dbData:      dbData,
-			id:          "id-1",
-			requestBody: `{"nama": "Pendidikan 1 Updated", "tingkat_pendidikan_id": 2}`,
-			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "987654321")},
-				"Content-Type":  []string{"application/json"},
-			},
-			wantResponseCode: http.StatusForbidden,
-			wantResponseBody: `{"message": "akses ditolak"}`,
-		},
-		{
 			name:        "error: data tidak ditemukan",
 			dbData:      dbData,
 			id:          "id-5",
 			requestBody: `{"nama": "Pendidikan 1 Updated", "tingkat_pendidikan_id": 2}`,
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusNotFound,
@@ -460,7 +430,7 @@ func Test_handler_update(t *testing.T) {
 			id:          "id-3",
 			requestBody: `{"nama": "Pendidikan 1 Updated", "tingkat_pendidikan_id": 2}`,
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusNotFound,
@@ -483,8 +453,10 @@ func Test_handler_update(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
+
 			repo := dbrepo.New(db)
-			pendidikan.RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Write)
+			pendidikan.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -523,7 +495,7 @@ func Test_handler_delete(t *testing.T) {
 			dbData: dbData,
 			id:     "id-1",
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
 			},
 			wantResponseCode: http.StatusNoContent,
 			wantResponseBody: "",
@@ -533,7 +505,7 @@ func Test_handler_delete(t *testing.T) {
 			dbData: dbData,
 			id:     "id-5",
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
 			},
 			wantResponseCode: http.StatusNotFound,
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
@@ -564,8 +536,10 @@ func Test_handler_delete(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
+
 			repo := dbrepo.New(db)
-			pendidikan.RegisterRoutes(e, repo, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Write)
+			pendidikan.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -580,7 +554,7 @@ func Test_handler_delete(t *testing.T) {
 }
 
 func removeUnassertedKey(jsonStr string, keys []string) string {
-	var m map[string]interface{}
+	var m map[string]any
 	if err := json.Unmarshal([]byte(jsonStr), &m); err != nil {
 		return jsonStr
 	}
@@ -592,7 +566,7 @@ func removeUnassertedKey(jsonStr string, keys []string) string {
 				delete(curr, part)
 			} else {
 				// Traverse deeper if possible
-				if next, ok := curr[part].(map[string]interface{}); ok {
+				if next, ok := curr[part].(map[string]any); ok {
 					curr = next
 				} else {
 					break

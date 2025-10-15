@@ -14,7 +14,6 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api/apitest"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db/dbtest"
-	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/config"
 	dbmigrations "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/migrations"
 	sqlc "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/docs"
@@ -42,7 +41,7 @@ func Test_handler_list(t *testing.T) {
 		{
 			name:             "ok: tanpa parameter apapun",
 			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "198765432100001")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("198765432100001")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `
 			{
@@ -67,7 +66,7 @@ func Test_handler_list(t *testing.T) {
 			name:             "ok: dengan parameter pagination",
 			dbData:           dbData,
 			requestQuery:     url.Values{"limit": []string{"1"}, "offset": []string{"1"}},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "198765432100001")}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("198765432100001")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -109,7 +108,8 @@ func Test_handler_list(t *testing.T) {
 			require.NoError(t, err)
 
 			sqlc := sqlc.New(pgxconn)
-			RegisterRoutes(e, sqlc, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Public)
+			RegisterRoutes(e, sqlc, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -142,7 +142,7 @@ func Test_handler_adminGetJenisPenghargaan(t *testing.T) {
 			name:             "ok: get jenis penghargaan",
 			dbData:           dbData,
 			id:               "1",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "111", api.RoleAdmin)}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("111")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": {
@@ -155,7 +155,7 @@ func Test_handler_adminGetJenisPenghargaan(t *testing.T) {
 			name:             "ok: get another jenis penghargaan",
 			dbData:           dbData,
 			id:               "2",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "111", api.RoleAdmin)}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("111")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": {
@@ -168,7 +168,7 @@ func Test_handler_adminGetJenisPenghargaan(t *testing.T) {
 			name:             "error: jenis penghargaan not found",
 			dbData:           dbData,
 			id:               "999",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "111", api.RoleAdmin)}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("111")}},
 			wantResponseCode: http.StatusNotFound,
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
 		},
@@ -176,17 +176,9 @@ func Test_handler_adminGetJenisPenghargaan(t *testing.T) {
 			name:             "error: jenis penghargaan deleted",
 			dbData:           dbData,
 			id:               "3",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "111", api.RoleAdmin)}},
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("111")}},
 			wantResponseCode: http.StatusNotFound,
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
-		},
-		{
-			name:             "error: user is not an admin",
-			dbData:           dbData,
-			id:               "1",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "999")}},
-			wantResponseCode: http.StatusForbidden,
-			wantResponseBody: `{"message": "akses ditolak"}`,
 		},
 		{
 			name:             "error: auth header tidak valid",
@@ -214,7 +206,8 @@ func Test_handler_adminGetJenisPenghargaan(t *testing.T) {
 			require.NoError(t, err)
 
 			sqlc := sqlc.New(pgxconn)
-			RegisterRoutes(e, sqlc, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Read)
+			RegisterRoutes(e, sqlc, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -249,7 +242,7 @@ func Test_handler_adminCreateJenisPenghargaan(t *testing.T) {
 				"nama": "Jenis Penghargaan 3"
 			}`,
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusCreated,
@@ -265,7 +258,7 @@ func Test_handler_adminCreateJenisPenghargaan(t *testing.T) {
 			dbData:      dbData,
 			requestBody: `{}`,
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusBadRequest,
@@ -283,19 +276,6 @@ func Test_handler_adminCreateJenisPenghargaan(t *testing.T) {
 			},
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
-		},
-		{
-			name:   "error: user is not an admin",
-			dbData: dbData,
-			requestBody: `{
-				"nama": "Penghargaan Percobaan"
-			}`,
-			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "987654321")},
-				"Content-Type":  []string{"application/json"},
-			},
-			wantResponseCode: http.StatusForbidden,
-			wantResponseBody: `{"message": "akses ditolak"}`,
 		},
 	}
 
@@ -315,7 +295,8 @@ func Test_handler_adminCreateJenisPenghargaan(t *testing.T) {
 			require.NoError(t, err)
 
 			sqlc := sqlc.New(pgxconn)
-			RegisterRoutes(e, sqlc, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Write)
+			RegisterRoutes(e, sqlc, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -356,7 +337,7 @@ func Test_handler_adminUpdateJenisPenghargaan(t *testing.T) {
 			}`,
 			requestHeader: http.Header{
 				"Authorization": []string{
-					apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin),
+					apitest.GenerateAuthHeader("123456789"),
 				},
 				"Content-Type": []string{"application/json"},
 			},
@@ -377,7 +358,7 @@ func Test_handler_adminUpdateJenisPenghargaan(t *testing.T) {
 			}`,
 			requestHeader: http.Header{
 				"Authorization": []string{
-					apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin),
+					apitest.GenerateAuthHeader("123456789"),
 				},
 				"Content-Type": []string{"application/json"},
 			},
@@ -393,7 +374,7 @@ func Test_handler_adminUpdateJenisPenghargaan(t *testing.T) {
 			}`,
 			requestHeader: http.Header{
 				"Authorization": []string{
-					apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin),
+					apitest.GenerateAuthHeader("123456789"),
 				},
 				"Content-Type": []string{"application/json"},
 			},
@@ -412,20 +393,6 @@ func Test_handler_adminUpdateJenisPenghargaan(t *testing.T) {
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
 		},
-		{
-			name:        "error: user is not an admin",
-			dbData:      dbData,
-			id:          "1",
-			requestBody: `{"nama": "Jenis Penghargaan 1 Diperbarui"}`,
-			requestHeader: http.Header{
-				"Authorization": []string{
-					apitest.GenerateAuthHeader(config.Service, "987654321"),
-				},
-				"Content-Type": []string{"application/json"},
-			},
-			wantResponseCode: http.StatusForbidden,
-			wantResponseBody: `{"message": "akses ditolak"}`,
-		},
 	}
 
 	for _, tt := range tests {
@@ -441,8 +408,10 @@ func Test_handler_adminUpdateJenisPenghargaan(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
+
 			r := sqlc.New(pgxconn)
-			RegisterRoutes(e, r, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Write)
+			RegisterRoutes(e, r, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -475,7 +444,7 @@ func Test_handler_adminDeleteJenisPenghargaan(t *testing.T) {
 			dbData: dbData,
 			id:     "1",
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusNoContent,
@@ -485,7 +454,7 @@ func Test_handler_adminDeleteJenisPenghargaan(t *testing.T) {
 			dbData: dbData,
 			id:     "999",
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusNotFound,
@@ -496,7 +465,7 @@ func Test_handler_adminDeleteJenisPenghargaan(t *testing.T) {
 			dbData: dbData,
 			id:     "3",
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "123456789", api.RoleAdmin)},
+				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusNotFound,
@@ -512,17 +481,6 @@ func Test_handler_adminDeleteJenisPenghargaan(t *testing.T) {
 			},
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
-		},
-		{
-			name:   "error: user is not an admin",
-			dbData: dbData,
-			id:     "1",
-			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader(config.Service, "987654321")},
-				"Content-Type":  []string{"application/json"},
-			},
-			wantResponseCode: http.StatusForbidden,
-			wantResponseBody: `{"message": "akses ditolak"}`,
 		},
 	}
 
@@ -540,8 +498,10 @@ func Test_handler_adminDeleteJenisPenghargaan(t *testing.T) {
 
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
+
 			r := sqlc.New(pgxconn)
-			RegisterRoutes(e, r, api.NewAuthMiddleware(config.Service, apitest.Keyfunc))
+			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Write)
+			RegisterRoutes(e, r, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
