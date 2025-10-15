@@ -6,6 +6,7 @@ info:
 servers:
   - url: http://localhost:8000
 tags:
+  - name: Admin Ref Template
   - name: Admin Ref Agama
   - name: Admin Pegawai Aktif
   - name: Admin Ref Golongan
@@ -33,6 +34,7 @@ tags:
   - name: Jenis Penghargaan
   - name: Jenis Satker
   - name: Keluarga
+  - name: Ref Template
   - name: Pegawai
   - name: Riwayat Asesmen Nine Box
   - name: Riwayat Hukuman Disiplin
@@ -53,6 +55,228 @@ tags:
   - name: Tingkat Pendidikan
   - name: Unit Kerja
 paths:
+  /v1/admin/template:
+    get:
+      tags:
+        - Admin Ref Template
+      summary: Daftar Ref Template.
+      description: Menampilkan daftar master template dengan pagination.
+      operationId: adminListTemplate
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/template"
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+        "401":
+          description: Token otentikasi tidak valid.
+        "403":
+          description: Tidak memiliki akses admin.
+        "500":
+          description: Error internal server.
+    post:
+      tags:
+        - Admin Ref Template
+      summary: Create Ref Template.
+      description: Membuat data Ref Template baru.
+      operationId: adminCreateTemplate
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                nama:
+                  type: string
+                  description: Name of the template
+                  example: "Invoice Template"
+                  maxLength: 255
+                file:
+                  type: string
+                  format: binary
+                  description: The uploaded file content
+              required:
+                - nama
+                - file
+      responses:
+        "201":
+          description: Ref Template berhasil dibuat.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/template"
+        "400":
+          description: Request tidak valid.
+        "401":
+          description: Token otentikasi tidak valid.
+        "403":
+          description: Tidak memiliki akses admin.
+        "500":
+          description: Error internal server.
+  /v1/admin/template/{id}:
+    get:
+      tags:
+        - Admin Ref Template
+      summary: Get Ref Template by ID.
+      description: Mendapatkan detail Ref Template berdasarkan ID.
+      operationId: adminGetTemplate
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/template"
+        "400":
+          description: ID tidak valid.
+        "401":
+          description: Token otentikasi tidak valid.
+        "403":
+          description: Tidak memiliki akses admin.
+        "404":
+          description: Ref Template tidak ditemukan.
+        "500":
+          description: Error internal server.
+    put:
+      tags:
+        - Admin Ref Template
+      summary: Update Ref Template.
+      description: Mengupdate master template berdasarkan ID.
+      operationId: adminUpdateTemplate
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                nama:
+                  type: string
+                  description: Name of the template
+                  example: "Invoice Template"
+                  maxLength: 255
+                file:
+                  type: string
+                  format: binary
+                  description: The uploaded file content
+              required:
+                - nama
+                - file
+      responses:
+        "200":
+          description: Ref Template berhasil diupdate.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/template"
+        "400":
+          description: Request tidak valid.
+        "401":
+          description: Token otentikasi tidak valid.
+        "403":
+          description: Tidak memiliki akses admin.
+        "404":
+          description: Ref Template tidak ditemukan.
+        "500":
+          description: Error internal server.
+    delete:
+      tags:
+        - Admin Ref Template
+      summary: Delete Ref Template.
+      description: Menghapus data master template berdasarkan ID.
+      operationId: adminDeleteTemplate
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "204":
+          description: Ref Template berhasil dihapus.
+        "400":
+          description: ID tidak valid.
+        "401":
+          description: Token otentikasi tidak valid.
+        "403":
+          description: Tidak memiliki akses admin.
+        "500":
+          description: Error internal server.
+  /v1/admin/template/{id}/berkas:
+    get:
+      tags:
+        - Admin Ref Template
+      summary: Get Ref Template Berkas by ID.
+      description: Mendapatkan berkas Ref Template berdasarkan ID.
+      operationId: adminGetBerkasTemplate
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: File successfully retrieved
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: ID tidak valid.
+        "401":
+          description: Token otentikasi tidak valid.
+        "403":
+          description: Tidak memiliki akses admin.
+        "404":
+          description: Ref Template tidak ditemukan.
+        "500":
+          description: Error internal server.
   /v1/admin/agama:
     get:
       tags:
@@ -3104,6 +3328,66 @@ paths:
                 properties:
                   data:
                     $ref: "#/components/schemas/dataPegawai"
+  /v1/template:
+    get:
+      tags:
+        - Ref Template
+      summary: Daftar Ref Template.
+      description: Menampilkan daftar master template dengan pagination.
+      operationId: listTemplate
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/template"
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+        "401":
+          description: Token otentikasi tidak valid.
+        "500":
+          description: Error internal server.
+  /v1/template/{id}/berkas:
+    get:
+      tags:
+        - Ref Template
+      summary: Get Ref Template Berkas by ID.
+      description: Mendapatkan berkas Ref Template berdasarkan ID.
+      operationId: getBerkasTemplate
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: File successfully retrieved
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: ID tidak valid.
+        "401":
+          description: Token otentikasi tidak valid.
+        "404":
+          description: Ref Template tidak ditemukan.
+        "500":
+          description: Error internal server.
   /v1/agama:
     get:
       tags:
@@ -5248,6 +5532,27 @@ components:
           type: string
           format: date
           nullable: true
+    template:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: ID agama
+        nama:
+          type: string
+          example: "Surat X"
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Tanggal dibuat
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Tanggal diperbarui
     agama:
       type: object
       additionalProperties: false

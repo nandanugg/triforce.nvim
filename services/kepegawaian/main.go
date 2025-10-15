@@ -41,6 +41,7 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/riwayatsertifikasi"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/statuspernikahan"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/suratkeputusan"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/template"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/tingkatpendidikan"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/unitkerja"
 )
@@ -78,6 +79,7 @@ func main() {
 	jenispenghargaan.RegisterRoutes(e, dbRepository, mwAuth)
 	jenissatker.RegisterRoutes(e, dbRepository, mwAuth)
 	keluarga.RegisterRoutes(e, dbRepository, mwAuth)
+	template.RegisterRoutes(e, dbRepository, mwAuth)
 	pegawai.RegisterRoutes(e, dbRepository, mwAuth)
 	pendidikan.RegisterRoutes(e, dbRepository, mwAuth)
 	riwayatasesmenninebox.RegisterRoutes(e, dbRepository, mwAuth)
