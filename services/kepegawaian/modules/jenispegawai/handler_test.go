@@ -29,10 +29,13 @@ func Test_handler_list(t *testing.T) {
 			(3,  'Non',  '2000-01-01'),
 			(4,  'P3K',  null);
 	`
+	pgxconn := dbtest.New(t, dbmigrations.FS)
+	_, err := pgxconn.Exec(context.Background(), dbData)
+	require.NoError(t, err)
 
+	authHeader := []string{apitest.GenerateAuthHeader("198765432100001")}
 	tests := []struct {
 		name             string
-		dbData           string
 		requestQuery     url.Values
 		requestHeader    http.Header
 		wantResponseCode int
@@ -40,8 +43,7 @@ func Test_handler_list(t *testing.T) {
 	}{
 		{
 			name:             "ok: tanpa parameter apapun",
-			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("198765432100001")}},
+			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `
 			{
@@ -64,9 +66,8 @@ func Test_handler_list(t *testing.T) {
 		},
 		{
 			name:             "ok: dengan parameter pagination",
-			dbData:           dbData,
 			requestQuery:     url.Values{"limit": []string{"1"}, "offset": []string{"1"}},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("198765432100001")}},
+			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -80,7 +81,6 @@ func Test_handler_list(t *testing.T) {
 		},
 		{
 			name:             "error: auth header tidak valid",
-			dbData:           dbData,
 			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
@@ -89,10 +89,6 @@ func Test_handler_list(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-
-			pgxconn := dbtest.New(t, dbmigrations.FS)
-			_, err := pgxconn.Exec(context.Background(), tt.dbData)
-			require.NoError(t, err)
 
 			req := httptest.NewRequest(http.MethodGet, "/v1/jenis-pegawai", nil)
 			req.URL.RawQuery = tt.requestQuery.Encode()

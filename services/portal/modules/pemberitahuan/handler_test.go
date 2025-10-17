@@ -27,10 +27,13 @@ func Test_handler_list(t *testing.T) {
 			(12, '12a',        '12b',            'Menunggu Diberitakan', '12c',      '2000-01-02'),
 			(13, '13a',        '13b',            'Sudah Tidak Aktif',    '13c',      '2000-01-02');
 	`
+	db := dbtest.New(t, dbmigrations.FS)
+	_, err := db.Exec(context.Background(), dbData)
+	require.NoError(t, err)
 
+	authHeader := []string{apitest.GenerateAuthHeader("1")}
 	tests := []struct {
 		name             string
-		dbData           string
 		requestQuery     url.Values
 		requestHeader    http.Header
 		wantResponseCode int
@@ -38,8 +41,7 @@ func Test_handler_list(t *testing.T) {
 	}{
 		{
 			name:             "ok: tanpa parameter apapun",
-			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1")}},
+			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -73,9 +75,8 @@ func Test_handler_list(t *testing.T) {
 		},
 		{
 			name:             "ok: dengan parameter pagination",
-			dbData:           dbData,
 			requestQuery:     url.Values{"limit": []string{"1"}, "offset": []string{"1"}},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1")}},
+			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -93,9 +94,8 @@ func Test_handler_list(t *testing.T) {
 		},
 		{
 			name:             "ok: cari judul",
-			dbData:           dbData,
 			requestQuery:     url.Values{"cari": []string{"12a"}},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1")}},
+			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -113,9 +113,8 @@ func Test_handler_list(t *testing.T) {
 		},
 		{
 			name:             "ok: cari deskripsi",
-			dbData:           dbData,
 			requestQuery:     url.Values{"cari": []string{"11b"}},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1")}},
+			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -133,9 +132,8 @@ func Test_handler_list(t *testing.T) {
 		},
 		{
 			name:             "ok: tidak ada data ditemukan",
-			dbData:           dbData,
 			requestQuery:     url.Values{"cari": []string{"22"}},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1")}},
+			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{"data": [], "meta": {"limit": 10, "offset": 0, "total": 0}}`,
 		},
@@ -144,10 +142,6 @@ func Test_handler_list(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-
-			db := dbtest.New(t, dbmigrations.FS)
-			_, err := db.Exec(context.Background(), tt.dbData)
-			require.NoError(t, err)
 
 			req := httptest.NewRequest(http.MethodGet, "/v1/pemberitahuan", nil)
 			req.URL.RawQuery = tt.requestQuery.Encode()

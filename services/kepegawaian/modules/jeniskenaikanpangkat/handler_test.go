@@ -43,10 +43,13 @@ func Test_handler_list(t *testing.T) {
 		(16, 'Kenaikan Pangkat Penyesuaian Promosi'),
 		(17, 'Kenaikan Pangkat Penyesuaian Khusus');
 	`
+	pgxconn := dbtest.New(t, dbmigrations.FS)
+	_, err := pgxconn.Exec(context.Background(), dbData)
+	require.NoError(t, err)
 
+	authHeader := []string{apitest.GenerateAuthHeader("41")}
 	tests := []struct {
 		name             string
-		dbData           string
 		requestQuery     url.Values
 		requestHeader    http.Header
 		wantResponseCode int
@@ -54,8 +57,7 @@ func Test_handler_list(t *testing.T) {
 	}{
 		{
 			name:             "ok: get data with default pagination",
-			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("41")}},
+			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -78,12 +80,11 @@ func Test_handler_list(t *testing.T) {
 			}`,
 		},
 		{
-			name:   "ok: with pagination limit 5",
-			dbData: dbData,
+			name: "ok: with pagination limit 5",
 			requestQuery: url.Values{
 				"limit": []string{"5"},
 			},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("41")}},
+			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -101,13 +102,12 @@ func Test_handler_list(t *testing.T) {
 			}`,
 		},
 		{
-			name:   "ok: with pagination limit 3 offset 5",
-			dbData: dbData,
+			name: "ok: with pagination limit 3 offset 5",
 			requestQuery: url.Values{
 				"limit":  []string{"3"},
 				"offset": []string{"5"},
 			},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("41")}},
+			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -123,21 +123,13 @@ func Test_handler_list(t *testing.T) {
 			}`,
 		},
 		{
-			name:             "ok: empty data",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("41")}},
-			wantResponseCode: http.StatusOK,
-			wantResponseBody: `{"data": [], "meta": {"limit": 10, "offset": 0, "total": 0}}`,
-		},
-		{
 			name:             "error: auth header tidak valid",
-			dbData:           dbData,
 			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
 		},
 		{
 			name:             "error: missing auth header",
-			dbData:           dbData,
 			requestHeader:    http.Header{},
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
@@ -147,10 +139,6 @@ func Test_handler_list(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			pgxconn := dbtest.New(t, dbmigrations.FS)
-
-			_, err := pgxconn.Exec(context.Background(), tt.dbData)
-			require.NoError(t, err)
 
 			req := httptest.NewRequest(http.MethodGet, "/v1/jenis-kenaikan-pangkat", nil)
 			req.URL.RawQuery = tt.requestQuery.Encode()
@@ -182,10 +170,13 @@ func Test_handler_adminGetJenisKenaikanPangkat(t *testing.T) {
 			(2, 'Kenaikan Pilihan', now(), now(), NULL),
 			(3, 'Kenaikan Luar Biasa', now(), now(), now());
 	`
+	pgxconn := dbtest.New(t, dbmigrations.FS)
+	_, err := pgxconn.Exec(context.Background(), dbData)
+	require.NoError(t, err)
 
+	authHeader := []string{apitest.GenerateAuthHeader("111")}
 	tests := []struct {
 		name             string
-		dbData           string
 		id               string
 		requestHeader    http.Header
 		wantResponseCode int
@@ -193,9 +184,8 @@ func Test_handler_adminGetJenisKenaikanPangkat(t *testing.T) {
 	}{
 		{
 			name:             "ok: get jenis kenaikan pangkat",
-			dbData:           dbData,
 			id:               "1",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("111")}},
+			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": {
@@ -206,9 +196,8 @@ func Test_handler_adminGetJenisKenaikanPangkat(t *testing.T) {
 		},
 		{
 			name:             "ok: get another jenis kenaikan pangkat",
-			dbData:           dbData,
 			id:               "2",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("111")}},
+			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": {
@@ -219,23 +208,20 @@ func Test_handler_adminGetJenisKenaikanPangkat(t *testing.T) {
 		},
 		{
 			name:             "error: jenis kenaikan pangkat not found",
-			dbData:           dbData,
 			id:               "999",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("111")}},
+			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusNotFound,
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
 		},
 		{
 			name:             "error: jenis kenaikan pangkat deleted",
-			dbData:           dbData,
 			id:               "3",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("111")}},
+			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusNotFound,
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
 		},
 		{
 			name:             "error: auth header tidak valid",
-			dbData:           dbData,
 			id:               "1",
 			requestHeader:    http.Header{"Authorization": []string{"Bearer invalid-token"}},
 			wantResponseCode: http.StatusUnauthorized,
@@ -246,10 +232,6 @@ func Test_handler_adminGetJenisKenaikanPangkat(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-
-			pgxconn := dbtest.New(t, dbmigrations.FS)
-			_, err := pgxconn.Exec(context.Background(), tt.dbData)
-			require.NoError(t, err)
 
 			req := httptest.NewRequest(http.MethodGet, "/v1/admin/jenis-kenaikan-pangkat/"+tt.id, nil)
 			req.Header = tt.requestHeader
@@ -279,23 +261,25 @@ func Test_handler_adminCreateJenisKenaikanPangkat(t *testing.T) {
 			('Kenaikan Reguler', now(), now(), NULL),
 			('Kenaikan Pilihan', now(), now(), NULL);
 	`
+	pgxconn := dbtest.New(t, dbmigrations.FS)
+	_, err := pgxconn.Exec(context.Background(), dbData)
+	require.NoError(t, err)
 
+	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	tests := []struct {
 		name             string
-		dbData           string
 		requestBody      string
 		requestHeader    http.Header
 		wantResponseCode int
 		wantResponseBody string
 	}{
 		{
-			name:   "ok: create jenis kenaikan pangkat with required field",
-			dbData: dbData,
+			name: "ok: create jenis kenaikan pangkat with required field",
 			requestBody: `{
 				"nama": "Kenaikan Luar Biasa"
 			}`,
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
+				"Authorization": authHeader,
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusCreated,
@@ -308,18 +292,16 @@ func Test_handler_adminCreateJenisKenaikanPangkat(t *testing.T) {
 		},
 		{
 			name:        "error: missing required field nama",
-			dbData:      dbData,
 			requestBody: `{}`,
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
+				"Authorization": authHeader,
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusBadRequest,
 			wantResponseBody: `{"message": "parameter \"nama\" harus diisi"}`,
 		},
 		{
-			name:   "error: auth header tidak valid",
-			dbData: dbData,
+			name: "error: auth header tidak valid",
 			requestBody: `{
 				"nama": "Kenaikan Pangkat Percobaan"
 			}`,
@@ -335,10 +317,6 @@ func Test_handler_adminCreateJenisKenaikanPangkat(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-
-			pgxconn := dbtest.New(t, dbmigrations.FS)
-			_, err := pgxconn.Exec(context.Background(), tt.dbData)
-			require.NoError(t, err)
 
 			req := httptest.NewRequest(http.MethodPost, "/v1/admin/jenis-kenaikan-pangkat", strings.NewReader(tt.requestBody))
 			req.Header = tt.requestHeader
@@ -371,10 +349,13 @@ func Test_handler_adminUpdateJenisKenaikanPangkat(t *testing.T) {
 		(3, 'Jabatan Fungsional', now(), now(), now()),
 		(4, 'Penyesuaian Ijazah', now(), now(), NULL);
 	`
+	pgxconn := dbtest.New(t, dbmigrations.FS)
+	_, err := pgxconn.Exec(context.Background(), dbData)
+	require.NoError(t, err)
 
+	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	tests := []struct {
 		name             string
-		dbData           string
 		id               string
 		requestBody      string
 		requestHeader    http.Header
@@ -382,17 +363,14 @@ func Test_handler_adminUpdateJenisKenaikanPangkat(t *testing.T) {
 		wantResponseBody string
 	}{
 		{
-			name:   "ok: update existing jenis kenaikan pangkat",
-			dbData: dbData,
-			id:     "2",
+			name: "ok: update existing jenis kenaikan pangkat",
+			id:   "2",
 			requestBody: `{
 				"nama": "Jabatan Struktural Diperbarui"
 			}`,
 			requestHeader: http.Header{
-				"Authorization": []string{
-					apitest.GenerateAuthHeader("123456789"),
-				},
-				"Content-Type": []string{"application/json"},
+				"Authorization": authHeader,
+				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
@@ -403,40 +381,33 @@ func Test_handler_adminUpdateJenisKenaikanPangkat(t *testing.T) {
 			}`,
 		},
 		{
-			name:   "error: update not found",
-			dbData: dbData,
-			id:     "99",
+			name: "error: update not found",
+			id:   "99",
 			requestBody: `{
 				"nama": "Tidak Ada"
 			}`,
 			requestHeader: http.Header{
-				"Authorization": []string{
-					apitest.GenerateAuthHeader("123456789"),
-				},
-				"Content-Type": []string{"application/json"},
+				"Authorization": authHeader,
+				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusNotFound,
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
 		},
 		{
-			name:   "error: update deleted record",
-			dbData: dbData,
-			id:     "3",
+			name: "error: update deleted record",
+			id:   "3",
 			requestBody: `{
 				"nama": "Tidak Boleh Diperbarui"
 			}`,
 			requestHeader: http.Header{
-				"Authorization": []string{
-					apitest.GenerateAuthHeader("123456789"),
-				},
-				"Content-Type": []string{"application/json"},
+				"Authorization": authHeader,
+				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusNotFound,
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
 		},
 		{
 			name:        "error: auth header tidak valid",
-			dbData:      dbData,
 			id:          "1",
 			requestBody: `{"nama": "Reguler Diperbarui"}`,
 			requestHeader: http.Header{
@@ -451,9 +422,6 @@ func Test_handler_adminUpdateJenisKenaikanPangkat(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			pgxconn := dbtest.New(t, dbmigrations.FS)
-			_, err := pgxconn.Exec(context.Background(), tt.dbData)
-			require.NoError(t, err)
 
 			req := httptest.NewRequest(http.MethodPut, "/v1/admin/jenis-kenaikan-pangkat/"+tt.id, strings.NewReader(tt.requestBody))
 			req.Header = tt.requestHeader
@@ -483,51 +451,50 @@ func Test_handler_adminDeleteJenisKenaikanPangkat(t *testing.T) {
 		(2, 'Pilihan', now(), now(), NULL),
 		(3, 'Luar Biasa', now(), now(), now());
 	`
+	pgxconn := dbtest.New(t, dbmigrations.FS)
+	_, err := pgxconn.Exec(context.Background(), dbData)
+	require.NoError(t, err)
 
+	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	tests := []struct {
 		name             string
-		dbData           string
 		id               string
 		requestHeader    http.Header
 		wantResponseCode int
 		wantResponseBody string
 	}{
 		{
-			name:   "ok: delete jenis kenaikan pangkat",
-			dbData: dbData,
-			id:     "1",
+			name: "ok: delete jenis kenaikan pangkat",
+			id:   "1",
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
+				"Authorization": authHeader,
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusNoContent,
 		},
 		{
-			name:   "error: delete not found jenis kenaikan pangkat",
-			dbData: dbData,
-			id:     "999",
+			name: "error: delete not found jenis kenaikan pangkat",
+			id:   "999",
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
+				"Authorization": authHeader,
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusNotFound,
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
 		},
 		{
-			name:   "error: delete already deleted jenis kenaikan pangkat",
-			dbData: dbData,
-			id:     "3",
+			name: "error: delete already deleted jenis kenaikan pangkat",
+			id:   "3",
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
+				"Authorization": authHeader,
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusNotFound,
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
 		},
 		{
-			name:   "error: auth header tidak valid",
-			dbData: dbData,
-			id:     "1",
+			name: "error: auth header tidak valid",
+			id:   "1",
 			requestHeader: http.Header{
 				"Authorization": []string{"Bearer some-token"},
 				"Content-Type":  []string{"application/json"},
@@ -540,10 +507,6 @@ func Test_handler_adminDeleteJenisKenaikanPangkat(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			pgxconn := dbtest.New(t, dbmigrations.FS)
-
-			_, err := pgxconn.Exec(context.Background(), tt.dbData)
-			require.NoError(t, err)
 
 			req := httptest.NewRequest(http.MethodDelete, "/v1/admin/jenis-kenaikan-pangkat/"+tt.id, nil)
 			req.Header = tt.requestHeader

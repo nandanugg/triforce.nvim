@@ -33,10 +33,13 @@ func Test_handler_list(t *testing.T) {
 			(14, 'Jenis Penghargaan 1', 'Penghargaan 4', 'Deskripsi Penghargaan 4', '2003-01-01', '41', now()),
 			(15, 'Jenis Penghargaan 1', 'Penghargaan 5', 'Deskripsi Penghargaan 5', '2004-01-01', '42', NULL);
 	`
+	db := dbtest.New(t, dbmigrations.FS)
+	_, err := db.Exec(context.Background(), dbData)
+	require.NoError(t, err)
 
+	authHeader := []string{apitest.GenerateAuthHeader("41")}
 	tests := []struct {
 		name             string
-		dbData           string
 		requestQuery     url.Values
 		requestHeader    http.Header
 		wantResponseCode int
@@ -44,8 +47,7 @@ func Test_handler_list(t *testing.T) {
 	}{
 		{
 			name:             "ok: tanpa parameter apapun",
-			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("41")}},
+			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -77,9 +79,8 @@ func Test_handler_list(t *testing.T) {
 		},
 		{
 			name:             "ok: dengan parameter pagination",
-			dbData:           dbData,
 			requestQuery:     url.Values{"limit": []string{"1"}, "offset": []string{"1"}},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("41")}},
+			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -96,14 +97,12 @@ func Test_handler_list(t *testing.T) {
 		},
 		{
 			name:             "ok: tidak ada data milik user",
-			dbData:           dbData,
 			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("200")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{"data": [], "meta": {"limit": 10, "offset": 0, "total": 0}}`,
 		},
 		{
 			name:             "error: auth header tidak valid",
-			dbData:           dbData,
 			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
@@ -114,11 +113,6 @@ func Test_handler_list(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			db := dbtest.New(t, dbmigrations.FS)
-			repo := repo.New(db)
-			_, err := db.Exec(context.Background(), tt.dbData)
-			require.NoError(t, err)
-
 			req := httptest.NewRequest(http.MethodGet, "/v1/riwayat-penghargaan", nil)
 			req.URL.RawQuery = tt.requestQuery.Encode()
 			req.Header = tt.requestHeader
@@ -127,6 +121,7 @@ func Test_handler_list(t *testing.T) {
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
 
+			repo := repo.New(db)
 			authSvc := apitest.NewAuthService(api.Kode_Pegawai_Self)
 			RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
@@ -165,10 +160,13 @@ func Test_handler_getBerkas(t *testing.T) {
 			(14, 'Penghargaan 4', 'Deskripsi Penghargaan 4', NULL, '2003-01-01', '41', NULL),
 			(15, 'Penghargaan 5', 'Deskripsi Penghargaan 5', '', '2004-01-01', '41', NULL);
 		`
+	pgxconn := dbtest.New(t, dbmigrations.FS)
+	_, err := pgxconn.Exec(context.Background(), dbData)
+	require.NoError(t, err)
 
+	authHeader := []string{apitest.GenerateAuthHeader("41")}
 	tests := []struct {
 		name              string
-		dbData            string
 		paramID           string
 		requestHeader     http.Header
 		wantResponseCode  int
@@ -177,48 +175,42 @@ func Test_handler_getBerkas(t *testing.T) {
 	}{
 		{
 			name:              "ok: valid png",
-			dbData:            dbData,
 			paramID:           "11",
-			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader("41")}},
+			requestHeader:     http.Header{"Authorization": authHeader},
 			wantResponseCode:  http.StatusOK,
 			wantContentType:   "image/png",
 			wantResponseBytes: pngBytes,
 		},
 		{
 			name:              "error: base64 berkas riwayat penghargaan tidak valid",
-			dbData:            dbData,
 			paramID:           "12",
-			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader("41")}},
+			requestHeader:     http.Header{"Authorization": authHeader},
 			wantResponseCode:  http.StatusInternalServerError,
 			wantResponseBytes: []byte(`{"message": "Internal Server Error"}`),
 		},
 		{
 			name:              "error: berkas riwayat penghargaan sudah dihapus",
-			dbData:            dbData,
 			paramID:           "13",
-			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader("41")}},
+			requestHeader:     http.Header{"Authorization": authHeader},
 			wantResponseCode:  http.StatusNotFound,
 			wantResponseBytes: []byte(`{"message": "berkas riwayat penghargaan tidak ditemukan"}`),
 		},
 		{
 			name:              "error: base64 berkas riwayat penghargaan berisi null value",
-			dbData:            dbData,
 			paramID:           "14",
-			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader("41")}},
+			requestHeader:     http.Header{"Authorization": authHeader},
 			wantResponseCode:  http.StatusNotFound,
 			wantResponseBytes: []byte(`{"message": "berkas riwayat penghargaan tidak ditemukan"}`),
 		},
 		{
 			name:              "error: base64 berkas riwayat penghargaan berupa string kosong",
-			dbData:            dbData,
 			paramID:           "15",
-			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader("41")}},
+			requestHeader:     http.Header{"Authorization": authHeader},
 			wantResponseCode:  http.StatusNotFound,
 			wantResponseBytes: []byte(`{"message": "berkas riwayat penghargaan tidak ditemukan"}`),
 		},
 		{
 			name:              "error: berkas riwayat penghargaan bukan milik user login",
-			dbData:            dbData,
 			paramID:           "11",
 			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader("42")}},
 			wantResponseCode:  http.StatusNotFound,
@@ -226,23 +218,20 @@ func Test_handler_getBerkas(t *testing.T) {
 		},
 		{
 			name:              "error: berkas riwayat penghargaan tidak ditemukan",
-			dbData:            dbData,
 			paramID:           "0",
-			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader("41")}},
+			requestHeader:     http.Header{"Authorization": authHeader},
 			wantResponseCode:  http.StatusNotFound,
 			wantResponseBytes: []byte(`{"message": "berkas riwayat penghargaan tidak ditemukan"}`),
 		},
 		{
 			name:              "error: invalid id",
-			dbData:            dbData,
 			paramID:           "abc",
-			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader("41")}},
+			requestHeader:     http.Header{"Authorization": authHeader},
 			wantResponseCode:  http.StatusBadRequest,
 			wantResponseBytes: []byte(`{"message": "parameter \"id\" harus dalam format yang sesuai"}`),
 		},
 		{
 			name:              "error: auth header tidak valid",
-			dbData:            dbData,
 			paramID:           "11",
 			requestHeader:     http.Header{"Authorization": []string{"Bearer some-token"}},
 			wantResponseCode:  http.StatusUnauthorized,
@@ -252,10 +241,6 @@ func Test_handler_getBerkas(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-
-			pgxconn := dbtest.New(t, dbmigrations.FS)
-			_, err := pgxconn.Exec(context.Background(), tt.dbData)
-			require.NoError(t, err)
 
 			req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/v1/riwayat-penghargaan/%s/berkas", tt.paramID), nil)
 			req.Header = tt.requestHeader
@@ -294,10 +279,13 @@ func Test_handler_listAdmin(t *testing.T) {
 			(14, 'Jenis Penghargaan 1', 'Penghargaan 4', 'Deskripsi Penghargaan 4', '2003-01-01', '41', now()),
 			(15, 'Jenis Penghargaan 1', 'Penghargaan 5', 'Deskripsi Penghargaan 5', '2004-01-01', '42', NULL);
 	`
+	db := dbtest.New(t, dbmigrations.FS)
+	_, err := db.Exec(context.Background(), dbData)
+	require.NoError(t, err)
 
+	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	tests := []struct {
 		name             string
-		dbData           string
 		nip              string
 		requestQuery     url.Values
 		requestHeader    http.Header
@@ -306,9 +294,8 @@ func Test_handler_listAdmin(t *testing.T) {
 	}{
 		{
 			name:             "ok: tanpa parameter apapun",
-			dbData:           dbData,
 			nip:              "41",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
+			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -340,10 +327,9 @@ func Test_handler_listAdmin(t *testing.T) {
 		},
 		{
 			name:             "ok: dengan parameter pagination",
-			dbData:           dbData,
 			nip:              "41",
 			requestQuery:     url.Values{"limit": []string{"1"}, "offset": []string{"1"}},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
+			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -360,7 +346,6 @@ func Test_handler_listAdmin(t *testing.T) {
 		},
 		{
 			name:             "error: auth header tidak valid",
-			dbData:           dbData,
 			nip:              "41",
 			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
 			wantResponseCode: http.StatusUnauthorized,
@@ -372,11 +357,6 @@ func Test_handler_listAdmin(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			db := dbtest.New(t, dbmigrations.FS)
-			repo := repo.New(db)
-			_, err := db.Exec(context.Background(), tt.dbData)
-			require.NoError(t, err)
-
 			req := httptest.NewRequest(http.MethodGet, "/v1/admin/pegawai/"+tt.nip+"/riwayat-penghargaan", nil)
 			req.URL.RawQuery = tt.requestQuery.Encode()
 			req.Header = tt.requestHeader
@@ -385,6 +365,7 @@ func Test_handler_listAdmin(t *testing.T) {
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
 
+			repo := repo.New(db)
 			authSvc := apitest.NewAuthService(api.Kode_Pegawai_Read)
 			RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
@@ -423,10 +404,13 @@ func Test_handler_getBerkasAdmin(t *testing.T) {
 			(14, 'Penghargaan 4', 'Deskripsi Penghargaan 4', NULL, '2003-01-01', '41', NULL),
 			(15, 'Penghargaan 5', 'Deskripsi Penghargaan 5', '', '2004-01-01', '41', NULL);
 		`
+	pgxconn := dbtest.New(t, dbmigrations.FS)
+	_, err := pgxconn.Exec(context.Background(), dbData)
+	require.NoError(t, err)
 
+	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	tests := []struct {
 		name              string
-		dbData            string
 		paramID           string
 		nip               string
 		requestHeader     http.Header
@@ -436,71 +420,63 @@ func Test_handler_getBerkasAdmin(t *testing.T) {
 	}{
 		{
 			name:              "ok: valid png",
-			dbData:            dbData,
 			paramID:           "11",
 			nip:               "41",
-			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
+			requestHeader:     http.Header{"Authorization": authHeader},
 			wantResponseCode:  http.StatusOK,
 			wantContentType:   "image/png",
 			wantResponseBytes: pngBytes,
 		},
 		{
 			name:              "error: base64 berkas riwayat penghargaan tidak valid",
-			dbData:            dbData,
 			paramID:           "12",
 			nip:               "41",
-			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
+			requestHeader:     http.Header{"Authorization": authHeader},
 			wantResponseCode:  http.StatusInternalServerError,
 			wantResponseBytes: []byte(`{"message": "Internal Server Error"}`),
 		},
 		{
 			name:              "error: berkas riwayat penghargaan sudah dihapus",
-			dbData:            dbData,
 			paramID:           "13",
 			nip:               "41",
-			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
+			requestHeader:     http.Header{"Authorization": authHeader},
 			wantResponseCode:  http.StatusNotFound,
 			wantResponseBytes: []byte(`{"message": "berkas riwayat penghargaan tidak ditemukan"}`),
 		},
 		{
 			name:              "error: base64 berkas riwayat penghargaan berisi null value",
-			dbData:            dbData,
 			paramID:           "14",
 			nip:               "41",
-			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
+			requestHeader:     http.Header{"Authorization": authHeader},
 			wantResponseCode:  http.StatusNotFound,
 			wantResponseBytes: []byte(`{"message": "berkas riwayat penghargaan tidak ditemukan"}`),
 		},
 		{
 			name:              "error: base64 berkas riwayat penghargaan berupa string kosong",
-			dbData:            dbData,
 			paramID:           "15",
 			nip:               "41",
-			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
+			requestHeader:     http.Header{"Authorization": authHeader},
 			wantResponseCode:  http.StatusNotFound,
 			wantResponseBytes: []byte(`{"message": "berkas riwayat penghargaan tidak ditemukan"}`),
 		},
 		{
 			name:              "error: berkas riwayat penghargaan tidak ditemukan",
-			dbData:            dbData,
 			paramID:           "0",
 			nip:               "41",
-			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
+			requestHeader:     http.Header{"Authorization": authHeader},
 			wantResponseCode:  http.StatusNotFound,
 			wantResponseBytes: []byte(`{"message": "berkas riwayat penghargaan tidak ditemukan"}`),
 		},
 		{
 			name:              "error: invalid id",
-			dbData:            dbData,
 			paramID:           "abc",
 			nip:               "41",
-			requestHeader:     http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
+			requestHeader:     http.Header{"Authorization": authHeader},
 			wantResponseCode:  http.StatusBadRequest,
 			wantResponseBytes: []byte(`{"message": "parameter \"id\" harus dalam format yang sesuai"}`),
 		},
 		{
 			name:              "error: auth header tidak valid",
-			dbData:            dbData,
 			paramID:           "11",
 			nip:               "41",
 			requestHeader:     http.Header{"Authorization": []string{"Bearer some-token"}},
@@ -511,10 +487,6 @@ func Test_handler_getBerkasAdmin(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-
-			pgxconn := dbtest.New(t, dbmigrations.FS)
-			_, err := pgxconn.Exec(context.Background(), tt.dbData)
-			require.NoError(t, err)
 
 			req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/v1/admin/pegawai/%s/riwayat-penghargaan/%s/berkas", tt.nip, tt.paramID), nil)
 			req.Header = tt.requestHeader

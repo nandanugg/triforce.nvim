@@ -26,10 +26,13 @@ func Test_handler_list(t *testing.T) {
 			(11, '11a',       '11b',        '11c',      '2000-01-02', null),
 			(12, '12a',       '12b',        null,       null,         '12d');
 	`
+	db := dbtest.New(t, dbmigrations.FS)
+	_, err := db.Exec(context.Background(), dbData)
+	require.NoError(t, err)
 
+	authHeader := []string{apitest.GenerateAuthHeader("1")}
 	tests := []struct {
 		name             string
-		dbData           string
 		requestQuery     url.Values
 		requestHeader    http.Header
 		wantResponseCode int
@@ -37,8 +40,7 @@ func Test_handler_list(t *testing.T) {
 	}{
 		{
 			name:             "ok",
-			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1")}},
+			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -64,10 +66,6 @@ func Test_handler_list(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-
-			db := dbtest.New(t, dbmigrations.FS)
-			_, err := db.Exec(context.Background(), tt.dbData)
-			require.NoError(t, err)
 
 			req := httptest.NewRequest(http.MethodGet, "/v1/dokumen-pendukung", nil)
 			req.URL.RawQuery = tt.requestQuery.Encode()

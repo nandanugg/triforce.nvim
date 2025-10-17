@@ -37,11 +37,14 @@ func Test_handler_ListRefAgama(t *testing.T) {
 		(8, 'Lainnya', '2024-01-01', '2024-01-01', null),
 		(9, 'Test', '2024-01-01', '2024-01-01', now());
 	`
+	pgx := dbtest.New(t, dbmigrations.FS)
+	_, err := pgx.Exec(context.Background(), dbData)
+	require.NoError(t, err)
 
+	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	defaulTimestamptz := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC).Local().Format(time.RFC3339)
 	tests := []struct {
 		name             string
-		dbData           string
 		requestQuery     url.Values
 		requestHeader    http.Header
 		wantResponseCode int
@@ -49,8 +52,7 @@ func Test_handler_ListRefAgama(t *testing.T) {
 	}{
 		{
 			name:             "ok: admin get all agama with default pagination",
-			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
+			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -67,13 +69,12 @@ func Test_handler_ListRefAgama(t *testing.T) {
 			}`,
 		},
 		{
-			name:   "ok: pagination limit 3 offset 2",
-			dbData: dbData,
+			name: "ok: pagination limit 3 offset 2",
 			requestQuery: url.Values{
 				"limit":  []string{"3"},
 				"offset": []string{"2"},
 			},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
+			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -86,7 +87,6 @@ func Test_handler_ListRefAgama(t *testing.T) {
 		},
 		{
 			name:             "error: invalid token",
-			dbData:           dbData,
 			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
@@ -96,9 +96,6 @@ func Test_handler_ListRefAgama(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			pgx := dbtest.New(t, dbmigrations.FS)
-			_, err := pgx.Exec(context.Background(), tt.dbData)
-			require.NoError(t, err)
 
 			req := httptest.NewRequest(http.MethodGet, "/v1/agama", nil)
 			req.URL.RawQuery = tt.requestQuery.Encode()
@@ -135,11 +132,14 @@ func Test_handler_adminListRefAgama(t *testing.T) {
 		(8, 'Lainnya', '2024-01-01', '2024-01-01', null),
 		(9, 'Test', '2024-01-01', '2024-01-01', now());
 	`
+	pgx := dbtest.New(t, dbmigrations.FS)
+	_, err := pgx.Exec(context.Background(), dbData)
+	require.NoError(t, err)
 
+	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	defaulTimestamptz := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC).Local().Format(time.RFC3339)
 	tests := []struct {
 		name             string
-		dbData           string
 		requestQuery     url.Values
 		requestHeader    http.Header
 		wantResponseCode int
@@ -147,8 +147,7 @@ func Test_handler_adminListRefAgama(t *testing.T) {
 	}{
 		{
 			name:             "ok: admin get all agama with default pagination",
-			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
+			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -165,13 +164,12 @@ func Test_handler_adminListRefAgama(t *testing.T) {
 			}`,
 		},
 		{
-			name:   "ok: pagination limit 3 offset 2",
-			dbData: dbData,
+			name: "ok: pagination limit 3 offset 2",
 			requestQuery: url.Values{
 				"limit":  []string{"3"},
 				"offset": []string{"2"},
 			},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
+			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -184,7 +182,6 @@ func Test_handler_adminListRefAgama(t *testing.T) {
 		},
 		{
 			name:             "error: invalid token",
-			dbData:           dbData,
 			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
@@ -194,9 +191,6 @@ func Test_handler_adminListRefAgama(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			pgx := dbtest.New(t, dbmigrations.FS)
-			_, err := pgx.Exec(context.Background(), tt.dbData)
-			require.NoError(t, err)
 
 			req := httptest.NewRequest(http.MethodGet, "/v1/admin/agama", nil)
 			req.URL.RawQuery = tt.requestQuery.Encode()
@@ -226,22 +220,24 @@ func Test_handler_adminGetRefAgama(t *testing.T) {
 		(1, 'Islam', '2024-01-01', '2024-01-01', null),
 		(2, 'Kristen', '2024-01-01', '2024-01-01', now());
 	`
+	pgx := dbtest.New(t, dbmigrations.FS)
+	_, err := pgx.Exec(context.Background(), dbData)
+	require.NoError(t, err)
 
+	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	defaulTimestamptz := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC).Local().Format(time.RFC3339)
 	tests := []struct {
 		name             string
 		id               string
-		dbData           string
 		requestHeader    http.Header
 		wantResponseCode int
 		wantResponseBody string
 	}{
 		{
-			name:   "ok: get existing agama by id",
-			id:     "1",
-			dbData: dbData,
+			name: "ok: get existing agama by id",
+			id:   "1",
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
+				"Authorization": authHeader,
 			},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
@@ -254,29 +250,26 @@ func Test_handler_adminGetRefAgama(t *testing.T) {
 			}`,
 		},
 		{
-			name:   "error: id not found",
-			id:     "99",
-			dbData: dbData,
+			name: "error: id not found",
+			id:   "99",
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
+				"Authorization": authHeader,
 			},
 			wantResponseCode: http.StatusNotFound,
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
 		},
 		{
-			name:   "error: already deleted",
-			id:     "2",
-			dbData: dbData,
+			name: "error: already deleted",
+			id:   "2",
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
+				"Authorization": authHeader,
 			},
 			wantResponseCode: http.StatusNotFound,
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
 		},
 		{
-			name:   "error: invalid token",
-			id:     "1",
-			dbData: dbData,
+			name: "error: invalid token",
+			id:   "1",
 			requestHeader: http.Header{
 				"Authorization": []string{"Bearer invalid"},
 			},
@@ -287,9 +280,7 @@ func Test_handler_adminGetRefAgama(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			pgx := dbtest.New(t, dbmigrations.FS)
-			_, err := pgx.Exec(context.Background(), tt.dbData)
-			require.NoError(t, err)
+			t.Parallel()
 
 			req := httptest.NewRequest(http.MethodGet, "/v1/admin/agama/"+tt.id, nil)
 			req.Header = tt.requestHeader
@@ -315,6 +306,9 @@ func Test_handler_adminGetRefAgama(t *testing.T) {
 func Test_handler_adminCreateRefAgama(t *testing.T) {
 	t.Parallel()
 
+	pgx := dbtest.New(t, dbmigrations.FS)
+
+	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	tests := []struct {
 		name             string
 		requestBody      string
@@ -326,7 +320,7 @@ func Test_handler_adminCreateRefAgama(t *testing.T) {
 			name:        "ok: admin create agama",
 			requestBody: `{"nama": "Zoroastrian"}`,
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
+				"Authorization": authHeader,
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusCreated,
@@ -346,7 +340,7 @@ func Test_handler_adminCreateRefAgama(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			pgx := dbtest.New(t, dbmigrations.FS)
+			t.Parallel()
 
 			req := httptest.NewRequest(http.MethodPost, "/v1/admin/agama", strings.NewReader(tt.requestBody))
 			req.Header = tt.requestHeader
@@ -401,7 +395,11 @@ func Test_handler_adminUpdateRefAgama(t *testing.T) {
 		(1, 'Islam', '2024-01-01', now(), null),
 		(2, 'Kristen', '2024-01-01', now(), now());
 	`
+	pgx := dbtest.New(t, dbmigrations.FS)
+	_, err := pgx.Exec(context.Background(), dbData)
+	require.NoError(t, err)
 
+	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	defaulTimestamptz := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC).Local().Format(time.RFC3339)
 	tests := []struct {
 		name             string
@@ -416,7 +414,7 @@ func Test_handler_adminUpdateRefAgama(t *testing.T) {
 			id:          "1",
 			requestBody: `{"nama": "Islam Updated"}`,
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
+				"Authorization": authHeader,
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusOK,
@@ -429,7 +427,7 @@ func Test_handler_adminUpdateRefAgama(t *testing.T) {
 			id:          "2",
 			requestBody: `{"nama": "Unknown"}`,
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
+				"Authorization": authHeader,
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusNotFound,
@@ -439,7 +437,7 @@ func Test_handler_adminUpdateRefAgama(t *testing.T) {
 			id:          "100",
 			requestBody: `{"nama": "Unknown"}`,
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
+				"Authorization": authHeader,
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusNotFound,
@@ -448,9 +446,7 @@ func Test_handler_adminUpdateRefAgama(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			pgx := dbtest.New(t, dbmigrations.FS)
-			_, err := pgx.Exec(context.Background(), dbData)
-			require.NoError(t, err)
+			t.Parallel()
 
 			req := httptest.NewRequest(http.MethodPut, "/v1/admin/agama/"+tt.id, strings.NewReader(tt.requestBody))
 			req.Header = tt.requestHeader
@@ -505,7 +501,11 @@ func Test_handler_adminDeleteRefAgama(t *testing.T) {
 		(1, 'Islam', now(), now(), null),
 		(2, 'Kristen', now(), now(), now());
 	`
+	pgx := dbtest.New(t, dbmigrations.FS)
+	_, err := pgx.Exec(context.Background(), dbData)
+	require.NoError(t, err)
 
+	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	tests := []struct {
 		name             string
 		id               string
@@ -517,7 +517,7 @@ func Test_handler_adminDeleteRefAgama(t *testing.T) {
 			name: "ok: admin delete agama",
 			id:   "1",
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
+				"Authorization": authHeader,
 			},
 			wantResponseCode: http.StatusNoContent,
 			wantResponseBody: `{}`,
@@ -526,7 +526,7 @@ func Test_handler_adminDeleteRefAgama(t *testing.T) {
 			name: "error: id not found if deleted",
 			id:   "2",
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
+				"Authorization": authHeader,
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusNotFound,
@@ -536,7 +536,7 @@ func Test_handler_adminDeleteRefAgama(t *testing.T) {
 			name: "error: id not found if not exists",
 			id:   "100",
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader("123456789")},
+				"Authorization": authHeader,
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusNotFound,
@@ -555,9 +555,7 @@ func Test_handler_adminDeleteRefAgama(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			pgx := dbtest.New(t, dbmigrations.FS)
-			_, err := pgx.Exec(context.Background(), dbData)
-			require.NoError(t, err)
+			t.Parallel()
 
 			req := httptest.NewRequest(http.MethodDelete, "/v1/admin/agama/"+tt.id, nil)
 			req.Header = tt.requestHeader

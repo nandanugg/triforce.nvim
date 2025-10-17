@@ -30,10 +30,13 @@ func Test_handler_list(t *testing.T) {
 			(4,  '2c', 2020,  'Sangat Baik',      'Sangat Baik',         'Sangat Baik',    null),
 			(5,  '1c', 2020,  'Sangat Baik',      'Sangat Baik',         'Sangat Baik',    '2020-01-01');
 	`
+	db := dbtest.New(t, dbmigrations.FS)
+	_, err := db.Exec(context.Background(), dbData)
+	require.NoError(t, err)
 
+	authHeader := []string{apitest.GenerateAuthHeader("1c")}
 	tests := []struct {
 		name             string
-		dbData           string
 		requestQuery     url.Values
 		requestHeader    http.Header
 		wantResponseCode int
@@ -41,8 +44,7 @@ func Test_handler_list(t *testing.T) {
 	}{
 		{
 			name:             "ok: tanpa parameter apapun",
-			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1c")}},
+			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -73,9 +75,8 @@ func Test_handler_list(t *testing.T) {
 		},
 		{
 			name:             "ok: dengan parameter pagination",
-			dbData:           dbData,
 			requestQuery:     url.Values{"limit": []string{"1"}, "offset": []string{"1"}},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1c")}},
+			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -92,14 +93,12 @@ func Test_handler_list(t *testing.T) {
 		},
 		{
 			name:             "ok: tidak ada data milik user",
-			dbData:           dbData,
 			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{"data": [], "meta": {"limit": 10, "offset": 0, "total": 0}}`,
 		},
 		{
 			name:             "error: auth header tidak valid",
-			dbData:           dbData,
 			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
@@ -109,10 +108,6 @@ func Test_handler_list(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-
-			db := dbtest.New(t, dbmigrations.FS)
-			_, err := db.Exec(context.Background(), tt.dbData)
-			require.NoError(t, err)
 
 			req := httptest.NewRequest(http.MethodGet, "/v1/riwayat-kinerja", nil)
 			req.URL.RawQuery = tt.requestQuery.Encode()
@@ -146,10 +141,13 @@ func Test_handler_listAdmin(t *testing.T) {
 			(5,  '1c', 2020,  'Sangat Baik',      'Sangat Baik',         'Sangat Baik',    '2020-01-01'),
 			(6,  '1d', 2021,  'Baik',             'Baik',                'Baik',           null);
 	`
+	db := dbtest.New(t, dbmigrations.FS)
+	_, err := db.Exec(context.Background(), dbData)
+	require.NoError(t, err)
 
+	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	tests := []struct {
 		name             string
-		dbData           string
 		nip              string
 		requestQuery     url.Values
 		requestHeader    http.Header
@@ -158,9 +156,8 @@ func Test_handler_listAdmin(t *testing.T) {
 	}{
 		{
 			name:             "ok: admin dapat melihat riwayat kinerja pegawai 1c",
-			dbData:           dbData,
 			nip:              "1c",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
+			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -191,9 +188,8 @@ func Test_handler_listAdmin(t *testing.T) {
 		},
 		{
 			name:             "ok: admin dapat melihat riwayat kinerja pegawai 1d",
-			dbData:           dbData,
 			nip:              "1d",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
+			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -210,9 +206,8 @@ func Test_handler_listAdmin(t *testing.T) {
 		},
 		{
 			name:             "ok: admin dapat melihat riwayat kinerja pegawai 2c",
-			dbData:           dbData,
 			nip:              "2c",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
+			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -229,10 +224,9 @@ func Test_handler_listAdmin(t *testing.T) {
 		},
 		{
 			name:             "ok: admin dapat melihat riwayat kinerja pegawai dengan pagination",
-			dbData:           dbData,
 			nip:              "1c",
 			requestQuery:     url.Values{"limit": []string{"1"}, "offset": []string{"1"}},
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
+			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -249,15 +243,13 @@ func Test_handler_listAdmin(t *testing.T) {
 		},
 		{
 			name:             "ok: admin melihat pegawai yang tidak memiliki riwayat kinerja",
-			dbData:           dbData,
 			nip:              "999",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
+			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{"data": [], "meta": {"limit": 10, "offset": 0, "total": 0}}`,
 		},
 		{
 			name:             "error: auth header tidak valid",
-			dbData:           dbData,
 			nip:              "1c",
 			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
 			wantResponseCode: http.StatusUnauthorized,
@@ -268,10 +260,6 @@ func Test_handler_listAdmin(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-
-			db := dbtest.New(t, dbmigrations.FS)
-			_, err := db.Exec(context.Background(), tt.dbData)
-			require.NoError(t, err)
 
 			req := httptest.NewRequest(http.MethodGet, "/v1/admin/pegawai/"+tt.nip+"/riwayat-kinerja", nil)
 			req.URL.RawQuery = tt.requestQuery.Encode()

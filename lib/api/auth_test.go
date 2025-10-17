@@ -37,7 +37,7 @@ func TestNewAuthMiddleware(t *testing.T) {
 		return "Bearer " + tokenString
 	}
 
-	seedData := `
+	dbData := `
 		insert into resource
 			(id, service,  kode,    nama,     deleted_at) values
 			(1,  'portal', 'page1', 'Page 1', null),
@@ -47,7 +47,8 @@ func TestNewAuthMiddleware(t *testing.T) {
 			(id, kode,    nama,    deleted_at) values
 			(1,  'write', 'Write', null),
 			(2,  'read',  'Read',  null),
-			(3,  'del',   'Del',   '2000-01-01');
+			(3,  'del',   'Del',   '2000-01-01'),
+			(4,  'exp',   'Exp',   null);
 		insert into resource_permission
 			(id, resource_id, permission_id, deleted_at) values
 			(1,  1,           1,             null),
@@ -56,7 +57,8 @@ func TestNewAuthMiddleware(t *testing.T) {
 			(4,  2,           2,             null),
 			(5,  1,           1,             '2000-01-01'),
 			(6,  1,           3,             null),
-			(7,  3,           1,             null);
+			(7,  3,           1,             null),
+			(8,  1,           4,             null);
 		insert into role
 			(id, nama,       is_default, is_aktif, deleted_at) values
 			(1,  'admin',    false,      true,     null),
@@ -68,15 +70,30 @@ func TestNewAuthMiddleware(t *testing.T) {
 			(1,       1,                      null),
 			(1,       4,                      '2000-01-01'),
 			(1,       6,                      null),
+			(1,       8,                      null),
 			(2,       2,                      null),
 			(2,       5,                      null),
 			(2,       7,                      null),
+			(2,       8,                      null),
 			(3,       3,                      null),
+			(3,       8,                      '2000-01-01'),
 			(4,       3,                      null);
+		insert into user_role
+			(nip,   role_id, deleted_at) values
+			('100', 1,       null),
+			('101', 1,       '2000-01-01'),
+			('102', 3,       null),
+			('102', 4,       null),
+			('103', 1,       null),
+			('103', 2,       null),
+			('103', 3,       null);
 	`
+	db := dbtest.New(t, dbmigrations.FS)
+	_, err := db.Exec(context.Background(), dbData)
+	require.NoError(t, err)
+
 	tests := []struct {
 		name                   string
-		dbData                 string
 		resourcePermissionKode string
 		requestHeader          http.Header
 		wantResponseCode       int
@@ -85,10 +102,7 @@ func TestNewAuthMiddleware(t *testing.T) {
 		wantIDs                any
 	}{
 		{
-			name: "ok: valid auth header with string audience and nip with role",
-			dbData: seedData + `
-				insert into user_role (nip, role_id) values ('100', 1);
-			`,
+			name:                   "ok: valid auth header with string audience and nip with role",
 			resourcePermissionKode: "portal.page1.write",
 			requestHeader: http.Header{
 				"Authorization": []string{generateHeader(jwt.MapClaims{
@@ -103,16 +117,13 @@ func TestNewAuthMiddleware(t *testing.T) {
 			wantIDs:          map[string]string{"keycloakID": "1", "zimbraID": "2"},
 		},
 		{
-			name: "error: valid auth header with string audience and nip with deleted user_role",
-			dbData: seedData + `
-				insert into user_role (nip, role_id, deleted_at) values ('100', 1, '2000-01-01');
-			`,
+			name:                   "error: valid auth header with string audience and nip with deleted user_role",
 			resourcePermissionKode: "portal.page1.write",
 			requestHeader: http.Header{
 				"Authorization": []string{generateHeader(jwt.MapClaims{
 					"sub":       "1",
 					"zimbra_id": "2",
-					"nip":       "100",
+					"nip":       "101",
 					"aud":       "testing",
 				})},
 			},
@@ -121,10 +132,7 @@ func TestNewAuthMiddleware(t *testing.T) {
 			wantIDs:          map[string]string{"keycloakID": "1", "zimbraID": "2"},
 		},
 		{
-			name: "error: valid auth header with string audience and nip with deleted role_resource_permission",
-			dbData: seedData + `
-				insert into user_role (nip, role_id) values ('100', 1);
-			`,
+			name:                   "error: valid auth header with string audience and nip with deleted role_resource_permission",
 			resourcePermissionKode: "portal.page2.read",
 			requestHeader: http.Header{
 				"Authorization": []string{generateHeader(jwt.MapClaims{
@@ -138,10 +146,7 @@ func TestNewAuthMiddleware(t *testing.T) {
 			wantIDs:          map[string]string{"keycloakID": "1"},
 		},
 		{
-			name: "error: valid auth header with string audience and nip with deleted permission",
-			dbData: seedData + `
-				insert into user_role (nip, role_id) values ('100', 1);
-			`,
+			name:                   "error: valid auth header with string audience and nip with deleted permission",
 			resourcePermissionKode: "portal.page1.del",
 			requestHeader: http.Header{
 				"Authorization": []string{generateHeader(jwt.MapClaims{
@@ -153,27 +158,25 @@ func TestNewAuthMiddleware(t *testing.T) {
 			wantResponseBody: `{"message": "akses ditolak"}`,
 		},
 		{
-			name:   "ok: valid auth header with list audience and nip with default roles",
-			dbData: seedData,
+			name: "ok: valid auth header with list audience and nip with default roles",
 			requestHeader: http.Header{
 				"Authorization": []string{generateHeader(jwt.MapClaims{
 					"sub":       "",
 					"zimbra_id": "",
-					"nip":       "100",
+					"nip":       "99",
 					"aud":       []string{"nexus", "testing"},
 				})},
 			},
 			resourcePermissionKode: "portal.page1.read",
 			wantResponseCode:       http.StatusOK,
-			wantUser:               &User{NIP: "100"},
+			wantUser:               &User{NIP: "99"},
 		},
 		{
-			name:   "error: valid auth header with list audience and nip with default roles accessing kode in specific role and deleted resource_permission",
-			dbData: seedData,
+			name: "error: valid auth header with list audience and nip with default roles accessing kode in specific role and deleted resource_permission",
 			requestHeader: http.Header{
 				"Authorization": []string{generateHeader(jwt.MapClaims{
 					"zimbra_id": "1",
-					"nip":       "100",
+					"nip":       "99",
 					"aud":       []string{"testing", "nexus"},
 				})},
 			},
@@ -184,13 +187,12 @@ func TestNewAuthMiddleware(t *testing.T) {
 		},
 		{
 			name:                   "error: valid auth header with list audience and nip with deleted resource",
-			dbData:                 seedData,
 			resourcePermissionKode: "portal.page3.write",
 			requestHeader: http.Header{
 				"Authorization": []string{generateHeader(jwt.MapClaims{
 					"sub":       "1",
 					"zimbra_id": "",
-					"nip":       "100",
+					"nip":       "99",
 					"aud":       []string{"nexus", "testing", "portal"},
 				})},
 			},
@@ -200,13 +202,12 @@ func TestNewAuthMiddleware(t *testing.T) {
 		},
 		{
 			name:                   "error: valid auth header with string audience and nip with deleted default role and default inactive role",
-			dbData:                 seedData,
 			resourcePermissionKode: "portal.page2.write",
 			requestHeader: http.Header{
 				"Authorization": []string{generateHeader(jwt.MapClaims{
 					"sub":       "",
 					"zimbra_id": "1",
-					"nip":       "100",
+					"nip":       "99",
 					"aud":       "testing",
 				})},
 			},
@@ -215,14 +216,11 @@ func TestNewAuthMiddleware(t *testing.T) {
 			wantIDs:          map[string]string{"zimbraID": "1"},
 		},
 		{
-			name: "error: valid auth header with string audience and nip with deleted role and inactive role",
-			dbData: seedData + `
-				insert into user_role (nip, role_id) values ('100', 3), ('100', 4);
-			`,
+			name:                   "error: valid auth header with string audience and nip with deleted role and inactive role",
 			resourcePermissionKode: "portal.page2.write",
 			requestHeader: http.Header{
 				"Authorization": []string{generateHeader(jwt.MapClaims{
-					"nip": "100",
+					"nip": "102",
 					"aud": "testing",
 				})},
 			},
@@ -230,29 +228,18 @@ func TestNewAuthMiddleware(t *testing.T) {
 			wantResponseBody: `{"message": "akses ditolak"}`,
 		},
 		{
-			name: "ok: valid auth header with string audience, multiple roles have access to kode, and user with multiple roles",
-			dbData: seedData + `
-				insert into role_resource_permission
-					(role_id, resource_permission_id, deleted_at) values
-					(2,       1,                      null),
-					(3,       1,                      '2000-01-01');
-				insert into user_role
-					(nip,   role_id) values
-					('100', 1),
-					('100', 2),
-					('100', 3);
-			`,
-			resourcePermissionKode: "portal.page1.write",
+			name:                   "ok: valid auth header with string audience, multiple roles have access to kode, and user with multiple roles",
+			resourcePermissionKode: "portal.page1.exp",
 			requestHeader: http.Header{
 				"Authorization": []string{generateHeader(jwt.MapClaims{
 					"sub":       1,
 					"zimbra_id": 1,
-					"nip":       "100",
+					"nip":       "103",
 					"aud":       "testing",
 				})},
 			},
 			wantResponseCode: http.StatusOK,
-			wantUser:         &User{NIP: "100"},
+			wantUser:         &User{NIP: "103"},
 		},
 		{
 			name:             "error: missing auth header",
@@ -332,10 +319,6 @@ func TestNewAuthMiddleware(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-
-			db := dbtest.New(t, dbmigrations.FS)
-			_, err := db.Exec(context.Background(), tt.dbData)
-			require.NoError(t, err)
 
 			req := httptest.NewRequest(http.MethodGet, "/", nil)
 			req.Header = tt.requestHeader

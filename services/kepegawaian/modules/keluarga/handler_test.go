@@ -44,10 +44,12 @@ func Test_handler_list(t *testing.T) {
 	VALUES (11, 31, 'Anak A', 'M', '2000-01-01', '1', 'pns-1');
 
 	`
+	db := dbtest.New(t, dbmigrations.FS)
+	_, err := db.Exec(t.Context(), dbData)
+	require.NoError(t, err)
 
 	tests := []struct {
 		name             string
-		dbData           string
 		requestQuery     url.Values
 		requestHeader    http.Header
 		wantResponseCode int
@@ -55,7 +57,6 @@ func Test_handler_list(t *testing.T) {
 	}{
 		{
 			name:             "ok: only nip 1c data returned",
-			dbData:           dbData,
 			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1c")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `
@@ -115,14 +116,12 @@ func Test_handler_list(t *testing.T) {
 		},
 		{
 			name:             "ok: nip 200 gets empty data",
-			dbData:           dbData,
 			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("200")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{"data": {"orang_tua":[],"pasangan":[],"anak":[]}}`,
 		},
 		{
 			name:             "error: invalid token",
-			dbData:           dbData,
 			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
@@ -133,11 +132,6 @@ func Test_handler_list(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			db := dbtest.New(t, dbmigrations.FS)
-			dbRepo := repo.New(db)
-			_, err := db.Exec(t.Context(), tt.dbData)
-			require.NoError(t, err)
-
 			req := httptest.NewRequest(http.MethodGet, "/v1/keluarga", nil)
 			req.URL.RawQuery = tt.requestQuery.Encode()
 			req.Header = tt.requestHeader
@@ -146,6 +140,7 @@ func Test_handler_list(t *testing.T) {
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
 
+			dbRepo := repo.New(db)
 			authSvc := apitest.NewAuthService(api.Kode_Pegawai_Self)
 			RegisterRoutes(e, dbRepo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
@@ -189,10 +184,13 @@ func Test_handler_listAdmin(t *testing.T) {
 	       (12, 32, 'Anak B', 'F', '2000-01-01', '1', 'pns-1', null),
 	       (13, 31, 'Anak C', 'M', '2000-01-01', '1', 'pns-1', now());
 	`
+	db := dbtest.New(t, dbmigrations.FS)
+	_, err := db.Exec(t.Context(), dbData)
+	require.NoError(t, err)
 
+	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	tests := []struct {
 		name             string
-		dbData           string
 		nip              string
 		requestQuery     url.Values
 		requestHeader    http.Header
@@ -201,9 +199,8 @@ func Test_handler_listAdmin(t *testing.T) {
 	}{
 		{
 			name:             "ok: only nip 1c data returned",
-			dbData:           dbData,
 			nip:              "1c",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
+			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `
 			{
@@ -273,23 +270,20 @@ func Test_handler_listAdmin(t *testing.T) {
 		},
 		{
 			name:             "ok: nip 200 gets empty data",
-			dbData:           dbData,
 			nip:              "200",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
+			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{"data": {"orang_tua":[],"pasangan":[],"anak":[]}}`,
 		},
 		{
 			name:             "ok: nip 1d gets empty data",
-			dbData:           dbData,
 			nip:              "1d",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
+			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{"data": {"orang_tua":[],"pasangan":[],"anak":[]}}`,
 		},
 		{
 			name:             "error: auth header tidak valid",
-			dbData:           dbData,
 			nip:              "123456789",
 			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
 			wantResponseCode: http.StatusUnauthorized,
@@ -300,11 +294,6 @@ func Test_handler_listAdmin(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			db := dbtest.New(t, dbmigrations.FS)
-			dbRepo := repo.New(db)
-			_, err := db.Exec(t.Context(), tt.dbData)
-			require.NoError(t, err)
-
 			req := httptest.NewRequest(http.MethodGet, "/v1/admin/pegawai/"+tt.nip+"/keluarga", nil)
 			req.URL.RawQuery = tt.requestQuery.Encode()
 			req.Header = tt.requestHeader
@@ -313,6 +302,7 @@ func Test_handler_listAdmin(t *testing.T) {
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
 
+			dbRepo := repo.New(db)
 			authSvc := apitest.NewAuthService(api.Kode_Pegawai_Read)
 			RegisterRoutes(e, dbRepo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)

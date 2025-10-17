@@ -106,6 +106,9 @@ func Test_handler_getDataPribadi(t *testing.T) {
 			('2c', 'PNS002', 'Budi Santoso', 'Dr.', 'M.Sc', 2, '2020-01-01', '0', '3173000000000001', '3173000000000002', 'L', 'DKI Jakarta', 1, '1990-05-20', 1, '1', 1, 1, 'budi@dikbud.go.id', 'budi@gmail.com', 'Jl. Merdeka No. 123', '08123456789', '08198765432', 1, 1, '2015-06-01', 2, 12, '5 Tahun 6 Bulan', 'KJ2', 'KJ3', 'Jakarta HQ', 1, 1, 2, '2018-01-01', 'SK-CPNS-2015', 'CPNS', '2017-01-01', 'KARPEG001', 'DOC-HEALTH-001', '2015-05-01', 'BN-001', '2015-05-02', 'SKCK-001', '2015-05-03', 'AKTE-001', 'BPJS-001', 'NPWP-001', '2016-01-01', 'TASPEN-001', 2, null, null, '2000-01-01');
 		update unit_kerja set pemimpin_pns_id = 'PNS001' where id = '8';
 	`
+	pgxconn := dbtest.New(t, dbmigrations.FS)
+	_, err := pgxconn.Exec(context.Background(), dbData)
+	require.NoError(t, err)
 
 	masaKerjaKeseluruhan := func(date time.Time, tahun, bulan int) string {
 		tahun += time.Now().Year() - date.Year()
@@ -122,15 +125,14 @@ func Test_handler_getDataPribadi(t *testing.T) {
 	}
 
 	tests := []struct {
-		name             string
-		dbData           string
+		name string
+
 		requestHeader    http.Header
 		wantResponseCode int
 		wantResponseBody string
 	}{
 		{
 			name:             "ok: non pppk with status_pns & tmt_pns",
-			dbData:           dbData,
 			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1c")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `
@@ -195,7 +197,6 @@ func Test_handler_getDataPribadi(t *testing.T) {
 		},
 		{
 			name:             "ok: most data is null",
-			dbData:           dbData,
 			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1d")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `
@@ -260,7 +261,6 @@ func Test_handler_getDataPribadi(t *testing.T) {
 		},
 		{
 			name:             "ok: references record is deleted with empty tmt_cpns without status_pns",
-			dbData:           dbData,
 			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1e")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `
@@ -325,7 +325,6 @@ func Test_handler_getDataPribadi(t *testing.T) {
 		},
 		{
 			name:             "ok: pppk with terminated date later than today",
-			dbData:           dbData,
 			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1f")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `
@@ -390,7 +389,6 @@ func Test_handler_getDataPribadi(t *testing.T) {
 		},
 		{
 			name:             "ok: status_pns without tmt_pns and another case with edge case",
-			dbData:           dbData,
 			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1g")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `
@@ -455,21 +453,18 @@ func Test_handler_getDataPribadi(t *testing.T) {
 		},
 		{
 			name:             "error: data pegawai deleted",
-			dbData:           dbData,
 			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2c")}},
 			wantResponseCode: http.StatusNotFound,
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
 		},
 		{
 			name:             "error: tidak ada data pegawai milik user",
-			dbData:           dbData,
 			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("2a")}},
 			wantResponseCode: http.StatusNotFound,
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
 		},
 		{
 			name:             "error: auth header tidak valid",
-			dbData:           dbData,
 			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
@@ -479,10 +474,6 @@ func Test_handler_getDataPribadi(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-
-			pgxconn := dbtest.New(t, dbmigrations.FS)
-			_, err := pgxconn.Exec(context.Background(), tt.dbData)
-			require.NoError(t, err)
 
 			req := httptest.NewRequest(http.MethodGet, "/v1/data-pribadi", nil)
 			req.Header = tt.requestHeader

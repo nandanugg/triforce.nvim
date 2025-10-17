@@ -12,7 +12,7 @@ import (
 type pendidikan struct {
 	ID                  string      `json:"id"`
 	Nama                pgtype.Text `json:"nama"`
-	TingkatPendidikan   pgtype.Text `json:"tingkat_pendidikan,omitempty"`
+	TingkatPendidikan   pgtype.Text `json:"tingkat_pendidikan"`
 	TingkatPendidikanID pgtype.Int2 `json:"tingkat_pendidikan_id"`
 }
 
