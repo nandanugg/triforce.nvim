@@ -9,6 +9,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
+	"net/textproto"
 	"net/url"
 	"os"
 	"strings"
@@ -712,6 +713,7 @@ func Test_handler_adminCreateTemplate(t *testing.T) {
 		formFields       map[string]string
 		files            map[string][]byte
 		authHeader       string
+		fileContentType  string
 		wantResponseCode int
 		wantResponseBody string
 	}{
@@ -723,6 +725,7 @@ func Test_handler_adminCreateTemplate(t *testing.T) {
 			files: map[string][]byte{
 				"file": pngBytes,
 			},
+			fileContentType:  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 			authHeader:       apitest.GenerateAuthHeader("123456789"),
 			wantResponseCode: http.StatusCreated,
 			wantResponseBody: `{"data": {
@@ -733,10 +736,24 @@ func Test_handler_adminCreateTemplate(t *testing.T) {
 			}}`,
 		},
 		{
+			name: "error: file with invalid type",
+			formFields: map[string]string{
+				"nama": "master 1",
+			},
+			files: map[string][]byte{
+				"file": pngBytes,
+			},
+			fileContentType:  "image/x-xpixmap",
+			authHeader:       apitest.GenerateAuthHeader("123456789"),
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "parameter \"file\" harus dalam format yang sesuai"}`,
+		},
+		{
 			name: "error: missing file upload",
 			formFields: map[string]string{
 				"nama": "no file",
 			},
+			fileContentType:  "application/pdf",
 			files:            nil,
 			authHeader:       apitest.GenerateAuthHeader("123456789"),
 			wantResponseCode: http.StatusBadRequest,
@@ -747,6 +764,7 @@ func Test_handler_adminCreateTemplate(t *testing.T) {
 			formFields: map[string]string{
 				"nama": "bad",
 			},
+			fileContentType: "application/pdf",
 			files: map[string][]byte{
 				"file": pngBytes,
 			},
@@ -772,7 +790,11 @@ func Test_handler_adminCreateTemplate(t *testing.T) {
 			}
 
 			for fieldName, content := range tt.files {
-				part, err := writer.CreateFormFile(fieldName, fieldName+".bin")
+				h := make(textproto.MIMEHeader)
+				h.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"; filename="%s"`, fieldName, "example.bin"))
+				h.Set("Content-Type", tt.fileContentType)
+
+				part, err := writer.CreatePart(h)
 				require.NoError(t, err)
 				_, err = part.Write(content)
 				require.NoError(t, err)
@@ -853,6 +875,7 @@ func Test_handler_adminUpdateTemplate(t *testing.T) {
 		dbData           string
 		paramID          string
 		formFields       map[string]string
+		fileContentType  string
 		files            map[string][]byte
 		authHeader       string
 		wantResponseCode int
@@ -865,6 +888,7 @@ func Test_handler_adminUpdateTemplate(t *testing.T) {
 			formFields: map[string]string{
 				"nama": "master 1",
 			},
+			fileContentType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 			files: map[string][]byte{
 				"file": pngBytes,
 			},
@@ -878,12 +902,28 @@ func Test_handler_adminUpdateTemplate(t *testing.T) {
 			}}`,
 		},
 		{
+			name:    "error: file with invalid type",
+			dbData:  dbData,
+			paramID: "11",
+			formFields: map[string]string{
+				"nama": "master 1",
+			},
+			fileContentType: "image/x-xpixmap",
+			files: map[string][]byte{
+				"file": pngBytes,
+			},
+			authHeader:       apitest.GenerateAuthHeader("123456789"),
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "parameter \"file\" harus dalam format yang sesuai"}`,
+		},
+		{
 			name:    "error: not found if deleted",
 			dbData:  dbData,
 			paramID: "12",
 			formFields: map[string]string{
 				"nama": "master 1",
 			},
+			fileContentType: "application/pdf",
 			files: map[string][]byte{
 				"file": pngBytes,
 			},
@@ -898,6 +938,7 @@ func Test_handler_adminUpdateTemplate(t *testing.T) {
 			formFields: map[string]string{
 				"nama": "master 1",
 			},
+			fileContentType: "application/pdf",
 			files: map[string][]byte{
 				"file": pngBytes,
 			},
@@ -912,6 +953,7 @@ func Test_handler_adminUpdateTemplate(t *testing.T) {
 			formFields: map[string]string{
 				"nama": "no file",
 			},
+			fileContentType:  "application/pdf",
 			files:            nil,
 			authHeader:       apitest.GenerateAuthHeader("123456789"),
 			wantResponseCode: http.StatusBadRequest,
@@ -924,6 +966,7 @@ func Test_handler_adminUpdateTemplate(t *testing.T) {
 			formFields: map[string]string{
 				"nama": "bad",
 			},
+			fileContentType: "application/pdf",
 			files: map[string][]byte{
 				"file": pngBytes,
 			},
@@ -950,7 +993,11 @@ func Test_handler_adminUpdateTemplate(t *testing.T) {
 			}
 
 			for fieldName, content := range tt.files {
-				part, err := writer.CreateFormFile(fieldName, fieldName+".bin")
+				h := make(textproto.MIMEHeader)
+				h.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"; filename="%s"`, fieldName, "example.bin"))
+				h.Set("Content-Type", tt.fileContentType)
+
+				part, err := writer.CreatePart(h)
 				require.NoError(t, err)
 				_, err = part.Write(content)
 				require.NoError(t, err)

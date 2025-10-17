@@ -19,6 +19,19 @@ import (
 func init() {
 	openapi3.SchemaErrorDetailsDisabled = true
 	openapi3.DefineStringFormatValidator("uuid", uuidFormatValidator{})
+	for _, a := range []string{
+		"application/vnd.openxmlformats-officedocument.wordprocessingml.document",   // .docx
+		"application/vnd.openxmlformats-officedocument.presentationml.presentation", // .pptx
+		"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",         // .xlsx
+		"application/msword",            // .doc
+		"application/vnd.ms-excel",      // .xls
+		"application/vnd.ms-powerpoint", // .ppt
+		"application/pdf",               // .pdf
+		"image/jpeg",                    // .jpg .jpeg
+		"image/png",                     // .png
+	} {
+		openapi3filter.RegisterBodyDecoder(a, openapi3filter.FileBodyDecoder)
+	}
 }
 
 // EchoBinder implements echo.Binder.

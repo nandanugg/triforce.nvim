@@ -98,6 +98,18 @@ paths:
         required: true
         content:
           multipart/form-data:
+            encoding:
+              file:
+                contentType: >-
+                  application/vnd.openxmlformats-officedocument.wordprocessingml.document,
+                  application/vnd.openxmlformats-officedocument.presentationml.presentation,
+                  application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,
+                  application/msword,
+                  application/vnd.ms-excel,
+                  application/vnd.ms-powerpoint,
+                  application/pdf,
+                  image/jpeg,
+                  image/png
             schema:
               type: object
               properties:
@@ -184,6 +196,18 @@ paths:
         required: true
         content:
           multipart/form-data:
+            encoding:
+              file:
+                contentType: >-
+                  application/vnd.openxmlformats-officedocument.wordprocessingml.document,
+                  application/vnd.openxmlformats-officedocument.presentationml.presentation,
+                  application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,
+                  application/msword,
+                  application/vnd.ms-excel,
+                  application/vnd.ms-powerpoint,
+                  application/pdf,
+                  image/jpeg,
+                  image/png
             schema:
               type: object
               properties:
