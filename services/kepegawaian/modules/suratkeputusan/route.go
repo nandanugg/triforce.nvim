@@ -12,12 +12,11 @@ func RegisterRoutes(e *echo.Echo, repo repository, mwAuth api.AuthMiddlewareFunc
 	s := newService(repo)
 	h := newHandler(s)
 
-	// TODO @yap: change kode resource permission after getting more context of surat keputusan
-	e.Add(http.MethodGet, "/v1/surat-keputusan", h.list, mwAuth(api.Kode_Pegawai_Self))
-	e.Add(http.MethodGet, "/v1/surat-keputusan/:id", h.get, mwAuth(api.Kode_Pegawai_Self))
-	e.Add(http.MethodGet, "/v1/surat-keputusan/:id/berkas", h.getBerkas, mwAuth(api.Kode_Pegawai_Self))
+	e.Add(http.MethodGet, "/v1/surat-keputusan", h.list, mwAuth(api.Kode_SuratKeputusan_Self))
+	e.Add(http.MethodGet, "/v1/surat-keputusan/:id", h.get, mwAuth(api.Kode_SuratKeputusan_Self))
+	e.Add(http.MethodGet, "/v1/surat-keputusan/:id/berkas", h.getBerkas, mwAuth(api.Kode_SuratKeputusan_Self))
 
-	e.Add(http.MethodGet, "/v1/admin/surat-keputusan", h.listAdmin, mwAuth(api.Kode_Pegawai_Read))
-	e.Add(http.MethodGet, "/v1/admin/surat-keputusan/:id", h.getAdmin, mwAuth(api.Kode_Pegawai_Read))
-	e.Add(http.MethodGet, "/v1/admin/surat-keputusan/:id/berkas", h.getBerkasAdmin, mwAuth(api.Kode_Pegawai_Read))
+	e.Add(http.MethodGet, "/v1/admin/surat-keputusan", h.listAdmin, mwAuth(api.Kode_SuratKeputusan_Read))
+	e.Add(http.MethodGet, "/v1/admin/surat-keputusan/:id", h.getAdmin, mwAuth(api.Kode_SuratKeputusan_Read))
+	e.Add(http.MethodGet, "/v1/admin/surat-keputusan/:id/berkas", h.getBerkasAdmin, mwAuth(api.Kode_SuratKeputusan_Read))
 }

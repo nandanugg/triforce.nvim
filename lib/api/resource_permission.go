@@ -9,6 +9,11 @@ const (
 	Kode_Pegawai_Read  = "kepegawaian.pegawai.read"
 	Kode_Pegawai_Write = "kepegawaian.pegawai.write"
 
+	Kode_SuratKeputusan_Self   = "kepegawaian.surat-keputusan.self"
+	Kode_SuratKeputusan_Read   = "kepegawaian.surat-keputusan.read"
+	Kode_SuratKeputusan_Review = "kepegawaian.surat-keputusan.review"
+	Kode_SuratKeputusan_Sign   = "kepegawaian.surat-keputusan.sign"
+
 	Kode_DataMaster_Public = "kepegawaian.data-master.public"
 	Kode_DataMaster_Read   = "kepegawaian.data-master.read"
 	Kode_DataMaster_Write  = "kepegawaian.data-master.write"
