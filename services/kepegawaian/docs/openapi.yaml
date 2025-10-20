@@ -117,6 +117,7 @@ paths:
                   type: string
                   description: Name of the template
                   example: "Invoice Template"
+                  minLength: 1
                   maxLength: 255
                 file:
                   type: string
@@ -215,6 +216,7 @@ paths:
                   type: string
                   description: Name of the template
                   example: "Invoice Template"
+                  minLength: 1
                   maxLength: 255
                 file:
                   type: string
@@ -5566,6 +5568,9 @@ components:
         nama:
           type: string
           example: "Surat X"
+        filename:
+          type: string
+          example: "suratx.xlsx"
         created_at:
           type: string
           format: date-time

@@ -109,15 +109,17 @@ func (h *handler) create(c echo.Context) error {
 	if err := c.Bind(&req); err != nil {
 		return err
 	}
-	str, err := api.GetFileBase64(c)
+
+	str, filename, err := api.GetFileBase64(c)
 	if err != nil {
 		return err
 	}
 
 	ctx := c.Request().Context()
 	data, err := h.service.create(ctx, createParams{
-		nama: req.Nama,
-		file: str,
+		nama:     req.Nama,
+		file:     str,
+		filename: filename,
 	})
 	if err != nil {
 		slog.ErrorContext(ctx, "Error creating template.", "error", err)
@@ -142,15 +144,16 @@ func (h *handler) update(c echo.Context) error {
 		return err
 	}
 
-	str, err := api.GetFileBase64(c)
+	str, filename, err := api.GetFileBase64(c)
 	if err != nil {
 		return err
 	}
 
 	ctx := c.Request().Context()
 	data, err := h.service.update(ctx, req.ID, updateParams{
-		nama: req.Nama,
-		file: str,
+		nama:     req.Nama,
+		file:     str,
+		filename: filename,
 	})
 	if err != nil {
 		slog.ErrorContext(ctx, "Error updating template.", "error", err)

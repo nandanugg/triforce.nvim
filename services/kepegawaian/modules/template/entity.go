@@ -5,6 +5,7 @@ import "time"
 type template struct {
 	ID        int32     `json:"id"`
 	Nama      string    `json:"nama"`
+	Filename  string    `json:"filename"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }

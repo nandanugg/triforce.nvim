@@ -786,6 +786,7 @@ type RefTemplate struct {
 	CreatedAt  pgtype.Timestamptz `db:"created_at"`
 	UpdatedAt  pgtype.Timestamptz `db:"updated_at"`
 	DeletedAt  pgtype.Timestamptz `db:"deleted_at"`
+	Filename   string             `db:"filename"`
 }
 
 // Referensi tingkat pendidikan

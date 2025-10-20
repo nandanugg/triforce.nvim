@@ -23,29 +23,32 @@ func (q *Queries) CountTemplates(ctx context.Context) (int64, error) {
 }
 
 const createTemplate = `-- name: CreateTemplate :one
-INSERT INTO ref_template (nama, file_base64)
-VALUES ($1::text, $2::text)
-RETURNING id, nama, created_at, updated_at
+INSERT INTO ref_template (nama, filename, file_base64)
+VALUES ($1::text, $2::text, $3::text)
+RETURNING id, nama, filename, created_at, updated_at
 `
 
 type CreateTemplateParams struct {
 	Name       string `db:"name"`
+	Filename   string `db:"filename"`
 	FileBase64 string `db:"file_base64"`
 }
 
 type CreateTemplateRow struct {
 	ID        int32              `db:"id"`
 	Nama      string             `db:"nama"`
+	Filename  string             `db:"filename"`
 	CreatedAt pgtype.Timestamptz `db:"created_at"`
 	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
 }
 
 func (q *Queries) CreateTemplate(ctx context.Context, arg CreateTemplateParams) (CreateTemplateRow, error) {
-	row := q.db.QueryRow(ctx, createTemplate, arg.Name, arg.FileBase64)
+	row := q.db.QueryRow(ctx, createTemplate, arg.Name, arg.Filename, arg.FileBase64)
 	var i CreateTemplateRow
 	err := row.Scan(
 		&i.ID,
 		&i.Nama,
+		&i.Filename,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -67,7 +70,7 @@ func (q *Queries) DeleteTemplate(ctx context.Context, id int32) (int64, error) {
 }
 
 const getTemplate = `-- name: GetTemplate :one
-SELECT id, nama, created_at, updated_at
+SELECT id, nama, filename, created_at, updated_at
 FROM ref_template
 WHERE id = $1::integer AND deleted_at IS NULL
 `
@@ -75,6 +78,7 @@ WHERE id = $1::integer AND deleted_at IS NULL
 type GetTemplateRow struct {
 	ID        int32              `db:"id"`
 	Nama      string             `db:"nama"`
+	Filename  string             `db:"filename"`
 	CreatedAt pgtype.Timestamptz `db:"created_at"`
 	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
 }
@@ -85,6 +89,7 @@ func (q *Queries) GetTemplate(ctx context.Context, id int32) (GetTemplateRow, er
 	err := row.Scan(
 		&i.ID,
 		&i.Nama,
+		&i.Filename,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -105,7 +110,7 @@ func (q *Queries) GetTemplateBerkas(ctx context.Context, id int32) (pgtype.Text,
 }
 
 const listTemplates = `-- name: ListTemplates :many
-SELECT id, nama, created_at, updated_at
+SELECT id, nama, filename, created_at, updated_at
 FROM ref_template
 WHERE deleted_at IS NULL
 LIMIT $1 OFFSET $2
@@ -119,6 +124,7 @@ type ListTemplatesParams struct {
 type ListTemplatesRow struct {
 	ID        int32              `db:"id"`
 	Nama      string             `db:"nama"`
+	Filename  string             `db:"filename"`
 	CreatedAt pgtype.Timestamptz `db:"created_at"`
 	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
 }
@@ -135,6 +141,7 @@ func (q *Queries) ListTemplates(ctx context.Context, arg ListTemplatesParams) ([
 		if err := rows.Scan(
 			&i.ID,
 			&i.Nama,
+			&i.Filename,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -150,15 +157,18 @@ func (q *Queries) ListTemplates(ctx context.Context, arg ListTemplatesParams) ([
 
 const updateTemplate = `-- name: UpdateTemplate :one
 UPDATE ref_template
-SET nama = $1::text,
-    file_base64 = $2::text,
-    updated_at = NOW()
-WHERE id = $3::integer AND deleted_at IS NULL
-RETURNING id, nama, created_at, updated_at
+SET
+	nama = $1::text,
+	filename = $2::text,
+	file_base64 = $3::text,
+	updated_at = NOW()
+WHERE id = $4::integer AND deleted_at IS NULL
+RETURNING id, nama, filename, created_at, updated_at
 `
 
 type UpdateTemplateParams struct {
 	Name       string `db:"name"`
+	Filename   string `db:"filename"`
 	FileBase64 string `db:"file_base64"`
 	ID         int32  `db:"id"`
 }
@@ -166,16 +176,23 @@ type UpdateTemplateParams struct {
 type UpdateTemplateRow struct {
 	ID        int32              `db:"id"`
 	Nama      string             `db:"nama"`
+	Filename  string             `db:"filename"`
 	CreatedAt pgtype.Timestamptz `db:"created_at"`
 	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
 }
 
 func (q *Queries) UpdateTemplate(ctx context.Context, arg UpdateTemplateParams) (UpdateTemplateRow, error) {
-	row := q.db.QueryRow(ctx, updateTemplate, arg.Name, arg.FileBase64, arg.ID)
+	row := q.db.QueryRow(ctx, updateTemplate,
+		arg.Name,
+		arg.Filename,
+		arg.FileBase64,
+		arg.ID,
+	)
 	var i UpdateTemplateRow
 	err := row.Scan(
 		&i.ID,
 		&i.Nama,
+		&i.Filename,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)

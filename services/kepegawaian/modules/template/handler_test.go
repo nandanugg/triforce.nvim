@@ -47,11 +47,11 @@ func Test_handler_ListTemplate(t *testing.T) {
 
 	dbData := `
 		insert into ref_template
-			(id, nama, file_base64, created_at, updated_at, deleted_at)
+			(id, nama, filename, file_base64, created_at, updated_at, deleted_at)
 			values
-			(11, 'Penghargaan 1', 'data:image/png;base64,` + pngBase64 + `', '2001-01-01', '2001-01-01', NULL),
-			(12, 'Penghargaan 2', 'data:image/png;base64,invalid', '2001-01-01', '2001-01-01', NULL),
-			(13, 'Penghargaan 3', 'data:image/png;base64,invalid', '2001-01-01', '2001-01-01', now());
+			(11, 'Penghargaan 1', 'filename.png', 'data:image/png;base64,` + pngBase64 + `', '2001-01-01', '2001-01-01', NULL),
+			(12, 'Penghargaan 2', 'filename_invalid.png', 'data:image/png;base64,invalid', '2001-01-01', '2001-01-01', NULL),
+			(13, 'Penghargaan 3', 'filename_invalid.png', 'data:image/png;base64,invalid', '2001-01-01', '2001-01-01', now());
 		`
 	pgxconn := dbtest.New(t, dbmigrations.FS)
 	_, err := pgxconn.Exec(context.Background(), dbData)
@@ -74,12 +74,14 @@ func Test_handler_ListTemplate(t *testing.T) {
 					{
 						"id": 11,
 						"nama": "Penghargaan 1",
+						"filename": "filename.png",
 						"created_at": "` + defaultTimestamptz + `",
 						"updated_at": "` + defaultTimestamptz + `"
 					},
 					{
 						"id": 12,
 						"nama": "Penghargaan 2",
+						"filename": "filename_invalid.png",
 						"created_at": "` + defaultTimestamptz + `",
 						"updated_at": "` + defaultTimestamptz + `"
 					}
@@ -104,6 +106,7 @@ func Test_handler_ListTemplate(t *testing.T) {
 					{
 						"id": 12,
 						"nama": "Penghargaan 2",
+						"filename": "filename_invalid.png",
 						"created_at": "` + defaultTimestamptz + `",
 						"updated_at": "` + defaultTimestamptz + `"
 					}
@@ -177,14 +180,14 @@ func Test_handler_GetBerkasTemplate(t *testing.T) {
 
 	dbData := `
 		insert into ref_template
-			(id, nama, file_base64, created_at, updated_at, deleted_at)
+			(id, nama, filename, file_base64, created_at, updated_at, deleted_at)
 			values
-			(11, 'Penghargaan png', 'data:images/png;base64,` + pngBase64 + `', '2001-01-01', '2001-01-01', NULL),
-			(12, 'Penghargaan pdf', 'data:application/pdf;base64,` + pdfBase64 + `', '2001-01-01', '2001-01-01', NULL),
-			(95, 'Penghargaan kosong', '', '2001-01-01', '2001-01-01', NULL),
-			(96, 'Penghargaan null', NULL, '2001-01-01', '2001-01-01', NULL),
-			(97, 'Penghargaan deleted', 'data:images/png;base64,` + pngBase64 + `', '2001-01-01', '2001-01-01', now()),
-			(98, 'Penghargaan invalid', 'data:images/png;base64,invalid', '2001-01-01', '2001-01-01', NULL)
+			(11, 'Penghargaan png', 'penghargaan.png', 'data:images/png;base64,` + pngBase64 + `', '2001-01-01', '2001-01-01', NULL),
+			(12, 'Penghargaan pdf', 'penghargaan.pdf', 'data:application/pdf;base64,` + pdfBase64 + `', '2001-01-01', '2001-01-01', NULL),
+			(95, 'Penghargaan kosong', 'kosong.pdf', '', '2001-01-01', '2001-01-01', NULL),
+			(96, 'Penghargaan null', 'null.pdf', NULL, '2001-01-01', '2001-01-01', NULL),
+			(97, 'Penghargaan deleted', 'deleted.pdf', 'data:images/png;base64,` + pngBase64 + `', '2001-01-01', '2001-01-01', now()),
+			(98, 'Penghargaan invalid', 'invalid.pdf', 'data:images/png;base64,invalid', '2001-01-01', '2001-01-01', NULL)
 			;
 		`
 	pgxconn := dbtest.New(t, dbmigrations.FS)
@@ -314,11 +317,11 @@ func Test_handler_adminListTemplate(t *testing.T) {
 
 	dbData := `
 		insert into ref_template
-			(id, nama, file_base64, created_at, updated_at, deleted_at)
+			(id, nama, filename, file_base64, created_at, updated_at, deleted_at)
 			values
-			(11, 'Penghargaan 1', 'data:image/png;base64,` + pngBase64 + `', '2001-01-01', '2001-01-01', NULL),
-			(12, 'Penghargaan 2', 'data:image/png;base64,invalid', '2001-01-01', '2001-01-01', NULL),
-			(13, 'Penghargaan 3', 'data:image/png;base64,invalid', '2001-01-01', '2001-01-01', now());
+			(11, 'Penghargaan 1', 'filename.png', 'data:image/png;base64,` + pngBase64 + `', '2001-01-01', '2001-01-01', NULL),
+			(12, 'Penghargaan 2', 'filename_invalid.png', 'data:image/png;base64,invalid', '2001-01-01', '2001-01-01', NULL),
+			(13, 'Penghargaan 3', 'filename_invalid.png', 'data:image/png;base64,invalid', '2001-01-01', '2001-01-01', now());
 		`
 	pgxconn := dbtest.New(t, dbmigrations.FS)
 	_, err := pgxconn.Exec(context.Background(), dbData)
@@ -341,12 +344,14 @@ func Test_handler_adminListTemplate(t *testing.T) {
 					{
 						"id": 11,
 						"nama": "Penghargaan 1",
+						"filename": "filename.png",
 						"created_at": "` + defaultTimestamptz + `",
 						"updated_at": "` + defaultTimestamptz + `"
 					},
 					{
 						"id": 12,
 						"nama": "Penghargaan 2",
+						"filename": "filename_invalid.png",
 						"created_at": "` + defaultTimestamptz + `",
 						"updated_at": "` + defaultTimestamptz + `"
 					}
@@ -371,6 +376,7 @@ func Test_handler_adminListTemplate(t *testing.T) {
 					{
 						"id": 12,
 						"nama": "Penghargaan 2",
+						"filename": "filename_invalid.png",
 						"created_at": "` + defaultTimestamptz + `",
 						"updated_at": "` + defaultTimestamptz + `"
 					}
@@ -440,11 +446,11 @@ func Test_handler_adminGetTemplate(t *testing.T) {
 
 	dbData := `
 		insert into ref_template
-			(id, nama, file_base64, created_at, updated_at, deleted_at)
+			(id, nama, filename, file_base64, created_at, updated_at, deleted_at)
 			values
-			(11, 'Penghargaan 1', 'data:image/png;base64,` + pngBase64 + `', '2001-01-01', '2001-01-01', NULL),
-			(12, 'Penghargaan 2', 'data:image/png;base64,invalid', '2001-01-01', '2001-01-01', NULL),
-			(13, 'Penghargaan 3', 'data:image/png;base64,invalid', '2001-01-01', '2001-01-01', now());
+			(11, 'Penghargaan 1', 'filename.png', 'data:image/png;base64,` + pngBase64 + `', '2001-01-01', '2001-01-01', NULL),
+			(12, 'Penghargaan 2', 'filename_invalid.png', 'data:image/png;base64,invalid', '2001-01-01', '2001-01-01', NULL),
+			(13, 'Penghargaan 3', 'filename_invalid.png', 'data:image/png;base64,invalid', '2001-01-01', '2001-01-01', now());
 		`
 	pgxconn := dbtest.New(t, dbmigrations.FS)
 	_, err := pgxconn.Exec(context.Background(), dbData)
@@ -468,6 +474,7 @@ func Test_handler_adminGetTemplate(t *testing.T) {
 				"data": {
 						"id": 11,
 						"nama": "Penghargaan 1",
+						"filename": "filename.png",
 						"created_at": "` + defaultTimestamptz + `",
 						"updated_at": "` + defaultTimestamptz + `"
 					}
@@ -544,14 +551,14 @@ func Test_handler_adminGetBerkasTemplate(t *testing.T) {
 
 	dbData := `
 		insert into ref_template
-			(id, nama, file_base64, created_at, updated_at, deleted_at)
+			(id, nama, filename, file_base64, created_at, updated_at, deleted_at)
 			values
-			(11, 'Penghargaan png', 'data:images/png;base64,` + pngBase64 + `', '2001-01-01', '2001-01-01', NULL),
-			(12, 'Penghargaan pdf', 'data:application/pdf;base64,` + pdfBase64 + `', '2001-01-01', '2001-01-01', NULL),
-			(95, 'Penghargaan kosong', '', '2001-01-01', '2001-01-01', NULL),
-			(96, 'Penghargaan null', NULL, '2001-01-01', '2001-01-01', NULL),
-			(97, 'Penghargaan deleted', 'data:images/png;base64,` + pngBase64 + `', '2001-01-01', '2001-01-01', now()),
-			(98, 'Penghargaan invalid', 'data:images/png;base64,invalid', '2001-01-01', '2001-01-01', NULL)
+			(11, 'Penghargaan png', 'penghargaan.png', 'data:images/png;base64,` + pngBase64 + `', '2001-01-01', '2001-01-01', NULL),
+			(12, 'Penghargaan pdf', 'penghargaan.pdf', 'data:application/pdf;base64,` + pdfBase64 + `', '2001-01-01', '2001-01-01', NULL),
+			(95, 'Penghargaan kosong', 'kosong.pdf', '', '2001-01-01', '2001-01-01', NULL),
+			(96, 'Penghargaan null', 'null.pdf', NULL, '2001-01-01', '2001-01-01', NULL),
+			(97, 'Penghargaan deleted', 'deleted.pdf', 'data:images/png;base64,` + pngBase64 + `', '2001-01-01', '2001-01-01', now()),
+			(98, 'Penghargaan invalid', 'invalid.pdf', 'data:images/png;base64,invalid', '2001-01-01', '2001-01-01', NULL)
 			;
 		`
 	pgxconn := dbtest.New(t, dbmigrations.FS)
@@ -702,6 +709,7 @@ func Test_handler_adminCreateTemplate(t *testing.T) {
 			wantResponseBody: `{"data": {
 				"id": 1,
 				"nama": "master 1",
+				"filename": "example.bin",
 				"created_at": "{created_at}",
 				"updated_at": "{updated_at}"
 			}}`,
@@ -831,10 +839,10 @@ func Test_handler_adminUpdateTemplate(t *testing.T) {
 
 	dbData := `
 		insert into ref_template
-			(id, nama, file_base64, created_at, updated_at, deleted_at)
+			(id, nama, filename, file_base64, created_at, updated_at, deleted_at)
 			values
-			(11, 'Penghargaan 1', 'data:image/png;base64,` + pngBase64 + `', '2001-01-01', '2001-01-01', NULL),
-			(12, 'Penghargaan deleted', 'data:image/png;base64,` + pngBase64 + `', '2001-01-01', '2001-01-01', now());
+			(11, 'Penghargaan 1', 'filename.png', 'data:image/png;base64,` + pngBase64 + `', '2001-01-01', '2001-01-01', NULL),
+			(12, 'Penghargaan deleted', 'filename.png', 'data:image/png;base64,` + pngBase64 + `', '2001-01-01', '2001-01-01', now());
 		`
 	pgxconn := dbtest.New(t, dbmigrations.FS)
 	_, err := pgxconn.Exec(context.Background(), dbData)
@@ -866,6 +874,7 @@ func Test_handler_adminUpdateTemplate(t *testing.T) {
 			wantResponseBody: `{"data": {
 				"id": 11,
 				"nama": "master 1",
+				"filename": "example.bin",
 				"created_at": "` + defaultTimestamptz + `",
 				"updated_at": "{updated_at}"
 			}}`,
@@ -1025,10 +1034,10 @@ func Test_handler_adminDeleteTemplate(t *testing.T) {
 
 	dbData := `
 		insert into ref_template
-			(id, nama, file_base64, created_at, updated_at, deleted_at)
+			(id, nama, filename, file_base64, created_at, updated_at, deleted_at)
 			values
-			(11, 'Penghargaan 1', 'data:image/png;base64,` + pngBase64 + `', '2001-01-01', '2001-01-01', NULL),
-			(12, 'Penghargaan dihapus', 'data:image/png;base64,` + pngBase64 + `', '2001-01-01', '2001-01-01', now());
+			(11, 'Penghargaan 1', 'filename.png', 'data:image/png;base64,` + pngBase64 + `', '2001-01-01', '2001-01-01', NULL),
+			(12, 'Penghargaan dihapus', 'deleted.png', 'data:image/png;base64,` + pngBase64 + `', '2001-01-01', '2001-01-01', now());
 		`
 	pgxconn := dbtest.New(t, dbmigrations.FS)
 	_, err := pgxconn.Exec(context.Background(), dbData)

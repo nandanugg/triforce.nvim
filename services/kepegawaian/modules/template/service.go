@@ -49,6 +49,7 @@ func (s *service) list(ctx context.Context, limit, offset uint) ([]template, int
 		return template{
 			ID:        row.ID,
 			Nama:      row.Nama,
+			Filename:  row.Filename,
 			CreatedAt: row.CreatedAt.Time,
 			UpdatedAt: row.UpdatedAt.Time,
 		}
@@ -67,6 +68,7 @@ func (s *service) get(ctx context.Context, id int32) (*template, error) {
 	result := &template{
 		ID:        row.ID,
 		Nama:      row.Nama,
+		Filename:  row.Filename,
 		CreatedAt: row.CreatedAt.Time,
 		UpdatedAt: row.UpdatedAt.Time,
 	}
@@ -86,13 +88,15 @@ func (s *service) getBerkas(ctx context.Context, id int32) (string, []byte, erro
 }
 
 type createParams struct {
-	nama string
-	file string
+	nama     string
+	filename string
+	file     string
 }
 
 func (s *service) create(ctx context.Context, params createParams) (*template, error) {
 	row, err := s.repo.CreateTemplate(ctx, sqlc.CreateTemplateParams{
 		Name:       params.nama,
+		Filename:   params.filename,
 		FileBase64: params.file,
 	})
 	if err != nil {
@@ -102,6 +106,7 @@ func (s *service) create(ctx context.Context, params createParams) (*template, e
 	result := &template{
 		ID:        row.ID,
 		Nama:      row.Nama,
+		Filename:  row.Filename,
 		CreatedAt: row.CreatedAt.Time,
 		UpdatedAt: row.UpdatedAt.Time,
 	}
@@ -110,14 +115,16 @@ func (s *service) create(ctx context.Context, params createParams) (*template, e
 }
 
 type updateParams struct {
-	nama string
-	file string
+	nama     string
+	filename string
+	file     string
 }
 
 func (s *service) update(ctx context.Context, id int32, params updateParams) (*template, error) {
 	row, err := s.repo.UpdateTemplate(ctx, sqlc.UpdateTemplateParams{
 		ID:         id,
 		Name:       params.nama,
+		Filename:   params.filename,
 		FileBase64: params.file,
 	})
 	if err != nil {
@@ -130,6 +137,7 @@ func (s *service) update(ctx context.Context, id int32, params updateParams) (*t
 	result := &template{
 		ID:        row.ID,
 		Nama:      row.Nama,
+		Filename:  row.Filename,
 		CreatedAt: row.CreatedAt.Time,
 		UpdatedAt: row.UpdatedAt.Time,
 	}
