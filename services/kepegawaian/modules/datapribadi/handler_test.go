@@ -125,8 +125,7 @@ func Test_handler_getDataPribadi(t *testing.T) {
 	}
 
 	tests := []struct {
-		name string
-
+		name             string
 		requestHeader    http.Header
 		wantResponseCode int
 		wantResponseBody string

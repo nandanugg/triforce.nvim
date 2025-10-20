@@ -86,16 +86,18 @@ func Test_handler_listMyResourcePermissions(t *testing.T) {
 			('1e', 6,       null),
 			('1c', 7,       null);
 	`
+	db := dbtest.New(t, dbmigrations.FS)
+	_, err := db.Exec(context.Background(), dbData)
+	require.NoError(t, err)
+
 	tests := []struct {
 		name             string
-		dbData           string
 		requestHeader    http.Header
 		wantResponseCode int
 		wantResponseBody string
 	}{
 		{
 			name:             "ok: nip with multiple roles",
-			dbData:           dbData,
 			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1c")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
@@ -110,7 +112,6 @@ func Test_handler_listMyResourcePermissions(t *testing.T) {
 		},
 		{
 			name:             "ok: nip with empty roles",
-			dbData:           dbData,
 			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1d")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
@@ -121,7 +122,6 @@ func Test_handler_listMyResourcePermissions(t *testing.T) {
 		},
 		{
 			name:             "ok: nip with default roles",
-			dbData:           dbData,
 			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1e")}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
@@ -133,8 +133,17 @@ func Test_handler_listMyResourcePermissions(t *testing.T) {
 			}`,
 		},
 		{
+			name:             "ok: nip not exists in user_role and with default role",
+			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1z")}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					"portal.page2.save"
+				]
+			}`,
+		},
+		{
 			name:             "error: invalid token",
-			dbData:           dbData,
 			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
@@ -143,10 +152,6 @@ func Test_handler_listMyResourcePermissions(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-
-			db := dbtest.New(t, dbmigrations.FS)
-			_, err := db.Exec(context.Background(), tt.dbData)
-			require.NoError(t, err)
 
 			req := httptest.NewRequest(http.MethodGet, "/v1/resource-permissions/me", nil)
 			req.Header = tt.requestHeader
@@ -180,7 +185,8 @@ func Test_handler_listResources(t *testing.T) {
 			(1,  'portal', 'page2', 'Page 2', null),
 			(2,  'portal', 'page1', 'Page 1', null),
 			(3,  'portal', 'page3', 'Page 3', null),
-			(4,  'portal', 'page4', 'Page 4', '2000-01-01');
+			(4,  'portal', 'page4', 'Page 4', '2000-01-01'),
+			(5,  'portal', 'page5', 'Page 5', null);
 		insert into resource_permission
 			(id, resource_id, permission_id, deleted_at) values
 			(1,  1,           1,             null),
@@ -193,9 +199,13 @@ func Test_handler_listResources(t *testing.T) {
 			(8,  1,           3,             null),
 			(9,  1,           2,             '2000-01-01');
 	`
+	db := dbtest.New(t, dbmigrations.FS)
+	_, err := db.Exec(context.Background(), dbData)
+	require.NoError(t, err)
+
+	authHeader := []string{apitest.GenerateAuthHeader("1c")}
 	tests := []struct {
 		name             string
-		dbData           string
 		requestHeader    http.Header
 		requestQuery     url.Values
 		wantResponseCode int
@@ -203,8 +213,7 @@ func Test_handler_listResources(t *testing.T) {
 	}{
 		{
 			name:             "ok",
-			dbData:           dbData,
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1c")}},
+			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
@@ -252,19 +261,22 @@ func Test_handler_listResources(t *testing.T) {
 								"nama_permission": "Write"
 							}
 						]
+					},
+					{
+						"nama": "Page 5",
+						"resource_permissions": []
 					}
 				],
 				"meta": {
 					"limit": 10,
 					"offset": 0,
-					"total": 3
+					"total": 4
 				}
 			}`,
 		},
 		{
 			name:          "ok: with limit offset",
-			dbData:        dbData,
-			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1c")}},
+			requestHeader: http.Header{"Authorization": authHeader},
 			requestQuery: url.Values{
 				"limit":  []string{"2"},
 				"offset": []string{"1"},
@@ -306,13 +318,12 @@ func Test_handler_listResources(t *testing.T) {
 				"meta": {
 					"limit": 2,
 					"offset": 1,
-					"total": 3
+					"total": 4
 				}
 			}`,
 		},
 		{
 			name:             "error: invalid token",
-			dbData:           dbData,
 			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
@@ -321,10 +332,6 @@ func Test_handler_listResources(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-
-			db := dbtest.New(t, dbmigrations.FS)
-			_, err := db.Exec(context.Background(), tt.dbData)
-			require.NoError(t, err)
 
 			req := httptest.NewRequest(http.MethodGet, "/v1/resources", nil)
 			req.Header = tt.requestHeader

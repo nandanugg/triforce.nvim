@@ -53,14 +53,13 @@ func (s *service) listResources(ctx context.Context, limit, offset uint) ([]reso
 		return nil, 0, fmt.Errorf("repo list resource permissions: %w", err)
 	}
 
-	resourcePermissionsMap := make(map[int16][]resourcePermission, len(resources))
-	for _, row := range resourcePermissions {
-		resourcePermissionsMap[row.ResourceID] = append(resourcePermissionsMap[row.ResourceID], resourcePermission{
+	resourcePermissionsMap := typeutil.GroupByMap(resourcePermissions, func(row sqlc.ListResourcePermissionsByResourceIDsRow) (int16, resourcePermission) {
+		return row.ResourceID, resourcePermission{
 			ID:             row.ID,
 			Kode:           row.Kode.String,
 			NamaPermission: row.NamaPermission,
-		})
-	}
+		}
+	})
 
 	total, err := s.repo.CountResources(ctx)
 	if err != nil {
@@ -68,9 +67,14 @@ func (s *service) listResources(ctx context.Context, limit, offset uint) ([]reso
 	}
 
 	return typeutil.Map(resources, func(row sqlc.ListResourcesRow) resource {
+		resourcePermissions := resourcePermissionsMap[row.ID]
+		if resourcePermissions == nil {
+			resourcePermissions = make([]resourcePermission, 0)
+		}
+
 		return resource{
 			Nama:                row.Nama,
-			ResourcePermissions: resourcePermissionsMap[row.ID],
+			ResourcePermissions: resourcePermissions,
 		}
 	}), uint(total), nil
 }

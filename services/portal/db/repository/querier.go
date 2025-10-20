@@ -12,10 +12,12 @@ type Querier interface {
 	CountActiveResourcePermissionsByIDs(ctx context.Context, ids []int32) (int64, error)
 	CountResources(ctx context.Context) (int64, error)
 	CountRoles(ctx context.Context) (int64, error)
+	CountUsersGroupByNIP(ctx context.Context, arg CountUsersGroupByNIPParams) (int64, error)
 	CreateRole(ctx context.Context, arg CreateRoleParams) (int16, error)
 	CreateRoleResourcePermissions(ctx context.Context, arg CreateRoleResourcePermissionsParams) error
 	DeleteRoleResourcePermissions(ctx context.Context, arg DeleteRoleResourcePermissionsParams) error
 	GetRole(ctx context.Context, id int16) (GetRoleRow, error)
+	GetUserGroupByNIP(ctx context.Context, nip string) (GetUserGroupByNIPRow, error)
 	GetUserNIPByIDAndSource(ctx context.Context, arg GetUserNIPByIDAndSourceParams) (string, error)
 	ListResourcePermissionsByNip(ctx context.Context, nip string) ([]pgtype.Text, error)
 	ListResourcePermissionsByResourceIDs(ctx context.Context, resourceIds []int16) ([]ListResourcePermissionsByResourceIDsRow, error)
@@ -23,7 +25,9 @@ type Querier interface {
 	ListResources(ctx context.Context, arg ListResourcesParams) ([]ListResourcesRow, error)
 	ListRoleResourcePermissionsByRoleID(ctx context.Context, roleID int16) ([]ListRoleResourcePermissionsByRoleIDRow, error)
 	ListRoles(ctx context.Context, arg ListRolesParams) ([]ListRolesRow, error)
+	ListRolesByNIPs(ctx context.Context, nips []string) ([]ListRolesByNIPsRow, error)
 	ListUserRoleByNIP(ctx context.Context, nip string) ([]ListUserRoleByNIPRow, error)
+	ListUsersGroupByNIP(ctx context.Context, arg ListUsersGroupByNIPParams) ([]ListUsersGroupByNIPRow, error)
 	UpdateLastLoginAt(ctx context.Context, arg UpdateLastLoginAtParams) error
 	UpdateRole(ctx context.Context, arg UpdateRoleParams) (int16, error)
 }

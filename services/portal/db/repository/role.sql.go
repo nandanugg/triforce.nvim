@@ -232,6 +232,64 @@ func (q *Queries) ListRoles(ctx context.Context, arg ListRolesParams) ([]ListRol
 	return items, nil
 }
 
+const listRolesByNIPs = `-- name: ListRolesByNIPs :many
+select
+  ur.nip,
+  r.id,
+  r.nama,
+  r.is_default,
+  r.is_aktif
+from user_role ur
+join role r on r.id = ur.role_id and r.is_default is false and r.deleted_at is null
+where ur.nip = any($1::varchar[]) and ur.deleted_at is null
+union all
+select
+  t.nip,
+  r.id,
+  r.nama,
+  r.is_default,
+  r.is_aktif
+from (
+  select unnest($1::varchar[]) as nip
+) as t
+join role r on r.is_default and r.deleted_at is null
+order by nama
+`
+
+type ListRolesByNIPsRow struct {
+	Nip       string `db:"nip"`
+	ID        int16  `db:"id"`
+	Nama      string `db:"nama"`
+	IsDefault bool   `db:"is_default"`
+	IsAktif   bool   `db:"is_aktif"`
+}
+
+func (q *Queries) ListRolesByNIPs(ctx context.Context, nips []string) ([]ListRolesByNIPsRow, error) {
+	rows, err := q.db.Query(ctx, listRolesByNIPs, nips)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListRolesByNIPsRow
+	for rows.Next() {
+		var i ListRolesByNIPsRow
+		if err := rows.Scan(
+			&i.Nip,
+			&i.ID,
+			&i.Nama,
+			&i.IsDefault,
+			&i.IsAktif,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateRole = `-- name: UpdateRole :one
 update role
 set

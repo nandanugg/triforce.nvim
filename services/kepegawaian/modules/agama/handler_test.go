@@ -369,11 +369,7 @@ func Test_handler_adminCreateRefAgama(t *testing.T) {
 							parsed, err := time.Parse(time.RFC3339, val)
 							require.NoErrorf(t, err, "invalid timestamp for %s", field)
 
-							diff := time.Since(parsed)
-							if diff < 0 {
-								diff = -diff
-							}
-							assert.LessOrEqualf(t, diff.Seconds(), 10.0, "%s difference too large: %v", field, diff)
+							assert.WithinDuration(t, time.Now(), parsed, 10*time.Second)
 
 							wantBody = strings.ReplaceAll(wantBody, "{"+field+"}", val)
 						}
@@ -475,11 +471,7 @@ func Test_handler_adminUpdateRefAgama(t *testing.T) {
 							parsed, err := time.Parse(time.RFC3339, val)
 							require.NoErrorf(t, err, "invalid timestamp for %s", field)
 
-							diff := time.Since(parsed)
-							if diff < 0 {
-								diff = -diff
-							}
-							assert.LessOrEqualf(t, diff.Seconds(), 10.0, "%s difference too large: %v", field, diff)
+							assert.WithinDuration(t, time.Now(), parsed, 10*time.Second)
 
 							wantBody = strings.ReplaceAll(wantBody, "{"+field+"}", val)
 						}

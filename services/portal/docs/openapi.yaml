@@ -11,6 +11,7 @@ tags:
   - name: Pemberitahuan
   - name: Resource Permission
   - name: Role
+  - name: User
 paths:
   /v1/auth/login:
     get:
@@ -101,7 +102,7 @@ paths:
                 additionalProperties: false
                 properties:
                   data:
-                    $ref: "#/components/schemas/tokenResponse"
+                    $ref: "#/components/schemas/token"
         "422":
           description: User tidak ditemukan.
           content:
@@ -147,7 +148,7 @@ paths:
                 additionalProperties: false
                 properties:
                   data:
-                    $ref: "#/components/schemas/tokenResponse"
+                    $ref: "#/components/schemas/token"
         "422":
           description: User tidak ditemukan.
           content:
@@ -488,6 +489,65 @@ paths:
           $ref: "#/components/responses/badRequest"
         "404":
           $ref: "#/components/responses/notFound"
+  /v1/users:
+    get:
+      tags:
+        - User
+      summary: Daftar user.
+      description: Daftar user.
+      operationId: listUser
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+        - name: nip
+          in: query
+          schema:
+            type: string
+        - name: role_id
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/user"
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/users/{nip}:
+    get:
+      tags:
+        - User
+      summary: Detail user.
+      description: Detail user berdasarkan NIP.
+      operationId: getUser
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/user"
+        "404":
+          $ref: "#/components/responses/notFound"
 components:
   parameters:
     authRequired:
@@ -548,7 +608,7 @@ components:
           type: integer
           example: 100
           minimum: 0
-    tokenResponse:
+    token:
       type: object
       additionalProperties: false
       properties:
@@ -568,3 +628,45 @@ components:
         - refresh_token
         - refresh_expires_in
         - id_token
+    user:
+      type: object
+      additionalProperties: false
+      properties:
+        nip:
+          type: string
+        profiles:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            properties:
+              id:
+                type: string
+                format: uuid
+              source:
+                type: string
+              nama:
+                type: string
+                nullable: true
+              email:
+                type: string
+                format: email
+                nullable: true
+              last_login_at:
+                type: string
+                format: date-time
+                nullable: true
+        roles:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            properties:
+              id:
+                type: integer
+              nama:
+                type: string
+              is_default:
+                type: boolean
+              is_aktif:
+                type: boolean

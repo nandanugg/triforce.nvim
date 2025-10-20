@@ -9,6 +9,67 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countUsersGroupByNIP = `-- name: CountUsersGroupByNIP :one
+select count(distinct u.nip)
+from "user" u
+where u.deleted_at is null
+  and ($1::varchar is null or u.nip = $1::varchar)
+  and (
+    $2::int2 is null
+    or (
+      select r.is_default from role r where r.id = $2::int2 and r.deleted_at is null
+    ) is true
+    or u.nip in (
+      select ur.nip
+      from user_role ur
+      join role r on r.id = ur.role_id and r.deleted_at is null
+      where ur.role_id = $2::int2 and ur.deleted_at is null
+    )
+  )
+`
+
+type CountUsersGroupByNIPParams struct {
+	Nip    pgtype.Text `db:"nip"`
+	RoleID pgtype.Int2 `db:"role_id"`
+}
+
+func (q *Queries) CountUsersGroupByNIP(ctx context.Context, arg CountUsersGroupByNIPParams) (int64, error) {
+	row := q.db.QueryRow(ctx, countUsersGroupByNIP, arg.Nip, arg.RoleID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const getUserGroupByNIP = `-- name: GetUserGroupByNIP :one
+select
+  u.nip,
+  json_agg(
+    json_build_object(
+      'id', u.id,
+      'source', u.source,
+      'nama', u.nama,
+      'email', u.email,
+      'last_login_at', u.last_login_at
+    )
+    order by u.last_login_at desc nulls last
+  ) as profiles
+from "user" u
+where u.nip = $1 and u.deleted_at is null
+group by u.nip
+`
+
+type GetUserGroupByNIPRow struct {
+	Nip      string `db:"nip"`
+	Profiles []byte `db:"profiles"`
+}
+
+func (q *Queries) GetUserGroupByNIP(ctx context.Context, nip string) (GetUserGroupByNIPRow, error) {
+	row := q.db.QueryRow(ctx, getUserGroupByNIP, nip)
+	var i GetUserGroupByNIPRow
+	err := row.Scan(&i.Nip, &i.Profiles)
+	return i, err
+}
+
 const getUserNIPByIDAndSource = `-- name: GetUserNIPByIDAndSource :one
 select nip from "user"
 where id = $1 and source = $2 and deleted_at is null
@@ -51,6 +112,75 @@ func (q *Queries) ListUserRoleByNIP(ctx context.Context, nip string) ([]ListUser
 	for rows.Next() {
 		var i ListUserRoleByNIPRow
 		if err := rows.Scan(&i.Service, &i.Nama); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listUsersGroupByNIP = `-- name: ListUsersGroupByNIP :many
+select
+  u.nip,
+  json_agg(
+    json_build_object(
+      'id', u.id,
+      'source', u.source,
+      'nama', u.nama,
+      'email', u.email,
+      'last_login_at', u.last_login_at
+    )
+    order by u.last_login_at desc nulls last
+  ) as profiles
+from "user" u
+where u.deleted_at is null
+  and ($3::varchar is null or u.nip = $3::varchar)
+  and (
+    $4::int2 is null
+    or (
+      select r.is_default from role r where r.id = $4::int2 and r.deleted_at is null
+    ) is true
+    or u.nip in (
+      select ur.nip
+      from user_role ur
+      join role r on r.id = ur.role_id and r.deleted_at is null
+      where ur.role_id = $4::int2 and ur.deleted_at is null
+    )
+  )
+group by u.nip
+limit $1 offset $2
+`
+
+type ListUsersGroupByNIPParams struct {
+	Limit  int32       `db:"limit"`
+	Offset int32       `db:"offset"`
+	Nip    pgtype.Text `db:"nip"`
+	RoleID pgtype.Int2 `db:"role_id"`
+}
+
+type ListUsersGroupByNIPRow struct {
+	Nip      string `db:"nip"`
+	Profiles []byte `db:"profiles"`
+}
+
+func (q *Queries) ListUsersGroupByNIP(ctx context.Context, arg ListUsersGroupByNIPParams) ([]ListUsersGroupByNIPRow, error) {
+	rows, err := q.db.Query(ctx, listUsersGroupByNIP,
+		arg.Limit,
+		arg.Offset,
+		arg.Nip,
+		arg.RoleID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListUsersGroupByNIPRow
+	for rows.Next() {
+		var i ListUsersGroupByNIPRow
+		if err := rows.Scan(&i.Nip, &i.Profiles); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

@@ -95,3 +95,26 @@ set deleted_at = now()
 where role_id = $1
   and resource_permission_id <> all(@exclude_resource_permission_ids::int4[])
   and deleted_at is null;
+
+-- name: ListRolesByNIPs :many
+select
+  ur.nip,
+  r.id,
+  r.nama,
+  r.is_default,
+  r.is_aktif
+from user_role ur
+join role r on r.id = ur.role_id and r.is_default is false and r.deleted_at is null
+where ur.nip = any(@nips::varchar[]) and ur.deleted_at is null
+union all
+select
+  t.nip,
+  r.id,
+  r.nama,
+  r.is_default,
+  r.is_aktif
+from (
+  select unnest(@nips::varchar[]) as nip
+) as t
+join role r on r.is_default and r.deleted_at is null
+order by nama;

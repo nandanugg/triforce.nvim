@@ -43,11 +43,19 @@ func UniqMap[T any, R comparable](collection []T, iteratee func(item T, index in
 // The order of keys in returned map is not specified and is not guaranteed to be the same from the original array.
 func SliceToMap[T any, K comparable, V any](collection []T, transform func(item T) (K, V)) map[K]V {
 	result := make(map[K]V, len(collection))
-
 	for i := range collection {
 		k, v := transform(collection[i])
 		result[k] = v
 	}
+	return result
+}
 
+// GroupByMap returns an object composed of keys generated from the results of running each element of collection through iteratee.
+func GroupByMap[T any, K comparable, V any](collection []T, iteratee func(item T) (K, V)) map[K][]V {
+	result := make(map[K][]V, 0)
+	for i := range collection {
+		k, v := iteratee(collection[i])
+		result[k] = append(result[k], v)
+	}
 	return result
 }
