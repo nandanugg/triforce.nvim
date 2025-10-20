@@ -40,6 +40,51 @@ func (q *Queries) CountUsersGroupByNIP(ctx context.Context, arg CountUsersGroupB
 	return count, err
 }
 
+const createUserRoles = `-- name: CreateUserRoles :exec
+insert into user_role (nip, role_id)
+select t.nip, t.role_id
+from (
+  select
+    $1::varchar as nip,
+    unnest($2::int2[]) as role_id
+) as t
+join role r on r.id = t.role_id and r.is_default is false and r.deleted_at is null
+where not exists (
+  select 1 from user_role as ur
+  where ur.nip = t.nip
+    and ur.role_id = t.role_id
+    and ur.deleted_at is null
+)
+`
+
+type CreateUserRolesParams struct {
+	Nip     string  `db:"nip"`
+	RoleIds []int16 `db:"role_ids"`
+}
+
+func (q *Queries) CreateUserRoles(ctx context.Context, arg CreateUserRolesParams) error {
+	_, err := q.db.Exec(ctx, createUserRoles, arg.Nip, arg.RoleIds)
+	return err
+}
+
+const deleteUserRoles = `-- name: DeleteUserRoles :exec
+update user_role
+set deleted_at = now()
+where nip = $1
+  and role_id <> all($2::int2[])
+  and deleted_at is null
+`
+
+type DeleteUserRolesParams struct {
+	Nip            string  `db:"nip"`
+	ExcludeRoleIds []int16 `db:"exclude_role_ids"`
+}
+
+func (q *Queries) DeleteUserRoles(ctx context.Context, arg DeleteUserRolesParams) error {
+	_, err := q.db.Exec(ctx, deleteUserRoles, arg.Nip, arg.ExcludeRoleIds)
+	return err
+}
+
 const getUserGroupByNIP = `-- name: GetUserGroupByNIP :one
 select
   u.nip,
@@ -85,6 +130,20 @@ func (q *Queries) GetUserNIPByIDAndSource(ctx context.Context, arg GetUserNIPByI
 	var nip string
 	err := row.Scan(&nip)
 	return nip, err
+}
+
+const isUserExistsByNIP = `-- name: IsUserExistsByNIP :one
+select exists (
+  select 1 from "user"
+  where nip = $1 and deleted_at is null
+)
+`
+
+func (q *Queries) IsUserExistsByNIP(ctx context.Context, nip string) (bool, error) {
+	row := q.db.QueryRow(ctx, isUserExistsByNIP, nip)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
 }
 
 const listUserRoleByNIP = `-- name: ListUserRoleByNIP :many

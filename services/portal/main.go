@@ -44,7 +44,7 @@ func main() {
 	pemberitahuan.RegisterRoutes(e, db, mwAuth)
 	resourcepermission.RegisterRoutes(e, dbRepository, mwAuth)
 	role.RegisterRoutes(e, db, dbRepository, mwAuth)
-	user.RegisterRoutes(e, dbRepository, mwAuth)
+	user.RegisterRoutes(e, db, dbRepository, mwAuth)
 
 	port := uint(c.Server.Port)
 	exitIfError("Error parsing server port.", err)

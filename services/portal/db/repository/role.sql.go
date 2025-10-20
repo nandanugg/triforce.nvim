@@ -22,6 +22,18 @@ func (q *Queries) CountRoles(ctx context.Context) (int64, error) {
 	return count, err
 }
 
+const countRolesByIDs = `-- name: CountRolesByIDs :one
+select count(1) from role
+where id = any($1::int2[]) and deleted_at is null
+`
+
+func (q *Queries) CountRolesByIDs(ctx context.Context, ids []int16) (int64, error) {
+	row := q.db.QueryRow(ctx, countRolesByIDs, ids)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createRole = `-- name: CreateRole :one
 insert into role (nama, deskripsi, is_default)
 values ($1, $2, $3)

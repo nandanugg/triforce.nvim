@@ -548,6 +548,40 @@ paths:
                     $ref: "#/components/schemas/user"
         "404":
           $ref: "#/components/responses/notFound"
+    patch:
+      tags:
+        - User
+      summary: Update user.
+      description: Update user berdasarkan NIP.
+      operationId: updateUser
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              properties:
+                role_ids:
+                  type: array
+                  items:
+                    type: integer
+                  uniqueItems: true
+              required:
+                - role_ids
+      responses:
+        "204":
+          description: Sukses.
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "404":
+          $ref: "#/components/responses/notFound"
 components:
   parameters:
     authRequired:

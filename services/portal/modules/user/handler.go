@@ -1,6 +1,7 @@
 package user
 
 import (
+	"errors"
 	"log/slog"
 	"net/http"
 
@@ -77,4 +78,32 @@ func (h *handler) get(c echo.Context) error {
 	return c.JSON(http.StatusOK, getResponse{
 		Data: data,
 	})
+}
+
+type updateRequest struct {
+	NIP     string  `param:"nip"`
+	RoleIDs []int16 `json:"role_ids"`
+}
+
+func (h *handler) update(c echo.Context) error {
+	var req updateRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	found, err := h.svc.update(c.Request().Context(), req.NIP, req.RoleIDs)
+	if err != nil {
+		if errors.Is(err, errRoleNotFound) {
+			return echo.NewHTTPError(http.StatusBadRequest, "data role tidak ditemukan")
+		}
+
+		slog.ErrorContext(c.Request().Context(), "Error updating user.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	if !found {
+		return echo.NewHTTPError(http.StatusNotFound, "data tidak ditemukan")
+	}
+
+	return c.NoContent(http.StatusNoContent)
 }

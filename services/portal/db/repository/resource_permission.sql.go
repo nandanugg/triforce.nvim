@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const countActiveResourcePermissionsByIDs = `-- name: CountActiveResourcePermissionsByIDs :one
+const countResourcePermissionsByIDs = `-- name: CountResourcePermissionsByIDs :one
 select count(1)
 from resource_permission
 where kode is not null -- kode is not null is alias for resource.deleted_at is null and permission.deleted_at is null
@@ -17,8 +17,8 @@ where kode is not null -- kode is not null is alias for resource.deleted_at is n
   and deleted_at is null
 `
 
-func (q *Queries) CountActiveResourcePermissionsByIDs(ctx context.Context, ids []int32) (int64, error) {
-	row := q.db.QueryRow(ctx, countActiveResourcePermissionsByIDs, ids)
+func (q *Queries) CountResourcePermissionsByIDs(ctx context.Context, ids []int32) (int64, error) {
+	row := q.db.QueryRow(ctx, countResourcePermissionsByIDs, ids)
 	var count int64
 	err := row.Scan(&count)
 	return count, err

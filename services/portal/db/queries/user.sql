@@ -81,3 +81,32 @@ select
 from "user" u
 where u.nip = $1 and u.deleted_at is null
 group by u.nip;
+
+-- name: IsUserExistsByNIP :one
+select exists (
+  select 1 from "user"
+  where nip = $1 and deleted_at is null
+);
+
+-- name: CreateUserRoles :exec
+insert into user_role (nip, role_id)
+select t.nip, t.role_id
+from (
+  select
+    @nip::varchar as nip,
+    unnest(@role_ids::int2[]) as role_id
+) as t
+join role r on r.id = t.role_id and r.is_default is false and r.deleted_at is null
+where not exists (
+  select 1 from user_role as ur
+  where ur.nip = t.nip
+    and ur.role_id = t.role_id
+    and ur.deleted_at is null
+);
+
+-- name: DeleteUserRoles :exec
+update user_role
+set deleted_at = now()
+where nip = $1
+  and role_id <> all(@exclude_role_ids::int2[])
+  and deleted_at is null;

@@ -12,7 +12,7 @@ select count(1)
 from resource
 where deleted_at is null;
 
--- name: CountActiveResourcePermissionsByIDs :one
+-- name: CountResourcePermissionsByIDs :one
 select count(1)
 from resource_permission
 where kode is not null -- kode is not null is alias for resource.deleted_at is null and permission.deleted_at is null

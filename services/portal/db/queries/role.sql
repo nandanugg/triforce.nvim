@@ -118,3 +118,7 @@ from (
 ) as t
 join role r on r.is_default and r.deleted_at is null
 order by nama;
+
+-- name: CountRolesByIDs :one
+select count(1) from role
+where id = any(@ids::int2[]) and deleted_at is null;

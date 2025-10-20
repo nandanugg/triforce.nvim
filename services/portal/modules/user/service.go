@@ -13,18 +13,11 @@ import (
 	sqlc "gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/db/repository"
 )
 
-type repository interface {
-	GetUserGroupByNIP(ctx context.Context, nip string) (sqlc.GetUserGroupByNIPRow, error)
-	ListUsersGroupByNIP(ctx context.Context, arg sqlc.ListUsersGroupByNIPParams) ([]sqlc.ListUsersGroupByNIPRow, error)
-	CountUsersGroupByNIP(ctx context.Context, arg sqlc.CountUsersGroupByNIPParams) (int64, error)
-	ListRolesByNIPs(ctx context.Context, nips []string) ([]sqlc.ListRolesByNIPsRow, error)
-}
-
 type service struct {
-	repo repository
+	repo *repository
 }
 
-func newService(repo repository) *service {
+func newService(repo *repository) *service {
 	return &service{repo: repo}
 }
 
@@ -122,4 +115,38 @@ func (s *service) get(ctx context.Context, nip string) (*user, error) {
 			}
 		}),
 	}, nil
+}
+
+func (s *service) update(ctx context.Context, nip string, roleIDs []int16) (bool, error) {
+	if err := s.validateRoleIDs(ctx, roleIDs); err != nil {
+		return false, err
+	}
+
+	found, err := s.repo.IsUserExistsByNIP(ctx, nip)
+	if err != nil {
+		return false, fmt.Errorf("repo user exists: %w", err)
+	}
+	if !found {
+		return false, nil
+	}
+
+	if err := s.repo.update(ctx, nip, roleIDs); err != nil {
+		return false, fmt.Errorf("repo update: %w", err)
+	}
+	return true, nil
+}
+
+func (s *service) validateRoleIDs(ctx context.Context, ids []int16) error {
+	if len(ids) == 0 {
+		return nil
+	}
+
+	count, err := s.repo.CountRolesByIDs(ctx, ids)
+	if err != nil {
+		return fmt.Errorf("repo count roles: %w", err)
+	}
+	if count != int64(len(ids)) {
+		return errRoleNotFound
+	}
+	return nil
 }

@@ -18,7 +18,7 @@ type sqlcRepository interface {
 	GetRole(ctx context.Context, id int16) (sqlc.GetRoleRow, error)
 	ListResourcePermissionsByRoleID(ctx context.Context, roleID int16) ([]sqlc.ListResourcePermissionsByRoleIDRow, error)
 	ListRoleResourcePermissionsByRoleID(ctx context.Context, roleID int16) ([]sqlc.ListRoleResourcePermissionsByRoleIDRow, error)
-	CountActiveResourcePermissionsByIDs(ctx context.Context, ids []int32) (int64, error)
+	CountResourcePermissionsByIDs(ctx context.Context, ids []int32) (int64, error)
 
 	WithTx(tx pgx.Tx) *sqlc.Queries
 }

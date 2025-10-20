@@ -127,9 +127,9 @@ func (s *service) validateResourcePermissionIDs(ctx context.Context, ids []int32
 		return nil
 	}
 
-	count, err := s.repo.CountActiveResourcePermissionsByIDs(ctx, ids)
+	count, err := s.repo.CountResourcePermissionsByIDs(ctx, ids)
 	if err != nil {
-		return fmt.Errorf("repo count active resource permissions: %w", err)
+		return fmt.Errorf("repo count resource permissions: %w", err)
 	}
 	if count != int64(len(ids)) {
 		return errResourcePermissionNotFound
