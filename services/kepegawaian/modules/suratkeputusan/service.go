@@ -30,6 +30,9 @@ type repository interface {
 	ListUnitKerjaHierarchyByNIP(ctx context.Context, nip string) ([]repo.ListUnitKerjaHierarchyByNIPRow, error)
 	ListLogSuratKeputusanByID(ctx context.Context, id string) ([]repo.ListLogSuratKeputusanByIDRow, error)
 	ListUnitKerjaLengkapByIDs(ctx context.Context, ids []string) ([]repo.ListUnitKerjaLengkapByIDsRow, error)
+	ListKoreksiSuratKeputusanByPNSID(ctx context.Context, arg repo.ListKoreksiSuratKeputusanByPNSIDParams) ([]repo.ListKoreksiSuratKeputusanByPNSIDRow, error)
+	CountKoreksiSuratKeputusanByPNSID(ctx context.Context, arg repo.CountKoreksiSuratKeputusanByPNSIDParams) (int64, error)
+	GetPegawaiPNSIDByNIP(ctx context.Context, nip string) (string, error)
 }
 type service struct {
 	repo repository
@@ -307,4 +310,86 @@ func (s *service) getBerkasAdmin(ctx context.Context, id string, signed bool) (s
 	}
 
 	return api.GetMimeTypeAndDecodedData(res.String)
+}
+
+type listKoreksiParams struct {
+	limit       uint
+	offset      uint
+	unitKerjaID string
+	namaPemilik string
+	nipPemilik  string
+	nip         string
+	golonganID  int32
+	jabatanID   string
+	kategoriSK  string
+	noSK        string
+	status      string
+}
+
+func (s *service) listKoreksi(ctx context.Context, arg listKoreksiParams) ([]koreksiSuratKeputusan, uint, error) {
+	pnsID, err := s.repo.GetPegawaiPNSIDByNIP(ctx, arg.nip)
+	if err != nil {
+		return nil, 0, fmt.Errorf("[suratkeputusan-listKoreksiBelumDikoreksi] repo GetPegawaiPNSIDByNIP: %w", err)
+	}
+	statusKoreksi := pgtype.Int4{Valid: false}
+	if getStatusKoreksiValue(arg.status) != nil {
+		statusKoreksi = pgtype.Int4{Int32: *getStatusKoreksiValue(arg.status), Valid: true}
+	}
+	data, err := s.repo.ListKoreksiSuratKeputusanByPNSID(ctx, repo.ListKoreksiSuratKeputusanByPNSIDParams{
+		Limit:         int32(arg.limit),
+		Offset:        int32(arg.offset),
+		UnitKerjaID:   pgtype.Text{String: arg.unitKerjaID, Valid: arg.unitKerjaID != ""},
+		NamaPemilik:   pgtype.Text{String: arg.namaPemilik, Valid: arg.namaPemilik != ""},
+		NipPemilik:    pgtype.Text{String: arg.nipPemilik, Valid: arg.nipPemilik != ""},
+		GolonganID:    pgtype.Int4{Int32: arg.golonganID, Valid: arg.golonganID != 0},
+		JabatanID:     pgtype.Text{String: arg.jabatanID, Valid: arg.jabatanID != ""},
+		KategoriSk:    pgtype.Text{String: arg.kategoriSK, Valid: arg.kategoriSK != ""},
+		NoSk:          pgtype.Text{String: arg.noSK, Valid: arg.noSK != ""},
+		StatusKoreksi: statusKoreksi,
+		PnsID:         pnsID,
+	})
+	if err != nil {
+		return nil, 0, fmt.Errorf("[suratkeputusan-listKoreksiBelumDikoreksi] repo ListKoreksiSuratKeputusanByPNSID: %w", err)
+	}
+
+	count, err := s.repo.CountKoreksiSuratKeputusanByPNSID(ctx, repo.CountKoreksiSuratKeputusanByPNSIDParams{
+		UnitKerjaID:   pgtype.Text{String: arg.unitKerjaID, Valid: arg.unitKerjaID != ""},
+		NamaPemilik:   pgtype.Text{String: arg.namaPemilik, Valid: arg.namaPemilik != ""},
+		NipPemilik:    pgtype.Text{String: arg.nipPemilik, Valid: arg.nipPemilik != ""},
+		GolonganID:    pgtype.Int4{Int32: arg.golonganID, Valid: arg.golonganID != 0},
+		JabatanID:     pgtype.Text{String: arg.jabatanID, Valid: arg.jabatanID != ""},
+		KategoriSk:    pgtype.Text{String: arg.kategoriSK, Valid: arg.kategoriSK != ""},
+		NoSk:          pgtype.Text{String: arg.noSK, Valid: arg.noSK != ""},
+		StatusKoreksi: statusKoreksi,
+		PnsID:         pnsID,
+	})
+	if err != nil {
+		return nil, 0, fmt.Errorf("[suratkeputusan-listKoreksiBelumDikoreksi] repo CountKoreksiSuratKeputusanByPNSID: %w", err)
+	}
+
+	uniqUnorIDs := typeutil.UniqMap(data, func(row repo.ListKoreksiSuratKeputusanByPNSIDRow, _ int) string {
+		return row.UnorID.String
+	})
+
+	listUnorLengkap, err := s.repo.ListUnitKerjaLengkapByIDs(ctx, uniqUnorIDs)
+	if err != nil {
+		return nil, 0, fmt.Errorf("[suratkeputusan-listKoreksiBelumDikoreksi] repo ListUnitKerjaLengkapByIDs: %w", err)
+	}
+
+	unorLengkapByID := typeutil.SliceToMap(listUnorLengkap, func(unorLengkap repo.ListUnitKerjaLengkapByIDsRow) (string, string) {
+		return unorLengkap.ID, unorLengkap.NamaUnorLengkap
+	})
+
+	result := typeutil.Map(data, func(row repo.ListKoreksiSuratKeputusanByPNSIDRow) koreksiSuratKeputusan {
+		return koreksiSuratKeputusan{
+			IDSK:        row.FileID,
+			NamaPemilik: row.NamaPemilikSk.String,
+			NIPPemilik:  row.NipPemilikSk.String,
+			KategoriSK:  row.KategoriSk.String,
+			NoSK:        row.NoSk.String,
+			TanggalSK:   db.Date(row.TanggalSk.Time),
+			UnitKerja:   unorLengkapByID[row.UnorID.String],
+		}
+	})
+	return result, uint(count), nil
 }

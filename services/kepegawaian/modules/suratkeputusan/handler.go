@@ -216,3 +216,51 @@ func (h *handler) getBerkasAdmin(c echo.Context) error {
 	c.Response().Header().Set("Content-Disposition", "inline")
 	return c.Blob(http.StatusOK, mimeType, blob)
 }
+
+type listKoreksiRequest struct {
+	api.PaginationRequest
+	UnitKerjaID   string `query:"unit_kerja_id"`
+	NamaPemilik   string `query:"nama_pemilik"`
+	NipPemilik    string `query:"nip_pemilik"`
+	GolonganID    int32  `query:"golongan_id"`
+	JabatanID     string `query:"jabatan_id"`
+	KategoriSK    string `query:"kategori_sk"`
+	NoSK          string `query:"no_sk"`
+	StatusKoreksi string `query:"status"`
+}
+
+type listKoreksiResponse struct {
+	Data []koreksiSuratKeputusan `json:"data"`
+	Meta api.MetaPagination      `json:"meta"`
+}
+
+func (h *handler) listKoreksi(c echo.Context) error {
+	var req listKoreksiRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	ctx := c.Request().Context()
+	data, total, err := h.service.listKoreksi(ctx, listKoreksiParams{
+		limit:       req.Limit,
+		offset:      req.Offset,
+		unitKerjaID: req.UnitKerjaID,
+		namaPemilik: req.NamaPemilik,
+		nip:         api.CurrentUser(c).NIP,
+		nipPemilik:  req.NipPemilik,
+		golonganID:  req.GolonganID,
+		jabatanID:   req.JabatanID,
+		kategoriSK:  req.KategoriSK,
+		noSK:        req.NoSK,
+		status:      req.StatusKoreksi,
+	})
+	if err != nil {
+		slog.ErrorContext(ctx, "Error getting list koreksi surat keputusan belum dikoreksi.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	return c.JSON(http.StatusOK, listKoreksiResponse{
+		Data: data,
+		Meta: api.MetaPagination{Limit: req.Limit, Offset: req.Offset, Total: total},
+	})
+}

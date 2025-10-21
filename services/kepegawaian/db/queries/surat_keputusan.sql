@@ -154,3 +154,57 @@ FROM
 WHERE 
     fds.deleted_at IS NULL
     AND fds.file_id = @id::varchar;
+
+-- name: ListKoreksiSuratKeputusanByPNSID :many
+SELECT
+    fds.file_id,
+    p.nama as nama_pemilik_sk,
+    p.nip_baru as nip_pemilik_sk,
+    fds.kategori AS kategori_sk,
+    fds.no_sk,
+    fds.tanggal_sk,
+    p.unor_id
+FROM file_digital_signature_corrector fdc
+JOIN file_digital_signature fds ON fds.file_id = fdc.file_id AND fds.deleted_at IS NULL
+JOIN pegawai p ON fds.nip_sk = p.nip_baru AND p.deleted_at IS NULL
+LEFT JOIN unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
+WHERE fdc.deleted_at IS NULL
+    AND (sqlc.narg('unit_kerja_id')::VARCHAR IS NULL
+        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.id
+        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_1
+        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_2
+        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_3
+        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_4)
+    AND (sqlc.narg('nama_pemilik')::VARCHAR IS NULL OR p.nama ILIKE '%' || sqlc.narg('nama_pemilik')::VARCHAR || '%')
+    AND (sqlc.narg('nip_pemilik')::VARCHAR IS NULL OR fds.nip_sk = sqlc.narg('nip_pemilik')::VARCHAR)
+    AND (sqlc.narg('golongan_id')::INTEGER IS NULL OR p.gol_id = sqlc.narg('golongan_id')::INTEGER)
+    AND (sqlc.narg('jabatan_id')::VARCHAR IS NULL OR p.jabatan_instansi_id = sqlc.narg('jabatan_id')::VARCHAR)
+    AND (sqlc.narg('kategori_sk')::VARCHAR is NULL OR fds.kategori ILIKE '%' || sqlc.narg('kategori_sk')::VARCHAR || '%')
+    AND (sqlc.narg('no_sk')::VARCHAR IS NULL OR fds.no_sk ILIKE '%' || sqlc.narg('no_sk')::VARCHAR || '%')
+    AND (sqlc.narg('status_koreksi')::integer is NULL or fdc.status_koreksi = sqlc.narg('status_koreksi')::integer)
+    AND fdc.pegawai_korektor_id = @pns_id::varchar
+ORDER BY fds.created_at DESC
+LIMIT $1 OFFSET $2;
+
+-- name: CountKoreksiSuratKeputusanByPNSID :one
+select
+    count(1) as total
+FROM file_digital_signature_corrector fdc
+JOIN file_digital_signature fds ON fds.file_id = fdc.file_id AND fds.deleted_at IS NULL
+JOIN pegawai p ON fds.nip_sk = p.nip_baru AND p.deleted_at IS NULL
+LEFT JOIN unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
+WHERE fdc.deleted_at IS NULL
+    AND (sqlc.narg('unit_kerja_id')::VARCHAR IS NULL
+        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.id
+        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_1
+        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_2
+        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_3
+        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_4)
+    AND (sqlc.narg('nama_pemilik')::VARCHAR IS NULL OR p.nama ILIKE '%' || sqlc.narg('nama_pemilik')::VARCHAR || '%')
+    AND (sqlc.narg('nip_pemilik')::VARCHAR IS NULL OR fds.nip_sk = sqlc.narg('nip_pemilik')::VARCHAR)
+    AND (sqlc.narg('golongan_id')::INTEGER IS NULL OR p.gol_id = sqlc.narg('golongan_id')::INTEGER)
+    AND (sqlc.narg('jabatan_id')::VARCHAR IS NULL OR p.jabatan_instansi_id = sqlc.narg('jabatan_id')::VARCHAR)
+    AND (sqlc.narg('kategori_sk')::VARCHAR is NULL OR fds.kategori ILIKE '%' || sqlc.narg('kategori_sk')::VARCHAR || '%')
+    AND (sqlc.narg('no_sk')::VARCHAR IS NULL OR fds.no_sk ILIKE '%' || sqlc.narg('no_sk')::VARCHAR || '%')
+    AND (sqlc.narg('status_koreksi')::integer is NULL or fdc.status_koreksi = sqlc.narg('status_koreksi')::integer)
+    AND fdc.pegawai_korektor_id = @pns_id::varchar;

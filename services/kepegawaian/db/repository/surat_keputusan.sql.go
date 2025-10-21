@@ -9,6 +9,59 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countKoreksiSuratKeputusanByPNSID = `-- name: CountKoreksiSuratKeputusanByPNSID :one
+select
+    count(1) as total
+FROM file_digital_signature_corrector fdc
+JOIN file_digital_signature fds ON fds.file_id = fdc.file_id AND fds.deleted_at IS NULL
+JOIN pegawai p ON fds.nip_sk = p.nip_baru AND p.deleted_at IS NULL
+LEFT JOIN unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
+WHERE fdc.deleted_at IS NULL
+    AND ($1::VARCHAR IS NULL
+        OR $1::VARCHAR = uk.id
+        OR $1::VARCHAR = uk.eselon_1
+        OR $1::VARCHAR = uk.eselon_2
+        OR $1::VARCHAR = uk.eselon_3
+        OR $1::VARCHAR = uk.eselon_4)
+    AND ($2::VARCHAR IS NULL OR p.nama ILIKE '%' || $2::VARCHAR || '%')
+    AND ($3::VARCHAR IS NULL OR fds.nip_sk = $3::VARCHAR)
+    AND ($4::INTEGER IS NULL OR p.gol_id = $4::INTEGER)
+    AND ($5::VARCHAR IS NULL OR p.jabatan_instansi_id = $5::VARCHAR)
+    AND ($6::VARCHAR is NULL OR fds.kategori ILIKE '%' || $6::VARCHAR || '%')
+    AND ($7::VARCHAR IS NULL OR fds.no_sk ILIKE '%' || $7::VARCHAR || '%')
+    AND ($8::integer is NULL or fdc.status_koreksi = $8::integer)
+    AND fdc.pegawai_korektor_id = $9::varchar
+`
+
+type CountKoreksiSuratKeputusanByPNSIDParams struct {
+	UnitKerjaID   pgtype.Text `db:"unit_kerja_id"`
+	NamaPemilik   pgtype.Text `db:"nama_pemilik"`
+	NipPemilik    pgtype.Text `db:"nip_pemilik"`
+	GolonganID    pgtype.Int4 `db:"golongan_id"`
+	JabatanID     pgtype.Text `db:"jabatan_id"`
+	KategoriSk    pgtype.Text `db:"kategori_sk"`
+	NoSk          pgtype.Text `db:"no_sk"`
+	StatusKoreksi pgtype.Int4 `db:"status_koreksi"`
+	PnsID         string      `db:"pns_id"`
+}
+
+func (q *Queries) CountKoreksiSuratKeputusanByPNSID(ctx context.Context, arg CountKoreksiSuratKeputusanByPNSIDParams) (int64, error) {
+	row := q.db.QueryRow(ctx, countKoreksiSuratKeputusanByPNSID,
+		arg.UnitKerjaID,
+		arg.NamaPemilik,
+		arg.NipPemilik,
+		arg.GolonganID,
+		arg.JabatanID,
+		arg.KategoriSk,
+		arg.NoSk,
+		arg.StatusKoreksi,
+		arg.PnsID,
+	)
+	var total int64
+	err := row.Scan(&total)
+	return total, err
+}
+
 const countSuratKeputusan = `-- name: CountSuratKeputusan :one
 SELECT COUNT(*) as total
 FROM file_digital_signature fds
@@ -256,6 +309,102 @@ func (q *Queries) GetSuratKeputusanByNIPAndID(ctx context.Context, arg GetSuratK
 		&i.NamaPenandatangan,
 	)
 	return i, err
+}
+
+const listKoreksiSuratKeputusanByPNSID = `-- name: ListKoreksiSuratKeputusanByPNSID :many
+SELECT
+    fds.file_id,
+    p.nama as nama_pemilik_sk,
+    p.nip_baru as nip_pemilik_sk,
+    fds.kategori AS kategori_sk,
+    fds.no_sk,
+    fds.tanggal_sk,
+    p.unor_id
+FROM file_digital_signature_corrector fdc
+JOIN file_digital_signature fds ON fds.file_id = fdc.file_id AND fds.deleted_at IS NULL
+JOIN pegawai p ON fds.nip_sk = p.nip_baru AND p.deleted_at IS NULL
+LEFT JOIN unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
+WHERE fdc.deleted_at IS NULL
+    AND ($3::VARCHAR IS NULL
+        OR $3::VARCHAR = uk.id
+        OR $3::VARCHAR = uk.eselon_1
+        OR $3::VARCHAR = uk.eselon_2
+        OR $3::VARCHAR = uk.eselon_3
+        OR $3::VARCHAR = uk.eselon_4)
+    AND ($4::VARCHAR IS NULL OR p.nama ILIKE '%' || $4::VARCHAR || '%')
+    AND ($5::VARCHAR IS NULL OR fds.nip_sk = $5::VARCHAR)
+    AND ($6::INTEGER IS NULL OR p.gol_id = $6::INTEGER)
+    AND ($7::VARCHAR IS NULL OR p.jabatan_instansi_id = $7::VARCHAR)
+    AND ($8::VARCHAR is NULL OR fds.kategori ILIKE '%' || $8::VARCHAR || '%')
+    AND ($9::VARCHAR IS NULL OR fds.no_sk ILIKE '%' || $9::VARCHAR || '%')
+    AND ($10::integer is NULL or fdc.status_koreksi = $10::integer)
+    AND fdc.pegawai_korektor_id = $11::varchar
+ORDER BY fds.created_at DESC
+LIMIT $1 OFFSET $2
+`
+
+type ListKoreksiSuratKeputusanByPNSIDParams struct {
+	Limit         int32       `db:"limit"`
+	Offset        int32       `db:"offset"`
+	UnitKerjaID   pgtype.Text `db:"unit_kerja_id"`
+	NamaPemilik   pgtype.Text `db:"nama_pemilik"`
+	NipPemilik    pgtype.Text `db:"nip_pemilik"`
+	GolonganID    pgtype.Int4 `db:"golongan_id"`
+	JabatanID     pgtype.Text `db:"jabatan_id"`
+	KategoriSk    pgtype.Text `db:"kategori_sk"`
+	NoSk          pgtype.Text `db:"no_sk"`
+	StatusKoreksi pgtype.Int4 `db:"status_koreksi"`
+	PnsID         string      `db:"pns_id"`
+}
+
+type ListKoreksiSuratKeputusanByPNSIDRow struct {
+	FileID        string      `db:"file_id"`
+	NamaPemilikSk pgtype.Text `db:"nama_pemilik_sk"`
+	NipPemilikSk  pgtype.Text `db:"nip_pemilik_sk"`
+	KategoriSk    pgtype.Text `db:"kategori_sk"`
+	NoSk          pgtype.Text `db:"no_sk"`
+	TanggalSk     pgtype.Date `db:"tanggal_sk"`
+	UnorID        pgtype.Text `db:"unor_id"`
+}
+
+func (q *Queries) ListKoreksiSuratKeputusanByPNSID(ctx context.Context, arg ListKoreksiSuratKeputusanByPNSIDParams) ([]ListKoreksiSuratKeputusanByPNSIDRow, error) {
+	rows, err := q.db.Query(ctx, listKoreksiSuratKeputusanByPNSID,
+		arg.Limit,
+		arg.Offset,
+		arg.UnitKerjaID,
+		arg.NamaPemilik,
+		arg.NipPemilik,
+		arg.GolonganID,
+		arg.JabatanID,
+		arg.KategoriSk,
+		arg.NoSk,
+		arg.StatusKoreksi,
+		arg.PnsID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListKoreksiSuratKeputusanByPNSIDRow
+	for rows.Next() {
+		var i ListKoreksiSuratKeputusanByPNSIDRow
+		if err := rows.Scan(
+			&i.FileID,
+			&i.NamaPemilikSk,
+			&i.NipPemilikSk,
+			&i.KategoriSk,
+			&i.NoSk,
+			&i.TanggalSk,
+			&i.UnorID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const listLogSuratKeputusanByID = `-- name: ListLogSuratKeputusanByID :many

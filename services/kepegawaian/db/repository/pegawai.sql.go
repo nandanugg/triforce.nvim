@@ -69,6 +69,17 @@ func (q *Queries) CountPegawaiAktif(ctx context.Context, arg CountPegawaiAktifPa
 	return count, err
 }
 
+const getPegawaiPNSIDByNIP = `-- name: GetPegawaiPNSIDByNIP :one
+SELECT pns_id FROM pegawai WHERE nip_baru = $1::varchar AND deleted_at IS NULL
+`
+
+func (q *Queries) GetPegawaiPNSIDByNIP(ctx context.Context, nip string) (string, error) {
+	row := q.db.QueryRow(ctx, getPegawaiPNSIDByNIP, nip)
+	var pns_id string
+	err := row.Scan(&pns_id)
+	return pns_id, err
+}
+
 const getProfilePegawaiByPNSID = `-- name: GetProfilePegawaiByPNSID :one
 select
   p.nip_lama,

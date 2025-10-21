@@ -43,3 +43,25 @@ func statusSKText(statusSK int16) string {
 		return "Status Tidak Diketahui"
 	}
 }
+
+type koreksiSuratKeputusan struct {
+	IDSK        string  `json:"id_sk"`
+	KategoriSK  string  `json:"kategori_sk"`
+	NoSK        string  `json:"no_sk"`
+	TanggalSK   db.Date `json:"tanggal_sk"`
+	UnitKerja   string  `json:"unit_kerja"`
+	NamaPemilik string  `json:"nama_pemilik,omitempty"`
+	NIPPemilik  string  `json:"nip_pemilik,omitempty"`
+}
+
+var statusKoreksiMap = map[string]int32{
+	"Sudah Dikoreksi": 1,
+	"Belum Dikoreksi": 2,
+}
+
+func getStatusKoreksiValue(status string) *int32 {
+	if val, ok := statusKoreksiMap[status]; ok {
+		return &val
+	}
+	return nil
+}

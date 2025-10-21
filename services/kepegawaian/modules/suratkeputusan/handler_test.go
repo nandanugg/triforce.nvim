@@ -1585,3 +1585,266 @@ func Test_handler_getBerkasAdmin(t *testing.T) {
 		})
 	}
 }
+
+func Test_handler_listKoreksi(t *testing.T) {
+	t.Parallel()
+
+	dbData := `
+		insert into unit_kerja
+			(id,  diatasan_id, nama_unor, nama_jabatan,    pemimpin_pns_id, deleted_at) values
+			('unor-1', null, 'Paling Atas', 'Atasan 1', null, null),
+			('unor-2', 'unor-1', 'Tengah', 'Atasan 2', null, null),
+			('unor-3', 'unor-2', 'Bawah', 'Atasan 3', null, null),
+			('unor-4', 'unor-1', 'Tengah deleted', 'Atasan 4', null, now()),
+			('unor-5', 'unor-4', 'Bawah 2', 'Atasan 5', null, null);
+		INSERT INTO file_digital_signature_corrector
+				("file_id","status_koreksi","pegawai_korektor_id","created_at", "deleted_at") VALUES
+				('sk-001', 1, '123456787', '2024-01-15', NULL),
+				('sk-002', 2, '123456787', '2024-02-20', NULL),
+				('sk-003', 2, '123456787', '2024-03-10', NULL),
+				('sk-004', 2, '123456787', '2024-03-10', NULL),
+				('sk-005', 2, '123456788', '2024-03-10', NULL),
+				('sk-006', 2, '123456787', '2024-03-10', now());
+		
+		INSERT INTO file_digital_signature 
+			("file_id","nip_sk","kategori","no_sk","tanggal_sk","status_sk","created_at", "deleted_at") VALUES
+			('sk-001', '123456789', 'Kenaikan Pangkat', 'SK-001/2024', '2024-01-15', 1, '2024-01-15', NULL),
+			('sk-002', '123456789', 'Mutasi', 'SK-002/2024', '2024-02-20', 0, '2024-02-20', NULL),
+			('sk-003', '123456789', 'Kenaikan Gaji', 'SK-003/2024', '2024-03-10', 2, '2024-03-10', NULL),
+			('sk-004', '123456789', 'Kenaikan Gaji', 'SK-004/2024', '2024-03-10', 2, '2024-03-10', NULL),
+			('sk-005', '123456788', 'Kenaikan Gaji', 'SK-005/2024', '2024-03-10', 2, '2024-03-10', NULL),
+			('sk-006', '123456789', 'Kenaikan Gaji', 'SK-006/2024', '2024-03-10', 2, '2024-03-10', NOW());
+
+		INSERT INTO ref_golongan (id, nama, nama_pangkat, nama_2, gol, gol_pppk)
+		VALUES
+			(1, 'I/a', 'Juru Muda', 'I/a', 1, 'I/a'),
+			(2, 'I/b', 'Juru Muda Tingkat I', 'I/b', 2, 'I/b'),
+			(3, 'II/a', 'Pengatur Muda', 'II/a', 3, 'II/a'),
+			(4, 'II/b', 'Pengatur Muda Tingkat I', 'II/b', 4, 'II/b'),
+			(5, 'III/a', 'Penata Muda', 'III/a', 5, 'III/a'),
+			(6, 'III/b', 'Penata Muda Tingkat I', 'III/b', 6, 'III/b'),
+			(7, 'IV/a', 'Pembina', 'IV/a', 7, 'IV/a');
+		INSERT INTO ref_jabatan (kode_jabatan, id, nama_jabatan, nama_jabatan_full, jenis_jabatan, kelas, pensiun, kode_bkn, nama_jabatan_bkn, kategori_jabatan, bkn_id)
+		VALUES
+			('JAB-01', 1, 'Kepala Bagian', 'Kepala Bagian Administrasi', 1, 3, 60, 'BKN-01', 'Kepala Bagian BKN', 'Struktural', 'BKN-01'),
+			('JAB-02', 2, 'Kepala Subbag', 'Kepala Subbag Umum', 1, 2, 60, 'BKN-02', 'Kepala Subbag BKN', 'Struktural', 'BKN-02'),
+			('JAB-03', 3, 'Pengawas', 'Pengawas Pelayanan', 2, 2, 58, 'BKN-03', 'Pengawas BKN', 'Fungsional', 'BKN-03'),
+			('JAB-04', 4, 'Staf Ahli', 'Staf Ahli Bidang Kepegawaian', 2, 3, 58, 'BKN-04', 'Staf Ahli BKN', 'Fungsional', 'BKN-04'),
+			('JAB-05', 5, 'Kepala Seksi', 'Kepala Seksi Administrasi', 1, 2, 60, 'BKN-05', 'Kepala Seksi BKN', 'Struktural', 'BKN-05'),
+			('JAB-06', 6, 'Analis', 'Analis Kepegawaian', 2, 1, 58, 'BKN-06', 'Analis BKN', 'Fungsional', 'BKN-06'),
+			('JAB-07', 7, 'Operator', 'Operator Sistem', 2, 1, 58, 'BKN-07', 'Operator BKN', 'Fungsional', 'BKN-07');
+		INSERT INTO pegawai
+			("nip_baru","pns_id","unor_id","nama", "gol_id", "jabatan_instansi_id", deleted_at) values
+			('123456789','123456789','unor-3','pemilik_sk', 1, 'JAB-01', null),
+			('123456788','123456788','unor-5','pemilik_sk_2', 2, 'JAB-02', null),
+			('123456787','123456787','unor-5','pemilik_sk_3', 3, 'JAB-03', null),
+			('12345678','12345678','unor-3','Jane Smith', 4, 'JAB-04', null),
+			('12345677','12345677','unor-3','Korektor', 5, 'JAB-05', null);
+	`
+	pgxconn := dbtest.New(t, dbmigrations.FS)
+	_, err := pgxconn.Exec(context.Background(), dbData)
+	require.NoError(t, err)
+
+	authHeader := []string{apitest.GenerateAuthHeader("123456787")}
+
+	tests := []struct {
+		name             string
+		requestPath      string
+		requestHeader    http.Header
+		requestQuery     url.Values
+		wantResponseCode int
+		wantResponseBody string
+	}{
+		{
+			name:          "ok belum dikoreksi: without params",
+			requestPath:   "/v1/koreksi-surat-keputusan",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestQuery: url.Values{
+				"status": []string{"Belum Dikoreksi"},
+			},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{
+						"id_sk": "sk-003",
+						"nama_pemilik": "pemilik_sk",
+						"nip_pemilik": "123456789",
+						"kategori_sk": "Kenaikan Gaji",
+						"no_sk": "SK-003/2024",
+						"tanggal_sk": "2024-03-10",
+						"unit_kerja": "Bawah - Tengah - Paling Atas"
+					},
+					{
+						"id_sk": "sk-004",
+						"nama_pemilik": "pemilik_sk",
+						"nip_pemilik": "123456789",
+						"kategori_sk": "Kenaikan Gaji",
+						"no_sk": "SK-004/2024",
+						"tanggal_sk": "2024-03-10",
+						"unit_kerja": "Bawah - Tengah - Paling Atas"
+					},
+					{
+						"id_sk": "sk-002",
+						"nama_pemilik": "pemilik_sk",
+						"nip_pemilik": "123456789",
+						"kategori_sk": "Mutasi",
+						"no_sk": "SK-002/2024",
+						"tanggal_sk": "2024-02-20",
+						"unit_kerja": "Bawah - Tengah - Paling Atas"
+					}
+				],
+				"meta": {
+					"limit": 10,
+					"offset": 0,
+					"total": 3
+				}
+			}`,
+		},
+		{
+			name:          "ok sudah dikoreksi: without params",
+			requestPath:   "/v1/koreksi-surat-keputusan",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestQuery: url.Values{
+				"status": []string{"Sudah Dikoreksi"},
+			},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{
+						"id_sk": "sk-001",
+						"nama_pemilik": "pemilik_sk",
+						"nip_pemilik": "123456789",
+						"kategori_sk": "Kenaikan Pangkat",
+						"no_sk": "SK-001/2024",
+						"tanggal_sk": "2024-01-15",
+						"unit_kerja": "Bawah - Tengah - Paling Atas"
+					}
+				],
+				"meta": {
+					"limit": 10,
+					"offset": 0,
+					"total": 1
+				}
+			}`,
+		},
+		{
+			name:          "ok belum dikoreksi: with pagination params",
+			requestPath:   "/v1/koreksi-surat-keputusan",
+			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456787")}},
+			requestQuery: url.Values{
+				"status": []string{"Belum Dikoreksi"},
+				"limit":  []string{"1"},
+				"offset": []string{"1"},
+			},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{
+						"id_sk": "sk-004",
+						"nama_pemilik": "pemilik_sk",
+						"nip_pemilik": "123456789",
+						"kategori_sk": "Kenaikan Gaji",
+						"no_sk": "SK-004/2024",
+						"tanggal_sk": "2024-03-10",
+						"unit_kerja": "Bawah - Tengah - Paling Atas"
+					}
+				],
+				"meta": {
+					"limit": 1,
+					"offset": 1,
+					"total": 3
+				}
+			}`,
+		},
+		{
+			name:          "ok belum dikoreksi with params",
+			requestPath:   "/v1/koreksi-surat-keputusan",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestQuery: url.Values{
+				"status":        []string{"Belum Dikoreksi"},
+				"unit_kerja_id": []string{"unor-3"},
+				"nama_pemilik":  []string{"pemilik_sk"},
+				"nip":           []string{"123456789"},
+				"golongan_id":   []string{"1"},
+				"jabatan_id":    []string{"JAB-01"},
+				"kategori_sk":   []string{"Kenaikan Gaji"},
+				"no_sk":         []string{"SK-003/2024"},
+			},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{
+						"id_sk": "sk-003",
+						"nama_pemilik": "pemilik_sk",
+						"nip_pemilik": "123456789",
+						"kategori_sk": "Kenaikan Gaji",
+						"no_sk": "SK-003/2024",
+						"tanggal_sk": "2024-03-10",
+						"unit_kerja": "Bawah - Tengah - Paling Atas"
+					}
+				],
+				"meta": {
+					"limit": 10,
+					"offset": 0,
+					"total": 1
+				}
+			}`,
+		},
+		{
+			name:          "ok belum dikoreksi another corrector",
+			requestPath:   "/v1/koreksi-surat-keputusan",
+			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456788")}},
+			requestQuery: url.Values{
+				"status": []string{"Belum Dikoreksi"},
+			},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{
+						"id_sk": "sk-005",
+						"nama_pemilik": "pemilik_sk_2",
+						"nip_pemilik": "123456788",
+						"kategori_sk": "Kenaikan Gaji",
+						"no_sk": "SK-005/2024",
+						"tanggal_sk": "2024-03-10",
+						"unit_kerja": "Bawah 2"
+					}
+				],
+				"meta": {
+					"limit": 10,
+					"offset": 0,
+					"total": 1
+				}
+			}`,
+		},
+		{
+			name:             "error: auth header tidak valid",
+			requestPath:      "/v1/koreksi-surat-keputusan",
+			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			req := httptest.NewRequest(http.MethodGet, tt.requestPath, nil)
+			req.Header = tt.requestHeader
+			req.URL.RawQuery = tt.requestQuery.Encode()
+			rec := httptest.NewRecorder()
+
+			e, err := api.NewEchoServer(docs.OpenAPIBytes)
+			require.NoError(t, err)
+
+			repo := dbrepository.New(pgxconn)
+			authSvc := apitest.NewAuthService(api.Kode_SuratKeputusan_Review)
+			suratkeputusan.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
+		})
+	}
+}

@@ -11,6 +11,7 @@ import (
 type Querier interface {
 	CountAkarUnitKerja(ctx context.Context) (int64, error)
 	CountJenisKenaikanPangkat(ctx context.Context) (int64, error)
+	CountKoreksiSuratKeputusanByPNSID(ctx context.Context, arg CountKoreksiSuratKeputusanByPNSIDParams) (int64, error)
 	CountPegawaiAktif(ctx context.Context, arg CountPegawaiAktifParams) (int64, error)
 	CountRefAgama(ctx context.Context) (int64, error)
 	CountRefGolongan(ctx context.Context) (int64, error)
@@ -88,6 +89,7 @@ type Querier interface {
 	GetBerkasSuratKeputusanSignedByNIPAndID(ctx context.Context, arg GetBerkasSuratKeputusanSignedByNIPAndIDParams) (pgtype.Text, error)
 	GetDataPribadi(ctx context.Context, arg GetDataPribadiParams) (GetDataPribadiRow, error)
 	GetJenisKenaikanPangkat(ctx context.Context, id int32) (GetJenisKenaikanPangkatRow, error)
+	GetPegawaiPNSIDByNIP(ctx context.Context, nip string) (string, error)
 	GetProfilePegawaiByPNSID(ctx context.Context, pnsID string) (GetProfilePegawaiByPNSIDRow, error)
 	GetRefAgama(ctx context.Context, id int32) (GetRefAgamaRow, error)
 	GetRefGolongan(ctx context.Context, id int32) (GetRefGolonganRow, error)
@@ -106,6 +108,7 @@ type Querier interface {
 	ListAkarUnitKerja(ctx context.Context, arg ListAkarUnitKerjaParams) ([]ListAkarUnitKerjaRow, error)
 	ListAnakByNip(ctx context.Context, nipBaru pgtype.Text) ([]ListAnakByNipRow, error)
 	ListJenisKenaikanPangkat(ctx context.Context, arg ListJenisKenaikanPangkatParams) ([]ListJenisKenaikanPangkatRow, error)
+	ListKoreksiSuratKeputusanByPNSID(ctx context.Context, arg ListKoreksiSuratKeputusanByPNSIDParams) ([]ListKoreksiSuratKeputusanByPNSIDRow, error)
 	ListLogSuratKeputusanByID(ctx context.Context, id string) ([]ListLogSuratKeputusanByIDRow, error)
 	ListOrangTuaByNip(ctx context.Context, nipBaru pgtype.Text) ([]ListOrangTuaByNipRow, error)
 	ListPasanganByNip(ctx context.Context, nipBaru pgtype.Text) ([]ListPasanganByNipRow, error)

@@ -98,3 +98,6 @@ WHERE
         OR ( pegawai.status_cpns_pns = ANY(sqlc.narg('status_pns')::VARCHAR[]) AND ref_kedudukan_hukum.nama <> @mpp::varchar ) 
     )
     AND pegawai.deleted_at IS NULL;
+
+-- name: GetPegawaiPNSIDByNIP :one
+SELECT pns_id FROM pegawai WHERE nip_baru = @nip::varchar AND deleted_at IS NULL;
