@@ -67,6 +67,12 @@ func Test_handler_getProfile(t *testing.T) {
 	_, err := pgxconn.Exec(context.Background(), dbData)
 	require.NoError(t, err)
 
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	authSvc := apitest.NewAuthService("")
+	RegisterRoutes(e, sqlc.New(pgxconn), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+
 	tests := []struct {
 		name             string
 		paramPNSID       string
@@ -183,11 +189,6 @@ func Test_handler_getProfile(t *testing.T) {
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			authSvc := apitest.NewAuthService("")
-			RegisterRoutes(e, sqlc.New(pgxconn), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -238,6 +239,12 @@ func Test_handler_listAdmin(t *testing.T) {
 	pgxconn := dbtest.New(t, dbmigrations.FS)
 	_, err := pgxconn.Exec(context.Background(), dbData)
 	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	authSvc := apitest.NewAuthService(api.Kode_Pegawai_Read)
+	RegisterRoutes(e, sqlc.New(pgxconn), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	tests := []struct {
@@ -783,11 +790,6 @@ func Test_handler_listAdmin(t *testing.T) {
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			authSvc := apitest.NewAuthService(api.Kode_Pegawai_Read)
-			RegisterRoutes(e, sqlc.New(pgxconn), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -887,6 +889,13 @@ func Test_handler_getAdmin(t *testing.T) {
 	pgxconn := dbtest.New(t, dbmigrations.FS)
 	_, err := pgxconn.Exec(context.Background(), dbData)
 	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	repo := sqlc.New(pgxconn)
+	authSvc := apitest.NewAuthService(api.Kode_Pegawai_Read)
+	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	masaKerjaKeseluruhan := func(date time.Time, tahun, bulan int) string {
 		tahun += time.Now().Year() - date.Year()
@@ -1271,12 +1280,6 @@ func Test_handler_getAdmin(t *testing.T) {
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			repo := sqlc.New(pgxconn)
-			authSvc := apitest.NewAuthService(api.Kode_Pegawai_Read)
-			RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)

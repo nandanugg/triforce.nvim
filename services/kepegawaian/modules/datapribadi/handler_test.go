@@ -110,6 +110,13 @@ func Test_handler_getDataPribadi(t *testing.T) {
 	_, err := pgxconn.Exec(context.Background(), dbData)
 	require.NoError(t, err)
 
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	repo := sqlc.New(pgxconn)
+	authSvc := apitest.NewAuthService(api.Kode_Pegawai_Self)
+	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+
 	masaKerjaKeseluruhan := func(date time.Time, tahun, bulan int) string {
 		tahun += time.Now().Year() - date.Year()
 		bulan += int(time.Now().Month()) - int(date.Month())
@@ -478,12 +485,6 @@ func Test_handler_getDataPribadi(t *testing.T) {
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			repo := sqlc.New(pgxconn)
-			authSvc := apitest.NewAuthService(api.Kode_Pegawai_Self)
-			RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)

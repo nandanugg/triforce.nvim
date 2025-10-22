@@ -1,4 +1,4 @@
-package suratkeputusan_test
+package suratkeputusan
 
 import (
 	"context"
@@ -18,7 +18,6 @@ import (
 	dbmigrations "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/migrations"
 	dbrepository "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/docs"
-	suratkeputusan "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/suratkeputusan"
 )
 
 func Test_handler_list(t *testing.T) {
@@ -51,6 +50,13 @@ func Test_handler_list(t *testing.T) {
 	db := dbtest.New(t, dbmigrations.FS)
 	_, err := db.Exec(context.Background(), dbData)
 	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	repo := dbrepository.New(db)
+	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusan_Self)
+	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	tests := []struct {
@@ -196,12 +202,6 @@ func Test_handler_list(t *testing.T) {
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			repo := dbrepository.New(db)
-			authSvc := apitest.NewAuthService(api.Kode_SuratKeputusan_Self)
-			suratkeputusan.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -247,6 +247,13 @@ func Test_handler_get(t *testing.T) {
 	db := dbtest.New(t, dbmigrations.FS)
 	_, err := db.Exec(context.Background(), dbData)
 	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	repo := dbrepository.New(db)
+	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusan_Self)
+	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	tests := []struct {
@@ -376,12 +383,6 @@ func Test_handler_get(t *testing.T) {
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			repo := dbrepository.New(db)
-			authSvc := apitest.NewAuthService(api.Kode_SuratKeputusan_Self)
-			suratkeputusan.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -435,6 +436,13 @@ func Test_handler_getBerkas(t *testing.T) {
 	pgxconn := dbtest.New(t, dbmigrations.FS)
 	_, err := pgxconn.Exec(context.Background(), dbData)
 	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	repo := dbrepository.New(pgxconn)
+	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusan_Self)
+	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	tests := []struct {
@@ -550,12 +558,6 @@ func Test_handler_getBerkas(t *testing.T) {
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			repo := dbrepository.New(pgxconn)
-			authSvc := apitest.NewAuthService(api.Kode_SuratKeputusan_Self)
-			suratkeputusan.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -632,6 +634,13 @@ func Test_handler_listAdmin(t *testing.T) {
 	db := dbtest.New(t, dbmigrations.FS)
 	_, err := db.Exec(context.Background(), dbData)
 	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	repo := dbrepository.New(db)
+	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusan_Read)
+	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("111")}
 	tests := []struct {
@@ -1177,12 +1186,6 @@ func Test_handler_listAdmin(t *testing.T) {
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			repo := dbrepository.New(db)
-			authSvc := apitest.NewAuthService(api.Kode_SuratKeputusan_Read)
-			suratkeputusan.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -1261,6 +1264,13 @@ func Test_handler_getAdmin(t *testing.T) {
 	db := dbtest.New(t, dbmigrations.FS)
 	_, err := db.Exec(context.Background(), dbData)
 	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	repo := dbrepository.New(db)
+	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusan_Read)
+	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("111")}
 	tests := []struct {
@@ -1399,12 +1409,6 @@ func Test_handler_getAdmin(t *testing.T) {
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			repo := dbrepository.New(db)
-			authSvc := apitest.NewAuthService(api.Kode_SuratKeputusan_Read)
-			suratkeputusan.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -1458,6 +1462,13 @@ func Test_handler_getBerkasAdmin(t *testing.T) {
 	pgxconn := dbtest.New(t, dbmigrations.FS)
 	_, err := pgxconn.Exec(context.Background(), dbData)
 	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	repo := dbrepository.New(pgxconn)
+	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusan_Read)
+	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("111")}
 	tests := []struct {
@@ -1566,12 +1577,6 @@ func Test_handler_getBerkasAdmin(t *testing.T) {
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			repo := dbrepository.New(pgxconn)
-			authSvc := apitest.NewAuthService(api.Kode_SuratKeputusan_Read)
-			suratkeputusan.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -1605,8 +1610,8 @@ func Test_handler_listKoreksi(t *testing.T) {
 				('sk-004', 2, '123456787', '2024-03-10', NULL),
 				('sk-005', 2, '123456788', '2024-03-10', NULL),
 				('sk-006', 2, '123456787', '2024-03-10', now());
-		
-		INSERT INTO file_digital_signature 
+
+		INSERT INTO file_digital_signature
 			("file_id","nip_sk","kategori","no_sk","tanggal_sk","status_sk","created_at", "deleted_at") VALUES
 			('sk-001', '123456789', 'Kenaikan Pangkat', 'SK-001/2024', '2024-01-15', 1, '2024-01-15', NULL),
 			('sk-002', '123456789', 'Mutasi', 'SK-002/2024', '2024-02-20', 0, '2024-02-20', NULL),
@@ -1644,6 +1649,13 @@ func Test_handler_listKoreksi(t *testing.T) {
 	pgxconn := dbtest.New(t, dbmigrations.FS)
 	_, err := pgxconn.Exec(context.Background(), dbData)
 	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	repo := dbrepository.New(pgxconn)
+	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusanApproval_Review)
+	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("123456787")}
 
@@ -1835,12 +1847,6 @@ func Test_handler_listKoreksi(t *testing.T) {
 			req.URL.RawQuery = tt.requestQuery.Encode()
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			repo := dbrepository.New(pgxconn)
-			authSvc := apitest.NewAuthService(api.Kode_SuratKeputusan_Review)
-			suratkeputusan.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)

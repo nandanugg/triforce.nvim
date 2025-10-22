@@ -1,4 +1,4 @@
-package jabatan_test
+package jabatan
 
 import (
 	"context"
@@ -15,9 +15,8 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api/apitest"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db/dbtest"
 	dbmigrations "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/migrations"
-	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
+	sqlc "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/docs"
-	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/jabatan"
 )
 
 func Test_handler_list(t *testing.T) {
@@ -34,6 +33,13 @@ func Test_handler_list(t *testing.T) {
 	db := dbtest.New(t, dbmigrations.FS)
 	_, err := db.Exec(context.Background(), dbData)
 	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	repo := sqlc.New(db)
+	authSvc := apitest.NewAuthService(api.Kode_DataMaster_Public)
+	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("41")}
 	tests := []struct {
@@ -120,12 +126,6 @@ func Test_handler_list(t *testing.T) {
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			repo := repository.New(db)
-			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Public)
-			jabatan.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -156,6 +156,13 @@ func Test_handler_adminListJabatan(t *testing.T) {
 	pgxconn := dbtest.New(t, dbmigrations.FS)
 	_, err := pgxconn.Exec(context.Background(), dbData)
 	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	repo := sqlc.New(pgxconn)
+	authSvc := apitest.NewAuthService(api.Kode_DataMaster_Read)
+	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	tests := []struct {
@@ -240,12 +247,6 @@ func Test_handler_adminListJabatan(t *testing.T) {
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			repo := repository.New(pgxconn)
-			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Read)
-			jabatan.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -313,9 +314,9 @@ func Test_handler_adminCreateJabatan(t *testing.T) {
 			e, err := api.NewEchoServer(docs.OpenAPIBytes)
 			require.NoError(t, err)
 
-			repo := repository.New(pgxconn)
+			repo := sqlc.New(pgxconn)
 			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Write)
-			jabatan.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+			RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -338,6 +339,13 @@ func Test_handler_adminGetJabatan(t *testing.T) {
 	pgxconn := dbtest.New(t, dbmigrations.FS)
 	_, err := pgxconn.Exec(context.Background(), dbData)
 	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	repo := sqlc.New(pgxconn)
+	authSvc := apitest.NewAuthService(api.Kode_DataMaster_Read)
+	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	tests := []struct {
@@ -385,12 +393,6 @@ func Test_handler_adminGetJabatan(t *testing.T) {
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			repo := repository.New(pgxconn)
-			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Read)
-			jabatan.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -413,6 +415,13 @@ func Test_handler_adminUpdateJabatan(t *testing.T) {
 	pgxconn := dbtest.New(t, dbmigrations.FS)
 	_, err := pgxconn.Exec(context.Background(), dbData)
 	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	repo := sqlc.New(pgxconn)
+	authSvc := apitest.NewAuthService(api.Kode_DataMaster_Write)
+	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	tests := []struct {
@@ -477,12 +486,6 @@ func Test_handler_adminUpdateJabatan(t *testing.T) {
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			repo := repository.New(pgxconn)
-			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Write)
-			jabatan.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -505,6 +508,13 @@ func Test_handler_adminDeleteJabatan(t *testing.T) {
 	pgxconn := dbtest.New(t, dbmigrations.FS)
 	_, err := pgxconn.Exec(context.Background(), dbData)
 	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	repo := sqlc.New(pgxconn)
+	authSvc := apitest.NewAuthService(api.Kode_DataMaster_Write)
+	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	tests := []struct {
@@ -552,12 +562,6 @@ func Test_handler_adminDeleteJabatan(t *testing.T) {
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			repo := repository.New(pgxconn)
-			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Write)
-			jabatan.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)

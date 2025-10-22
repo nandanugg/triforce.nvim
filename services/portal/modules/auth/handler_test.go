@@ -26,6 +26,17 @@ import (
 func Test_handler_login(t *testing.T) {
 	t.Parallel()
 
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	keycloak := config.Keycloak{
+		PublicHost:  "https://auth.local",
+		Realm:       "nexus",
+		ClientID:    "my-portal",
+		RedirectURI: "https://portal.local/callback",
+	}
+	RegisterRoutes(e, nil, keycloak, nil, nil, nil)
+
 	tests := []struct {
 		name             string
 		requestQuery     url.Values
@@ -55,16 +66,6 @@ func Test_handler_login(t *testing.T) {
 			req.URL.RawQuery = tt.requestQuery.Encode()
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			keycloak := config.Keycloak{
-				PublicHost:  "https://auth.local",
-				Realm:       "nexus",
-				ClientID:    "my-portal",
-				RedirectURI: "https://portal.local/callback",
-			}
-			RegisterRoutes(e, nil, keycloak, nil, nil, nil)
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -81,6 +82,16 @@ func Test_handler_login(t *testing.T) {
 
 func Test_handler_logout(t *testing.T) {
 	t.Parallel()
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	keycloak := config.Keycloak{
+		PublicHost:            "https://auth.local",
+		Realm:                 "nexus",
+		PostLogoutRedirectURI: "https://portal.local/",
+	}
+	RegisterRoutes(e, nil, keycloak, nil, nil, nil)
 
 	tests := []struct {
 		name             string
@@ -120,15 +131,6 @@ func Test_handler_logout(t *testing.T) {
 			req.URL.RawQuery = tt.requestQuery.Encode()
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			keycloak := config.Keycloak{
-				PublicHost:            "https://auth.local",
-				Realm:                 "nexus",
-				PostLogoutRedirectURI: "https://portal.local/",
-			}
-			RegisterRoutes(e, nil, keycloak, nil, nil, nil)
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)

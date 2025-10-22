@@ -32,6 +32,13 @@ func Test_handler_list(t *testing.T) {
 	_, err := pgxconn.Exec(context.Background(), dbData)
 	require.NoError(t, err)
 
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	repo := sqlc.New(pgxconn)
+	authSvc := apitest.NewAuthService(api.Kode_DataMaster_Public)
+	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+
 	authHeader := []string{apitest.GenerateAuthHeader("198765432100001")}
 	tests := []struct {
 		name             string
@@ -99,12 +106,6 @@ func Test_handler_list(t *testing.T) {
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			repo := sqlc.New(pgxconn)
-			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Public)
-			RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)

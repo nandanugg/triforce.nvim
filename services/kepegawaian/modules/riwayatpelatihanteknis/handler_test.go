@@ -45,6 +45,13 @@ func Test_handler_list(t *testing.T) {
 	_, err := pgxconn.Exec(context.Background(), dbData)
 	require.NoError(t, err)
 
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	repo := sqlc.New(pgxconn)
+	authSvc := apitest.NewAuthService(api.Kode_Pegawai_Self)
+	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+
 	authHeader := []string{apitest.GenerateAuthHeader("1c")}
 	tests := []struct {
 		name             string
@@ -229,12 +236,6 @@ func Test_handler_list(t *testing.T) {
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			repo := sqlc.New(pgxconn)
-			authSvc := apitest.NewAuthService(api.Kode_Pegawai_Self)
-			RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -280,6 +281,13 @@ func Test_handler_getBerkas(t *testing.T) {
 	pgxconn := dbtest.New(t, dbmigrations.FS)
 	_, err = pgxconn.Exec(context.Background(), dbData)
 	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	repo := sqlc.New(pgxconn)
+	authSvc := apitest.NewAuthService(api.Kode_Pegawai_Self)
+	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("1c")}
 	tests := []struct {
@@ -379,12 +387,6 @@ func Test_handler_getBerkas(t *testing.T) {
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			repo := sqlc.New(pgxconn)
-			authSvc := apitest.NewAuthService(api.Kode_Pegawai_Self)
-			RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -423,6 +425,12 @@ func Test_handler_listAdmin(t *testing.T) {
 	db := dbtest.New(t, dbmigrations.FS)
 	_, err := db.Exec(context.Background(), dbData)
 	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	authSvc := apitest.NewAuthService(api.Kode_Pegawai_Read)
+	RegisterRoutes(e, sqlc.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	tests := []struct {
@@ -651,11 +659,6 @@ func Test_handler_listAdmin(t *testing.T) {
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			authSvc := apitest.NewAuthService(api.Kode_Pegawai_Read)
-			RegisterRoutes(e, sqlc.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)

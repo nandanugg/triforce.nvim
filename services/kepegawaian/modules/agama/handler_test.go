@@ -1,4 +1,4 @@
-package agama_test
+package agama
 
 import (
 	"context"
@@ -17,9 +17,8 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api/apitest"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db/dbtest"
 	dbmigrations "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/migrations"
-	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
+	sqlc "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/docs"
-	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/agama"
 )
 
 func Test_handler_ListRefAgama(t *testing.T) {
@@ -40,6 +39,13 @@ func Test_handler_ListRefAgama(t *testing.T) {
 	pgx := dbtest.New(t, dbmigrations.FS)
 	_, err := pgx.Exec(context.Background(), dbData)
 	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	repo := sqlc.New(pgx)
+	authSvc := apitest.NewAuthService(api.Kode_DataMaster_Public)
+	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	defaulTimestamptz := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC).Local().Format(time.RFC3339)
@@ -102,12 +108,6 @@ func Test_handler_ListRefAgama(t *testing.T) {
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			repo := repository.New(pgx)
-			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Public)
-			agama.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -135,6 +135,13 @@ func Test_handler_adminListRefAgama(t *testing.T) {
 	pgx := dbtest.New(t, dbmigrations.FS)
 	_, err := pgx.Exec(context.Background(), dbData)
 	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	repo := sqlc.New(pgx)
+	authSvc := apitest.NewAuthService(api.Kode_DataMaster_Read)
+	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	defaulTimestamptz := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC).Local().Format(time.RFC3339)
@@ -197,12 +204,6 @@ func Test_handler_adminListRefAgama(t *testing.T) {
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			repo := repository.New(pgx)
-			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Read)
-			agama.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -223,6 +224,13 @@ func Test_handler_adminGetRefAgama(t *testing.T) {
 	pgx := dbtest.New(t, dbmigrations.FS)
 	_, err := pgx.Exec(context.Background(), dbData)
 	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	repo := sqlc.New(pgx)
+	authSvc := apitest.NewAuthService(api.Kode_DataMaster_Read)
+	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	defaulTimestamptz := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC).Local().Format(time.RFC3339)
@@ -286,12 +294,6 @@ func Test_handler_adminGetRefAgama(t *testing.T) {
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			repo := repository.New(pgx)
-			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Read)
-			agama.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -307,6 +309,13 @@ func Test_handler_adminCreateRefAgama(t *testing.T) {
 	t.Parallel()
 
 	pgx := dbtest.New(t, dbmigrations.FS)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	repo := sqlc.New(pgx)
+	authSvc := apitest.NewAuthService(api.Kode_DataMaster_Write)
+	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	tests := []struct {
@@ -346,12 +355,6 @@ func Test_handler_adminCreateRefAgama(t *testing.T) {
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			repo := repository.New(pgx)
-			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Write)
-			agama.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -394,6 +397,13 @@ func Test_handler_adminUpdateRefAgama(t *testing.T) {
 	pgx := dbtest.New(t, dbmigrations.FS)
 	_, err := pgx.Exec(context.Background(), dbData)
 	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	repo := sqlc.New(pgx)
+	authSvc := apitest.NewAuthService(api.Kode_DataMaster_Write)
+	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	defaulTimestamptz := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC).Local().Format(time.RFC3339)
@@ -448,12 +458,6 @@ func Test_handler_adminUpdateRefAgama(t *testing.T) {
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			repo := repository.New(pgx)
-			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Write)
-			agama.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -496,6 +500,13 @@ func Test_handler_adminDeleteRefAgama(t *testing.T) {
 	pgx := dbtest.New(t, dbmigrations.FS)
 	_, err := pgx.Exec(context.Background(), dbData)
 	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	repo := sqlc.New(pgx)
+	authSvc := apitest.NewAuthService(api.Kode_DataMaster_Write)
+	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	tests := []struct {
@@ -553,12 +564,6 @@ func Test_handler_adminDeleteRefAgama(t *testing.T) {
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			repo := repository.New(pgx)
-			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Write)
-			agama.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)

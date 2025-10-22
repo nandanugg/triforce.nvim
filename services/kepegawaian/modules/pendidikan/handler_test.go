@@ -1,4 +1,4 @@
-package pendidikan_test
+package pendidikan
 
 import (
 	"bytes"
@@ -20,7 +20,6 @@ import (
 	dbmigrations "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/migrations"
 	dbrepo "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/docs"
-	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/pendidikan"
 )
 
 func Test_handler_list(t *testing.T) {
@@ -41,6 +40,13 @@ func Test_handler_list(t *testing.T) {
 	db := dbtest.New(t, dbmigrations.FS)
 	_, err := db.Exec(context.Background(), dbData)
 	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	repo := dbrepo.New(db)
+	authSvc := apitest.NewAuthService(api.Kode_DataMaster_Read)
+	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	tests := []struct {
@@ -147,12 +153,6 @@ func Test_handler_list(t *testing.T) {
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			repo := dbrepo.New(db)
-			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Read)
-			pendidikan.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -180,6 +180,13 @@ func Test_handler_get(t *testing.T) {
 	db := dbtest.New(t, dbmigrations.FS)
 	_, err := db.Exec(context.Background(), dbData)
 	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	repo := dbrepo.New(db)
+	authSvc := apitest.NewAuthService(api.Kode_DataMaster_Read)
+	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	tests := []struct {
@@ -241,12 +248,6 @@ func Test_handler_get(t *testing.T) {
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			repo := dbrepo.New(db)
-			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Read)
-			pendidikan.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -268,6 +269,41 @@ func Test_handler_create(t *testing.T) {
 	db := dbtest.New(t, dbmigrations.FS)
 	_, err := db.Exec(context.Background(), dbData)
 	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	repo := dbrepo.New(db)
+	authSvc := apitest.NewAuthService(api.Kode_DataMaster_Write)
+	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+
+	removeUnassertedKey := func(jsonStr string, keys []string) string {
+		var m map[string]any
+		if err := json.Unmarshal([]byte(jsonStr), &m); err != nil {
+			return jsonStr
+		}
+		for _, key := range keys {
+			parts := strings.Split(key, ".")
+			curr := m
+			for i, part := range parts {
+				if i == len(parts)-1 {
+					delete(curr, part)
+				} else {
+					// Traverse deeper if possible
+					if next, ok := curr[part].(map[string]any); ok {
+						curr = next
+					} else {
+						break
+					}
+				}
+			}
+		}
+		b, err := json.Marshal(m)
+		if err != nil {
+			return jsonStr
+		}
+		return string(b)
+	}
 
 	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	tests := []struct {
@@ -317,12 +353,6 @@ func Test_handler_create(t *testing.T) {
 			req.Body = io.NopCloser(bytes.NewBufferString(tt.requestBody))
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			repo := dbrepo.New(db)
-			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Write)
-			pendidikan.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			responseBody := rec.Body.String()
@@ -354,6 +384,13 @@ func Test_handler_update(t *testing.T) {
 	db := dbtest.New(t, dbmigrations.FS)
 	_, err := db.Exec(context.Background(), dbData)
 	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	repo := dbrepo.New(db)
+	authSvc := apitest.NewAuthService(api.Kode_DataMaster_Write)
+	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	tests := []struct {
@@ -430,12 +467,6 @@ func Test_handler_update(t *testing.T) {
 			req.Body = io.NopCloser(bytes.NewBufferString(tt.requestBody))
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			repo := dbrepo.New(db)
-			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Write)
-			pendidikan.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -463,6 +494,13 @@ func Test_handler_delete(t *testing.T) {
 	db := dbtest.New(t, dbmigrations.FS)
 	_, err := db.Exec(context.Background(), dbData)
 	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	repo := dbrepo.New(db)
+	authSvc := apitest.NewAuthService(api.Kode_DataMaster_Write)
+	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	tests := []struct {
@@ -509,12 +547,6 @@ func Test_handler_delete(t *testing.T) {
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			repo := dbrepo.New(db)
-			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Write)
-			pendidikan.RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -526,32 +558,4 @@ func Test_handler_delete(t *testing.T) {
 			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
 		})
 	}
-}
-
-func removeUnassertedKey(jsonStr string, keys []string) string {
-	var m map[string]any
-	if err := json.Unmarshal([]byte(jsonStr), &m); err != nil {
-		return jsonStr
-	}
-	for _, key := range keys {
-		parts := strings.Split(key, ".")
-		curr := m
-		for i, part := range parts {
-			if i == len(parts)-1 {
-				delete(curr, part)
-			} else {
-				// Traverse deeper if possible
-				if next, ok := curr[part].(map[string]any); ok {
-					curr = next
-				} else {
-					break
-				}
-			}
-		}
-	}
-	b, err := json.Marshal(m)
-	if err != nil {
-		return jsonStr
-	}
-	return string(b)
 }

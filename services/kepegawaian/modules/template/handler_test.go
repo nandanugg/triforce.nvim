@@ -57,6 +57,13 @@ func Test_handler_ListTemplate(t *testing.T) {
 	_, err := pgxconn.Exec(context.Background(), dbData)
 	require.NoError(t, err)
 
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	repo := repository.New(pgxconn)
+	authSvc := apitest.NewAuthService(api.Kode_DataMaster_Public)
+	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+
 	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	tests := []struct {
 		name             string
@@ -141,12 +148,6 @@ func Test_handler_ListTemplate(t *testing.T) {
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			repo := repository.New(pgxconn)
-			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Public)
-			RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -193,6 +194,13 @@ func Test_handler_GetBerkasTemplate(t *testing.T) {
 	pgxconn := dbtest.New(t, dbmigrations.FS)
 	_, err = pgxconn.Exec(context.Background(), dbData)
 	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	queries := repository.New(pgxconn)
+	authSvc := apitest.NewAuthService(api.Kode_DataMaster_Public)
+	RegisterRoutes(e, queries, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	tests := []struct {
@@ -277,12 +285,6 @@ func Test_handler_GetBerkasTemplate(t *testing.T) {
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			queries := repository.New(pgxconn)
-			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Public)
-			RegisterRoutes(e, queries, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -326,6 +328,13 @@ func Test_handler_adminListTemplate(t *testing.T) {
 	pgxconn := dbtest.New(t, dbmigrations.FS)
 	_, err := pgxconn.Exec(context.Background(), dbData)
 	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	repo := repository.New(pgxconn)
+	authSvc := apitest.NewAuthService(api.Kode_DataMaster_Read)
+	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	tests := []struct {
@@ -411,12 +420,6 @@ func Test_handler_adminListTemplate(t *testing.T) {
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			repo := repository.New(pgxconn)
-			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Read)
-			RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -455,6 +458,13 @@ func Test_handler_adminGetTemplate(t *testing.T) {
 	pgxconn := dbtest.New(t, dbmigrations.FS)
 	_, err := pgxconn.Exec(context.Background(), dbData)
 	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	repo := repository.New(pgxconn)
+	authSvc := apitest.NewAuthService(api.Kode_DataMaster_Read)
+	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("41")}
 	tests := []struct {
@@ -512,12 +522,6 @@ func Test_handler_adminGetTemplate(t *testing.T) {
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			repo := repository.New(pgxconn)
-			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Read)
-			RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -564,6 +568,13 @@ func Test_handler_adminGetBerkasTemplate(t *testing.T) {
 	pgxconn := dbtest.New(t, dbmigrations.FS)
 	_, err = pgxconn.Exec(context.Background(), dbData)
 	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	queries := repository.New(pgxconn)
+	authSvc := apitest.NewAuthService(api.Kode_DataMaster_Read)
+	RegisterRoutes(e, queries, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	tests := []struct {
@@ -648,12 +659,6 @@ func Test_handler_adminGetBerkasTemplate(t *testing.T) {
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			queries := repository.New(pgxconn)
-			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Read)
-			RegisterRoutes(e, queries, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -684,6 +689,13 @@ func Test_handler_adminCreateTemplate(t *testing.T) {
 	}
 
 	pgxconn := dbtest.New(t, dbmigrations.FS)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	repo := repository.New(pgxconn)
+	authSvc := apitest.NewAuthService(api.Kode_DataMaster_Write)
+	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	tests := []struct {
@@ -783,12 +795,6 @@ func Test_handler_adminCreateTemplate(t *testing.T) {
 
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			repo := repository.New(pgxconn)
-			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Write)
-			RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			// --- Assertions ---
@@ -798,15 +804,13 @@ func Test_handler_adminCreateTemplate(t *testing.T) {
 			var got map[string]any
 			require.NoError(t, json.Unmarshal([]byte(gotBody), &got))
 
-			data, ok := got["data"].(map[string]any)
-			if ok {
+			if data, ok := got["data"].(map[string]any); ok {
 				for _, field := range []string{"created_at", "updated_at"} {
 					if val, ok := data[field].(string); ok {
 						parsed, err := time.Parse(time.RFC3339, val)
 						require.NoErrorf(t, err, "invalid timestamp for %s", field)
 
 						assert.WithinDuration(t, time.Now(), parsed, 10*time.Second)
-
 						wantBody = strings.ReplaceAll(wantBody, "{"+field+"}", val)
 					}
 				}
@@ -847,6 +851,13 @@ func Test_handler_adminUpdateTemplate(t *testing.T) {
 	pgxconn := dbtest.New(t, dbmigrations.FS)
 	_, err := pgxconn.Exec(context.Background(), dbData)
 	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	repo := repository.New(pgxconn)
+	authSvc := apitest.NewAuthService(api.Kode_DataMaster_Write)
+	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	tests := []struct {
@@ -979,12 +990,6 @@ func Test_handler_adminUpdateTemplate(t *testing.T) {
 
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			repo := repository.New(pgxconn)
-			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Write)
-			RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			// --- Assertions ---
@@ -994,15 +999,13 @@ func Test_handler_adminUpdateTemplate(t *testing.T) {
 			var got map[string]any
 			require.NoError(t, json.Unmarshal([]byte(gotBody), &got))
 
-			data, ok := got["data"].(map[string]any)
-			if ok {
+			if data, ok := got["data"].(map[string]any); ok {
 				for _, field := range []string{"updated_at"} {
 					if val, ok := data[field].(string); ok {
 						parsed, err := time.Parse(time.RFC3339, val)
 						require.NoErrorf(t, err, "invalid timestamp for %s", field)
 
 						assert.WithinDuration(t, time.Now(), parsed, 10*time.Second)
-
 						wantBody = strings.ReplaceAll(wantBody, "{"+field+"}", val)
 					}
 				}
@@ -1042,6 +1045,13 @@ func Test_handler_adminDeleteTemplate(t *testing.T) {
 	pgxconn := dbtest.New(t, dbmigrations.FS)
 	_, err := pgxconn.Exec(context.Background(), dbData)
 	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	repo := repository.New(pgxconn)
+	authSvc := apitest.NewAuthService(api.Kode_DataMaster_Write)
+	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	tests := []struct {
@@ -1104,12 +1114,6 @@ func Test_handler_adminDeleteTemplate(t *testing.T) {
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			repo := repository.New(pgxconn)
-			authSvc := apitest.NewAuthService(api.Kode_DataMaster_Write)
-			RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
