@@ -67,8 +67,8 @@ SELECT
     rk.gaji_pokok,
     rk.jabatan,
     rk.tmt_jabatan,
-    rk.last_education AS pendidikan,
-    rk.last_education_date AS tanggal_lulus,
+    rk.pendidikan_terakhir AS pendidikan,
+    rk.tanggal_lulus_pendidikan_terakhir AS tanggal_lulus,
     rk.kantor_pembayaran,
     rk.unit_kerja_induk_id,
     uk.nama_unor AS unit_kerja_induk,
@@ -77,7 +77,7 @@ FROM
     riwayat_kenaikan_gaji_berkala rk
     JOIN pegawai p ON rk.pegawai_id = p.id
     LEFT JOIN ref_golongan rg ON rk.golongan_id = rg.id AND rg.deleted_at IS NULL
-    LEFT JOIN unit_kerja uk ON rk.unit_kerja_induk_id = uk.id AND uk.deleted_at IS NULL
+    LEFT JOIN ref_unit_kerja uk ON rk.unit_kerja_induk_id = uk.id AND uk.deleted_at IS NULL
 WHERE
     p.nip_baru = $1
     AND p.deleted_at IS NULL

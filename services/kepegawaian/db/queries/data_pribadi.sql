@@ -5,11 +5,11 @@ select
   pegawai.gelar_depan,
   pegawai.gelar_belakang,
   case
-    when pegawai.jenis_jabatan_id = @jenis_jabatan_struktural::int and pegawai.pns_id = unit_kerja.pemimpin_pns_id then unit_kerja.nama_jabatan
+    when pegawai.jenis_jabatan_id = @jenis_jabatan_struktural::int and pegawai.pns_id = ref_unit_kerja.pemimpin_pns_id then ref_unit_kerja.nama_jabatan
     else ref_jabatan_aktual.nama_jabatan
   end as jabatan_aktual,
   case
-    when pegawai.jenis_jabatan_id = @jenis_jabatan_struktural::int and pegawai.pns_id = unit_kerja.pemimpin_pns_id then 'Struktural'
+    when pegawai.jenis_jabatan_id = @jenis_jabatan_struktural::int and pegawai.pns_id = ref_unit_kerja.pemimpin_pns_id then 'Struktural'
     else ref_jenis_jabatan_aktual.nama
   end as jenis_jabatan_aktual,
   pegawai.tmt_jabatan,
@@ -85,14 +85,14 @@ left join ref_kedudukan_hukum
 	on ref_kedudukan_hukum.id = pegawai.kedudukan_hukum_id and ref_kedudukan_hukum.deleted_at is null
 left join ref_jenis_kawin
 	on ref_jenis_kawin.id = pegawai.jenis_kawin_id and ref_jenis_kawin.deleted_at is null
-left join unit_kerja
-	on unit_kerja.id = pegawai.unor_id and unit_kerja.deleted_at is null
+left join ref_unit_kerja
+	on ref_unit_kerja.id = pegawai.unor_id and ref_unit_kerja.deleted_at is null
 left join ref_jabatan
 	on ref_jabatan.kode_jabatan = pegawai.jabatan_instansi_id and ref_jabatan.deleted_at is null
 left join ref_jenis_jabatan
 	on ref_jenis_jabatan.id = ref_jabatan.jenis_jabatan and ref_jenis_jabatan.deleted_at is null
 left join ref_kelas_jabatan
-	on ref_kelas_jabatan.id = ref_jabatan.kelas
+	on ref_kelas_jabatan.id = ref_jabatan.kelas and ref_kelas_jabatan.deleted_at is null
 left join ref_jabatan ref_jabatan_aktual
 	on ref_jabatan_aktual.kode_jabatan = pegawai.jabatan_instansi_real_id and ref_jabatan_aktual.deleted_at is null
 left join ref_jenis_jabatan ref_jenis_jabatan_aktual

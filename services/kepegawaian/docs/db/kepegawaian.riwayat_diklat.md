@@ -25,7 +25,7 @@ Riwayat diklat pegawai
 | rumpun_diklat_nama | varchar(200) |  | true |  |  | Nama rumpun diklat |
 | rumpun_diklat_id | varchar(36) |  | true |  |  | id rumpun diklat |
 | sudah_kirim_siasn | varchar(10) | 'belum'::character varying | true |  |  | Penanda data sudah dikirim ke BKN |
-| siasn_id | varchar(36) |  | true |  |  | id referensi pada sistem BKN |
+| bkn_id | varchar(36) |  | true |  |  | id referensi pada sistem BKN |
 | created_at | timestamp with time zone | now() | true |  |  | Waktu perekaman data |
 | updated_at | timestamp with time zone | now() | true |  |  | Waktu terakhir pembaruan |
 | deleted_at | timestamp with time zone |  | true |  |  | Waktu penghapusan data |
@@ -70,7 +70,7 @@ erDiagram
   varchar_200_ rumpun_diklat_nama
   varchar_36_ rumpun_diklat_id
   varchar_10_ sudah_kirim_siasn
-  varchar_36_ siasn_id
+  varchar_36_ bkn_id
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
@@ -129,12 +129,12 @@ erDiagram
   varchar_36_ instansi_induk_id FK
   varchar_36_ instansi_kerja_id FK
   varchar_36_ satuan_kerja_induk_id
-  varchar_36_ satuan_kerja_kerja_id
+  varchar_36_ satuan_kerja_id
   varchar_10_ golongan_darah
   varchar_200_ foto
   date tmt_pensiun
   varchar_36_ lokasi_kerja
-  smallint jml_istri
+  smallint jml_pasangan
   smallint jml_anak
   varchar_100_ no_surat_dokter
   date tanggal_surat_dokter

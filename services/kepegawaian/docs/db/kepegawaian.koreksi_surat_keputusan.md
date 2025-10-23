@@ -1,4 +1,4 @@
-# kepegawaian.file_digital_signature_corrector
+# kepegawaian.koreksi_surat_keputusan
 
 ## Description
 
@@ -27,7 +27,7 @@
 
 | Name | Definition |
 | ---- | ---------- |
-| file_digital_signature_corrector_pkey | CREATE UNIQUE INDEX file_digital_signature_corrector_pkey ON kepegawaian.file_digital_signature_corrector USING btree (id) |
+| file_digital_signature_corrector_pkey | CREATE UNIQUE INDEX file_digital_signature_corrector_pkey ON kepegawaian.koreksi_surat_keputusan USING btree (id) |
 
 ## Relations
 
@@ -35,7 +35,7 @@
 erDiagram
 
 
-"kepegawaian.file_digital_signature_corrector" {
+"kepegawaian.koreksi_surat_keputusan" {
   integer id
   smallint korektor_ke
   varchar_100_ pegawai_korektor_id

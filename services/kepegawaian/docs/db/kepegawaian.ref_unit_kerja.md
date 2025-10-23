@@ -1,4 +1,4 @@
-# kepegawaian.unit_kerja
+# kepegawaian.ref_unit_kerja
 
 ## Description
 
@@ -8,7 +8,7 @@ Referensi referensi unit kerja
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| id | varchar(60) |  | false | [kepegawaian.pegawai](kepegawaian.pegawai.md) [kepegawaian.pindah_unit](kepegawaian.pindah_unit.md) [kepegawaian.riwayat_asesmen](kepegawaian.riwayat_asesmen.md) [kepegawaian.riwayat_jabatan](kepegawaian.riwayat_jabatan.md) [kepegawaian.unit_kerja](kepegawaian.unit_kerja.md) |  | id unit organisasi (UUID) |
+| id | varchar(60) |  | false | [kepegawaian.pegawai](kepegawaian.pegawai.md) [kepegawaian.pindah_unit](kepegawaian.pindah_unit.md) [kepegawaian.riwayat_asesmen](kepegawaian.riwayat_asesmen.md) [kepegawaian.riwayat_jabatan](kepegawaian.riwayat_jabatan.md) [kepegawaian.ref_unit_kerja](kepegawaian.ref_unit_kerja.md) |  | id unit organisasi (UUID) |
 | no | integer |  | true |  |  | Nomor urut unit kerja |
 | kode_internal | varchar(60) |  | true |  |  | Kode internal unit organisasi |
 | nama_unor | varchar(200) |  | true |  |  | Nama unit organisasi |
@@ -16,7 +16,7 @@ Referensi referensi unit kerja
 | cepat_kode | varchar(60) |  | true |  |  | Kode cepat untuk pencarian unit kerja |
 | nama_jabatan | varchar(200) |  | true |  |  | Nama jabatan dalam unit kerja |
 | nama_pejabat | varchar(200) |  | true |  |  | Nama pejabat yang menjabat |
-| diatasan_id | varchar(60) |  | true |  | [kepegawaian.unit_kerja](kepegawaian.unit_kerja.md) | Unit atasan langsung (self-reference ke unit_kerja) |
+| diatasan_id | varchar(60) |  | true |  | [kepegawaian.ref_unit_kerja](kepegawaian.ref_unit_kerja.md) | Unit atasan langsung (self-reference ke unit_kerja) |
 | instansi_id | varchar(60) |  | true |  | [kepegawaian.ref_instansi](kepegawaian.ref_instansi.md) | id instansi pemilik unit (rujuk ref_instansi) |
 | pemimpin_pns_id | varchar(60) |  | true |  | [kepegawaian.pegawai](kepegawaian.pegawai.md) | ID PNS yang memimpin unit kerja |
 | jenis_unor_id | varchar(60) |  | true |  |  | Jenis unit organisasi (bila digunakan) |
@@ -49,30 +49,30 @@ Referensi referensi unit kerja
 | ---- | ---- | ---------- |
 | fk_unit_kerja_instansi | FOREIGN KEY | FOREIGN KEY (instansi_id) REFERENCES ref_instansi(id) |
 | fk_unit_kerja_pemimpin | FOREIGN KEY | FOREIGN KEY (pemimpin_pns_id) REFERENCES pegawai(pns_id) |
-| fk_unit_kerja_diatasan | FOREIGN KEY | FOREIGN KEY (diatasan_id) REFERENCES unit_kerja(id) |
+| fk_unit_kerja_diatasan | FOREIGN KEY | FOREIGN KEY (diatasan_id) REFERENCES ref_unit_kerja(id) |
 | unit_kerja_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 
 ## Indexes
 
 | Name | Definition |
 | ---- | ---------- |
-| unit_kerja_pkey | CREATE UNIQUE INDEX unit_kerja_pkey ON kepegawaian.unit_kerja USING btree (id) |
+| unit_kerja_pkey | CREATE UNIQUE INDEX unit_kerja_pkey ON kepegawaian.ref_unit_kerja USING btree (id) |
 
 ## Relations
 
 ```mermaid
 erDiagram
 
-"kepegawaian.pegawai" }o--o| "kepegawaian.unit_kerja" : "FOREIGN KEY (unor_id) REFERENCES unit_kerja(id)"
-"kepegawaian.pindah_unit" }o--o| "kepegawaian.unit_kerja" : "FOREIGN KEY (unit_asal) REFERENCES unit_kerja(id)"
-"kepegawaian.pindah_unit" }o--o| "kepegawaian.unit_kerja" : "FOREIGN KEY (unit_tujuan) REFERENCES unit_kerja(id)"
-"kepegawaian.riwayat_asesmen" }o--o| "kepegawaian.unit_kerja" : "FOREIGN KEY (unit_org_id) REFERENCES unit_kerja(id)"
-"kepegawaian.riwayat_jabatan" }o--o| "kepegawaian.unit_kerja" : "FOREIGN KEY (satuan_kerja_id) REFERENCES unit_kerja(id)"
-"kepegawaian.unit_kerja" }o--o| "kepegawaian.unit_kerja" : "FOREIGN KEY (diatasan_id) REFERENCES unit_kerja(id)"
-"kepegawaian.unit_kerja" }o--o| "kepegawaian.ref_instansi" : "FOREIGN KEY (instansi_id) REFERENCES ref_instansi(id)"
-"kepegawaian.unit_kerja" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pemimpin_pns_id) REFERENCES pegawai(pns_id)"
+"kepegawaian.pegawai" }o--o| "kepegawaian.ref_unit_kerja" : "FOREIGN KEY (unor_id) REFERENCES ref_unit_kerja(id)"
+"kepegawaian.pindah_unit" }o--o| "kepegawaian.ref_unit_kerja" : "FOREIGN KEY (unit_asal) REFERENCES ref_unit_kerja(id)"
+"kepegawaian.pindah_unit" }o--o| "kepegawaian.ref_unit_kerja" : "FOREIGN KEY (unit_tujuan) REFERENCES ref_unit_kerja(id)"
+"kepegawaian.riwayat_asesmen" }o--o| "kepegawaian.ref_unit_kerja" : "FOREIGN KEY (unit_org_id) REFERENCES ref_unit_kerja(id)"
+"kepegawaian.riwayat_jabatan" }o--o| "kepegawaian.ref_unit_kerja" : "FOREIGN KEY (satuan_kerja_id) REFERENCES ref_unit_kerja(id)"
+"kepegawaian.ref_unit_kerja" }o--o| "kepegawaian.ref_unit_kerja" : "FOREIGN KEY (diatasan_id) REFERENCES ref_unit_kerja(id)"
+"kepegawaian.ref_unit_kerja" }o--o| "kepegawaian.ref_instansi" : "FOREIGN KEY (instansi_id) REFERENCES ref_instansi(id)"
+"kepegawaian.ref_unit_kerja" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pemimpin_pns_id) REFERENCES pegawai(pns_id)"
 
-"kepegawaian.unit_kerja" {
+"kepegawaian.ref_unit_kerja" {
   varchar_60_ id
   integer no
   varchar_60_ kode_internal
@@ -152,12 +152,12 @@ erDiagram
   varchar_36_ instansi_induk_id FK
   varchar_36_ instansi_kerja_id FK
   varchar_36_ satuan_kerja_induk_id
-  varchar_36_ satuan_kerja_kerja_id
+  varchar_36_ satuan_kerja_id
   varchar_10_ golongan_darah
   varchar_200_ foto
   date tmt_pensiun
   varchar_36_ lokasi_kerja
-  smallint jml_istri
+  smallint jml_pasangan
   smallint jml_anak
   varchar_100_ no_surat_dokter
   date tanggal_surat_dokter

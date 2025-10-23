@@ -18,7 +18,7 @@ Riwayat kursus pegawai
 | no_sertifikat | varchar(100) |  | true |  |  | Nomor sertifikat yang diterbitkan |
 | instansi | varchar(200) |  | true |  |  | Nama instansi penyelenggara |
 | institusi_penyelenggara | varchar(200) |  | true |  |  | Nama lembaga yang menyelenggarakan |
-| siasn_id | varchar(36) |  | true |  |  | id pada sistem BKN |
+| bkn_id | varchar(36) |  | true |  |  | id pada sistem BKN |
 | pns_id | varchar(36) |  | true |  | [kepegawaian.pegawai](kepegawaian.pegawai.md) | id PNS |
 | created_at | timestamp with time zone | now() | true |  |  | Waktu perekaman data |
 | updated_at | timestamp with time zone | now() | true |  |  | Waktu terakhir data diperbarui |
@@ -57,7 +57,7 @@ erDiagram
   varchar_100_ no_sertifikat
   varchar_200_ instansi
   varchar_200_ institusi_penyelenggara
-  varchar_36_ siasn_id
+  varchar_36_ bkn_id
   varchar_36_ pns_id FK
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
@@ -109,12 +109,12 @@ erDiagram
   varchar_36_ instansi_induk_id FK
   varchar_36_ instansi_kerja_id FK
   varchar_36_ satuan_kerja_induk_id
-  varchar_36_ satuan_kerja_kerja_id
+  varchar_36_ satuan_kerja_id
   varchar_10_ golongan_darah
   varchar_200_ foto
   date tmt_pensiun
   varchar_36_ lokasi_kerja
-  smallint jml_istri
+  smallint jml_pasangan
   smallint jml_anak
   varchar_100_ no_surat_dokter
   date tanggal_surat_dokter

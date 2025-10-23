@@ -33,12 +33,12 @@ func Test_handler_list(t *testing.T) {
 			(1, 'III/a', 'Penata Muda', '2000-01-01'),
 			(2, 'III/b', 'Penata Muda Tingkat I', '2000-01-01');
 
-		insert into unit_kerja (id, nama_unor, created_at) values
+		insert into ref_unit_kerja (id, nama_unor, created_at) values
 			(1, 'Unit Kerja 1', '2000-01-01'),
 			(2, 'Unit Kerja 2', '2000-01-01');
 
 		insert into riwayat_kenaikan_gaji_berkala
-			(id, pegawai_id, golongan_id, no_sk, tanggal_sk, tmt_golongan, masa_kerja_golongan_tahun, masa_kerja_golongan_bulan, tmt_sk, n_gapok, gaji_pokok, jabatan, tmt_jabatan, last_education, last_education_date, kantor_pembayaran, unit_kerja_induk_id, pejabat, created_at, deleted_at) values
+			(id, pegawai_id, golongan_id, no_sk, tanggal_sk, tmt_golongan, masa_kerja_golongan_tahun, masa_kerja_golongan_bulan, tmt_sk, n_gapok, gaji_pokok, jabatan, tmt_jabatan, pendidikan_terakhir, tanggal_lulus_pendidikan_terakhir, kantor_pembayaran, unit_kerja_induk_id, pejabat, created_at, deleted_at) values
 			(11, 1, 1, 'SK/123/2023', '2023-01-15', '2023-01-15', 2, 6, '2023-01-15', '3500000', 3500000, 'Staff A', '2023-01-15', 'S1', '2018-05-20', 'Kantor A', 1, 'Pejabat A', now(), null),
 			(12, 1, 2, 'SK/124/2024', '2024-01-15', '2024-01-15', 3, 0, '2024-01-15', '4000000', 4000000, 'Staff B', '2024-01-15', 'S2', '2019-06-20', 'Kantor B', 2, 'Pejabat B', now(), null),
 			(13, 2, 1, 'SK/125/2023', '2023-06-15', '2023-06-15', 1, 3, '2023-06-15', '3200000', 3200000, 'Staff C', '2023-06-15', 'S1', '2017-04-10', 'Kantor C', 1, 'Pejabat C', now(), null),
@@ -502,12 +502,12 @@ func Test_handler_listAdmin(t *testing.T) {
 			(1, 'III/a', 'Penata Muda', '2000-01-01'),
 			(2, 'III/b', 'Penata Muda Tingkat I', '2000-01-01');
 
-		insert into unit_kerja (id, nama_unor, created_at) values
+		insert into ref_unit_kerja (id, nama_unor, created_at) values
 			(1, 'Unit Kerja 1', '2000-01-01'),
 			(2, 'Unit Kerja 2', '2000-01-01');
 
 		insert into riwayat_kenaikan_gaji_berkala
-			(id, pegawai_id, golongan_id, no_sk, tanggal_sk, tmt_golongan, masa_kerja_golongan_tahun, masa_kerja_golongan_bulan, tmt_sk, n_gapok, gaji_pokok, jabatan, tmt_jabatan, last_education, last_education_date, kantor_pembayaran, unit_kerja_induk_id, pejabat, created_at, deleted_at) values
+			(id, pegawai_id, golongan_id, no_sk, tanggal_sk, tmt_golongan, masa_kerja_golongan_tahun, masa_kerja_golongan_bulan, tmt_sk, n_gapok, gaji_pokok, jabatan, tmt_jabatan, pendidikan_terakhir, tanggal_lulus_pendidikan_terakhir, kantor_pembayaran, unit_kerja_induk_id, pejabat, created_at, deleted_at) values
 			(11, 1, 1, 'SK/123/2023', '2023-01-15', '2023-01-15', 2, 6, '2023-01-15', '3500000', 3500000, 'Staff A', '2023-01-15', 'S1', '2018-05-20', 'Kantor A', 1, 'Pejabat A', now(), null),
 			(12, 1, 2, 'SK/124/2024', '2024-01-15', '2024-01-15', 3, 0, '2024-01-15', '4000000', 4000000, 'Staff B', '2024-01-15', 'S2', '2019-06-20', 'Kantor B', 2, 'Pejabat B', now(), null),
 			(13, 2, 1, 'SK/125/2023', '2023-06-15', '2023-06-15', 1, 3, '2023-06-15', '3200000', 3200000, 'Staff C', '2023-06-15', 'S1', '2017-04-10', 'Kantor C', 1, 'Pejabat C', now(), null),

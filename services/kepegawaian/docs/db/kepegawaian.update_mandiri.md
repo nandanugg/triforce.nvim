@@ -15,7 +15,7 @@ Riwayat pembaruan data secara mandiri oleh pegawai
 | perubahan | varchar(400) |  | true |  |  | Nilai perubahan kolom |
 | status | integer |  | true |  |  | Status verifikasi diperbarui |
 | verifikasi_by | integer |  | true |  |  | id user yang melakukan verifikasi |
-| verifikasi_tgl | date |  | true |  |  | Tanggal verifikasi |
+| tanggal_verifikasi | date |  | true |  |  | Tanggal verifikasi |
 | nama_kolom | varchar(100) |  | true |  |  | Nama kolom yang diperbarui |
 | level_update | integer |  | true |  |  | Level/update yang dilakukan |
 | tabel_id | integer |  | true |  |  | id tabel yang diperbarui |
@@ -52,7 +52,7 @@ erDiagram
   varchar_400_ perubahan
   integer status
   integer verifikasi_by
-  date verifikasi_tgl
+  date tanggal_verifikasi
   varchar_100_ nama_kolom
   integer level_update
   integer tabel_id
@@ -105,12 +105,12 @@ erDiagram
   varchar_36_ instansi_induk_id FK
   varchar_36_ instansi_kerja_id FK
   varchar_36_ satuan_kerja_induk_id
-  varchar_36_ satuan_kerja_kerja_id
+  varchar_36_ satuan_kerja_id
   varchar_10_ golongan_darah
   varchar_200_ foto
   date tmt_pensiun
   varchar_36_ lokasi_kerja
-  smallint jml_istri
+  smallint jml_pasangan
   smallint jml_anak
   varchar_100_ no_surat_dokter
   date tanggal_surat_dokter

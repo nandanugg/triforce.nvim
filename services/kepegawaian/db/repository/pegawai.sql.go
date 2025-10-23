@@ -10,15 +10,15 @@ import (
 )
 
 const countPegawaiAktif = `-- name: CountPegawaiAktif :one
-SELECT 
+SELECT
   COUNT(1)
 FROM pegawai
-LEFT JOIN unit_kerja uk 
+LEFT JOIN ref_unit_kerja uk
     ON pegawai.unor_id = uk.id AND uk.deleted_at IS NULL
 JOIN ref_kedudukan_hukum
     ON ref_kedudukan_hukum.id = pegawai.kedudukan_hukum_id AND ref_kedudukan_hukum.deleted_at IS NULL
-WHERE 
-    ref_kedudukan_hukum.is_pegawai_aktif = TRUE 
+WHERE
+    ref_kedudukan_hukum.is_pegawai_aktif = TRUE
     AND ($1::varchar is null or ref_kedudukan_hukum.nama = $1::varchar)
     AND (
         $2::VARCHAR IS NULL
@@ -37,9 +37,9 @@ WHERE
     )
     AND ( $4::INTEGER IS NULL OR pegawai.gol_id = $4::INTEGER )
     AND ( $5::VARCHAR IS NULL OR pegawai.jabatan_instansi_id = $5::VARCHAR )
-    AND ( 
-        $6::varchar[] IS NULL 
-        OR ( pegawai.status_cpns_pns = ANY($6::VARCHAR[]) AND ref_kedudukan_hukum.nama <> $7::varchar ) 
+    AND (
+        $6::varchar[] IS NULL
+        OR ( pegawai.status_cpns_pns = ANY($6::VARCHAR[]) AND ref_kedudukan_hukum.nama <> $7::varchar )
     )
     AND pegawai.deleted_at IS NULL
 `
@@ -131,7 +131,7 @@ func (q *Queries) GetProfilePegawaiByPNSID(ctx context.Context, pnsID string) (G
 }
 
 const listPegawaiAktif = `-- name: ListPegawaiAktif :many
-SELECT 
+SELECT
     pegawai.pns_id,
     pegawai.nip_baru AS nip,
     pegawai.nama,
@@ -144,7 +144,7 @@ SELECT
     status_cpns_pns,
     pegawai.foto
 FROM pegawai
-LEFT JOIN unit_kerja uk 
+LEFT JOIN ref_unit_kerja uk
     ON pegawai.unor_id = uk.id AND uk.deleted_at IS NULL
 JOIN ref_kedudukan_hukum
     ON ref_kedudukan_hukum.id = pegawai.kedudukan_hukum_id AND ref_kedudukan_hukum.deleted_at IS NULL
@@ -152,8 +152,8 @@ LEFT JOIN ref_jabatan
     ON ref_jabatan.kode_jabatan = pegawai.jabatan_instansi_id AND ref_jabatan.deleted_at IS NULL
 LEFT JOIN ref_golongan ref_golongan_akhir
     ON ref_golongan_akhir.id = pegawai.gol_id AND ref_golongan_akhir.deleted_at IS NULL
-WHERE 
-    ref_kedudukan_hukum.is_pegawai_aktif = TRUE 
+WHERE
+    ref_kedudukan_hukum.is_pegawai_aktif = TRUE
     AND ($3::varchar is null or ref_kedudukan_hukum.nama = $3::varchar)
     AND (
         $4::VARCHAR IS NULL
@@ -172,9 +172,9 @@ WHERE
     )
     AND ( $6::INTEGER IS NULL OR pegawai.gol_id = $6::INTEGER )
     AND ( $7::VARCHAR IS NULL OR pegawai.jabatan_instansi_id = $7::VARCHAR )
-    AND ( 
-        $8::varchar[] IS NULL 
-        OR ( pegawai.status_cpns_pns = ANY($8::VARCHAR[]) AND ref_kedudukan_hukum.nama <> $9::varchar ) 
+    AND (
+        $8::varchar[] IS NULL
+        OR ( pegawai.status_cpns_pns = ANY($8::VARCHAR[]) AND ref_kedudukan_hukum.nama <> $9::varchar )
     )
     AND pegawai.deleted_at IS NULL
 LIMIT $1 OFFSET $2

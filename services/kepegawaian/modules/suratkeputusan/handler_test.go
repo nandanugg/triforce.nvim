@@ -24,7 +24,7 @@ func Test_handler_list(t *testing.T) {
 	t.Parallel()
 
 	dbData := `
-		insert into unit_kerja
+		insert into ref_unit_kerja
 			(id,  diatasan_id, nama_unor, nama_jabatan,    pemimpin_pns_id, deleted_at) values
 			('unor-1', null, 'Paling Atas', 'Atasan 1', null, null),
 			('unor-2', 'unor-1', 'Tengah', 'Atasan 2', null, null),
@@ -38,7 +38,7 @@ func Test_handler_list(t *testing.T) {
 			('123456788','123456788','unor-4'),
 			('123456787','123456787','unor-5');
 
-		INSERT INTO file_digital_signature
+		INSERT INTO surat_keputusan
 				("file_id", "nip_sk", "kategori", "no_sk", "tanggal_sk", "status_sk", "created_at", "deleted_at") VALUES
 				('sk-001', '123456789', 'Kenaikan Pangkat', 'SK-001/2024', '2024-01-15', 1, '2024-01-15', NULL),
 				('sk-002', '123456789', 'Mutasi', 'SK-002/2024', '2024-02-20', 0, '2024-02-20', NULL),
@@ -215,7 +215,7 @@ func Test_handler_get(t *testing.T) {
 	t.Parallel()
 
 	dbData := `
-		insert into unit_kerja
+		insert into ref_unit_kerja
 			(id,  diatasan_id, nama_unor, nama_jabatan,    pemimpin_pns_id, deleted_at) values
 			('unor-1', null, 'Paling Atas', 'Atasan 1', null, null),
 			('unor-2', 'unor-1', 'Tengah', 'Atasan 2', null, null),
@@ -231,7 +231,7 @@ func Test_handler_get(t *testing.T) {
 			('12345678','12345678','unor-3','Jane Smith'),
 			('12345677','12345677','unor-3','Korektor');
 
-		INSERT INTO file_digital_signature
+		INSERT INTO surat_keputusan
 				("file_id", "nip_sk", "kategori", "no_sk", "tanggal_sk", "status_sk","nip_pemroses", "created_at", "deleted_at") VALUES
 				('sk-001', '123456789', 'Kenaikan Pangkat', 'SK-001/2024', '2024-01-15', 1, '12345678', '2024-01-15', NULL),
 				('sk-002', '123456789', 'Mutasi', 'SK-002/2024', '2024-02-20', 0, '12345678', '2024-02-20', NULL),
@@ -239,7 +239,8 @@ func Test_handler_get(t *testing.T) {
 				('sk-004', '123456789', 'Kenaikan Gaji', 'SK-004/2024', '2024-03-10', 2,'12345678', '2024-03-10', NOW()),
 				('sk-005', '123456788', 'Mutasi', 'SK-005/2024', '2024-03-10', 2,'12345678', '2024-03-10', NULL),
 				('sk-006', '123456787', 'Mutasi', 'SK-006/2024', '2024-03-10', 2,'12345678', '2024-03-10', NULL);
-		INSERT INTO file_digital_signature_riwayat
+
+		INSERT INTO riwayat_surat_keputusan
 			("file_id","nip_pemroses","tindakan","created_at","deleted_at") VALUES
 			('sk-002','12345677','Mengkoreksi','2025-09-24T01:02:03',NULL),
 			('sk-002','12345678','Mengkoreksi',NOW(),NOW());
@@ -423,7 +424,7 @@ func Test_handler_getBerkas(t *testing.T) {
 	signedPngBase64 := base64.StdEncoding.EncodeToString(signedBytes)
 
 	dbData := `
-		INSERT INTO file_digital_signature
+		INSERT INTO surat_keputusan
 			("file_id","file_base64","file_base64_sign", "nip_sk", "kategori", "no_sk", "tanggal_sk", "status_sk","nip_pemroses", "created_at", "deleted_at") VALUES
 			('sk-001','data:image/png;base64,` + pngBase64 + `',NULL, '123456789', 'Kenaikan Pangkat', 'SK-001/2024', '2024-01-15', 1, '12345678', '2024-01-15', NULL),
 			('sk-002','data:image/png;base64,invalid',NULL, '123456789', 'Mutasi', 'SK-002/2024', '2024-02-20', 0, '12345678', '2024-02-20', NULL),
@@ -576,7 +577,7 @@ func Test_handler_listAdmin(t *testing.T) {
 	t.Parallel()
 
 	dbData := `
-		insert into unit_kerja
+		insert into ref_unit_kerja
 			(id,  diatasan_id, nama_unor, nama_jabatan, pemimpin_pns_id, eselon_1, eselon_2, eselon_3, eselon_4, deleted_at) values
 			('unor-1', null, 'Paling Atas', 'Atasan 1', null, null, null, null, null, null),
 			('unor-2', 'unor-1', 'Tengah', 'Atasan 2', null, null, 'unor-1', null, null, null),
@@ -617,7 +618,7 @@ func Test_handler_listAdmin(t *testing.T) {
 			('123456783','123456783','unor-2','Gledi', 7, 'JAB-07', NULL),
 			('123456782','123456782','unor-2','Hadi', 7, 'JAB-07', NOW());
 
-		INSERT INTO file_digital_signature
+		INSERT INTO surat_keputusan
 			("file_id", "nip_sk", "kategori", "no_sk", "tanggal_sk", "status_sk", "created_at", "deleted_at") VALUES
 			('sk-001', '123456789', 'Kenaikan Pangkat', 'SK-001/2024', '2024-01-15', 1, '2024-01-15', NULL),
 			('sk-002', '123456789', 'Mutasi', 'SK-002/2024', '2024-02-20', 0, '2024-02-20', NULL),
@@ -1199,7 +1200,7 @@ func Test_handler_getAdmin(t *testing.T) {
 	t.Parallel()
 
 	dbData := `
-		insert into unit_kerja
+		insert into ref_unit_kerja
 			(id,  diatasan_id, nama_unor, nama_jabatan, pemimpin_pns_id, eselon_1, eselon_2, eselon_3, eselon_4, deleted_at) values
 			('unor-1', null, 'Paling Atas', 'Atasan 1', null, null, null, null, null, null),
 			('unor-2', 'unor-1', 'Tengah', 'Atasan 2', null, null, 'unor-1', null, null, null),
@@ -1241,7 +1242,7 @@ func Test_handler_getAdmin(t *testing.T) {
 			('123456782','123456782','unor-2','Hadi', 7, 'JAB-07', NULL),
 			('123456781','123456781','unor-2','Ikhdi', 7, 'JAB-07', NOW());
 
-		INSERT INTO file_digital_signature
+		INSERT INTO surat_keputusan
 			("file_id", "nip_sk", "kategori", "no_sk", "tanggal_sk", "status_sk", "nip_pemroses", "created_at", "deleted_at") VALUES
 			('sk-001', '123456789', 'Kenaikan Pangkat', 'SK-001/2024', '2024-01-15', 1, NULL, '2024-01-15', NULL),
 			('sk-002', '123456789', 'Mutasi', 'SK-002/2024', '2024-02-20', 0, NULL, '2024-02-20', NULL),
@@ -1255,7 +1256,7 @@ func Test_handler_getAdmin(t *testing.T) {
 			('sk-010', '123456783', 'Mutasi', 'SK-010/2024', '2024-03-16', 5, '123456782', '2024-03-16', NULL),
 			('sk-011', '123456781', 'Kenaikan Pangkat', 'SK-011/2024', '2024-01-17', 1, NULL, '2024-01-15', NULL);
 
-		INSERT INTO file_digital_signature_riwayat
+		INSERT INTO riwayat_surat_keputusan
 			("file_id","nip_pemroses","tindakan","created_at","deleted_at") VALUES
 			('sk-010','123456782','Mengkoreksi','2025-09-24T01:02:03',NULL),
 			('sk-010','123456782','Mengkoreksi',NOW(),NOW()),
@@ -1449,7 +1450,7 @@ func Test_handler_getBerkasAdmin(t *testing.T) {
 	signedPngBase64 := base64.StdEncoding.EncodeToString(signedBytes)
 
 	dbData := `
-		INSERT INTO file_digital_signature
+		INSERT INTO surat_keputusan
 			("file_id","file_base64","file_base64_sign", "nip_sk", "kategori", "no_sk", "tanggal_sk", "status_sk","nip_pemroses", "created_at", "deleted_at") VALUES
 			('sk-001','data:image/png;base64,` + pngBase64 + `',NULL, '123456789', 'Kenaikan Pangkat', 'SK-001/2024', '2024-01-15', 1, '12345678', '2024-01-15', NULL),
 			('sk-002','data:image/png;base64,invalid',NULL, '123456789', 'Mutasi', 'SK-002/2024', '2024-02-20', 0, '12345678', '2024-02-20', NULL),
@@ -1595,14 +1596,14 @@ func Test_handler_listKoreksi(t *testing.T) {
 	t.Parallel()
 
 	dbData := `
-		insert into unit_kerja
+		insert into ref_unit_kerja
 			(id,  diatasan_id, nama_unor, nama_jabatan,    pemimpin_pns_id, deleted_at) values
 			('unor-1', null, 'Paling Atas', 'Atasan 1', null, null),
 			('unor-2', 'unor-1', 'Tengah', 'Atasan 2', null, null),
 			('unor-3', 'unor-2', 'Bawah', 'Atasan 3', null, null),
 			('unor-4', 'unor-1', 'Tengah deleted', 'Atasan 4', null, now()),
 			('unor-5', 'unor-4', 'Bawah 2', 'Atasan 5', null, null);
-		INSERT INTO file_digital_signature_corrector
+		INSERT INTO koreksi_surat_keputusan
 				("file_id","status_koreksi","pegawai_korektor_id","created_at", "deleted_at") VALUES
 				('sk-001', 1, '123456787', '2024-01-15', NULL),
 				('sk-002', 2, '123456787', '2024-02-20', NULL),
@@ -1611,7 +1612,7 @@ func Test_handler_listKoreksi(t *testing.T) {
 				('sk-005', 2, '123456788', '2024-03-10', NULL),
 				('sk-006', 2, '123456787', '2024-03-10', now());
 
-		INSERT INTO file_digital_signature
+		INSERT INTO surat_keputusan
 			("file_id","nip_sk","kategori","no_sk","tanggal_sk","status_sk","created_at", "deleted_at") VALUES
 			('sk-001', '123456789', 'Kenaikan Pangkat', 'SK-001/2024', '2024-01-15', 1, '2024-01-15', NULL),
 			('sk-002', '123456789', 'Mutasi', 'SK-002/2024', '2024-02-20', 0, '2024-02-20', NULL),

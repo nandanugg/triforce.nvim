@@ -24,7 +24,7 @@ func Test_handler_List(t *testing.T) {
 	t.Parallel()
 
 	dbData := `
-		insert into unit_kerja
+		insert into ref_unit_kerja
 		("id", "nama_unor", "unor_induk") values
 		('001', 'Sekretariat Jenderal', ''),
 		('002', 'Direktorat Jenderal Pendidikan Dasar dan Menengah', '001'),
@@ -242,7 +242,7 @@ func Test_handler_ListAkar(t *testing.T) {
 	t.Parallel()
 
 	dbData := `
-		insert into unit_kerja
+		insert into ref_unit_kerja
 		("id", "nama_unor", "order", "diatasan_id", deleted_at) values
 		('001', 'Tingkat 1', 8, NULL, NULL),
 		('002', 'Tingkat 2', 3, '001', NULL),
@@ -343,7 +343,7 @@ func Test_handler_ListAnak(t *testing.T) {
 	t.Parallel()
 
 	dbData := `
-		insert into unit_kerja
+		insert into ref_unit_kerja
 		("id", "nama_unor", "order", "diatasan_id", deleted_at) values
 		('001', 'Tingkat 1', 8, NULL, NULL),
 		('002', 'Tingkat 2', 3, '001', NULL),
@@ -506,7 +506,7 @@ func Test_handler_adminGet(t *testing.T) {
 			'INST002', 'Direktorat SDM', now(), now(), NULL
 		);
 
-		INSERT INTO unit_kerja (
+		INSERT INTO ref_unit_kerja (
 				id, "no", kode_internal, nama_unor, eselon_id, cepat_kode, nama_jabatan, nama_pejabat,
 				diatasan_id, instansi_id, pemimpin_pns_id, jenis_unor_id, unor_induk, jumlah_ideal_staff,
 				"order", is_satker, eselon_1, eselon_2, eselon_3, eselon_4, expired_date, keterangan,
@@ -710,7 +710,7 @@ func Test_handler_adminCreate(t *testing.T) {
 			'INST002', 'Direktorat SDM', now(), now(), NULL
 		);
 
-		INSERT INTO unit_kerja (
+		INSERT INTO ref_unit_kerja (
 				id, "no", kode_internal, nama_unor, eselon_id, cepat_kode, nama_jabatan, nama_pejabat,
 				diatasan_id, instansi_id, pemimpin_pns_id, jenis_unor_id, unor_induk, jumlah_ideal_staff,
 				"order", is_satker, eselon_1, eselon_2, eselon_3, eselon_4, expired_date, keterangan,
@@ -979,7 +979,7 @@ func Test_handler_adminUpdate(t *testing.T) {
 			'INST002', 'Direktorat SDM', now(), now(), NULL
 		);
 
-		INSERT INTO unit_kerja (
+		INSERT INTO ref_unit_kerja (
 			id, "no", kode_internal, nama_unor, eselon_id, cepat_kode, nama_jabatan, nama_pejabat,
 			diatasan_id, instansi_id, pemimpin_pns_id, jenis_unor_id, unor_induk, jumlah_ideal_staff,
 			"order", is_satker, eselon_1, eselon_2, eselon_3, eselon_4, expired_date, keterangan,
@@ -1284,7 +1284,7 @@ func Test_handler_adminDelete(t *testing.T) {
 			'INST002', 'Direktorat SDM', now(), now(), NULL
 		);
 
-		INSERT INTO unit_kerja (
+		INSERT INTO ref_unit_kerja (
 			id, "no", kode_internal, nama_unor, eselon_id, cepat_kode, nama_jabatan, nama_pejabat,
 			diatasan_id, instansi_id, pemimpin_pns_id, jenis_unor_id, unor_induk, jumlah_ideal_staff,
 			"order", is_satker, eselon_1, eselon_2, eselon_3, eselon_4, expired_date, keterangan,

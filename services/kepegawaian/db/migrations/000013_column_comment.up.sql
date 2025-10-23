@@ -78,7 +78,7 @@ COMMENT ON COLUMN orang_tua.no_dokumen IS 'Nomor dokumen identitas';
 COMMENT ON COLUMN orang_tua.pns_id IS 'Referensi ke pegawai.pns_id';
 COMMENT ON COLUMN orang_tua.tanggal_lahir IS 'Tanggal lahir orang tua';
 COMMENT ON COLUMN orang_tua.tempat_lahir IS 'Tempat lahir orang tua';
-COMMENT ON COLUMN orang_tua.tgl_meninggal IS 'Tanggal meninggal orang tua'; -- TODO: ganti dengan tanggal_meninggal
+COMMENT ON COLUMN orang_tua.tgl_meninggal IS 'Tanggal meninggal orang tua';
 COMMENT ON COLUMN orang_tua.updated_at IS 'Waktu terakhir pembaruan';
 
 -- Comments for table: pasangan
@@ -138,7 +138,7 @@ COMMENT ON COLUMN pegawai.jenis_kawin_id IS 'Status perkawinan (rujuk ref_jenis_
 COMMENT ON COLUMN pegawai.jenis_kelamin IS 'Kode jenis kelamin, M: laki-laki, F: perempuan';
 COMMENT ON COLUMN pegawai.jenis_pegawai_id IS 'id jenis pegawai (PNS/PPPK/dll; rujuk ref_jenis_pegawai)';
 COMMENT ON COLUMN pegawai.jml_anak IS 'Jumlah anak yang tercatat';
-COMMENT ON COLUMN pegawai.jml_istri IS 'Jumlah pasangan'; -- TODO: ganti dengan jml_pasangan
+COMMENT ON COLUMN pegawai.jml_istri IS 'Jumlah pasangan';
 COMMENT ON COLUMN pegawai.kartu_asn IS 'Nomor kartu ASN';
 COMMENT ON COLUMN pegawai.kartu_pegawai IS 'Nomor kartu pegawai';
 COMMENT ON COLUMN pegawai.kedudukan_hukum_id IS 'id kedudukan hukum (rujuk ref_kedudukan_hukum)';
@@ -173,7 +173,7 @@ COMMENT ON COLUMN pegawai.pns_id IS 'id pegawai negeri sipil (UUID) yang menjadi
 COMMENT ON COLUMN pegawai.satuan_kerja_induk_id IS 'id satuan kerja induk pegawai';
 COMMENT ON COLUMN pegawai.satuan_kerja_induk_nama IS 'Nama satuan kerja induk pegawai';
 COMMENT ON COLUMN pegawai.satuan_kerja_kerja_id IS 'id satuan kerja pegawai';
-COMMENT ON COLUMN pegawai.satuan_kerja_nama IS 'Nama satuan kerja pegawai'; -- TODO: ganti dengan satuan_kerja_kerja_nama
+COMMENT ON COLUMN pegawai.satuan_kerja_nama IS 'Nama satuan kerja pegawai';
 COMMENT ON COLUMN pegawai.status_cpns_pns IS 'Status CPNS/PNS';
 COMMENT ON COLUMN pegawai.status_hidup IS 'Status hidup pegawai';
 COMMENT ON COLUMN pegawai.status_pegawai IS 'Status pegawai, 1: pns, 2: honorer';
@@ -182,13 +182,13 @@ COMMENT ON COLUMN pegawai.tahun_lulus IS 'Tahun kelulusan pendidikan terakhir';
 COMMENT ON COLUMN pegawai.tempat_lahir IS 'Nama tempat lahir berdasarkan referensi ref_lokasi';
 COMMENT ON COLUMN pegawai.tempat_lahir_id IS 'id tempat lahir (rujuk ref_lokasi)';
 COMMENT ON COLUMN pegawai.tempat_lahir_nama IS 'Nama tempat lahir (teks bebas)';
-COMMENT ON COLUMN pegawai.tgl_bebas_narkoba IS 'Tanggal Surat Keterangan Bebas Narkoba'; -- TODO: ganti dengan tanggal_bebas_narkoba
-COMMENT ON COLUMN pegawai.tgl_catatan_polisi IS 'Tanggal Surat Catatan Kelakukan Baik dari kepolisian'; -- TODO: ganti dengan tanggal_catatan_polisi
-COMMENT ON COLUMN pegawai.tgl_lahir IS 'Tanggal lahir pegawai'; -- TODO: ganti dengan tanggal_lahir
-COMMENT ON COLUMN pegawai.tgl_meninggal IS 'Tanggal meninggal pegawai'; -- TODO: ganti dengan tanggal_meninggal
-COMMENT ON COLUMN pegawai.tgl_npwp IS 'Tanggal terbit NPWP'; -- TODO: ganti dengan tanggal_npwp
-COMMENT ON COLUMN pegawai.tgl_sk_cpns IS 'Tanggal SK pengangkatan CPNS'; -- TODO: ganti dengan tanggal_sk_cpns
-COMMENT ON COLUMN pegawai.tgl_surat_dokter IS 'Tanggal surat pemeriksaan kesehatan'; -- TODO: ganti dengan tanggal_surat_dokter
+COMMENT ON COLUMN pegawai.tgl_bebas_narkoba IS 'Tanggal Surat Keterangan Bebas Narkoba';
+COMMENT ON COLUMN pegawai.tgl_catatan_polisi IS 'Tanggal Surat Catatan Kelakukan Baik dari kepolisian';
+COMMENT ON COLUMN pegawai.tgl_lahir IS 'Tanggal lahir pegawai';
+COMMENT ON COLUMN pegawai.tgl_meninggal IS 'Tanggal meninggal pegawai';
+COMMENT ON COLUMN pegawai.tgl_npwp IS 'Tanggal terbit NPWP';
+COMMENT ON COLUMN pegawai.tgl_sk_cpns IS 'Tanggal SK pengangkatan CPNS';
+COMMENT ON COLUMN pegawai.tgl_surat_dokter IS 'Tanggal surat pemeriksaan kesehatan';
 COMMENT ON COLUMN pegawai.tingkat_pendidikan_id IS 'Tingkat pendidikan terakhir (rujuk tingkat_pendidikan)';
 COMMENT ON COLUMN pegawai.tmt_cpns IS 'Tanggal mulai tugas (CPNS)';
 COMMENT ON COLUMN pegawai.tmt_golongan IS 'Tanggal mulai berlaku golongan saat ini';
@@ -254,12 +254,12 @@ COMMENT ON COLUMN ref_instansi.updated_at IS 'Waktu terakhir pembaruan';
 COMMENT ON COLUMN ref_jabatan.bkn_id IS 'id pada sistem BKN';
 COMMENT ON COLUMN ref_jabatan.created_at IS 'Waktu perekaman data';
 COMMENT ON COLUMN ref_jabatan.deleted_at IS 'Waktu penghapusan data';
-COMMENT ON COLUMN ref_jabatan.id IS 'id jabatan';
+COMMENT ON COLUMN ref_jabatan.id IS 'id jabatan'; -- TODO: hapus jika sudah tidak digunakan
 COMMENT ON COLUMN ref_jabatan.jenis_jabatan IS 'Kode jenis jabatan';
 COMMENT ON COLUMN ref_jabatan.kategori_jabatan IS 'Nama kategori jabatan';
 COMMENT ON COLUMN ref_jabatan.kelas IS 'Kelas jabatan';
 COMMENT ON COLUMN ref_jabatan.kode_bkn IS 'Kode pada sistem BKN'; -- TODO: hapus jika sudah tidak digunakan
-COMMENT ON COLUMN ref_jabatan.kode_jabatan IS 'Kode unik jabatan'; -- TODO: hapus jika sudah tidak digunakan
+COMMENT ON COLUMN ref_jabatan.kode_jabatan IS 'Kode unik jabatan'; -- TODO: ubah mapping kode_jabatan jadi id
 COMMENT ON COLUMN ref_jabatan.nama_jabatan IS 'Nama jabatan';
 COMMENT ON COLUMN ref_jabatan.nama_jabatan_bkn IS 'Nama jabatan pada sistem BKN';
 COMMENT ON COLUMN ref_jabatan.nama_jabatan_full IS 'Nama jabatan lengkap';
@@ -342,7 +342,6 @@ COMMENT ON COLUMN ref_kedudukan_hukum.updated_at IS 'Waktu terakhir pembaruan';
 
 -- Comments for table: ref_kelas_jabatan
 COMMENT ON COLUMN ref_kelas_jabatan.created_at IS 'Waktu perekaman data';
--- TODO: tambah colom deleted_at
 COMMENT ON COLUMN ref_kelas_jabatan.id IS 'id kelas jabatan';
 COMMENT ON COLUMN ref_kelas_jabatan.kelas_jabatan IS 'Nama kelas jabatan';
 COMMENT ON COLUMN ref_kelas_jabatan.tunjangan_kinerja IS 'Nilai tunjangan kinerja pada kelas jabatan terkait';
@@ -388,7 +387,6 @@ COMMENT ON COLUMN ref_tingkat_pendidikan.tingkat IS 'Urutan/level numerik pendid
 COMMENT ON COLUMN ref_tingkat_pendidikan.updated_at IS 'Waktu terakhir pembaruan';
 
 -- Comments for table: riwayat_assesmen
--- TODO: ganti dengan riwayat_asesmen
 COMMENT ON COLUMN riwayat_assesmen.created_at IS 'Waktu perekaman data';
 COMMENT ON COLUMN riwayat_assesmen.deleted_at IS 'Waktu penghapusan data';
 COMMENT ON COLUMN riwayat_assesmen.file_upload IS 'Lokasi penyimpanan berkas asesmen';
@@ -428,7 +426,7 @@ COMMENT ON COLUMN riwayat_diklat.no_sertifikat IS 'Nomor sertifikat diklat';
 COMMENT ON COLUMN riwayat_diklat.pns_orang_id IS 'Referensi pegawai (rujuk pegawai.pns_id)';
 COMMENT ON COLUMN riwayat_diklat.rumpun_diklat_id IS 'id rumpun diklat';
 COMMENT ON COLUMN riwayat_diklat.rumpun_diklat_nama IS 'Nama rumpun diklat';
-COMMENT ON COLUMN riwayat_diklat.siasn_id IS 'id referensi pada sistem BKN'; -- TODO: ganti dengan bkn_id
+COMMENT ON COLUMN riwayat_diklat.siasn_id IS 'id referensi pada sistem BKN';
 COMMENT ON COLUMN riwayat_diklat.sudah_kirim_siasn IS 'Penanda data sudah dikirim ke BKN';
 COMMENT ON COLUMN riwayat_diklat.tahun_diklat IS 'Tahun pelaksanaan diklat';
 COMMENT ON COLUMN riwayat_diklat.tanggal_mulai IS 'Tanggal mulai diklat';
@@ -540,14 +538,14 @@ COMMENT ON COLUMN riwayat_jabatan.updated_at IS 'Waktu terakhir pembaruan';
 
 -- Comments for table: riwayat_kgb
 COMMENT ON COLUMN riwayat_kgb.alasan IS 'Alasan kenaikan gaji berkala';
-COMMENT ON COLUMN riwayat_kgb.birth_date IS 'Tanggal lahir pegawai'; -- TODO: ganti dengan tanggal_lahir
-COMMENT ON COLUMN riwayat_kgb.birth_place IS 'Tempat lahir pegawai'; -- TODO: ganti dengan tempat_lahir
+COMMENT ON COLUMN riwayat_kgb.birth_date IS 'Tanggal lahir pegawai';
+COMMENT ON COLUMN riwayat_kgb.birth_place IS 'Tempat lahir pegawai';
 COMMENT ON COLUMN riwayat_kgb.created_at IS 'Waktu perekaman data';
 COMMENT ON COLUMN riwayat_kgb.deleted_at IS 'Waktu penghapusan data';
 COMMENT ON COLUMN riwayat_kgb.id IS 'id riwayat kenaikan gaji berkala';
 COMMENT ON COLUMN riwayat_kgb.kantor_pembayaran IS 'Kantor yang melakukan pembayaran gaji';
-COMMENT ON COLUMN riwayat_kgb.last_education IS 'Pendidikan terakhir'; -- TODO: ganti dengan pendidikan_terakhir
-COMMENT ON COLUMN riwayat_kgb.last_education_date IS 'Tanggal lulus pendidikan terakhir'; -- TODO: ganti dengan tanggal_lulus_pendidikan_terakhir
+COMMENT ON COLUMN riwayat_kgb.last_education IS 'Pendidikan terakhir';
+COMMENT ON COLUMN riwayat_kgb.last_education_date IS 'Tanggal lulus pendidikan terakhir';
 COMMENT ON COLUMN riwayat_kgb.mv_kgb_id IS 'Referensi ke materialized view KGB';
 COMMENT ON COLUMN riwayat_kgb.n_gapok IS 'Nilai gaji pokok';
 COMMENT ON COLUMN riwayat_kgb.n_gol_ruang IS 'Golongan ruang';
@@ -563,7 +561,7 @@ COMMENT ON COLUMN riwayat_kgb.pegawai_nama IS 'Nama pegawai';
 COMMENT ON COLUMN riwayat_kgb.pegawai_nip IS 'NIP pegawai';
 COMMENT ON COLUMN riwayat_kgb.pejabat IS 'Pejabat yang menandatangani';
 COMMENT ON COLUMN riwayat_kgb.ref IS 'Nomor referensi';
-COMMENT ON COLUMN riwayat_kgb.tgl_sk IS 'Tanggal SK kenaikan gaji berkala'; -- TODO: ganti dengan tanggal_sk
+COMMENT ON COLUMN riwayat_kgb.tgl_sk IS 'Tanggal SK kenaikan gaji berkala';
 COMMENT ON COLUMN riwayat_kgb.tmt_sk IS 'TMT SK kenaikan gaji berkala';
 COMMENT ON COLUMN riwayat_kgb.unit_kerja_induk_id IS 'id unit kerja induk';
 COMMENT ON COLUMN riwayat_kgb.unit_kerja_induk_text IS 'Nama unit kerja induk';
@@ -602,7 +600,7 @@ COMMENT ON COLUMN riwayat_kursus.nama_kursus IS 'Nama kursus';
 COMMENT ON COLUMN riwayat_kursus.no_sertifikat IS 'Nomor sertifikat yang diterbitkan';
 COMMENT ON COLUMN riwayat_kursus.pns_id IS 'id PNS';
 COMMENT ON COLUMN riwayat_kursus.pns_nip IS 'NIP pegawai';
-COMMENT ON COLUMN riwayat_kursus.siasn_id IS 'id pada sistem BKN'; -- TODO: ganti dengan bkn_id
+COMMENT ON COLUMN riwayat_kursus.siasn_id IS 'id pada sistem BKN';
 COMMENT ON COLUMN riwayat_kursus.tanggal_kursus IS 'Tanggal pelaksanaan';
 COMMENT ON COLUMN riwayat_kursus.tipe_kursus IS 'Tipe kursus';
 COMMENT ON COLUMN riwayat_kursus.updated_at IS 'Waktu terakhir data diperbarui';
@@ -717,7 +715,6 @@ COMMENT ON COLUMN riwayat_ujikom.tahun IS 'Tahun uji kompetensi';
 COMMENT ON COLUMN riwayat_ujikom.updated_at IS 'Waktu terakhir pembaruan data';
 
 -- Comments for table: unit_kerja
--- TODO: ganti dengan ref_unit_kerja
 COMMENT ON COLUMN unit_kerja.abbreviation IS 'Singkatan unit organisasi';
 COMMENT ON COLUMN unit_kerja.aktif IS 'Status keaktifan unit';
 COMMENT ON COLUMN unit_kerja.cepat_kode IS 'Kode cepat untuk pencarian unit kerja';

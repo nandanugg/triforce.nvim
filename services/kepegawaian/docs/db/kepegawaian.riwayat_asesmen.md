@@ -19,7 +19,7 @@ Riwayat asesmen pegawai
 | tahun_penilaian_title | varchar(50) |  | true |  |  | Judul tahun pada laporan hasil asesmen |
 | nama_lengkap | varchar(100) |  | true |  |  | Nama lengkap pegawai yang diases |
 | posisi_id | varchar(20) |  | true |  |  | id posisi |
-| unit_org_id | varchar(36) |  | true |  | [kepegawaian.unit_kerja](kepegawaian.unit_kerja.md) | id unit organisasi |
+| unit_org_id | varchar(36) |  | true |  | [kepegawaian.ref_unit_kerja](kepegawaian.ref_unit_kerja.md) | id unit organisasi |
 | nama_unor | varchar(200) |  | true |  |  | Nama unit organisasi pegawai yang diases |
 | saran_pengembangan | text |  | true |  |  | Saran pengembangan |
 | file_upload_fb_potensi | varchar(200) |  | true |  |  | Lokasi penyimpanan berkas umpan balik asesmen pada asesmen-pegawai.kemendikdasmen.go.id |
@@ -37,7 +37,7 @@ Riwayat asesmen pegawai
 | ---- | ---- | ---------- |
 | fk_riwayat_assesmen_pns_id | FOREIGN KEY | FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id) |
 | riwayat_assesmen_pkey | PRIMARY KEY | PRIMARY KEY (id) |
-| fk_riwayat_assesmen_unit_org | FOREIGN KEY | FOREIGN KEY (unit_org_id) REFERENCES unit_kerja(id) |
+| fk_riwayat_assesmen_unit_org | FOREIGN KEY | FOREIGN KEY (unit_org_id) REFERENCES ref_unit_kerja(id) |
 
 ## Indexes
 
@@ -51,7 +51,7 @@ Riwayat asesmen pegawai
 erDiagram
 
 "kepegawaian.riwayat_asesmen" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
-"kepegawaian.riwayat_asesmen" }o--o| "kepegawaian.unit_kerja" : "FOREIGN KEY (unit_org_id) REFERENCES unit_kerja(id)"
+"kepegawaian.riwayat_asesmen" }o--o| "kepegawaian.ref_unit_kerja" : "FOREIGN KEY (unit_org_id) REFERENCES ref_unit_kerja(id)"
 
 "kepegawaian.riwayat_asesmen" {
   integer id
@@ -121,12 +121,12 @@ erDiagram
   varchar_36_ instansi_induk_id FK
   varchar_36_ instansi_kerja_id FK
   varchar_36_ satuan_kerja_induk_id
-  varchar_36_ satuan_kerja_kerja_id
+  varchar_36_ satuan_kerja_id
   varchar_10_ golongan_darah
   varchar_200_ foto
   date tmt_pensiun
   varchar_36_ lokasi_kerja
-  smallint jml_istri
+  smallint jml_pasangan
   smallint jml_anak
   varchar_100_ no_surat_dokter
   date tanggal_surat_dokter
@@ -178,7 +178,7 @@ erDiagram
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
 }
-"kepegawaian.unit_kerja" {
+"kepegawaian.ref_unit_kerja" {
   varchar_60_ id
   integer no
   varchar_60_ kode_internal

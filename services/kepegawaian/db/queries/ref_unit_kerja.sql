@@ -1,6 +1,6 @@
 -- name: ListUnitKerjaByNamaOrInduk :many
 SELECT id, nama_unor
-from unit_kerja
+FROM ref_unit_kerja
 WHERE
     (CASE WHEN @nama::varchar = '' THEN true ELSE nama_unor ilike @nama::varchar || '%' END)
     AND (CASE WHEN @unor_induk::varchar = '' THEN true ELSE unor_induk = @unor_induk::varchar END)
@@ -8,7 +8,7 @@ WHERE
 LIMIT $1 OFFSET $2;
 
 -- name: CountUnitKerja :one
-SELECT COUNT(1) FROM unit_kerja
+SELECT COUNT(1) FROM ref_unit_kerja
 WHERE
     (CASE WHEN @nama::varchar = '' THEN true ELSE nama_unor ilike @nama::varchar || '%' END)
     AND (CASE WHEN @unor_induk::varchar = '' THEN true ELSE unor_induk = @unor_induk::varchar END)
@@ -18,14 +18,14 @@ WHERE
 with recursive unit_kerja_path as (
     -- anchor
     select uk.id, uk.nama_unor, uk.diatasan_id, 1 as depth
-    from unit_kerja uk
+    from ref_unit_kerja uk
     where uk.id = $1 and uk.deleted_at is null
 
     union all
 
     -- recursive
     select uk.id, uk.nama_unor, uk.diatasan_id, ukp.depth + 1
-    from unit_kerja uk
+    from ref_unit_kerja uk
     join unit_kerja_path ukp on uk.id = ukp.diatasan_id
     where ukp.depth < 10 and uk.deleted_at is null
 )
@@ -35,14 +35,14 @@ select id, nama_unor from unit_kerja_path;
 with recursive unit_kerja_path as (
     -- anchor
     select uk.id, uk.nama_unor, uk.diatasan_id, 1 as depth
-    from unit_kerja uk
+    from ref_unit_kerja uk
     where uk.id = (SELECT unor_id FROM pegawai where nip_baru = @nip::varchar LIMIT 1) and uk.deleted_at is null
 
     union all
 
     -- recursive
     select uk.id, uk.nama_unor, uk.diatasan_id, ukp.depth + 1
-    from unit_kerja uk
+    from ref_unit_kerja uk
     join unit_kerja_path ukp on uk.id = ukp.diatasan_id
     where ukp.depth < 10 and uk.deleted_at is null
 )
@@ -51,31 +51,31 @@ select id, nama_unor from unit_kerja_path;
 -- name: ListUnitKerjaLengkapByIDs :many
 with recursive unit_kerja_path as (
     -- anchor
-    select 
+    select
         uk.id,
         uk.id as start_id,
         uk.diatasan_id,
         uk.nama_unor::text as path,
         1 as depth
-    from unit_kerja uk
+    from ref_unit_kerja uk
     where uk.id = ANY(sqlc.arg(ids)::varchar[]) AND uk.deleted_at is null
 
     union all
 
     -- recursive
-    select 
+    select
         uk.id,
         ukp.start_id,
         uk.diatasan_id,
-        ukp.path || ' - ' || uk.nama_unor, 
+        ukp.path || ' - ' || uk.nama_unor,
         ukp.depth + 1
-    from unit_kerja uk
+    from ref_unit_kerja uk
     join unit_kerja_path ukp
       on uk.id = ukp.diatasan_id
     where ukp.depth < 10 and uk.deleted_at is null
 )
 
-select 
+select
     start_id as id,
     path as nama_unor_lengkap
 from (
@@ -85,17 +85,17 @@ from (
 where rn = 1;
 
 -- name: ListAkarUnitKerja :many
-SELECT 
-    uk.id, 
+SELECT
+    uk.id,
     uk.nama_unor,
     EXISTS (
-        SELECT 1 
-        FROM unit_kerja uk2
-        WHERE 
+        SELECT 1
+        FROM ref_unit_kerja uk2
+        WHERE
             uk2.diatasan_id = uk.id
             AND uk2.deleted_at IS NULL
     ) as has_anak
-FROM unit_kerja uk
+FROM ref_unit_kerja uk
 WHERE
     uk.diatasan_id IS NULL
     AND uk.deleted_at IS NULL
@@ -103,23 +103,23 @@ ORDER BY "order"
 LIMIT $1 OFFSET $2;
 
 -- name: CountAkarUnitKerja :one
-SELECT COUNT(1) FROM unit_kerja
+SELECT COUNT(1) FROM ref_unit_kerja
 WHERE
     diatasan_id IS NULL
     AND deleted_at IS NULL;
 
 -- name: ListUnitKerjaByDiatasanID :many
-SELECT 
+SELECT
     uk.id,
     uk.nama_unor,
     EXISTS (
-        SELECT 1 
-        FROM unit_kerja uk2
-        WHERE 
+        SELECT 1
+        FROM ref_unit_kerja uk2
+        WHERE
             uk2.diatasan_id = uk.id
             AND uk2.deleted_at IS NULL
     ) as has_anak
-FROM unit_kerja uk
+FROM ref_unit_kerja uk
 WHERE
     uk.diatasan_id = sqlc.arg(diatasan_id)
     AND uk.deleted_at IS NULL
@@ -127,7 +127,7 @@ ORDER BY "order"
 LIMIT $1 OFFSET $2;
 
 -- name: CountUnitKerjaByDiatasanID :one
-SELECT COUNT(1) FROM unit_kerja
+SELECT COUNT(1) FROM ref_unit_kerja
 WHERE
     diatasan_id = sqlc.arg(diatasan_id)
     AND deleted_at IS NULL;
@@ -167,13 +167,13 @@ SELECT
     uk.eselon_nama,
     ukd.nama_unor as nama_diatasan,
     ukui.nama_unor as nama_unor_induk
-FROM unit_kerja uk
-LEFT JOIN unit_kerja ukd ON uk.diatasan_id = ukd.id AND ukd.deleted_at IS NULL
-LEFT JOIN unit_kerja ukui ON uk.unor_induk = ukui.id AND ukui.deleted_at IS NULL
+FROM ref_unit_kerja uk
+LEFT JOIN ref_unit_kerja ukd ON uk.diatasan_id = ukd.id AND ukd.deleted_at IS NULL
+LEFT JOIN ref_unit_kerja ukui ON uk.unor_induk = ukui.id AND ukui.deleted_at IS NULL
 WHERE uk.id = @id::varchar AND uk.deleted_at IS NULL;
 
 -- name: CreateUnitKerja :one
-INSERT INTO unit_kerja (
+INSERT INTO ref_unit_kerja (
   diatasan_id,
   id,
   nama_unor,
@@ -240,7 +240,7 @@ RETURNING
   eselon_nama;
 
 -- name: UpdateUnitKerja :one
-UPDATE unit_kerja
+UPDATE ref_unit_kerja
 SET
     diatasan_id = @diatasan_id,
     nama_unor = @nama,
@@ -292,6 +292,6 @@ RETURNING
     eselon_nama;
 
 -- name: DeleteUnitKerja :execrows
-UPDATE unit_kerja
+UPDATE ref_unit_kerja
 SET deleted_at = NOW()
 WHERE id = $1 AND deleted_at IS NULL;

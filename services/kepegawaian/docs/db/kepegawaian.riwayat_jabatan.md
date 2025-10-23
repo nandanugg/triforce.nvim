@@ -23,7 +23,7 @@ Riwayat jabatan pegawai
 | tmt_jabatan | date |  | true |  |  | Tanggal mulai memangku jabatan |
 | no_sk | varchar(100) |  | true |  |  | Nomor SK jabatan |
 | tanggal_sk | date |  | true |  |  | Tanggal SK jabatan |
-| satuan_kerja_id | varchar(36) |  | true |  | [kepegawaian.unit_kerja](kepegawaian.unit_kerja.md) | Satuan kerja terkait jabatan (rujuk unit_kerja) |
+| satuan_kerja_id | varchar(36) |  | true |  | [kepegawaian.ref_unit_kerja](kepegawaian.ref_unit_kerja.md) | Satuan kerja terkait jabatan (rujuk unit_kerja) |
 | tmt_pelantikan | date |  | true |  |  | Tanggal mulai pelantikan |
 | is_active | smallint |  | true |  |  | Penanda apakah jabatan masih aktif saat ini |
 | eselon1 | text |  | true |  |  | Unit eselon 1 terkait jabatan |
@@ -56,7 +56,7 @@ Riwayat jabatan pegawai
 | fk_riwayat_jabatan_pns_id | FOREIGN KEY | FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id) |
 | riwayat_jabatan_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 | riwayat_jabatan_kelas_jabatan_id_fkey | FOREIGN KEY | FOREIGN KEY (kelas_jabatan_id) REFERENCES ref_kelas_jabatan(id) |
-| fk_riwayat_jabatan_satuan_kerja | FOREIGN KEY | FOREIGN KEY (satuan_kerja_id) REFERENCES unit_kerja(id) |
+| fk_riwayat_jabatan_satuan_kerja | FOREIGN KEY | FOREIGN KEY (satuan_kerja_id) REFERENCES ref_unit_kerja(id) |
 
 ## Indexes
 
@@ -71,7 +71,7 @@ erDiagram
 
 "kepegawaian.riwayat_jabatan" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
 "kepegawaian.riwayat_jabatan" }o--o| "kepegawaian.ref_jabatan" : "FOREIGN KEY (jabatan_id) REFERENCES ref_jabatan(kode_jabatan)"
-"kepegawaian.riwayat_jabatan" }o--o| "kepegawaian.unit_kerja" : "FOREIGN KEY (satuan_kerja_id) REFERENCES unit_kerja(id)"
+"kepegawaian.riwayat_jabatan" }o--o| "kepegawaian.ref_unit_kerja" : "FOREIGN KEY (satuan_kerja_id) REFERENCES ref_unit_kerja(id)"
 "kepegawaian.riwayat_jabatan" }o--o| "kepegawaian.ref_kelas_jabatan" : "FOREIGN KEY (kelas_jabatan_id) REFERENCES ref_kelas_jabatan(id)"
 
 "kepegawaian.riwayat_jabatan" {
@@ -159,12 +159,12 @@ erDiagram
   varchar_36_ instansi_induk_id FK
   varchar_36_ instansi_kerja_id FK
   varchar_36_ satuan_kerja_induk_id
-  varchar_36_ satuan_kerja_kerja_id
+  varchar_36_ satuan_kerja_id
   varchar_10_ golongan_darah
   varchar_200_ foto
   date tmt_pensiun
   varchar_36_ lokasi_kerja
-  smallint jml_istri
+  smallint jml_pasangan
   smallint jml_anak
   varchar_100_ no_surat_dokter
   date tanggal_surat_dokter
@@ -234,7 +234,7 @@ erDiagram
   bigint tunjangan_jabatan
   integer no
 }
-"kepegawaian.unit_kerja" {
+"kepegawaian.ref_unit_kerja" {
   varchar_60_ id
   integer no
   varchar_60_ kode_internal
@@ -276,6 +276,7 @@ erDiagram
   bigint tunjangan_kinerja
   timestamp_without_time_zone created_at
   timestamp_without_time_zone updated_at
+  timestamp_with_time_zone deleted_at
 }
 ```
 

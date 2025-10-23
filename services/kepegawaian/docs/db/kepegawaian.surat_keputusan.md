@@ -1,4 +1,4 @@
-# kepegawaian.file_digital_signature
+# kepegawaian.surat_keputusan
 
 ## Description
 
@@ -58,7 +58,7 @@
 
 | Name | Definition |
 | ---- | ---------- |
-| file_digital_signature_pkey | CREATE UNIQUE INDEX file_digital_signature_pkey ON kepegawaian.file_digital_signature USING btree (file_id) |
+| file_digital_signature_pkey | CREATE UNIQUE INDEX file_digital_signature_pkey ON kepegawaian.surat_keputusan USING btree (file_id) |
 
 ## Relations
 
@@ -66,7 +66,7 @@
 erDiagram
 
 
-"kepegawaian.file_digital_signature" {
+"kepegawaian.surat_keputusan" {
   varchar_200_ file_id
   varchar_100_ kategori
   text file_base64

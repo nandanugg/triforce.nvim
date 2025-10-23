@@ -1,4 +1,4 @@
-# kepegawaian.log_digital_signature
+# kepegawaian.log_request_surat_keputusan
 
 ## Description
 
@@ -27,7 +27,7 @@
 
 | Name | Definition |
 | ---- | ---------- |
-| log_digital_signature_pkey | CREATE UNIQUE INDEX log_digital_signature_pkey ON kepegawaian.log_digital_signature USING btree (id) |
+| log_digital_signature_pkey | CREATE UNIQUE INDEX log_digital_signature_pkey ON kepegawaian.log_request_surat_keputusan USING btree (id) |
 
 ## Relations
 
@@ -35,7 +35,7 @@
 erDiagram
 
 
-"kepegawaian.log_digital_signature" {
+"kepegawaian.log_request_surat_keputusan" {
   integer id
   varchar_32_ file_id
   varchar_30_ nik

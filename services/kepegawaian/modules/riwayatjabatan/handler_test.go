@@ -35,7 +35,7 @@ func Test_handler_list(t *testing.T) {
 		(2, 'Jabatan Fungsional', null),
 		(3, 'Jabatan Deleted', '2000-01-01');
 
-		insert into unit_kerja(id, nama_unor, deleted_at) values
+		insert into ref_unit_kerja(id, nama_unor, deleted_at) values
 		(1, 'Unit 1', null),
 		(2, 'Unit 2', null),
 		(3, 'Unit 3', '2000-01-01');
@@ -352,7 +352,7 @@ func Test_handler_listAdmin(t *testing.T) {
 		(2, 'Jabatan Fungsional', null),
 		(3, 'Jabatan Deleted', '2000-01-01');
 
-		insert into unit_kerja(id, nama_unor, deleted_at) values
+		insert into ref_unit_kerja(id, nama_unor, deleted_at) values
 		(1, 'Unit 1', null),
 		(2, 'Unit 2', null),
 		(3, 'Unit 3', '2000-01-01');

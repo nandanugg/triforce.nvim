@@ -11,8 +11,8 @@ Riwayat perpindahan unit kerja
 | id | integer | nextval('pindah_unit_id_seq'::regclass) | false |  |  | id pindah unit |
 | nip | varchar(36) |  | false |  |  | NIP pegawai |
 | surat_permohonan_pindah | varchar(200) |  | true |  |  | Lokasi penyimpanan berkas permohonan pindah |
-| unit_asal | varchar(36) |  | true |  | [kepegawaian.unit_kerja](kepegawaian.unit_kerja.md) | Unit kerja asal (rujuk unit_kerja) |
-| unit_tujuan | varchar(36) |  | true |  | [kepegawaian.unit_kerja](kepegawaian.unit_kerja.md) | Unit kerja tujuan (rujuk unit_kerja) |
+| unit_asal | varchar(36) |  | true |  | [kepegawaian.ref_unit_kerja](kepegawaian.ref_unit_kerja.md) | Unit kerja asal (rujuk unit_kerja) |
+| unit_tujuan | varchar(36) |  | true |  | [kepegawaian.ref_unit_kerja](kepegawaian.ref_unit_kerja.md) | Unit kerja tujuan (rujuk unit_kerja) |
 | surat_pernyataan_melepas | varchar(200) |  | true |  |  | Lokasi penyimpanan berkas pernyataan melepas pegawai |
 | sk_kp_terakhir | varchar(100) |  | true |  |  | Nomor SK kenaikan pangkat terakhir |
 | sk_jabatan | varchar(100) |  | true |  |  | Nomor SK jabatan |
@@ -37,8 +37,8 @@ Riwayat perpindahan unit kerja
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
 | pindah_unit_pkey | PRIMARY KEY | PRIMARY KEY (id) |
-| fk_pindah_unit_unit_asal | FOREIGN KEY | FOREIGN KEY (unit_asal) REFERENCES unit_kerja(id) |
-| fk_pindah_unit_unit_tujuan | FOREIGN KEY | FOREIGN KEY (unit_tujuan) REFERENCES unit_kerja(id) |
+| fk_pindah_unit_unit_asal | FOREIGN KEY | FOREIGN KEY (unit_asal) REFERENCES ref_unit_kerja(id) |
+| fk_pindah_unit_unit_tujuan | FOREIGN KEY | FOREIGN KEY (unit_tujuan) REFERENCES ref_unit_kerja(id) |
 
 ## Indexes
 
@@ -51,8 +51,8 @@ Riwayat perpindahan unit kerja
 ```mermaid
 erDiagram
 
-"kepegawaian.pindah_unit" }o--o| "kepegawaian.unit_kerja" : "FOREIGN KEY (unit_asal) REFERENCES unit_kerja(id)"
-"kepegawaian.pindah_unit" }o--o| "kepegawaian.unit_kerja" : "FOREIGN KEY (unit_tujuan) REFERENCES unit_kerja(id)"
+"kepegawaian.pindah_unit" }o--o| "kepegawaian.ref_unit_kerja" : "FOREIGN KEY (unit_asal) REFERENCES ref_unit_kerja(id)"
+"kepegawaian.pindah_unit" }o--o| "kepegawaian.ref_unit_kerja" : "FOREIGN KEY (unit_tujuan) REFERENCES ref_unit_kerja(id)"
 
 "kepegawaian.pindah_unit" {
   integer id
@@ -79,7 +79,7 @@ erDiagram
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
 }
-"kepegawaian.unit_kerja" {
+"kepegawaian.ref_unit_kerja" {
   varchar_60_ id
   integer no
   varchar_60_ kode_internal

@@ -9,7 +9,7 @@ Data utama pegawai
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
 | id | integer | nextval('pegawai_id_seq'::regclass) | false |  |  | Identitas numerik unik baris data pegawai |
-| pns_id | varchar(36) |  | false | [kepegawaian.anak](kepegawaian.anak.md) [kepegawaian.pasangan](kepegawaian.pasangan.md) [kepegawaian.orang_tua](kepegawaian.orang_tua.md) [kepegawaian.riwayat_asesmen](kepegawaian.riwayat_asesmen.md) [kepegawaian.riwayat_diklat](kepegawaian.riwayat_diklat.md) [kepegawaian.riwayat_diklat_struktural](kepegawaian.riwayat_diklat_struktural.md) [kepegawaian.riwayat_golongan](kepegawaian.riwayat_golongan.md) [kepegawaian.riwayat_hukuman_disiplin](kepegawaian.riwayat_hukuman_disiplin.md) [kepegawaian.riwayat_jabatan](kepegawaian.riwayat_jabatan.md) [kepegawaian.riwayat_kursus](kepegawaian.riwayat_kursus.md) [kepegawaian.riwayat_pendidikan](kepegawaian.riwayat_pendidikan.md) [kepegawaian.riwayat_pindah_unit_kerja](kepegawaian.riwayat_pindah_unit_kerja.md) [kepegawaian.unit_kerja](kepegawaian.unit_kerja.md) [kepegawaian.update_mandiri](kepegawaian.update_mandiri.md) |  | id pegawai negeri sipil (UUID) yang menjadi kunci rujukan antar tabel |
+| pns_id | varchar(36) |  | false | [kepegawaian.anak](kepegawaian.anak.md) [kepegawaian.pasangan](kepegawaian.pasangan.md) [kepegawaian.orang_tua](kepegawaian.orang_tua.md) [kepegawaian.riwayat_asesmen](kepegawaian.riwayat_asesmen.md) [kepegawaian.riwayat_diklat](kepegawaian.riwayat_diklat.md) [kepegawaian.riwayat_diklat_struktural](kepegawaian.riwayat_diklat_struktural.md) [kepegawaian.riwayat_golongan](kepegawaian.riwayat_golongan.md) [kepegawaian.riwayat_hukuman_disiplin](kepegawaian.riwayat_hukuman_disiplin.md) [kepegawaian.riwayat_jabatan](kepegawaian.riwayat_jabatan.md) [kepegawaian.riwayat_kursus](kepegawaian.riwayat_kursus.md) [kepegawaian.riwayat_pendidikan](kepegawaian.riwayat_pendidikan.md) [kepegawaian.riwayat_pindah_unit_kerja](kepegawaian.riwayat_pindah_unit_kerja.md) [kepegawaian.ref_unit_kerja](kepegawaian.ref_unit_kerja.md) [kepegawaian.update_mandiri](kepegawaian.update_mandiri.md) |  | id pegawai negeri sipil (UUID) yang menjadi kunci rujukan antar tabel |
 | nip_lama | varchar(9) |  | true |  |  | Nomor Induk Pegawai format lama |
 | nip_baru | varchar(20) |  | true |  |  | Nomor Induk Pegawai format baru (20 digit) |
 | nama | varchar(100) |  | true |  |  | Nama lengkap pegawai |
@@ -46,17 +46,17 @@ Data utama pegawai
 | tahun_lulus | smallint |  | true |  |  | Tahun kelulusan pendidikan terakhir |
 | kpkn_id | varchar(36) |  | true |  | [kepegawaian.ref_kpkn](kepegawaian.ref_kpkn.md) | id KPPN/KPKN pembayaran gaji (rujuk ref_kpkn) |
 | lokasi_kerja_id | varchar(36) |  | true |  | [kepegawaian.ref_lokasi](kepegawaian.ref_lokasi.md) | id lokasi kerja (rujuk ref_lokasi) |
-| unor_id | varchar(36) |  | true |  | [kepegawaian.unit_kerja](kepegawaian.unit_kerja.md) | Unit organisasi/kerja (rujuk unit_kerja) |
+| unor_id | varchar(36) |  | true |  | [kepegawaian.ref_unit_kerja](kepegawaian.ref_unit_kerja.md) | Unit organisasi/kerja (rujuk unit_kerja) |
 | unor_induk_id | varchar(36) |  | true |  |  | Unit organisasi/kerja induk (rujuk unit_kerja) |
 | instansi_induk_id | varchar(36) |  | true |  | [kepegawaian.ref_instansi](kepegawaian.ref_instansi.md) | id instansi induk pegawai (rujuk ref_instansi) |
 | instansi_kerja_id | varchar(36) |  | true |  | [kepegawaian.ref_instansi](kepegawaian.ref_instansi.md) | id instansi tempat bekerja (rujuk ref_instansi) |
 | satuan_kerja_induk_id | varchar(36) |  | true |  |  | id satuan kerja induk pegawai |
-| satuan_kerja_kerja_id | varchar(36) |  | true |  |  | id satuan kerja pegawai |
+| satuan_kerja_id | varchar(36) |  | true |  |  | id satuan kerja pegawai |
 | golongan_darah | varchar(10) |  | true |  |  | Golongan darah |
 | foto | varchar(200) |  | true |  |  | Lokasi/URL berkas foto pegawai |
 | tmt_pensiun | date |  | true |  |  | Tanggal perkiraan/penetapan pensiun (BUP) |
 | lokasi_kerja | varchar(36) |  | true |  |  | Nama lokasi kerja |
-| jml_istri | smallint |  | true |  |  | Jumlah pasangan |
+| jml_pasangan | smallint |  | true |  |  | Jumlah pasangan |
 | jml_anak | smallint |  | true |  |  | Jumlah anak yang tercatat |
 | no_surat_dokter | varchar(100) |  | true |  |  | Nomor surat pemeriksaan kesehatan |
 | tanggal_surat_dokter | date |  | true |  |  | Tanggal surat pemeriksaan kesehatan |
@@ -126,7 +126,7 @@ Data utama pegawai
 | pegawai_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 | pegawai_pns_id_key | UNIQUE | UNIQUE (pns_id) |
 | fk_pegawai_pendidikan | FOREIGN KEY | FOREIGN KEY (tingkat_pendidikan_id) REFERENCES ref_tingkat_pendidikan(id) |
-| fk_pegawai_unor | FOREIGN KEY | FOREIGN KEY (unor_id) REFERENCES unit_kerja(id) |
+| fk_pegawai_unor | FOREIGN KEY | FOREIGN KEY (unor_id) REFERENCES ref_unit_kerja(id) |
 
 ## Indexes
 
@@ -152,7 +152,7 @@ erDiagram
 "kepegawaian.riwayat_kursus" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
 "kepegawaian.riwayat_pendidikan" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
 "kepegawaian.riwayat_pindah_unit_kerja" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
-"kepegawaian.unit_kerja" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pemimpin_pns_id) REFERENCES pegawai(pns_id)"
+"kepegawaian.ref_unit_kerja" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pemimpin_pns_id) REFERENCES pegawai(pns_id)"
 "kepegawaian.update_mandiri" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
 "kepegawaian.pegawai" }o--o| "kepegawaian.ref_agama" : "FOREIGN KEY (agama_id) REFERENCES ref_agama(id)"
 "kepegawaian.pegawai" }o--o| "kepegawaian.ref_jenis_kawin" : "FOREIGN KEY (jenis_kawin_id) REFERENCES ref_jenis_kawin(id)"
@@ -161,7 +161,7 @@ erDiagram
 "kepegawaian.pegawai" }o--o| "kepegawaian.ref_jabatan" : "FOREIGN KEY (jabatan_id) REFERENCES ref_jabatan(kode_jabatan)"
 "kepegawaian.pegawai" }o--o| "kepegawaian.ref_kpkn" : "FOREIGN KEY (kpkn_id) REFERENCES ref_kpkn(id)"
 "kepegawaian.pegawai" }o--o| "kepegawaian.ref_lokasi" : "FOREIGN KEY (lokasi_kerja_id) REFERENCES ref_lokasi(id)"
-"kepegawaian.pegawai" }o--o| "kepegawaian.unit_kerja" : "FOREIGN KEY (unor_id) REFERENCES unit_kerja(id)"
+"kepegawaian.pegawai" }o--o| "kepegawaian.ref_unit_kerja" : "FOREIGN KEY (unor_id) REFERENCES ref_unit_kerja(id)"
 "kepegawaian.pegawai" }o--o| "kepegawaian.ref_instansi" : "FOREIGN KEY (instansi_induk_id) REFERENCES ref_instansi(id)"
 "kepegawaian.pegawai" }o--o| "kepegawaian.ref_instansi" : "FOREIGN KEY (instansi_kerja_id) REFERENCES ref_instansi(id)"
 "kepegawaian.pegawai" }o--o| "kepegawaian.ref_tingkat_pendidikan" : "FOREIGN KEY (tingkat_pendidikan_id) REFERENCES ref_tingkat_pendidikan(id)"
@@ -212,12 +212,12 @@ erDiagram
   varchar_36_ instansi_induk_id FK
   varchar_36_ instansi_kerja_id FK
   varchar_36_ satuan_kerja_induk_id
-  varchar_36_ satuan_kerja_kerja_id
+  varchar_36_ satuan_kerja_id
   varchar_10_ golongan_darah
   varchar_200_ foto
   date tmt_pensiun
   varchar_36_ lokasi_kerja
-  smallint jml_istri
+  smallint jml_pasangan
   smallint jml_anak
   varchar_100_ no_surat_dokter
   date tanggal_surat_dokter
@@ -365,7 +365,7 @@ erDiagram
   varchar_200_ rumpun_diklat_nama
   varchar_36_ rumpun_diklat_id
   varchar_10_ sudah_kirim_siasn
-  varchar_36_ siasn_id
+  varchar_36_ bkn_id
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
@@ -505,7 +505,7 @@ erDiagram
   varchar_100_ no_sertifikat
   varchar_200_ instansi
   varchar_200_ institusi_penyelenggara
-  varchar_36_ siasn_id
+  varchar_36_ bkn_id
   varchar_36_ pns_id FK
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
@@ -561,7 +561,7 @@ erDiagram
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
 }
-"kepegawaian.unit_kerja" {
+"kepegawaian.ref_unit_kerja" {
   varchar_60_ id
   integer no
   varchar_60_ kode_internal
@@ -605,7 +605,7 @@ erDiagram
   varchar_400_ perubahan
   integer status
   integer verifikasi_by
-  date verifikasi_tgl
+  date tanggal_verifikasi
   varchar_100_ nama_kolom
   integer level_update
   integer tabel_id

@@ -7,16 +7,16 @@ SELECT
     tmt_jabatan,
     no_sk,
     tanggal_sk,
-    unit_kerja.nama_unor as satuan_kerja,
+    ref_unit_kerja.nama_unor as satuan_kerja,
     status_plt,
     ref_kelas_jabatan.kelas_jabatan,
     periode_jabatan_start_date,
     periode_jabatan_end_date,
     unit_organisasi.nama_unor as unit_organisasi
 FROM riwayat_jabatan
-LEFT JOIN unit_kerja on riwayat_jabatan.satuan_kerja_id = unit_kerja.id AND unit_kerja.deleted_at IS NULL
-LEFT JOIN ref_kelas_jabatan on riwayat_jabatan.kelas_jabatan_id = ref_kelas_jabatan.id
-LEFT JOIN unit_kerja unit_organisasi on riwayat_jabatan.unor_id = unit_organisasi.id AND unit_organisasi.deleted_at IS NULL
+LEFT JOIN ref_unit_kerja on riwayat_jabatan.satuan_kerja_id = ref_unit_kerja.id AND ref_unit_kerja.deleted_at IS NULL
+LEFT JOIN ref_kelas_jabatan on riwayat_jabatan.kelas_jabatan_id = ref_kelas_jabatan.id AND ref_kelas_jabatan.deleted_at IS NULL
+LEFT JOIN ref_unit_kerja unit_organisasi on riwayat_jabatan.unor_id = unit_organisasi.id AND unit_organisasi.deleted_at IS NULL
 LEFT JOIN ref_jenis_jabatan on riwayat_jabatan.jenis_jabatan_id = ref_jenis_jabatan.id AND ref_jenis_jabatan.deleted_at IS NULL
 LEFT JOIN ref_jabatan on riwayat_jabatan.jabatan_id = ref_jabatan.kode_jabatan AND ref_jabatan.deleted_at IS NULL
 WHERE riwayat_jabatan.pns_nip = @pns_nip::varchar and riwayat_jabatan.deleted_at IS NULL

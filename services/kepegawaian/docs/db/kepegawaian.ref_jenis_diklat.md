@@ -64,7 +64,7 @@ erDiagram
   varchar_200_ rumpun_diklat_nama
   varchar_36_ rumpun_diklat_id
   varchar_10_ sudah_kirim_siasn
-  varchar_36_ siasn_id
+  varchar_36_ bkn_id
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at

@@ -13,6 +13,7 @@ Referensi kelas jabatan
 | tunjangan_kinerja | bigint |  | true |  |  | Nilai tunjangan kinerja pada kelas jabatan terkait |
 | created_at | timestamp without time zone | now() | true |  |  | Waktu perekaman data |
 | updated_at | timestamp without time zone | now() | true |  |  | Waktu terakhir pembaruan |
+| deleted_at | timestamp with time zone |  | true |  |  |  |
 
 ## Constraints
 
@@ -39,6 +40,7 @@ erDiagram
   bigint tunjangan_kinerja
   timestamp_without_time_zone created_at
   timestamp_without_time_zone updated_at
+  timestamp_with_time_zone deleted_at
 }
 "kepegawaian.riwayat_jabatan" {
   varchar_36_ bkn_id

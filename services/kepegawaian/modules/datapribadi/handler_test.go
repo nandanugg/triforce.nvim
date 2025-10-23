@@ -76,7 +76,7 @@ func Test_handler_getDataPribadi(t *testing.T) {
 			(id, nama,      deleted_at) values
 			(1,  'Kristen', null),
 			(2,  'Katolik', '2000-01-01');
-		insert into unit_kerja
+		insert into ref_unit_kerja
 			(id,  diatasan_id, nama_unor, nama_jabatan,    pemimpin_pns_id, deleted_at) values
 			('0', '1',         'Unor 0',  'Unit Kerja 0',  null,            null),
 			('1', '2',         'Unor 1',  'Unit Kerja 1',  null,            null),
@@ -104,7 +104,7 @@ func Test_handler_getDataPribadi(t *testing.T) {
 			('1f', 'PNS001', 'Budi John', '', '', 1, '2020-01-01', '8', '3173000000000001', '3173000000000002', 'L', 'DKI Jakarta', 1, '1990-05-20', 1, '1', 1, 1, 'budi@dikbud.go.id', 'budi@gmail.com', 'Jl. Merdeka No. 123', '08123456789', '08198765432', 1, 1, '2015-06-01', null, null, '5 Tahun 6 Bulan', 'KJ4', 'KJ6', 'Jakarta HQ', 1, 1, 2, '2018-01-01', 'SK-CPNS-2015', 'C', '2017-01-01', 'KARPEG001', 'DOC-HEALTH-001', '2015-05-01', 'BN-001', '2015-05-02', 'SKCK-001', '2015-05-03', 'AKTE-001', 'BPJS-001', 'NPWP-001', '2016-01-01', 'TASPEN-001', 1, '3000-01-01', null, null),
 			('1g', 'PNS_1g', 'Budi Santoso', 'Dr.', 'M.Sc', 1, '2020-01-01', 'C', '3173000000000001', '3173000000000002', 'L', 'DKI Jakarta', 1, '1990-05-20', 1, '1', 1, 1, 'budi@dikbud.go.id', 'budi@gmail.com', 'Jl. Merdeka No. 123', '08123456789', '08198765432', 1, 1, '2015-06-01', 2, 4, '5 Tahun 6 Bulan', 'KJ1', 'KJ6', 'Jakarta HQ', 2, 1, 2, '2018-01-01', 'SK-CPNS-2015', 'P', null, 'KARPEG001', 'DOC-HEALTH-001', '2015-05-01', 'BN-001', '2015-05-02', 'SKCK-001', '2015-05-03', 'AKTE-001', 'BPJS-001', 'NPWP-001', '2016-01-01', 'TASPEN-001', 4, '2000-01-01', null, null),
 			('2c', 'PNS002', 'Budi Santoso', 'Dr.', 'M.Sc', 2, '2020-01-01', '0', '3173000000000001', '3173000000000002', 'L', 'DKI Jakarta', 1, '1990-05-20', 1, '1', 1, 1, 'budi@dikbud.go.id', 'budi@gmail.com', 'Jl. Merdeka No. 123', '08123456789', '08198765432', 1, 1, '2015-06-01', 2, 12, '5 Tahun 6 Bulan', 'KJ2', 'KJ3', 'Jakarta HQ', 1, 1, 2, '2018-01-01', 'SK-CPNS-2015', 'CPNS', '2017-01-01', 'KARPEG001', 'DOC-HEALTH-001', '2015-05-01', 'BN-001', '2015-05-02', 'SKCK-001', '2015-05-03', 'AKTE-001', 'BPJS-001', 'NPWP-001', '2016-01-01', 'TASPEN-001', 2, null, null, '2000-01-01');
-		update unit_kerja set pemimpin_pns_id = 'PNS001' where id = '8';
+		update ref_unit_kerja set pemimpin_pns_id = 'PNS001' where id = '8';
 	`
 	pgxconn := dbtest.New(t, dbmigrations.FS)
 	_, err := pgxconn.Exec(context.Background(), dbData)

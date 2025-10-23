@@ -19,8 +19,8 @@ Riwayat kenaikan gaji berkala pegawai
 | tanggal_sk | date |  | true |  |  | Tanggal SK kenaikan gaji berkala |
 | pegawai_nama | varchar(255) |  | true |  |  | Nama pegawai |
 | pegawai_nip | varchar(20) |  | true |  |  | NIP pegawai |
-| birth_place | varchar(255) |  | true |  |  | Tempat lahir pegawai |
-| birth_date | date |  | true |  |  | Tanggal lahir pegawai |
+| tempat_lahir | varchar(255) |  | true |  |  | Tempat lahir pegawai |
+| tanggal_lahir | date |  | true |  |  | Tanggal lahir pegawai |
 | n_gol_ruang | varchar(50) |  | true |  |  | Golongan ruang |
 | tmt_golongan | date |  | true |  |  | Tanggal mulai golongan terkait |
 | masa_kerja_golongan_tahun | smallint |  | true |  |  | Masa kerja dalam tahun |
@@ -32,8 +32,8 @@ Riwayat kenaikan gaji berkala pegawai
 | unit_kerja_induk_text | varchar(200) |  | true |  |  | Nama unit kerja induk |
 | unit_kerja_induk_id | varchar(200) |  | true |  |  | id unit kerja induk |
 | kantor_pembayaran | varchar(200) |  | true |  |  | Kantor yang melakukan pembayaran gaji |
-| last_education | varchar(200) |  | true |  |  | Pendidikan terakhir |
-| last_education_date | date |  | true |  |  | Tanggal lulus pendidikan terakhir |
+| pendidikan_terakhir | varchar(200) |  | true |  |  | Pendidikan terakhir |
+| tanggal_lulus_pendidikan_terakhir | date |  | true |  |  | Tanggal lulus pendidikan terakhir |
 | created_at | timestamp with time zone | now() | true |  |  | Waktu perekaman data |
 | updated_at | timestamp with time zone | now() | true |  |  | Waktu terakhir pembaruan |
 | deleted_at | timestamp with time zone |  | true |  |  | Waktu penghapusan data |
@@ -71,8 +71,8 @@ erDiagram
   date tanggal_sk
   varchar_255_ pegawai_nama
   varchar_20_ pegawai_nip
-  varchar_255_ birth_place
-  date birth_date
+  varchar_255_ tempat_lahir
+  date tanggal_lahir
   varchar_50_ n_gol_ruang
   date tmt_golongan
   smallint masa_kerja_golongan_tahun
@@ -84,8 +84,8 @@ erDiagram
   varchar_200_ unit_kerja_induk_text
   varchar_200_ unit_kerja_induk_id
   varchar_200_ kantor_pembayaran
-  varchar_200_ last_education
-  date last_education_date
+  varchar_200_ pendidikan_terakhir
+  date tanggal_lulus_pendidikan_terakhir
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at

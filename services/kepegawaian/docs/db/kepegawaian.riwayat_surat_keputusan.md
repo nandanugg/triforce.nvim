@@ -1,4 +1,4 @@
-# kepegawaian.file_digital_signature_riwayat
+# kepegawaian.riwayat_surat_keputusan
 
 ## Description
 
@@ -27,7 +27,7 @@
 
 | Name | Definition |
 | ---- | ---------- |
-| file_digital_signature_riwayat_pkey | CREATE UNIQUE INDEX file_digital_signature_riwayat_pkey ON kepegawaian.file_digital_signature_riwayat USING btree (id) |
+| file_digital_signature_riwayat_pkey | CREATE UNIQUE INDEX file_digital_signature_riwayat_pkey ON kepegawaian.riwayat_surat_keputusan USING btree (id) |
 
 ## Relations
 
@@ -35,7 +35,7 @@
 erDiagram
 
 
-"kepegawaian.file_digital_signature_riwayat" {
+"kepegawaian.riwayat_surat_keputusan" {
   bigint id
   varchar_200_ file_id
   varchar_255_ nip_pemroses

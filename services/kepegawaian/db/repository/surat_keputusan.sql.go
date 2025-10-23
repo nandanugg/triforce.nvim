@@ -12,10 +12,10 @@ import (
 const countKoreksiSuratKeputusanByPNSID = `-- name: CountKoreksiSuratKeputusanByPNSID :one
 select
     count(1) as total
-FROM file_digital_signature_corrector fdc
-JOIN file_digital_signature fds ON fds.file_id = fdc.file_id AND fds.deleted_at IS NULL
+FROM koreksi_surat_keputusan fdc
+JOIN surat_keputusan fds ON fds.file_id = fdc.file_id AND fds.deleted_at IS NULL
 JOIN pegawai p ON fds.nip_sk = p.nip_baru AND p.deleted_at IS NULL
-LEFT JOIN unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
+LEFT JOIN ref_unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
 WHERE fdc.deleted_at IS NULL
     AND ($1::VARCHAR IS NULL
         OR $1::VARCHAR = uk.id
@@ -64,9 +64,9 @@ func (q *Queries) CountKoreksiSuratKeputusanByPNSID(ctx context.Context, arg Cou
 
 const countSuratKeputusan = `-- name: CountSuratKeputusan :one
 SELECT COUNT(*) as total
-FROM file_digital_signature fds
+FROM surat_keputusan fds
 JOIN pegawai p ON fds.nip_sk = p.nip_baru AND p.deleted_at IS NULL
-LEFT JOIN unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
+LEFT JOIN ref_unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
 WHERE fds.deleted_at IS NULL
     AND ($1::VARCHAR IS NULL
         OR $1::VARCHAR = uk.id
@@ -115,7 +115,7 @@ func (q *Queries) CountSuratKeputusan(ctx context.Context, arg CountSuratKeputus
 
 const countSuratKeputusanByNIP = `-- name: CountSuratKeputusanByNIP :one
 SELECT COUNT(1) as total
-FROM file_digital_signature fds
+FROM surat_keputusan fds
 WHERE fds.deleted_at IS NULL
     AND fds.nip_sk = $1::VARCHAR
     AND ($2::varchar IS NULL OR fds.no_sk ILIKE '%' || $2::varchar || '%')
@@ -143,11 +143,11 @@ func (q *Queries) CountSuratKeputusanByNIP(ctx context.Context, arg CountSuratKe
 }
 
 const getBerkasSuratKeputusanByID = `-- name: GetBerkasSuratKeputusanByID :one
-SELECT 
+SELECT
     file_base64
-FROM 
-    file_digital_signature fds
-WHERE 
+FROM
+    surat_keputusan fds
+WHERE
     fds.deleted_at IS NULL
     AND fds.file_id = $1::varchar
 `
@@ -160,11 +160,11 @@ func (q *Queries) GetBerkasSuratKeputusanByID(ctx context.Context, id string) (p
 }
 
 const getBerkasSuratKeputusanByNIPAndID = `-- name: GetBerkasSuratKeputusanByNIPAndID :one
-SELECT 
+SELECT
     file_base64
-FROM 
-    file_digital_signature fds
-WHERE 
+FROM
+    surat_keputusan fds
+WHERE
     fds.deleted_at IS NULL
     AND fds.nip_sk = $1::VARCHAR
     AND fds.file_id = $2::varchar
@@ -183,11 +183,11 @@ func (q *Queries) GetBerkasSuratKeputusanByNIPAndID(ctx context.Context, arg Get
 }
 
 const getBerkasSuratKeputusanSignedByID = `-- name: GetBerkasSuratKeputusanSignedByID :one
-SELECT 
+SELECT
     file_base64_sign
-FROM 
-    file_digital_signature fds
-WHERE 
+FROM
+    surat_keputusan fds
+WHERE
     fds.deleted_at IS NULL
     AND fds.file_id = $1::varchar
 `
@@ -200,11 +200,11 @@ func (q *Queries) GetBerkasSuratKeputusanSignedByID(ctx context.Context, id stri
 }
 
 const getBerkasSuratKeputusanSignedByNIPAndID = `-- name: GetBerkasSuratKeputusanSignedByNIPAndID :one
-SELECT 
+SELECT
     file_base64_sign
-FROM 
-    file_digital_signature fds
-WHERE 
+FROM
+    surat_keputusan fds
+WHERE
     fds.deleted_at IS NULL
     AND fds.nip_sk = $1::VARCHAR
     AND fds.file_id = $2::varchar
@@ -232,7 +232,7 @@ SELECT
     p.nip_baru as nip_pemilik_sk,
     pemroses.nama as nama_penandatangan,
     rj.nama_jabatan as jabatan_penandatangan
-FROM file_digital_signature fds
+FROM surat_keputusan fds
 JOIN pegawai p on p.nip_baru = fds.nip_sk and p.deleted_at is null
 LEFT JOIN pegawai pemroses on pemroses.nip_baru = fds.nip_pemroses and pemroses.deleted_at is null
 LEFT JOIN ref_jabatan rj on pemroses.jabatan_instansi_id = rj.kode_jabatan and rj.deleted_at is null
@@ -275,7 +275,7 @@ SELECT
     fds.status_sk,
     p.nama as nama_pemilik_sk,
     pemroses.nama as nama_penandatangan
-FROM file_digital_signature fds
+FROM surat_keputusan fds
 JOIN pegawai p on p.nip_baru = fds.nip_sk  and p.deleted_at is null
 LEFT JOIN pegawai pemroses on pemroses.nip_baru = fds.nip_pemroses and pemroses.deleted_at is null
 WHERE fds.deleted_at IS NULL
@@ -320,10 +320,10 @@ SELECT
     fds.no_sk,
     fds.tanggal_sk,
     p.unor_id
-FROM file_digital_signature_corrector fdc
-JOIN file_digital_signature fds ON fds.file_id = fdc.file_id AND fds.deleted_at IS NULL
+FROM koreksi_surat_keputusan fdc
+JOIN surat_keputusan fds ON fds.file_id = fdc.file_id AND fds.deleted_at IS NULL
 JOIN pegawai p ON fds.nip_sk = p.nip_baru AND p.deleted_at IS NULL
-LEFT JOIN unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
+LEFT JOIN ref_unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
 WHERE fdc.deleted_at IS NULL
     AND ($3::VARCHAR IS NULL
         OR $3::VARCHAR = uk.id
@@ -408,12 +408,12 @@ func (q *Queries) ListKoreksiSuratKeputusanByPNSID(ctx context.Context, arg List
 }
 
 const listLogSuratKeputusanByID = `-- name: ListLogSuratKeputusanByID :many
-SELECT 
-    tindakan as log, 
+SELECT
+    tindakan as log,
     pemroses.nama as actor,
     fdsr.created_at as waktu_tindakan
-FROM 
-    file_digital_signature_riwayat fdsr
+FROM
+    riwayat_surat_keputusan fdsr
 LEFT JOIN pegawai pemroses on pemroses.nip_baru = fdsr.nip_pemroses and pemroses.deleted_at is null
 WHERE fdsr.file_id = $1::varchar and fdsr.deleted_at IS NULL
 `
@@ -454,9 +454,9 @@ SELECT
     fds.tanggal_sk,
     p.unor_id,
     fds.status_sk
-FROM file_digital_signature fds
+FROM surat_keputusan fds
 JOIN pegawai p ON fds.nip_sk = p.nip_baru AND p.deleted_at IS NULL
-LEFT JOIN unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
+LEFT JOIN ref_unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
 WHERE fds.deleted_at IS NULL
     AND ($3::VARCHAR IS NULL
         OR $3::VARCHAR = uk.id
@@ -549,7 +549,7 @@ SELECT
     fds.no_sk,
     fds.tanggal_sk,
     fds.status_sk
-FROM file_digital_signature fds
+FROM surat_keputusan fds
 WHERE fds.deleted_at IS NULL
     AND fds.nip_sk = $3::varchar
     AND ($4::varchar IS NULL OR fds.no_sk ILIKE '%' || $4::varchar || '%')
