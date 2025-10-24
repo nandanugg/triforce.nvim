@@ -23,6 +23,13 @@ type sqlcRepository interface {
 	WithTx(tx pgx.Tx) *sqlc.Queries
 }
 
+type txRepository interface {
+	CreateRole(ctx context.Context, arg sqlc.CreateRoleParams) (int16, error)
+	UpdateRole(ctx context.Context, arg sqlc.UpdateRoleParams) (int16, error)
+	CreateRoleResourcePermissions(ctx context.Context, arg sqlc.CreateRoleResourcePermissionsParams) error
+	DeleteRoleResourcePermissions(ctx context.Context, arg sqlc.DeleteRoleResourcePermissionsParams) error
+}
+
 type repository struct {
 	db *pgxpool.Pool
 	sqlcRepository
@@ -35,75 +42,76 @@ func newRepository(db *pgxpool.Pool, repo sqlcRepository) *repository {
 	}
 }
 
-func (r *repository) create(ctx context.Context, params createParams) (int16, error) {
-	tx, err := r.db.Begin(ctx)
-	if err != nil {
-		return 0, fmt.Errorf("begin tx: %w", err)
-	}
-
-	qtx := r.WithTx(tx)
-	id, err := qtx.CreateRole(ctx, sqlc.CreateRoleParams{
-		Nama:      params.nama,
-		Deskripsi: pgtype.Text{String: params.deskripsi, Valid: true},
-		IsDefault: params.isDefault,
-	})
-	if err != nil {
-		_ = tx.Rollback(ctx)
-		return 0, fmt.Errorf("create role: %w", err)
-	}
-
-	if err := qtx.CreateRoleResourcePermissions(ctx, sqlc.CreateRoleResourcePermissionsParams{
-		RoleID:                id,
-		ResourcePermissionIds: params.resourcePermissionIDs,
-	}); err != nil {
-		_ = tx.Rollback(ctx)
-		return 0, fmt.Errorf("create role resource permission: %w", err)
-	}
-
-	if err := tx.Commit(ctx); err != nil {
-		return 0, fmt.Errorf("commit tx: %w", err)
-	}
-	return id, nil
-}
-
-func (r *repository) update(ctx context.Context, id int16, opts updateOptions) error {
+func (r *repository) withTransaction(ctx context.Context, fc func(txRepository) error) error {
 	tx, err := r.db.Begin(ctx)
 	if err != nil {
 		return fmt.Errorf("begin tx: %w", err)
 	}
 
-	qtx := r.WithTx(tx)
-	if _, err := qtx.UpdateRole(ctx, sqlc.UpdateRoleParams{
-		ID:        id,
-		Nama:      pgtype.Text{String: typeutil.FromPtr(opts.nama), Valid: opts.nama != nil},
-		Deskripsi: pgtype.Text{String: typeutil.FromPtr(opts.deskripsi), Valid: opts.deskripsi != nil},
-		IsDefault: pgtype.Bool{Bool: typeutil.FromPtr(opts.isDefault), Valid: opts.isDefault != nil},
-		IsAktif:   pgtype.Bool{Bool: typeutil.FromPtr(opts.isAktif), Valid: opts.isAktif != nil},
-	}); err != nil {
+	if err := fc(r.WithTx(tx)); err != nil {
 		_ = tx.Rollback(ctx)
-		return fmt.Errorf("update role: %w", err)
-	}
-
-	if opts.resourcePermissionIDs != nil {
-		if err := qtx.CreateRoleResourcePermissions(ctx, sqlc.CreateRoleResourcePermissionsParams{
-			RoleID:                id,
-			ResourcePermissionIds: *opts.resourcePermissionIDs,
-		}); err != nil {
-			_ = tx.Rollback(ctx)
-			return fmt.Errorf("create role resource permission: %w", err)
-		}
-
-		if err := qtx.DeleteRoleResourcePermissions(ctx, sqlc.DeleteRoleResourcePermissionsParams{
-			RoleID:                       id,
-			ExcludeResourcePermissionIds: *opts.resourcePermissionIDs,
-		}); err != nil {
-			_ = tx.Rollback(ctx)
-			return fmt.Errorf("delete role resource permission: %w", err)
-		}
+		return err
 	}
 
 	if err := tx.Commit(ctx); err != nil {
 		return fmt.Errorf("commit tx: %w", err)
 	}
 	return nil
+}
+
+func (r *repository) create(ctx context.Context, params createParams) (int16, error) {
+	var res int16
+	err := r.withTransaction(ctx, func(r txRepository) error {
+		id, err := r.CreateRole(ctx, sqlc.CreateRoleParams{
+			Nama:      params.nama,
+			Deskripsi: pgtype.Text{String: params.deskripsi, Valid: true},
+			IsDefault: params.isDefault,
+		})
+		if err != nil {
+			return fmt.Errorf("create role: %w", err)
+		}
+
+		if err := r.CreateRoleResourcePermissions(ctx, sqlc.CreateRoleResourcePermissionsParams{
+			RoleID:                id,
+			ResourcePermissionIds: params.resourcePermissionIDs,
+		}); err != nil {
+			return fmt.Errorf("create role resource permission: %w", err)
+		}
+
+		res = id
+		return nil
+	})
+	return res, err
+}
+
+func (r *repository) update(ctx context.Context, id int16, opts updateOptions) error {
+	return r.withTransaction(ctx, func(r txRepository) error {
+		if _, err := r.UpdateRole(ctx, sqlc.UpdateRoleParams{
+			ID:        id,
+			Nama:      pgtype.Text{String: typeutil.FromPtr(opts.nama), Valid: opts.nama != nil},
+			Deskripsi: pgtype.Text{String: typeutil.FromPtr(opts.deskripsi), Valid: opts.deskripsi != nil},
+			IsDefault: pgtype.Bool{Bool: typeutil.FromPtr(opts.isDefault), Valid: opts.isDefault != nil},
+			IsAktif:   pgtype.Bool{Bool: typeutil.FromPtr(opts.isAktif), Valid: opts.isAktif != nil},
+		}); err != nil {
+			return fmt.Errorf("update role: %w", err)
+		}
+
+		if opts.resourcePermissionIDs != nil {
+			if err := r.CreateRoleResourcePermissions(ctx, sqlc.CreateRoleResourcePermissionsParams{
+				RoleID:                id,
+				ResourcePermissionIds: *opts.resourcePermissionIDs,
+			}); err != nil {
+				return fmt.Errorf("create role resource permission: %w", err)
+			}
+
+			if err := r.DeleteRoleResourcePermissions(ctx, sqlc.DeleteRoleResourcePermissionsParams{
+				RoleID:                       id,
+				ExcludeResourcePermissionIds: *opts.resourcePermissionIDs,
+			}); err != nil {
+				return fmt.Errorf("delete role resource permission: %w", err)
+			}
+		}
+
+		return nil
+	})
 }

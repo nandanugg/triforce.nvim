@@ -21,6 +21,11 @@ type sqlcRepository interface {
 	WithTx(tx pgx.Tx) *sqlc.Queries
 }
 
+type txRepository interface {
+	CreateUserRoles(ctx context.Context, arg sqlc.CreateUserRolesParams) error
+	DeleteUserRoles(ctx context.Context, arg sqlc.DeleteUserRolesParams) error
+}
+
 type repository struct {
 	db *pgxpool.Pool
 	sqlcRepository
@@ -33,31 +38,39 @@ func newRepository(db *pgxpool.Pool, repo sqlcRepository) *repository {
 	}
 }
 
-func (r *repository) update(ctx context.Context, nip string, roleIDs []int16) error {
+func (r *repository) withTransaction(ctx context.Context, fc func(txRepository) error) error {
 	tx, err := r.db.Begin(ctx)
 	if err != nil {
 		return fmt.Errorf("begin tx: %w", err)
 	}
 
-	qtx := r.WithTx(tx)
-	if err := qtx.CreateUserRoles(ctx, sqlc.CreateUserRolesParams{
-		Nip:     nip,
-		RoleIds: roleIDs,
-	}); err != nil {
+	if err := fc(r.WithTx(tx)); err != nil {
 		_ = tx.Rollback(ctx)
-		return fmt.Errorf("create user role: %w", err)
-	}
-
-	if err := qtx.DeleteUserRoles(ctx, sqlc.DeleteUserRolesParams{
-		Nip:            nip,
-		ExcludeRoleIds: roleIDs,
-	}); err != nil {
-		_ = tx.Rollback(ctx)
-		return fmt.Errorf("delete user role: %w", err)
+		return err
 	}
 
 	if err := tx.Commit(ctx); err != nil {
 		return fmt.Errorf("commit tx: %w", err)
 	}
 	return nil
+}
+
+func (r *repository) update(ctx context.Context, nip string, roleIDs []int16) error {
+	return r.withTransaction(ctx, func(r txRepository) error {
+		if err := r.CreateUserRoles(ctx, sqlc.CreateUserRolesParams{
+			Nip:     nip,
+			RoleIds: roleIDs,
+		}); err != nil {
+			return fmt.Errorf("create user role: %w", err)
+		}
+
+		if err := r.DeleteUserRoles(ctx, sqlc.DeleteUserRolesParams{
+			Nip:            nip,
+			ExcludeRoleIds: roleIDs,
+		}); err != nil {
+			return fmt.Errorf("delete user role: %w", err)
+		}
+
+		return nil
+	})
 }
