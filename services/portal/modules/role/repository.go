@@ -3,6 +3,7 @@ package role
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -42,14 +43,19 @@ func newRepository(db *pgxpool.Pool, repo sqlcRepository) *repository {
 	}
 }
 
-func (r *repository) withTransaction(ctx context.Context, fc func(txRepository) error) error {
+func (r *repository) withTransaction(ctx context.Context, fn func(txRepository) error) error {
 	tx, err := r.db.Begin(ctx)
 	if err != nil {
 		return fmt.Errorf("begin tx: %w", err)
 	}
 
-	if err := fc(r.WithTx(tx)); err != nil {
-		_ = tx.Rollback(ctx)
+	defer func() {
+		if err := tx.Rollback(ctx); err != nil && err != pgx.ErrTxClosed {
+			slog.WarnContext(ctx, "Error rollback transaction", "error", err)
+		}
+	}()
+
+	if err := fn(r.WithTx(tx)); err != nil {
 		return err
 	}
 

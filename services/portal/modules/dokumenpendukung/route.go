@@ -14,5 +14,6 @@ func RegisterRoutes(e *echo.Echo, db *pgxpool.Pool, mwAuth api.AuthMiddlewareFun
 	s := newService(r)
 	h := newHandler(s)
 
-	e.Add(http.MethodGet, "/v1/dokumen-pendukung", h.list, mwAuth(api.Kode_Informasi_Read))
+	// TODO: @yap fix permission
+	e.Add(http.MethodGet, "/v1/dokumen-pendukung", h.list, mwAuth("undefined"))
 }

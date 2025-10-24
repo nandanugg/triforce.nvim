@@ -33,7 +33,7 @@ func Test_handler_list(t *testing.T) {
 	e, err := api.NewEchoServer(docs.OpenAPIBytes)
 	require.NoError(t, err)
 
-	authSvc := apitest.NewAuthService(api.Kode_Informasi_Read)
+	authSvc := apitest.NewAuthService("undefined")
 	RegisterRoutes(e, db, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("1")}

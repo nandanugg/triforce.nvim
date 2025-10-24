@@ -24,5 +24,7 @@ const (
 	Kode_ManajemenAkses_Read  = "portal.manajemen-akses.read"
 	Kode_ManajemenAkses_Write = "portal.manajemen-akses.write"
 
-	Kode_Informasi_Read = "portal.informasi.read"
+	Kode_Pemberitahuan_Public = "portal.pemberitahuan.public"
+	Kode_Pemberitahuan_Read   = "portal.pemberitahuan.read"
+	Kode_Pemberitahuan_Write  = "portal.pemberitahuan.write"
 ) //revive:enable:var-naming
