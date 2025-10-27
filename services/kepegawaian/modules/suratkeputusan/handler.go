@@ -264,3 +264,91 @@ func (h *handler) listKoreksi(c echo.Context) error {
 		Meta: api.MetaPagination{Limit: req.Limit, Offset: req.Offset, Total: total},
 	})
 }
+
+type listKoreksiAntrianResponse struct {
+	Data []antrianKoreksiSuratKeputusan `json:"data"`
+	Meta api.MetaPagination             `json:"meta"`
+}
+
+func (h *handler) listKoreksiAntrian(c echo.Context) error {
+	var req api.PaginationRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	ctx := c.Request().Context()
+	data, total, err := h.service.listKoreksiAntrian(ctx, listKoreksiAntrianParams{
+		limit:  req.Limit,
+		offset: req.Offset,
+		nip:    api.CurrentUser(c).NIP,
+	})
+	if err != nil {
+		slog.ErrorContext(ctx, "Error getting list koreksi surat keputusan antrian.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	return c.JSON(http.StatusOK, listKoreksiAntrianResponse{
+		Data: data,
+		Meta: api.MetaPagination{Limit: req.Limit, Offset: req.Offset, Total: total},
+	})
+}
+
+type getDetailSuratKeputusanRequest struct {
+	ID string `param:"id"`
+}
+
+type getDetailSuratKeputusanResponse struct {
+	Data *koreksiSuratKeputusan `json:"data"`
+}
+
+func (h *handler) getDetailSuratKeputusan(c echo.Context) error {
+	var req getDetailSuratKeputusanRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	ctx := c.Request().Context()
+	data, err := h.service.getDetailSuratKeputusan(ctx, req.ID, api.CurrentUser(c).NIP)
+	if err != nil {
+		slog.ErrorContext(ctx, "Error getting detail surat keputusan.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+	if data == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "data tidak ditemukan")
+	}
+
+	return c.JSON(http.StatusOK, getDetailSuratKeputusanResponse{
+		Data: data,
+	})
+}
+
+type koreksiSuratKeputusanRequest struct {
+	ID             string `param:"id"`
+	StatusKoreksi  string `json:"status_koreksi"`
+	CatatanKoreksi string `json:"catatan_koreksi"`
+}
+
+func (h *handler) koreksiSuratKeputusan(c echo.Context) error {
+	var req koreksiSuratKeputusanRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	ctx := c.Request().Context()
+	success, err := h.service.koreksiSuratKeputusan(ctx, koreksiSuratKeputusanParams{
+		id:             req.ID,
+		statusKoreksi:  req.StatusKoreksi,
+		catatanKoreksi: req.CatatanKoreksi,
+		nip:            api.CurrentUser(c).NIP,
+	})
+	if err != nil {
+		slog.ErrorContext(ctx, "Error koreksi surat keputusan.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	if !success {
+		return echo.NewHTTPError(http.StatusBadRequest, "Surat keputusan tidak dapat dikoreksi")
+	}
+
+	return c.NoContent(http.StatusNoContent)
+}

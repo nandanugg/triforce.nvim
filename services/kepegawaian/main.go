@@ -95,7 +95,7 @@ func main() {
 	riwayatpenghargaan.RegisterRoutes(e, dbRepository, mwAuth)
 	riwayatpenugasan.RegisterRoutes(e, dbRepository, mwAuth)
 	riwayatsertifikasi.RegisterRoutes(e, dbRepository, mwAuth)
-	suratkeputusan.RegisterRoutes(e, dbRepository, mwAuth)
+	suratkeputusan.RegisterRoutes(e, dbRepository, db, mwAuth)
 	statuspernikahan.RegisterRoutes(e, dbRepository, mwAuth)
 	tingkatpendidikan.RegisterRoutes(e, dbRepository, mwAuth)
 	unitkerja.RegisterRoutes(e, dbRepository, mwAuth)

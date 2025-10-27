@@ -4,11 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/jackc/pgx/v5/pgxpool"
 
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
@@ -17,6 +20,7 @@ import (
 )
 
 type repository interface {
+	WithTx(tx pgx.Tx) *repo.Queries
 	CountSuratKeputusan(ctx context.Context, arg repo.CountSuratKeputusanParams) (int64, error)
 	CountSuratKeputusanByNIP(ctx context.Context, arg repo.CountSuratKeputusanByNIPParams) (int64, error)
 	GetBerkasSuratKeputusanByID(ctx context.Context, id string) (pgtype.Text, error)
@@ -33,13 +37,20 @@ type repository interface {
 	ListKoreksiSuratKeputusanByPNSID(ctx context.Context, arg repo.ListKoreksiSuratKeputusanByPNSIDParams) ([]repo.ListKoreksiSuratKeputusanByPNSIDRow, error)
 	CountKoreksiSuratKeputusanByPNSID(ctx context.Context, arg repo.CountKoreksiSuratKeputusanByPNSIDParams) (int64, error)
 	GetPegawaiPNSIDByNIP(ctx context.Context, nip string) (string, error)
+	ListAntrianKoreksiSuratKeputusanByNIP(ctx context.Context, arg repo.ListAntrianKoreksiSuratKeputusanByNIPParams) ([]repo.ListAntrianKoreksiSuratKeputusanByNIPRow, error)
+	CountAntrianKoreksiSuratKeputusanByNIP(ctx context.Context, nipKorektor string) (int64, error)
+	ListKorektorSuratKeputusanByID(ctx context.Context, id string) ([]repo.ListKorektorSuratKeputusanByIDRow, error)
+	UpdateKorektorSuratKeputusanByID(ctx context.Context, arg repo.UpdateKorektorSuratKeputusanByIDParams) error
+	UpdateStatusSuratKeputusanByID(ctx context.Context, arg repo.UpdateStatusSuratKeputusanByIDParams) error
+	InsertRiwayatSuratKeputusan(ctx context.Context, arg repo.InsertRiwayatSuratKeputusanParams) error
 }
 type service struct {
 	repo repository
+	db   *pgxpool.Pool
 }
 
-func newService(r repository) *service {
-	return &service{repo: r}
+func newService(r repository, db *pgxpool.Pool) *service {
+	return &service{repo: r, db: db}
 }
 
 type listParams struct {
@@ -329,11 +340,11 @@ type listKoreksiParams struct {
 func (s *service) listKoreksi(ctx context.Context, arg listKoreksiParams) ([]koreksiSuratKeputusan, uint, error) {
 	pnsID, err := s.repo.GetPegawaiPNSIDByNIP(ctx, arg.nip)
 	if err != nil {
-		return nil, 0, fmt.Errorf("[suratkeputusan-listKoreksiBelumDikoreksi] repo GetPegawaiPNSIDByNIP: %w", err)
+		return nil, 0, fmt.Errorf("[suratkeputusan-listKoreksi] repo GetPegawaiPNSIDByNIP: %w", err)
 	}
 	statusKoreksi := pgtype.Int4{Valid: false}
-	if getStatusKoreksiValue(arg.status) != nil {
-		statusKoreksi = pgtype.Int4{Int32: *getStatusKoreksiValue(arg.status), Valid: true}
+	if statusKoreksiValue(arg.status) != nil {
+		statusKoreksi = pgtype.Int4{Int32: *statusKoreksiValue(arg.status), Valid: true}
 	}
 	data, err := s.repo.ListKoreksiSuratKeputusanByPNSID(ctx, repo.ListKoreksiSuratKeputusanByPNSIDParams{
 		Limit:         int32(arg.limit),
@@ -349,7 +360,7 @@ func (s *service) listKoreksi(ctx context.Context, arg listKoreksiParams) ([]kor
 		PnsID:         pnsID,
 	})
 	if err != nil {
-		return nil, 0, fmt.Errorf("[suratkeputusan-listKoreksiBelumDikoreksi] repo ListKoreksiSuratKeputusanByPNSID: %w", err)
+		return nil, 0, fmt.Errorf("[suratkeputusan-listKoreksi] repo ListKoreksiSuratKeputusanByPNSID: %w", err)
 	}
 
 	count, err := s.repo.CountKoreksiSuratKeputusanByPNSID(ctx, repo.CountKoreksiSuratKeputusanByPNSIDParams{
@@ -364,7 +375,7 @@ func (s *service) listKoreksi(ctx context.Context, arg listKoreksiParams) ([]kor
 		PnsID:         pnsID,
 	})
 	if err != nil {
-		return nil, 0, fmt.Errorf("[suratkeputusan-listKoreksiBelumDikoreksi] repo CountKoreksiSuratKeputusanByPNSID: %w", err)
+		return nil, 0, fmt.Errorf("[suratkeputusan-listKoreksi] repo CountKoreksiSuratKeputusanByPNSID: %w", err)
 	}
 
 	uniqUnorIDs := typeutil.UniqMap(data, func(row repo.ListKoreksiSuratKeputusanByPNSIDRow, _ int) string {
@@ -373,7 +384,7 @@ func (s *service) listKoreksi(ctx context.Context, arg listKoreksiParams) ([]kor
 
 	listUnorLengkap, err := s.repo.ListUnitKerjaLengkapByIDs(ctx, uniqUnorIDs)
 	if err != nil {
-		return nil, 0, fmt.Errorf("[suratkeputusan-listKoreksiBelumDikoreksi] repo ListUnitKerjaLengkapByIDs: %w", err)
+		return nil, 0, fmt.Errorf("[suratkeputusan-listKoreksi] repo ListUnitKerjaLengkapByIDs: %w", err)
 	}
 
 	unorLengkapByID := typeutil.SliceToMap(listUnorLengkap, func(unorLengkap repo.ListUnitKerjaLengkapByIDsRow) (string, string) {
@@ -392,4 +403,285 @@ func (s *service) listKoreksi(ctx context.Context, arg listKoreksiParams) ([]kor
 		}
 	})
 	return result, uint(count), nil
+}
+
+type listKoreksiAntrianParams struct {
+	limit  uint
+	offset uint
+	nip    string
+}
+
+func (s *service) listKoreksiAntrian(ctx context.Context, arg listKoreksiAntrianParams) ([]antrianKoreksiSuratKeputusan, uint, error) {
+	data, err := s.repo.ListAntrianKoreksiSuratKeputusanByNIP(ctx, repo.ListAntrianKoreksiSuratKeputusanByNIPParams{
+		Limit:       int32(arg.limit),
+		Offset:      int32(arg.offset),
+		NipKorektor: arg.nip,
+	})
+	if err != nil {
+		return nil, 0, fmt.Errorf("[suratkeputusan-listKoreksiAntrian] repo ListKoreksiSuratKeputusanAntrian: %w", err)
+	}
+
+	count, err := s.repo.CountAntrianKoreksiSuratKeputusanByNIP(ctx, arg.nip)
+	if err != nil {
+		return nil, 0, fmt.Errorf("[suratkeputusan-listKoreksiAntrian] repo CountAntrianKoreksiSuratKeputusan: %w", err)
+	}
+
+	result := typeutil.Map(data, func(row repo.ListAntrianKoreksiSuratKeputusanByNIPRow) antrianKoreksiSuratKeputusan {
+		return antrianKoreksiSuratKeputusan{
+			KategoriSK: row.Kategori.String,
+			Jumlah:     row.Jumlah,
+		}
+	})
+	return result, uint(count), nil
+}
+
+func (s *service) getDetailSuratKeputusan(ctx context.Context, id, nip string) (*koreksiSuratKeputusan, error) {
+	sk, err := s.repo.GetSuratKeputusanByID(ctx, id)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("[suratkeputusan-getDetailSuratKeputusan] repo GetSuratKeputusanByID: %w", err)
+	}
+
+	listUnor, err := s.repo.ListUnitKerjaHierarchyByNIP(ctx, sk.NipPemilikSk.String)
+	if err != nil {
+		return nil, fmt.Errorf("[suratkeputusan-getDetailSuratKeputusan] repo ListUnitKerjaHierarchyByNIP: %w", err)
+	}
+
+	korektor, err := s.repo.ListKorektorSuratKeputusanByID(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("[suratkeputusan-getDetailSuratKeputusan] repo ListKorektorSuratKeputusanByID: %w", err)
+	}
+
+	aksi := s.getAksiSuratKeputusan(sk, korektor, nip)
+
+	return &koreksiSuratKeputusan{
+		IDSK:        id,
+		KategoriSK:  sk.KategoriSk.String,
+		NoSK:        sk.NoSk.String,
+		TanggalSK:   db.Date(sk.TanggalSk.Time),
+		UnitKerja:   s.getUnorLengkap(listUnor),
+		NamaPemilik: sk.NamaPemilikSk.String,
+		NIPPemilik:  sk.NipPemilikSk.String,
+		ListKorektor: typeutil.Map(korektor, func(row repo.ListKorektorSuratKeputusanByIDRow) korektorSuratKeputusan {
+			return korektorSuratKeputusan{
+				Nama:           row.NamaKorektor.String,
+				NIP:            row.NipKorektor.String,
+				GelarDepan:     row.GelarDepanKorektor.String,
+				GelarBelakang:  row.GelarBelakangKorektor.String,
+				StatusKoreksi:  statusKorektorSK(row.StatusKoreksi.Int16).String(),
+				CatatanKoreksi: row.CatatanKoreksi.String,
+				KorektorKe:     row.KorektorKe.Int16,
+			}
+		}),
+		Aksi: &aksi,
+	}, nil
+}
+
+func (s *service) getAksiSuratKeputusan(sk repo.GetSuratKeputusanByIDRow, korektor []repo.ListKorektorSuratKeputusanByIDRow, nip string) string {
+	aksi := ""
+
+	if s.cekTtd(sk) {
+		aksi = "tandatangan"
+	}
+
+	if s.cekKoreksi(korektor, nip) {
+		aksi = "koreksi"
+	}
+
+	return aksi
+}
+
+func (s *service) cekTtd(sk repo.GetSuratKeputusanByIDRow) bool {
+	statusKoreksiSK := statusKoreksiSK(sk.StatusKoreksi.Int16)
+	statusTtdSK := statusTtd(sk.StatusTtd.Int16)
+
+	return statusTtdSK.belumTtd() && statusKoreksiSK.sudahDikoreksi()
+}
+
+func (s *service) cekKoreksi(korektor []repo.ListKorektorSuratKeputusanByIDRow, nip string) bool {
+	var currentKorektor *repo.ListKorektorSuratKeputusanByIDRow
+	for i := range korektor {
+		if korektor[i].NipKorektor.String == nip {
+			currentKorektor = &korektor[i]
+			break
+		}
+	}
+
+	if currentKorektor == nil {
+		return false
+	}
+
+	korektorKe := currentKorektor.KorektorKe.Int16
+	statusKoreksi := statusKorektorSK(currentKorektor.StatusKoreksi.Int16)
+
+	if statusKoreksi.sudahDikoreksi() || statusKoreksi.dikembalikan() {
+		return false
+	}
+
+	if korektorKe == 1 && statusKoreksi.belumDikoreksi() {
+		return true
+	}
+
+	if korektorKe > 1 {
+		for i := range korektor {
+			if korektor[i].KorektorKe.Int16 < korektorKe {
+				statusKoreksi := statusKorektorSK(korektor[i].StatusKoreksi.Int16)
+				if statusKoreksi.belumDikoreksi() || statusKoreksi.dikembalikan() {
+					return false
+				}
+			}
+		}
+	}
+
+	return true
+}
+
+type koreksiSuratKeputusanParams struct {
+	id             string
+	statusKoreksi  string
+	catatanKoreksi string
+	nip            string
+}
+
+func (s *service) koreksiSuratKeputusan(ctx context.Context, arg koreksiSuratKeputusanParams) (bool, error) {
+	pnsID, err := s.repo.GetPegawaiPNSIDByNIP(ctx, arg.nip)
+	if err != nil {
+		return false, fmt.Errorf("[suratkeputusan-koreksiSuratKeputusan] repo GetPegawaiPNSIDByNIP: %w", err)
+	}
+	sk, err := s.repo.GetSuratKeputusanByID(ctx, arg.id)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return false, nil
+		}
+		return false, fmt.Errorf("[suratkeputusan-koreksiSuratKeputusan] repo GetSuratKeputusanByID: %w", err)
+	}
+
+	korektor, err := s.repo.ListKorektorSuratKeputusanByID(ctx, arg.id)
+	if err != nil {
+		return false, fmt.Errorf("[suratkeputusan-koreksiSuratKeputusan] repo ListKorektorSuratKeputusanByID: %w", err)
+	}
+
+	aksi := s.getAksiSuratKeputusan(sk, korektor, arg.nip)
+	if aksi != "koreksi" {
+		return false, nil
+	}
+
+	if arg.statusKoreksi == "dikembalikan" {
+		return s.rejectKoreksiSuratKeputusan(ctx, arg.id, arg.catatanKoreksi, arg.nip, pnsID)
+	}
+
+	return s.approveKoreksiSuratKeputusan(ctx, arg.id, arg.catatanKoreksi, arg.nip, pnsID, korektor)
+}
+
+func (s *service) approveKoreksiSuratKeputusan(ctx context.Context, id, catatanKoreksi, nip, pnsID string, korektor []repo.ListKorektorSuratKeputusanByIDRow) (bool, error) {
+	err := s.withTransaction(ctx, func(txRepo repository) error {
+		tindakan := ""
+		err := txRepo.UpdateKorektorSuratKeputusanByID(ctx, repo.UpdateKorektorSuratKeputusanByIDParams{
+			ID:             id,
+			PnsID:          pnsID,
+			StatusKoreksi:  pgtype.Int2{Int16: int16(statusKorektorSK(statusKorektorSKSudahDikoreksi)), Valid: true},
+			CatatanKoreksi: catatanKoreksi,
+		})
+		if err != nil {
+			return fmt.Errorf("[approveKoreksiSuratKeputusan] UpdateKorektorSuratKeputusanByID: %w", err)
+		}
+
+		nextKorektor := s.cekKorektorSelanjutnya(korektor, pnsID)
+		if nextKorektor == nil {
+			err = txRepo.UpdateStatusSuratKeputusanByID(ctx, repo.UpdateStatusSuratKeputusanByIDParams{
+				ID:            id,
+				StatusSk:      pgtype.Int2{Int16: int16(statusSK(statusSKSudahDikoreksi)), Valid: true},
+				StatusKoreksi: pgtype.Int2{Int16: int16(statusKoreksiSK(statusKoreksiSudahDikoreksi)), Valid: true},
+			})
+			if err != nil {
+				return fmt.Errorf("[approveKoreksiSuratKeputusan] UpdateStatusSuratKeputusanByID: %w", err)
+			}
+			tindakan = string(diteruskanKePenandatangan)
+		} else {
+			err = txRepo.UpdateKorektorSuratKeputusanByID(ctx, repo.UpdateKorektorSuratKeputusanByIDParams{
+				ID:            id,
+				PnsID:         nextKorektor.PegawaiKorektorID.String,
+				StatusKoreksi: pgtype.Int2{Int16: int16(statusKorektorSK(statusKorektorSKBelumDikoreksi)), Valid: true},
+			})
+			if err != nil {
+				return fmt.Errorf("[approveKoreksiSuratKeputusan] UpdateKorektorSuratKeputusanByID(next): %w", err)
+			}
+
+			tindakan = string(diteruskanKeKorektorSelanjutnya) + " " + strconv.Itoa(int(nextKorektor.KorektorKe.Int16))
+		}
+
+		err = txRepo.InsertRiwayatSuratKeputusan(ctx, repo.InsertRiwayatSuratKeputusanParams{
+			FileID:          id,
+			NipPemroses:     nip,
+			Tindakan:        tindakan,
+			CatatanTindakan: catatanKoreksi,
+			AksesPengguna:   "web",
+		})
+		if err != nil {
+			return fmt.Errorf("[approveKoreksiSuratKeputusan] InsertRiwayatSuratKeputusan: %w", err)
+		}
+		return nil
+	})
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
+func (s *service) rejectKoreksiSuratKeputusan(ctx context.Context, id, catatanKoreksi, nip, pnsID string) (bool, error) {
+	err := s.withTransaction(ctx, func(txRepo repository) error {
+		err := txRepo.UpdateKorektorSuratKeputusanByID(ctx, repo.UpdateKorektorSuratKeputusanByIDParams{
+			ID:             id,
+			PnsID:          pnsID,
+			StatusKoreksi:  pgtype.Int2{Int16: int16(statusKorektorSK(statusKorektorSKDikembalikan)), Valid: true},
+			CatatanKoreksi: catatanKoreksi,
+		})
+		if err != nil {
+			return fmt.Errorf("[rejectKoreksiSuratKeputusan] UpdateKorektorSuratKeputusanByID: %w", err)
+		}
+
+		err = txRepo.UpdateStatusSuratKeputusanByID(ctx, repo.UpdateStatusSuratKeputusanByIDParams{
+			ID:            id,
+			StatusKoreksi: pgtype.Int2{Int16: int16(statusKoreksiSK(statusKoreksiDikembalikan)), Valid: true},
+			StatusTtd:     pgtype.Int2{Int16: int16(statusTtd(statusTtdDikembalikan)), Valid: true},
+			StatusKembali: pgtype.Int2{Int16: 1, Valid: true},
+			StatusSk:      pgtype.Int2{Int16: int16(statusSK(statusSKDikembalikan)), Valid: true},
+			Catatan:       catatanKoreksi,
+		})
+		if err != nil {
+			return fmt.Errorf("[rejectKoreksiSuratKeputusan] UpdateStatusSuratKeputusanByID: %w", err)
+		}
+
+		err = txRepo.InsertRiwayatSuratKeputusan(ctx, repo.InsertRiwayatSuratKeputusanParams{
+			FileID:          id,
+			NipPemroses:     nip,
+			Tindakan:        string(suratKeputusanRiwayatMessage(dikembalikan)),
+			CatatanTindakan: catatanKoreksi,
+			AksesPengguna:   "web",
+		})
+		if err != nil {
+			return fmt.Errorf("[rejectKoreksiSuratKeputusan] InsertRiwayatSuratKeputusan: %w", err)
+		}
+		return nil
+	})
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
+func (s *service) cekKorektorSelanjutnya(korektor []repo.ListKorektorSuratKeputusanByIDRow, nip string) *repo.ListKorektorSuratKeputusanByIDRow {
+	currentKorektorIndex := slices.IndexFunc(korektor, func(row repo.ListKorektorSuratKeputusanByIDRow) bool {
+		return row.NipKorektor.String == nip
+	})
+
+	if currentKorektorIndex == len(korektor)-1 {
+		return nil
+	}
+
+	return &korektor[currentKorektorIndex+1]
 }

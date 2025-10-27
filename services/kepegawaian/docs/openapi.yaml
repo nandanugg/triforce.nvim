@@ -3876,6 +3876,95 @@ paths:
                       $ref: "#/components/schemas/koreksiSuratKeputusan"
                   meta:
                     $ref: "#/components/schemas/metaPagination"
+  /v1/koreksi-surat-keputusan/antrian:
+    get:
+      tags:
+        - Koreksi Surat Keputusan Pegawai
+      summary: Lihat daftar koreksi surat keputusan antrian.
+      description: Lihat daftar koreksi surat keputusan antrian.
+      operationId: listKoreksiSuratKeputusanAntrian
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        kategori_sk:
+                          description: Kategori surat keputusan
+                          type: string
+                        jumlah:
+                          description: Jumlah surat keputusan
+                          type: integer
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/koreksi-surat-keputusan/{id}:
+    get:
+      tags:
+        - Koreksi Surat Keputusan Pegawai
+      summary: Lihat detail koreksi surat keputusan.
+      description: Lihat detail koreksi surat keputusan.
+      operationId: getDetailKoreksiSuratKeputusan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/koreksiSuratKeputusan"
+    post:
+      tags:
+        - Koreksi Surat Keputusan Pegawai
+      summary: Koreksi surat keputusan.
+      description: Koreksi surat keputusan.
+      operationId: koreksiSuratKeputusan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status_koreksi:
+                  type: string
+                  enum: ["diteruskan", "dikembalikan"]
+                  description: Status koreksi diteruskan atau dikembalikan
+                  example: "diteruskan"
+                catatan_koreksi:
+                  type: string
+                  description: Catatan koreksi
+                  example: "Catatan koreksi contoh"
+      responses:
+        "204":
+          description: Sukses.
   /v1/pegawai/profil/{pns_id}:
     get:
       tags:
@@ -6037,3 +6126,42 @@ components:
         unit_kerja:
           type: string
           description: Unit kerja
+        list_korektor:
+          nullable: true
+          type: array
+          items:
+            type: object
+            properties:
+              nama:
+                type: string
+                description: Nama korektor
+                example: "John Doe"
+              nip:
+                type: string
+                description: NIP korektor
+              gelar_depan:
+                type: string
+                description: Gelar depan korektor
+                example: "S.Kom"
+              gelar_belakang:
+                type: string
+                description: Gelar belakang korektor
+                example: "M.Kom"
+              status_koreksi:
+                type: string
+                description: Status koreksi
+                example: "Sudah Dikoreksi"
+              catatan_koreksi:
+                type: string
+                description: Catatan koreksi
+                example: "Catatan koreksi contoh"
+              korektor_ke:
+                type: integer
+                description: Korektor ke
+                example: 1
+        aksi:
+          type: string
+          description: Aksi yang bisa dilakukan oleh user
+          example: "koreksi"
+          nullable: true
+          enum: ["koreksi", "tandatangan", ""]

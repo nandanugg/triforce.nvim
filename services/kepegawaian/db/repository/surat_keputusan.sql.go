@@ -9,6 +9,30 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countAntrianKoreksiSuratKeputusanByNIP = `-- name: CountAntrianKoreksiSuratKeputusanByNIP :one
+SELECT 
+    COUNT(DISTINCT fds.kategori) AS total
+FROM 
+    surat_keputusan fds
+JOIN 
+    koreksi_surat_keputusan fdc ON fds.file_id = fdc.file_id AND fdc.deleted_at IS NULL
+JOIN 
+    pegawai korektor ON fdc.pegawai_korektor_id = korektor.pns_id AND korektor.deleted_at IS NULL
+WHERE 
+    fds.status_ttd = 0
+    AND fds.ds_ok = true
+    AND fds.kategori != '< Semua >'
+    AND (fdc.status_koreksi = 0 OR fdc.status_koreksi IS NULL)
+    AND korektor.nip_baru = $1::varchar
+`
+
+func (q *Queries) CountAntrianKoreksiSuratKeputusanByNIP(ctx context.Context, nipKorektor string) (int64, error) {
+	row := q.db.QueryRow(ctx, countAntrianKoreksiSuratKeputusanByNIP, nipKorektor)
+	var total int64
+	err := row.Scan(&total)
+	return total, err
+}
+
 const countKoreksiSuratKeputusanByPNSID = `-- name: CountKoreksiSuratKeputusanByPNSID :one
 select
     count(1) as total
@@ -231,7 +255,10 @@ SELECT
     p.nama as nama_pemilik_sk,
     p.nip_baru as nip_pemilik_sk,
     pemroses.nama as nama_penandatangan,
-    rj.nama_jabatan as jabatan_penandatangan
+    rj.nama_jabatan as jabatan_penandatangan,
+    status_ttd,
+    status_koreksi,
+    catatan
 FROM surat_keputusan fds
 JOIN pegawai p on p.nip_baru = fds.nip_sk and p.deleted_at is null
 LEFT JOIN pegawai pemroses on pemroses.nip_baru = fds.nip_pemroses and pemroses.deleted_at is null
@@ -249,6 +276,9 @@ type GetSuratKeputusanByIDRow struct {
 	NipPemilikSk         pgtype.Text `db:"nip_pemilik_sk"`
 	NamaPenandatangan    pgtype.Text `db:"nama_penandatangan"`
 	JabatanPenandatangan pgtype.Text `db:"jabatan_penandatangan"`
+	StatusTtd            pgtype.Int2 `db:"status_ttd"`
+	StatusKoreksi        pgtype.Int2 `db:"status_koreksi"`
+	Catatan              pgtype.Text `db:"catatan"`
 }
 
 func (q *Queries) GetSuratKeputusanByID(ctx context.Context, id string) (GetSuratKeputusanByIDRow, error) {
@@ -263,6 +293,9 @@ func (q *Queries) GetSuratKeputusanByID(ctx context.Context, id string) (GetSura
 		&i.NipPemilikSk,
 		&i.NamaPenandatangan,
 		&i.JabatanPenandatangan,
+		&i.StatusTtd,
+		&i.StatusKoreksi,
+		&i.Catatan,
 	)
 	return i, err
 }
@@ -309,6 +342,99 @@ func (q *Queries) GetSuratKeputusanByNIPAndID(ctx context.Context, arg GetSuratK
 		&i.NamaPenandatangan,
 	)
 	return i, err
+}
+
+const insertRiwayatSuratKeputusan = `-- name: InsertRiwayatSuratKeputusan :exec
+INSERT INTO riwayat_surat_keputusan (
+    file_id,
+    nip_pemroses,
+    tindakan,
+    catatan_tindakan,
+    akses_pengguna,
+    waktu_tindakan,
+    created_at,
+    updated_at
+) VALUES (
+    $1::varchar,
+    $2::varchar,
+    $3::varchar,
+    $4::text,
+    $5::varchar,
+    now(),
+    now(),
+    now()
+)
+`
+
+type InsertRiwayatSuratKeputusanParams struct {
+	FileID          string `db:"file_id"`
+	NipPemroses     string `db:"nip_pemroses"`
+	Tindakan        string `db:"tindakan"`
+	CatatanTindakan string `db:"catatan_tindakan"`
+	AksesPengguna   string `db:"akses_pengguna"`
+}
+
+func (q *Queries) InsertRiwayatSuratKeputusan(ctx context.Context, arg InsertRiwayatSuratKeputusanParams) error {
+	_, err := q.db.Exec(ctx, insertRiwayatSuratKeputusan,
+		arg.FileID,
+		arg.NipPemroses,
+		arg.Tindakan,
+		arg.CatatanTindakan,
+		arg.AksesPengguna,
+	)
+	return err
+}
+
+const listAntrianKoreksiSuratKeputusanByNIP = `-- name: ListAntrianKoreksiSuratKeputusanByNIP :many
+SELECT 
+  fds.kategori,
+  COUNT(1) AS jumlah
+FROM 
+  surat_keputusan fds
+JOIN 
+  koreksi_surat_keputusan fdc ON fds.file_id = fdc.file_id AND fdc.deleted_at IS NULL
+JOIN 
+  pegawai korektor ON fdc.pegawai_korektor_id = korektor.pns_id AND korektor.deleted_at IS NULL
+WHERE 
+  fds.status_ttd = 0
+  AND fds.ds_ok = true
+  AND fds.kategori != '< Semua >'
+  AND (fdc.status_koreksi = 0 OR fdc.status_koreksi IS NULL)
+  AND korektor.nip_baru = $3::varchar
+GROUP BY 
+  fds.kategori
+LIMIT $1 OFFSET $2
+`
+
+type ListAntrianKoreksiSuratKeputusanByNIPParams struct {
+	Limit       int32  `db:"limit"`
+	Offset      int32  `db:"offset"`
+	NipKorektor string `db:"nip_korektor"`
+}
+
+type ListAntrianKoreksiSuratKeputusanByNIPRow struct {
+	Kategori pgtype.Text `db:"kategori"`
+	Jumlah   int64       `db:"jumlah"`
+}
+
+func (q *Queries) ListAntrianKoreksiSuratKeputusanByNIP(ctx context.Context, arg ListAntrianKoreksiSuratKeputusanByNIPParams) ([]ListAntrianKoreksiSuratKeputusanByNIPRow, error) {
+	rows, err := q.db.Query(ctx, listAntrianKoreksiSuratKeputusanByNIP, arg.Limit, arg.Offset, arg.NipKorektor)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListAntrianKoreksiSuratKeputusanByNIPRow
+	for rows.Next() {
+		var i ListAntrianKoreksiSuratKeputusanByNIPRow
+		if err := rows.Scan(&i.Kategori, &i.Jumlah); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const listKoreksiSuratKeputusanByPNSID = `-- name: ListKoreksiSuratKeputusanByPNSID :many
@@ -396,6 +522,71 @@ func (q *Queries) ListKoreksiSuratKeputusanByPNSID(ctx context.Context, arg List
 			&i.NoSk,
 			&i.TanggalSk,
 			&i.UnorID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listKorektorSuratKeputusanByID = `-- name: ListKorektorSuratKeputusanByID :many
+SELECT 
+    fds.file_id,
+    fdc.korektor_ke,
+    korektor.nama as nama_korektor,
+    korektor.nip_baru as nip_korektor,
+    korektor.gelar_depan as gelar_depan_korektor,
+    korektor.gelar_belakang as gelar_belakang_korektor,
+    fdc.status_koreksi,
+    fdc.catatan_koreksi,
+    fdc.pegawai_korektor_id
+FROM 
+    surat_keputusan fds
+JOIN 
+    koreksi_surat_keputusan fdc ON fds.file_id = fdc.file_id AND fdc.deleted_at IS NULL
+JOIN 
+    pegawai korektor on fdc.pegawai_korektor_id = korektor.pns_id and korektor.deleted_at is null
+WHERE 
+    fds.deleted_at IS NULL
+    AND fds.file_id = $1::varchar
+ORDER BY fdc.korektor_ke ASC
+`
+
+type ListKorektorSuratKeputusanByIDRow struct {
+	FileID                string      `db:"file_id"`
+	KorektorKe            pgtype.Int2 `db:"korektor_ke"`
+	NamaKorektor          pgtype.Text `db:"nama_korektor"`
+	NipKorektor           pgtype.Text `db:"nip_korektor"`
+	GelarDepanKorektor    pgtype.Text `db:"gelar_depan_korektor"`
+	GelarBelakangKorektor pgtype.Text `db:"gelar_belakang_korektor"`
+	StatusKoreksi         pgtype.Int2 `db:"status_koreksi"`
+	CatatanKoreksi        pgtype.Text `db:"catatan_koreksi"`
+	PegawaiKorektorID     pgtype.Text `db:"pegawai_korektor_id"`
+}
+
+func (q *Queries) ListKorektorSuratKeputusanByID(ctx context.Context, id string) ([]ListKorektorSuratKeputusanByIDRow, error) {
+	rows, err := q.db.Query(ctx, listKorektorSuratKeputusanByID, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListKorektorSuratKeputusanByIDRow
+	for rows.Next() {
+		var i ListKorektorSuratKeputusanByIDRow
+		if err := rows.Scan(
+			&i.FileID,
+			&i.KorektorKe,
+			&i.NamaKorektor,
+			&i.NipKorektor,
+			&i.GelarDepanKorektor,
+			&i.GelarBelakangKorektor,
+			&i.StatusKoreksi,
+			&i.CatatanKoreksi,
+			&i.PegawaiKorektorID,
 		); err != nil {
 			return nil, err
 		}
@@ -607,4 +798,65 @@ func (q *Queries) ListSuratKeputusanByNIP(ctx context.Context, arg ListSuratKepu
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateKorektorSuratKeputusanByID = `-- name: UpdateKorektorSuratKeputusanByID :exec
+UPDATE 
+    koreksi_surat_keputusan
+SET 
+    status_koreksi = COALESCE($1, status_koreksi),
+    catatan_koreksi = COALESCE($2::text, catatan_koreksi)
+WHERE 
+    file_id = $3::varchar AND pegawai_korektor_id = $4::varchar
+`
+
+type UpdateKorektorSuratKeputusanByIDParams struct {
+	StatusKoreksi  pgtype.Int2 `db:"status_koreksi"`
+	CatatanKoreksi string      `db:"catatan_koreksi"`
+	ID             string      `db:"id"`
+	PnsID          string      `db:"pns_id"`
+}
+
+func (q *Queries) UpdateKorektorSuratKeputusanByID(ctx context.Context, arg UpdateKorektorSuratKeputusanByIDParams) error {
+	_, err := q.db.Exec(ctx, updateKorektorSuratKeputusanByID,
+		arg.StatusKoreksi,
+		arg.CatatanKoreksi,
+		arg.ID,
+		arg.PnsID,
+	)
+	return err
+}
+
+const updateStatusSuratKeputusanByID = `-- name: UpdateStatusSuratKeputusanByID :exec
+UPDATE 
+    surat_keputusan
+SET 
+    status_sk = COALESCE($1, status_sk),
+    status_ttd = COALESCE($2, status_ttd),
+    status_kembali = COALESCE($3, status_kembali),
+    status_koreksi = COALESCE($4, status_koreksi),
+    catatan = COALESCE($5::text, catatan)
+WHERE 
+    file_id = $6::varchar
+`
+
+type UpdateStatusSuratKeputusanByIDParams struct {
+	StatusSk      pgtype.Int2 `db:"status_sk"`
+	StatusTtd     pgtype.Int2 `db:"status_ttd"`
+	StatusKembali pgtype.Int2 `db:"status_kembali"`
+	StatusKoreksi pgtype.Int2 `db:"status_koreksi"`
+	Catatan       string      `db:"catatan"`
+	ID            string      `db:"id"`
+}
+
+func (q *Queries) UpdateStatusSuratKeputusanByID(ctx context.Context, arg UpdateStatusSuratKeputusanByIDParams) error {
+	_, err := q.db.Exec(ctx, updateStatusSuratKeputusanByID,
+		arg.StatusSk,
+		arg.StatusTtd,
+		arg.StatusKembali,
+		arg.StatusKoreksi,
+		arg.Catatan,
+		arg.ID,
+	)
+	return err
 }
