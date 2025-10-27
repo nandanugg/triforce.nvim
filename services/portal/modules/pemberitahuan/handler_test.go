@@ -5,7 +5,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -14,30 +16,42 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api/apitest"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db/dbtest"
 	dbmigrations "gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/db/migrations"
+	sqlc "gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/db/repository"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/docs"
 )
 
-func Test_handler_list(t *testing.T) {
+const YYYYMMDD = "2006-01-02"
+
+func getDate(day int) string {
+	time.Local = time.UTC
+	t := time.Now().AddDate(0, 0, day)
+	t = time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.UTC)
+	return t.Format(time.RFC3339)
+}
+
+func Test_handler_ListPemberitahuan(t *testing.T) {
 	t.Parallel()
 
 	dbData := `
-		insert into pemberitahuan
-			(id, judul_berita, deskripsi_berita, status,                 updated_by, updated_at) values
-			(11, '11a',        '11b',            'Aktif',                '11c',      '2000-01-02'),
-			(12, '12a',        '12b',            'Menunggu Diberitakan', '12c',      '2000-01-02'),
-			(13, '13a',        '13b',            'Sudah Tidak Aktif',    '13c',      '2000-01-02');
+		insert into pemberitahuan (id, judul_berita, deskripsi_berita, pinned, diterbitkan_pada, ditarik_pada, updated_by, updated_at, deleted_at) values
+		  (1, 'Notice over', 'Desc 1', false, current_date - interval '3 days', current_date - interval '2 days', 'admin', current_date - interval '5 days', null),
+		  (2, 'Notice active', 'Desc 1', false, current_date - interval '3 days', current_date + interval '3 days', 'admin', current_date - interval '4 days', null),
+		  (3, 'Notice waiting', 'Desc 1', false, current_date + interval '3 days', current_date + interval '4 days', 'admin', current_date, null),
+		  (4, 'Notice pinned', 'Desc 1', true, current_date - interval '3 days', current_date + interval '3 days', 'admin', current_date - interval '3 days', null),
+		  (5, 'Notice 3', 'Desc 3', false, current_date - interval '3 days', current_date + interval '3 days', 'admin', now(), now());
 	`
-	db := dbtest.New(t, dbmigrations.FS)
-	_, err := db.Exec(context.Background(), dbData)
+	pgx := dbtest.New(t, dbmigrations.FS)
+	_, err := pgx.Exec(context.Background(), dbData)
 	require.NoError(t, err)
 
 	e, err := api.NewEchoServer(docs.OpenAPIBytes)
 	require.NoError(t, err)
 
+	repo := sqlc.New(pgx)
 	authSvc := apitest.NewAuthService(api.Kode_Pemberitahuan_Public)
-	RegisterRoutes(e, db, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
-	authHeader := []string{apitest.GenerateAuthHeader("1")}
+	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	tests := []struct {
 		name             string
 		requestQuery     url.Values
@@ -46,109 +60,136 @@ func Test_handler_list(t *testing.T) {
 		wantResponseBody string
 	}{
 		{
-			name:             "ok: tanpa parameter apapun",
+			name:             "ok: list all pemberitahuan with default pagination",
 			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
-					{
-						"id":                  11,
-						"deskripsi_berita":    "11b",
-						"diperbarui_oleh":     "11c",
-						"judul_berita":        "11a",
-						"status":              "Aktif",
-						"terakhir_diperbarui": "2000-01-02"
-					},
-					{
-						"id":                  12,
-						"deskripsi_berita":    "12b",
-						"diperbarui_oleh":     "12c",
-						"judul_berita":        "12a",
-						"status":              "Menunggu Diberitakan",
-						"terakhir_diperbarui": "2000-01-02"
-					},
-					{
-						"id":                  13,
-						"deskripsi_berita":    "13b",
-						"diperbarui_oleh":     "13c",
-						"judul_berita":        "13a",
-						"status":              "Sudah Tidak Aktif",
-						"terakhir_diperbarui": "2000-01-02"
-					}
+				{
+					"id": 4,
+					"judul_berita": "Notice pinned",
+					"deskripsi_berita": "Desc 1",
+					"pinned": true,
+					"status": "ACTIVE",
+					"diterbitkan_pada": "` + getDate(-3) + `",
+					"ditarik_pada": "` + getDate(3) + `",
+					"diperbarui_oleh": "admin",
+					"terakhir_diperbarui": "` + getDate(-3) + `"
+				},
+				{
+					"id": 3,
+					"judul_berita": "Notice waiting",
+					"deskripsi_berita": "Desc 1",
+					"pinned": false,
+					"status": "WAITING",
+					"diterbitkan_pada": "` + getDate(3) + `",
+					"ditarik_pada": "` + getDate(4) + `",
+					"diperbarui_oleh": "admin",
+					"terakhir_diperbarui": "` + getDate(0) + `"
+				},
+				{
+					"id": 1,
+					"judul_berita": "Notice over",
+					"deskripsi_berita": "Desc 1",
+					"pinned": false,
+					"status": "OVER",
+					"diterbitkan_pada": "` + getDate(-3) + `",
+					"ditarik_pada": "` + getDate(-2) + `",
+					"diperbarui_oleh": "admin",
+					"terakhir_diperbarui": "` + getDate(-5) + `"
+				},
+				{
+					"id": 2,
+					"judul_berita": "Notice active",
+					"deskripsi_berita": "Desc 1",
+					"pinned": false,
+					"status": "ACTIVE",
+					"diterbitkan_pada": "` + getDate(-3) + `",
+					"ditarik_pada": "` + getDate(3) + `",
+					"diperbarui_oleh": "admin",
+					"terakhir_diperbarui": "` + getDate(-4) + `"
+				}
 				],
-				"meta": {"limit": 10, "offset": 0, "total": 3}
+				"meta": {"limit": 10, "offset": 0, "total": 4}
 			}`,
 		},
 		{
-			name:             "ok: dengan parameter pagination",
-			requestQuery:     url.Values{"limit": []string{"1"}, "offset": []string{"1"}},
+			name:             "ok: list pemberitahuan with limit=2",
 			requestHeader:    http.Header{"Authorization": authHeader},
+			requestQuery:     url.Values{"limit": []string{"2"}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
-					{
-						"deskripsi_berita":    "12b",
-						"diperbarui_oleh":     "12c",
-						"id":                  12,
-						"judul_berita":        "12a",
-						"status":              "Menunggu Diberitakan",
-						"terakhir_diperbarui": "2000-01-02"
-					}
+				{
+					"id": 4,
+					"judul_berita": "Notice pinned",
+					"deskripsi_berita": "Desc 1",
+					"pinned": true,
+					"status": "ACTIVE",
+					"diterbitkan_pada": "` + getDate(-3) + `",
+					"ditarik_pada": "` + getDate(3) + `",
+					"diperbarui_oleh": "admin",
+					"terakhir_diperbarui": "` + getDate(-3) + `"
+				},
+				{
+					"id": 3,
+					"judul_berita": "Notice waiting",
+					"deskripsi_berita": "Desc 1",
+					"pinned": false,
+					"status": "WAITING",
+					"diterbitkan_pada": "` + getDate(3) + `",
+					"ditarik_pada": "` + getDate(4) + `",
+					"diperbarui_oleh": "admin",
+					"terakhir_diperbarui": "` + getDate(0) + `"
+				}
 				],
-				"meta": {"limit": 1, "offset": 1, "total": 3}
+				"meta": {"limit": 2, "offset": 0, "total": 4}
 			}`,
 		},
 		{
-			name:             "ok: cari judul",
-			requestQuery:     url.Values{"cari": []string{"12a"}},
+			name:             "ok: list pemberitahuan with limit=2 and offset=2",
 			requestHeader:    http.Header{"Authorization": authHeader},
+			requestQuery:     url.Values{"limit": []string{"2"}, "offset": []string{"2"}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
-					{
-						"id":                  12,
-						"deskripsi_berita":    "12b",
-						"diperbarui_oleh":     "12c",
-						"judul_berita":        "12a",
-						"status":              "Menunggu Diberitakan",
-						"terakhir_diperbarui": "2000-01-02"
-					}
+				{
+					"id": 1,
+					"judul_berita": "Notice over",
+					"deskripsi_berita": "Desc 1",
+					"pinned": false,
+					"status": "OVER",
+					"diterbitkan_pada": "` + getDate(-3) + `",
+					"ditarik_pada": "` + getDate(-2) + `",
+					"diperbarui_oleh": "admin",
+					"terakhir_diperbarui": "` + getDate(-5) + `"
+				},
+				{
+					"id": 2,
+					"judul_berita": "Notice active",
+					"deskripsi_berita": "Desc 1",
+					"pinned": false,
+					"status": "ACTIVE",
+					"diterbitkan_pada": "` + getDate(-3) + `",
+					"ditarik_pada": "` + getDate(3) + `",
+					"diperbarui_oleh": "admin",
+					"terakhir_diperbarui": "` + getDate(-4) + `"
+				}
 				],
-				"meta": {"limit": 10, "offset": 0, "total": 1}
+				"meta": {"limit": 2, "offset": 2, "total": 4}
 			}`,
 		},
 		{
-			name:             "ok: cari deskripsi",
-			requestQuery:     url.Values{"cari": []string{"11b"}},
-			requestHeader:    http.Header{"Authorization": authHeader},
-			wantResponseCode: http.StatusOK,
-			wantResponseBody: `{
-				"data": [
-					{
-						"id":                  11,
-						"deskripsi_berita":    "11b",
-						"diperbarui_oleh":     "11c",
-						"judul_berita":        "11a",
-						"status":              "Aktif",
-						"terakhir_diperbarui": "2000-01-02"
-					}
-				],
-				"meta": {"limit": 10, "offset": 0, "total": 1}
-			}`,
-		},
-		{
-			name:             "ok: tidak ada data ditemukan",
-			requestQuery:     url.Values{"cari": []string{"22"}},
-			requestHeader:    http.Header{"Authorization": authHeader},
-			wantResponseCode: http.StatusOK,
-			wantResponseBody: `{"data": [], "meta": {"limit": 10, "offset": 0, "total": 0}}`,
+			name:             "error: invalid token",
+			requestHeader:    http.Header{"Authorization": []string{"Bearer invalid"}},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-
 			req := httptest.NewRequest(http.MethodGet, "/v1/pemberitahuan", nil)
 			req.URL.RawQuery = tt.requestQuery.Encode()
 			req.Header = tt.requestHeader
@@ -158,6 +199,386 @@ func Test_handler_list(t *testing.T) {
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
 			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
+			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+		})
+	}
+}
+
+func Test_handler_adminListPemberitahuan(t *testing.T) {
+	t.Parallel()
+
+	dbData := `
+		insert into pemberitahuan (id, judul_berita, deskripsi_berita, pinned, diterbitkan_pada, ditarik_pada, updated_by, updated_at, deleted_at) values
+		  (1, 'Notice over', 'Desc 1', false, current_date - interval '3 days', current_date - interval '2 days', 'admin', current_date - interval '5 days', null),
+		  (2, 'Notice active', 'Desc 1', false, current_date - interval '3 days', current_date + interval '3 days', 'admin', current_date - interval '4 days', null),
+		  (3, 'Notice waiting', 'Desc 1', false, current_date + interval '3 days', current_date + interval '4 days', 'admin', current_date, null),
+		  (4, 'Notice pinned', 'Desc 1', true, current_date - interval '3 days', current_date + interval '3 days', 'admin', current_date - interval '3 days', null),
+		  (5, 'Notice 3', 'Desc 3', false, current_date - interval '3 days', current_date + interval '3 days', 'admin', now(), now());
+	`
+	pgx := dbtest.New(t, dbmigrations.FS)
+	_, err := pgx.Exec(context.Background(), dbData)
+	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	repo := sqlc.New(pgx)
+	authSvc := apitest.NewAuthService(api.Kode_Pemberitahuan_Read)
+	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+
+	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
+
+	tests := []struct {
+		name             string
+		requestHeader    http.Header
+		wantResponseCode int
+		requestQuery     url.Values
+		wantResponseBody string
+	}{
+		{
+			name:             "ok: admin get all pemberitahuan",
+			requestHeader:    http.Header{"Authorization": authHeader},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+				{
+					"id": 4,
+					"judul_berita": "Notice pinned",
+					"deskripsi_berita": "Desc 1",
+					"pinned": true,
+					"status": "ACTIVE",
+					"diterbitkan_pada": "` + getDate(-3) + `",
+					"ditarik_pada": "` + getDate(3) + `",
+					"diperbarui_oleh": "admin",
+					"terakhir_diperbarui": "` + getDate(-3) + `"
+				},
+				{
+					"id": 3,
+					"judul_berita": "Notice waiting",
+					"deskripsi_berita": "Desc 1",
+					"pinned": false,
+					"status": "WAITING",
+					"diterbitkan_pada": "` + getDate(3) + `",
+					"ditarik_pada": "` + getDate(4) + `",
+					"diperbarui_oleh": "admin",
+					"terakhir_diperbarui": "` + getDate(0) + `"
+				},
+				{
+					"id": 1,
+					"judul_berita": "Notice over",
+					"deskripsi_berita": "Desc 1",
+					"pinned": false,
+					"status": "OVER",
+					"diterbitkan_pada": "` + getDate(-3) + `",
+					"ditarik_pada": "` + getDate(-2) + `",
+					"diperbarui_oleh": "admin",
+					"terakhir_diperbarui": "` + getDate(-5) + `"
+				},
+				{
+					"id": 2,
+					"judul_berita": "Notice active",
+					"deskripsi_berita": "Desc 1",
+					"pinned": false,
+					"status": "ACTIVE",
+					"diterbitkan_pada": "` + getDate(-3) + `",
+					"ditarik_pada": "` + getDate(3) + `",
+					"diperbarui_oleh": "admin",
+					"terakhir_diperbarui": "` + getDate(-4) + `"
+				}
+				],
+				"meta": {"limit": 10, "offset": 0, "total": 4}
+			}`,
+		},
+		{
+			name:             "ok: list pemberitahuan with limit=2",
+			requestHeader:    http.Header{"Authorization": authHeader},
+			requestQuery:     url.Values{"limit": []string{"2"}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+				{
+					"id": 4,
+					"judul_berita": "Notice pinned",
+					"deskripsi_berita": "Desc 1",
+					"pinned": true,
+					"status": "ACTIVE",
+					"diterbitkan_pada": "` + getDate(-3) + `",
+					"ditarik_pada": "` + getDate(3) + `",
+					"diperbarui_oleh": "admin",
+					"terakhir_diperbarui": "` + getDate(-3) + `"
+				},
+				{
+					"id": 3,
+					"judul_berita": "Notice waiting",
+					"deskripsi_berita": "Desc 1",
+					"pinned": false,
+					"status": "WAITING",
+					"diterbitkan_pada": "` + getDate(3) + `",
+					"ditarik_pada": "` + getDate(4) + `",
+					"diperbarui_oleh": "admin",
+					"terakhir_diperbarui": "` + getDate(0) + `"
+				}
+				],
+				"meta": {"limit": 2, "offset": 0, "total": 4}
+			}`,
+		},
+		{
+			name:             "ok: list pemberitahuan with limit=2 and offset=2",
+			requestHeader:    http.Header{"Authorization": authHeader},
+			requestQuery:     url.Values{"limit": []string{"2"}, "offset": []string{"2"}},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+				{
+					"id": 1,
+					"judul_berita": "Notice over",
+					"deskripsi_berita": "Desc 1",
+					"pinned": false,
+					"status": "OVER",
+					"diterbitkan_pada": "` + getDate(-3) + `",
+					"ditarik_pada": "` + getDate(-2) + `",
+					"diperbarui_oleh": "admin",
+					"terakhir_diperbarui": "` + getDate(-5) + `"
+				},
+				{
+					"id": 2,
+					"judul_berita": "Notice active",
+					"deskripsi_berita": "Desc 1",
+					"pinned": false,
+					"status": "ACTIVE",
+					"diterbitkan_pada": "` + getDate(-3) + `",
+					"ditarik_pada": "` + getDate(3) + `",
+					"diperbarui_oleh": "admin",
+					"terakhir_diperbarui": "` + getDate(-4) + `"
+				}
+				],
+				"meta": {"limit": 2, "offset": 2, "total": 4}
+			}`,
+		},
+		{
+			name:             "error: invalid token",
+			requestHeader:    http.Header{"Authorization": []string{"Bearer invalid"}},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			req := httptest.NewRequest(http.MethodGet, "/v1/admin/pemberitahuan", nil)
+			req.URL.RawQuery = tt.requestQuery.Encode()
+			req.Header = tt.requestHeader
+			rec := httptest.NewRecorder()
+
+			e.ServeHTTP(rec, req)
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
+			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+		})
+	}
+}
+
+func Test_handler_adminCreatePemberitahuan(t *testing.T) {
+	t.Parallel()
+
+	pgx := dbtest.New(t, dbmigrations.FS)
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+	repo := sqlc.New(pgx)
+	authSvc := apitest.NewAuthService(api.Kode_Pemberitahuan_Write)
+	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
+
+	tests := []struct {
+		name             string
+		requestBody      string
+		requestHeader    http.Header
+		wantResponseCode int
+		wantResponseBody string
+	}{
+		{
+			name: "ok: create pemberitahuan",
+			requestBody: `{
+				"judul_berita":"New Notice",
+				"deskripsi_berita":"Some desc",
+				"pinned":false,
+				"diterbitkan_pada":"2024-01-01T00:00:00Z",
+				"ditarik_pada":"2024-01-02T00:00:00Z"
+			}`,
+			requestHeader: http.Header{
+				"Authorization": authHeader,
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusCreated,
+			wantResponseBody: `{
+				"data": {
+					"id": 1,
+					"judul_berita": "New Notice",
+					"deskripsi_berita": "Some desc",
+					"pinned": false,
+					"status": "OVER",
+					"diterbitkan_pada":"2024-01-01T00:00:00Z",
+					"ditarik_pada":"2024-01-02T00:00:00Z",
+					"diperbarui_oleh": "123456789",
+					"terakhir_diperbarui": "` + getDate(0) + `"
+				}
+			}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			req := httptest.NewRequest(http.MethodPost, "/v1/admin/pemberitahuan", strings.NewReader(tt.requestBody))
+			req.Header = tt.requestHeader
+			rec := httptest.NewRecorder()
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
+			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+		})
+	}
+}
+
+func Test_handler_adminUpdatePemberitahuan(t *testing.T) {
+	t.Parallel()
+
+	dbData := `
+		insert into pemberitahuan (
+		  id, judul_berita, deskripsi_berita, pinned,
+		  diterbitkan_pada, ditarik_pada, updated_by, updated_at, deleted_at
+		)
+		values
+		  (1, 'Old', 'Desc', false, now(), now(), 'admin', now(), null),
+		  (2, 'Deleted', 'Desc', false, now(), now(), 'admin', now(), now());
+	`
+	pgx := dbtest.New(t, dbmigrations.FS)
+	_, err := pgx.Exec(context.Background(), dbData)
+	require.NoError(t, err)
+	e, _ := api.NewEchoServer(docs.OpenAPIBytes)
+	repo := sqlc.New(pgx)
+	authSvc := apitest.NewAuthService(api.Kode_Pemberitahuan_Write)
+	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
+
+	tests := []struct {
+		name             string
+		id               string
+		requestBody      string
+		wantResponseCode int
+		wantResponseBody string
+	}{
+		{
+			name: "ok: update pemberitahuan",
+			id:   "1",
+			requestBody: `{
+				"judul_berita":"New Notice",
+				"deskripsi_berita":"Some desc",
+				"pinned":false,
+				"diterbitkan_pada":"2024-01-01T00:00:00Z",
+				"ditarik_pada":"2024-01-02T00:00:00Z"
+			}`,
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": {
+					"id": 1,
+					"judul_berita": "New Notice",
+					"deskripsi_berita": "Some desc",
+					"pinned": false,
+					"status": "OVER",
+					"diterbitkan_pada":"2024-01-01T00:00:00Z",
+					"ditarik_pada":"2024-01-02T00:00:00Z",
+					"diperbarui_oleh": "123456789",
+					"terakhir_diperbarui": "` + getDate(0) + `"
+				}
+			}`,
+		},
+		{
+			name: "error: deleted id",
+			id:   "2",
+			requestBody: `{
+				"judul_berita":"New Notice",
+				"deskripsi_berita":"Some desc",
+				"pinned":false,
+				"diterbitkan_pada":"2024-01-01T00:00:00Z",
+				"ditarik_pada":"2024-01-02T00:00:00Z"
+			}`,
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message":"data tidak ditemukan"}`,
+		},
+		{
+			name: "error: not exists",
+			id:   "99",
+			requestBody: `{
+				"judul_berita":"New Notice",
+				"deskripsi_berita":"Some desc",
+				"pinned":false,
+				"diterbitkan_pada":"2024-01-01T00:00:00Z",
+				"ditarik_pada":"2024-01-02T00:00:00Z"
+			}`,
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message":"data tidak ditemukan"}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			req := httptest.NewRequest(http.MethodPut, "/v1/admin/pemberitahuan/"+tt.id, strings.NewReader(tt.requestBody))
+			req.Header = http.Header{
+				"Authorization": authHeader,
+				"Content-Type":  []string{"application/json"},
+			}
+			rec := httptest.NewRecorder()
+			e.ServeHTTP(rec, req)
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
+			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+		})
+	}
+}
+
+func Test_handler_adminDeletePemberitahuan(t *testing.T) {
+	t.Parallel()
+
+	dbData := `
+		insert into pemberitahuan (
+		  id, judul_berita, deskripsi_berita, pinned,
+		  diterbitkan_pada, ditarik_pada, updated_by, updated_at, deleted_at
+		)
+		values
+		  (1, 'Old', 'Desc', false, now(), now(), 'admin', now(), null),
+		  (2, 'Deleted', 'Desc', false, now(), now(), 'admin', now(), now());
+	`
+	pgx := dbtest.New(t, dbmigrations.FS)
+	_, err := pgx.Exec(context.Background(), dbData)
+	require.NoError(t, err)
+	e, _ := api.NewEchoServer(docs.OpenAPIBytes)
+	repo := sqlc.New(pgx)
+	authSvc := apitest.NewAuthService(api.Kode_Pemberitahuan_Write)
+	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
+
+	tests := []struct {
+		name             string
+		id               string
+		wantResponseCode int
+	}{
+		{"ok: delete pemberitahuan", "1", http.StatusNoContent},
+		{"error: already deleted", "2", http.StatusNotFound},
+		{"error: not exists", "99", http.StatusNotFound},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			req := httptest.NewRequest(http.MethodDelete, "/v1/admin/pemberitahuan/"+tt.id, nil)
+			req.Header = http.Header{"Authorization": authHeader}
+			rec := httptest.NewRecorder()
+			e.ServeHTTP(rec, req)
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
 			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
 		})
 	}

@@ -16,12 +16,16 @@ type DokumenPendukung struct {
 }
 
 type Pemberitahuan struct {
-	ID              int64       `db:"id"`
-	JudulBerita     string      `db:"judul_berita"`
-	DeskripsiBerita string      `db:"deskripsi_berita"`
-	Status          string      `db:"status"`
-	UpdatedBy       string      `db:"updated_by"`
-	UpdatedAt       pgtype.Date `db:"updated_at"`
+	ID              int64              `db:"id"`
+	JudulBerita     string             `db:"judul_berita"`
+	DeskripsiBerita string             `db:"deskripsi_berita"`
+	UpdatedBy       string             `db:"updated_by"`
+	UpdatedAt       pgtype.Date        `db:"updated_at"`
+	Pinned          bool               `db:"pinned"`
+	DiterbitkanPada pgtype.Timestamptz `db:"diterbitkan_pada"`
+	DitarikPada     pgtype.Timestamptz `db:"ditarik_pada"`
+	CreatedAt       pgtype.Timestamptz `db:"created_at"`
+	DeletedAt       pgtype.Timestamptz `db:"deleted_at"`
 }
 
 type Permission struct {

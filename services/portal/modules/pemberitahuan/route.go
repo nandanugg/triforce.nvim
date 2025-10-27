@@ -3,16 +3,19 @@ package pemberitahuan
 import (
 	"net/http"
 
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v4"
 
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
 )
 
-func RegisterRoutes(e *echo.Echo, db *pgxpool.Pool, mwAuth api.AuthMiddlewareFunc) {
-	r := newRepository(db)
-	s := newService(r)
+func RegisterRoutes(e *echo.Echo, repo repository, mwAuth api.AuthMiddlewareFunc) {
+	s := newService(repo)
 	h := newHandler(s)
+
+	e.Add(http.MethodGet, "/v1/admin/pemberitahuan", h.list, mwAuth(api.Kode_Pemberitahuan_Read))
+	e.Add(http.MethodPost, "/v1/admin/pemberitahuan", h.create, mwAuth(api.Kode_Pemberitahuan_Write))
+	e.Add(http.MethodPut, "/v1/admin/pemberitahuan/:id", h.update, mwAuth(api.Kode_Pemberitahuan_Write))
+	e.Add(http.MethodDelete, "/v1/admin/pemberitahuan/:id", h.delete, mwAuth(api.Kode_Pemberitahuan_Write))
 
 	e.Add(http.MethodGet, "/v1/pemberitahuan", h.list, mwAuth(api.Kode_Pemberitahuan_Public))
 }

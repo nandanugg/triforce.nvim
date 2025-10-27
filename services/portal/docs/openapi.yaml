@@ -6,6 +6,7 @@ info:
 servers:
   - url: http://localhost:8000
 tags:
+  - name: Admin Pemberitahuan
   - name: Authentication
   - name: Dokumen Pendukung
   - name: Pemberitahuan
@@ -203,7 +204,7 @@ paths:
       tags:
         - Pemberitahuan
       summary: Lihat daftar pemberitahuan.
-      description: Lihat daftar pemberitahuan.
+      description: Menampilkan daftar pemberitahuan.
       operationId: listPemberitahuan
       parameters:
         - $ref: "#/components/parameters/authRequired"
@@ -220,27 +221,202 @@ paths:
                   data:
                     type: array
                     items:
-                      type: object
-                      additionalProperties: false
-                      properties:
-                        id:
-                          type: integer
-                        judul_berita:
-                          type: string
-                        deskripsi_berita:
-                          type: string
-                        status:
-                          type: string
-                          enum:
-                            - Menunggu Diberitakan
-                            - Aktif
-                            - Sudah Tidak Aktif
-                        diperbarui_oleh:
-                          type: string
-                        terakhir_diperbarui:
-                          type: string
+                      $ref: "#/components/schemas/Pemberitahuan"
                   meta:
                     $ref: "#/components/schemas/metaPagination"
+        "401":
+          description: Token otentikasi tidak valid.
+        "403":
+          description: Tidak memiliki akses.
+        "500":
+          description: Error internal server.
+  /v1/admin/pemberitahuan:
+    get:
+      tags:
+        - Admin Pemberitahuan
+      summary: Admin daftar pemberitahuan.
+      description: Menampilkan daftar semua pemberitahuan (admin).
+      operationId: adminListPemberitahuan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Pemberitahuan"
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+        "401":
+          description: Token otentikasi tidak valid.
+        "403":
+          description: Tidak memiliki akses admin.
+        "500":
+          description: Error internal server.
+
+    post:
+      tags:
+        - Admin Pemberitahuan
+      summary: Create Pemberitahuan.
+      description: Membuat data pemberitahuan baru.
+      operationId: adminCreatePemberitahuan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - judul_berita
+                - deskripsi_berita
+                - diterbitkan_pada
+                - ditarik_pada
+              additionalProperties: false
+              properties:
+                judul_berita:
+                  type: string
+                  description: Judul pemberitahuan
+                  maxLength: 200
+                  example: "Pengumuman Penting"
+                deskripsi_berita:
+                  type: string
+                  description: Deskripsi pemberitahuan
+                  example: "Deskripsi lengkap pengumuman..."
+                pinned:
+                  type: boolean
+                  description: Apakah pemberitahuan dipinned
+                  example: false
+                diterbitkan_pada:
+                  type: string
+                  format: date-time
+                  description: Waktu dikirim
+                ditarik_pada:
+                  type: string
+                  format: date-time
+                  description: Waktu ditarik
+      responses:
+        "201":
+          description: Pemberitahuan berhasil dibuat.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Pemberitahuan"
+        "400":
+          description: Request tidak valid.
+        "401":
+          description: Token otentikasi tidak valid.
+        "403":
+          description: Tidak memiliki akses admin.
+        "500":
+          description: Error internal server.
+  /v1/admin/pemberitahuan/{id}:
+    put:
+      tags:
+        - Admin Pemberitahuan
+      summary: Update Pemberitahuan.
+      description: Mengupdate data pemberitahuan berdasarkan ID.
+      operationId: adminUpdatePemberitahuan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - judul_berita
+                - deskripsi_berita
+                - diterbitkan_pada
+                - ditarik_pada
+              additionalProperties: false
+              properties:
+                judul_berita:
+                  type: string
+                  description: Judul pemberitahuan
+                  maxLength: 200
+                  example: "Pengumuman Penting"
+                deskripsi_berita:
+                  type: string
+                  description: Deskripsi pemberitahuan
+                  example: "Deskripsi lengkap pengumuman..."
+                pinned:
+                  type: boolean
+                  description: Apakah pemberitahuan dipinned
+                  example: false
+                diterbitkan_pada:
+                  type: string
+                  format: date-time
+                  description: Waktu dikirim
+                ditarik_pada:
+                  type: string
+                  format: date-time
+                  description: Waktu ditarik
+      responses:
+        "200":
+          description: Pemberitahuan berhasil diupdate.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Pemberitahuan"
+        "400":
+          description: Request tidak valid.
+        "401":
+          description: Token otentikasi tidak valid.
+        "403":
+          description: Tidak memiliki akses admin.
+        "404":
+          description: Pemberitahuan tidak ditemukan.
+        "500":
+          description: Error internal server.
+
+    delete:
+      tags:
+        - Admin Pemberitahuan
+      summary: Delete Pemberitahuan.
+      description: Menghapus data pemberitahuan berdasarkan ID.
+      operationId: adminDeletePemberitahuan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "204":
+          description: Pemberitahuan berhasil dihapus.
+        "400":
+          description: ID tidak valid.
+        "401":
+          description: Token otentikasi tidak valid.
+        "403":
+          description: Tidak memiliki akses admin.
+        "500":
+          description: Error internal server.
   /v1/resources:
     get:
       tags:
@@ -704,3 +880,47 @@ components:
                 type: boolean
               is_aktif:
                 type: boolean
+    Pemberitahuan:
+      type: object
+      required:
+        - id
+        - judul_berita
+        - deskripsi_berita
+        - pinned
+        - diterbitkan_pada
+        - ditarik_pada
+        - diperbarui_oleh
+        - terakhir_diperbarui
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          format: int32
+          example: 1
+        judul_berita:
+          type: string
+          example: "Pengumuman Penting"
+        deskripsi_berita:
+          type: string
+          example: "Deskripsi lengkap pengumuman..."
+        status:
+          type: string
+          enum:
+            - WAITING
+            - ACTIVE
+            - OVER
+        pinned:
+          type: boolean
+          example: false
+        diterbitkan_pada:
+          type: string
+          format: date-time
+        ditarik_pada:
+          type: string
+          format: date-time
+        diperbarui_oleh:
+          type: string
+          example: "admin"
+        terakhir_diperbarui:
+          type: string
+          format: date-time

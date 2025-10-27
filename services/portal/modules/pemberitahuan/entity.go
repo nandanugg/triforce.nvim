@@ -1,12 +1,17 @@
 package pemberitahuan
 
-import "gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
+import (
+	"time"
+)
 
 type pemberitahuan struct {
-	ID                 int64   `json:"id"`
-	JudulBerita        string  `json:"judul_berita"`
-	DeskripsiBerita    string  `json:"deskripsi_berita"`
-	Status             string  `json:"status"`
-	DiperbaruiOleh     string  `json:"diperbarui_oleh"`
-	TerakhirDiperbarui db.Date `json:"terakhir_diperbarui"`
+	ID                 int64     `json:"id"`
+	JudulBerita        string    `json:"judul_berita"`
+	DeskripsiBerita    string    `json:"deskripsi_berita"`
+	Pinned             bool      `json:"pinned"`
+	Status             string    `json:"status"`
+	DiterbitkanPada    time.Time `json:"diterbitkan_pada"`
+	DitarikPada        time.Time `json:"ditarik_pada"`
+	DiperbaruiOleh     string    `json:"diperbarui_oleh"`
+	TerakhirDiperbarui time.Time `json:"terakhir_diperbarui"`
 }

@@ -9,20 +9,24 @@ import (
 )
 
 type Querier interface {
+	CountPemberitahuan(ctx context.Context) (int64, error)
 	CountResourcePermissionsByIDs(ctx context.Context, ids []int32) (int64, error)
 	CountResources(ctx context.Context) (int64, error)
 	CountRoles(ctx context.Context) (int64, error)
 	CountRolesByIDs(ctx context.Context, ids []int16) (int64, error)
 	CountUsersGroupByNIP(ctx context.Context, arg CountUsersGroupByNIPParams) (int64, error)
+	CreatePemberitahuan(ctx context.Context, arg CreatePemberitahuanParams) (CreatePemberitahuanRow, error)
 	CreateRole(ctx context.Context, arg CreateRoleParams) (int16, error)
 	CreateRoleResourcePermissions(ctx context.Context, arg CreateRoleResourcePermissionsParams) error
 	CreateUserRoles(ctx context.Context, arg CreateUserRolesParams) error
+	DeletePemberitahuan(ctx context.Context, id int64) (int64, error)
 	DeleteRoleResourcePermissions(ctx context.Context, arg DeleteRoleResourcePermissionsParams) error
 	DeleteUserRoles(ctx context.Context, arg DeleteUserRolesParams) error
 	GetRole(ctx context.Context, id int16) (GetRoleRow, error)
 	GetUserGroupByNIP(ctx context.Context, nip string) (GetUserGroupByNIPRow, error)
 	GetUserNIPByIDAndSource(ctx context.Context, arg GetUserNIPByIDAndSourceParams) (string, error)
 	IsUserExistsByNIP(ctx context.Context, nip string) (bool, error)
+	ListPemberitahuan(ctx context.Context, arg ListPemberitahuanParams) ([]ListPemberitahuanRow, error)
 	ListResourcePermissionsByNip(ctx context.Context, nip string) ([]pgtype.Text, error)
 	ListResourcePermissionsByResourceIDs(ctx context.Context, resourceIds []int16) ([]ListResourcePermissionsByResourceIDsRow, error)
 	ListResourcePermissionsByRoleID(ctx context.Context, roleID int16) ([]ListResourcePermissionsByRoleIDRow, error)
@@ -33,6 +37,7 @@ type Querier interface {
 	ListUserRoleByNIP(ctx context.Context, nip string) ([]ListUserRoleByNIPRow, error)
 	ListUsersGroupByNIP(ctx context.Context, arg ListUsersGroupByNIPParams) ([]ListUsersGroupByNIPRow, error)
 	UpdateLastLoginAt(ctx context.Context, arg UpdateLastLoginAtParams) error
+	UpdatePemberitahuan(ctx context.Context, arg UpdatePemberitahuanParams) (UpdatePemberitahuanRow, error)
 	UpdateRole(ctx context.Context, arg UpdateRoleParams) (int16, error)
 }
 

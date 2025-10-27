@@ -41,7 +41,7 @@ func main() {
 
 	auth.RegisterRoutes(e, dbRepository, c.Keycloak, client, privateKey, keyfunc.Keyfunc)
 	dokumenpendukung.RegisterRoutes(e, db, mwAuth)
-	pemberitahuan.RegisterRoutes(e, db, mwAuth)
+	pemberitahuan.RegisterRoutes(e, dbRepository, mwAuth)
 	resourcepermission.RegisterRoutes(e, dbRepository, mwAuth)
 	role.RegisterRoutes(e, db, dbRepository, mwAuth)
 	user.RegisterRoutes(e, db, dbRepository, mwAuth)
