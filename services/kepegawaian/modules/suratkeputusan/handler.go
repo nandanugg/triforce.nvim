@@ -265,29 +265,29 @@ func (h *handler) listKoreksi(c echo.Context) error {
 	})
 }
 
-type listKoreksiAntrianResponse struct {
-	Data []antrianKoreksiSuratKeputusan `json:"data"`
-	Meta api.MetaPagination             `json:"meta"`
+type listKoreksiAntreanResponse struct {
+	Data []antreanSK        `json:"data"`
+	Meta api.MetaPagination `json:"meta"`
 }
 
-func (h *handler) listKoreksiAntrian(c echo.Context) error {
+func (h *handler) listKoreksiAntrean(c echo.Context) error {
 	var req api.PaginationRequest
 	if err := c.Bind(&req); err != nil {
 		return err
 	}
 
 	ctx := c.Request().Context()
-	data, total, err := h.service.listKoreksiAntrian(ctx, listKoreksiAntrianParams{
+	data, total, err := h.service.listKoreksiAntrean(ctx, listKoreksiAntreanParams{
 		limit:  req.Limit,
 		offset: req.Offset,
 		nip:    api.CurrentUser(c).NIP,
 	})
 	if err != nil {
-		slog.ErrorContext(ctx, "Error getting list koreksi surat keputusan antrian.", "error", err)
+		slog.ErrorContext(ctx, "Error getting list koreksi surat keputusan antrean.", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
-	return c.JSON(http.StatusOK, listKoreksiAntrianResponse{
+	return c.JSON(http.StatusOK, listKoreksiAntreanResponse{
 		Data: data,
 		Meta: api.MetaPagination{Limit: req.Limit, Offset: req.Offset, Total: total},
 	})
@@ -351,4 +351,108 @@ func (h *handler) koreksiSuratKeputusan(c echo.Context) error {
 	}
 
 	return c.NoContent(http.StatusNoContent)
+}
+
+type listTandatanganRequest struct {
+	api.PaginationRequest
+	UnitKerjaID   string `query:"unit_kerja_id"`
+	NamaPemilik   string `query:"nama_pemilik"`
+	NipPemilik    string `query:"nip_pemilik"`
+	GolonganID    int32  `query:"golongan_id"`
+	JabatanID     string `query:"jabatan_id"`
+	KategoriSK    string `query:"kategori_sk"`
+	NoSK          string `query:"no_sk"`
+	StatusKoreksi string `query:"status"`
+}
+
+type listTandatanganResponse struct {
+	Data []koreksiSuratKeputusan `json:"data"`
+	Meta api.MetaPagination      `json:"meta"`
+}
+
+func (h *handler) listTandatangan(c echo.Context) error {
+	var req listTandatanganRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	ctx := c.Request().Context()
+	data, total, err := h.service.listTandatangan(ctx, listTandatanganParams{
+		limit:       req.Limit,
+		offset:      req.Offset,
+		unitKerjaID: req.UnitKerjaID,
+		namaPemilik: req.NamaPemilik,
+		nipPemilik:  req.NipPemilik,
+		golonganID:  req.GolonganID,
+		jabatanID:   req.JabatanID,
+		kategoriSK:  req.KategoriSK,
+		noSK:        req.NoSK,
+		status:      req.StatusKoreksi,
+		nip:         api.CurrentUser(c).NIP,
+	})
+	if err != nil {
+		slog.ErrorContext(ctx, "Error getting list tandatangan surat keputusan.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	return c.JSON(http.StatusOK, listTandatanganResponse{
+		Data: data,
+		Meta: api.MetaPagination{Limit: req.Limit, Offset: req.Offset, Total: total},
+	})
+}
+
+type listTandatanganAntreanResponse struct {
+	Data []antreanSK        `json:"data"`
+	Meta api.MetaPagination `json:"meta"`
+}
+
+func (h *handler) listTandatanganAntrean(c echo.Context) error {
+	var req api.PaginationRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	ctx := c.Request().Context()
+	data, total, err := h.service.listTandatanganAntrean(ctx, req.Limit, req.Offset, api.CurrentUser(c).NIP)
+	if err != nil {
+		slog.ErrorContext(ctx, "Error getting list tandatangan surat keputusan antrean.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	return c.JSON(http.StatusOK, listTandatanganAntreanResponse{
+		Data: data,
+		Meta: api.MetaPagination{Limit: req.Limit, Offset: req.Offset, Total: total},
+	})
+}
+
+type tandatanganSKRequest struct {
+	ID         string `param:"id"`
+	StatusTtd  string `json:"status_ttd"`
+	CatatanTtd string `json:"catatan_ttd"`
+}
+
+func (h *handler) tandatanganSK(c echo.Context) error {
+	var req tandatanganSKRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	ctx := c.Request().Context()
+	err, validationErr := h.service.tandatanganSK(ctx, tandatanganSKParams{
+		id:        req.ID,
+		statusTtd: req.StatusTtd,
+		nip:       api.CurrentUser(c).NIP,
+	})
+	if err != nil {
+		slog.ErrorContext(ctx, "Error tandatangan surat keputusan.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	if validationErr != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"message": validationErr.Error(),
+		})
+	}
+
+	return c.NoContent(http.StatusOK)
 }

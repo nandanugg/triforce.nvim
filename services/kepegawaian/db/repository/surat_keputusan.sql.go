@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const countAntrianKoreksiSuratKeputusanByNIP = `-- name: CountAntrianKoreksiSuratKeputusanByNIP :one
+const countAntreanKoreksiSuratKeputusanByNIP = `-- name: CountAntreanKoreksiSuratKeputusanByNIP :one
 SELECT 
     COUNT(DISTINCT fds.kategori) AS total
 FROM 
@@ -26,8 +26,8 @@ WHERE
     AND korektor.nip_baru = $1::varchar
 `
 
-func (q *Queries) CountAntrianKoreksiSuratKeputusanByNIP(ctx context.Context, nipKorektor string) (int64, error) {
-	row := q.db.QueryRow(ctx, countAntrianKoreksiSuratKeputusanByNIP, nipKorektor)
+func (q *Queries) CountAntreanKoreksiSuratKeputusanByNIP(ctx context.Context, nipKorektor string) (int64, error) {
+	row := q.db.QueryRow(ctx, countAntreanKoreksiSuratKeputusanByNIP, nipKorektor)
 	var total int64
 	err := row.Scan(&total)
 	return total, err
@@ -166,6 +166,78 @@ func (q *Queries) CountSuratKeputusanByNIP(ctx context.Context, arg CountSuratKe
 	return total, err
 }
 
+const countTandaTanganSuratKeputusanAntreanByPNSID = `-- name: CountTandaTanganSuratKeputusanAntreanByPNSID :one
+select
+    count(distinct fds.kategori) as total
+FROM surat_keputusan fds
+JOIN koreksi_surat_keputusan fdc  ON fds.file_id = fdc.file_id AND fdc.deleted_at IS NULL AND fdc.status_koreksi = 2
+WHERE fds.status_ttd = 0
+  AND fds.ds_ok = true
+  AND fds.kategori NOT IN ('< Semua >', '< Pilih >')
+  AND fds.ttd_pegawai_id = $1::varchar
+  AND fds.deleted_at IS NULL
+`
+
+func (q *Queries) CountTandaTanganSuratKeputusanAntreanByPNSID(ctx context.Context, pnsID string) (int64, error) {
+	row := q.db.QueryRow(ctx, countTandaTanganSuratKeputusanAntreanByPNSID, pnsID)
+	var total int64
+	err := row.Scan(&total)
+	return total, err
+}
+
+const countTandaTanganSuratKeputusanByPNSID = `-- name: CountTandaTanganSuratKeputusanByPNSID :one
+select
+    count(1) as total
+FROM surat_keputusan fds
+JOIN pegawai p ON fds.nip_sk = p.nip_baru AND p.deleted_at IS NULL
+LEFT JOIN ref_unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
+WHERE fds.deleted_at IS NULL
+    AND ($1::VARCHAR IS NULL
+        OR $1::VARCHAR = uk.id
+        OR $1::VARCHAR = uk.eselon_1
+        OR $1::VARCHAR = uk.eselon_2
+        OR $1::VARCHAR = uk.eselon_3
+        OR $1::VARCHAR = uk.eselon_4)
+    AND ($2::VARCHAR IS NULL OR p.nama ILIKE '%' || $2::VARCHAR || '%')
+    AND ($3::VARCHAR IS NULL OR fds.nip_sk = $3::VARCHAR)
+    AND ($4::INTEGER IS NULL OR p.gol_id = $4::INTEGER)
+    AND ($5::VARCHAR IS NULL OR p.jabatan_instansi_id = $5::VARCHAR)
+    AND ($6::VARCHAR is NULL OR fds.kategori ILIKE '%' || $6::VARCHAR || '%')
+    AND ($7::VARCHAR IS NULL OR fds.no_sk ILIKE '%' || $7::VARCHAR || '%')
+    AND fds.status_koreksi = 1 
+    and ($8::integer is NULL or fds.status_ttd = $8::integer)
+    AND fds.ttd_pegawai_id = $9::varchar
+`
+
+type CountTandaTanganSuratKeputusanByPNSIDParams struct {
+	UnitKerjaID pgtype.Text `db:"unit_kerja_id"`
+	NamaPemilik pgtype.Text `db:"nama_pemilik"`
+	NipPemilik  pgtype.Text `db:"nip_pemilik"`
+	GolonganID  pgtype.Int4 `db:"golongan_id"`
+	JabatanID   pgtype.Text `db:"jabatan_id"`
+	KategoriSk  pgtype.Text `db:"kategori_sk"`
+	NoSk        pgtype.Text `db:"no_sk"`
+	StatusTtd   pgtype.Int4 `db:"status_ttd"`
+	PnsID       string      `db:"pns_id"`
+}
+
+func (q *Queries) CountTandaTanganSuratKeputusanByPNSID(ctx context.Context, arg CountTandaTanganSuratKeputusanByPNSIDParams) (int64, error) {
+	row := q.db.QueryRow(ctx, countTandaTanganSuratKeputusanByPNSID,
+		arg.UnitKerjaID,
+		arg.NamaPemilik,
+		arg.NipPemilik,
+		arg.GolonganID,
+		arg.JabatanID,
+		arg.KategoriSk,
+		arg.NoSk,
+		arg.StatusTtd,
+		arg.PnsID,
+	)
+	var total int64
+	err := row.Scan(&total)
+	return total, err
+}
+
 const getBerkasSuratKeputusanByID = `-- name: GetBerkasSuratKeputusanByID :one
 SELECT
     file_base64
@@ -258,7 +330,8 @@ SELECT
     rj.nama_jabatan as jabatan_penandatangan,
     status_ttd,
     status_koreksi,
-    catatan
+    catatan,
+    ttd_pegawai_id
 FROM surat_keputusan fds
 JOIN pegawai p on p.nip_baru = fds.nip_sk and p.deleted_at is null
 LEFT JOIN pegawai pemroses on pemroses.nip_baru = fds.nip_pemroses and pemroses.deleted_at is null
@@ -279,6 +352,7 @@ type GetSuratKeputusanByIDRow struct {
 	StatusTtd            pgtype.Int2 `db:"status_ttd"`
 	StatusKoreksi        pgtype.Int2 `db:"status_koreksi"`
 	Catatan              pgtype.Text `db:"catatan"`
+	TtdPegawaiID         pgtype.Text `db:"ttd_pegawai_id"`
 }
 
 func (q *Queries) GetSuratKeputusanByID(ctx context.Context, id string) (GetSuratKeputusanByIDRow, error) {
@@ -296,6 +370,7 @@ func (q *Queries) GetSuratKeputusanByID(ctx context.Context, id string) (GetSura
 		&i.StatusTtd,
 		&i.StatusKoreksi,
 		&i.Catatan,
+		&i.TtdPegawaiID,
 	)
 	return i, err
 }
@@ -385,7 +460,7 @@ func (q *Queries) InsertRiwayatSuratKeputusan(ctx context.Context, arg InsertRiw
 	return err
 }
 
-const listAntrianKoreksiSuratKeputusanByNIP = `-- name: ListAntrianKoreksiSuratKeputusanByNIP :many
+const listAntreanKoreksiSuratKeputusanByNIP = `-- name: ListAntreanKoreksiSuratKeputusanByNIP :many
 SELECT 
   fds.kategori,
   COUNT(1) AS jumlah
@@ -406,26 +481,26 @@ GROUP BY
 LIMIT $1 OFFSET $2
 `
 
-type ListAntrianKoreksiSuratKeputusanByNIPParams struct {
+type ListAntreanKoreksiSuratKeputusanByNIPParams struct {
 	Limit       int32  `db:"limit"`
 	Offset      int32  `db:"offset"`
 	NipKorektor string `db:"nip_korektor"`
 }
 
-type ListAntrianKoreksiSuratKeputusanByNIPRow struct {
+type ListAntreanKoreksiSuratKeputusanByNIPRow struct {
 	Kategori pgtype.Text `db:"kategori"`
 	Jumlah   int64       `db:"jumlah"`
 }
 
-func (q *Queries) ListAntrianKoreksiSuratKeputusanByNIP(ctx context.Context, arg ListAntrianKoreksiSuratKeputusanByNIPParams) ([]ListAntrianKoreksiSuratKeputusanByNIPRow, error) {
-	rows, err := q.db.Query(ctx, listAntrianKoreksiSuratKeputusanByNIP, arg.Limit, arg.Offset, arg.NipKorektor)
+func (q *Queries) ListAntreanKoreksiSuratKeputusanByNIP(ctx context.Context, arg ListAntreanKoreksiSuratKeputusanByNIPParams) ([]ListAntreanKoreksiSuratKeputusanByNIPRow, error) {
+	rows, err := q.db.Query(ctx, listAntreanKoreksiSuratKeputusanByNIP, arg.Limit, arg.Offset, arg.NipKorektor)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []ListAntrianKoreksiSuratKeputusanByNIPRow
+	var items []ListAntreanKoreksiSuratKeputusanByNIPRow
 	for rows.Next() {
-		var i ListAntrianKoreksiSuratKeputusanByNIPRow
+		var i ListAntreanKoreksiSuratKeputusanByNIPRow
 		if err := rows.Scan(&i.Kategori, &i.Jumlah); err != nil {
 			return nil, err
 		}
@@ -789,6 +864,152 @@ func (q *Queries) ListSuratKeputusanByNIP(ctx context.Context, arg ListSuratKepu
 			&i.NoSk,
 			&i.TanggalSk,
 			&i.StatusSk,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listTandaTanganSuratKeputusanAntreanByPNSID = `-- name: ListTandaTanganSuratKeputusanAntreanByPNSID :many
+SELECT 
+    fds.kategori,
+    fds.ttd_pegawai_id,
+    COUNT(*) AS jumlah
+FROM surat_keputusan fds
+JOIN koreksi_surat_keputusan fdc  ON fds.file_id = fdc.file_id AND fdc.deleted_at IS NULL AND fdc.status_koreksi = 2
+WHERE fds.status_ttd = 0
+  AND fds.ds_ok = true
+  AND fds.kategori NOT IN ('< Semua >', '< Pilih >')
+  AND fds.ttd_pegawai_id = $3::varchar
+  AND fds.deleted_at IS NULL
+GROUP BY 
+    fds.kategori,
+    fds.ttd_pegawai_id
+LIMIT $1 OFFSET $2
+`
+
+type ListTandaTanganSuratKeputusanAntreanByPNSIDParams struct {
+	Limit  int32  `db:"limit"`
+	Offset int32  `db:"offset"`
+	PnsID  string `db:"pns_id"`
+}
+
+type ListTandaTanganSuratKeputusanAntreanByPNSIDRow struct {
+	Kategori     pgtype.Text `db:"kategori"`
+	TtdPegawaiID pgtype.Text `db:"ttd_pegawai_id"`
+	Jumlah       int64       `db:"jumlah"`
+}
+
+func (q *Queries) ListTandaTanganSuratKeputusanAntreanByPNSID(ctx context.Context, arg ListTandaTanganSuratKeputusanAntreanByPNSIDParams) ([]ListTandaTanganSuratKeputusanAntreanByPNSIDRow, error) {
+	rows, err := q.db.Query(ctx, listTandaTanganSuratKeputusanAntreanByPNSID, arg.Limit, arg.Offset, arg.PnsID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListTandaTanganSuratKeputusanAntreanByPNSIDRow
+	for rows.Next() {
+		var i ListTandaTanganSuratKeputusanAntreanByPNSIDRow
+		if err := rows.Scan(&i.Kategori, &i.TtdPegawaiID, &i.Jumlah); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listTandaTanganSuratKeputusanByPNSID = `-- name: ListTandaTanganSuratKeputusanByPNSID :many
+SELECT
+    fds.file_id,
+    p.nama as nama_pemilik_sk,
+    p.nip_baru as nip_pemilik_sk,
+    fds.kategori AS kategori_sk,
+    fds.no_sk,
+    fds.tanggal_sk,
+    p.unor_id
+FROM surat_keputusan fds
+JOIN pegawai p ON fds.nip_sk = p.nip_baru AND p.deleted_at IS NULL
+LEFT JOIN ref_unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
+WHERE fds.deleted_at IS NULL
+    AND ($3::VARCHAR IS NULL
+        OR $3::VARCHAR = uk.id
+        OR $3::VARCHAR = uk.eselon_1
+        OR $3::VARCHAR = uk.eselon_2
+        OR $3::VARCHAR = uk.eselon_3
+        OR $3::VARCHAR = uk.eselon_4)
+    AND ($4::VARCHAR IS NULL OR p.nama ILIKE '%' || $4::VARCHAR || '%')
+    AND ($5::VARCHAR IS NULL OR fds.nip_sk = $5::VARCHAR)
+    AND ($6::INTEGER IS NULL OR p.gol_id = $6::INTEGER)
+    AND ($7::VARCHAR IS NULL OR p.jabatan_instansi_id = $7::VARCHAR)
+    AND ($8::VARCHAR is NULL OR fds.kategori ILIKE '%' || $8::VARCHAR || '%')
+    AND ($9::VARCHAR IS NULL OR fds.no_sk ILIKE '%' || $9::VARCHAR || '%')
+    AND fds.status_koreksi = 1 
+    and ($10::integer is NULL or fds.status_ttd = $10::integer)
+    AND fds.ttd_pegawai_id = $11::varchar
+ORDER BY fds.created_at DESC
+LIMIT $1 OFFSET $2
+`
+
+type ListTandaTanganSuratKeputusanByPNSIDParams struct {
+	Limit       int32       `db:"limit"`
+	Offset      int32       `db:"offset"`
+	UnitKerjaID pgtype.Text `db:"unit_kerja_id"`
+	NamaPemilik pgtype.Text `db:"nama_pemilik"`
+	NipPemilik  pgtype.Text `db:"nip_pemilik"`
+	GolonganID  pgtype.Int4 `db:"golongan_id"`
+	JabatanID   pgtype.Text `db:"jabatan_id"`
+	KategoriSk  pgtype.Text `db:"kategori_sk"`
+	NoSk        pgtype.Text `db:"no_sk"`
+	StatusTtd   pgtype.Int4 `db:"status_ttd"`
+	PnsID       string      `db:"pns_id"`
+}
+
+type ListTandaTanganSuratKeputusanByPNSIDRow struct {
+	FileID        string      `db:"file_id"`
+	NamaPemilikSk pgtype.Text `db:"nama_pemilik_sk"`
+	NipPemilikSk  pgtype.Text `db:"nip_pemilik_sk"`
+	KategoriSk    pgtype.Text `db:"kategori_sk"`
+	NoSk          pgtype.Text `db:"no_sk"`
+	TanggalSk     pgtype.Date `db:"tanggal_sk"`
+	UnorID        pgtype.Text `db:"unor_id"`
+}
+
+func (q *Queries) ListTandaTanganSuratKeputusanByPNSID(ctx context.Context, arg ListTandaTanganSuratKeputusanByPNSIDParams) ([]ListTandaTanganSuratKeputusanByPNSIDRow, error) {
+	rows, err := q.db.Query(ctx, listTandaTanganSuratKeputusanByPNSID,
+		arg.Limit,
+		arg.Offset,
+		arg.UnitKerjaID,
+		arg.NamaPemilik,
+		arg.NipPemilik,
+		arg.GolonganID,
+		arg.JabatanID,
+		arg.KategoriSk,
+		arg.NoSk,
+		arg.StatusTtd,
+		arg.PnsID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListTandaTanganSuratKeputusanByPNSIDRow
+	for rows.Next() {
+		var i ListTandaTanganSuratKeputusanByPNSIDRow
+		if err := rows.Scan(
+			&i.FileID,
+			&i.NamaPemilikSk,
+			&i.NipPemilikSk,
+			&i.KategoriSk,
+			&i.NoSk,
+			&i.TanggalSk,
+			&i.UnorID,
 		); err != nil {
 			return nil, err
 		}

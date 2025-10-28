@@ -37,12 +37,16 @@ type repository interface {
 	ListKoreksiSuratKeputusanByPNSID(ctx context.Context, arg repo.ListKoreksiSuratKeputusanByPNSIDParams) ([]repo.ListKoreksiSuratKeputusanByPNSIDRow, error)
 	CountKoreksiSuratKeputusanByPNSID(ctx context.Context, arg repo.CountKoreksiSuratKeputusanByPNSIDParams) (int64, error)
 	GetPegawaiPNSIDByNIP(ctx context.Context, nip string) (string, error)
-	ListAntrianKoreksiSuratKeputusanByNIP(ctx context.Context, arg repo.ListAntrianKoreksiSuratKeputusanByNIPParams) ([]repo.ListAntrianKoreksiSuratKeputusanByNIPRow, error)
-	CountAntrianKoreksiSuratKeputusanByNIP(ctx context.Context, nipKorektor string) (int64, error)
+	ListAntreanKoreksiSuratKeputusanByNIP(ctx context.Context, arg repo.ListAntreanKoreksiSuratKeputusanByNIPParams) ([]repo.ListAntreanKoreksiSuratKeputusanByNIPRow, error)
+	CountAntreanKoreksiSuratKeputusanByNIP(ctx context.Context, nipKorektor string) (int64, error)
 	ListKorektorSuratKeputusanByID(ctx context.Context, id string) ([]repo.ListKorektorSuratKeputusanByIDRow, error)
 	UpdateKorektorSuratKeputusanByID(ctx context.Context, arg repo.UpdateKorektorSuratKeputusanByIDParams) error
 	UpdateStatusSuratKeputusanByID(ctx context.Context, arg repo.UpdateStatusSuratKeputusanByIDParams) error
 	InsertRiwayatSuratKeputusan(ctx context.Context, arg repo.InsertRiwayatSuratKeputusanParams) error
+	ListTandaTanganSuratKeputusanByPNSID(ctx context.Context, arg repo.ListTandaTanganSuratKeputusanByPNSIDParams) ([]repo.ListTandaTanganSuratKeputusanByPNSIDRow, error)
+	CountTandaTanganSuratKeputusanByPNSID(ctx context.Context, arg repo.CountTandaTanganSuratKeputusanByPNSIDParams) (int64, error)
+	ListTandaTanganSuratKeputusanAntreanByPNSID(ctx context.Context, arg repo.ListTandaTanganSuratKeputusanAntreanByPNSIDParams) ([]repo.ListTandaTanganSuratKeputusanAntreanByPNSIDRow, error)
+	CountTandaTanganSuratKeputusanAntreanByPNSID(ctx context.Context, pnsID string) (int64, error)
 }
 type service struct {
 	repo repository
@@ -405,29 +409,29 @@ func (s *service) listKoreksi(ctx context.Context, arg listKoreksiParams) ([]kor
 	return result, uint(count), nil
 }
 
-type listKoreksiAntrianParams struct {
+type listKoreksiAntreanParams struct {
 	limit  uint
 	offset uint
 	nip    string
 }
 
-func (s *service) listKoreksiAntrian(ctx context.Context, arg listKoreksiAntrianParams) ([]antrianKoreksiSuratKeputusan, uint, error) {
-	data, err := s.repo.ListAntrianKoreksiSuratKeputusanByNIP(ctx, repo.ListAntrianKoreksiSuratKeputusanByNIPParams{
+func (s *service) listKoreksiAntrean(ctx context.Context, arg listKoreksiAntreanParams) ([]antreanSK, uint, error) {
+	data, err := s.repo.ListAntreanKoreksiSuratKeputusanByNIP(ctx, repo.ListAntreanKoreksiSuratKeputusanByNIPParams{
 		Limit:       int32(arg.limit),
 		Offset:      int32(arg.offset),
 		NipKorektor: arg.nip,
 	})
 	if err != nil {
-		return nil, 0, fmt.Errorf("[suratkeputusan-listKoreksiAntrian] repo ListKoreksiSuratKeputusanAntrian: %w", err)
+		return nil, 0, fmt.Errorf("[suratkeputusan-listKoreksiAntrean] repo ListKoreksiSuratKeputusanAntrean: %w", err)
 	}
 
-	count, err := s.repo.CountAntrianKoreksiSuratKeputusanByNIP(ctx, arg.nip)
+	count, err := s.repo.CountAntreanKoreksiSuratKeputusanByNIP(ctx, arg.nip)
 	if err != nil {
-		return nil, 0, fmt.Errorf("[suratkeputusan-listKoreksiAntrian] repo CountAntrianKoreksiSuratKeputusan: %w", err)
+		return nil, 0, fmt.Errorf("[suratkeputusan-listKoreksiAntrean] repo CountAntreanKoreksiSuratKeputusan: %w", err)
 	}
 
-	result := typeutil.Map(data, func(row repo.ListAntrianKoreksiSuratKeputusanByNIPRow) antrianKoreksiSuratKeputusan {
-		return antrianKoreksiSuratKeputusan{
+	result := typeutil.Map(data, func(row repo.ListAntreanKoreksiSuratKeputusanByNIPRow) antreanSK {
+		return antreanSK{
 			KategoriSK: row.Kategori.String,
 			Jumlah:     row.Jumlah,
 		}
@@ -684,4 +688,209 @@ func (s *service) cekKorektorSelanjutnya(korektor []repo.ListKorektorSuratKeputu
 	}
 
 	return &korektor[currentKorektorIndex+1]
+}
+
+type listTandatanganParams struct {
+	limit       uint
+	offset      uint
+	unitKerjaID string
+	namaPemilik string
+	nipPemilik  string
+	golonganID  int32
+	jabatanID   string
+	kategoriSK  string
+	noSK        string
+	status      string
+	nip         string
+}
+
+func (s *service) listTandatangan(ctx context.Context, arg listTandatanganParams) ([]koreksiSuratKeputusan, uint, error) {
+	pnsID, err := s.repo.GetPegawaiPNSIDByNIP(ctx, arg.nip)
+	if err != nil {
+		return nil, 0, fmt.Errorf("[suratkeputusan-listTandatangan] repo GetPegawaiPNSIDByNIP: %w", err)
+	}
+	statusTandatangan := pgtype.Int4{Valid: false}
+	if statusTandaTangan(arg.status).valid() {
+		statusTandatangan = pgtype.Int4{Int32: statusTandaTangan(arg.status).value(), Valid: true}
+	}
+	data, err := s.repo.ListTandaTanganSuratKeputusanByPNSID(ctx, repo.ListTandaTanganSuratKeputusanByPNSIDParams{
+		Limit:       int32(arg.limit),
+		Offset:      int32(arg.offset),
+		UnitKerjaID: pgtype.Text{String: arg.unitKerjaID, Valid: arg.unitKerjaID != ""},
+		NamaPemilik: pgtype.Text{String: arg.namaPemilik, Valid: arg.namaPemilik != ""},
+		NipPemilik:  pgtype.Text{String: arg.nipPemilik, Valid: arg.nipPemilik != ""},
+		GolonganID:  pgtype.Int4{Int32: arg.golonganID, Valid: arg.golonganID != 0},
+		JabatanID:   pgtype.Text{String: arg.jabatanID, Valid: arg.jabatanID != ""},
+		KategoriSk:  pgtype.Text{String: arg.kategoriSK, Valid: arg.kategoriSK != ""},
+		NoSk:        pgtype.Text{String: arg.noSK, Valid: arg.noSK != ""},
+		StatusTtd:   statusTandatangan,
+		PnsID:       pnsID,
+	})
+	if err != nil {
+		return nil, 0, fmt.Errorf("[suratkeputusan-listTandatangan] repo ListTandaTanganSuratKeputusanByID: %w", err)
+	}
+
+	count, err := s.repo.CountTandaTanganSuratKeputusanByPNSID(ctx, repo.CountTandaTanganSuratKeputusanByPNSIDParams{
+		UnitKerjaID: pgtype.Text{String: arg.unitKerjaID, Valid: arg.unitKerjaID != ""},
+		NamaPemilik: pgtype.Text{String: arg.namaPemilik, Valid: arg.namaPemilik != ""},
+		NipPemilik:  pgtype.Text{String: arg.nipPemilik, Valid: arg.nipPemilik != ""},
+		GolonganID:  pgtype.Int4{Int32: arg.golonganID, Valid: arg.golonganID != 0},
+		JabatanID:   pgtype.Text{String: arg.jabatanID, Valid: arg.jabatanID != ""},
+		KategoriSk:  pgtype.Text{String: arg.kategoriSK, Valid: arg.kategoriSK != ""},
+		NoSk:        pgtype.Text{String: arg.noSK, Valid: arg.noSK != ""},
+		StatusTtd:   statusTandatangan,
+		PnsID:       pnsID,
+	})
+	if err != nil {
+		return nil, 0, fmt.Errorf("[suratkeputusan-listTandatangan] repo CountTandaTanganSuratKeputusanByID: %w", err)
+	}
+
+	uniqUnorIDs := typeutil.UniqMap(data, func(row repo.ListTandaTanganSuratKeputusanByPNSIDRow, _ int) string {
+		return row.UnorID.String
+	})
+	listUnorLengkap, err := s.repo.ListUnitKerjaLengkapByIDs(ctx, uniqUnorIDs)
+	if err != nil {
+		return nil, 0, fmt.Errorf("[suratkeputusan-listTandatangan] repo ListUnitKerjaLengkapByIDs: %w", err)
+	}
+
+	unorLengkapByID := typeutil.SliceToMap(listUnorLengkap, func(unorLengkap repo.ListUnitKerjaLengkapByIDsRow) (string, string) {
+		return unorLengkap.ID, unorLengkap.NamaUnorLengkap
+	})
+
+	result := typeutil.Map(data, func(row repo.ListTandaTanganSuratKeputusanByPNSIDRow) koreksiSuratKeputusan {
+		return koreksiSuratKeputusan{
+			IDSK:        row.FileID,
+			NamaPemilik: row.NamaPemilikSk.String,
+			NIPPemilik:  row.NipPemilikSk.String,
+			KategoriSK:  row.KategoriSk.String,
+			NoSK:        row.NoSk.String,
+			TanggalSK:   db.Date(row.TanggalSk.Time),
+			UnitKerja:   unorLengkapByID[row.UnorID.String],
+		}
+	})
+	return result, uint(count), nil
+}
+
+func (s *service) listTandatanganAntrean(ctx context.Context, limit, offset uint, nip string) ([]antreanSK, uint, error) {
+	pnsID, err := s.repo.GetPegawaiPNSIDByNIP(ctx, nip)
+	if err != nil {
+		return nil, 0, fmt.Errorf("[suratkeputusan-listTandatanganAntrean] repo GetPegawaiPNSIDByNIP: %w", err)
+	}
+	data, err := s.repo.ListTandaTanganSuratKeputusanAntreanByPNSID(ctx, repo.ListTandaTanganSuratKeputusanAntreanByPNSIDParams{
+		Limit:  int32(limit),
+		Offset: int32(offset),
+		PnsID:  pnsID,
+	})
+	if err != nil {
+		return nil, 0, fmt.Errorf("[suratkeputusan-listTandatanganAntrean] repo ListTandaTanganSuratKeputusanAntreanByID: %w", err)
+	}
+
+	count, err := s.repo.CountTandaTanganSuratKeputusanAntreanByPNSID(ctx, pnsID)
+	if err != nil {
+		return nil, 0, fmt.Errorf("[suratkeputusan-listTandatanganAntrean] repo CountTandaTanganSuratKeputusanAntreanByID: %w", err)
+	}
+
+	result := typeutil.Map(data, func(row repo.ListTandaTanganSuratKeputusanAntreanByPNSIDRow) antreanSK {
+		return antreanSK{
+			KategoriSK: row.Kategori.String,
+			Jumlah:     row.Jumlah,
+		}
+	})
+	return result, uint(count), nil
+}
+
+type tandatanganSKParams struct {
+	id         string
+	statusTtd  string
+	nip        string
+	catatanTtd string
+}
+
+func (s *service) tandatanganSK(ctx context.Context, arg tandatanganSKParams) (error, error) {
+	pnsID, err := s.repo.GetPegawaiPNSIDByNIP(ctx, arg.nip)
+	if err != nil {
+		return fmt.Errorf("[suratkeputusan-tandatanganSK] repo GetPegawaiPNSIDByNIP: %w", err), nil
+	}
+
+	sk, err := s.repo.GetSuratKeputusanByID(ctx, arg.id)
+	if err != nil {
+		return fmt.Errorf("[suratkeputusan-tandatanganSK] repo GetSuratKeputusanByID: %w", err), nil
+	}
+
+	if sk.TtdPegawaiID.String != pnsID {
+		return nil, errors.New("bukan pegawai yang bertugas menandatangani surat keputusan ini")
+	}
+
+	if !s.cekTtd(sk) {
+		return nil, errors.New("surat keputusan belum siap untuk ditandatangani")
+	}
+
+	statusTtd := statusTandatanganRequest(arg.statusTtd)
+	if !statusTtd.tandaTangan() && !statusTtd.dikembalikan() {
+		return nil, errors.New("status tandatangan tidak valid")
+	}
+
+	if statusTtd.dikembalikan() {
+		return s.rejectTandatanganSK(ctx, arg.id, arg.catatanTtd, arg.nip), nil
+	}
+
+	return s.approveTandatanganSK(ctx, arg.id, arg.nip), nil
+}
+
+func (s *service) rejectTandatanganSK(ctx context.Context, id, catatanTtd, nip string) error {
+	err := s.withTransaction(ctx, func(txRepo repository) error {
+		err := txRepo.UpdateStatusSuratKeputusanByID(ctx, repo.UpdateStatusSuratKeputusanByIDParams{
+			ID:        id,
+			StatusTtd: pgtype.Int2{Int16: int16(statusTtdDikembalikan), Valid: true},
+			StatusSk:  pgtype.Int2{Int16: int16(statusSK(statusSKDikembalikan)), Valid: true},
+			Catatan:   catatanTtd,
+		})
+		if err != nil {
+			return fmt.Errorf("[suratkeputusan-rejectTandatanganSK] UpdateStatusSuratKeputusanByID: %w", err)
+		}
+
+		err = txRepo.InsertRiwayatSuratKeputusan(ctx, repo.InsertRiwayatSuratKeputusanParams{
+			FileID:          id,
+			NipPemroses:     nip,
+			Tindakan:        string(suratKeputusanRiwayatMessage(dikembalikanOlehPenandatangan)),
+			CatatanTindakan: catatanTtd,
+		})
+		if err != nil {
+			return fmt.Errorf("[suratkeputusan-rejectTandatanganSK] InsertRiwayatSuratKeputusan: %w", err)
+		}
+		return nil
+	})
+	if err != nil {
+		return fmt.Errorf("[suratkeputusan-rejectTandatanganSK] %w", err)
+	}
+	return err
+}
+
+func (s *service) approveTandatanganSK(ctx context.Context, id, nip string) error {
+	err := s.withTransaction(ctx, func(txRepo repository) error {
+		err := txRepo.UpdateStatusSuratKeputusanByID(ctx, repo.UpdateStatusSuratKeputusanByIDParams{
+			ID:        id,
+			StatusTtd: pgtype.Int2{Int16: int16(statusTtdSudahTtd), Valid: true},
+			StatusSk:  pgtype.Int2{Int16: int16(statusSK(statusSKSudahTtd)), Valid: true},
+		})
+		if err != nil {
+			return fmt.Errorf("[suratkeputusan-approveTandatanganSK] UpdateStatusSuratKeputusanByID: %w", err)
+		}
+
+		err = txRepo.InsertRiwayatSuratKeputusan(ctx, repo.InsertRiwayatSuratKeputusanParams{
+			FileID:          id,
+			NipPemroses:     nip,
+			Tindakan:        string(suratKeputusanRiwayatMessage(ditandatangani)),
+			CatatanTindakan: "",
+			AksesPengguna:   "web",
+		})
+		if err != nil {
+			return fmt.Errorf("[suratkeputusan-approveTandatanganSK] InsertRiwayatSuratKeputusan: %w", err)
+		}
+		return err
+	})
+	if err != nil {
+		return fmt.Errorf("[suratkeputusan-approveTandatanganSK] %w", err)
+	}
+	return nil
 }

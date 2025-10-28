@@ -132,7 +132,8 @@ SELECT
     rj.nama_jabatan as jabatan_penandatangan,
     status_ttd,
     status_koreksi,
-    catatan
+    catatan,
+    ttd_pegawai_id
 FROM surat_keputusan fds
 JOIN pegawai p on p.nip_baru = fds.nip_sk and p.deleted_at is null
 LEFT JOIN pegawai pemroses on pemroses.nip_baru = fds.nip_pemroses and pemroses.deleted_at is null
@@ -212,7 +213,7 @@ WHERE fdc.deleted_at IS NULL
     AND (sqlc.narg('status_koreksi')::integer is NULL or fdc.status_koreksi = sqlc.narg('status_koreksi')::integer)
     AND fdc.pegawai_korektor_id = @pns_id::varchar;
 
--- name: ListAntrianKoreksiSuratKeputusanByNIP :many
+-- name: ListAntreanKoreksiSuratKeputusanByNIP :many
 SELECT 
   fds.kategori,
   COUNT(1) AS jumlah
@@ -232,7 +233,7 @@ GROUP BY
   fds.kategori
 LIMIT $1 OFFSET $2;
 
--- name: CountAntrianKoreksiSuratKeputusanByNIP :one
+-- name: CountAntreanKoreksiSuratKeputusanByNIP :one
 SELECT 
     COUNT(DISTINCT fds.kategori) AS total
 FROM 
@@ -311,3 +312,85 @@ INSERT INTO riwayat_surat_keputusan (
     now(),
     now()
 );  
+
+-- name: ListTandaTanganSuratKeputusanByPNSID :many
+SELECT
+    fds.file_id,
+    p.nama as nama_pemilik_sk,
+    p.nip_baru as nip_pemilik_sk,
+    fds.kategori AS kategori_sk,
+    fds.no_sk,
+    fds.tanggal_sk,
+    p.unor_id
+FROM surat_keputusan fds
+JOIN pegawai p ON fds.nip_sk = p.nip_baru AND p.deleted_at IS NULL
+LEFT JOIN ref_unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
+WHERE fds.deleted_at IS NULL
+    AND (sqlc.narg('unit_kerja_id')::VARCHAR IS NULL
+        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.id
+        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_1
+        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_2
+        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_3
+        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_4)
+    AND (sqlc.narg('nama_pemilik')::VARCHAR IS NULL OR p.nama ILIKE '%' || sqlc.narg('nama_pemilik')::VARCHAR || '%')
+    AND (sqlc.narg('nip_pemilik')::VARCHAR IS NULL OR fds.nip_sk = sqlc.narg('nip_pemilik')::VARCHAR)
+    AND (sqlc.narg('golongan_id')::INTEGER IS NULL OR p.gol_id = sqlc.narg('golongan_id')::INTEGER)
+    AND (sqlc.narg('jabatan_id')::VARCHAR IS NULL OR p.jabatan_instansi_id = sqlc.narg('jabatan_id')::VARCHAR)
+    AND (sqlc.narg('kategori_sk')::VARCHAR is NULL OR fds.kategori ILIKE '%' || sqlc.narg('kategori_sk')::VARCHAR || '%')
+    AND (sqlc.narg('no_sk')::VARCHAR IS NULL OR fds.no_sk ILIKE '%' || sqlc.narg('no_sk')::VARCHAR || '%')
+    AND fds.status_koreksi = 1 
+    and (sqlc.narg('status_ttd')::integer is NULL or fds.status_ttd = sqlc.narg('status_ttd')::integer)
+    AND fds.ttd_pegawai_id = @pns_id::varchar
+ORDER BY fds.created_at DESC
+LIMIT $1 OFFSET $2;
+
+-- name: CountTandaTanganSuratKeputusanByPNSID :one
+select
+    count(1) as total
+FROM surat_keputusan fds
+JOIN pegawai p ON fds.nip_sk = p.nip_baru AND p.deleted_at IS NULL
+LEFT JOIN ref_unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
+WHERE fds.deleted_at IS NULL
+    AND (sqlc.narg('unit_kerja_id')::VARCHAR IS NULL
+        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.id
+        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_1
+        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_2
+        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_3
+        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_4)
+    AND (sqlc.narg('nama_pemilik')::VARCHAR IS NULL OR p.nama ILIKE '%' || sqlc.narg('nama_pemilik')::VARCHAR || '%')
+    AND (sqlc.narg('nip_pemilik')::VARCHAR IS NULL OR fds.nip_sk = sqlc.narg('nip_pemilik')::VARCHAR)
+    AND (sqlc.narg('golongan_id')::INTEGER IS NULL OR p.gol_id = sqlc.narg('golongan_id')::INTEGER)
+    AND (sqlc.narg('jabatan_id')::VARCHAR IS NULL OR p.jabatan_instansi_id = sqlc.narg('jabatan_id')::VARCHAR)
+    AND (sqlc.narg('kategori_sk')::VARCHAR is NULL OR fds.kategori ILIKE '%' || sqlc.narg('kategori_sk')::VARCHAR || '%')
+    AND (sqlc.narg('no_sk')::VARCHAR IS NULL OR fds.no_sk ILIKE '%' || sqlc.narg('no_sk')::VARCHAR || '%')
+    AND fds.status_koreksi = 1 
+    and (sqlc.narg('status_ttd')::integer is NULL or fds.status_ttd = sqlc.narg('status_ttd')::integer)
+    AND fds.ttd_pegawai_id = @pns_id::varchar;
+
+-- name: ListTandaTanganSuratKeputusanAntreanByPNSID :many
+SELECT 
+    fds.kategori,
+    fds.ttd_pegawai_id,
+    COUNT(*) AS jumlah
+FROM surat_keputusan fds
+JOIN koreksi_surat_keputusan fdc  ON fds.file_id = fdc.file_id AND fdc.deleted_at IS NULL AND fdc.status_koreksi = 2
+WHERE fds.status_ttd = 0
+  AND fds.ds_ok = true
+  AND fds.kategori NOT IN ('< Semua >', '< Pilih >')
+  AND fds.ttd_pegawai_id = @pns_id::varchar
+  AND fds.deleted_at IS NULL
+GROUP BY 
+    fds.kategori,
+    fds.ttd_pegawai_id
+LIMIT $1 OFFSET $2;
+
+-- name: CountTandaTanganSuratKeputusanAntreanByPNSID :one
+select
+    count(distinct fds.kategori) as total
+FROM surat_keputusan fds
+JOIN koreksi_surat_keputusan fdc  ON fds.file_id = fdc.file_id AND fdc.deleted_at IS NULL AND fdc.status_koreksi = 2
+WHERE fds.status_ttd = 0
+  AND fds.ds_ok = true
+  AND fds.kategori NOT IN ('< Semua >', '< Pilih >')
+  AND fds.ttd_pegawai_id = @pns_id::varchar
+  AND fds.deleted_at IS NULL;

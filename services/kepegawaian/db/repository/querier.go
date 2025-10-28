@@ -10,7 +10,7 @@ import (
 
 type Querier interface {
 	CountAkarUnitKerja(ctx context.Context) (int64, error)
-	CountAntrianKoreksiSuratKeputusanByNIP(ctx context.Context, nipKorektor string) (int64, error)
+	CountAntreanKoreksiSuratKeputusanByNIP(ctx context.Context, nipKorektor string) (int64, error)
 	CountJenisKenaikanPangkat(ctx context.Context) (int64, error)
 	CountKoreksiSuratKeputusanByPNSID(ctx context.Context, arg CountKoreksiSuratKeputusanByPNSIDParams) (int64, error)
 	CountPegawaiAktif(ctx context.Context, arg CountPegawaiAktifParams) (int64, error)
@@ -45,6 +45,8 @@ type Querier interface {
 	CountRiwayatSertifikasi(ctx context.Context, nip pgtype.Text) (int64, error)
 	CountSuratKeputusan(ctx context.Context, arg CountSuratKeputusanParams) (int64, error)
 	CountSuratKeputusanByNIP(ctx context.Context, arg CountSuratKeputusanByNIPParams) (int64, error)
+	CountTandaTanganSuratKeputusanAntreanByPNSID(ctx context.Context, pnsID string) (int64, error)
+	CountTandaTanganSuratKeputusanByPNSID(ctx context.Context, arg CountTandaTanganSuratKeputusanByPNSIDParams) (int64, error)
 	CountTemplates(ctx context.Context) (int64, error)
 	CountUnitKerja(ctx context.Context, arg CountUnitKerjaParams) (int64, error)
 	CountUnitKerjaByDiatasanID(ctx context.Context, diatasanID pgtype.Text) (int64, error)
@@ -109,7 +111,7 @@ type Querier interface {
 	InsertRiwayatSuratKeputusan(ctx context.Context, arg InsertRiwayatSuratKeputusanParams) error
 	ListAkarUnitKerja(ctx context.Context, arg ListAkarUnitKerjaParams) ([]ListAkarUnitKerjaRow, error)
 	ListAnakByNip(ctx context.Context, nipBaru pgtype.Text) ([]ListAnakByNipRow, error)
-	ListAntrianKoreksiSuratKeputusanByNIP(ctx context.Context, arg ListAntrianKoreksiSuratKeputusanByNIPParams) ([]ListAntrianKoreksiSuratKeputusanByNIPRow, error)
+	ListAntreanKoreksiSuratKeputusanByNIP(ctx context.Context, arg ListAntreanKoreksiSuratKeputusanByNIPParams) ([]ListAntreanKoreksiSuratKeputusanByNIPRow, error)
 	ListJenisKenaikanPangkat(ctx context.Context, arg ListJenisKenaikanPangkatParams) ([]ListJenisKenaikanPangkatRow, error)
 	ListKoreksiSuratKeputusanByPNSID(ctx context.Context, arg ListKoreksiSuratKeputusanByPNSIDParams) ([]ListKoreksiSuratKeputusanByPNSIDRow, error)
 	ListKorektorSuratKeputusanByID(ctx context.Context, id string) ([]ListKorektorSuratKeputusanByIDRow, error)
@@ -148,6 +150,8 @@ type Querier interface {
 	ListRiwayatSertifikasi(ctx context.Context, arg ListRiwayatSertifikasiParams) ([]ListRiwayatSertifikasiRow, error)
 	ListSuratKeputusan(ctx context.Context, arg ListSuratKeputusanParams) ([]ListSuratKeputusanRow, error)
 	ListSuratKeputusanByNIP(ctx context.Context, arg ListSuratKeputusanByNIPParams) ([]ListSuratKeputusanByNIPRow, error)
+	ListTandaTanganSuratKeputusanAntreanByPNSID(ctx context.Context, arg ListTandaTanganSuratKeputusanAntreanByPNSIDParams) ([]ListTandaTanganSuratKeputusanAntreanByPNSIDRow, error)
+	ListTandaTanganSuratKeputusanByPNSID(ctx context.Context, arg ListTandaTanganSuratKeputusanByPNSIDParams) ([]ListTandaTanganSuratKeputusanByPNSIDRow, error)
 	ListTemplates(ctx context.Context, arg ListTemplatesParams) ([]ListTemplatesRow, error)
 	ListUnitKerjaByDiatasanID(ctx context.Context, arg ListUnitKerjaByDiatasanIDParams) ([]ListUnitKerjaByDiatasanIDRow, error)
 	ListUnitKerjaByNamaOrInduk(ctx context.Context, arg ListUnitKerjaByNamaOrIndukParams) ([]ListUnitKerjaByNamaOrIndukRow, error)

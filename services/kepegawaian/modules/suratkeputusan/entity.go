@@ -89,11 +89,6 @@ func statusKoreksiValue(status string) *int32 {
 	return nil
 }
 
-type antrianKoreksiSuratKeputusan struct {
-	KategoriSK string `json:"kategori_sk"`
-	Jumlah     int64  `json:"jumlah"`
-}
-
 type statusKoreksiSK int16
 
 const (
@@ -156,4 +151,47 @@ const (
 	diteruskanKePenandatangan       suratKeputusanRiwayatMessage = "SK di teruskan ke penandatangan"
 	diteruskanKeKorektorSelanjutnya suratKeputusanRiwayatMessage = "SK di teruskan ke korektor " // korektor n
 	dikembalikan                    suratKeputusanRiwayatMessage = "Koreksi SK (SK dikembalikan)"
+	dikembalikanOlehPenandatangan   suratKeputusanRiwayatMessage = "SK dikembalikan oleh penandatangan"
+	ditandatangani                  suratKeputusanRiwayatMessage = "Berhasil ditandatangan"
 )
+
+type statusTandaTangan string
+
+const (
+	statusTandaTanganBelumDitandatangan statusTandaTangan = "Belum Ditandatangan"
+	statusTandaTanganSudahDitandatangan statusTandaTangan = "Sudah Ditandatangan"
+)
+
+func (s statusTandaTangan) value() int32 {
+	switch s {
+	case statusTandaTanganBelumDitandatangan:
+		return 0
+	case statusTandaTanganSudahDitandatangan:
+		return 1
+	}
+	return -1
+}
+
+func (s statusTandaTangan) valid() bool {
+	return s == statusTandaTanganBelumDitandatangan || s == statusTandaTanganSudahDitandatangan
+}
+
+type antreanSK struct {
+	KategoriSK string `json:"kategori_sk"`
+	Jumlah     int64  `json:"jumlah"`
+}
+
+type statusTandatanganRequest string
+
+const (
+	statusTandatanganRequestTandatangan  statusTandatanganRequest = "Tandatangan"
+	statusTandatanganRequestDikembalikan statusTandatanganRequest = "Dikembalikan"
+)
+
+func (s statusTandatanganRequest) tandaTangan() bool {
+	return s == statusTandatanganRequestTandatangan
+}
+
+func (s statusTandatanganRequest) dikembalikan() bool {
+	return s == statusTandatanganRequestDikembalikan
+}

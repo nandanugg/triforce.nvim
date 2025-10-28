@@ -24,6 +24,10 @@ func RegisterRoutes(e *echo.Echo, repo repository, db *pgxpool.Pool, mwAuth api.
 	e.Add(http.MethodGet, "/v1/koreksi-surat-keputusan", h.listKoreksi, mwAuth(api.Kode_SuratKeputusanApproval_Review))
 	e.Add(http.MethodGet, "/v1/koreksi-surat-keputusan/:id", h.getDetailSuratKeputusan, mwAuth(api.Kode_SuratKeputusanApproval_Review))
 	e.Add(http.MethodGet, "/v1/koreksi-surat-keputusan/:id/berkas", h.getBerkasAdmin, mwAuth(api.Kode_SuratKeputusanApproval_Review))
-	e.Add(http.MethodGet, "/v1/koreksi-surat-keputusan/antrian", h.listKoreksiAntrian, mwAuth(api.Kode_SuratKeputusanApproval_Review))
+	e.Add(http.MethodGet, "/v1/koreksi-surat-keputusan/antrean", h.listKoreksiAntrean, mwAuth(api.Kode_SuratKeputusanApproval_Review))
 	e.Add(http.MethodPost, "/v1/koreksi-surat-keputusan/:id", h.koreksiSuratKeputusan, mwAuth(api.Kode_SuratKeputusanApproval_Review))
+
+	e.Add(http.MethodGet, "/v1/tanda-tangan-surat-keputusan", h.listTandatangan, mwAuth(api.Kode_SuratKeputusanApproval_Sign))
+	e.Add(http.MethodGet, "/v1/tanda-tangan-surat-keputusan/antrean", h.listTandatanganAntrean, mwAuth(api.Kode_SuratKeputusanApproval_Sign))
+	e.Add(http.MethodPost, "/v1/tanda-tangan-surat-keputusan/:id", h.tandatanganSK, mwAuth(api.Kode_SuratKeputusanApproval_Sign))
 }

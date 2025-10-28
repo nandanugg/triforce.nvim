@@ -22,7 +22,7 @@ tags:
   - name: Admin Unit Kerja
   - name: Data Pribadi
   - name: Keluarga
-  - name: Koreksi Surat Keputusan Pegawai
+  - name: Koreksi dan Tanda Tangan Surat Keputusan Pegawai
   - name: Pegawai
   - name: Ref Agama
   - name: Ref Golongan
@@ -3799,7 +3799,7 @@ paths:
   /v1/koreksi-surat-keputusan:
     get:
       tags:
-        - Koreksi Surat Keputusan Pegawai
+        - Koreksi dan Tanda Tangan Surat Keputusan Pegawai
       summary: Lihat daftar koreksi surat keputusan belum dikoreksi.
       description: Lihat daftar koreksi surat keputusan belum dikoreksi.
       operationId: listKoreksiSuratKeputusanBelumDikoreksi
@@ -3876,13 +3876,13 @@ paths:
                       $ref: "#/components/schemas/koreksiSuratKeputusan"
                   meta:
                     $ref: "#/components/schemas/metaPagination"
-  /v1/koreksi-surat-keputusan/antrian:
+  /v1/koreksi-surat-keputusan/antrean:
     get:
       tags:
-        - Koreksi Surat Keputusan Pegawai
-      summary: Lihat daftar koreksi surat keputusan antrian.
-      description: Lihat daftar koreksi surat keputusan antrian.
-      operationId: listKoreksiSuratKeputusanAntrian
+        - Koreksi dan Tanda Tangan Surat Keputusan Pegawai
+      summary: Lihat daftar koreksi surat keputusan antrean.
+      description: Lihat daftar koreksi surat keputusan antrean.
+      operationId: listKoreksiSuratKeputusanAntrean
       parameters:
         - $ref: "#/components/parameters/authRequired"
         - $ref: "#/components/parameters/limit"
@@ -3912,7 +3912,7 @@ paths:
   /v1/koreksi-surat-keputusan/{id}:
     get:
       tags:
-        - Koreksi Surat Keputusan Pegawai
+        - Koreksi dan Tanda Tangan Surat Keputusan Pegawai
       summary: Lihat detail koreksi surat keputusan.
       description: Lihat detail koreksi surat keputusan.
       operationId: getDetailKoreksiSuratKeputusan
@@ -3935,7 +3935,7 @@ paths:
                     $ref: "#/components/schemas/koreksiSuratKeputusan"
     post:
       tags:
-        - Koreksi Surat Keputusan Pegawai
+        - Koreksi dan Tanda Tangan Surat Keputusan Pegawai
       summary: Koreksi surat keputusan.
       description: Koreksi surat keputusan.
       operationId: koreksiSuratKeputusan
@@ -4869,6 +4869,150 @@ paths:
                 format: binary
         "404":
           description: Berkas sk tidak ditemukan atau User tidak mempunyai akses.
+  /v1/tanda-tangan-surat-keputusan:
+    get:
+      tags:
+        - Koreksi dan Tanda Tangan Surat Keputusan Pegawai
+      summary: Lihat daftar tanda tangan surat keputusan.
+      description: Lihat daftar tanda tangan surat keputusan.
+      operationId: listTandaTanganSuratKeputusan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+        - name: unit_kerja_id
+          in: query
+          description: Filter berdasarkan unit kerja ID
+          required: false
+          schema:
+            type: string
+            example: "1234567890"
+        - name: nama_pemilik
+          in: query
+          description: Filter berdasarkan nama pemilik
+          required: false
+          schema:
+            type: string
+            example: "John Doe"
+        - name: nip
+          in: query
+          description: Filter berdasarkan NIP pemilik
+          required: false
+          schema:
+            type: string
+            example: "1234567890"
+        - name: golongan_id
+          in: query
+          description: Filter berdasarkan Golongan ID
+          required: false
+          schema:
+            type: integer
+            example: 1
+        - name: jabatan_id
+          in: query
+          description: Filter berdasarkan Jabatan ID
+          required: false
+          schema:
+            type: string
+            example: JAB-01
+        - name: kategori_sk
+          in: query
+          description: Filter berdasarkan kategori surat keputusan
+          required: false
+          schema:
+            type: string
+        - name: no_sk
+          in: query
+          description: Filter berdasarkan nomor surat keputusan
+          required: false
+          schema:
+            type: string
+            example: "1234567890"
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: ["Sudah Ditandatangan", "Belum Ditandatangan"]
+            description: Filter berdasarkan status koreksi
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/koreksiSuratKeputusan"
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/tanda-tangan-surat-keputusan/antrean:
+    get:
+      tags:
+        - Koreksi dan Tanda Tangan Surat Keputusan Pegawai
+      summary: Lihat daftar tanda tangan surat keputusan antrean.
+      description: Lihat daftar tanda tangan surat keputusan antrean.
+      operationId: listTandatanganAntrean
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        kategori_sk:
+                          description: Kategori surat keputusan
+                          type: string
+                        jumlah:
+                          description: Jumlah surat keputusan
+                          type: integer
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/tanda-tangan-surat-keputusan/{id}:
+    post:
+      tags:
+        - Koreksi dan Tanda Tangan Surat Keputusan Pegawai
+      summary: Tanda tangan surat keputusan.
+      description: Tanda tangan surat keputusan berdasarkan ID SK Pegawai.
+      operationId: tandatanganSK
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status_ttd:
+                  type: string
+                  description: Status tandatangan
+                  enum: ["Tandatangan", "Dikembalikan"]
+                catatan_ttd:
+                  type: string
+                  description: Catatan tandatangan
+                  nullable: true
+      responses:
+        "200":
+          description: Sukses.
   /v1/tingkat-pendidikan:
     get:
       tags:
