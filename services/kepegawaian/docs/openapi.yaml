@@ -3965,6 +3965,36 @@ paths:
       responses:
         "204":
           description: Sukses.
+  /v1/koreksi-surat-keputusan/{id}/berkas:
+    get:
+      tags:
+        - Koreksi dan Tanda Tangan Surat Keputusan Pegawai
+      summary: Berkas untuk preview koreksi surat keputusan pegawai.
+      description: Berkas surat keputusan pegawai berdasarkan ID SK Pegawai. Signed=true akan mengembalikan berkas yang sudah disign.
+      operationId: getBerkasKoreksiSuratKeputusan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: signed
+          in: query
+          required: false
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Berkas sk tidak ditemukan atau User tidak mempunyai akses.
+  
   /v1/pegawai/profil/{pns_id}:
     get:
       tags:
@@ -6309,3 +6339,12 @@ components:
           example: "koreksi"
           nullable: true
           enum: ["koreksi", "tandatangan", ""]
+        korektor_ke: 
+          type: integer
+          description: Urutan korektor dari pengguna yang sedang koreksi surat keputusan
+          nullable: true
+          example : 1
+        status_sk:
+          type: string
+          example: "Sedang Dikoreksi"
+          description: Status SK

@@ -63,8 +63,10 @@ type koreksiSuratKeputusan struct {
 	UnitKerja    string                   `json:"unit_kerja"`
 	NamaPemilik  string                   `json:"nama_pemilik"`
 	NIPPemilik   string                   `json:"nip_pemilik"`
+	StatusSK     string                   `json:"status_sk,omitempty"`
 	ListKorektor []korektorSuratKeputusan `json:"list_korektor,omitempty"`
 	Aksi         *string                  `json:"aksi,omitempty"`
+	KorektorKe   int                      `json:"korektor_ke,omitempty"`
 }
 
 type korektorSuratKeputusan struct {

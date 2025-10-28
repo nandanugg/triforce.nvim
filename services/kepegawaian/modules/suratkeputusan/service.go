@@ -460,6 +460,8 @@ func (s *service) getDetailSuratKeputusan(ctx context.Context, id, nip string) (
 
 	aksi := s.getAksiSuratKeputusan(sk, korektor, nip)
 
+	korektorKe := 0
+
 	return &koreksiSuratKeputusan{
 		IDSK:        id,
 		KategoriSK:  sk.KategoriSk.String,
@@ -469,6 +471,9 @@ func (s *service) getDetailSuratKeputusan(ctx context.Context, id, nip string) (
 		NamaPemilik: sk.NamaPemilikSk.String,
 		NIPPemilik:  sk.NipPemilikSk.String,
 		ListKorektor: typeutil.Map(korektor, func(row repo.ListKorektorSuratKeputusanByIDRow) korektorSuratKeputusan {
+			if nip == row.NipKorektor.String {
+				korektorKe = int(row.KorektorKe.Int16)
+			}
 			return korektorSuratKeputusan{
 				Nama:           row.NamaKorektor.String,
 				NIP:            row.NipKorektor.String,
@@ -479,7 +484,9 @@ func (s *service) getDetailSuratKeputusan(ctx context.Context, id, nip string) (
 				KorektorKe:     row.KorektorKe.Int16,
 			}
 		}),
-		Aksi: &aksi,
+		Aksi:       &aksi,
+		StatusSK:   statusSKText(sk.StatusSk.Int16),
+		KorektorKe: korektorKe,
 	}, nil
 }
 
