@@ -47,11 +47,11 @@ func Test_handler_list(t *testing.T) {
 			('1a', 'Jane Doe', 'jane.doe@test.com', '2012-01-01',  '00000000-0000-0000-0000-000000000001', 'keycloak', null),
 			('1a', 'Will Doe', 'will.doe@test.com', null,          '00000000-0000-0000-0000-000000000002', 'zimbra',   null),
 			('1a', 'Wish Doe', 'wish.doe@test.com', '2011-01-01',  '00000000-0000-0000-0000-000000000003', 'zimbra',   null),
-			('1a', null,       null,                '2009-01-01',  '00000000-0000-0000-0000-000000000004', 'zimbra',   null),
+			('1a', '',         '',                  '2009-01-01',  '00000000-0000-0000-0000-000000000004', 'zimbra',   null),
 			('1b', 'Will',     'will@test.com',     '2000-01-01',  '00000000-0000-0000-0000-000000000005', 'zimbra',   null),
 			('1b', 'Joy',      'joy@test.com',      '2001-01-01',  '00000000-0000-0000-0000-000000000006', 'zimbra',   '2000-01-01'),
 			('1b', '',         '',                  null,          '00000000-0000-0000-0000-000000000007', 'zimbra',   null),
-			('1c', null,       null,                null,          '00000000-0000-0000-0000-000000000008', 'zimbra',   '2000-01-01'),
+			('1c', '',         '',                  null,          '00000000-0000-0000-0000-000000000008', 'zimbra',   '2000-01-01'),
 			('1d', 'Carl',     'carl@test.com',     null,          '00000000-0000-0000-0000-000000000009', 'zimbra',   null);
 	`
 	db := dbtest.New(t, dbmigrations.FS)
@@ -105,8 +105,8 @@ func Test_handler_list(t *testing.T) {
 							{
 								"id": "00000000-0000-0000-0000-000000000004",
 								"source": "zimbra",
-								"nama": null,
-								"email": null,
+								"nama": "",
+								"email": "",
 								"last_login_at": "2009-01-01T00:00:00Z"
 							},
 							{
@@ -306,8 +306,8 @@ func Test_handler_list(t *testing.T) {
 							{
 								"id": "00000000-0000-0000-0000-000000000004",
 								"source": "zimbra",
-								"nama": null,
-								"email": null,
+								"nama": "",
+								"email": "",
 								"last_login_at": "2009-01-01T00:00:00Z"
 							},
 							{
@@ -383,8 +383,8 @@ func Test_handler_list(t *testing.T) {
 							{
 								"id": "00000000-0000-0000-0000-000000000004",
 								"source": "zimbra",
-								"nama": null,
-								"email": null,
+								"nama": "",
+								"email": "",
 								"last_login_at": "2009-01-01T00:00:00Z"
 							},
 							{
@@ -513,8 +513,8 @@ func Test_handler_list(t *testing.T) {
 							{
 								"id": "00000000-0000-0000-0000-000000000004",
 								"source": "zimbra",
-								"nama": null,
-								"email": null,
+								"nama": "",
+								"email": "",
 								"last_login_at": "2009-01-01T00:00:00Z"
 							},
 							{
@@ -689,11 +689,11 @@ func Test_handler_get(t *testing.T) {
 			('1a', 'Jane Doe', 'jane.doe@test.com', '2012-01-01',  '00000000-0000-0000-0000-000000000001', 'keycloak', null),
 			('1a', 'Will Doe', 'will.doe@test.com', null,          '00000000-0000-0000-0000-000000000002', 'zimbra',   null),
 			('1a', 'Wish Doe', 'wish.doe@test.com', '2011-01-01',  '00000000-0000-0000-0000-000000000003', 'zimbra',   null),
-			('1a', null,       null,                '2009-01-01',  '00000000-0000-0000-0000-000000000004', 'zimbra',   null),
+			('1a', '',         '',                '2009-01-01',  '00000000-0000-0000-0000-000000000004', 'zimbra',   null),
 			('1b', 'Will',     'will@test.com',     '2000-01-01',  '00000000-0000-0000-0000-000000000005', 'zimbra',   null),
 			('1b', 'Joy',      'joy@test.com',      '2001-01-01',  '00000000-0000-0000-0000-000000000006', 'zimbra',   '2000-01-01'),
 			('1b', '',         '',                  null,          '00000000-0000-0000-0000-000000000007', 'zimbra',   null),
-			('1c', null,       null,                null,          '00000000-0000-0000-0000-000000000008', 'zimbra',   '2000-01-01'),
+			('1c', '',         '',                null,          '00000000-0000-0000-0000-000000000008', 'zimbra',   '2000-01-01'),
 			('1d', 'Carl',     'carl@test.com',     null,          '00000000-0000-0000-0000-000000000009', 'zimbra',   null);
 	`
 	db := dbtest.New(t, dbmigrations.FS)
@@ -747,8 +747,8 @@ func Test_handler_get(t *testing.T) {
 						{
 							"id": "00000000-0000-0000-0000-000000000004",
 							"source": "zimbra",
-							"nama": null,
-							"email": null,
+							"nama": "",
+							"email": "",
 							"last_login_at": "2009-01-01T00:00:00Z"
 						},
 						{
@@ -919,9 +919,9 @@ func Test_handler_update(t *testing.T) {
 			name: "ok: only create non default role",
 			dbData: seedData + `
 				insert into "user"
-					(id,                                     source,   nip) values
-					('00000000-0000-0000-0000-000000000001', 'zimbra', '1a'),
-					('00000000-0000-0000-0000-000000000001', 'zimbre', '1b');
+					(id,                                     source,   nip,  email,         nama) values
+					('00000000-0000-0000-0000-000000000001', 'zimbra', '1a', '1a@test.com', 'a1'),
+					('00000000-0000-0000-0000-000000000001', 'zimbre', '1b', '1b@test.com', 'b1');
 			`,
 			paramNIP:         "1a",
 			requestHeader:    http.Header{"Authorization": authHeader},
@@ -951,8 +951,8 @@ func Test_handler_update(t *testing.T) {
 			name: "ok: default roles behavior",
 			dbData: seedData + `
 				insert into "user"
-					(id,                                     source,   nip) values
-					('00000000-0000-0000-0000-000000000001', 'zimbra', '1a');
+					(id,                                     source,   nip,  email,         nama) values
+					('00000000-0000-0000-0000-000000000001', 'zimbra', '1a', '1a@test.com', 'a1');
 				insert into user_role
 					(nip,  role_id, created_at,   updated_at) values
 					('1a',  2,       '2000-01-01', '2000-01-01'),
@@ -986,8 +986,8 @@ func Test_handler_update(t *testing.T) {
 			name: "ok: create & delete user role",
 			dbData: seedData + `
 				insert into "user"
-					(id,                                     source,   nip) values
-					('00000000-0000-0000-0000-000000000001', 'zimbra', '1');
+					(id,                                     source,   nip, email,         nama) values
+					('00000000-0000-0000-0000-000000000001', 'zimbra', '1', '1a@test.com', 'a1');
 				insert into user_role
 					(nip,  role_id, created_at,   updated_at,   deleted_at) values
 					('1',  6,       '2000-01-01', '2000-01-01', null),
@@ -1029,9 +1029,9 @@ func Test_handler_update(t *testing.T) {
 			name: "ok: without updating any data",
 			dbData: seedData + `
 				insert into "user"
-					(id,                                     source,   nip) values
-					('00000000-0000-0000-0000-000000000001', 'zimbra', '1'),
-					('00000000-0000-0000-0000-000000000001', 'zimbre', '1');
+					(id,                                     source,   nip, email,         nama) values
+					('00000000-0000-0000-0000-000000000001', 'zimbra', '1', '1a@test.com', 'a1'),
+					('00000000-0000-0000-0000-000000000001', 'zimbre', '1', '1a@test.com', 'a1');
 				insert into user_role
 					(nip,  role_id, created_at,   updated_at,   deleted_at) values
 					('1',  1,       '2000-01-01', '2000-01-01', null),
@@ -1074,9 +1074,9 @@ func Test_handler_update(t *testing.T) {
 			name: "ok: success create user role that previously being deleted",
 			dbData: seedData + `
 				insert into "user"
-					(id,                                     source,   nip,  deleted_at) values
-					('00000000-0000-0000-0000-000000000001', 'zimbra', '1c', null),
-					('00000000-0000-0000-0000-000000000001', 'zimbre', '1c', '2000-01-01');
+					(id,                                     source,   nip,  email,         nama, deleted_at) values
+					('00000000-0000-0000-0000-000000000001', 'zimbra', '1c', '1c@test.com', 'c1', null),
+					('00000000-0000-0000-0000-000000000001', 'zimbre', '1c', '1c@test.com', 'c1', '2000-01-01');
 				insert into user_role
 					(nip,  role_id, created_at,   updated_at,   deleted_at) values
 					('1c', 1,       '2000-01-01', '2000-01-01', null),
@@ -1135,8 +1135,8 @@ func Test_handler_update(t *testing.T) {
 					(5,  'role5', false,      false),
 					(6,  'role6', false,      false);
 				insert into "user"
-					(id,                                     source,   nip) values
-					('00000000-0000-0000-0000-000000000001', 'zimbra', '1c');
+					(id,                                     source,   nip,  email,         nama) values
+					('00000000-0000-0000-0000-000000000001', 'zimbra', '1c', '1c@test.com', 'c1');
 				insert into user_role
 					(nip,  role_id, created_at,   updated_at) values
 					('1c', 1,       '2000-01-01', '2000-01-01'),
@@ -1196,8 +1196,8 @@ func Test_handler_update(t *testing.T) {
 			name: "error: user not found",
 			dbData: seedData + `
 				insert into "user"
-					(id,                                     source,   nip) values
-					('00000000-0000-0000-0000-000000000001', 'zimbra', '1');
+					(id,                                     source,   nip, email,         nama) values
+					('00000000-0000-0000-0000-000000000001', 'zimbra', '1', '1a@test.com', 'a1');
 				insert into user_role
 					(nip, role_id, created_at,   updated_at) values
 					('1', 1,       '2000-01-01', '2000-01-01');
@@ -1222,8 +1222,8 @@ func Test_handler_update(t *testing.T) {
 			name: "error: have active, deleted and not exists role",
 			dbData: seedData + `
 				insert into "user"
-					(id,                                     source,   nip) values
-					('00000000-0000-0000-0000-000000000001', 'zimbra', '1');
+					(id,                                     source,   nip, email,         nama) values
+					('00000000-0000-0000-0000-000000000001', 'zimbra', '1', '1a@test.com', 'a1');
 				insert into user_role
 					(nip, role_id, created_at,   updated_at) values
 					('1', 1,       '2000-01-01', '2000-01-01');
@@ -1248,9 +1248,9 @@ func Test_handler_update(t *testing.T) {
 			name: "error: user is deleted",
 			dbData: seedData + `
 				insert into "user"
-					(id,                                     source,     nip, deleted_at) values
-					('00000000-0000-0000-0000-000000000001', 'zimbra',   '1', '2000-01-01'),
-					('00000000-0000-0000-0000-000000000001', 'keycloak', '1', '2000-01-01');
+					(id,                                     source,     nip, email,         nama, deleted_at) values
+					('00000000-0000-0000-0000-000000000001', 'zimbra',   '1', '1a@test.com', 'a1', '2000-01-01'),
+					('00000000-0000-0000-0000-000000000001', 'keycloak', '1', '1a@test.com', 'a1', '2000-01-01');
 				insert into user_role
 					(nip, role_id, created_at,   updated_at) values
 					('1', 1,       '2000-01-01', '2000-01-01');
@@ -1275,8 +1275,8 @@ func Test_handler_update(t *testing.T) {
 			name: "error: don't allow empty json",
 			dbData: seedData + `
 				insert into "user"
-					(id,                                     source,   nip) values
-					('00000000-0000-0000-0000-000000000001', 'zimbra', '1');
+					(id,                                     source,   nip, email,         nama) values
+					('00000000-0000-0000-0000-000000000001', 'zimbra', '1', '1a@test.com', 'a1');
 				insert into user_role
 					(nip, role_id, created_at,   updated_at) values
 					('1', 1,       '2000-01-01', '2000-01-01');

@@ -69,7 +69,7 @@ type CreatePemberitahuanRow struct {
 	DiterbitkanPada pgtype.Timestamptz `db:"diterbitkan_pada"`
 	DitarikPada     pgtype.Timestamptz `db:"ditarik_pada"`
 	UpdatedBy       string             `db:"updated_by"`
-	UpdatedAt       pgtype.Date        `db:"updated_at"`
+	UpdatedAt       pgtype.Timestamptz `db:"updated_at"`
 	DeletedAt       pgtype.Timestamptz `db:"deleted_at"`
 	Status          string             `db:"status"`
 }
@@ -152,7 +152,7 @@ type ListPemberitahuanRow struct {
 	DiterbitkanPada pgtype.Timestamptz `db:"diterbitkan_pada"`
 	DitarikPada     pgtype.Timestamptz `db:"ditarik_pada"`
 	UpdatedBy       string             `db:"updated_by"`
-	UpdatedAt       pgtype.Date        `db:"updated_at"`
+	UpdatedAt       pgtype.Timestamptz `db:"updated_at"`
 	DeletedAt       pgtype.Timestamptz `db:"deleted_at"`
 	Status          string             `db:"status"`
 }
@@ -236,7 +236,7 @@ type UpdatePemberitahuanRow struct {
 	DiterbitkanPada pgtype.Timestamptz `db:"diterbitkan_pada"`
 	DitarikPada     pgtype.Timestamptz `db:"ditarik_pada"`
 	UpdatedBy       string             `db:"updated_by"`
-	UpdatedAt       pgtype.Date        `db:"updated_at"`
+	UpdatedAt       pgtype.Timestamptz `db:"updated_at"`
 	DeletedAt       pgtype.Timestamptz `db:"deleted_at"`
 	Status          string             `db:"status"`
 }

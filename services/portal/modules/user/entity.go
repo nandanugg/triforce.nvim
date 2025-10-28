@@ -22,7 +22,7 @@ type role struct {
 type profile struct {
 	ID          uuid.UUID  `json:"id"`
 	Source      string     `json:"source"`
-	Nama        *string    `json:"nama"`
-	Email       *string    `json:"email"`
+	Nama        string     `json:"nama"`
+	Email       string     `json:"email"`
 	LastLoginAt *time.Time `json:"last_login_at"`
 }

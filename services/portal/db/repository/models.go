@@ -20,7 +20,7 @@ type Pemberitahuan struct {
 	JudulBerita     string             `db:"judul_berita"`
 	DeskripsiBerita string             `db:"deskripsi_berita"`
 	UpdatedBy       string             `db:"updated_by"`
-	UpdatedAt       pgtype.Date        `db:"updated_at"`
+	UpdatedAt       pgtype.Timestamptz `db:"updated_at"`
 	Pinned          bool               `db:"pinned"`
 	DiterbitkanPada pgtype.Timestamptz `db:"diterbitkan_pada"`
 	DitarikPada     pgtype.Timestamptz `db:"ditarik_pada"`
@@ -80,16 +80,15 @@ type RoleResourcePermission struct {
 }
 
 type User struct {
-	ID             pgtype.UUID        `db:"id"`
-	Source         string             `db:"source"`
-	Nip            string             `db:"nip"`
-	CreatedAt      pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt      pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt      pgtype.Timestamptz `db:"deleted_at"`
-	Email          pgtype.Text        `db:"email"`
-	Nama           pgtype.Text        `db:"nama"`
-	UnitOrganisasi pgtype.Text        `db:"unit_organisasi"`
-	LastLoginAt    pgtype.Timestamptz `db:"last_login_at"`
+	ID          pgtype.UUID        `db:"id"`
+	Source      string             `db:"source"`
+	Nip         string             `db:"nip"`
+	CreatedAt   pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `db:"updated_at"`
+	DeletedAt   pgtype.Timestamptz `db:"deleted_at"`
+	Email       string             `db:"email"`
+	Nama        string             `db:"nama"`
+	LastLoginAt pgtype.Timestamptz `db:"last_login_at"`
 }
 
 type UserRole struct {

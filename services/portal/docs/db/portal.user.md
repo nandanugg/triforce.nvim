@@ -12,9 +12,8 @@
 | created_at | timestamp with time zone | now() | true |  |  |  |
 | updated_at | timestamp with time zone | now() | true |  |  |  |
 | deleted_at | timestamp with time zone |  | true |  |  |  |
-| email | varchar(255) |  | true |  |  |  |
-| nama | varchar(255) |  | true |  |  |  |
-| unit_organisasi | varchar(200) |  | true |  |  |  |
+| email | varchar(255) |  | false |  |  |  |
+| nama | varchar(255) |  | false |  |  |  |
 | last_login_at | timestamp with time zone |  | true |  |  |  |
 
 ## Constraints
@@ -45,7 +44,6 @@ erDiagram
   timestamp_with_time_zone deleted_at
   varchar_255_ email
   varchar_255_ nama
-  varchar_200_ unit_organisasi
   timestamp_with_time_zone last_login_at
 }
 ```

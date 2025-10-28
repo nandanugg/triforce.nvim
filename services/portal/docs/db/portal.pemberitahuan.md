@@ -9,9 +9,13 @@
 | id | bigint | nextval('pemberitahuan_id_seq'::regclass) | false |  |  |  |
 | judul_berita | text |  | false |  |  |  |
 | deskripsi_berita | text |  | false |  |  |  |
-| status | text |  | false |  |  |  |
 | updated_by | text |  | false |  |  |  |
-| updated_at | date |  | false |  |  |  |
+| updated_at | timestamp with time zone | now() | false |  |  |  |
+| pinned | boolean | false | false |  |  |  |
+| diterbitkan_pada | timestamp with time zone |  | false |  |  |  |
+| ditarik_pada | timestamp with time zone |  | false |  |  |  |
+| created_at | timestamp with time zone | now() | false |  |  |  |
+| deleted_at | timestamp with time zone |  | true |  |  |  |
 
 ## Constraints
 
@@ -37,9 +41,13 @@ erDiagram
   bigint id
   text judul_berita
   text deskripsi_berita
-  text status
   text updated_by
-  date updated_at
+  timestamp_with_time_zone updated_at
+  boolean pinned
+  timestamp_with_time_zone diterbitkan_pada
+  timestamp_with_time_zone ditarik_pada
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone deleted_at
 }
 ```
 

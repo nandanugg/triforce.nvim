@@ -2,6 +2,7 @@ package pemberitahuan
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -20,13 +21,9 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/portal/docs"
 )
 
-const YYYYMMDD = "2006-01-02"
-
 func getDate(day int) string {
-	time.Local = time.UTC
 	t := time.Now().AddDate(0, 0, day)
-	t = time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.UTC)
-	return t.Format(time.RFC3339)
+	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.UTC).Local().Format(time.RFC3339)
 }
 
 func Test_handler_ListPemberitahuan(t *testing.T) {
@@ -418,10 +415,10 @@ func Test_handler_adminCreatePemberitahuan(t *testing.T) {
 					"deskripsi_berita": "Some desc",
 					"pinned": false,
 					"status": "OVER",
-					"diterbitkan_pada":"2024-01-01T00:00:00Z",
-					"ditarik_pada":"2024-01-02T00:00:00Z",
+					"diterbitkan_pada":"` + time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC).Local().Format(time.RFC3339) + `",
+					"ditarik_pada":"` + time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC).Local().Format(time.RFC3339) + `",
 					"diperbarui_oleh": "123456789",
-					"terakhir_diperbarui": "` + getDate(0) + `"
+					"terakhir_diperbarui": "{updated_at}"
 				}
 			}`,
 		},
@@ -430,14 +427,24 @@ func Test_handler_adminCreatePemberitahuan(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			req := httptest.NewRequest(http.MethodPost, "/v1/admin/pemberitahuan", strings.NewReader(tt.requestBody))
 			req.Header = tt.requestHeader
 			rec := httptest.NewRecorder()
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
-			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
 			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+
+			if rec.Code == http.StatusCreated {
+				var resp createUpdateResponse
+				err := json.Unmarshal(rec.Body.Bytes(), &resp)
+				require.NoError(t, err)
+
+				assert.WithinDuration(t, time.Now(), resp.Data.TerakhirDiperbarui, 10*time.Second)
+				tt.wantResponseBody = strings.ReplaceAll(tt.wantResponseBody, "{updated_at}", resp.Data.TerakhirDiperbarui.Format(time.RFC3339Nano))
+			}
+			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
 		})
 	}
 }
@@ -488,10 +495,10 @@ func Test_handler_adminUpdatePemberitahuan(t *testing.T) {
 					"deskripsi_berita": "Some desc",
 					"pinned": false,
 					"status": "OVER",
-					"diterbitkan_pada":"2024-01-01T00:00:00Z",
-					"ditarik_pada":"2024-01-02T00:00:00Z",
+					"diterbitkan_pada":"` + time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC).Local().Format(time.RFC3339) + `",
+					"ditarik_pada":"` + time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC).Local().Format(time.RFC3339) + `",
 					"diperbarui_oleh": "123456789",
-					"terakhir_diperbarui": "` + getDate(0) + `"
+					"terakhir_diperbarui": "{updated_at}"
 				}
 			}`,
 		},
@@ -526,6 +533,7 @@ func Test_handler_adminUpdatePemberitahuan(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			req := httptest.NewRequest(http.MethodPut, "/v1/admin/pemberitahuan/"+tt.id, strings.NewReader(tt.requestBody))
 			req.Header = http.Header{
 				"Authorization": authHeader,
@@ -533,9 +541,19 @@ func Test_handler_adminUpdatePemberitahuan(t *testing.T) {
 			}
 			rec := httptest.NewRecorder()
 			e.ServeHTTP(rec, req)
+
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
-			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
 			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+
+			if rec.Code == http.StatusOK {
+				var resp createUpdateResponse
+				err := json.Unmarshal(rec.Body.Bytes(), &resp)
+				require.NoError(t, err)
+
+				assert.WithinDuration(t, time.Now(), resp.Data.TerakhirDiperbarui, 10*time.Second)
+				tt.wantResponseBody = strings.ReplaceAll(tt.wantResponseBody, "{updated_at}", resp.Data.TerakhirDiperbarui.Format(time.RFC3339Nano))
+			}
+			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
 		})
 	}
 }
@@ -574,6 +592,7 @@ func Test_handler_adminDeletePemberitahuan(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			req := httptest.NewRequest(http.MethodDelete, "/v1/admin/pemberitahuan/"+tt.id, nil)
 			req.Header = http.Header{"Authorization": authHeader}
 			rec := httptest.NewRecorder()

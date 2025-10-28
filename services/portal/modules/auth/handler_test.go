@@ -175,10 +175,10 @@ func Test_handler_exchangeToken(t *testing.T) {
 		{
 			name: "success exchange token user without roles using keycloak_id without forwarded header",
 			dbData: `
-				insert into "user" (id, source, nip, created_at, updated_at) values
-					('00000000-0000-0000-0000-000000000001', 'keycloak', '1c', '2000-01-01', '2000-01-01'),
-					('00000000-0000-0000-0000-000000000002', 'keycloak', '1a', '2000-01-01', '2000-01-01'),
-					('00000000-0000-0000-0000-000000000001', 'zimbra', '1b', '2000-01-01', '2000-01-01');
+				insert into "user" (id, source, nip, email, nama, created_at, updated_at) values
+					('00000000-0000-0000-0000-000000000001', 'keycloak', '1c', '1c@test.com', 'c1', '2000-01-01', '2000-01-01'),
+					('00000000-0000-0000-0000-000000000002', 'keycloak', '1a', '1a@test.com', 'a1', '2000-01-01', '2000-01-01'),
+					('00000000-0000-0000-0000-000000000001', 'zimbra', '1b', '1b@test.com', 'b1', '2000-01-01', '2000-01-01');
 			`,
 			requestBody:      `{"code": "my-code", "redirect_uri": "http://localhost:5173/callback"}`,
 			keycloakRespCode: 200,
@@ -206,49 +206,46 @@ func Test_handler_exchangeToken(t *testing.T) {
 			}`,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":              [16]byte(uuid.MustParse("00000000-0000-0000-0000-000000000001")),
-					"source":          "keycloak",
-					"nip":             "1c",
-					"nama":            nil,
-					"email":           nil,
-					"unit_organisasi": nil,
-					"last_login_at":   "{last_login_at}",
-					"created_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":      nil,
+					"id":            [16]byte(uuid.MustParse("00000000-0000-0000-0000-000000000001")),
+					"source":        "keycloak",
+					"nip":           "1c",
+					"nama":          "c1",
+					"email":         "1c@test.com",
+					"last_login_at": "{last_login_at}",
+					"created_at":    time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":    time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":    nil,
 				},
 				{
-					"id":              [16]byte(uuid.MustParse("00000000-0000-0000-0000-000000000001")),
-					"source":          "zimbra",
-					"nip":             "1b",
-					"nama":            nil,
-					"email":           nil,
-					"unit_organisasi": nil,
-					"last_login_at":   nil,
-					"created_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":      nil,
+					"id":            [16]byte(uuid.MustParse("00000000-0000-0000-0000-000000000001")),
+					"source":        "zimbra",
+					"nip":           "1b",
+					"nama":          "b1",
+					"email":         "1b@test.com",
+					"last_login_at": nil,
+					"created_at":    time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":    time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":    nil,
 				},
 				{
-					"id":              [16]byte(uuid.MustParse("00000000-0000-0000-0000-000000000002")),
-					"source":          "keycloak",
-					"nip":             "1a",
-					"nama":            nil,
-					"email":           nil,
-					"unit_organisasi": nil,
-					"last_login_at":   nil,
-					"created_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":      nil,
+					"id":            [16]byte(uuid.MustParse("00000000-0000-0000-0000-000000000002")),
+					"source":        "keycloak",
+					"nip":           "1a",
+					"nama":          "a1",
+					"email":         "1a@test.com",
+					"last_login_at": nil,
+					"created_at":    time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":    time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":    nil,
 				},
 			},
 		},
 		{
 			name: "success exchange token user without deleted roles using zimbra_id as priority with forwarded header without redirect_uri",
 			dbData: `
-				insert into "user" (id, source, nip, created_at, updated_at) values
-					('00000000-0000-0000-0000-000000000001', 'keycloak', '1c', '2000-01-01', '2000-01-01'),
-					('00000000-0000-0000-0000-000000000002', 'zimbra', '1b', '2000-01-01', '2000-01-01');
+				insert into "user" (id, source, nip, email, nama, created_at, updated_at) values
+					('00000000-0000-0000-0000-000000000001', 'keycloak', '1c', '1c@test.com', 'c1', '2000-01-01', '2000-01-01'),
+					('00000000-0000-0000-0000-000000000002', 'zimbra', '1b', '1b@test.com', 'b1', '2000-01-01', '2000-01-01');
 				insert into role (id, service, nama, deleted_at) values
 					(1, 'portal', 'admin', '2000-01-01'),
 					(2, 'portal', 'admin', null);
@@ -283,36 +280,34 @@ func Test_handler_exchangeToken(t *testing.T) {
 			}`,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":              [16]byte(uuid.MustParse("00000000-0000-0000-0000-000000000001")),
-					"source":          "keycloak",
-					"nip":             "1c",
-					"nama":            nil,
-					"email":           nil,
-					"unit_organisasi": nil,
-					"last_login_at":   nil,
-					"created_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":      nil,
+					"id":            [16]byte(uuid.MustParse("00000000-0000-0000-0000-000000000001")),
+					"source":        "keycloak",
+					"nip":           "1c",
+					"nama":          "c1",
+					"email":         "1c@test.com",
+					"last_login_at": nil,
+					"created_at":    time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":    time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":    nil,
 				},
 				{
-					"id":              [16]byte(uuid.MustParse("00000000-0000-0000-0000-000000000002")),
-					"source":          "zimbra",
-					"nip":             "1b",
-					"nama":            nil,
-					"email":           nil,
-					"unit_organisasi": nil,
-					"last_login_at":   "{last_login_at}",
-					"created_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":      nil,
+					"id":            [16]byte(uuid.MustParse("00000000-0000-0000-0000-000000000002")),
+					"source":        "zimbra",
+					"nip":           "1b",
+					"nama":          "b1",
+					"email":         "1b@test.com",
+					"last_login_at": "{last_login_at}",
+					"created_at":    time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":    time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":    nil,
 				},
 			},
 		},
 		{
 			name: "success exchange token user with multiple roles order by updated_at fallback using keycloak_id when user zimbra is not found with forwarded host only and with redirect_uri",
 			dbData: `
-				insert into "user" (id, source, nip, created_at, updated_at, last_login_at) values
-					('00000000-0000-0000-0000-000000000001', 'keycloak', '1c', '2000-01-01', '2000-01-01', '2000-01-01');
+				insert into "user" (id, source, nip, email, nama, created_at, updated_at, last_login_at) values
+					('00000000-0000-0000-0000-000000000001', 'keycloak', '1c', '1c@test.com', 'c1', '2000-01-01', '2000-01-01', '2000-01-01');
 				insert into role (id, service, nama) values
 					(1, 'portal', 'admin'),
 					(2, 'portal', 'pegawai'),
@@ -352,27 +347,26 @@ func Test_handler_exchangeToken(t *testing.T) {
 			}`,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":              [16]byte(uuid.MustParse("00000000-0000-0000-0000-000000000001")),
-					"source":          "keycloak",
-					"nip":             "1c",
-					"nama":            nil,
-					"email":           nil,
-					"unit_organisasi": nil,
-					"last_login_at":   "{last_login_at}",
-					"created_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":      nil,
+					"id":            [16]byte(uuid.MustParse("00000000-0000-0000-0000-000000000001")),
+					"source":        "keycloak",
+					"nip":           "1c",
+					"nama":          "c1",
+					"email":         "1c@test.com",
+					"last_login_at": "{last_login_at}",
+					"created_at":    time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":    time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":    nil,
 				},
 			},
 		},
 		{
 			name: "error exchange token, user keycloak or zimbra not found",
 			dbData: `
-				insert into "user" (id, source, nip, created_at, updated_at, deleted_at) values
-					('00000000-0000-0000-0000-000000000001', 'keycloak', '1a', '2000-01-01', '2000-01-01', '2000-02-02'),
-					('00000000-0000-0000-0000-000000000002', 'zimbra', '1b', '2000-01-01', '2000-01-01', '2000-01-01'),
-					('00000000-0000-0000-0000-000000000002', 'keycloak', '1a', '2000-01-01', '2000-01-01', null),
-					('00000000-0000-0000-0000-000000000001', 'zimbra', '1b', '2000-01-01', '2000-01-01', null);
+				insert into "user" (id, source, nip, email, nama, created_at, updated_at, deleted_at) values
+					('00000000-0000-0000-0000-000000000001', 'keycloak', '1a', '1a@test.com', 'a1', '2000-01-01', '2000-01-01', '2000-02-02'),
+					('00000000-0000-0000-0000-000000000002', 'zimbra', '1b', '1b@test.com', 'b1', '2000-01-01', '2000-01-01', '2000-01-01'),
+					('00000000-0000-0000-0000-000000000002', 'keycloak', '1a', '1a@test.com', 'a1', '2000-01-01', '2000-01-01', null),
+					('00000000-0000-0000-0000-000000000001', 'zimbra', '1b', '1b@test.com', 'b1', '2000-01-01', '2000-01-01', null);
 			`,
 			requestBody:      `{"code": "my-code", "redirect_uri": "http://localhost:5173/callback"}`,
 			keycloakRespCode: 200,
@@ -392,52 +386,48 @@ func Test_handler_exchangeToken(t *testing.T) {
 			wantResponseBody: `{"message": "user tidak ditemukan"}`,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":              [16]byte(uuid.MustParse("00000000-0000-0000-0000-000000000001")),
-					"source":          "keycloak",
-					"nip":             "1a",
-					"nama":            nil,
-					"email":           nil,
-					"unit_organisasi": nil,
-					"last_login_at":   nil,
-					"created_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":      time.Date(2000, 2, 2, 0, 0, 0, 0, time.UTC).Local(),
+					"id":            [16]byte(uuid.MustParse("00000000-0000-0000-0000-000000000001")),
+					"source":        "keycloak",
+					"nip":           "1a",
+					"nama":          "a1",
+					"email":         "1a@test.com",
+					"last_login_at": nil,
+					"created_at":    time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":    time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":    time.Date(2000, 2, 2, 0, 0, 0, 0, time.UTC).Local(),
 				},
 				{
-					"id":              [16]byte(uuid.MustParse("00000000-0000-0000-0000-000000000001")),
-					"source":          "zimbra",
-					"nip":             "1b",
-					"nama":            nil,
-					"email":           nil,
-					"unit_organisasi": nil,
-					"last_login_at":   nil,
-					"created_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":      nil,
+					"id":            [16]byte(uuid.MustParse("00000000-0000-0000-0000-000000000001")),
+					"source":        "zimbra",
+					"nip":           "1b",
+					"nama":          "b1",
+					"email":         "1b@test.com",
+					"last_login_at": nil,
+					"created_at":    time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":    time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":    nil,
 				},
 				{
-					"id":              [16]byte(uuid.MustParse("00000000-0000-0000-0000-000000000002")),
-					"source":          "keycloak",
-					"nip":             "1a",
-					"nama":            nil,
-					"email":           nil,
-					"unit_organisasi": nil,
-					"last_login_at":   nil,
-					"created_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":      nil,
+					"id":            [16]byte(uuid.MustParse("00000000-0000-0000-0000-000000000002")),
+					"source":        "keycloak",
+					"nip":           "1a",
+					"nama":          "a1",
+					"email":         "1a@test.com",
+					"last_login_at": nil,
+					"created_at":    time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":    time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":    nil,
 				},
 				{
-					"id":              [16]byte(uuid.MustParse("00000000-0000-0000-0000-000000000002")),
-					"source":          "zimbra",
-					"nip":             "1b",
-					"nama":            nil,
-					"email":           nil,
-					"unit_organisasi": nil,
-					"last_login_at":   nil,
-					"created_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":      time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"id":            [16]byte(uuid.MustParse("00000000-0000-0000-0000-000000000002")),
+					"source":        "zimbra",
+					"nip":           "1b",
+					"nama":          "b1",
+					"email":         "1b@test.com",
+					"last_login_at": nil,
+					"created_at":    time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":    time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":    time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
 				},
 			},
 		},
@@ -622,8 +612,8 @@ func Test_handler_refreshToken(t *testing.T) {
 		{
 			name: "success refresh token user without roles using keycloak_id",
 			dbData: `
-				insert into "user" (id, source, nip) values
-					('00000000-0000-0000-0000-000000000001', 'keycloak', '1c');
+				insert into "user" (id, source, nip, email, nama) values
+					('00000000-0000-0000-0000-000000000001', 'keycloak', '1c', '1c@test.com', 'c1');
 			`,
 			requestBody:      `{"refresh_token": "my-code"}`,
 			keycloakRespCode: 200,
@@ -652,9 +642,9 @@ func Test_handler_refreshToken(t *testing.T) {
 		{
 			name: "success refresh token user without deleted roles using zimbra_id as priority",
 			dbData: `
-				insert into "user" (id, source, nip) values
-					('00000000-0000-0000-0000-000000000001', 'keycloak', '1c'),
-					('00000000-0000-0000-0000-000000000002', 'zimbra', '1b');
+				insert into "user" (id, source, nip, email, nama) values
+					('00000000-0000-0000-0000-000000000001', 'keycloak', '1c', '1c@test.com', 'c1'),
+					('00000000-0000-0000-0000-000000000002', 'zimbra', '1b', '1b@test.com', 'b1');
 				insert into role (id, service, nama, deleted_at) values
 					(1, 'portal', 'admin', '2000-01-01'),
 					(2, 'portal', 'admin', null);
@@ -690,8 +680,8 @@ func Test_handler_refreshToken(t *testing.T) {
 		{
 			name: "success refresh token user with multiple roles order by updated_at fallback using keycloak_id when user zimbra is not found",
 			dbData: `
-				insert into "user" (id, source, nip) values
-					('00000000-0000-0000-0000-000000000001', 'keycloak', '1c');
+				insert into "user" (id, source, nip, email, nama) values
+					('00000000-0000-0000-0000-000000000001', 'keycloak', '1c', '1c@test.com', 'c1');
 				insert into role (id, service, nama) values
 					(1, 'portal', 'admin'),
 					(2, 'portal', 'pegawai'),
@@ -732,11 +722,11 @@ func Test_handler_refreshToken(t *testing.T) {
 		{
 			name: "error refresh token, user keycloak or zimbra not found",
 			dbData: `
-				insert into "user" (id, source, nip, deleted_at) values
-					('00000000-0000-0000-0000-000000000001', 'keycloak', '1a', '2000-02-02'),
-					('00000000-0000-0000-0000-000000000002', 'zimbra', '1b', '2000-01-01'),
-					('00000000-0000-0000-0000-000000000002', 'keycloak', '1a', null),
-					('00000000-0000-0000-0000-000000000001', 'zimbra', '1b', null);
+				insert into "user" (id, source, nip, email, nama, deleted_at) values
+					('00000000-0000-0000-0000-000000000001', 'keycloak', '1a', '1a@test.com', 'a1', '2000-02-02'),
+					('00000000-0000-0000-0000-000000000002', 'zimbra', '1b', '1b@test.com', 'b1', '2000-01-01'),
+					('00000000-0000-0000-0000-000000000002', 'keycloak', '1a', '1a@test.com', 'a1', null),
+					('00000000-0000-0000-0000-000000000001', 'zimbra', '1b', '1b@test.com', 'b1', null);
 			`,
 			requestBody:      `{"refresh_token": "my-code"}`,
 			keycloakRespCode: 200,

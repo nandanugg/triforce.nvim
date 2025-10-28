@@ -5,9 +5,9 @@
 | Name | Columns | Comment | Type |
 | ---- | ------- | ------- | ---- |
 | [portal.schema_migrations](portal.schema_migrations.md) | 2 |  | BASE TABLE |
-| [portal.pemberitahuan](portal.pemberitahuan.md) | 6 |  | BASE TABLE |
+| [portal.pemberitahuan](portal.pemberitahuan.md) | 10 |  | BASE TABLE |
 | [portal.dokumen_pendukung](portal.dokumen_pendukung.md) | 6 |  | BASE TABLE |
-| [portal.user](portal.user.md) | 10 |  | BASE TABLE |
+| [portal.user](portal.user.md) | 9 |  | BASE TABLE |
 | [portal.role](portal.role.md) | 9 |  | BASE TABLE |
 | [portal.user_role](portal.user_role.md) | 6 |  | BASE TABLE |
 | [portal.resource](portal.resource.md) | 7 |  | BASE TABLE |
@@ -19,10 +19,10 @@
 
 | Name | ReturnType | Arguments | Type |
 | ---- | ------- | ------- | ---- |
+| public.is_user_has_access | bool | p_nip text, p_kode text | FUNCTION |
 | portal.resource_permission_set_kode | trigger |  | FUNCTION |
 | portal.resource_update_resource_permission_kode | trigger |  | FUNCTION |
 | portal.permission_update_resource_permission_kode | trigger |  | FUNCTION |
-| public.is_user_has_access | bool | p_nip text, p_kode text | FUNCTION |
 
 ## Relations
 
@@ -43,9 +43,13 @@ erDiagram
   bigint id
   text judul_berita
   text deskripsi_berita
-  text status
   text updated_by
-  date updated_at
+  timestamp_with_time_zone updated_at
+  boolean pinned
+  timestamp_with_time_zone diterbitkan_pada
+  timestamp_with_time_zone ditarik_pada
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone deleted_at
 }
 "portal.dokumen_pendukung" {
   bigint id
@@ -64,7 +68,6 @@ erDiagram
   timestamp_with_time_zone deleted_at
   varchar_255_ email
   varchar_255_ nama
-  varchar_200_ unit_organisasi
   timestamp_with_time_zone last_login_at
 }
 "portal.role" {

@@ -1740,7 +1740,7 @@ func Test_handler_listKoreksi(t *testing.T) {
 		{
 			name:          "ok belum dikoreksi: with pagination params",
 			requestPath:   "/v1/koreksi-surat-keputusan",
-			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456787")}},
+			requestHeader: http.Header{"Authorization": authHeader},
 			requestQuery: url.Values{
 				"status": []string{"Belum Dikoreksi"},
 				"limit":  []string{"1"},
@@ -1875,8 +1875,8 @@ func Test_handler_listKoreksiAntrean(t *testing.T) {
 				('sk-008', NULL, '123456787', '2024-03-10', NULL),
 				('sk-009', 0, '123456787', '2024-03-10', NULL),
 				('sk-010', 0, '123456788', '2024-03-10', NULL);
-		
-		INSERT INTO surat_keputusan 
+
+		INSERT INTO surat_keputusan
 			("file_id","nip_sk","kategori","no_sk","tanggal_sk","status_sk", "ds_ok", "status_ttd", "created_at", "deleted_at") VALUES
 			('sk-001', '123456789', 'Kenaikan Pangkat', 'SK-001/2024', '2024-01-15', 1, true, 0, '2024-01-15', NULL),
 			('sk-002', '123456789', 'Mutasi', 'SK-002/2024', '2024-02-20', 0, true, 0, '2024-02-20', NULL),
@@ -1927,6 +1927,7 @@ func Test_handler_listKoreksiAntrean(t *testing.T) {
 	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusanApproval_Review)
 	RegisterRoutes(e, repo, pgxconn, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
+	authHeader := []string{apitest.GenerateAuthHeader("123456787")}
 	tests := []struct {
 		name             string
 		requestHeader    http.Header
@@ -1936,7 +1937,7 @@ func Test_handler_listKoreksiAntrean(t *testing.T) {
 	}{
 		{
 			name:             "success: get antrean koreksi surat keputusan",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456787")}},
+			requestHeader:    http.Header{"Authorization": authHeader},
 			requestQuery:     url.Values{"limit": []string{"10"}, "offset": []string{"0"}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
@@ -1968,7 +1969,7 @@ func Test_handler_listKoreksiAntrean(t *testing.T) {
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
-					
+
 					{
 						"kategori_sk": "Kenaikan Pangkat",
 						"jumlah": 1
@@ -1997,7 +1998,7 @@ func Test_handler_listKoreksiAntrean(t *testing.T) {
 		},
 		{
 			name:             "success: get antrean koreksi surat keputusan with pagination",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456787")}},
+			requestHeader:    http.Header{"Authorization": authHeader},
 			requestQuery:     url.Values{"limit": []string{"1"}, "offset": []string{"1"}},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `
@@ -2061,7 +2062,7 @@ func Test_handler_getDetailSuratKeputusan(t *testing.T) {
 				('sk-003', 2, '12345677', 2, '2024-03-10', NULL),
 				('sk-004', 3, '12345678', 1, '2024-03-10', NULL),
 				('sk-004', 2, '12345677', 2, '2024-03-10', NULL);
-		INSERT INTO surat_keputusan 
+		INSERT INTO surat_keputusan
 			("file_id","nip_sk","kategori","no_sk","tanggal_sk","status_sk", "ds_ok", "status_ttd", "created_at", "deleted_at") VALUES
 			('sk-001', '123456789', 'Kenaikan Pangkat', 'SK-001/2024', '2024-01-15', 1, true, 0, '2024-01-15', NULL),
 			('sk-002', '123456789', 'Mutasi', 'SK-002/2024', '2024-02-20', 1, true, 0, '2024-02-20', NULL),
@@ -2106,6 +2107,8 @@ func Test_handler_getDetailSuratKeputusan(t *testing.T) {
 	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusanApproval_Read)
 	RegisterRoutes(e, repo, pgxconn, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
+	authHeader12345677 := []string{apitest.GenerateAuthHeader("12345677")}
+	authHeader123456789 := []string{apitest.GenerateAuthHeader("123456789")}
 	tests := []struct {
 		id               string
 		name             string
@@ -2147,7 +2150,7 @@ func Test_handler_getDetailSuratKeputusan(t *testing.T) {
 		{
 			id:               "sk-003",
 			name:             "success: get detail surat keputusan as korektor 2 with korektor 1 status sudah dikoreksi dan aksi koreksi",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("12345677")}},
+			requestHeader:    http.Header{"Authorization": authHeader12345677},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": {
@@ -2187,7 +2190,7 @@ func Test_handler_getDetailSuratKeputusan(t *testing.T) {
 		{
 			id:               "sk-002",
 			name:             "success: get detail surat keputusan as korektor 2 with korektor 1 status belum dikoreksi dan aksi kosong ( karena menunggu korektor 1 )",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("12345677")}},
+			requestHeader:    http.Header{"Authorization": authHeader12345677},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": {
@@ -2227,7 +2230,7 @@ func Test_handler_getDetailSuratKeputusan(t *testing.T) {
 		{
 			id:               "sk-004",
 			name:             "success: get detail surat keputusan as korektor 2 with korektor 1 status dikembalikan dan aksi kosong ( karena dikembalikan oleh korektor 1 )",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("12345677")}},
+			requestHeader:    http.Header{"Authorization": authHeader12345677},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": {
@@ -2267,7 +2270,7 @@ func Test_handler_getDetailSuratKeputusan(t *testing.T) {
 		{
 			id:               "sk-004",
 			name:             "success: get detail surat keputusan as korektor other than korektor 1 and korektor 2 akan menghasilkan aksi kosong",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
+			requestHeader:    http.Header{"Authorization": authHeader123456789},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": {
@@ -2306,7 +2309,7 @@ func Test_handler_getDetailSuratKeputusan(t *testing.T) {
 		{
 			id:               "sk-006",
 			name:             "error: surat keputusan telah dihapus",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
+			requestHeader:    http.Header{"Authorization": authHeader123456789},
 			wantResponseCode: http.StatusNotFound,
 			wantResponseBody: `{
 				"message": "data tidak ditemukan"
@@ -2315,7 +2318,7 @@ func Test_handler_getDetailSuratKeputusan(t *testing.T) {
 		{
 			id:               "sk-999",
 			name:             "error: surat keputusan tidak ditemukan",
-			requestHeader:    http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456789")}},
+			requestHeader:    http.Header{"Authorization": authHeader123456789},
 			wantResponseCode: http.StatusNotFound,
 			wantResponseBody: `{
 				"message": "data tidak ditemukan"
@@ -2534,7 +2537,7 @@ func Test_handler_approveKoreksiSuratKeputusan(t *testing.T) {
 		VALUES
 			(1, 'I/a', 'Juru Muda', 'I/a', 1, 'I/a');
 
-		INSERT INTO surat_keputusan 
+		INSERT INTO surat_keputusan
 			("file_id","nip_sk","kategori","no_sk","tanggal_sk","status_sk", "ds_ok", "status_ttd", "created_at", "deleted_at") VALUES
 			('sk-001', '123456789', 'Kenaikan Pangkat', 'SK-001/2024', '2024-01-15', 1, true, 0, '2024-01-15', NULL),
 			('sk-002', '123456789', 'Kenaikan Pangkat', 'SK-002/2024', '2024-01-15', 1, true, 0, '2024-01-15', NULL),
@@ -2566,6 +2569,14 @@ func Test_handler_approveKoreksiSuratKeputusan(t *testing.T) {
 	_, err := pgxconn.Exec(context.Background(), dbData)
 	require.NoError(t, err)
 
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	repo := dbrepository.New(pgxconn)
+	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusanApproval_Review)
+	RegisterRoutes(e, repo, pgxconn, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+
+	authHeader := []string{apitest.GenerateAuthHeader("12345678")}
 	tests := []struct {
 		id               string
 		name             string
@@ -2573,18 +2584,18 @@ func Test_handler_approveKoreksiSuratKeputusan(t *testing.T) {
 		requestBody      string
 		wantResponseCode int
 		wantResponseBody string
-		assertDB         func(t *testing.T, db dbrepository.Queries)
+		assertDB         func(t *testing.T, db *dbrepository.Queries)
 	}{
 		{
 			id:   "sk-001",
 			name: "success: approve koreksi surat keputusan as korektor 1 and only one korektor",
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader("12345678")},
+				"Authorization": authHeader,
 				"Content-Type":  []string{"application/json"},
 			},
 			requestBody:      `{"catatan_koreksi": "", "status_koreksi": "diteruskan"}`,
 			wantResponseCode: http.StatusNoContent,
-			assertDB: func(t *testing.T, db dbrepository.Queries) {
+			assertDB: func(t *testing.T, db *dbrepository.Queries) {
 				// karena cuma 1 korektor, SK langsung menjadi sudah dikoreksi
 				sk, err := db.GetSuratKeputusanByID(context.Background(), "sk-001")
 				require.NoError(t, err)
@@ -2604,7 +2615,7 @@ func Test_handler_approveKoreksiSuratKeputusan(t *testing.T) {
 			},
 			requestBody:      `{"catatan_koreksi": "Ada salah itu", "status_koreksi": "dikembalikan"}`,
 			wantResponseCode: http.StatusNoContent,
-			assertDB: func(t *testing.T, db dbrepository.Queries) {
+			assertDB: func(t *testing.T, db *dbrepository.Queries) {
 				// karena ditolak, SK langsung menjadi dikembalikan
 				sk, err := db.GetSuratKeputusanByID(context.Background(), "sk-005")
 				require.NoError(t, err)
@@ -2621,12 +2632,12 @@ func Test_handler_approveKoreksiSuratKeputusan(t *testing.T) {
 			id:   "sk-002",
 			name: "success: approve koreksi surat keputusan as korektor 2 dan korektor pertama sudah dikoreksi",
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader("12345678")},
+				"Authorization": authHeader,
 				"Content-Type":  []string{"application/json"},
 			},
 			requestBody:      `{"catatan_koreksi": "", "status_koreksi": "diteruskan"}`,
 			wantResponseCode: http.StatusNoContent,
-			assertDB: func(t *testing.T, db dbrepository.Queries) {
+			assertDB: func(t *testing.T, db *dbrepository.Queries) {
 				// karena semua korektor sudah dikoreksi, SK langsung menjadi sudah dikoreksi
 				sk, err := db.GetSuratKeputusanByID(context.Background(), "sk-002")
 				require.NoError(t, err)
@@ -2642,12 +2653,12 @@ func Test_handler_approveKoreksiSuratKeputusan(t *testing.T) {
 			id:   "sk-006",
 			name: "success: approve koreksi surat keputusan as korektor 1 dan masih ada korektor selanjutnya",
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader("12345678")},
+				"Authorization": authHeader,
 				"Content-Type":  []string{"application/json"},
 			},
 			requestBody:      `{"catatan_koreksi": "", "status_koreksi": "diteruskan"}`,
 			wantResponseCode: http.StatusNoContent,
-			assertDB: func(t *testing.T, db dbrepository.Queries) {
+			assertDB: func(t *testing.T, db *dbrepository.Queries) {
 				// karena masih ada korektor selanjutnya, SK langsung menjadi sedang dikoreksi
 				sk, err := db.GetSuratKeputusanByID(context.Background(), "sk-006")
 				require.NoError(t, err)
@@ -2663,7 +2674,7 @@ func Test_handler_approveKoreksiSuratKeputusan(t *testing.T) {
 			id:   "sk-003",
 			name: "error: gagal koreksi surat keputusan as korektor 2 karena korektor pertama belum dikoreksi",
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader("12345678")},
+				"Authorization": authHeader,
 				"Content-Type":  []string{"application/json"},
 			},
 			requestBody:      `{"catatan_koreksi": "", "status_koreksi": "diteruskan"}`,
@@ -2676,7 +2687,7 @@ func Test_handler_approveKoreksiSuratKeputusan(t *testing.T) {
 			id:   "sk-004",
 			name: "gagal: gagal koreksi surat keputusan as korektor 1 karena sudah pernah dikoreksi",
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader("12345678")},
+				"Authorization": authHeader,
 				"Content-Type":  []string{"application/json"},
 			},
 			requestBody:      `{"catatan_koreksi": "", "status_koreksi": "diteruskan"}`,
@@ -2689,7 +2700,7 @@ func Test_handler_approveKoreksiSuratKeputusan(t *testing.T) {
 			id:   "sk-005",
 			name: "gagal: gagal koreksi surat keputusan as korektor 1 karena assignment koreksi ke korektor 2",
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader("12345678")},
+				"Authorization": authHeader,
 				"Content-Type":  []string{"application/json"},
 			},
 			requestBody:      `{"catatan_koreksi": "", "status_koreksi": "diteruskan"}`,
@@ -2709,12 +2720,6 @@ func Test_handler_approveKoreksiSuratKeputusan(t *testing.T) {
 			req.Body = io.NopCloser(bytes.NewBufferString(tt.requestBody))
 
 			rec := httptest.NewRecorder()
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			repo := dbrepository.New(pgxconn)
-			authSvc := apitest.NewAuthService(api.Kode_SuratKeputusanApproval_Review)
-			RegisterRoutes(e, repo, pgxconn, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 			e.ServeHTTP(rec, req)
 
@@ -2727,7 +2732,7 @@ func Test_handler_approveKoreksiSuratKeputusan(t *testing.T) {
 			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
 
 			if tt.assertDB != nil {
-				tt.assertDB(t, *repo)
+				tt.assertDB(t, repo)
 			}
 		})
 	}
@@ -2867,7 +2872,7 @@ func Test_handler_listTandatangan(t *testing.T) {
 		{
 			name:          "ok belum ditandatangan: with pagination params",
 			requestPath:   "/v1/tanda-tangan-surat-keputusan",
-			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("123456787")}},
+			requestHeader: http.Header{"Authorization": authHeader},
 			requestQuery: url.Values{
 				"status": []string{"Belum Ditandatangan"},
 				"limit":  []string{"1"},
@@ -3155,7 +3160,7 @@ func Test_handler_tandatanganSK(t *testing.T) {
 		VALUES
 			(1, 'I/a', 'Juru Muda', 'I/a', 1, 'I/a');
 
-		INSERT INTO surat_keputusan 
+		INSERT INTO surat_keputusan
 			("file_id","nip_sk","status_sk", "status_koreksi", "ds_ok", "status_ttd", "ttd_pegawai_id", "created_at", "deleted_at") VALUES
 			('sk-001', '123456789', 1, 1, true, 0, '12345678', '2024-01-15', NULL),
 			('sk-002', '123456789', 1, 1, true, 0, '12345678', '2024-01-15', NULL),
@@ -3174,6 +3179,14 @@ func Test_handler_tandatanganSK(t *testing.T) {
 	_, err := pgxconn.Exec(context.Background(), dbData)
 	require.NoError(t, err)
 
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	repo := dbrepository.New(pgxconn)
+	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusanApproval_Sign)
+	RegisterRoutes(e, repo, pgxconn, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+
+	authHeader := []string{apitest.GenerateAuthHeader("12345678")}
 	tests := []struct {
 		name             string
 		requestPath      string
@@ -3187,7 +3200,7 @@ func Test_handler_tandatanganSK(t *testing.T) {
 			name:        "success: tandatangan surat keputusan",
 			requestPath: "/v1/tanda-tangan-surat-keputusan/sk-001",
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader("12345678")},
+				"Authorization": authHeader,
 				"Content-Type":  []string{"application/json"},
 			},
 			requestBody: `{
@@ -3207,7 +3220,7 @@ func Test_handler_tandatanganSK(t *testing.T) {
 			name:        "success: tandatangan surat keputusan dikembalikan",
 			requestPath: "/v1/tanda-tangan-surat-keputusan/sk-002",
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader("12345678")},
+				"Authorization": authHeader,
 				"Content-Type":  []string{"application/json"},
 			},
 			requestBody: `{
@@ -3228,7 +3241,7 @@ func Test_handler_tandatanganSK(t *testing.T) {
 			name:        "error: sk sudah ditandatangan",
 			requestPath: "/v1/tanda-tangan-surat-keputusan/sk-003",
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader("12345678")},
+				"Authorization": authHeader,
 				"Content-Type":  []string{"application/json"},
 			},
 			requestBody: `{
@@ -3242,7 +3255,7 @@ func Test_handler_tandatanganSK(t *testing.T) {
 			name:        "error: status koreksi masih belum ok",
 			requestPath: "/v1/tanda-tangan-surat-keputusan/sk-004",
 			requestHeader: http.Header{
-				"Authorization": []string{apitest.GenerateAuthHeader("12345678")},
+				"Authorization": authHeader,
 				"Content-Type":  []string{"application/json"},
 			},
 			requestBody: `{
@@ -3275,13 +3288,6 @@ func Test_handler_tandatanganSK(t *testing.T) {
 			req := httptest.NewRequest(http.MethodPost, tt.requestPath, nil)
 			req.Header = tt.requestHeader
 			req.Body = io.NopCloser(bytes.NewBufferString(tt.requestBody))
-
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			repo := dbrepository.New(pgxconn)
-			authSvc := apitest.NewAuthService(api.Kode_SuratKeputusanApproval_Sign)
-			RegisterRoutes(e, repo, pgxconn, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 			rec := httptest.NewRecorder()
 			e.ServeHTTP(rec, req)
