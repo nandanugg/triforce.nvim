@@ -11,6 +11,7 @@ WHERE fds.deleted_at IS NULL
     AND (sqlc.narg('no_sk')::varchar IS NULL OR fds.no_sk ILIKE '%' || sqlc.narg('no_sk')::varchar || '%')
     AND (sqlc.narg('list_status_sk')::integer[] IS NULL OR fds.status_sk = ANY(sqlc.narg('list_status_sk')::integer[]))
     AND (sqlc.narg('kategori_sk')::varchar is null OR fds.kategori ILIKE '%' || sqlc.narg('kategori_sk')::varchar || '%')
+    AND ds_ok = true
 ORDER BY fds.created_at DESC
 LIMIT $1 OFFSET $2;
 
@@ -21,7 +22,8 @@ WHERE fds.deleted_at IS NULL
     AND fds.nip_sk = @nip::VARCHAR
     AND (sqlc.narg('no_sk')::varchar IS NULL OR fds.no_sk ILIKE '%' || sqlc.narg('no_sk')::varchar || '%')
     AND (sqlc.narg('list_status_sk')::integer[] IS NULL OR fds.status_sk = ANY(sqlc.narg('list_status_sk')::integer[]))
-    AND (sqlc.narg('kategori_sk')::varchar is null OR fds.kategori ILIKE '%' || sqlc.narg('kategori_sk')::varchar || '%');
+    AND (sqlc.narg('kategori_sk')::varchar is null OR fds.kategori ILIKE '%' || sqlc.narg('kategori_sk')::varchar || '%')
+    AND ds_ok = true;
 
 -- name: GetSuratKeputusanByNIPAndID :one
 SELECT
@@ -96,6 +98,7 @@ WHERE fds.deleted_at IS NULL
     AND (sqlc.narg('tanggal_sk_mulai')::DATE IS NULL OR fds.tanggal_sk >= sqlc.narg('tanggal_sk_mulai')::DATE)
     AND (sqlc.narg('tanggal_sk_akhir')::DATE IS NULL OR fds.tanggal_sk <= sqlc.narg('tanggal_sk_akhir')::DATE)
     AND (sqlc.narg('list_status_sk')::integer[] IS NULL OR fds.status_sk = ANY(sqlc.narg('list_status_sk')::integer[]))
+    AND ds_ok = true
 ORDER BY fds.created_at DESC
 LIMIT $1 OFFSET $2;
 
@@ -118,7 +121,8 @@ WHERE fds.deleted_at IS NULL
     AND (sqlc.narg('kategori_sk')::VARCHAR is NULL OR fds.kategori ILIKE '%' || sqlc.narg('kategori_sk')::VARCHAR || '%')
     AND (sqlc.narg('tanggal_sk_mulai')::DATE IS NULL OR fds.tanggal_sk >= sqlc.narg('tanggal_sk_mulai')::DATE)
     AND (sqlc.narg('tanggal_sk_akhir')::DATE IS NULL OR fds.tanggal_sk <= sqlc.narg('tanggal_sk_akhir')::DATE)
-    AND (sqlc.narg('list_status_sk')::integer[] IS NULL OR fds.status_sk = ANY(sqlc.narg('list_status_sk')::integer[]));
+    AND (sqlc.narg('list_status_sk')::integer[] IS NULL OR fds.status_sk = ANY(sqlc.narg('list_status_sk')::integer[]))
+    AND ds_ok = true;
 
 -- name: GetSuratKeputusanByID :one
 SELECT
@@ -185,8 +189,12 @@ WHERE fdc.deleted_at IS NULL
     AND (sqlc.narg('jabatan_id')::VARCHAR IS NULL OR p.jabatan_instansi_id = sqlc.narg('jabatan_id')::VARCHAR)
     AND (sqlc.narg('kategori_sk')::VARCHAR is NULL OR fds.kategori ILIKE '%' || sqlc.narg('kategori_sk')::VARCHAR || '%')
     AND (sqlc.narg('no_sk')::VARCHAR IS NULL OR fds.no_sk ILIKE '%' || sqlc.narg('no_sk')::VARCHAR || '%')
-    AND (sqlc.narg('status_koreksi')::integer is NULL or fdc.status_koreksi = sqlc.narg('status_koreksi')::integer)
+    AND (
+        sqlc.narg('status_koreksi')::integer[] IS NULL
+        OR fdc.status_koreksi = ANY(sqlc.narg('status_koreksi')::integer[])
+    )
     AND fdc.pegawai_korektor_id = @pns_id::varchar
+    AND ds_ok = true
 ORDER BY fds.created_at DESC
 LIMIT $1 OFFSET $2;
 
@@ -210,8 +218,12 @@ WHERE fdc.deleted_at IS NULL
     AND (sqlc.narg('jabatan_id')::VARCHAR IS NULL OR p.jabatan_instansi_id = sqlc.narg('jabatan_id')::VARCHAR)
     AND (sqlc.narg('kategori_sk')::VARCHAR is NULL OR fds.kategori ILIKE '%' || sqlc.narg('kategori_sk')::VARCHAR || '%')
     AND (sqlc.narg('no_sk')::VARCHAR IS NULL OR fds.no_sk ILIKE '%' || sqlc.narg('no_sk')::VARCHAR || '%')
-    AND (sqlc.narg('status_koreksi')::integer is NULL or fdc.status_koreksi = sqlc.narg('status_koreksi')::integer)
-    AND fdc.pegawai_korektor_id = @pns_id::varchar;
+    AND (
+        sqlc.narg('status_koreksi')::integer[] IS NULL
+        OR fdc.status_koreksi = ANY(sqlc.narg('status_koreksi')::integer[])
+    )
+    AND fdc.pegawai_korektor_id = @pns_id::varchar
+    AND ds_ok = true;
 
 -- name: ListAntreanKoreksiSuratKeputusanByNIP :many
 SELECT 
@@ -229,6 +241,7 @@ WHERE
   AND fds.kategori != '< Semua >'
   AND (fdc.status_koreksi = 0 OR fdc.status_koreksi IS NULL)
   AND korektor.nip_baru = @nip_korektor::varchar
+  AND fds.ds_ok = true
 GROUP BY 
   fds.kategori
 LIMIT $1 OFFSET $2;
@@ -247,7 +260,8 @@ WHERE
     AND fds.ds_ok = true
     AND fds.kategori != '< Semua >'
     AND (fdc.status_koreksi = 0 OR fdc.status_koreksi IS NULL)
-    AND korektor.nip_baru = @nip_korektor::varchar;
+    AND korektor.nip_baru = @nip_korektor::varchar
+    AND fds.ds_ok = true;
 
 -- name: ListKorektorSuratKeputusanByID :many
 SELECT 
@@ -269,6 +283,7 @@ JOIN
 WHERE 
     fds.deleted_at IS NULL
     AND fds.file_id = @id::varchar
+    AND fds.ds_ok = true
 ORDER BY fdc.korektor_ke ASC;
 
 -- name: UpdateKorektorSuratKeputusanByID :exec
@@ -341,6 +356,7 @@ WHERE fds.deleted_at IS NULL
     AND fds.status_koreksi = 1 
     and (sqlc.narg('status_ttd')::integer is NULL or fds.status_ttd = sqlc.narg('status_ttd')::integer)
     AND fds.ttd_pegawai_id = @pns_id::varchar
+    AND fds.ds_ok = true
 ORDER BY fds.created_at DESC
 LIMIT $1 OFFSET $2;
 
@@ -365,7 +381,8 @@ WHERE fds.deleted_at IS NULL
     AND (sqlc.narg('no_sk')::VARCHAR IS NULL OR fds.no_sk ILIKE '%' || sqlc.narg('no_sk')::VARCHAR || '%')
     AND fds.status_koreksi = 1 
     and (sqlc.narg('status_ttd')::integer is NULL or fds.status_ttd = sqlc.narg('status_ttd')::integer)
-    AND fds.ttd_pegawai_id = @pns_id::varchar;
+    AND fds.ttd_pegawai_id = @pns_id::varchar
+    AND fds.ds_ok = true;
 
 -- name: ListTandaTanganSuratKeputusanAntreanByPNSID :many
 SELECT 
@@ -379,6 +396,7 @@ WHERE fds.status_ttd = 0
   AND fds.kategori NOT IN ('< Semua >', '< Pilih >')
   AND fds.ttd_pegawai_id = @pns_id::varchar
   AND fds.deleted_at IS NULL
+  AND fds.ds_ok = true
 GROUP BY 
     fds.kategori,
     fds.ttd_pegawai_id
@@ -393,4 +411,5 @@ WHERE fds.status_ttd = 0
   AND fds.ds_ok = true
   AND fds.kategori NOT IN ('< Semua >', '< Pilih >')
   AND fds.ttd_pegawai_id = @pns_id::varchar
-  AND fds.deleted_at IS NULL;
+  AND fds.deleted_at IS NULL
+  AND fds.ds_ok = true;

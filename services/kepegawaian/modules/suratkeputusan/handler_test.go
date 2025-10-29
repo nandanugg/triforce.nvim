@@ -41,13 +41,13 @@ func Test_handler_list(t *testing.T) {
 			('123456787','123456787','unor-5');
 
 		INSERT INTO surat_keputusan
-				("file_id", "nip_sk", "kategori", "no_sk", "tanggal_sk", "status_sk", "created_at", "deleted_at") VALUES
-				('sk-001', '123456789', 'Kenaikan Pangkat', 'SK-001/2024', '2024-01-15', 1, '2024-01-15', NULL),
-				('sk-002', '123456789', 'Mutasi', 'SK-002/2024', '2024-02-20', 0, '2024-02-20', NULL),
-				('sk-003', '123456789', 'Kenaikan Gaji', 'SK-003/2024', '2024-03-10', 2, '2024-03-10', NULL),
-				('sk-004', '123456789', 'Kenaikan Gaji', 'SK-004/2024', '2024-03-10', 2, '2024-03-10', NOW()),
-				('sk-005', '123456788', 'Mutasi', 'SK-005/2024', '2024-03-10', 2, '2024-03-10', NULL),
-				('sk-006', '123456787', 'Mutasi', 'SK-006/2024', '2024-03-10', 2, '2024-03-10', NULL);
+				("file_id", "nip_sk", "kategori", "no_sk", "tanggal_sk", "status_sk", "created_at", "deleted_at", "ds_ok") VALUES
+				('sk-001', '123456789', 'Kenaikan Pangkat', 'SK-001/2024', '2024-01-15', 1, '2024-01-15', NULL, true),
+				('sk-002', '123456789', 'Mutasi', 'SK-002/2024', '2024-02-20', 0, '2024-02-20', NULL, true),
+				('sk-003', '123456789', 'Kenaikan Gaji', 'SK-003/2024', '2024-03-10', 2, '2024-03-10', NULL, true),
+				('sk-004', '123456789', 'Kenaikan Gaji', 'SK-004/2024', '2024-03-10', 2, '2024-03-10', NOW(), true),
+				('sk-005', '123456788', 'Mutasi', 'SK-005/2024', '2024-03-10', 2, '2024-03-10', NULL, true),
+				('sk-006', '123456787', 'Mutasi', 'SK-006/2024', '2024-03-10', 2, '2024-03-10', NULL, true);
 	`
 	db := dbtest.New(t, dbmigrations.FS)
 	_, err := db.Exec(context.Background(), dbData)
@@ -233,13 +233,13 @@ func Test_handler_get(t *testing.T) {
 			('12345677','12345677','unor-3','Korektor');
 
 		INSERT INTO surat_keputusan
-				("file_id", "nip_sk", "kategori", "no_sk", "tanggal_sk", "status_sk","nip_pemroses", "created_at", "deleted_at") VALUES
-				('sk-001', '123456789', 'Kenaikan Pangkat', 'SK-001/2024', '2024-01-15', 1, '12345678', '2024-01-15', NULL),
-				('sk-002', '123456789', 'Mutasi', 'SK-002/2024', '2024-02-20', 0, '12345678', '2024-02-20', NULL),
-				('sk-003', '123456789', 'Kenaikan Gaji', 'SK-003/2024', '2024-03-10', 2,'12345678', '2024-03-10', NULL),
-				('sk-004', '123456789', 'Kenaikan Gaji', 'SK-004/2024', '2024-03-10', 2,'12345678', '2024-03-10', NOW()),
-				('sk-005', '123456788', 'Mutasi', 'SK-005/2024', '2024-03-10', 2,'12345678', '2024-03-10', NULL),
-				('sk-006', '123456787', 'Mutasi', 'SK-006/2024', '2024-03-10', 2,'12345678', '2024-03-10', NULL);
+				("file_id", "nip_sk", "kategori", "no_sk", "tanggal_sk", "status_sk","nip_pemroses", "created_at", "deleted_at", "ds_ok") VALUES
+				('sk-001', '123456789', 'Kenaikan Pangkat', 'SK-001/2024', '2024-01-15', 1, '12345678', '2024-01-15', NULL, true),
+				('sk-002', '123456789', 'Mutasi', 'SK-002/2024', '2024-02-20', 0, '12345678', '2024-02-20', NULL, true),
+				('sk-003', '123456789', 'Kenaikan Gaji', 'SK-003/2024', '2024-03-10', 2,'12345678', '2024-03-10', NULL, true),
+				('sk-004', '123456789', 'Kenaikan Gaji', 'SK-004/2024', '2024-03-10', 2,'12345678', '2024-03-10', NOW(), true),
+				('sk-005', '123456788', 'Mutasi', 'SK-005/2024', '2024-03-10', 2,'12345678', '2024-03-10', NULL, true),
+				('sk-006', '123456787', 'Mutasi', 'SK-006/2024', '2024-03-10', 2,'12345678', '2024-03-10', NULL, true);
 
 		INSERT INTO riwayat_surat_keputusan
 			("file_id","nip_pemroses","tindakan","created_at","deleted_at") VALUES
@@ -619,18 +619,18 @@ func Test_handler_listAdmin(t *testing.T) {
 			('123456782','123456782','unor-2','Hadi', 7, 'JAB-07', NOW());
 
 		INSERT INTO surat_keputusan
-			("file_id", "nip_sk", "kategori", "no_sk", "tanggal_sk", "status_sk", "created_at", "deleted_at") VALUES
-			('sk-001', '123456789', 'Kenaikan Pangkat', 'SK-001/2024', '2024-01-15', 1, '2024-01-15', NULL),
-			('sk-002', '123456789', 'Mutasi', 'SK-002/2024', '2024-02-20', 0, '2024-02-20', NULL),
-			('sk-003', '123456789', 'Kenaikan Gaji', 'SK-003/2024', '2024-03-10', 2, '2024-03-10', NULL),
-			('sk-004', '123456789', 'Kenaikan Gaji', 'SK-004/2024', '2024-03-10', 2, '2024-03-10', NOW()),
-			('sk-005', '123456788', 'Mutasi', 'SK-005/2024', '2024-03-11', 3, '2024-03-11', NULL),
-			('sk-006', '123456787', 'Mutasi', 'SK-006/2024', '2024-03-12', 4, '2024-03-12', NULL),
-			('sk-007', '123456786', 'Mutasi', 'SK-007/2024', '2024-03-13', 5, '2024-03-13', NULL),
-			('sk-008', '123456785', 'Mutasi', 'SK-008/2024', '2024-03-14', 5, '2024-03-14', NULL),
-			('sk-009', '123456784', 'Mutasi', 'SK-009/2024', '2024-03-15', 5, '2024-03-15', NULL),
-			('sk-010', '123456783', 'Mutasi', 'SK-010/2024', '2024-03-16', 5, '2024-03-16', NULL),
-			('sk-011', '123456782', 'Kenaikan Pangkat', 'SK-011/2024', '2024-01-17', 1, '2024-01-15', NULL);
+			("file_id", "nip_sk", "kategori", "no_sk", "tanggal_sk", "status_sk", "created_at", "deleted_at", "ds_ok") VALUES
+			('sk-001', '123456789', 'Kenaikan Pangkat', 'SK-001/2024', '2024-01-15', 1, '2024-01-15', NULL, true),
+			('sk-002', '123456789', 'Mutasi', 'SK-002/2024', '2024-02-20', 0, '2024-02-20', NULL, true),
+			('sk-003', '123456789', 'Kenaikan Gaji', 'SK-003/2024', '2024-03-10', 2, '2024-03-10', NULL, true),
+			('sk-004', '123456789', 'Kenaikan Gaji', 'SK-004/2024', '2024-03-10', 2, '2024-03-10', NOW(), true),
+			('sk-005', '123456788', 'Mutasi', 'SK-005/2024', '2024-03-11', 3, '2024-03-11', NULL, true),
+			('sk-006', '123456787', 'Mutasi', 'SK-006/2024', '2024-03-12', 4, '2024-03-12', NULL, true),
+			('sk-007', '123456786', 'Mutasi', 'SK-007/2024', '2024-03-13', 5, '2024-03-13', NULL, true),
+			('sk-008', '123456785', 'Mutasi', 'SK-008/2024', '2024-03-14', 5, '2024-03-14', NULL, true),
+			('sk-009', '123456784', 'Mutasi', 'SK-009/2024', '2024-03-15', 5, '2024-03-15', NULL, true),
+			('sk-010', '123456783', 'Mutasi', 'SK-010/2024', '2024-03-16', 5, '2024-03-16', NULL, true),
+			('sk-011', '123456782', 'Kenaikan Pangkat', 'SK-011/2024', '2024-01-17', 1, '2024-01-15', NULL, true);
 	`
 	db := dbtest.New(t, dbmigrations.FS)
 	_, err := db.Exec(context.Background(), dbData)
@@ -1242,18 +1242,18 @@ func Test_handler_getAdmin(t *testing.T) {
 			('123456781','123456781','unor-2','Ikhdi', 7, 'JAB-07', NOW());
 
 		INSERT INTO surat_keputusan
-			("file_id", "nip_sk", "kategori", "no_sk", "tanggal_sk", "status_sk", "nip_pemroses", "created_at", "deleted_at") VALUES
-			('sk-001', '123456789', 'Kenaikan Pangkat', 'SK-001/2024', '2024-01-15', 1, NULL, '2024-01-15', NULL),
-			('sk-002', '123456789', 'Mutasi', 'SK-002/2024', '2024-02-20', 0, NULL, '2024-02-20', NULL),
-			('sk-003', '123456789', 'Kenaikan Gaji', 'SK-003/2024', '2024-03-10', 2, NULL, '2024-03-10', NULL),
-			('sk-004', '123456789', 'Kenaikan Gaji', 'SK-004/2024', '2024-03-10', 2, NULL, '2024-03-10', NOW()),
-			('sk-005', '123456788', 'Mutasi', 'SK-005/2024', '2024-03-11', 3, NULL, '2024-03-11', NULL),
-			('sk-006', '123456787', 'Mutasi', 'SK-006/2024', '2024-03-12', 4, '123456782', '2024-03-12', NULL),
-			('sk-007', '123456786', 'Mutasi', 'SK-007/2024', '2024-03-13', 5, '123456782', '2024-03-13', NULL),
-			('sk-008', '123456785', 'Mutasi', 'SK-008/2024', '2024-03-14', 5, '123456782', '2024-03-14', NULL),
-			('sk-009', '123456784', 'Mutasi', 'SK-009/2024', '2024-03-15', 5, '123456782', '2024-03-15', NULL),
-			('sk-010', '123456783', 'Mutasi', 'SK-010/2024', '2024-03-16', 5, '123456782', '2024-03-16', NULL),
-			('sk-011', '123456781', 'Kenaikan Pangkat', 'SK-011/2024', '2024-01-17', 1, NULL, '2024-01-15', NULL);
+			("file_id", "nip_sk", "kategori", "no_sk", "tanggal_sk", "status_sk", "nip_pemroses", "created_at", "deleted_at", "ds_ok") VALUES
+			('sk-001', '123456789', 'Kenaikan Pangkat', 'SK-001/2024', '2024-01-15', 1, NULL, '2024-01-15', NULL, true),
+			('sk-002', '123456789', 'Mutasi', 'SK-002/2024', '2024-02-20', 0, NULL, '2024-02-20', NULL, true),
+			('sk-003', '123456789', 'Kenaikan Gaji', 'SK-003/2024', '2024-03-10', 2, NULL, '2024-03-10', NULL, true),
+			('sk-004', '123456789', 'Kenaikan Gaji', 'SK-004/2024', '2024-03-10', 2, NULL, '2024-03-10', NOW(), true),
+			('sk-005', '123456788', 'Mutasi', 'SK-005/2024', '2024-03-11', 3, NULL, '2024-03-11', NULL, true),
+			('sk-006', '123456787', 'Mutasi', 'SK-006/2024', '2024-03-12', 4, '123456782', '2024-03-12', NULL, true),
+			('sk-007', '123456786', 'Mutasi', 'SK-007/2024', '2024-03-13', 5, '123456782', '2024-03-13', NULL, true),
+			('sk-008', '123456785', 'Mutasi', 'SK-008/2024', '2024-03-14', 5, '123456782', '2024-03-14', NULL, true),
+			('sk-009', '123456784', 'Mutasi', 'SK-009/2024', '2024-03-15', 5, '123456782', '2024-03-15', NULL, true),
+			('sk-010', '123456783', 'Mutasi', 'SK-010/2024', '2024-03-16', 5, '123456782', '2024-03-16', NULL, true),
+			('sk-011', '123456781', 'Kenaikan Pangkat', 'SK-011/2024', '2024-01-17', 1, NULL, '2024-01-15', NULL, true);
 
 		INSERT INTO riwayat_surat_keputusan
 			("file_id","nip_pemroses","tindakan","created_at","deleted_at") VALUES
@@ -1610,13 +1610,13 @@ func Test_handler_listKoreksi(t *testing.T) {
 				('sk-006', 2, '123456787', '2024-03-10', now());
 
 		INSERT INTO surat_keputusan
-			("file_id","nip_sk","kategori","no_sk","tanggal_sk","status_sk","created_at", "deleted_at") VALUES
-			('sk-001', '123456789', 'Kenaikan Pangkat', 'SK-001/2024', '2024-01-15', 1, '2024-01-15', NULL),
-			('sk-002', '123456789', 'Mutasi', 'SK-002/2024', '2024-02-20', 0, '2024-02-20', NULL),
-			('sk-003', '123456789', 'Kenaikan Gaji', 'SK-003/2024', '2024-03-10', 2, '2024-03-10', NULL),
-			('sk-004', '123456789', 'Kenaikan Gaji', 'SK-004/2024', '2024-03-10', 2, '2024-03-10', NULL),
-			('sk-005', '123456788', 'Kenaikan Gaji', 'SK-005/2024', '2024-03-10', 2, '2024-03-10', NULL),
-			('sk-006', '123456789', 'Kenaikan Gaji', 'SK-006/2024', '2024-03-10', 2, '2024-03-10', NOW());
+			("file_id","nip_sk","kategori","no_sk","tanggal_sk","status_sk","created_at", "deleted_at", "ds_ok") VALUES
+			('sk-001', '123456789', 'Kenaikan Pangkat', 'SK-001/2024', '2024-01-15', 1, '2024-01-15', NULL, true),
+			('sk-002', '123456789', 'Mutasi', 'SK-002/2024', '2024-02-20', 0, '2024-02-20', NULL, true),
+			('sk-003', '123456789', 'Kenaikan Gaji', 'SK-003/2024', '2024-03-10', 2, '2024-03-10', NULL, true),
+			('sk-004', '123456789', 'Kenaikan Gaji', 'SK-004/2024', '2024-03-10', 2, '2024-03-10', NULL, true),
+			('sk-005', '123456788', 'Kenaikan Gaji', 'SK-005/2024', '2024-03-10', 2, '2024-03-10', NULL, true),
+			('sk-006', '123456789', 'Kenaikan Gaji', 'SK-006/2024', '2024-03-10', 2, '2024-03-10', NOW(), true);
 
 		INSERT INTO ref_golongan (id, nama, nama_pangkat, nama_2, gol, gol_pppk)
 		VALUES
@@ -2751,13 +2751,13 @@ func Test_handler_listTandatangan(t *testing.T) {
 			('unor-5', 'unor-4', 'Bawah 2', 'Atasan 5', null, null);
 
 		INSERT INTO surat_keputusan
-			("file_id","nip_sk","kategori","no_sk","tanggal_sk","status_koreksi","status_ttd","ttd_pegawai_id","created_at", "deleted_at") VALUES
-			('sk-001', '123456789', 'Kenaikan Pangkat', 'SK-001/2024', '2024-01-15', 1, 1, '123456787', '2024-01-15', NULL),
-			('sk-002', '123456789', 'Mutasi', 'SK-002/2024', '2024-02-20', 1, 0, '123456787', '2024-02-20', NULL),
-			('sk-003', '123456789', 'Kenaikan Gaji', 'SK-003/2024', '2024-03-10', 1, 0, '123456787', '2024-03-10', NULL),
-			('sk-004', '123456789', 'Kenaikan Gaji', 'SK-004/2024', '2024-03-10', 2, 0, '123456787', '2024-03-10', NULL),
-			('sk-005', '123456788', 'Kenaikan Gaji', 'SK-005/2024', '2024-03-10', 1, 0, '123456788', '2024-03-10', NULL),
-			('sk-006', '123456789', 'Kenaikan Gaji', 'SK-006/2024', '2024-03-10', 1, 0, '123456788', '2024-03-10', NOW());
+			("file_id","nip_sk","kategori","no_sk","tanggal_sk","status_koreksi","status_ttd","ttd_pegawai_id","created_at", "deleted_at", "ds_ok") VALUES
+			('sk-001', '123456789', 'Kenaikan Pangkat', 'SK-001/2024', '2024-01-15', 1, 1, '123456787', '2024-01-15', NULL, true),
+			('sk-002', '123456789', 'Mutasi', 'SK-002/2024', '2024-02-20', 1, 0, '123456787', '2024-02-20', NULL, true),
+			('sk-003', '123456789', 'Kenaikan Gaji', 'SK-003/2024', '2024-03-10', 1, 0, '123456787', '2024-03-10', NULL, true),
+			('sk-004', '123456789', 'Kenaikan Gaji', 'SK-004/2024', '2024-03-10', 2, 0, '123456787', '2024-03-10', NULL, true),
+			('sk-005', '123456788', 'Kenaikan Gaji', 'SK-005/2024', '2024-03-10', 1, 0, '123456788', '2024-03-10', NULL, true),
+			('sk-006', '123456789', 'Kenaikan Gaji', 'SK-006/2024', '2024-03-10', 1, 0, '123456788', '2024-03-10', NOW(), true);
 
 		INSERT INTO ref_golongan (id, nama, nama_pangkat, nama_2, gol, gol_pppk)
 		VALUES

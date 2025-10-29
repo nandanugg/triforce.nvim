@@ -3932,7 +3932,7 @@ paths:
                 additionalProperties: false
                 properties:
                   data:
-                    $ref: "#/components/schemas/koreksiSuratKeputusan"
+                    $ref: "#/components/schemas/detailKoreksiSuratKeputusan"
     post:
       tags:
         - Koreksi dan Tanda Tangan Surat Keputusan Pegawai
@@ -6271,7 +6271,6 @@ components:
               example: "unit kerja teratas"
     koreksiSuratKeputusan:
       type: object
-      additionalProperties: false
       properties:
         id:
           type: string
@@ -6300,51 +6299,58 @@ components:
         unit_kerja:
           type: string
           description: Unit kerja
-        list_korektor:
-          nullable: true
-          type: array
-          items:
-            type: object
-            properties:
-              nama:
-                type: string
-                description: Nama korektor
-                example: "John Doe"
-              nip:
-                type: string
-                description: NIP korektor
-              gelar_depan:
-                type: string
-                description: Gelar depan korektor
-                example: "S.Kom"
-              gelar_belakang:
-                type: string
-                description: Gelar belakang korektor
-                example: "M.Kom"
-              status_koreksi:
-                type: string
-                description: Status koreksi
-                example: "Sudah Dikoreksi"
-              catatan_koreksi:
-                type: string
-                description: Catatan koreksi
-                example: "Catatan koreksi contoh"
-              korektor_ke:
-                type: integer
-                description: Korektor ke
-                example: 1
-        aksi:
-          type: string
-          description: Aksi yang bisa dilakukan oleh user
-          example: "koreksi"
-          nullable: true
-          enum: ["koreksi", "tandatangan", ""]
-        korektor_ke: 
-          type: integer
-          description: Urutan korektor dari pengguna yang sedang koreksi surat keputusan
-          nullable: true
-          example : 1
-        status_sk:
-          type: string
-          example: "Sedang Dikoreksi"
-          description: Status SK
+        
+    detailKoreksiSuratKeputusan:
+      allOf:
+        - $ref: "#/components/schemas/koreksiSuratKeputusan"
+        - type: object
+          properties:
+            list_korektor:
+              nullable: true
+              type: array
+              items:
+                type: object
+                properties:
+                  nama:
+                    type: string
+                    description: Nama korektor
+                    example: "John Doe"
+                  nip:
+                    type: string
+                    description: NIP korektor
+                  gelar_depan:
+                    type: string
+                    description: Gelar depan korektor
+                    example: "S.Kom"
+                  gelar_belakang:
+                    type: string
+                    description: Gelar belakang korektor
+                    example: "M.Kom"
+                  status_koreksi:
+                    type: string
+                    description: Status koreksi
+                    example: "Sudah Dikoreksi"
+                  catatan_koreksi:
+                    type: string
+                    description: Catatan koreksi
+                    example: "Catatan koreksi contoh"
+                  korektor_ke:
+                    type: integer
+                    description: Korektor ke
+                    example: 1
+            aksi:
+              type: string
+              description: Aksi yang bisa dilakukan oleh user
+              example: "koreksi"
+              nullable: true
+              enum: ["koreksi", "tandatangan", ""]
+            korektor_ke: 
+              type: integer
+              description: Urutan korektor dari pengguna yang sedang koreksi surat keputusan
+              nullable: true
+              example : 1
+            status_sk:
+              type: string
+              enum: ["Belum Dikoreksi","Sedang Dikoreksi","Sudah Dikoreksi & Dikembalikan","Sudah dikoreksi dan menunggu TTD","Sudah TTD","Sudah dikirim"]
+              example: "Sedang Dikoreksi"
+              description: Status SK

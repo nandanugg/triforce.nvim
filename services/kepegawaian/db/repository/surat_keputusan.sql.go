@@ -24,6 +24,7 @@ WHERE
     AND fds.kategori != '< Semua >'
     AND (fdc.status_koreksi = 0 OR fdc.status_koreksi IS NULL)
     AND korektor.nip_baru = $1::varchar
+    AND fds.ds_ok = true
 `
 
 func (q *Queries) CountAntreanKoreksiSuratKeputusanByNIP(ctx context.Context, nipKorektor string) (int64, error) {
@@ -53,8 +54,12 @@ WHERE fdc.deleted_at IS NULL
     AND ($5::VARCHAR IS NULL OR p.jabatan_instansi_id = $5::VARCHAR)
     AND ($6::VARCHAR is NULL OR fds.kategori ILIKE '%' || $6::VARCHAR || '%')
     AND ($7::VARCHAR IS NULL OR fds.no_sk ILIKE '%' || $7::VARCHAR || '%')
-    AND ($8::integer is NULL or fdc.status_koreksi = $8::integer)
+    AND (
+        $8::integer[] IS NULL
+        OR fdc.status_koreksi = ANY($8::integer[])
+    )
     AND fdc.pegawai_korektor_id = $9::varchar
+    AND ds_ok = true
 `
 
 type CountKoreksiSuratKeputusanByPNSIDParams struct {
@@ -65,7 +70,7 @@ type CountKoreksiSuratKeputusanByPNSIDParams struct {
 	JabatanID     pgtype.Text `db:"jabatan_id"`
 	KategoriSk    pgtype.Text `db:"kategori_sk"`
 	NoSk          pgtype.Text `db:"no_sk"`
-	StatusKoreksi pgtype.Int4 `db:"status_koreksi"`
+	StatusKoreksi []int32     `db:"status_koreksi"`
 	PnsID         string      `db:"pns_id"`
 }
 
@@ -106,6 +111,7 @@ WHERE fds.deleted_at IS NULL
     AND ($7::DATE IS NULL OR fds.tanggal_sk >= $7::DATE)
     AND ($8::DATE IS NULL OR fds.tanggal_sk <= $8::DATE)
     AND ($9::integer[] IS NULL OR fds.status_sk = ANY($9::integer[]))
+    AND ds_ok = true
 `
 
 type CountSuratKeputusanParams struct {
@@ -145,6 +151,7 @@ WHERE fds.deleted_at IS NULL
     AND ($2::varchar IS NULL OR fds.no_sk ILIKE '%' || $2::varchar || '%')
     AND ($3::integer[] IS NULL OR fds.status_sk = ANY($3::integer[]))
     AND ($4::varchar is null OR fds.kategori ILIKE '%' || $4::varchar || '%')
+    AND ds_ok = true
 `
 
 type CountSuratKeputusanByNIPParams struct {
@@ -176,6 +183,7 @@ WHERE fds.status_ttd = 0
   AND fds.kategori NOT IN ('< Semua >', '< Pilih >')
   AND fds.ttd_pegawai_id = $1::varchar
   AND fds.deleted_at IS NULL
+  AND fds.ds_ok = true
 `
 
 func (q *Queries) CountTandaTanganSuratKeputusanAntreanByPNSID(ctx context.Context, pnsID string) (int64, error) {
@@ -207,6 +215,7 @@ WHERE fds.deleted_at IS NULL
     AND fds.status_koreksi = 1 
     and ($8::integer is NULL or fds.status_ttd = $8::integer)
     AND fds.ttd_pegawai_id = $9::varchar
+    AND fds.ds_ok = true
 `
 
 type CountTandaTanganSuratKeputusanByPNSIDParams struct {
@@ -476,6 +485,7 @@ WHERE
   AND fds.kategori != '< Semua >'
   AND (fdc.status_koreksi = 0 OR fdc.status_koreksi IS NULL)
   AND korektor.nip_baru = $3::varchar
+  AND fds.ds_ok = true
 GROUP BY 
   fds.kategori
 LIMIT $1 OFFSET $2
@@ -538,8 +548,12 @@ WHERE fdc.deleted_at IS NULL
     AND ($7::VARCHAR IS NULL OR p.jabatan_instansi_id = $7::VARCHAR)
     AND ($8::VARCHAR is NULL OR fds.kategori ILIKE '%' || $8::VARCHAR || '%')
     AND ($9::VARCHAR IS NULL OR fds.no_sk ILIKE '%' || $9::VARCHAR || '%')
-    AND ($10::integer is NULL or fdc.status_koreksi = $10::integer)
+    AND (
+        $10::integer[] IS NULL
+        OR fdc.status_koreksi = ANY($10::integer[])
+    )
     AND fdc.pegawai_korektor_id = $11::varchar
+    AND ds_ok = true
 ORDER BY fds.created_at DESC
 LIMIT $1 OFFSET $2
 `
@@ -554,7 +568,7 @@ type ListKoreksiSuratKeputusanByPNSIDParams struct {
 	JabatanID     pgtype.Text `db:"jabatan_id"`
 	KategoriSk    pgtype.Text `db:"kategori_sk"`
 	NoSk          pgtype.Text `db:"no_sk"`
-	StatusKoreksi pgtype.Int4 `db:"status_koreksi"`
+	StatusKoreksi []int32     `db:"status_koreksi"`
 	PnsID         string      `db:"pns_id"`
 }
 
@@ -628,6 +642,7 @@ JOIN
 WHERE 
     fds.deleted_at IS NULL
     AND fds.file_id = $1::varchar
+    AND fds.ds_ok = true
 ORDER BY fdc.korektor_ke ASC
 `
 
@@ -738,6 +753,7 @@ WHERE fds.deleted_at IS NULL
     AND ($9::DATE IS NULL OR fds.tanggal_sk >= $9::DATE)
     AND ($10::DATE IS NULL OR fds.tanggal_sk <= $10::DATE)
     AND ($11::integer[] IS NULL OR fds.status_sk = ANY($11::integer[]))
+    AND ds_ok = true
 ORDER BY fds.created_at DESC
 LIMIT $1 OFFSET $2
 `
@@ -821,6 +837,7 @@ WHERE fds.deleted_at IS NULL
     AND ($4::varchar IS NULL OR fds.no_sk ILIKE '%' || $4::varchar || '%')
     AND ($5::integer[] IS NULL OR fds.status_sk = ANY($5::integer[]))
     AND ($6::varchar is null OR fds.kategori ILIKE '%' || $6::varchar || '%')
+    AND ds_ok = true
 ORDER BY fds.created_at DESC
 LIMIT $1 OFFSET $2
 `
@@ -887,6 +904,7 @@ WHERE fds.status_ttd = 0
   AND fds.kategori NOT IN ('< Semua >', '< Pilih >')
   AND fds.ttd_pegawai_id = $3::varchar
   AND fds.deleted_at IS NULL
+  AND fds.ds_ok = true
 GROUP BY 
     fds.kategori,
     fds.ttd_pegawai_id
@@ -953,6 +971,7 @@ WHERE fds.deleted_at IS NULL
     AND fds.status_koreksi = 1 
     and ($10::integer is NULL or fds.status_ttd = $10::integer)
     AND fds.ttd_pegawai_id = $11::varchar
+    AND fds.ds_ok = true
 ORDER BY fds.created_at DESC
 LIMIT $1 OFFSET $2
 `

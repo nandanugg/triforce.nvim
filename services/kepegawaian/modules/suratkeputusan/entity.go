@@ -79,18 +79,6 @@ type korektorSuratKeputusan struct {
 	CatatanKoreksi string `json:"catatan_koreksi"`
 }
 
-var statusKoreksiMap = map[string]int32{
-	"Sudah Dikoreksi": 1,
-	"Belum Dikoreksi": 2,
-}
-
-func statusKoreksiValue(status string) *int32 {
-	if val, ok := statusKoreksiMap[status]; ok {
-		return &val
-	}
-	return nil
-}
-
 type statusKoreksiSK int16
 
 const (
@@ -196,4 +184,36 @@ func (s statusTandatanganRequest) tandaTangan() bool {
 
 func (s statusTandatanganRequest) dikembalikan() bool {
 	return s == statusTandatanganRequestDikembalikan
+}
+
+type statusKoreksiRequest string
+
+const (
+	statusKoreksiRequestSudahDikoreksi statusKoreksiRequest = "Sudah Dikoreksi"
+	statusKoreksiRequestBelumDikoreksi statusKoreksiRequest = "Belum Dikoreksi"
+)
+
+func (s statusKoreksiRequest) sudahDikoreksi() bool {
+	return s == statusKoreksiRequestSudahDikoreksi
+}
+
+func (s statusKoreksiRequest) belumDikoreksi() bool {
+	return s == statusKoreksiRequestBelumDikoreksi
+}
+
+func (s statusKoreksiRequest) value() []int32 {
+	if s.sudahDikoreksi() {
+		return []int32{
+			int32(statusKorektorSK(statusKorektorSKSudahDikoreksi)),
+			int32(statusKorektorSK(statusKorektorSKDikembalikan)),
+		}
+	}
+
+	if s.belumDikoreksi() {
+		return []int32{
+			int32(statusKorektorSK(statusKorektorSKBelumDikoreksi)),
+		}
+	}
+
+	return []int32{}
 }

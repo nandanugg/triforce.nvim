@@ -346,10 +346,7 @@ func (s *service) listKoreksi(ctx context.Context, arg listKoreksiParams) ([]kor
 	if err != nil {
 		return nil, 0, fmt.Errorf("[suratkeputusan-listKoreksi] repo GetPegawaiPNSIDByNIP: %w", err)
 	}
-	statusKoreksi := pgtype.Int4{Valid: false}
-	if statusKoreksiValue(arg.status) != nil {
-		statusKoreksi = pgtype.Int4{Int32: *statusKoreksiValue(arg.status), Valid: true}
-	}
+	statusKoreksi := statusKoreksiRequest(arg.status).value()
 	data, err := s.repo.ListKoreksiSuratKeputusanByPNSID(ctx, repo.ListKoreksiSuratKeputusanByPNSIDParams{
 		Limit:         int32(arg.limit),
 		Offset:        int32(arg.offset),
