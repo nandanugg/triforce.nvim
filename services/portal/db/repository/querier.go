@@ -9,7 +9,7 @@ import (
 )
 
 type Querier interface {
-	CountPemberitahuan(ctx context.Context) (int64, error)
+	CountPemberitahuan(ctx context.Context, status interface{}) (int64, error)
 	CountResourcePermissionsByIDs(ctx context.Context, ids []int32) (int64, error)
 	CountResources(ctx context.Context) (int64, error)
 	CountRoles(ctx context.Context) (int64, error)
@@ -22,6 +22,7 @@ type Querier interface {
 	DeletePemberitahuan(ctx context.Context, id int64) (int64, error)
 	DeleteRoleResourcePermissions(ctx context.Context, arg DeleteRoleResourcePermissionsParams) error
 	DeleteUserRoles(ctx context.Context, arg DeleteUserRolesParams) error
+	GetOverlappingPinnedPemberitahuan(ctx context.Context, arg GetOverlappingPinnedPemberitahuanParams) (GetOverlappingPinnedPemberitahuanRow, error)
 	GetRole(ctx context.Context, id int16) (GetRoleRow, error)
 	GetUserGroupByNIP(ctx context.Context, nip string) (GetUserGroupByNIPRow, error)
 	GetUserNIPByIDAndSource(ctx context.Context, arg GetUserNIPByIDAndSourceParams) (string, error)

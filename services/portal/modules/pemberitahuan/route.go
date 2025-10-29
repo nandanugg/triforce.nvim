@@ -17,5 +17,5 @@ func RegisterRoutes(e *echo.Echo, repo repository, mwAuth api.AuthMiddlewareFunc
 	e.Add(http.MethodPut, "/v1/admin/pemberitahuan/:id", h.update, mwAuth(api.Kode_Pemberitahuan_Write))
 	e.Add(http.MethodDelete, "/v1/admin/pemberitahuan/:id", h.delete, mwAuth(api.Kode_Pemberitahuan_Write))
 
-	e.Add(http.MethodGet, "/v1/pemberitahuan", h.list, mwAuth(api.Kode_Pemberitahuan_Public))
+	e.Add(http.MethodGet, "/v1/pemberitahuan", h.listPublic, mwAuth(api.Kode_Pemberitahuan_Public))
 }

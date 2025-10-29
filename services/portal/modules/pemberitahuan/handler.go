@@ -1,6 +1,7 @@
 package pemberitahuan
 
 import (
+	"errors"
 	"log/slog"
 	"net/http"
 	"time"
@@ -24,6 +25,25 @@ type listResponse struct {
 	Meta api.MetaPagination `json:"meta"`
 }
 
+func (h *handler) listPublic(c echo.Context) error {
+	var req api.PaginationRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	ctx := c.Request().Context()
+	data, total, err := h.service.list(ctx, PemberitahuanStatusActive, req.Limit, req.Offset)
+	if err != nil {
+		slog.ErrorContext(ctx, "Error getting list pemberitahuan", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	return c.JSON(http.StatusOK, listResponse{
+		Data: data,
+		Meta: api.MetaPagination{Limit: req.Limit, Offset: req.Offset, Total: total},
+	})
+}
+
 func (h *handler) list(c echo.Context) error {
 	var req api.PaginationRequest
 	if err := c.Bind(&req); err != nil {
@@ -31,7 +51,7 @@ func (h *handler) list(c echo.Context) error {
 	}
 
 	ctx := c.Request().Context()
-	data, total, err := h.service.list(ctx, req.Limit, req.Offset)
+	data, total, err := h.service.list(ctx, PemberitahuanStatusAll, req.Limit, req.Offset)
 	if err != nil {
 		slog.ErrorContext(ctx, "Error getting list pemberitahuan", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
@@ -71,6 +91,10 @@ func (h *handler) create(c echo.Context) error {
 		DiperbaharuiOleh: usr.NIP,
 	})
 	if err != nil {
+		if errors.Is(err, ErrConflict) {
+			slog.ErrorContext(ctx, "Error creating pemberitahuan", "error", err)
+			return echo.NewHTTPError(http.StatusConflict, err)
+		}
 		slog.ErrorContext(ctx, "Error creating pemberitahuan", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
@@ -99,6 +123,10 @@ func (h *handler) update(c echo.Context) error {
 		DiperbaharuiOleh: usr.NIP,
 	})
 	if err != nil {
+		if errors.Is(err, ErrConflict) {
+			slog.ErrorContext(ctx, "Error updating pemberitahuan", "error", err)
+			return echo.NewHTTPError(http.StatusConflict, err)
+		}
 		slog.ErrorContext(ctx, "Error updating pemberitahuan", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}

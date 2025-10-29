@@ -15,3 +15,12 @@ type pemberitahuan struct {
 	DiperbaruiOleh     string    `json:"diperbarui_oleh"`
 	TerakhirDiperbarui time.Time `json:"terakhir_diperbarui"`
 }
+
+type Status string
+
+const (
+	PemberitahuanStatusWaiting Status = "WAITING"
+	PemberitahuanStatusActive  Status = "ACTIVE"
+	PemberitahuanStatusOver    Status = "OVER"
+	PemberitahuanStatusAll     Status = "ALL"
+)

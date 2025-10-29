@@ -27,6 +27,21 @@ RETURNING
         ELSE 'UNKNOWN'
     END AS status;
 
+-- name: GetOverlappingPinnedPemberitahuan :one
+SELECT
+    id,
+    judul_berita
+FROM pemberitahuan
+WHERE
+    deleted_at IS NULL
+    AND pinned = TRUE
+    AND diterbitkan_pada <= @ditarik_pada::timestamptz
+    AND ditarik_pada >= @diterbitkan_pada::timestamptz
+    AND (
+        @id::bigint = 0 OR id <> @id::bigint
+    )
+LIMIT 1;
+
 -- name: ListPemberitahuan :many
 SELECT
     id,
@@ -45,16 +60,30 @@ SELECT
         ELSE 'UNKNOWN'
     END AS status
 FROM pemberitahuan
-WHERE deleted_at IS NULL
+WHERE
+    deleted_at IS NULL
+    AND (
+        @status = 'ALL'
+        OR (@status = 'WAITING' AND NOW() < diterbitkan_pada)
+        OR (@status = 'ACTIVE' AND NOW() >= diterbitkan_pada AND NOW() < ditarik_pada)
+        OR (@status = 'OVER' AND NOW() >= ditarik_pada)
+    )
 ORDER BY
-    pinned DESC,
+    (pinned = TRUE AND NOW() >= diterbitkan_pada AND NOW() < ditarik_pada) DESC,
     diterbitkan_pada DESC
 LIMIT $1 OFFSET $2;
 
 -- name: CountPemberitahuan :one
 SELECT COUNT(1) AS total
 FROM pemberitahuan
-WHERE deleted_at IS NULL;
+WHERE
+    deleted_at IS NULL
+    AND (
+        @status = 'ALL'
+        OR (@status = 'WAITING' AND NOW() < diterbitkan_pada)
+        OR (@status = 'ACTIVE' AND NOW() >= diterbitkan_pada AND NOW() < ditarik_pada)
+        OR (@status = 'OVER' AND NOW() >= ditarik_pada)
+    );
 
 -- name: UpdatePemberitahuan :one
 UPDATE pemberitahuan

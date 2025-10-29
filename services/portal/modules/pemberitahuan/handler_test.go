@@ -33,6 +33,7 @@ func Test_handler_ListPemberitahuan(t *testing.T) {
 		insert into pemberitahuan (id, judul_berita, deskripsi_berita, pinned, diterbitkan_pada, ditarik_pada, updated_by, updated_at, deleted_at) values
 		  (1, 'Notice over', 'Desc 1', false, current_date - interval '3 days', current_date - interval '2 days', 'admin', current_date - interval '5 days', null),
 		  (2, 'Notice active', 'Desc 1', false, current_date - interval '3 days', current_date + interval '3 days', 'admin', current_date - interval '4 days', null),
+		  (6, 'Notice active 2', 'Desc 1', false, current_date - interval '2 days', current_date + interval '3 days', 'admin', current_date - interval '4 days', null),
 		  (3, 'Notice waiting', 'Desc 1', false, current_date + interval '3 days', current_date + interval '4 days', 'admin', current_date, null),
 		  (4, 'Notice pinned', 'Desc 1', true, current_date - interval '3 days', current_date + interval '3 days', 'admin', current_date - interval '3 days', null),
 		  (5, 'Notice 3', 'Desc 3', false, current_date - interval '3 days', current_date + interval '3 days', 'admin', now(), now());
@@ -74,26 +75,15 @@ func Test_handler_ListPemberitahuan(t *testing.T) {
 					"terakhir_diperbarui": "` + getDate(-3) + `"
 				},
 				{
-					"id": 3,
-					"judul_berita": "Notice waiting",
+					"id": 6,
+					"judul_berita": "Notice active 2",
 					"deskripsi_berita": "Desc 1",
 					"pinned": false,
-					"status": "WAITING",
-					"diterbitkan_pada": "` + getDate(3) + `",
-					"ditarik_pada": "` + getDate(4) + `",
+					"status": "ACTIVE",
+					"diterbitkan_pada": "` + getDate(-2) + `",
+					"ditarik_pada": "` + getDate(3) + `",
 					"diperbarui_oleh": "admin",
-					"terakhir_diperbarui": "` + getDate(0) + `"
-				},
-				{
-					"id": 1,
-					"judul_berita": "Notice over",
-					"deskripsi_berita": "Desc 1",
-					"pinned": false,
-					"status": "OVER",
-					"diterbitkan_pada": "` + getDate(-3) + `",
-					"ditarik_pada": "` + getDate(-2) + `",
-					"diperbarui_oleh": "admin",
-					"terakhir_diperbarui": "` + getDate(-5) + `"
+					"terakhir_diperbarui": "` + getDate(-4) + `"
 				},
 				{
 					"id": 2,
@@ -107,7 +97,7 @@ func Test_handler_ListPemberitahuan(t *testing.T) {
 					"terakhir_diperbarui": "` + getDate(-4) + `"
 				}
 				],
-				"meta": {"limit": 10, "offset": 0, "total": 4}
+				"meta": {"limit": 10, "offset": 0, "total": 3}
 			}`,
 		},
 		{
@@ -129,18 +119,18 @@ func Test_handler_ListPemberitahuan(t *testing.T) {
 					"terakhir_diperbarui": "` + getDate(-3) + `"
 				},
 				{
-					"id": 3,
-					"judul_berita": "Notice waiting",
+					"id": 6,
+					"judul_berita": "Notice active 2",
 					"deskripsi_berita": "Desc 1",
 					"pinned": false,
-					"status": "WAITING",
-					"diterbitkan_pada": "` + getDate(3) + `",
-					"ditarik_pada": "` + getDate(4) + `",
+					"status": "ACTIVE",
+					"diterbitkan_pada": "` + getDate(-2) + `",
+					"ditarik_pada": "` + getDate(3) + `",
 					"diperbarui_oleh": "admin",
-					"terakhir_diperbarui": "` + getDate(0) + `"
+					"terakhir_diperbarui": "` + getDate(-4) + `"
 				}
 				],
-				"meta": {"limit": 2, "offset": 0, "total": 4}
+				"meta": {"limit": 2, "offset": 0, "total": 3}
 			}`,
 		},
 		{
@@ -150,17 +140,6 @@ func Test_handler_ListPemberitahuan(t *testing.T) {
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
-				{
-					"id": 1,
-					"judul_berita": "Notice over",
-					"deskripsi_berita": "Desc 1",
-					"pinned": false,
-					"status": "OVER",
-					"diterbitkan_pada": "` + getDate(-3) + `",
-					"ditarik_pada": "` + getDate(-2) + `",
-					"diperbarui_oleh": "admin",
-					"terakhir_diperbarui": "` + getDate(-5) + `"
-				},
 				{
 					"id": 2,
 					"judul_berita": "Notice active",
@@ -173,7 +152,7 @@ func Test_handler_ListPemberitahuan(t *testing.T) {
 					"terakhir_diperbarui": "` + getDate(-4) + `"
 				}
 				],
-				"meta": {"limit": 2, "offset": 2, "total": 4}
+				"meta": {"limit": 2, "offset": 2, "total": 3}
 			}`,
 		},
 		{
@@ -207,6 +186,7 @@ func Test_handler_adminListPemberitahuan(t *testing.T) {
 	dbData := `
 		insert into pemberitahuan (id, judul_berita, deskripsi_berita, pinned, diterbitkan_pada, ditarik_pada, updated_by, updated_at, deleted_at) values
 		  (1, 'Notice over', 'Desc 1', false, current_date - interval '3 days', current_date - interval '2 days', 'admin', current_date - interval '5 days', null),
+		  (6, 'Notice over pinned', 'Desc 1', true, current_date - interval '3 days', current_date - interval '2 days', 'admin', current_date - interval '5 days', null),
 		  (2, 'Notice active', 'Desc 1', false, current_date - interval '3 days', current_date + interval '3 days', 'admin', current_date - interval '4 days', null),
 		  (3, 'Notice waiting', 'Desc 1', false, current_date + interval '3 days', current_date + interval '4 days', 'admin', current_date, null),
 		  (4, 'Notice pinned', 'Desc 1', true, current_date - interval '3 days', current_date + interval '3 days', 'admin', current_date - interval '3 days', null),
@@ -272,6 +252,17 @@ func Test_handler_adminListPemberitahuan(t *testing.T) {
 					"terakhir_diperbarui": "` + getDate(-5) + `"
 				},
 				{
+					"id": 6,
+					"judul_berita": "Notice over pinned",
+					"deskripsi_berita": "Desc 1",
+					"pinned": true,
+					"status": "OVER",
+					"diterbitkan_pada": "` + getDate(-3) + `",
+					"ditarik_pada": "` + getDate(-2) + `",
+					"diperbarui_oleh": "admin",
+					"terakhir_diperbarui": "` + getDate(-5) + `"
+				},
+				{
 					"id": 2,
 					"judul_berita": "Notice active",
 					"deskripsi_berita": "Desc 1",
@@ -283,7 +274,7 @@ func Test_handler_adminListPemberitahuan(t *testing.T) {
 					"terakhir_diperbarui": "` + getDate(-4) + `"
 				}
 				],
-				"meta": {"limit": 10, "offset": 0, "total": 4}
+				"meta": {"limit": 10, "offset": 0, "total": 5}
 			}`,
 		},
 		{
@@ -316,7 +307,7 @@ func Test_handler_adminListPemberitahuan(t *testing.T) {
 					"terakhir_diperbarui": "` + getDate(0) + `"
 				}
 				],
-				"meta": {"limit": 2, "offset": 0, "total": 4}
+				"meta": {"limit": 2, "offset": 0, "total": 5}
 			}`,
 		},
 		{
@@ -338,18 +329,18 @@ func Test_handler_adminListPemberitahuan(t *testing.T) {
 					"terakhir_diperbarui": "` + getDate(-5) + `"
 				},
 				{
-					"id": 2,
-					"judul_berita": "Notice active",
+					"id": 6,
+					"judul_berita": "Notice over pinned",
 					"deskripsi_berita": "Desc 1",
-					"pinned": false,
-					"status": "ACTIVE",
+					"pinned": true,
+					"status": "OVER",
 					"diterbitkan_pada": "` + getDate(-3) + `",
-					"ditarik_pada": "` + getDate(3) + `",
+					"ditarik_pada": "` + getDate(-2) + `",
 					"diperbarui_oleh": "admin",
-					"terakhir_diperbarui": "` + getDate(-4) + `"
+					"terakhir_diperbarui": "` + getDate(-5) + `"
 				}
 				],
-				"meta": {"limit": 2, "offset": 2, "total": 4}
+				"meta": {"limit": 2, "offset": 2, "total": 5}
 			}`,
 		},
 		{
@@ -379,7 +370,14 @@ func Test_handler_adminListPemberitahuan(t *testing.T) {
 func Test_handler_adminCreatePemberitahuan(t *testing.T) {
 	t.Parallel()
 
+	dbData := `
+		insert into pemberitahuan (id, judul_berita, deskripsi_berita, pinned, diterbitkan_pada, ditarik_pada, updated_by, updated_at, deleted_at) values
+		  (3, 'Notice waiting', 'Desc 1', true, current_date + interval '3 days', current_date + interval '4 days', 'admin', current_date, null);
+	`
 	pgx := dbtest.New(t, dbmigrations.FS)
+	_, err := pgx.Exec(context.Background(), dbData)
+	require.NoError(t, err)
+
 	e, err := api.NewEchoServer(docs.OpenAPIBytes)
 	require.NoError(t, err)
 	repo := sqlc.New(pgx)
@@ -422,6 +420,24 @@ func Test_handler_adminCreatePemberitahuan(t *testing.T) {
 				}
 			}`,
 		},
+		{
+			name: "error: conflict pinned pemberitahuan",
+			requestBody: `{
+				"judul_berita":"New Notice",
+				"deskripsi_berita":"Some desc",
+				"pinned":true,
+				"diterbitkan_pada":"` + getDate(2) + `",
+				"ditarik_pada":"` + getDate(5) + `"
+			}`,
+			requestHeader: http.Header{
+				"Authorization": authHeader,
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusConflict,
+			wantResponseBody: `{
+				"message": "pemberitahuan conflict: conflict with 'Notice waiting' (id=3)"
+			}`,
+		},
 	}
 
 	for _, tt := range tests {
@@ -459,7 +475,8 @@ func Test_handler_adminUpdatePemberitahuan(t *testing.T) {
 		)
 		values
 		  (1, 'Old', 'Desc', false, now(), now(), 'admin', now(), null),
-		  (2, 'Deleted', 'Desc', false, now(), now(), 'admin', now(), now());
+		  (2, 'Deleted', 'Desc', false, now(), now(), 'admin', now(), now()),
+		  (3, 'Notice waiting', 'Desc 1', true, current_date + interval '3 days', current_date + interval '4 days', 'admin', current_date, null);
 	`
 	pgx := dbtest.New(t, dbmigrations.FS)
 	_, err := pgx.Exec(context.Background(), dbData)
@@ -500,6 +517,21 @@ func Test_handler_adminUpdatePemberitahuan(t *testing.T) {
 					"diperbarui_oleh": "123456789",
 					"terakhir_diperbarui": "{updated_at}"
 				}
+			}`,
+		},
+		{
+			name: "error: conflict pinned pemberitahuan",
+			id:   "1",
+			requestBody: `{
+				"judul_berita":"New Notice",
+				"deskripsi_berita":"Some desc",
+				"pinned":true,
+				"diterbitkan_pada":"` + getDate(2) + `",
+				"ditarik_pada":"` + getDate(5) + `"
+			}`,
+			wantResponseCode: http.StatusConflict,
+			wantResponseBody: `{
+				"message": "pemberitahuan conflict: conflict with 'Notice waiting' (id=3)"
 			}`,
 		},
 		{

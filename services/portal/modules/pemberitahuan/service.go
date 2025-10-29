@@ -15,9 +15,10 @@ import (
 type repository interface {
 	ListPemberitahuan(ctx context.Context, arg sqlc.ListPemberitahuanParams) ([]sqlc.ListPemberitahuanRow, error)
 	UpdatePemberitahuan(ctx context.Context, arg sqlc.UpdatePemberitahuanParams) (sqlc.UpdatePemberitahuanRow, error)
-	CountPemberitahuan(ctx context.Context) (int64, error)
+	CountPemberitahuan(ctx context.Context, status any) (int64, error)
 	CreatePemberitahuan(ctx context.Context, arg sqlc.CreatePemberitahuanParams) (sqlc.CreatePemberitahuanRow, error)
 	DeletePemberitahuan(ctx context.Context, id int64) (int64, error)
+	GetOverlappingPinnedPemberitahuan(ctx context.Context, arg sqlc.GetOverlappingPinnedPemberitahuanParams) (sqlc.GetOverlappingPinnedPemberitahuanRow, error)
 }
 
 type service struct {
@@ -28,15 +29,16 @@ func newService(r repository) *service {
 	return &service{repo: r}
 }
 
-func (s *service) list(ctx context.Context, limit, offset uint) ([]pemberitahuan, uint, error) {
+func (s *service) list(ctx context.Context, filterPeriode Status, limit, offset uint) ([]pemberitahuan, uint, error) {
 	rows, err := s.repo.ListPemberitahuan(ctx, sqlc.ListPemberitahuanParams{
 		Limit: int32(limit), Offset: int32(offset),
+		Status: filterPeriode,
 	})
 	if err != nil {
 		return nil, 0, fmt.Errorf("repo list: %w", err)
 	}
 
-	count, err := s.repo.CountPemberitahuan(ctx)
+	count, err := s.repo.CountPemberitahuan(ctx, filterPeriode)
 	if err != nil {
 		return nil, 0, fmt.Errorf("repo count: %w", err)
 	}
@@ -66,6 +68,14 @@ type createPemberitahuanParams struct {
 }
 
 func (s *service) create(ctx context.Context, p createPemberitahuanParams) (*pemberitahuan, error) {
+	if err := s.checkOverlap(ctx, sqlc.GetOverlappingPinnedPemberitahuanParams{
+		DitarikPada:     p.DitarikPada,
+		DiterbitkanPada: p.DiterbitkanPada,
+		ID:              0,
+	}); err != nil {
+		return nil, err
+	}
+
 	r, err := s.repo.CreatePemberitahuan(ctx, sqlc.CreatePemberitahuanParams{
 		JudulBerita:     p.JudulBerita,
 		DeskripsiBerita: p.DeskripsiBerita,
@@ -101,6 +111,14 @@ type updatePemberitahuanParams struct {
 }
 
 func (s *service) update(ctx context.Context, id int64, p updatePemberitahuanParams) (*pemberitahuan, error) {
+	if err := s.checkOverlap(ctx, sqlc.GetOverlappingPinnedPemberitahuanParams{
+		DitarikPada:     p.DitarikPada,
+		DiterbitkanPada: p.DiterbitkanPada,
+		ID:              id,
+	}); err != nil {
+		return nil, err
+	}
+
 	r, err := s.repo.UpdatePemberitahuan(ctx, sqlc.UpdatePemberitahuanParams{
 		ID:              id,
 		JudulBerita:     p.JudulBerita,
@@ -136,4 +154,15 @@ func (s *service) delete(ctx context.Context, id int64) (bool, error) {
 		return false, fmt.Errorf("[delete] error: %w", err)
 	}
 	return affected > 0, nil
+}
+
+func (s *service) checkOverlap(ctx context.Context, p sqlc.GetOverlappingPinnedPemberitahuanParams) error {
+	overlap, err := s.repo.GetOverlappingPinnedPemberitahuan(ctx, p)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil
+		}
+		return fmt.Errorf("repo check pinned duplicate: %w", err)
+	}
+	return NewError(ErrConflict, fmt.Sprintf("conflict with '%s' (id=%d)", overlap.JudulBerita, overlap.ID))
 }

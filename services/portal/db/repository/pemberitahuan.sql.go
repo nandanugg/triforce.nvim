@@ -12,11 +12,18 @@ import (
 const countPemberitahuan = `-- name: CountPemberitahuan :one
 SELECT COUNT(1) AS total
 FROM pemberitahuan
-WHERE deleted_at IS NULL
+WHERE
+    deleted_at IS NULL
+    AND (
+        $1 = 'ALL'
+        OR ($1 = 'WAITING' AND NOW() < diterbitkan_pada)
+        OR ($1 = 'ACTIVE' AND NOW() >= diterbitkan_pada AND NOW() < ditarik_pada)
+        OR ($1 = 'OVER' AND NOW() >= ditarik_pada)
+    )
 `
 
-func (q *Queries) CountPemberitahuan(ctx context.Context) (int64, error) {
-	row := q.db.QueryRow(ctx, countPemberitahuan)
+func (q *Queries) CountPemberitahuan(ctx context.Context, status interface{}) (int64, error) {
+	row := q.db.QueryRow(ctx, countPemberitahuan, status)
 	var total int64
 	err := row.Scan(&total)
 	return total, err
@@ -114,6 +121,40 @@ func (q *Queries) DeletePemberitahuan(ctx context.Context, id int64) (int64, err
 	return result.RowsAffected(), nil
 }
 
+const getOverlappingPinnedPemberitahuan = `-- name: GetOverlappingPinnedPemberitahuan :one
+SELECT
+    id,
+    judul_berita
+FROM pemberitahuan
+WHERE
+    deleted_at IS NULL
+    AND pinned = TRUE
+    AND diterbitkan_pada <= $1::timestamptz
+    AND ditarik_pada >= $2::timestamptz
+    AND (
+        $3::bigint = 0 OR id <> $3::bigint
+    )
+LIMIT 1
+`
+
+type GetOverlappingPinnedPemberitahuanParams struct {
+	DitarikPada     pgtype.Timestamptz `db:"ditarik_pada"`
+	DiterbitkanPada pgtype.Timestamptz `db:"diterbitkan_pada"`
+	ID              int64              `db:"id"`
+}
+
+type GetOverlappingPinnedPemberitahuanRow struct {
+	ID          int64  `db:"id"`
+	JudulBerita string `db:"judul_berita"`
+}
+
+func (q *Queries) GetOverlappingPinnedPemberitahuan(ctx context.Context, arg GetOverlappingPinnedPemberitahuanParams) (GetOverlappingPinnedPemberitahuanRow, error) {
+	row := q.db.QueryRow(ctx, getOverlappingPinnedPemberitahuan, arg.DitarikPada, arg.DiterbitkanPada, arg.ID)
+	var i GetOverlappingPinnedPemberitahuanRow
+	err := row.Scan(&i.ID, &i.JudulBerita)
+	return i, err
+}
+
 const listPemberitahuan = `-- name: ListPemberitahuan :many
 SELECT
     id,
@@ -132,16 +173,24 @@ SELECT
         ELSE 'UNKNOWN'
     END AS status
 FROM pemberitahuan
-WHERE deleted_at IS NULL
+WHERE
+    deleted_at IS NULL
+    AND (
+        $3 = 'ALL'
+        OR ($3 = 'WAITING' AND NOW() < diterbitkan_pada)
+        OR ($3 = 'ACTIVE' AND NOW() >= diterbitkan_pada AND NOW() < ditarik_pada)
+        OR ($3 = 'OVER' AND NOW() >= ditarik_pada)
+    )
 ORDER BY
-    pinned DESC,
+    (pinned = TRUE AND NOW() >= diterbitkan_pada AND NOW() < ditarik_pada) DESC,
     diterbitkan_pada DESC
 LIMIT $1 OFFSET $2
 `
 
 type ListPemberitahuanParams struct {
-	Limit  int32 `db:"limit"`
-	Offset int32 `db:"offset"`
+	Limit  int32       `db:"limit"`
+	Offset int32       `db:"offset"`
+	Status interface{} `db:"status"`
 }
 
 type ListPemberitahuanRow struct {
@@ -158,7 +207,7 @@ type ListPemberitahuanRow struct {
 }
 
 func (q *Queries) ListPemberitahuan(ctx context.Context, arg ListPemberitahuanParams) ([]ListPemberitahuanRow, error) {
-	rows, err := q.db.Query(ctx, listPemberitahuan, arg.Limit, arg.Offset)
+	rows, err := q.db.Query(ctx, listPemberitahuan, arg.Limit, arg.Offset, arg.Status)
 	if err != nil {
 		return nil, err
 	}
