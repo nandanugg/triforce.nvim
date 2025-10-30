@@ -68,12 +68,14 @@ type createPemberitahuanParams struct {
 }
 
 func (s *service) create(ctx context.Context, p createPemberitahuanParams) (*pemberitahuan, error) {
-	if err := s.checkOverlap(ctx, sqlc.GetOverlappingPinnedPemberitahuanParams{
-		DitarikPada:     p.DitarikPada,
-		DiterbitkanPada: p.DiterbitkanPada,
-		ID:              0,
-	}); err != nil {
-		return nil, err
+	if p.Pinned {
+		if err := s.checkOverlap(ctx, sqlc.GetOverlappingPinnedPemberitahuanParams{
+			DitarikPada:     p.DitarikPada,
+			DiterbitkanPada: p.DiterbitkanPada,
+			ID:              0,
+		}); err != nil {
+			return nil, err
+		}
 	}
 
 	r, err := s.repo.CreatePemberitahuan(ctx, sqlc.CreatePemberitahuanParams{
@@ -111,12 +113,14 @@ type updatePemberitahuanParams struct {
 }
 
 func (s *service) update(ctx context.Context, id int64, p updatePemberitahuanParams) (*pemberitahuan, error) {
-	if err := s.checkOverlap(ctx, sqlc.GetOverlappingPinnedPemberitahuanParams{
-		DitarikPada:     p.DitarikPada,
-		DiterbitkanPada: p.DiterbitkanPada,
-		ID:              id,
-	}); err != nil {
-		return nil, err
+	if p.Pinned {
+		if err := s.checkOverlap(ctx, sqlc.GetOverlappingPinnedPemberitahuanParams{
+			DitarikPada:     p.DitarikPada,
+			DiterbitkanPada: p.DiterbitkanPada,
+			ID:              id,
+		}); err != nil {
+			return nil, err
+		}
 	}
 
 	r, err := s.repo.UpdatePemberitahuan(ctx, sqlc.UpdatePemberitahuanParams{

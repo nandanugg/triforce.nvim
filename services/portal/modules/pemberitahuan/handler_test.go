@@ -398,8 +398,8 @@ func Test_handler_adminCreatePemberitahuan(t *testing.T) {
 				"judul_berita":"New Notice",
 				"deskripsi_berita":"Some desc",
 				"pinned":false,
-				"diterbitkan_pada":"2024-01-01T00:00:00Z",
-				"ditarik_pada":"2024-01-02T00:00:00Z"
+				"diterbitkan_pada":"` + getDate(2) + `",
+				"ditarik_pada":"` + getDate(5) + `"
 			}`,
 			requestHeader: http.Header{
 				"Authorization": authHeader,
@@ -412,9 +412,9 @@ func Test_handler_adminCreatePemberitahuan(t *testing.T) {
 					"judul_berita": "New Notice",
 					"deskripsi_berita": "Some desc",
 					"pinned": false,
-					"status": "OVER",
-					"diterbitkan_pada":"` + time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC).Local().Format(time.RFC3339) + `",
-					"ditarik_pada":"` + time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC).Local().Format(time.RFC3339) + `",
+					"status": "WAITING",
+					"diterbitkan_pada":"` + getDate(2) + `",
+					"ditarik_pada":"` + getDate(5) + `",
 					"diperbarui_oleh": "123456789",
 					"terakhir_diperbarui": "{updated_at}"
 				}
@@ -501,8 +501,8 @@ func Test_handler_adminUpdatePemberitahuan(t *testing.T) {
 				"judul_berita":"New Notice",
 				"deskripsi_berita":"Some desc",
 				"pinned":false,
-				"diterbitkan_pada":"2024-01-01T00:00:00Z",
-				"ditarik_pada":"2024-01-02T00:00:00Z"
+				"diterbitkan_pada":"` + getDate(2) + `",
+				"ditarik_pada":"` + getDate(5) + `"
 			}`,
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
@@ -511,9 +511,9 @@ func Test_handler_adminUpdatePemberitahuan(t *testing.T) {
 					"judul_berita": "New Notice",
 					"deskripsi_berita": "Some desc",
 					"pinned": false,
-					"status": "OVER",
-					"diterbitkan_pada":"` + time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC).Local().Format(time.RFC3339) + `",
-					"ditarik_pada":"` + time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC).Local().Format(time.RFC3339) + `",
+					"status": "WAITING",
+					"diterbitkan_pada":"` + getDate(2) + `",
+					"ditarik_pada":"` + getDate(5) + `",
 					"diperbarui_oleh": "123456789",
 					"terakhir_diperbarui": "{updated_at}"
 				}
