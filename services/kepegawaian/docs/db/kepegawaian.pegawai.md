@@ -134,6 +134,7 @@ Data utama pegawai
 | ---- | ---------- |
 | pegawai_pkey | CREATE UNIQUE INDEX pegawai_pkey ON kepegawaian.pegawai USING btree (id) |
 | pegawai_pns_id_key | CREATE UNIQUE INDEX pegawai_pns_id_key ON kepegawaian.pegawai USING btree (pns_id) |
+| pegawai_nip_baru_idx | CREATE INDEX pegawai_nip_baru_idx ON kepegawaian.pegawai USING btree (nip_baru) |
 
 ## Relations
 
@@ -282,6 +283,11 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  varchar_20_ nik
+  smallint agama_id FK
+  smallint jenis_kawin_id FK
+  smallint status_sekolah
+  smallint anak_ke
 }
 "kepegawaian.pasangan" {
   bigint id
@@ -302,6 +308,8 @@ erDiagram
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
   date tanggal_lahir
+  varchar_20_ nik
+  smallint agama_id FK
 }
 "kepegawaian.orang_tua" {
   integer id

@@ -40,6 +40,7 @@ Orang tua pegawai
 | Name | Definition |
 | ---- | ---------- |
 | orang_tua_pkey | CREATE UNIQUE INDEX orang_tua_pkey ON kepegawaian.orang_tua USING btree (id) |
+| orang_tua_pns_id_idx | CREATE INDEX orang_tua_pns_id_idx ON kepegawaian.orang_tua USING btree (pns_id) |
 
 ## Relations
 

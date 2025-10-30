@@ -21,6 +21,23 @@ func (q *Queries) CountRefJenisKawin(ctx context.Context) (int64, error) {
 	return count, err
 }
 
+const getRefJenisKawin = `-- name: GetRefJenisKawin :one
+select id, nama from ref_jenis_kawin
+where id = $1 and deleted_at is null
+`
+
+type GetRefJenisKawinRow struct {
+	ID   int32       `db:"id"`
+	Nama pgtype.Text `db:"nama"`
+}
+
+func (q *Queries) GetRefJenisKawin(ctx context.Context, id int32) (GetRefJenisKawinRow, error) {
+	row := q.db.QueryRow(ctx, getRefJenisKawin, id)
+	var i GetRefJenisKawinRow
+	err := row.Scan(&i.ID, &i.Nama)
+	return i, err
+}
+
 const listRefJenisKawin = `-- name: ListRefJenisKawin :many
 select id, nama from ref_jenis_kawin
 where deleted_at is null

@@ -20,11 +20,18 @@ Anak pegawai
 | created_at | timestamp with time zone | now() | true |  |  | Waktu perekaman data |
 | updated_at | timestamp with time zone | now() | true |  |  | Waktu terakhir pembaruan |
 | deleted_at | timestamp with time zone |  | true |  |  | Waktu penghapusan data |
+| nik | varchar(20) |  | true |  |  |  |
+| agama_id | smallint |  | true |  | [kepegawaian.ref_agama](kepegawaian.ref_agama.md) |  |
+| jenis_kawin_id | smallint |  | true |  | [kepegawaian.ref_jenis_kawin](kepegawaian.ref_jenis_kawin.md) |  |
+| status_sekolah | smallint |  | true |  |  | Status Sekolah / Kerja, 1: Masih Sekolah, 2: Sudah Bekerja |
+| anak_ke | smallint |  | true |  |  |  |
 
 ## Constraints
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
+| anak_agama_id_fkey | FOREIGN KEY | FOREIGN KEY (agama_id) REFERENCES ref_agama(id) |
+| anak_jenis_kawin_id_fkey | FOREIGN KEY | FOREIGN KEY (jenis_kawin_id) REFERENCES ref_jenis_kawin(id) |
 | anak_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 | fk_anak_pns_id | FOREIGN KEY | FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id) |
 
@@ -33,6 +40,7 @@ Anak pegawai
 | Name | Definition |
 | ---- | ---------- |
 | anak_pkey | CREATE UNIQUE INDEX anak_pkey ON kepegawaian.anak USING btree (id) |
+| anak_pns_id_idx | CREATE INDEX anak_pns_id_idx ON kepegawaian.anak USING btree (pns_id) |
 
 ## Relations
 
@@ -40,6 +48,8 @@ Anak pegawai
 erDiagram
 
 "kepegawaian.anak" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
+"kepegawaian.anak" }o--o| "kepegawaian.ref_agama" : "FOREIGN KEY (agama_id) REFERENCES ref_agama(id)"
+"kepegawaian.anak" }o--o| "kepegawaian.ref_jenis_kawin" : "FOREIGN KEY (jenis_kawin_id) REFERENCES ref_jenis_kawin(id)"
 
 "kepegawaian.anak" {
   bigint id
@@ -54,6 +64,11 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  varchar_20_ nik
+  smallint agama_id FK
+  smallint jenis_kawin_id FK
+  smallint status_sekolah
+  smallint anak_ke
 }
 "kepegawaian.pegawai" {
   integer id
@@ -152,6 +167,20 @@ erDiagram
   smallint status_pegawai_backup
   varchar_50_ masa_kerja
   varchar_50_ kartu_asn
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
+}
+"kepegawaian.ref_agama" {
+  integer id
+  varchar_20_ nama
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
+}
+"kepegawaian.ref_jenis_kawin" {
+  integer id
+  varchar_50_ nama
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at

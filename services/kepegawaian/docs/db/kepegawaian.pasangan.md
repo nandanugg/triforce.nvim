@@ -18,7 +18,7 @@ Pasangan pegawai
 | tanggal_cerai | date |  | true |  |  | Tanggal perceraian (jika ada) |
 | akte_cerai | varchar(100) |  | true |  |  | Nomor/berkas akta cerai |
 | karsus | varchar(100) |  | true |  |  | Nomor kartu suami istri |
-| status | smallint |  | true |  |  | Status hubungan saat ini, 1: menikah, 2: cerai, 3: jada/duda |
+| status | smallint |  | true |  |  | Referensi ke ref_jenis_kawin.id |
 | hubungan | smallint |  | true |  |  | Kode hubungan, 1: istri, 2: suami |
 | pns_id | varchar(36) |  | true |  | [kepegawaian.pegawai](kepegawaian.pegawai.md) | Referensi ke pegawai.pns_id |
 | nip | varchar(20) |  | true |  |  | NIP pegawai |
@@ -26,11 +26,14 @@ Pasangan pegawai
 | updated_at | timestamp with time zone | now() | true |  |  | Waktu terakhir pembaruan |
 | deleted_at | timestamp with time zone |  | true |  |  | Waktu penghapusan data |
 | tanggal_lahir | date |  | true |  |  | Tanggal lahir pasangan |
+| nik | varchar(20) |  | true |  |  |  |
+| agama_id | smallint |  | true |  | [kepegawaian.ref_agama](kepegawaian.ref_agama.md) |  |
 
 ## Constraints
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
+| pasangan_agama_id_fkey | FOREIGN KEY | FOREIGN KEY (agama_id) REFERENCES ref_agama(id) |
 | pasangan_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 | fk_pasangan_pns_id | FOREIGN KEY | FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id) |
 
@@ -39,6 +42,7 @@ Pasangan pegawai
 | Name | Definition |
 | ---- | ---------- |
 | pasangan_pkey | CREATE UNIQUE INDEX pasangan_pkey ON kepegawaian.pasangan USING btree (id) |
+| pasangan_pns_id_idx | CREATE INDEX pasangan_pns_id_idx ON kepegawaian.pasangan USING btree (pns_id) |
 
 ## Relations
 
@@ -46,6 +50,7 @@ Pasangan pegawai
 erDiagram
 
 "kepegawaian.pasangan" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
+"kepegawaian.pasangan" }o--o| "kepegawaian.ref_agama" : "FOREIGN KEY (agama_id) REFERENCES ref_agama(id)"
 
 "kepegawaian.pasangan" {
   bigint id
@@ -66,6 +71,8 @@ erDiagram
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
   date tanggal_lahir
+  varchar_20_ nik
+  smallint agama_id FK
 }
 "kepegawaian.pegawai" {
   integer id
@@ -164,6 +171,13 @@ erDiagram
   smallint status_pegawai_backup
   varchar_50_ masa_kerja
   varchar_50_ kartu_asn
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
+}
+"kepegawaian.ref_agama" {
+  integer id
+  varchar_20_ nama
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at

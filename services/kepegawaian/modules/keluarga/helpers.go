@@ -2,17 +2,6 @@ package keluarga
 
 import "github.com/jackc/pgx/v5/pgtype"
 
-func hubunganToPeran(hubungan pgtype.Int2) string {
-	switch hubungan.Int16 {
-	case 1:
-		return "Ayah"
-	case 2:
-		return "Ibu"
-	default:
-		return "Orang Tua"
-	}
-}
-
 func statusHidupFromTanggalMeninggal(tglMeninggal pgtype.Date) string {
 	if tglMeninggal.Valid {
 		return "Sudah Meninggal"
@@ -27,26 +16,9 @@ func pnsToLabel(pns pgtype.Int2) string {
 	return "PNS"
 }
 
-func statusAnakToLabel(statusAnak pgtype.Text) string {
-	switch statusAnak.String {
-	case "1":
-		return "Kandung"
-	case "2":
-		return "Angkat"
-	default:
-		return "Tidak Diketahui"
+func statusPNS(isPns bool) pgtype.Int2 {
+	if isPns {
+		return pgtype.Int2{Int16: 1, Valid: true}
 	}
-}
-
-func statusPernikahanToString(status pgtype.Int2) string {
-	switch status.Int16 {
-	case 1:
-		return "Menikah"
-	case 2:
-		return "Cerai Hidup"
-	case 3:
-		return "Cerai Mati"
-	default:
-		return "Tidak Diketahui"
-	}
+	return pgtype.Int2{Int16: 0, Valid: true}
 }

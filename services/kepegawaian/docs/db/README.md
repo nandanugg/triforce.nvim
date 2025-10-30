@@ -22,8 +22,8 @@
 | [kepegawaian.ref_kpkn](kepegawaian.ref_kpkn.md) | 5 | Referensi kantor pelayanan kekayaan negara | BASE TABLE |
 | [kepegawaian.ref_lokasi](kepegawaian.ref_lokasi.md) | 11 | Referensi lokasi | BASE TABLE |
 | [kepegawaian.ref_jenis_satker](kepegawaian.ref_jenis_satker.md) | 5 | Referensi jenis satuan kerja | BASE TABLE |
-| [kepegawaian.anak](kepegawaian.anak.md) | 12 | Anak pegawai | BASE TABLE |
-| [kepegawaian.pasangan](kepegawaian.pasangan.md) | 18 | Pasangan pegawai | BASE TABLE |
+| [kepegawaian.anak](kepegawaian.anak.md) | 17 | Anak pegawai | BASE TABLE |
+| [kepegawaian.pasangan](kepegawaian.pasangan.md) | 20 | Pasangan pegawai | BASE TABLE |
 | [kepegawaian.orang_tua](kepegawaian.orang_tua.md) | 18 | Orang tua pegawai | BASE TABLE |
 | [kepegawaian.pegawai](kepegawaian.pegawai.md) | 99 | Data utama pegawai | BASE TABLE |
 | [kepegawaian.ref_pendidikan](kepegawaian.ref_pendidikan.md) | 6 | Referensi pendidikan | BASE TABLE |
@@ -75,7 +75,10 @@
 ```mermaid
 erDiagram
 
+"kepegawaian.anak" }o--o| "kepegawaian.ref_agama" : "FOREIGN KEY (agama_id) REFERENCES ref_agama(id)"
+"kepegawaian.anak" }o--o| "kepegawaian.ref_jenis_kawin" : "FOREIGN KEY (jenis_kawin_id) REFERENCES ref_jenis_kawin(id)"
 "kepegawaian.anak" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
+"kepegawaian.pasangan" }o--o| "kepegawaian.ref_agama" : "FOREIGN KEY (agama_id) REFERENCES ref_agama(id)"
 "kepegawaian.pasangan" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
 "kepegawaian.orang_tua" }o--o| "kepegawaian.ref_agama" : "FOREIGN KEY (agama_id) REFERENCES ref_agama(id)"
 "kepegawaian.orang_tua" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
@@ -288,6 +291,11 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  varchar_20_ nik
+  smallint agama_id FK
+  smallint jenis_kawin_id FK
+  smallint status_sekolah
+  smallint anak_ke
 }
 "kepegawaian.pasangan" {
   bigint id
@@ -308,6 +316,8 @@ erDiagram
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
   date tanggal_lahir
+  varchar_20_ nik
+  smallint agama_id FK
 }
 "kepegawaian.orang_tua" {
   integer id

@@ -31,7 +31,13 @@ type Anak struct {
 	// Waktu terakhir pembaruan
 	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
 	// Waktu penghapusan data
-	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
+	DeletedAt    pgtype.Timestamptz `db:"deleted_at"`
+	Nik          pgtype.Text        `db:"nik"`
+	AgamaID      pgtype.Int2        `db:"agama_id"`
+	JenisKawinID pgtype.Int2        `db:"jenis_kawin_id"`
+	// Status Sekolah / Kerja, 1: Masih Sekolah, 2: Sudah Bekerja
+	StatusSekolah pgtype.Int2 `db:"status_sekolah"`
+	AnakKe        pgtype.Int2 `db:"anak_ke"`
 }
 
 type KoreksiSuratKeputusan struct {
@@ -126,7 +132,7 @@ type Pasangan struct {
 	AkteCerai pgtype.Text `db:"akte_cerai"`
 	// Nomor kartu suami istri
 	Karsus pgtype.Text `db:"karsus"`
-	// Status hubungan saat ini, 1: menikah, 2: cerai, 3: jada/duda
+	// Referensi ke ref_jenis_kawin.id
 	Status pgtype.Int2 `db:"status"`
 	// Kode hubungan, 1: istri, 2: suami
 	Hubungan pgtype.Int2 `db:"hubungan"`
@@ -142,6 +148,8 @@ type Pasangan struct {
 	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 	// Tanggal lahir pasangan
 	TanggalLahir pgtype.Date `db:"tanggal_lahir"`
+	Nik          pgtype.Text `db:"nik"`
+	AgamaID      pgtype.Int2 `db:"agama_id"`
 }
 
 // Data utama pegawai

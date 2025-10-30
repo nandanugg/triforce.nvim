@@ -8,7 +8,7 @@ Referensi agama
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| id | integer | nextval('ref_agama_id_seq'::regclass) | false | [kepegawaian.orang_tua](kepegawaian.orang_tua.md) [kepegawaian.pegawai](kepegawaian.pegawai.md) |  | id agama |
+| id | integer | nextval('ref_agama_id_seq'::regclass) | false | [kepegawaian.anak](kepegawaian.anak.md) [kepegawaian.pasangan](kepegawaian.pasangan.md) [kepegawaian.orang_tua](kepegawaian.orang_tua.md) [kepegawaian.pegawai](kepegawaian.pegawai.md) |  | id agama |
 | nama | varchar(20) |  | true |  |  | Nama agama |
 | created_at | timestamp with time zone | now() | true |  |  | Waktu perekaman data |
 | updated_at | timestamp with time zone | now() | true |  |  | Waktu terakhir pembaruan |
@@ -31,6 +31,8 @@ Referensi agama
 ```mermaid
 erDiagram
 
+"kepegawaian.anak" }o--o| "kepegawaian.ref_agama" : "FOREIGN KEY (agama_id) REFERENCES ref_agama(id)"
+"kepegawaian.pasangan" }o--o| "kepegawaian.ref_agama" : "FOREIGN KEY (agama_id) REFERENCES ref_agama(id)"
 "kepegawaian.orang_tua" }o--o| "kepegawaian.ref_agama" : "FOREIGN KEY (agama_id) REFERENCES ref_agama(id)"
 "kepegawaian.pegawai" }o--o| "kepegawaian.ref_agama" : "FOREIGN KEY (agama_id) REFERENCES ref_agama(id)"
 
@@ -40,6 +42,47 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+}
+"kepegawaian.anak" {
+  bigint id
+  bigint pasangan_id
+  varchar_100_ nama
+  varchar_1_ jenis_kelamin
+  date tanggal_lahir
+  varchar_100_ tempat_lahir
+  varchar_1_ status_anak
+  varchar_36_ pns_id FK
+  varchar_20_ nip
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
+  varchar_20_ nik
+  smallint agama_id FK
+  smallint jenis_kawin_id FK
+  smallint status_sekolah
+  smallint anak_ke
+}
+"kepegawaian.pasangan" {
+  bigint id
+  smallint pns
+  varchar_100_ nama
+  date tanggal_menikah
+  varchar_100_ akte_nikah
+  date tanggal_meninggal
+  varchar_100_ akte_meninggal
+  date tanggal_cerai
+  varchar_100_ akte_cerai
+  varchar_100_ karsus
+  smallint status
+  smallint hubungan
+  varchar_36_ pns_id FK
+  varchar_20_ nip
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
+  date tanggal_lahir
+  varchar_20_ nik
+  smallint agama_id FK
 }
 "kepegawaian.orang_tua" {
   integer id

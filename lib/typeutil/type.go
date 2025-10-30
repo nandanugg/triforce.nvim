@@ -13,7 +13,7 @@ func ToPtr[T any](x T) *T {
 	return &x
 }
 
-// PointerInt16ToPgtypeInt2 converts a int16 to a pgtype.Int2.
+// PointerToPgtype convert pointer type to pgtype.
 func PointerToPgtype[T any](ptr *T) any {
 	if ptr == nil {
 		switch any(*new(T)).(type) {

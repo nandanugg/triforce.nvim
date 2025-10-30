@@ -8,7 +8,7 @@ Referensi status pernikahan
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| id | integer | nextval('ref_jenis_kawin_id_seq'::regclass) | false | [kepegawaian.pegawai](kepegawaian.pegawai.md) |  | id status perkawinan |
+| id | integer | nextval('ref_jenis_kawin_id_seq'::regclass) | false | [kepegawaian.anak](kepegawaian.anak.md) [kepegawaian.pegawai](kepegawaian.pegawai.md) |  | id status perkawinan |
 | nama | varchar(50) |  | true |  |  | Nama status perkawinan |
 | created_at | timestamp with time zone | now() | true |  |  | Waktu perekaman data |
 | updated_at | timestamp with time zone | now() | true |  |  | Waktu terakhir pembaruan |
@@ -31,6 +31,7 @@ Referensi status pernikahan
 ```mermaid
 erDiagram
 
+"kepegawaian.anak" }o--o| "kepegawaian.ref_jenis_kawin" : "FOREIGN KEY (jenis_kawin_id) REFERENCES ref_jenis_kawin(id)"
 "kepegawaian.pegawai" }o--o| "kepegawaian.ref_jenis_kawin" : "FOREIGN KEY (jenis_kawin_id) REFERENCES ref_jenis_kawin(id)"
 
 "kepegawaian.ref_jenis_kawin" {
@@ -39,6 +40,25 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+}
+"kepegawaian.anak" {
+  bigint id
+  bigint pasangan_id
+  varchar_100_ nama
+  varchar_1_ jenis_kelamin
+  date tanggal_lahir
+  varchar_100_ tempat_lahir
+  varchar_1_ status_anak
+  varchar_36_ pns_id FK
+  varchar_20_ nip
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
+  varchar_20_ nik
+  smallint agama_id FK
+  smallint jenis_kawin_id FK
+  smallint status_sekolah
+  smallint anak_ke
 }
 "kepegawaian.pegawai" {
   integer id

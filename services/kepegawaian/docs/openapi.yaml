@@ -7,6 +7,7 @@ servers:
   - url: http://localhost:8000
 tags:
   - name: Admin Pegawai Aktif
+  - name: Admin Keluarga
   - name: Admin Ref Agama
   - name: Admin Ref Golongan
   - name: Admin Ref Jabatan
@@ -1818,7 +1819,7 @@ paths:
   /v1/admin/pegawai/{nip}/keluarga:
     get:
       tags:
-        - Keluarga
+        - Admin Keluarga
       summary: Lihat daftar keluarga.
       description: >-
         Lihat daftar keluarga dari pegawai berdasarkan NIP.
@@ -1840,6 +1841,228 @@ paths:
                 properties:
                   data:
                     $ref: "#/components/schemas/keluarga"
+  /v1/admin/pegawai/{nip}/anak:
+    post:
+      tags:
+        - Admin Keluarga
+      summary: Tambah anak pegawai.
+      description: Tambah anak pegawai berdasarkan NIP.
+      operationId: adminCreatePegawaiAnak
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/anak"
+      responses:
+        "201":
+          $ref: "#/components/responses/createdId"
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "404":
+          $ref: "#/components/responses/notFound"
+  /v1/admin/pegawai/{nip}/anak/{id}:
+    put:
+      tags:
+        - Admin Keluarga
+      summary: Mengubah anak pegawai.
+      description: Mengubah anak pegawai berdasarkan NIP dan ID anak.
+      operationId: adminUpdatePegawaiAnak
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        $ref: "#/components/requestBodies/anak"
+      responses:
+        "204":
+          description: Sukses.
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "404":
+          $ref: "#/components/responses/notFound"
+    delete:
+      tags:
+        - Admin Keluarga
+      summary: Menghapus anak pegawai.
+      description: Menghapus anak pegawai berdasarkan NIP dan ID anak.
+      operationId: adminDeletePegawaiAnak
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Sukses.
+        "404":
+          $ref: "#/components/responses/notFound"
+  /v1/admin/pegawai/{nip}/orang-tua:
+    post:
+      tags:
+        - Admin Keluarga
+      summary: Tambah orang tua pegawai.
+      description: Tambah orang tua pegawai berdasarkan NIP.
+      operationId: adminCreatePegawaiOrangTua
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/orangTua"
+      responses:
+        "201":
+          $ref: "#/components/responses/createdId"
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "404":
+          $ref: "#/components/responses/notFound"
+  /v1/admin/pegawai/{nip}/orang-tua/{id}:
+    put:
+      tags:
+        - Admin Keluarga
+      summary: Mengubah orang tua pegawai.
+      description: Mengubah orang tua pegawai berdasarkan NIP dan ID orang tua.
+      operationId: adminUpdatePegawaiOrangTua
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        $ref: "#/components/requestBodies/orangTua"
+      responses:
+        "204":
+          description: Sukses.
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "404":
+          $ref: "#/components/responses/notFound"
+    delete:
+      tags:
+        - Admin Keluarga
+      summary: Menghapus orang tua pegawai.
+      description: Menghapus orang tua pegawai berdasarkan NIP dan ID orang tua.
+      operationId: adminDeletePegawaiOrangTua
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Sukses.
+        "404":
+          $ref: "#/components/responses/notFound"
+  /v1/admin/pegawai/{nip}/pasangan:
+    post:
+      tags:
+        - Admin Keluarga
+      summary: Tambah pasangan pegawai.
+      description: Tambah pasangan pegawai berdasarkan NIP.
+      operationId: adminCreatePegawaiPasangan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/pasangan"
+      responses:
+        "201":
+          $ref: "#/components/responses/createdId"
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "404":
+          $ref: "#/components/responses/notFound"
+  /v1/admin/pegawai/{nip}/pasangan/{id}:
+    put:
+      tags:
+        - Admin Keluarga
+      summary: Mengubah pasangan pegawai.
+      description: Mengubah pasangan pegawai berdasarkan NIP dan ID pasangan.
+      operationId: adminUpdatePegawaiPasangan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        $ref: "#/components/requestBodies/pasangan"
+      responses:
+        "204":
+          description: Sukses.
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "404":
+          $ref: "#/components/responses/notFound"
+    delete:
+      tags:
+        - Admin Keluarga
+      summary: Menghapus pasangan pegawai.
+      description: Menghapus pasangan pegawai berdasarkan NIP dan ID pasangan.
+      operationId: adminDeletePegawaiPasangan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Sukses.
+        "404":
+          $ref: "#/components/responses/notFound"
   /v1/admin/pegawai/{nip}/riwayat-kinerja:
     get:
       tags:
@@ -3994,7 +4217,7 @@ paths:
                 format: binary
         "404":
           description: Berkas sk tidak ditemukan atau User tidak mempunyai akses.
-  
+
   /v1/pegawai/profil/{pns_id}:
     get:
       tags:
@@ -5205,6 +5428,165 @@ components:
         type: integer
         default: 0
         minimum: 0
+  requestBodies:
+    anak:
+      required: true
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              nama:
+                type: string
+                maxLength: 100
+              nik:
+                type: string
+                maxLength: 20
+              jenis_kelamin:
+                type: string
+                enum: ["M", "F"]
+              tanggal_lahir:
+                type: string
+                format: date
+              pasangan_orang_tua_id:
+                type: integer
+              agama_id:
+                type: integer
+                nullable: true
+              status_pernikahan_id:
+                type: integer
+              status_anak:
+                type: string
+                enum: ["Kandung", "Angkat"]
+              status_sekolah:
+                type: string
+                enum: ["Masih Sekolah", "Sudah Bekerja", ""]
+              anak_ke:
+                type: integer
+                nullable: true
+            required:
+              - nama
+              - jenis_kelamin
+              - tanggal_lahir
+              - pasangan_orang_tua_id
+              - status_pernikahan_id
+              - status_anak
+    orangTua:
+      required: true
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              nama:
+                type: string
+                maxLength: 255
+              nik:
+                type: string
+                maxLength: 20
+              agama_id:
+                type: integer
+                nullable: true
+              hubungan:
+                type: string
+                enum: ["Ayah", "Ibu"]
+              tanggal_meninggal:
+                type: string
+                format: date
+                nullable: true
+              akte_meninggal:
+                type: string
+                maxLength: 100
+            required:
+              - nama
+              - hubungan
+    pasangan:
+      required: true
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              nama:
+                type: string
+                maxLength: 100
+              nik:
+                type: string
+                maxLength: 20
+              is_pns:
+                type: boolean
+              tanggal_lahir:
+                type: string
+                format: date
+              no_karsus:
+                type: string
+                maxLength: 100
+              agama_id:
+                type: integer
+                nullable: true
+              status_pernikahan_id:
+                type: integer
+              hubungan:
+                type: string
+                enum: ["Istri", "Suami"]
+              tanggal_menikah:
+                type: string
+                format: date
+                nullable: true
+              akte_nikah:
+                type: string
+                maxLength: 100
+              tanggal_meninggal:
+                type: string
+                format: date
+                nullable: true
+              akte_meninggal:
+                type: string
+                maxLength: 100
+              tanggal_cerai:
+                type: string
+                format: date
+                nullable: true
+              akte_cerai:
+                type: string
+                maxLength: 100
+            required:
+              - nama
+              - tanggal_lahir
+              - status_pernikahan_id
+              - hubungan
+  responses:
+    createdId:
+      description: Sukses.
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              data:
+                type: object
+                additionalProperties: false
+                properties:
+                  id:
+                    type: integer
+    badRequest:
+      description: Request dari client tidak valid.
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              message:
+                type: string
+    notFound:
+      description: Data tidak ditemukan.
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              message:
+                type: string
   schemas:
     metaPagination:
       type: object
@@ -5410,11 +5792,20 @@ components:
           type: string
         nik:
           type: string
+        agama_id:
+          type: integer
+          nullable: true
         agama:
           type: string
         hubungan:
           type: string
         status_hidup:
+          type: string
+        tanggal_meninggal:
+          type: string
+          format: date
+          nullable: true
+        akte_meninggal:
           type: string
     pasangan:
       type: object
@@ -5426,10 +5817,16 @@ components:
           type: string
         nik:
           type: string
+        agama_id:
+          type: integer
+          nullable: true
         agama:
           type: string
         status_pns:
           type: string
+        status_pernikahan_id:
+          type: integer
+          nullable: true
         status_nikah:
           type: string
         tanggal_lahir:
@@ -5472,11 +5869,24 @@ components:
           type: string
         status_sekolah:
           type: string
+        status_pernikahan_id:
+          type: integer
+          nullable: true
+        status_pernikahan:
+          type: string
         tanggal_lahir:
           type: string
           format: date
           nullable: true
+        pasangan_orang_tua_id:
+          type: integer
+          nullable: true
         nama_orang_tua:
+          type: string
+        agama_id:
+          type: integer
+          nullable: true
+        agama:
           type: string
         anak_ke:
           type: integer
@@ -5862,7 +6272,6 @@ components:
         jumlah_angka_kredit_utama:
           type: integer
           nullable: true
-
     riwayatPenghargaan:
       type: object
       additionalProperties: false
@@ -6299,7 +6708,6 @@ components:
         unit_kerja:
           type: string
           description: Unit kerja
-        
     detailKoreksiSuratKeputusan:
       allOf:
         - $ref: "#/components/schemas/koreksiSuratKeputusan"
@@ -6344,7 +6752,7 @@ components:
               example: "koreksi"
               nullable: true
               enum: ["koreksi", "tandatangan", ""]
-            korektor_ke: 
+            korektor_ke:
               type: integer
               description: Urutan korektor dari pengguna yang sedang koreksi surat keputusan
               nullable: true
