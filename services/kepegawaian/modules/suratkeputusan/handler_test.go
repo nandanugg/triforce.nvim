@@ -1607,16 +1607,17 @@ func Test_handler_listKoreksi(t *testing.T) {
 				('sk-003', 2, '123456787', '2024-03-10', NULL),
 				('sk-004', 2, '123456787', '2024-03-10', NULL),
 				('sk-005', 2, '123456788', '2024-03-10', NULL),
-				('sk-006', 2, '123456787', '2024-03-10', now());
-
+				('sk-006', 2, '123456787', '2024-03-10', now()),
+				('sk-007', 2, '123456787', '2024-03-10', NULL);
 		INSERT INTO surat_keputusan
 			("file_id","nip_sk","kategori","no_sk","tanggal_sk","status_sk","created_at", "deleted_at", "ds_ok") VALUES
 			('sk-001', '123456789', 'Kenaikan Pangkat', 'SK-001/2024', '2024-01-15', 1, '2024-01-15', NULL, true),
-			('sk-002', '123456789', 'Mutasi', 'SK-002/2024', '2024-02-20', 0, '2024-02-20', NULL, true),
+			('sk-002', '123456788', 'Mutasi', 'SK-002/2024', '2024-02-20', 0, '2024-02-20', NULL, true),
 			('sk-003', '123456789', 'Kenaikan Gaji', 'SK-003/2024', '2024-03-10', 2, '2024-03-10', NULL, true),
 			('sk-004', '123456789', 'Kenaikan Gaji', 'SK-004/2024', '2024-03-10', 2, '2024-03-10', NULL, true),
 			('sk-005', '123456788', 'Kenaikan Gaji', 'SK-005/2024', '2024-03-10', 2, '2024-03-10', NULL, true),
-			('sk-006', '123456789', 'Kenaikan Gaji', 'SK-006/2024', '2024-03-10', 2, '2024-03-10', NOW(), true);
+			('sk-006', '123456789', 'Kenaikan Gaji', 'SK-006/2024', '2024-03-10', 2, '2024-03-10', NOW(), true),
+			('sk-007', '123456788', 'Kenaikan Gaji', 'SK-007/2024', '2024-03-10', 0, '2024-03-10', NULL, true);
 
 		INSERT INTO ref_golongan (id, nama, nama_pangkat, nama_2, gol, gol_pppk)
 		VALUES
@@ -1694,19 +1695,28 @@ func Test_handler_listKoreksi(t *testing.T) {
 						"unit_kerja": "Bawah - Tengah - Paling Atas"
 					},
 					{
+						"id_sk": "sk-007",
+						"nama_pemilik": "pemilik_sk_2",
+						"nip_pemilik": "123456788",
+						"kategori_sk": "Kenaikan Gaji",
+						"no_sk": "SK-007/2024",
+						"tanggal_sk": "2024-03-10",
+						"unit_kerja": "Bawah 2"
+					},
+					{
 						"id_sk": "sk-002",
-						"nama_pemilik": "pemilik_sk",
-						"nip_pemilik": "123456789",
+						"nama_pemilik": "pemilik_sk_2",
+						"nip_pemilik": "123456788",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-002/2024",
 						"tanggal_sk": "2024-02-20",
-						"unit_kerja": "Bawah - Tengah - Paling Atas"
+						"unit_kerja": "Bawah 2"
 					}
 				],
 				"meta": {
 					"limit": 10,
 					"offset": 0,
-					"total": 3
+					"total": 4
 				}
 			}`,
 		},
@@ -1762,7 +1772,7 @@ func Test_handler_listKoreksi(t *testing.T) {
 				"meta": {
 					"limit": 1,
 					"offset": 1,
-					"total": 3
+					"total": 4
 				}
 			}`,
 		},
@@ -1797,6 +1807,43 @@ func Test_handler_listKoreksi(t *testing.T) {
 					"limit": 10,
 					"offset": 0,
 					"total": 1
+				}
+			}`,
+		},
+		{
+			name:          "ok belum dikoreksi with params nip",
+			requestPath:   "/v1/koreksi-surat-keputusan",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestQuery: url.Values{
+				"status": []string{"Belum Dikoreksi"},
+				"nip":    []string{"123456788"},
+			},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{
+						"id_sk": "sk-007",
+						"nama_pemilik": "pemilik_sk_2",
+						"nip_pemilik": "123456788",
+						"kategori_sk": "Kenaikan Gaji",
+						"no_sk": "SK-007/2024",
+						"tanggal_sk": "2024-03-10",
+						"unit_kerja": "Bawah 2"
+					},
+					{
+						"id_sk": "sk-002",
+						"nama_pemilik": "pemilik_sk_2",
+						"nip_pemilik": "123456788",
+						"kategori_sk": "Mutasi",
+						"no_sk": "SK-002/2024",
+						"tanggal_sk": "2024-02-20",
+						"unit_kerja": "Bawah 2"
+					}
+				],
+				"meta": {
+					"limit": 10,
+					"offset": 0,
+					"total": 2
 				}
 			}`,
 		},
@@ -2753,7 +2800,7 @@ func Test_handler_listTandatangan(t *testing.T) {
 		INSERT INTO surat_keputusan
 			("file_id","nip_sk","kategori","no_sk","tanggal_sk","status_koreksi","status_ttd","ttd_pegawai_id","created_at", "deleted_at", "ds_ok") VALUES
 			('sk-001', '123456789', 'Kenaikan Pangkat', 'SK-001/2024', '2024-01-15', 1, 1, '123456787', '2024-01-15', NULL, true),
-			('sk-002', '123456789', 'Mutasi', 'SK-002/2024', '2024-02-20', 1, 0, '123456787', '2024-02-20', NULL, true),
+			('sk-002', '123456788', 'Mutasi', 'SK-002/2024', '2024-02-20', 1, 0, '123456787', '2024-02-20', NULL, true),
 			('sk-003', '123456789', 'Kenaikan Gaji', 'SK-003/2024', '2024-03-10', 1, 0, '123456787', '2024-03-10', NULL, true),
 			('sk-004', '123456789', 'Kenaikan Gaji', 'SK-004/2024', '2024-03-10', 2, 0, '123456787', '2024-03-10', NULL, true),
 			('sk-005', '123456788', 'Kenaikan Gaji', 'SK-005/2024', '2024-03-10', 1, 0, '123456788', '2024-03-10', NULL, true),
@@ -2827,12 +2874,12 @@ func Test_handler_listTandatangan(t *testing.T) {
 					},
 					{
 						"id_sk": "sk-002",
-						"nama_pemilik": "pemilik_sk",
-						"nip_pemilik": "123456789",
+						"nama_pemilik": "pemilik_sk_2",
+						"nip_pemilik": "123456788",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-002/2024",
 						"tanggal_sk": "2024-02-20",
-						"unit_kerja": "Bawah - Tengah - Paling Atas"
+						"unit_kerja": "Bawah 2"
 					}
 				],
 				"meta": {
@@ -2883,12 +2930,12 @@ func Test_handler_listTandatangan(t *testing.T) {
 				"data": [
 					{
 						"id_sk": "sk-002",
-						"nama_pemilik": "pemilik_sk",
-						"nip_pemilik": "123456789",
+						"nama_pemilik": "pemilik_sk_2",
+						"nip_pemilik": "123456788",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-002/2024",
 						"tanggal_sk": "2024-02-20",
-						"unit_kerja": "Bawah - Tengah - Paling Atas"
+						"unit_kerja": "Bawah 2"
 					}
 				],
 				"meta": {
@@ -2923,6 +2970,34 @@ func Test_handler_listTandatangan(t *testing.T) {
 						"no_sk": "SK-003/2024",
 						"tanggal_sk": "2024-03-10",
 						"unit_kerja": "Bawah - Tengah - Paling Atas"
+					}
+				],
+				"meta": {
+					"limit": 10,
+					"offset": 0,
+					"total": 1
+				}
+			}`,
+		},
+		{
+			name:          "ok belum ditandatangan with params nip",
+			requestPath:   "/v1/tanda-tangan-surat-keputusan",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestQuery: url.Values{
+				"status": []string{"Belum Ditandatangan"},
+				"nip":    []string{"123456788"},
+			},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{
+						"id_sk": "sk-002",
+						"nama_pemilik": "pemilik_sk_2",
+						"nip_pemilik": "123456788",
+						"kategori_sk": "Mutasi",
+						"no_sk": "SK-002/2024",
+						"tanggal_sk": "2024-02-20",
+						"unit_kerja": "Bawah 2"
 					}
 				],
 				"meta": {

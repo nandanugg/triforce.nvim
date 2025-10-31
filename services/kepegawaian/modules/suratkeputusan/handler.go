@@ -221,7 +221,7 @@ type listKoreksiRequest struct {
 	api.PaginationRequest
 	UnitKerjaID   string `query:"unit_kerja_id"`
 	NamaPemilik   string `query:"nama_pemilik"`
-	NipPemilik    string `query:"nip_pemilik"`
+	NipPemilik    string `query:"nip"`
 	GolonganID    int32  `query:"golongan_id"`
 	JabatanID     string `query:"jabatan_id"`
 	KategoriSK    string `query:"kategori_sk"`
@@ -357,7 +357,7 @@ type listTandatanganRequest struct {
 	api.PaginationRequest
 	UnitKerjaID   string `query:"unit_kerja_id"`
 	NamaPemilik   string `query:"nama_pemilik"`
-	NipPemilik    string `query:"nip_pemilik"`
+	NipPemilik    string `query:"nip"`
 	GolonganID    int32  `query:"golongan_id"`
 	JabatanID     string `query:"jabatan_id"`
 	KategoriSK    string `query:"kategori_sk"`
