@@ -596,7 +596,8 @@ func (s *service) approveKoreksiSuratKeputusan(ctx context.Context, id, catatanK
 			return fmt.Errorf("[approveKoreksiSuratKeputusan] UpdateKorektorSuratKeputusanByID: %w", err)
 		}
 
-		nextKorektor := s.cekKorektorSelanjutnya(korektor, pnsID)
+		nextKorektor := s.cekKorektorSelanjutnya(korektor, nip)
+
 		if nextKorektor == nil {
 			err = txRepo.UpdateStatusSuratKeputusanByID(ctx, repo.UpdateStatusSuratKeputusanByIDParams{
 				ID:            id,
