@@ -8,6 +8,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/typeutil"
 	repo "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
@@ -182,15 +183,19 @@ func (s *service) deleteOrangTua(ctx context.Context, id int32, nip string) (boo
 }
 
 func (s *service) validateOrangTuaReferences(ctx context.Context, params upsertOrangTuaParams) error {
+	var errs []error
 	if params.AgamaID != nil {
 		if _, err := s.repo.GetRefAgama(ctx, int32(*params.AgamaID)); err != nil {
-			if errors.Is(err, pgx.ErrNoRows) {
-				return errAgamaNotFound
+			if !errors.Is(err, pgx.ErrNoRows) {
+				return fmt.Errorf("repo get agama: %w", err)
 			}
-			return fmt.Errorf("repo get agama: %w", err)
+			errs = append(errs, errAgamaNotFound)
 		}
 	}
 
+	if len(errs) > 0 {
+		return api.NewMultiError(errs)
+	}
 	return nil
 }
 
@@ -272,22 +277,26 @@ func (s *service) deletePasangan(ctx context.Context, id int64, nip string) (boo
 }
 
 func (s *service) validatePasanganReferences(ctx context.Context, params upsertPasanganParams) error {
+	var errs []error
 	if params.AgamaID != nil {
 		if _, err := s.repo.GetRefAgama(ctx, int32(*params.AgamaID)); err != nil {
-			if errors.Is(err, pgx.ErrNoRows) {
-				return errAgamaNotFound
+			if !errors.Is(err, pgx.ErrNoRows) {
+				return fmt.Errorf("repo get agama: %w", err)
 			}
-			return fmt.Errorf("repo get agama: %w", err)
+			errs = append(errs, errAgamaNotFound)
 		}
 	}
 
 	if _, err := s.repo.GetRefJenisKawin(ctx, int32(params.StatusPernikahanID)); err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return errStatusPernikahanNotFound
+		if !errors.Is(err, pgx.ErrNoRows) {
+			return fmt.Errorf("repo get status pernikahan: %w", err)
 		}
-		return fmt.Errorf("repo get status pernikahan: %w", err)
+		errs = append(errs, errStatusPernikahanNotFound)
 	}
 
+	if len(errs) > 0 {
+		return api.NewMultiError(errs)
+	}
 	return nil
 }
 
@@ -361,20 +370,21 @@ func (s *service) deleteAnak(ctx context.Context, id int64, nip string) (bool, e
 }
 
 func (s *service) validateAnakReferences(ctx context.Context, nip string, params upsertAnakParams) error {
+	var errs []error
 	if params.AgamaID != nil {
 		if _, err := s.repo.GetRefAgama(ctx, int32(*params.AgamaID)); err != nil {
-			if errors.Is(err, pgx.ErrNoRows) {
-				return errAgamaNotFound
+			if !errors.Is(err, pgx.ErrNoRows) {
+				return fmt.Errorf("repo get agama: %w", err)
 			}
-			return fmt.Errorf("repo get agama: %w", err)
+			errs = append(errs, errAgamaNotFound)
 		}
 	}
 
 	if _, err := s.repo.GetRefJenisKawin(ctx, int32(params.StatusPernikahanID)); err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return errStatusPernikahanNotFound
+		if !errors.Is(err, pgx.ErrNoRows) {
+			return fmt.Errorf("repo get status pernikahan: %w", err)
 		}
-		return fmt.Errorf("repo get status pernikahan: %w", err)
+		errs = append(errs, errStatusPernikahanNotFound)
 	}
 
 	if ok, err := s.repo.IsPasanganExistsByIDAndNIP(ctx, repo.IsPasanganExistsByIDAndNIPParams{
@@ -383,8 +393,11 @@ func (s *service) validateAnakReferences(ctx context.Context, nip string, params
 	}); err != nil {
 		return fmt.Errorf("repo pasangan exists: %w", err)
 	} else if !ok {
-		return errPasanganOrangTuaNotFound
+		errs = append(errs, errPasanganOrangTuaNotFound)
 	}
 
+	if len(errs) > 0 {
+		return api.NewMultiError(errs)
+	}
 	return nil
 }

@@ -2009,37 +2009,7 @@ func Test_handler_adminCreatePasangan(t *testing.T) {
 			wantDBRows:       dbtest.Rows{},
 		},
 		{
-			name:          "error: status pernikahan is not found",
-			dbData:        seedData,
-			paramNIP:      "1c",
-			requestHeader: http.Header{"Authorization": authHeader},
-			requestBody: `{
-				"nama": "John Doe",
-				"tanggal_lahir": "2000-01-01",
-				"status_pernikahan_id": 0,
-				"hubungan": "Suami"
-			}`,
-			wantResponseCode: http.StatusBadRequest,
-			wantResponseBody: `{"message": "data status pernikahan tidak ditemukan"}`,
-			wantDBRows:       dbtest.Rows{},
-		},
-		{
-			name:          "error: status pernikahan is deleted",
-			dbData:        seedData,
-			paramNIP:      "1c",
-			requestHeader: http.Header{"Authorization": authHeader},
-			requestBody: `{
-				"nama": "John Doe",
-				"tanggal_lahir": "2000-01-01",
-				"status_pernikahan_id": 2,
-				"hubungan": "Suami"
-			}`,
-			wantResponseCode: http.StatusBadRequest,
-			wantResponseBody: `{"message": "data status pernikahan tidak ditemukan"}`,
-			wantDBRows:       dbtest.Rows{},
-		},
-		{
-			name:          "error: agama is not found",
+			name:          "error: agama or status pernikahan is not found",
 			dbData:        seedData,
 			paramNIP:      "1c",
 			requestHeader: http.Header{"Authorization": authHeader},
@@ -2047,15 +2017,15 @@ func Test_handler_adminCreatePasangan(t *testing.T) {
 				"nama": "John Doe",
 				"tanggal_lahir": "2000-01-01",
 				"agama_id": 0,
-				"status_pernikahan_id": 1,
+				"status_pernikahan_id": 0,
 				"hubungan": "Suami"
 			}`,
 			wantResponseCode: http.StatusBadRequest,
-			wantResponseBody: `{"message": "data agama tidak ditemukan"}`,
+			wantResponseBody: `{"message": "data agama tidak ditemukan | data status pernikahan tidak ditemukan"}`,
 			wantDBRows:       dbtest.Rows{},
 		},
 		{
-			name:          "error: agama is deleted",
+			name:          "error: agama or status pernikahan is deleted",
 			dbData:        seedData,
 			paramNIP:      "1c",
 			requestHeader: http.Header{"Authorization": authHeader},
@@ -2066,7 +2036,7 @@ func Test_handler_adminCreatePasangan(t *testing.T) {
 				"tanggal_lahir": "2000-01-01",
 				"no_karsus": "",
 				"agama_id": 2,
-				"status_pernikahan_id": 1,
+				"status_pernikahan_id": 2,
 				"hubungan": "Suami",
 				"tanggal_menikah": "2000-01-01",
 				"akte_nikah": "akte_01",
@@ -2076,7 +2046,7 @@ func Test_handler_adminCreatePasangan(t *testing.T) {
 				"akte_cerai": ""
 			}`,
 			wantResponseCode: http.StatusBadRequest,
-			wantResponseBody: `{"message": "data agama tidak ditemukan"}`,
+			wantResponseBody: `{"message": "data agama tidak ditemukan | data status pernikahan tidak ditemukan"}`,
 			wantDBRows:       dbtest.Rows{},
 		},
 		{
@@ -2598,93 +2568,7 @@ func Test_handler_adminUpdatePasangan(t *testing.T) {
 			},
 		},
 		{
-			name: "error: status pernikahan is not found",
-			dbData: seedData + `
-				insert into pasangan
-					(id, nama,       hubungan, status, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'Jane Doe', 1,        2,      'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
-			paramNIP:      "1c",
-			paramID:       "1",
-			requestHeader: http.Header{"Authorization": authHeader},
-			requestBody: `{
-				"nama": "John Doe",
-				"tanggal_lahir": "2000-01-01",
-				"status_pernikahan_id": 0,
-				"hubungan": "Suami"
-			}`,
-			wantResponseCode: http.StatusBadRequest,
-			wantResponseBody: `{"message": "data status pernikahan tidak ditemukan"}`,
-			wantDBRows: dbtest.Rows{
-				{
-					"id":                int64(1),
-					"nama":              "Jane Doe",
-					"hubungan":          int16(1),
-					"tanggal_lahir":     nil,
-					"pns":               nil,
-					"nik":               nil,
-					"agama_id":          nil,
-					"tanggal_menikah":   nil,
-					"akte_nikah":        nil,
-					"tanggal_cerai":     nil,
-					"akte_cerai":        nil,
-					"tanggal_meninggal": nil,
-					"akte_meninggal":    nil,
-					"karsus":            nil,
-					"status":            int16(2),
-					"pns_id":            "id_1c",
-					"nip":               "1c",
-					"created_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":        nil,
-				},
-			},
-		},
-		{
-			name: "error: status pernikahan is deleted",
-			dbData: seedData + `
-				insert into pasangan
-					(id, nama,       hubungan, status, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'Jane Doe', 1,        1,      'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
-			paramNIP:      "1c",
-			paramID:       "1",
-			requestHeader: http.Header{"Authorization": authHeader},
-			requestBody: `{
-				"nama": "John Doe",
-				"tanggal_lahir": "2000-01-01",
-				"status_pernikahan_id": 2,
-				"hubungan": "Suami"
-			}`,
-			wantResponseCode: http.StatusBadRequest,
-			wantResponseBody: `{"message": "data status pernikahan tidak ditemukan"}`,
-			wantDBRows: dbtest.Rows{
-				{
-					"id":                int64(1),
-					"nama":              "Jane Doe",
-					"hubungan":          int16(1),
-					"tanggal_lahir":     nil,
-					"pns":               nil,
-					"nik":               nil,
-					"agama_id":          nil,
-					"tanggal_menikah":   nil,
-					"akte_nikah":        nil,
-					"tanggal_cerai":     nil,
-					"akte_cerai":        nil,
-					"tanggal_meninggal": nil,
-					"akte_meninggal":    nil,
-					"karsus":            nil,
-					"status":            int16(1),
-					"pns_id":            "id_1c",
-					"nip":               "1c",
-					"created_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":        nil,
-				},
-			},
-		},
-		{
-			name: "error: agama is not found",
+			name: "error: agama or status pernikahan is not found",
 			dbData: seedData + `
 				insert into pasangan
 					(id, nama,       hubungan, agama_id, pns_id,  nip,  created_at,   updated_at) values
@@ -2697,11 +2581,11 @@ func Test_handler_adminUpdatePasangan(t *testing.T) {
 				"nama": "John Doe",
 				"tanggal_lahir": "2000-01-01",
 				"agama_id": 0,
-				"status_pernikahan_id": 1,
+				"status_pernikahan_id": 0,
 				"hubungan": "Suami"
 			}`,
 			wantResponseCode: http.StatusBadRequest,
-			wantResponseBody: `{"message": "data agama tidak ditemukan"}`,
+			wantResponseBody: `{"message": "data agama tidak ditemukan | data status pernikahan tidak ditemukan"}`,
 			wantDBRows: dbtest.Rows{
 				{
 					"id":                int64(1),
@@ -2728,7 +2612,7 @@ func Test_handler_adminUpdatePasangan(t *testing.T) {
 			},
 		},
 		{
-			name: "error: agama is deleted",
+			name: "error: agama or status pernikahan is deleted",
 			dbData: seedData + `
 				insert into pasangan
 					(id, nama,       hubungan, agama_id, pns_id,  nip,  created_at,   updated_at) values
@@ -2744,7 +2628,7 @@ func Test_handler_adminUpdatePasangan(t *testing.T) {
 				"tanggal_lahir": "2000-01-01",
 				"no_karsus": "",
 				"agama_id": 2,
-				"status_pernikahan_id": 1,
+				"status_pernikahan_id": 2,
 				"hubungan": "Suami",
 				"tanggal_menikah": "2000-01-01",
 				"akte_nikah": "akte_01",
@@ -2754,7 +2638,7 @@ func Test_handler_adminUpdatePasangan(t *testing.T) {
 				"akte_cerai": ""
 			}`,
 			wantResponseCode: http.StatusBadRequest,
-			wantResponseBody: `{"message": "data agama tidak ditemukan"}`,
+			wantResponseBody: `{"message": "data agama tidak ditemukan | data status pernikahan tidak ditemukan"}`,
 			wantDBRows: dbtest.Rows{
 				{
 					"id":                int64(1),
@@ -3421,23 +3305,6 @@ func Test_handler_adminCreateAnak(t *testing.T) {
 			wantDBRows:       dbtest.Rows{},
 		},
 		{
-			name:          "error: pasangan orang tua is not found",
-			dbData:        seedData,
-			paramNIP:      "1c",
-			requestHeader: http.Header{"Authorization": authHeader},
-			requestBody: `{
-				"nama": "John Doe",
-				"jenis_kelamin": "F",
-				"tanggal_lahir": "2000-01-01",
-				"pasangan_orang_tua_id": 0,
-				"status_pernikahan_id": 1,
-				"status_anak": "Angkat"
-			}`,
-			wantResponseCode: http.StatusBadRequest,
-			wantResponseBody: `{"message": "data pasangan orang tua tidak ditemukan"}`,
-			wantDBRows:       dbtest.Rows{},
-		},
-		{
 			name:          "error: pasangan orang tua is owned by different pegawai",
 			dbData:        seedData,
 			paramNIP:      "1c",
@@ -3455,24 +3322,7 @@ func Test_handler_adminCreateAnak(t *testing.T) {
 			wantDBRows:       dbtest.Rows{},
 		},
 		{
-			name:          "error: pasangan orang tua is deleted",
-			dbData:        seedData,
-			paramNIP:      "1c",
-			requestHeader: http.Header{"Authorization": authHeader},
-			requestBody: `{
-				"nama": "John Doe",
-				"jenis_kelamin": "M",
-				"tanggal_lahir": "2000-01-01",
-				"pasangan_orang_tua_id": 2,
-				"status_pernikahan_id": 1,
-				"status_anak": "Kandung"
-			}`,
-			wantResponseCode: http.StatusBadRequest,
-			wantResponseBody: `{"message": "data pasangan orang tua tidak ditemukan"}`,
-			wantDBRows:       dbtest.Rows{},
-		},
-		{
-			name:          "error: status pernikahan is not found",
+			name:          "error: agama or status pernikahan or pasangan orang tua is not found",
 			dbData:        seedData,
 			paramNIP:      "1c",
 			requestHeader: http.Header{"Authorization": authHeader},
@@ -3480,51 +3330,17 @@ func Test_handler_adminCreateAnak(t *testing.T) {
 				"nama": "John Doe",
 				"jenis_kelamin": "F",
 				"tanggal_lahir": "2000-01-01",
-				"pasangan_orang_tua_id": 1,
+				"pasangan_orang_tua_id": 0,
+				"agama_id": 0,
 				"status_pernikahan_id": 0,
 				"status_anak": "Angkat"
 			}`,
 			wantResponseCode: http.StatusBadRequest,
-			wantResponseBody: `{"message": "data status pernikahan tidak ditemukan"}`,
+			wantResponseBody: `{"message": "data agama tidak ditemukan | data status pernikahan tidak ditemukan | data pasangan orang tua tidak ditemukan"}`,
 			wantDBRows:       dbtest.Rows{},
 		},
 		{
-			name:          "error: status pernikahan is deleted",
-			dbData:        seedData,
-			paramNIP:      "1c",
-			requestHeader: http.Header{"Authorization": authHeader},
-			requestBody: `{
-				"nama": "John Doe",
-				"jenis_kelamin": "M",
-				"tanggal_lahir": "2000-01-01",
-				"pasangan_orang_tua_id": 1,
-				"status_pernikahan_id": 2,
-				"status_anak": "Kandung"
-			}`,
-			wantResponseCode: http.StatusBadRequest,
-			wantResponseBody: `{"message": "data status pernikahan tidak ditemukan"}`,
-			wantDBRows:       dbtest.Rows{},
-		},
-		{
-			name:          "error: agama is not found",
-			dbData:        seedData,
-			paramNIP:      "1c",
-			requestHeader: http.Header{"Authorization": authHeader},
-			requestBody: `{
-				"nama": "John Doe",
-				"jenis_kelamin": "F",
-				"tanggal_lahir": "2000-01-01",
-				"pasangan_orang_tua_id": 1,
-				"agama_id": 0,
-				"status_pernikahan_id": 1,
-				"status_anak": "Angkat"
-			}`,
-			wantResponseCode: http.StatusBadRequest,
-			wantResponseBody: `{"message": "data agama tidak ditemukan"}`,
-			wantDBRows:       dbtest.Rows{},
-		},
-		{
-			name:          "error: agama is deleted",
+			name:          "error: agama or status pernikahan or pasangan orang tua is deleted",
 			dbData:        seedData,
 			paramNIP:      "1c",
 			requestHeader: http.Header{"Authorization": authHeader},
@@ -3533,15 +3349,15 @@ func Test_handler_adminCreateAnak(t *testing.T) {
 				"nik": "",
 				"jenis_kelamin": "M",
 				"tanggal_lahir": "2000-01-01",
-				"pasangan_orang_tua_id": 1,
+				"pasangan_orang_tua_id": 2,
 				"agama_id": 2,
-				"status_pernikahan_id": 1,
+				"status_pernikahan_id": 2,
 				"status_anak": "Kandung",
 				"status_sekolah": "Masih Sekolah",
 				"anak_ke": 0
 			}`,
 			wantResponseCode: http.StatusBadRequest,
-			wantResponseBody: `{"message": "data agama tidak ditemukan"}`,
+			wantResponseBody: `{"message": "data agama tidak ditemukan | data status pernikahan tidak ditemukan | data pasangan orang tua tidak ditemukan"}`,
 			wantDBRows:       dbtest.Rows{},
 		},
 		{

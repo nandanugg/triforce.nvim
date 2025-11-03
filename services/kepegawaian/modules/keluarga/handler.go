@@ -84,8 +84,10 @@ func (h *handler) adminCreateOrangTua(c echo.Context) error {
 		if errors.Is(err, errPegawaiNotFound) {
 			return echo.NewHTTPError(http.StatusNotFound, "data pegawai tidak ditemukan")
 		}
-		if errors.Is(err, errAgamaNotFound) {
-			return echo.NewHTTPError(http.StatusBadRequest, "data agama tidak ditemukan")
+
+		var multiErr *api.MultiError
+		if errors.As(err, &multiErr) {
+			return echo.NewHTTPError(http.StatusBadRequest, multiErr.Error())
 		}
 
 		slog.ErrorContext(c.Request().Context(), "Error admin creating orang tua pegawai.", "error", err)
@@ -111,8 +113,9 @@ func (h *handler) adminUpdateOrangTua(c echo.Context) error {
 
 	found, err := h.service.updateOrangTua(c.Request().Context(), req.ID, req.NIP, req.upsertOrangTuaParams)
 	if err != nil {
-		if errors.Is(err, errAgamaNotFound) {
-			return echo.NewHTTPError(http.StatusBadRequest, "data agama tidak ditemukan")
+		var multiErr *api.MultiError
+		if errors.As(err, &multiErr) {
+			return echo.NewHTTPError(http.StatusBadRequest, multiErr.Error())
 		}
 
 		slog.ErrorContext(c.Request().Context(), "Error admin updating orang tua pegawai.", "error", err)
@@ -189,11 +192,10 @@ func (h *handler) adminCreatePasangan(c echo.Context) error {
 		if errors.Is(err, errPegawaiNotFound) {
 			return echo.NewHTTPError(http.StatusNotFound, "data pegawai tidak ditemukan")
 		}
-		if errors.Is(err, errAgamaNotFound) {
-			return echo.NewHTTPError(http.StatusBadRequest, "data agama tidak ditemukan")
-		}
-		if errors.Is(err, errStatusPernikahanNotFound) {
-			return echo.NewHTTPError(http.StatusBadRequest, "data status pernikahan tidak ditemukan")
+
+		var multiErr *api.MultiError
+		if errors.As(err, &multiErr) {
+			return echo.NewHTTPError(http.StatusBadRequest, multiErr.Error())
 		}
 
 		slog.ErrorContext(c.Request().Context(), "Error admin creating pasangan pegawai.", "error", err)
@@ -219,11 +221,9 @@ func (h *handler) adminUpdatePasangan(c echo.Context) error {
 
 	found, err := h.service.updatePasangan(c.Request().Context(), req.ID, req.NIP, req.upsertPasanganParams)
 	if err != nil {
-		if errors.Is(err, errAgamaNotFound) {
-			return echo.NewHTTPError(http.StatusBadRequest, "data agama tidak ditemukan")
-		}
-		if errors.Is(err, errStatusPernikahanNotFound) {
-			return echo.NewHTTPError(http.StatusBadRequest, "data status pernikahan tidak ditemukan")
+		var multiErr *api.MultiError
+		if errors.As(err, &multiErr) {
+			return echo.NewHTTPError(http.StatusBadRequest, multiErr.Error())
 		}
 
 		slog.ErrorContext(c.Request().Context(), "Error admin updating pasangan pegawai.", "error", err)
@@ -296,14 +296,10 @@ func (h *handler) adminCreateAnak(c echo.Context) error {
 		if errors.Is(err, errPegawaiNotFound) {
 			return echo.NewHTTPError(http.StatusNotFound, "data pegawai tidak ditemukan")
 		}
-		if errors.Is(err, errAgamaNotFound) {
-			return echo.NewHTTPError(http.StatusBadRequest, "data agama tidak ditemukan")
-		}
-		if errors.Is(err, errStatusPernikahanNotFound) {
-			return echo.NewHTTPError(http.StatusBadRequest, "data status pernikahan tidak ditemukan")
-		}
-		if errors.Is(err, errPasanganOrangTuaNotFound) {
-			return echo.NewHTTPError(http.StatusBadRequest, "data pasangan orang tua tidak ditemukan")
+
+		var multiErr *api.MultiError
+		if errors.As(err, &multiErr) {
+			return echo.NewHTTPError(http.StatusBadRequest, multiErr.Error())
 		}
 
 		slog.ErrorContext(c.Request().Context(), "Error admin creating anak pegawai.", "error", err)
@@ -329,14 +325,9 @@ func (h *handler) adminUpdateAnak(c echo.Context) error {
 
 	found, err := h.service.updateAnak(c.Request().Context(), req.ID, req.NIP, req.upsertAnakParams)
 	if err != nil {
-		if errors.Is(err, errAgamaNotFound) {
-			return echo.NewHTTPError(http.StatusBadRequest, "data agama tidak ditemukan")
-		}
-		if errors.Is(err, errStatusPernikahanNotFound) {
-			return echo.NewHTTPError(http.StatusBadRequest, "data status pernikahan tidak ditemukan")
-		}
-		if errors.Is(err, errPasanganOrangTuaNotFound) {
-			return echo.NewHTTPError(http.StatusBadRequest, "data pasangan orang tua tidak ditemukan")
+		var multiErr *api.MultiError
+		if errors.As(err, &multiErr) {
+			return echo.NewHTTPError(http.StatusBadRequest, multiErr.Error())
 		}
 
 		slog.ErrorContext(c.Request().Context(), "Error admin updating anak pegawai.", "error", err)
