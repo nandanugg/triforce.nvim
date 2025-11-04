@@ -22,6 +22,65 @@ func (q *Queries) CountRiwayatPendidikan(ctx context.Context, nip pgtype.Text) (
 	return count, err
 }
 
+const createRiwayatPendidikan = `-- name: CreateRiwayatPendidikan :one
+insert into riwayat_pendidikan
+    (tingkat_pendidikan_id, pendidikan_id, nama_sekolah, tahun_lulus, no_ijazah, gelar_depan, gelar_belakang, negara_sekolah, tugas_belajar, pns_id, nip) values
+    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+returning id
+`
+
+type CreateRiwayatPendidikanParams struct {
+	TingkatPendidikanID pgtype.Int2 `db:"tingkat_pendidikan_id"`
+	PendidikanID        pgtype.Text `db:"pendidikan_id"`
+	NamaSekolah         pgtype.Text `db:"nama_sekolah"`
+	TahunLulus          pgtype.Int2 `db:"tahun_lulus"`
+	NoIjazah            pgtype.Text `db:"no_ijazah"`
+	GelarDepan          pgtype.Text `db:"gelar_depan"`
+	GelarBelakang       pgtype.Text `db:"gelar_belakang"`
+	NegaraSekolah       pgtype.Text `db:"negara_sekolah"`
+	TugasBelajar        pgtype.Int2 `db:"tugas_belajar"`
+	PnsID               pgtype.Text `db:"pns_id"`
+	Nip                 pgtype.Text `db:"nip"`
+}
+
+func (q *Queries) CreateRiwayatPendidikan(ctx context.Context, arg CreateRiwayatPendidikanParams) (int32, error) {
+	row := q.db.QueryRow(ctx, createRiwayatPendidikan,
+		arg.TingkatPendidikanID,
+		arg.PendidikanID,
+		arg.NamaSekolah,
+		arg.TahunLulus,
+		arg.NoIjazah,
+		arg.GelarDepan,
+		arg.GelarBelakang,
+		arg.NegaraSekolah,
+		arg.TugasBelajar,
+		arg.PnsID,
+		arg.Nip,
+	)
+	var id int32
+	err := row.Scan(&id)
+	return id, err
+}
+
+const deleteRiwayatPendidikan = `-- name: DeleteRiwayatPendidikan :execrows
+update riwayat_pendidikan
+set deleted_at = now()
+where id = $1 and nip = $2 and deleted_at is null
+`
+
+type DeleteRiwayatPendidikanParams struct {
+	ID  int32       `db:"id"`
+	Nip pgtype.Text `db:"nip"`
+}
+
+func (q *Queries) DeleteRiwayatPendidikan(ctx context.Context, arg DeleteRiwayatPendidikanParams) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteRiwayatPendidikan, arg.ID, arg.Nip)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const getBerkasRiwayatPendidikan = `-- name: GetBerkasRiwayatPendidikan :one
 select file_base64 from riwayat_pendidikan
 where nip = $1 and id = $2 and deleted_at is null
@@ -49,7 +108,9 @@ select
     rp.gelar_belakang,
     rp.tugas_belajar,
     rp.negara_sekolah,
+    rp.tingkat_pendidikan_id,
     tk.nama as jenjang_pendidikan,
+    rp.pendidikan_id,
     pend.nama as pendidikan
 from riwayat_pendidikan rp
 left join ref_tingkat_pendidikan tk on tk.id = rp.tingkat_pendidikan_id and tk.deleted_at is null
@@ -66,16 +127,18 @@ type ListRiwayatPendidikanParams struct {
 }
 
 type ListRiwayatPendidikanRow struct {
-	ID                int32       `db:"id"`
-	NamaSekolah       pgtype.Text `db:"nama_sekolah"`
-	TahunLulus        pgtype.Int2 `db:"tahun_lulus"`
-	NoIjazah          pgtype.Text `db:"no_ijazah"`
-	GelarDepan        pgtype.Text `db:"gelar_depan"`
-	GelarBelakang     pgtype.Text `db:"gelar_belakang"`
-	TugasBelajar      pgtype.Int2 `db:"tugas_belajar"`
-	NegaraSekolah     pgtype.Text `db:"negara_sekolah"`
-	JenjangPendidikan pgtype.Text `db:"jenjang_pendidikan"`
-	Pendidikan        pgtype.Text `db:"pendidikan"`
+	ID                  int32       `db:"id"`
+	NamaSekolah         pgtype.Text `db:"nama_sekolah"`
+	TahunLulus          pgtype.Int2 `db:"tahun_lulus"`
+	NoIjazah            pgtype.Text `db:"no_ijazah"`
+	GelarDepan          pgtype.Text `db:"gelar_depan"`
+	GelarBelakang       pgtype.Text `db:"gelar_belakang"`
+	TugasBelajar        pgtype.Int2 `db:"tugas_belajar"`
+	NegaraSekolah       pgtype.Text `db:"negara_sekolah"`
+	TingkatPendidikanID pgtype.Int2 `db:"tingkat_pendidikan_id"`
+	JenjangPendidikan   pgtype.Text `db:"jenjang_pendidikan"`
+	PendidikanID        pgtype.Text `db:"pendidikan_id"`
+	Pendidikan          pgtype.Text `db:"pendidikan"`
 }
 
 func (q *Queries) ListRiwayatPendidikan(ctx context.Context, arg ListRiwayatPendidikanParams) ([]ListRiwayatPendidikanRow, error) {
@@ -96,7 +159,9 @@ func (q *Queries) ListRiwayatPendidikan(ctx context.Context, arg ListRiwayatPend
 			&i.GelarBelakang,
 			&i.TugasBelajar,
 			&i.NegaraSekolah,
+			&i.TingkatPendidikanID,
 			&i.JenjangPendidikan,
+			&i.PendidikanID,
 			&i.Pendidikan,
 		); err != nil {
 			return nil, err
@@ -107,4 +172,76 @@ func (q *Queries) ListRiwayatPendidikan(ctx context.Context, arg ListRiwayatPend
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateRiwayatPendidikan = `-- name: UpdateRiwayatPendidikan :execrows
+update riwayat_pendidikan
+set
+    tingkat_pendidikan_id = $1,
+    pendidikan_id = $2,
+    nama_sekolah = $3,
+    tahun_lulus = $4,
+    no_ijazah = $5,
+    gelar_depan = $6,
+    gelar_belakang = $7,
+    negara_sekolah = $8,
+    tugas_belajar = $9,
+    updated_at = now()
+where id = $10 and nip = $11 and deleted_at is null
+`
+
+type UpdateRiwayatPendidikanParams struct {
+	TingkatPendidikanID pgtype.Int2 `db:"tingkat_pendidikan_id"`
+	PendidikanID        pgtype.Text `db:"pendidikan_id"`
+	NamaSekolah         pgtype.Text `db:"nama_sekolah"`
+	TahunLulus          pgtype.Int2 `db:"tahun_lulus"`
+	NoIjazah            pgtype.Text `db:"no_ijazah"`
+	GelarDepan          pgtype.Text `db:"gelar_depan"`
+	GelarBelakang       pgtype.Text `db:"gelar_belakang"`
+	NegaraSekolah       pgtype.Text `db:"negara_sekolah"`
+	TugasBelajar        pgtype.Int2 `db:"tugas_belajar"`
+	ID                  int32       `db:"id"`
+	Nip                 pgtype.Text `db:"nip"`
+}
+
+func (q *Queries) UpdateRiwayatPendidikan(ctx context.Context, arg UpdateRiwayatPendidikanParams) (int64, error) {
+	result, err := q.db.Exec(ctx, updateRiwayatPendidikan,
+		arg.TingkatPendidikanID,
+		arg.PendidikanID,
+		arg.NamaSekolah,
+		arg.TahunLulus,
+		arg.NoIjazah,
+		arg.GelarDepan,
+		arg.GelarBelakang,
+		arg.NegaraSekolah,
+		arg.TugasBelajar,
+		arg.ID,
+		arg.Nip,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
+const uploadBerkasRiwayatPendidikan = `-- name: UploadBerkasRiwayatPendidikan :execrows
+update riwayat_pendidikan
+set
+    file_base64 = $1,
+    updated_at = now()
+where id = $2 and nip = $3 and deleted_at is null
+`
+
+type UploadBerkasRiwayatPendidikanParams struct {
+	FileBase64 pgtype.Text `db:"file_base64"`
+	ID         int32       `db:"id"`
+	Nip        pgtype.Text `db:"nip"`
+}
+
+func (q *Queries) UploadBerkasRiwayatPendidikan(ctx context.Context, arg UploadBerkasRiwayatPendidikanParams) (int64, error) {
+	result, err := q.db.Exec(ctx, uploadBerkasRiwayatPendidikan, arg.FileBase64, arg.ID, arg.Nip)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
 }

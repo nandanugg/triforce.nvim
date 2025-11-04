@@ -1,6 +1,7 @@
 package riwayatpendidikan
 
 import (
+	"errors"
 	"log/slog"
 	"net/http"
 
@@ -114,4 +115,136 @@ func (h *handler) getBerkasAdmin(c echo.Context) error {
 
 	c.Response().Header().Set("Content-Disposition", "inline")
 	return c.Blob(http.StatusOK, mimeType, blob)
+}
+
+type upsertParams struct {
+	TingkatPendidikanID int16         `json:"tingkat_pendidikan_id"`
+	PendidikanID        *string       `json:"pendidikan_id"`
+	NamaSekolah         string        `json:"nama_sekolah"`
+	TahunLulus          int16         `json:"tahun_lulus"`
+	NomorIjazah         string        `json:"nomor_ijazah"`
+	GelarDepan          string        `json:"gelar_depan"`
+	GelarBelakang       string        `json:"gelar_belakang"`
+	TugasBelajar        statusBelajar `json:"tugas_belajar"`
+	NegaraSekolah       string        `json:"negara_sekolah"`
+}
+
+type adminCreateRequest struct {
+	NIP string `param:"nip"`
+	upsertParams
+}
+
+type adminCreateResponse struct {
+	Data struct {
+		ID int32 `json:"id"`
+	} `json:"data"`
+}
+
+func (h *handler) adminCreate(c echo.Context) error {
+	var req adminCreateRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	id, err := h.service.create(c.Request().Context(), req.NIP, req.upsertParams)
+	if err != nil {
+		if errors.Is(err, errPegawaiNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, "data pegawai tidak ditemukan")
+		}
+
+		var multiErr *api.MultiError
+		if errors.As(err, &multiErr) {
+			return echo.NewHTTPError(http.StatusBadRequest, multiErr.Error())
+		}
+
+		slog.ErrorContext(c.Request().Context(), "Error admin creating riwayat pendidikan pegawai.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	var resp adminCreateResponse
+	resp.Data.ID = id
+	return c.JSON(http.StatusCreated, resp)
+}
+
+type adminUpdateRequest struct {
+	ID  int32  `param:"id"`
+	NIP string `param:"nip"`
+	upsertParams
+}
+
+func (h *handler) adminUpdate(c echo.Context) error {
+	var req adminUpdateRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	found, err := h.service.update(c.Request().Context(), req.ID, req.NIP, req.upsertParams)
+	if err != nil {
+		var multiErr *api.MultiError
+		if errors.As(err, &multiErr) {
+			return echo.NewHTTPError(http.StatusBadRequest, multiErr.Error())
+		}
+
+		slog.ErrorContext(c.Request().Context(), "Error admin updating riwayat pendidikan pegawai.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	if !found {
+		return echo.NewHTTPError(http.StatusNotFound, "data tidak ditemukan")
+	}
+
+	return c.NoContent(http.StatusNoContent)
+}
+
+type adminDeleteRequest struct {
+	ID  int32  `param:"id"`
+	NIP string `param:"nip"`
+}
+
+func (h *handler) adminDelete(c echo.Context) error {
+	var req adminDeleteRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	found, err := h.service.delete(c.Request().Context(), req.ID, req.NIP)
+	if err != nil {
+		slog.ErrorContext(c.Request().Context(), "Error admin deleting riwayat pendidikan pegawai.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	if !found {
+		return echo.NewHTTPError(http.StatusNotFound, "data tidak ditemukan")
+	}
+
+	return c.NoContent(http.StatusNoContent)
+}
+
+type adminUploadBerkasRequest struct {
+	ID  int32  `param:"id"`
+	NIP string `param:"nip"`
+}
+
+func (h *handler) adminUploadBerkas(c echo.Context) error {
+	var req adminUploadBerkasRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	fileBase64, _, err := api.GetFileBase64(c)
+	if err != nil {
+		return err
+	}
+
+	found, err := h.service.uploadBerkas(c.Request().Context(), req.ID, req.NIP, fileBase64)
+	if err != nil {
+		slog.ErrorContext(c.Request().Context(), "Error admin uploading berkas riwayat pendidikan pegawai.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	if !found {
+		return echo.NewHTTPError(http.StatusNotFound, "data tidak ditemukan")
+	}
+
+	return c.NoContent(http.StatusNoContent)
 }

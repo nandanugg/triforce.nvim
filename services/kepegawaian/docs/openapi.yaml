@@ -2156,6 +2156,79 @@ paths:
                       $ref: "#/components/schemas/riwayatPendidikan"
                   meta:
                     $ref: "#/components/schemas/metaPagination"
+    post:
+      tags:
+        - Riwayat Pendidikan
+      summary: Admin - Tambah riwayat pendidikan pegawai.
+      description: Tambah riwayat pendidikan pegawai berdasarkan NIP oleh admin.
+      operationId: adminCreateRiwayatPendidikan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/riwayatPendidikan"
+      responses:
+        "201":
+          $ref: "#/components/responses/createdId"
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "404":
+          $ref: "#/components/responses/notFound"
+  /v1/admin/pegawai/{nip}/riwayat-pendidikan/{id}:
+    put:
+      tags:
+        - Riwayat Pendidikan
+      summary: Admin - Mengubah riwayat pendidikan pegawai.
+      description: Mengubah riwayat pendidikan pegawai berdasarkan NIP dan ID riwayat pendidikan oleh admin.
+      operationId: adminUpdateRiwayatPendidikan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        $ref: "#/components/requestBodies/riwayatPendidikan"
+      responses:
+        "204":
+          description: Sukses.
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "404":
+          $ref: "#/components/responses/notFound"
+    delete:
+      tags:
+        - Riwayat Pendidikan
+      summary: Admin - Menghapus riwayat pendidikan pegawai.
+      description: Menghapus riwayat pendidikan pegawai berdasarkan NIP dan ID riwayat pendidikan oleh admin.
+      operationId: adminDeleteRiwayatPendidikan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Sukses.
+        "404":
+          $ref: "#/components/responses/notFound"
   /v1/admin/pegawai/{nip}/riwayat-pendidikan/{id}/berkas:
     get:
       tags:
@@ -2186,6 +2259,46 @@ paths:
                 format: binary
         "404":
           description: Berkas riwayat pendidikan tidak ditemukan atau User tidak mempunyai akses.
+    put:
+      tags:
+        - Riwayat Pendidikan
+      summary: Admin - Mengunggah berkas riwayat pendidikan pegawai.
+      description: Mengunggah berkas riwayat pendidikan pegawai berdasarkan NIP dan ID riwayat pendidikan oleh admin.
+      operationId: adminUploadBerkasRiwayatPendidikan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required:
+                - file
+            encoding:
+              file:
+                contentType: application/pdf
+      responses:
+        "204":
+          description: Sukses.
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "404":
+          $ref: "#/components/responses/notFound"
   /v1/admin/pegawai/{nip}/riwayat-pelatihan-teknis:
     get:
       tags:
@@ -5558,6 +5671,43 @@ components:
               - tanggal_lahir
               - status_pernikahan_id
               - hubungan
+    riwayatPendidikan:
+      required: true
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              tingkat_pendidikan_id:
+                type: integer
+              pendidikan_id:
+                type: string
+                nullable: true
+              nama_sekolah:
+                type: string
+                maxLength: 200
+              tahun_lulus:
+                type: integer
+              nomor_ijazah:
+                type: string
+                maxLength: 100
+              gelar_depan:
+                type: string
+                maxLength: 50
+              gelar_belakang:
+                type: string
+                maxLength: 60
+              tugas_belajar:
+                type: string
+                enum: ["Tugas Belajar", "Izin Belajar", ""]
+              negara_sekolah:
+                type: string
+                enum: ["Dalam Negeri", "Luar Negeri", ""]
+            required:
+              - tingkat_pendidikan_id
+              - nama_sekolah
+              - tahun_lulus
+              - nomor_ijazah
   responses:
     createdId:
       description: Sukses.
@@ -5640,8 +5790,14 @@ components:
       properties:
         id:
           type: integer
+        tingkat_pendidikan_id:
+          type: integer
+          nullable: true
         jenjang_pendidikan:
           type: string
+        pendidikan_id:
+          type: string
+          nullable: true
         jurusan:
           type: string
         nama_sekolah:

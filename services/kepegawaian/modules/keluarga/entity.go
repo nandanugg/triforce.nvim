@@ -67,26 +67,18 @@ const (
 	statusSudahBekerja statusSekolah = "Sudah Bekerja"
 )
 
-func (s statusSekolah) toID() pgtype.Int2 {
-	switch s {
-	case statusMasihSekolah:
-		return pgtype.Int2{Int16: 1, Valid: true}
-	case statusSudahBekerja:
-		return pgtype.Int2{Int16: 2, Valid: true}
-	default:
-		return pgtype.Int2{}
-	}
+var labelStatusSekolah = map[int16]statusSekolah{
+	1: statusMasihSekolah,
+	2: statusSudahBekerja,
 }
 
-func labelStatusSekolah(statusID pgtype.Int2) statusSekolah {
-	switch statusID.Int16 {
-	case 1:
-		return statusMasihSekolah
-	case 2:
-		return statusSudahBekerja
-	default:
-		return ""
+func (s statusSekolah) toID() pgtype.Int2 {
+	for status, label := range labelStatusSekolah {
+		if s == label {
+			return pgtype.Int2{Int16: status, Valid: true}
+		}
 	}
+	return pgtype.Int2{}
 }
 
 type statusAnak string
@@ -96,26 +88,18 @@ const (
 	statusAnakAngkat  statusAnak = "Angkat"
 )
 
-func (s statusAnak) toID() pgtype.Text {
-	switch s {
-	case statusAnakKandung:
-		return pgtype.Text{String: "1", Valid: true}
-	case statusAnakAngkat:
-		return pgtype.Text{String: "2", Valid: true}
-	default:
-		return pgtype.Text{}
-	}
+var labelStatusAnak = map[string]statusAnak{
+	"1": statusAnakKandung,
+	"2": statusAnakAngkat,
 }
 
-func labelStatusAnak(statusID pgtype.Text) statusAnak {
-	switch statusID.String {
-	case "1":
-		return statusAnakKandung
-	case "2":
-		return statusAnakAngkat
-	default:
-		return ""
+func (s statusAnak) toID() pgtype.Text {
+	for status, label := range labelStatusAnak {
+		if s == label {
+			return pgtype.Text{String: status, Valid: true}
+		}
 	}
+	return pgtype.Text{}
 }
 
 type hubunganOrangTua string
@@ -125,26 +109,18 @@ const (
 	hubunganIbu  hubunganOrangTua = "Ibu"
 )
 
-func (s hubunganOrangTua) toID() pgtype.Int2 {
-	switch s {
-	case hubunganAyah:
-		return pgtype.Int2{Int16: 1, Valid: true}
-	case hubunganIbu:
-		return pgtype.Int2{Int16: 2, Valid: true}
-	default:
-		return pgtype.Int2{}
-	}
+var labelHubunganOrangTua = map[int16]hubunganOrangTua{
+	1: hubunganAyah,
+	2: hubunganIbu,
 }
 
-func labelHubunganOrangTua(hubunganID pgtype.Int2) hubunganOrangTua {
-	switch hubunganID.Int16 {
-	case 1:
-		return hubunganAyah
-	case 2:
-		return hubunganIbu
-	default:
-		return ""
+func (s hubunganOrangTua) toID() pgtype.Int2 {
+	for status, label := range labelHubunganOrangTua {
+		if s == label {
+			return pgtype.Int2{Int16: status, Valid: true}
+		}
 	}
+	return pgtype.Int2{}
 }
 
 type hubunganPasangan string
@@ -154,13 +130,16 @@ const (
 	hubunganSuami hubunganPasangan = "Suami"
 )
 
+var labelHubunganPasangan = map[int16]hubunganPasangan{
+	1: hubunganIstri,
+	2: hubunganSuami,
+}
+
 func (s hubunganPasangan) toID() pgtype.Int2 {
-	switch s {
-	case hubunganIstri:
-		return pgtype.Int2{Int16: 1, Valid: true}
-	case hubunganSuami:
-		return pgtype.Int2{Int16: 2, Valid: true}
-	default:
-		return pgtype.Int2{}
+	for status, label := range labelHubunganPasangan {
+		if s == label {
+			return pgtype.Int2{Int16: status, Valid: true}
+		}
 	}
+	return pgtype.Int2{}
 }

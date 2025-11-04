@@ -55,7 +55,7 @@ func (s *service) list(ctx context.Context, nip string) (keluarga, error) {
 	result.OrangTua = typeutil.Map(orangTuaList, func(row repo.ListOrangTuaByNipRow) orangTua {
 		return orangTua{
 			ID:               row.ID,
-			Hubungan:         labelHubunganOrangTua(row.Hubungan),
+			Hubungan:         labelHubunganOrangTua[row.Hubungan.Int16],
 			TanggalMeninggal: db.Date(row.TanggalMeninggal.Time),
 			AkteMeninggal:    row.AkteMeninggal.String,
 			StatusHidup:      statusHidupFromTanggalMeninggal(row.TanggalMeninggal),
@@ -103,8 +103,8 @@ func (s *service) list(ctx context.Context, nip string) (keluarga, error) {
 			Nama:               row.Nama.String,
 			NIK:                row.Nik.String,
 			JenisKelamin:       row.JenisKelamin.String,
-			StatusAnak:         labelStatusAnak(row.StatusAnak),
-			StatusSekolah:      labelStatusSekolah(row.StatusSekolah),
+			StatusAnak:         labelStatusAnak[row.StatusAnak.String],
+			StatusSekolah:      labelStatusSekolah[row.StatusSekolah.Int16],
 			AgamaID:            row.AgamaID,
 			Agama:              row.Agama.String,
 			StatusPernikahanID: row.JenisKawinID,

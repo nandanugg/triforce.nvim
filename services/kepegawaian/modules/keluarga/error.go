@@ -1,8 +1,6 @@
 package keluarga
 
-import (
-	"errors"
-)
+import "errors"
 
 var (
 	errPegawaiNotFound = errors.New("pegawai not found")

@@ -10,11 +10,11 @@ import (
 )
 
 const countRefPendidikan = `-- name: CountRefPendidikan :one
-SELECT 
-    COUNT(1) 
-FROM 
+SELECT
+    COUNT(1)
+FROM
     ref_pendidikan p
-WHERE 
+WHERE
     deleted_at IS NULL
     AND ($1::varchar IS NULL OR p.nama ILIKE '%' || $1::varchar || '%')
 `
@@ -27,9 +27,9 @@ func (q *Queries) CountRefPendidikan(ctx context.Context, nama pgtype.Text) (int
 }
 
 const createRefPendidikan = `-- name: CreateRefPendidikan :one
-INSERT INTO 
+INSERT INTO
     ref_pendidikan (id, nama, tingkat_pendidikan_id)
-VALUES 
+VALUES
     ($1::text, $2::text, $3)
 RETURNING id
 `
@@ -62,13 +62,13 @@ func (q *Queries) DeleteRefPendidikan(ctx context.Context, id string) (int64, er
 }
 
 const getRefPendidikan = `-- name: GetRefPendidikan :one
-SELECT 
+SELECT
     p.id, p.nama, tp.nama as tingkat_pendidikan, tingkat_pendidikan_id
-FROM 
+FROM
     ref_pendidikan p
-LEFT JOIN 
+LEFT JOIN
     ref_tingkat_pendidikan tp ON tp.id = p.tingkat_pendidikan_id AND tp.deleted_at IS NULL
-WHERE 
+WHERE
     p.id = $1::text AND p.deleted_at IS NULL
 `
 
@@ -92,13 +92,13 @@ func (q *Queries) GetRefPendidikan(ctx context.Context, id string) (GetRefPendid
 }
 
 const listRefPendidikanWithTingkatPendidikan = `-- name: ListRefPendidikanWithTingkatPendidikan :many
-SELECT 
+SELECT
     p.id, p.nama, tp.nama as tingkat_pendidikan, tingkat_pendidikan_id
-FROM 
+FROM
     ref_pendidikan p
-LEFT JOIN 
+LEFT JOIN
     ref_tingkat_pendidikan tp ON tp.id = p.tingkat_pendidikan_id AND tp.deleted_at IS NULL
-WHERE 
+WHERE
     p.deleted_at IS NULL
     AND ($3::varchar IS NULL OR p.nama ILIKE '%' || $3::varchar || '%')
 LIMIT $1 OFFSET $2
