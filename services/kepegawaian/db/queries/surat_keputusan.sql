@@ -137,7 +137,10 @@ SELECT
     status_ttd,
     status_koreksi,
     catatan,
-    ttd_pegawai_id
+    ttd_pegawai_id,
+    letak_ttd,
+    show_qrcode,
+    halaman_ttd
 FROM surat_keputusan fds
 JOIN pegawai p on p.nip_baru = fds.nip_sk and p.deleted_at is null
 LEFT JOIN pegawai pemroses on pemroses.nip_baru = fds.nip_pemroses and pemroses.deleted_at is null
@@ -413,3 +416,30 @@ WHERE fds.status_ttd = 0
   AND fds.ttd_pegawai_id = @pns_id::varchar
   AND fds.deleted_at IS NULL
   AND fds.ds_ok = true;
+
+-- name: UpdateBerkasSuratKeputusanSignedByID :exec
+UPDATE 
+    surat_keputusan
+SET 
+    file_base64_sign = @file_base64_sign::text
+WHERE 
+    file_id = @id::varchar;
+
+-- name: InsertLogRequestSuratKeputusan :exec
+INSERT INTO log_request_surat_keputusan (
+    file_id,
+    nik,
+    keterangan,
+    status,
+    proses_cron,
+    created_at,
+    updated_at
+) VALUES (
+    @file_id::varchar,
+    @nik::varchar,
+    @keterangan::varchar,
+    @status::integer,
+    @proses_cron::boolean,
+    now(),
+    now()
+);

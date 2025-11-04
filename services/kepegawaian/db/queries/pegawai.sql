@@ -101,3 +101,9 @@ WHERE
 
 -- name: GetPegawaiPNSIDByNIP :one
 SELECT pns_id FROM pegawai WHERE nip_baru = @nip::varchar AND deleted_at IS NULL;
+
+-- name: GetPegawaiTTDByNIP :one
+SELECT base64ttd FROM pegawai_ttd WHERE nip = @nip::varchar;
+
+-- name: GetPegawaiNIKByNIP :one
+SELECT nik::text FROM pegawai WHERE nip_baru = @nip::varchar AND deleted_at IS NULL;

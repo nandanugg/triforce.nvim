@@ -10,6 +10,7 @@ type Config struct {
 	Server   Server   `envPrefix:"NEXUS_KEPEGAWAIAN_SERVER_"`
 	DB       Database `envPrefix:"NEXUS_KEPEGAWAIAN_DB_"`
 	Keycloak Keycloak `envPrefix:"NEXUS_KEYCLOAK_"`
+	BSRE     BSRE     `envPrefix:"NEXUS_BSRE_"`
 
 	LogLevel slog.Level `env:"NEXUS_KEPEGAWAIAN_LOG_LEVEL"`
 }
@@ -31,6 +32,12 @@ type Keycloak struct {
 	Host     string `env:"HOST"`
 	Realm    string `env:"REALM"`
 	Audience string `env:"AUDIENCE"`
+}
+
+type BSRE struct {
+	Host              string `env:"HOST"`
+	BasicAuthUsername string `env:"BASIC_AUTH_USERNAME"`
+	BasicAuthPassword string `env:"BASIC_AUTH_PASSWORD"`
 }
 
 func Load() (Config, error) {

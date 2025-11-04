@@ -429,6 +429,7 @@ type tandatanganSKRequest struct {
 	ID         string `param:"id"`
 	StatusTtd  string `json:"status_ttd"`
 	CatatanTtd string `json:"catatan_ttd"`
+	Passphrase string `json:"passphrase"`
 }
 
 func (h *handler) tandatanganSK(c echo.Context) error {
@@ -439,9 +440,10 @@ func (h *handler) tandatanganSK(c echo.Context) error {
 
 	ctx := c.Request().Context()
 	err, validationErr := h.service.tandatanganSK(ctx, tandatanganSKParams{
-		id:        req.ID,
-		statusTtd: req.StatusTtd,
-		nip:       api.CurrentUser(c).NIP,
+		id:         req.ID,
+		statusTtd:  req.StatusTtd,
+		nip:        api.CurrentUser(c).NIP,
+		passphrase: req.Passphrase,
 	})
 	if err != nil {
 		slog.ErrorContext(ctx, "Error tandatangan surat keputusan.", "error", err)

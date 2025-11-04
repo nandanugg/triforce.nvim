@@ -16,6 +16,7 @@ import (
 
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api/apitest"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/bsre"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db/dbtest"
 	dbmigrations "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/migrations"
 	dbrepository "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
@@ -56,9 +57,11 @@ func Test_handler_list(t *testing.T) {
 	e, err := api.NewEchoServer(docs.OpenAPIBytes)
 	require.NoError(t, err)
 
+	mockBSRE := bsre.NewMockBSreServer(t)
+
 	repo := dbrepository.New(db)
 	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusan_Self)
-	RegisterRoutes(e, repo, db, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+	RegisterRoutes(e, repo, db, api.NewAuthMiddleware(authSvc, apitest.Keyfunc), mockBSRE)
 
 	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	tests := []struct {
@@ -253,9 +256,11 @@ func Test_handler_get(t *testing.T) {
 	e, err := api.NewEchoServer(docs.OpenAPIBytes)
 	require.NoError(t, err)
 
+	mockBSRE := bsre.NewMockBSreServer(t)
+
 	repo := dbrepository.New(db)
 	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusan_Self)
-	RegisterRoutes(e, repo, db, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+	RegisterRoutes(e, repo, db, api.NewAuthMiddleware(authSvc, apitest.Keyfunc), mockBSRE)
 
 	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	tests := []struct {
@@ -442,9 +447,11 @@ func Test_handler_getBerkas(t *testing.T) {
 	e, err := api.NewEchoServer(docs.OpenAPIBytes)
 	require.NoError(t, err)
 
+	mockBSRE := bsre.NewMockBSreServer(t)
+
 	repo := dbrepository.New(pgxconn)
 	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusan_Self)
-	RegisterRoutes(e, repo, pgxconn, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+	RegisterRoutes(e, repo, pgxconn, api.NewAuthMiddleware(authSvc, apitest.Keyfunc), mockBSRE)
 
 	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	tests := []struct {
@@ -639,9 +646,11 @@ func Test_handler_listAdmin(t *testing.T) {
 	e, err := api.NewEchoServer(docs.OpenAPIBytes)
 	require.NoError(t, err)
 
+	mockBSRE := bsre.NewMockBSreServer(t)
+
 	repo := dbrepository.New(db)
 	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusan_Read)
-	RegisterRoutes(e, repo, db, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+	RegisterRoutes(e, repo, db, api.NewAuthMiddleware(authSvc, apitest.Keyfunc), mockBSRE)
 
 	authHeader := []string{apitest.GenerateAuthHeader("111")}
 	tests := []struct {
@@ -1268,9 +1277,11 @@ func Test_handler_getAdmin(t *testing.T) {
 	e, err := api.NewEchoServer(docs.OpenAPIBytes)
 	require.NoError(t, err)
 
+	mockBSRE := bsre.NewMockBSreServer(t)
+
 	repo := dbrepository.New(db)
 	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusan_Read)
-	RegisterRoutes(e, repo, db, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+	RegisterRoutes(e, repo, db, api.NewAuthMiddleware(authSvc, apitest.Keyfunc), mockBSRE)
 
 	authHeader := []string{apitest.GenerateAuthHeader("111")}
 	tests := []struct {
@@ -1465,9 +1476,10 @@ func Test_handler_getBerkasAdmin(t *testing.T) {
 	e, err := api.NewEchoServer(docs.OpenAPIBytes)
 	require.NoError(t, err)
 
+	mockBSRE := bsre.NewMockBSreServer(t)
 	repo := dbrepository.New(pgxconn)
 	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusan_Read)
-	RegisterRoutes(e, repo, pgxconn, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+	RegisterRoutes(e, repo, pgxconn, api.NewAuthMiddleware(authSvc, apitest.Keyfunc), mockBSRE)
 
 	authHeader := []string{apitest.GenerateAuthHeader("111")}
 	tests := []struct {
@@ -1652,9 +1664,11 @@ func Test_handler_listKoreksi(t *testing.T) {
 	e, err := api.NewEchoServer(docs.OpenAPIBytes)
 	require.NoError(t, err)
 
+	mockBSRE := bsre.NewMockBSreServer(t)
+
 	repo := dbrepository.New(pgxconn)
 	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusanApproval_Review)
-	RegisterRoutes(e, repo, pgxconn, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+	RegisterRoutes(e, repo, pgxconn, api.NewAuthMiddleware(authSvc, apitest.Keyfunc), mockBSRE)
 
 	authHeader := []string{apitest.GenerateAuthHeader("123456787")}
 
@@ -1970,9 +1984,11 @@ func Test_handler_listKoreksiAntrean(t *testing.T) {
 	e, err := api.NewEchoServer(docs.OpenAPIBytes)
 	require.NoError(t, err)
 
+	mockBSRE := bsre.NewMockBSreServer(t)
+
 	repo := dbrepository.New(pgxconn)
 	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusanApproval_Review)
-	RegisterRoutes(e, repo, pgxconn, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+	RegisterRoutes(e, repo, pgxconn, api.NewAuthMiddleware(authSvc, apitest.Keyfunc), mockBSRE)
 
 	authHeader := []string{apitest.GenerateAuthHeader("123456787")}
 	tests := []struct {
@@ -2150,9 +2166,11 @@ func Test_handler_getDetailSuratKeputusan(t *testing.T) {
 	e, err := api.NewEchoServer(docs.OpenAPIBytes)
 	require.NoError(t, err)
 
+	mockBSRE := bsre.NewMockBSreServer(t)
+
 	repo := dbrepository.New(pgxconn)
 	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusanApproval_Read)
-	RegisterRoutes(e, repo, pgxconn, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+	RegisterRoutes(e, repo, pgxconn, api.NewAuthMiddleware(authSvc, apitest.Keyfunc), mockBSRE)
 
 	authHeader12345677 := []string{apitest.GenerateAuthHeader("12345677")}
 	authHeader123456789 := []string{apitest.GenerateAuthHeader("123456789")}
@@ -2446,9 +2464,11 @@ func Test_handler_getBerkasKoreksiSuratKeputusan(t *testing.T) {
 	e, err := api.NewEchoServer(docs.OpenAPIBytes)
 	require.NoError(t, err)
 
+	mockBSRE := bsre.NewMockBSreServer(t)
+
 	repo := dbrepository.New(pgxconn)
 	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusanApproval_Read)
-	RegisterRoutes(e, repo, pgxconn, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+	RegisterRoutes(e, repo, pgxconn, api.NewAuthMiddleware(authSvc, apitest.Keyfunc), mockBSRE)
 
 	authHeader := []string{apitest.GenerateAuthHeader("111")}
 	tests := []struct {
@@ -2619,9 +2639,11 @@ func Test_handler_approveKoreksiSuratKeputusan(t *testing.T) {
 	e, err := api.NewEchoServer(docs.OpenAPIBytes)
 	require.NoError(t, err)
 
+	mockBSRE := bsre.NewMockBSreServer(t)
+
 	repo := dbrepository.New(pgxconn)
 	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusanApproval_Review)
-	RegisterRoutes(e, repo, pgxconn, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+	RegisterRoutes(e, repo, pgxconn, api.NewAuthMiddleware(authSvc, apitest.Keyfunc), mockBSRE)
 
 	authHeader := []string{apitest.GenerateAuthHeader("12345678")}
 	tests := []struct {
@@ -2839,9 +2861,11 @@ func Test_handler_listTandatangan(t *testing.T) {
 	e, err := api.NewEchoServer(docs.OpenAPIBytes)
 	require.NoError(t, err)
 
+	mockBSRE := bsre.NewMockBSreServer(t)
+
 	repo := dbrepository.New(pgxconn)
 	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusanApproval_Sign)
-	RegisterRoutes(e, repo, pgxconn, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+	RegisterRoutes(e, repo, pgxconn, api.NewAuthMiddleware(authSvc, apitest.Keyfunc), mockBSRE)
 
 	authHeader := []string{apitest.GenerateAuthHeader("123456787")}
 
@@ -3123,9 +3147,11 @@ func Test_handler_listTandatanganAntrean(t *testing.T) {
 	e, err := api.NewEchoServer(docs.OpenAPIBytes)
 	require.NoError(t, err)
 
+	mockBSRE := bsre.NewMockBSreServer(t)
+
 	repo := dbrepository.New(pgxconn)
 	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusanApproval_Sign)
-	RegisterRoutes(e, repo, pgxconn, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+	RegisterRoutes(e, repo, pgxconn, api.NewAuthMiddleware(authSvc, apitest.Keyfunc), mockBSRE)
 
 	authHeader123456787 := []string{apitest.GenerateAuthHeader("123456787")}
 	authHeader123456788 := []string{apitest.GenerateAuthHeader("123456788")}
@@ -3236,19 +3262,25 @@ func Test_handler_tandatanganSK(t *testing.T) {
 			(1, 'I/a', 'Juru Muda', 'I/a', 1, 'I/a');
 
 		INSERT INTO surat_keputusan
-			("file_id","nip_sk","status_sk", "status_koreksi", "ds_ok", "status_ttd", "ttd_pegawai_id", "created_at", "deleted_at") VALUES
-			('sk-001', '123456789', 1, 1, true, 0, '12345678', '2024-01-15', NULL),
-			('sk-002', '123456789', 1, 1, true, 0, '12345678', '2024-01-15', NULL),
-			('sk-003', '123456789', 1, 1, true, 1, '12345678', '2024-01-15', NULL),
-			('sk-004', '123456789', 1, 2, true, 0, '12345678', '2024-01-15', NULL),
-			('sk-005', '123456789', 1, 1, true, 0, '12345678', '2024-01-15', NULL),
-			('sk-006', '123456789', 1, 1, true, 0, '12345678', '2024-01-15', NULL);
+			("file_id", "file_base64", "nip_sk","status_sk", "status_koreksi", "ds_ok", "status_ttd", "ttd_pegawai_id", "created_at", "deleted_at") VALUES
+			('sk-001', 'JVBERi0xLjQKJcTl8uXrp/Og0MTGCjEgMCBvYmoKPDwvVHlwZSAvQ2F0YWxvZyAvUGFnZXMgMiAwIFIgPj4KZW5kb2JqCjIgMCBvYmoKPDwvVHlwZSAvUGFnZXMgL0tpZHMgWzMgMCBSXSAvQ291bnQgMSA+PgplbmRvYmoKMyAwIG9iago8PC9UeXBlIC9QYWdlIC9QYXJlbnQgMiAwIFIgL01lZGlhQm94IFswIDAgNTk1LjI3IDg0MS4xOV0gL1Jlc291cmNlcyA8PC9Gb250IDw8L0YxIDQgMCBSID4+ID4+IC9Db250ZW50cyA1IDAgUiAvR3JvdXAgPDwvUyAvVHJhbnNwYXJlbmN5IC9DUyAvRGV2aWNlUkdCPj4gPj4KZW5kb2JqCjQgMCBvYmoKPDwvVHlwZSAvRm9udCAvU3VidHlwZSAvVHlwZTEgL05hbWUgL0YxIC9CYXNlRm9udCAvSGVsdmV0aWNhIC9FbmNvZGluZyAvV2luQW5zaUVuY29kaW5nPj4KZW5kb2JqCjUgMCBvYmoKPDwvTGVuZ3RoIDYgMCBSID4+CnN0cmVhbQpCVAovRjEgMTIgVGYKMTAwIDEwMCBUZAooU21hbGwgUGRmKSBUagpFVAplbmRzdHJlYW0KZW5kb2JqCjYgMCBvYmoKMTIKZW5kb2JqCnhyZWYKMCA3CjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDExMCAwMDAwMCBuIAowMDAwMDAwMTYyIDAwMDAwIG4gCjAwMDAwMDAyMTUgMDAwMDAgbiAKMDAwMDAwMDM0NSAwMDAwMCBuIAowMDAwMDAwNDM5IDAwMDAwIG4gCjAwMDAwMDA1MjggMDAwMDAgbiAKdHJhaWxlcgo8PC9TaXplIDcgL1Jvb3QgMSAwIFIgL0luZm8gOCAwIFIgL0lEIFsgPDQxMzYzNDc2RjA4RTkzQzE5MzU3OTlENUIzOEE2MjRBPl0+PgplbmR0cmFpbGVyCjggMCBvYmoKPDwvVHlwZSAvSW5mbyAvUHJvZHVjZXIgKE9wZW5BSSkgL1RpdGxlICgqKik+PgplbmRvYmoKJSVFT0YK', '123456789', 1, 1, true, 0, '12345678', '2024-01-15', NULL),
+			('sk-002', 'JVBERi0xLjQKJcTl8uXrp/Og0MTGCjEgMCBvYmoKPDwvVHlwZSAvQ2F0YWxvZyAvUGFnZXMgMiAwIFIgPj4KZW5kb2JqCjIgMCBvYmoKPDwvVHlwZSAvUGFnZXMgL0tpZHMgWzMgMCBSXSAvQ291bnQgMSA+PgplbmRvYmoKMyAwIG9iago8PC9UeXBlIC9QYWdlIC9QYXJlbnQgMiAwIFIgL01lZGlhQm94IFswIDAgNTk1LjI3IDg0MS4xOV0gL1Jlc291cmNlcyA8PC9Gb250IDw8L0YxIDQgMCBSID4+ID4+IC9Db250ZW50cyA1IDAgUiAvR3JvdXAgPDwvUyAvVHJhbnNwYXJlbmN5IC9DUyAvRGV2aWNlUkdCPj4gPj4KZW5kb2JqCjQgMCBvYmoKPDwvVHlwZSAvRm9udCAvU3VidHlwZSAvVHlwZTEgL05hbWUgL0YxIC9CYXNlRm9udCAvSGVsdmV0aWNhIC9FbmNvZGluZyAvV2luQW5zaUVuY29kaW5nPj4KZW5kb2JqCjUgMCBvYmoKPDwvTGVuZ3RoIDYgMCBSID4+CnN0cmVhbQpCVAovRjEgMTIgVGYKMTAwIDEwMCBUZAooU21hbGwgUGRmKSBUagpFVAplbmRzdHJlYW0KZW5kb2JqCjYgMCBvYmoKMTIKZW5kb2JqCnhyZWYKMCA3CjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDExMCAwMDAwMCBuIAowMDAwMDAwMTYyIDAwMDAwIG4gCjAwMDAwMDAyMTUgMDAwMDAgbiAKMDAwMDAwMDM0NSAwMDAwMCBuIAowMDAwMDAwNDM5IDAwMDAwIG4gCjAwMDAwMDA1MjggMDAwMDAgbiAKdHJhaWxlcgo8PC9TaXplIDcgL1Jvb3QgMSAwIFIgL0luZm8gOCAwIFIgL0lEIFsgPDQxMzYzNDc2RjA4RTkzQzE5MzU3OTlENUIzOEE2MjRBPl0+PgplbmR0cmFpbGVyCjggMCBvYmoKPDwvVHlwZSAvSW5mbyAvUHJvZHVjZXIgKE9wZW5BSSkgL1RpdGxlICgqKik+PgplbmRvYmoKJSVFT0YK', '123456789', 1, 1, true, 0, '12345678', '2024-01-15', NULL),
+			('sk-003', 'JVBERi0xLjQKJcTl8uXrp/Og0MTGCjEgMCBvYmoKPDwvVHlwZSAvQ2F0YWxvZyAvUGFnZXMgMiAwIFIgPj4KZW5kb2JqCjIgMCBvYmoKPDwvVHlwZSAvUGFnZXMgL0tpZHMgWzMgMCBSXSAvQ291bnQgMSA+PgplbmRvYmoKMyAwIG9iago8PC9UeXBlIC9QYWdlIC9QYXJlbnQgMiAwIFIgL01lZGlhQm94IFswIDAgNTk1LjI3IDg0MS4xOV0gL1Jlc291cmNlcyA8PC9Gb250IDw8L0YxIDQgMCBSID4+ID4+IC9Db250ZW50cyA1IDAgUiAvR3JvdXAgPDwvUyAvVHJhbnNwYXJlbmN5IC9DUyAvRGV2aWNlUkdCPj4gPj4KZW5kb2JqCjQgMCBvYmoKPDwvVHlwZSAvRm9udCAvU3VidHlwZSAvVHlwZTEgL05hbWUgL0YxIC9CYXNlRm9udCAvSGVsdmV0aWNhIC9FbmNvZGluZyAvV2luQW5zaUVuY29kaW5nPj4KZW5kb2JqCjUgMCBvYmoKPDwvTGVuZ3RoIDYgMCBSID4+CnN0cmVhbQpCVAovRjEgMTIgVGYKMTAwIDEwMCBUZAooU21hbGwgUGRmKSBUagpFVAplbmRzdHJlYW0KZW5kb2JqCjYgMCBvYmoKMTIKZW5kb2JqCnhyZWYKMCA3CjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDExMCAwMDAwMCBuIAowMDAwMDAwMTYyIDAwMDAwIG4gCjAwMDAwMDAyMTUgMDAwMDAgbiAKMDAwMDAwMDM0NSAwMDAwMCBuIAowMDAwMDAwNDM5IDAwMDAwIG4gCjAwMDAwMDA1MjggMDAwMDAgbiAKdHJhaWxlcgo8PC9TaXplIDcgL1Jvb3QgMSAwIFIgL0luZm8gOCAwIFIgL0lEIFsgPDQxMzYzNDc2RjA4RTkzQzE5MzU3OTlENUIzOEE2MjRBPl0+PgplbmR0cmFpbGVyCjggMCBvYmoKPDwvVHlwZSAvSW5mbyAvUHJvZHVjZXIgKE9wZW5BSSkgL1RpdGxlICgqKik+PgplbmRvYmoKJSVFT0YK', '123456789', 1, 1, true, 1, '12345678', '2024-01-15', NULL),
+			('sk-004', 'JVBERi0xLjQKJcTl8uXrp/Og0MTGCjEgMCBvYmoKPDwvVHlwZSAvQ2F0YWxvZyAvUGFnZXMgMiAwIFIgPj4KZW5kb2JqCjIgMCBvYmoKPDwvVHlwZSAvUGFnZXMgL0tpZHMgWzMgMCBSXSAvQ291bnQgMSA+PgplbmRvYmoKMyAwIG9iago8PC9UeXBlIC9QYWdlIC9QYXJlbnQgMiAwIFIgL01lZGlhQm94IFswIDAgNTk1LjI3IDg0MS4xOV0gL1Jlc291cmNlcyA8PC9Gb250IDw8L0YxIDQgMCBSID4+ID4+IC9Db250ZW50cyA1IDAgUiAvR3JvdXAgPDwvUyAvVHJhbnNwYXJlbmN5IC9DUyAvRGV2aWNlUkdCPj4gPj4KZW5kb2JqCjQgMCBvYmoKPDwvVHlwZSAvRm9udCAvU3VidHlwZSAvVHlwZTEgL05hbWUgL0YxIC9CYXNlRm9udCAvSGVsdmV0aWNhIC9FbmNvZGluZyAvV2luQW5zaUVuY29kaW5nPj4KZW5kb2JqCjUgMCBvYmoKPDwvTGVuZ3RoIDYgMCBSID4+CnN0cmVhbQpCVAovRjEgMTIgVGYKMTAwIDEwMCBUZAooU21hbGwgUGRmKSBUagpFVAplbmRzdHJlYW0KZW5kb2JqCjYgMCBvYmoKMTIKZW5kb2JqCnhyZWYKMCA3CjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDExMCAwMDAwMCBuIAowMDAwMDAwMTYyIDAwMDAwIG4gCjAwMDAwMDAyMTUgMDAwMDAgbiAKMDAwMDAwMDM0NSAwMDAwMCBuIAowMDAwMDAwNDM5IDAwMDAwIG4gCjAwMDAwMDA1MjggMDAwMDAgbiAKdHJhaWxlcgo8PC9TaXplIDcgL1Jvb3QgMSAwIFIgL0luZm8gOCAwIFIgL0lEIFsgPDQxMzYzNDc2RjA4RTkzQzE5MzU3OTlENUIzOEE2MjRBPl0+PgplbmR0cmFpbGVyCjggMCBvYmoKPDwvVHlwZSAvSW5mbyAvUHJvZHVjZXIgKE9wZW5BSSkgL1RpdGxlICgqKik+PgplbmRvYmoKJSVFT0YK', '123456789', 1, 2, true, 0, '12345678', '2024-01-15', NULL),
+			('sk-005', 'JVBERi0xLjQKJcTl8uXrp/Og0MTGCjEgMCBvYmoKPDwvVHlwZSAvQ2F0YWxvZyAvUGFnZXMgMiAwIFIgPj4KZW5kb2JqCjIgMCBvYmoKPDwvVHlwZSAvUGFnZXMgL0tpZHMgWzMgMCBSXSAvQ291bnQgMSA+PgplbmRvYmoKMyAwIG9iago8PC9UeXBlIC9QYWdlIC9QYXJlbnQgMiAwIFIgL01lZGlhQm94IFswIDAgNTk1LjI3IDg0MS4xOV0gL1Jlc291cmNlcyA8PC9Gb250IDw8L0YxIDQgMCBSID4+ID4+IC9Db250ZW50cyA1IDAgUiAvR3JvdXAgPDwvUyAvVHJhbnNwYXJlbmN5IC9DUyAvRGV2aWNlUkdCPj4gPj4KZW5kb2JqCjQgMCBvYmoKPDwvVHlwZSAvRm9udCAvU3VidHlwZSAvVHlwZTEgL05hbWUgL0YxIC9CYXNlRm9udCAvSGVsdmV0aWNhIC9FbmNvZGluZyAvV2luQW5zaUVuY29kaW5nPj4KZW5kb2JqCjUgMCBvYmoKPDwvTGVuZ3RoIDYgMCBSID4+CnN0cmVhbQpCVAovRjEgMTIgVGYKMTAwIDEwMCBUZAooU21hbGwgUGRmKSBUagpFVAplbmRzdHJlYW0KZW5kb2JqCjYgMCBvYmoKMTIKZW5kb2JqCnhyZWYKMCA3CjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDExMCAwMDAwMCBuIAowMDAwMDAwMTYyIDAwMDAwIG4gCjAwMDAwMDAyMTUgMDAwMDAgbiAKMDAwMDAwMDM0NSAwMDAwMCBuIAowMDAwMDAwNDM5IDAwMDAwIG4gCjAwMDAwMDA1MjggMDAwMDAgbiAKdHJhaWxlcgo8PC9TaXplIDcgL1Jvb3QgMSAwIFIgL0luZm8gOCAwIFIgL0lEIFsgPDQxMzYzNDc2RjA4RTkzQzE5MzU3OTlENUIzOEE2MjRBPl0+PgplbmR0cmFpbGVyCjggMCBvYmoKPDwvVHlwZSAvSW5mbyAvUHJvZHVjZXIgKE9wZW5BSSkgL1RpdGxlICgqKik+PgplbmRvYmoKJSVFT0YK', '123456789', 1, 1, true, 0, '12345678', '2024-01-15', NULL),
+			('sk-006', 'JVBERi0xLjQKJcTl8uXrp/Og0MTGCjEgMCBvYmoKPDwvVHlwZSAvQ2F0YWxvZyAvUGFnZXMgMiAwIFIgPj4KZW5kb2JqCjIgMCBvYmoKPDwvVHlwZSAvUGFnZXMgL0tpZHMgWzMgMCBSXSAvQ291bnQgMSA+PgplbmRvYmoKMyAwIG9iago8PC9UeXBlIC9QYWdlIC9QYXJlbnQgMiAwIFIgL01lZGlhQm94IFswIDAgNTk1LjI3IDg0MS4xOV0gL1Jlc291cmNlcyA8PC9Gb250IDw8L0YxIDQgMCBSID4+ID4+IC9Db250ZW50cyA1IDAgUiAvR3JvdXAgPDwvUyAvVHJhbnNwYXJlbmN5IC9DUyAvRGV2aWNlUkdCPj4gPj4KZW5kb2JqCjQgMCBvYmoKPDwvVHlwZSAvRm9udCAvU3VidHlwZSAvVHlwZTEgL05hbWUgL0YxIC9CYXNlRm9udCAvSGVsdmV0aWNhIC9FbmNvZGluZyAvV2luQW5zaUVuY29kaW5nPj4KZW5kb2JqCjUgMCBvYmoKPDwvTGVuZ3RoIDYgMCBSID4+CnN0cmVhbQpCVAovRjEgMTIgVGYKMTAwIDEwMCBUZAooU21hbGwgUGRmKSBUagpFVAplbmRzdHJlYW0KZW5kb2JqCjYgMCBvYmoKMTIKZW5kb2JqCnhyZWYKMCA3CjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDExMCAwMDAwMCBuIAowMDAwMDAwMTYyIDAwMDAwIG4gCjAwMDAwMDAyMTUgMDAwMDAgbiAKMDAwMDAwMDM0NSAwMDAwMCBuIAowMDAwMDAwNDM5IDAwMDAwIG4gCjAwMDAwMDA1MjggMDAwMDAgbiAKdHJhaWxlcgo8PC9TaXplIDcgL1Jvb3QgMSAwIFIgL0luZm8gOCAwIFIgL0lEIFsgPDQxMzYzNDc2RjA4RTkzQzE5MzU3OTlENUIzOEE2MjRBPl0+PgplbmR0cmFpbGVyCjggMCBvYmoKPDwvVHlwZSAvSW5mbyAvUHJvZHVjZXIgKE9wZW5BSSkgL1RpdGxlICgqKik+PgplbmRvYmoKJSVFT0YK', '123456789', 1, 1, true, 0, '12345678', '2024-01-15', NULL);
 
 		INSERT INTO pegawai
-			("nip_baru","pns_id","unor_id","nama", "gol_id", "jabatan_instansi_id", deleted_at) values
-			('123456789','123456789','unor-1','pemilik_sk', 1, 'JAB-01', null),
-			('12345678','12345678','unor-1','korektor 1', 1, 'JAB-01', null),
-			('12345677','12345677','unor-1','korektor 2', 1, 'JAB-01', null);
+			("nip_baru","pns_id", "nik", "unor_id","nama", "gol_id", "jabatan_instansi_id", deleted_at) values
+			('123456789','123456789','123456789','unor-1','pemilik_sk', 1, 'JAB-01', null),
+			('12345678','12345678','12345678','unor-1','korektor 1', 1, 'JAB-01', null),
+			('12345677','12345677','12345677','unor-1','korektor 2', 1, 'JAB-01', null);
+		
+		INSERT INTO pegawai_ttd (pns_id, nip, base64ttd) values
+			('123456789', '123456789', 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4AWJSrt4pCwAAAP//Pcl30wAAAAZJREFUAwADmwF3gutGTwAAAABJRU5ErkJggg=='),
+			('12345678', '12345678', 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4AWJSrt4pCwAAAP//Pcl30wAAAAZJREFUAwADmwF3gutGTwAAAABJRU5ErkJggg=='),
+			('12345677', '12345677', 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4AWJSrt4pCwAAAP//Pcl30wAAAAZJREFUAwADmwF3gutGTwAAAABJRU5ErkJggg==');
+		
 	`
 	pgxconn := dbtest.New(t, dbmigrations.FS)
 	_, err := pgxconn.Exec(context.Background(), dbData)
@@ -3257,9 +3289,10 @@ func Test_handler_tandatanganSK(t *testing.T) {
 	e, err := api.NewEchoServer(docs.OpenAPIBytes)
 	require.NoError(t, err)
 
+	mockBSRE := bsre.NewMockBSreServer(t)
 	repo := dbrepository.New(pgxconn)
 	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusanApproval_Sign)
-	RegisterRoutes(e, repo, pgxconn, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+	RegisterRoutes(e, repo, pgxconn, api.NewAuthMiddleware(authSvc, apitest.Keyfunc), mockBSRE)
 
 	authHeader := []string{apitest.GenerateAuthHeader("12345678")}
 	tests := []struct {

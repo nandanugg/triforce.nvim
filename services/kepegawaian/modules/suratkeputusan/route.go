@@ -7,10 +7,11 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/bsre"
 )
 
-func RegisterRoutes(e *echo.Echo, repo repository, db *pgxpool.Pool, mwAuth api.AuthMiddlewareFunc) {
-	s := newService(repo, db)
+func RegisterRoutes(e *echo.Echo, repo repository, db *pgxpool.Pool, mwAuth api.AuthMiddlewareFunc, bsre bsre.Client) {
+	s := newService(repo, db, bsre)
 	h := newHandler(s)
 
 	e.Add(http.MethodGet, "/v1/surat-keputusan", h.list, mwAuth(api.Kode_SuratKeputusan_Self))

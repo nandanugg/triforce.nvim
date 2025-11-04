@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/bsre"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/config"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
@@ -64,6 +65,8 @@ func main() {
 	dbRepository := repository.New(db)
 	mwAuth := api.NewAuthMiddleware(api.NewAuthService(db), keyfunc)
 
+	bsreClient := bsre.New(c.BSRE.Host, c.BSRE.BasicAuthUsername, c.BSRE.BasicAuthPassword)
+
 	agama.RegisterRoutes(e, dbRepository, mwAuth)
 	datapribadi.RegisterRoutes(e, dbRepository, mwAuth)
 	golongan.RegisterRoutes(e, dbRepository, mwAuth)
@@ -95,7 +98,7 @@ func main() {
 	riwayatpenghargaan.RegisterRoutes(e, dbRepository, mwAuth)
 	riwayatpenugasan.RegisterRoutes(e, dbRepository, mwAuth)
 	riwayatsertifikasi.RegisterRoutes(e, dbRepository, mwAuth)
-	suratkeputusan.RegisterRoutes(e, dbRepository, db, mwAuth)
+	suratkeputusan.RegisterRoutes(e, dbRepository, db, mwAuth, bsreClient)
 	statuspernikahan.RegisterRoutes(e, dbRepository, mwAuth)
 	tingkatpendidikan.RegisterRoutes(e, dbRepository, mwAuth)
 	unitkerja.RegisterRoutes(e, dbRepository, mwAuth)

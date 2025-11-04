@@ -2,8 +2,10 @@ package suratkeputusan
 
 import (
 	"context"
+	"encoding/base64"
 	"errors"
 	"fmt"
+	"net/http"
 	"slices"
 	"strconv"
 	"strings"
@@ -14,7 +16,9 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/bsre"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/pdfcpu"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/typeutil"
 	repo "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
 )
@@ -47,14 +51,19 @@ type repository interface {
 	CountTandaTanganSuratKeputusanByPNSID(ctx context.Context, arg repo.CountTandaTanganSuratKeputusanByPNSIDParams) (int64, error)
 	ListTandaTanganSuratKeputusanAntreanByPNSID(ctx context.Context, arg repo.ListTandaTanganSuratKeputusanAntreanByPNSIDParams) ([]repo.ListTandaTanganSuratKeputusanAntreanByPNSIDRow, error)
 	CountTandaTanganSuratKeputusanAntreanByPNSID(ctx context.Context, pnsID string) (int64, error)
+	GetPegawaiTTDByNIP(ctx context.Context, nip string) (string, error)
+	UpdateBerkasSuratKeputusanSignedByID(ctx context.Context, arg repo.UpdateBerkasSuratKeputusanSignedByIDParams) error
+	InsertLogRequestSuratKeputusan(ctx context.Context, arg repo.InsertLogRequestSuratKeputusanParams) error
+	GetPegawaiNIKByNIP(ctx context.Context, nip string) (string, error)
 }
 type service struct {
 	repo repository
 	db   *pgxpool.Pool
+	bsre bsre.Client
 }
 
-func newService(r repository, db *pgxpool.Pool) *service {
-	return &service{repo: r, db: db}
+func newService(r repository, db *pgxpool.Pool, bsre bsre.Client) *service {
+	return &service{repo: r, db: db, bsre: bsre}
 }
 
 type listParams struct {
@@ -809,6 +818,7 @@ type tandatanganSKParams struct {
 	statusTtd  string
 	nip        string
 	catatanTtd string
+	passphrase string
 }
 
 func (s *service) tandatanganSK(ctx context.Context, arg tandatanganSKParams) (error, error) {
@@ -839,7 +849,7 @@ func (s *service) tandatanganSK(ctx context.Context, arg tandatanganSKParams) (e
 		return s.rejectTandatanganSK(ctx, arg.id, arg.catatanTtd, arg.nip), nil
 	}
 
-	return s.approveTandatanganSK(ctx, arg.id, arg.nip), nil
+	return s.approveTandatanganSK(ctx, arg.id, arg.nip, arg.passphrase), nil
 }
 
 func (s *service) rejectTandatanganSK(ctx context.Context, id, catatanTtd, nip string) error {
@@ -871,7 +881,7 @@ func (s *service) rejectTandatanganSK(ctx context.Context, id, catatanTtd, nip s
 	return err
 }
 
-func (s *service) approveTandatanganSK(ctx context.Context, id, nip string) error {
+func (s *service) approveTandatanganSK(ctx context.Context, id, nip, passphrase string) error {
 	err := s.withTransaction(ctx, func(txRepo repository) error {
 		err := txRepo.UpdateStatusSuratKeputusanByID(ctx, repo.UpdateStatusSuratKeputusanByIDParams{
 			ID:        id,
@@ -892,10 +902,103 @@ func (s *service) approveTandatanganSK(ctx context.Context, id, nip string) erro
 		if err != nil {
 			return fmt.Errorf("[suratkeputusan-approveTandatanganSK] InsertRiwayatSuratKeputusan: %w", err)
 		}
+
+		err = s.signSK(ctx, txRepo, id, nip, passphrase)
 		return err
 	})
 	if err != nil {
 		return fmt.Errorf("[suratkeputusan-approveTandatanganSK] %w", err)
 	}
+	return nil
+}
+
+func (s *service) signSK(
+	ctx context.Context,
+	txRepo repository,
+	id, nip, passphrase string,
+) error {
+	sk, err := txRepo.GetSuratKeputusanByID(ctx, id)
+	if err != nil {
+		return fmt.Errorf("[suratkeputusan-signSK] repo GetSuratKeputusanByID: %w", err)
+	}
+
+	berkas, err := txRepo.GetBerkasSuratKeputusanByID(ctx, id)
+	if err != nil {
+		return fmt.Errorf("[suratkeputusan-signSK] repo GetBerkasSuratKeputusanByID: %w", err)
+	}
+
+	sigBase64, err := txRepo.GetPegawaiTTDByNIP(ctx, nip)
+	if err != nil {
+		return fmt.Errorf("[suratkeputusan-signSK] repo GetPegawaiTTDByNIP: %w", err)
+	}
+
+	posisiTtd := letakTTDsk(sk.LetakTtd.Int16)
+	x, y := posisiTtd.koordinat()
+	page := strconv.Itoa(int(sk.HalamanTtd.Int16))
+	signed, err := pdfcpu.AddSignatureToPDF(
+		berkas.String, sigBase64, x, y, 0.1,
+		[]string{page},
+	)
+	if err != nil {
+		return fmt.Errorf("[suratkeputusan-signSK] pdfcpu.AddSignatureToPDF: %w", err)
+	}
+
+	nik, err := txRepo.GetPegawaiNIKByNIP(ctx, nip)
+	if err != nil {
+		return fmt.Errorf("[suratkeputusan-signSK] repo GetPegawaiNIKByNIP: %w", err)
+	}
+
+	signedBytes, statusCode, err := s.bsre.Sign(
+		bsre.SignParams{
+			NIK:        nik,
+			Passphrase: passphrase,
+			Tampilan:   bsre.InvisibleMode,
+		},
+		[]bsre.UploadFile{
+			{
+				Field:         "file",
+				ContentBase64: signed,
+			},
+		},
+	)
+	if err != nil {
+		return fmt.Errorf("[suratkeputusan-signSK] bsre.Send: %w", err)
+	}
+
+	if statusCode != http.StatusOK {
+		decoded, _ := base64.StdEncoding.DecodeString(signedBytes)
+		responseBody := string(decoded)
+		logErr := txRepo.InsertLogRequestSuratKeputusan(ctx, repo.InsertLogRequestSuratKeputusanParams{
+			FileID:     id,
+			Nik:        nik,
+			Keterangan: responseBody,
+			Status:     1,
+			ProsesCron: true,
+		})
+		if logErr != nil {
+			return fmt.Errorf("[suratkeputusan-signSK] repo InsertLogRequestSuratKeputusan: %w", logErr)
+		}
+		return nil
+	}
+
+	err = txRepo.UpdateBerkasSuratKeputusanSignedByID(ctx, repo.UpdateBerkasSuratKeputusanSignedByIDParams{
+		ID:             id,
+		FileBase64Sign: signedBytes,
+	})
+	if err != nil {
+		return fmt.Errorf("[suratkeputusan-signSK] repo UpdateBerkasSuratKeputusanSignedByID: %w", err)
+	}
+
+	err = txRepo.InsertLogRequestSuratKeputusan(ctx, repo.InsertLogRequestSuratKeputusanParams{
+		FileID:     id,
+		Nik:        nik,
+		Keterangan: "Berhasil tandatangan.",
+		Status:     2,
+		ProsesCron: true,
+	})
+	if err != nil {
+		return fmt.Errorf("[suratkeputusan-signSK] repo InsertLogRequestSuratKeputusan: %w", err)
+	}
+
 	return nil
 }

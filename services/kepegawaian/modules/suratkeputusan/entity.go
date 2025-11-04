@@ -217,3 +217,23 @@ func (s statusKoreksiRequest) value() []int32 {
 
 	return []int32{}
 }
+
+type letakTTDsk int16
+
+const (
+	letakTTDskKiriBawah   letakTTDsk = 0
+	letakTTDskTengahBawah letakTTDsk = 1
+	letakTTDskKananBawah  letakTTDsk = 2
+)
+
+func (s letakTTDsk) koordinat() (xAxis float64, yAxis float64) {
+	switch s {
+	case letakTTDskKiriBawah:
+		return 5, 10
+	case letakTTDskTengahBawah:
+		return 150, 10
+	case letakTTDskKananBawah:
+		return 300, 10
+	}
+	return 600, 70
+}

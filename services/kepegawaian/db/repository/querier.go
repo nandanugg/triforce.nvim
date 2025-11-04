@@ -98,7 +98,9 @@ type Querier interface {
 	GetBerkasSuratKeputusanSignedByNIPAndID(ctx context.Context, arg GetBerkasSuratKeputusanSignedByNIPAndIDParams) (pgtype.Text, error)
 	GetDataPribadi(ctx context.Context, arg GetDataPribadiParams) (GetDataPribadiRow, error)
 	GetJenisKenaikanPangkat(ctx context.Context, id int32) (GetJenisKenaikanPangkatRow, error)
+	GetPegawaiNIKByNIP(ctx context.Context, nip string) (string, error)
 	GetPegawaiPNSIDByNIP(ctx context.Context, nip string) (string, error)
+	GetPegawaiTTDByNIP(ctx context.Context, nip string) (string, error)
 	GetProfilePegawaiByPNSID(ctx context.Context, pnsID string) (GetProfilePegawaiByPNSIDRow, error)
 	GetRefAgama(ctx context.Context, id int32) (GetRefAgamaRow, error)
 	GetRefGolongan(ctx context.Context, id int32) (GetRefGolonganRow, error)
@@ -115,6 +117,7 @@ type Querier interface {
 	GetTemplate(ctx context.Context, id int32) (GetTemplateRow, error)
 	GetTemplateBerkas(ctx context.Context, id int32) (pgtype.Text, error)
 	GetUnitKerja(ctx context.Context, id string) (GetUnitKerjaRow, error)
+	InsertLogRequestSuratKeputusan(ctx context.Context, arg InsertLogRequestSuratKeputusanParams) error
 	InsertRiwayatSuratKeputusan(ctx context.Context, arg InsertRiwayatSuratKeputusanParams) error
 	IsPasanganExistsByIDAndNIP(ctx context.Context, arg IsPasanganExistsByIDAndNIPParams) (bool, error)
 	ListAkarUnitKerja(ctx context.Context, arg ListAkarUnitKerjaParams) ([]ListAkarUnitKerjaRow, error)
@@ -167,6 +170,7 @@ type Querier interface {
 	ListUnitKerjaHierarchyByNIP(ctx context.Context, nip string) ([]ListUnitKerjaHierarchyByNIPRow, error)
 	ListUnitKerjaLengkapByIDs(ctx context.Context, ids []string) ([]ListUnitKerjaLengkapByIDsRow, error)
 	UpdateAnak(ctx context.Context, arg UpdateAnakParams) (int64, error)
+	UpdateBerkasSuratKeputusanSignedByID(ctx context.Context, arg UpdateBerkasSuratKeputusanSignedByIDParams) error
 	UpdateJenisKenaikanPangkat(ctx context.Context, arg UpdateJenisKenaikanPangkatParams) (UpdateJenisKenaikanPangkatRow, error)
 	UpdateKorektorSuratKeputusanByID(ctx context.Context, arg UpdateKorektorSuratKeputusanByIDParams) error
 	UpdateOrangTua(ctx context.Context, arg UpdateOrangTuaParams) (int64, error)

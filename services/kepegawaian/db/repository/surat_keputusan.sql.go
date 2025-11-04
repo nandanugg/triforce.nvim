@@ -340,7 +340,10 @@ SELECT
     status_ttd,
     status_koreksi,
     catatan,
-    ttd_pegawai_id
+    ttd_pegawai_id,
+    letak_ttd,
+    show_qrcode,
+    halaman_ttd
 FROM surat_keputusan fds
 JOIN pegawai p on p.nip_baru = fds.nip_sk and p.deleted_at is null
 LEFT JOIN pegawai pemroses on pemroses.nip_baru = fds.nip_pemroses and pemroses.deleted_at is null
@@ -362,6 +365,9 @@ type GetSuratKeputusanByIDRow struct {
 	StatusKoreksi        pgtype.Int2 `db:"status_koreksi"`
 	Catatan              pgtype.Text `db:"catatan"`
 	TtdPegawaiID         pgtype.Text `db:"ttd_pegawai_id"`
+	LetakTtd             pgtype.Int2 `db:"letak_ttd"`
+	ShowQrcode           pgtype.Bool `db:"show_qrcode"`
+	HalamanTtd           pgtype.Int2 `db:"halaman_ttd"`
 }
 
 func (q *Queries) GetSuratKeputusanByID(ctx context.Context, id string) (GetSuratKeputusanByIDRow, error) {
@@ -380,6 +386,9 @@ func (q *Queries) GetSuratKeputusanByID(ctx context.Context, id string) (GetSura
 		&i.StatusKoreksi,
 		&i.Catatan,
 		&i.TtdPegawaiID,
+		&i.LetakTtd,
+		&i.ShowQrcode,
+		&i.HalamanTtd,
 	)
 	return i, err
 }
@@ -426,6 +435,45 @@ func (q *Queries) GetSuratKeputusanByNIPAndID(ctx context.Context, arg GetSuratK
 		&i.NamaPenandatangan,
 	)
 	return i, err
+}
+
+const insertLogRequestSuratKeputusan = `-- name: InsertLogRequestSuratKeputusan :exec
+INSERT INTO log_request_surat_keputusan (
+    file_id,
+    nik,
+    keterangan,
+    status,
+    proses_cron,
+    created_at,
+    updated_at
+) VALUES (
+    $1::varchar,
+    $2::varchar,
+    $3::varchar,
+    $4::integer,
+    $5::boolean,
+    now(),
+    now()
+)
+`
+
+type InsertLogRequestSuratKeputusanParams struct {
+	FileID     string `db:"file_id"`
+	Nik        string `db:"nik"`
+	Keterangan string `db:"keterangan"`
+	Status     int32  `db:"status"`
+	ProsesCron bool   `db:"proses_cron"`
+}
+
+func (q *Queries) InsertLogRequestSuratKeputusan(ctx context.Context, arg InsertLogRequestSuratKeputusanParams) error {
+	_, err := q.db.Exec(ctx, insertLogRequestSuratKeputusan,
+		arg.FileID,
+		arg.Nik,
+		arg.Keterangan,
+		arg.Status,
+		arg.ProsesCron,
+	)
+	return err
 }
 
 const insertRiwayatSuratKeputusan = `-- name: InsertRiwayatSuratKeputusan :exec
@@ -1038,6 +1086,25 @@ func (q *Queries) ListTandaTanganSuratKeputusanByPNSID(ctx context.Context, arg 
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateBerkasSuratKeputusanSignedByID = `-- name: UpdateBerkasSuratKeputusanSignedByID :exec
+UPDATE 
+    surat_keputusan
+SET 
+    file_base64_sign = $1::text
+WHERE 
+    file_id = $2::varchar
+`
+
+type UpdateBerkasSuratKeputusanSignedByIDParams struct {
+	FileBase64Sign string `db:"file_base64_sign"`
+	ID             string `db:"id"`
+}
+
+func (q *Queries) UpdateBerkasSuratKeputusanSignedByID(ctx context.Context, arg UpdateBerkasSuratKeputusanSignedByIDParams) error {
+	_, err := q.db.Exec(ctx, updateBerkasSuratKeputusanSignedByID, arg.FileBase64Sign, arg.ID)
+	return err
 }
 
 const updateKorektorSuratKeputusanByID = `-- name: UpdateKorektorSuratKeputusanByID :exec

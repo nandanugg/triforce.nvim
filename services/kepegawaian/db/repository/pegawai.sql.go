@@ -69,6 +69,17 @@ func (q *Queries) CountPegawaiAktif(ctx context.Context, arg CountPegawaiAktifPa
 	return count, err
 }
 
+const getPegawaiNIKByNIP = `-- name: GetPegawaiNIKByNIP :one
+SELECT nik::text FROM pegawai WHERE nip_baru = $1::varchar AND deleted_at IS NULL
+`
+
+func (q *Queries) GetPegawaiNIKByNIP(ctx context.Context, nip string) (string, error) {
+	row := q.db.QueryRow(ctx, getPegawaiNIKByNIP, nip)
+	var nik string
+	err := row.Scan(&nik)
+	return nik, err
+}
+
 const getPegawaiPNSIDByNIP = `-- name: GetPegawaiPNSIDByNIP :one
 SELECT pns_id FROM pegawai WHERE nip_baru = $1::varchar AND deleted_at IS NULL
 `
@@ -78,6 +89,17 @@ func (q *Queries) GetPegawaiPNSIDByNIP(ctx context.Context, nip string) (string,
 	var pns_id string
 	err := row.Scan(&pns_id)
 	return pns_id, err
+}
+
+const getPegawaiTTDByNIP = `-- name: GetPegawaiTTDByNIP :one
+SELECT base64ttd FROM pegawai_ttd WHERE nip = $1::varchar
+`
+
+func (q *Queries) GetPegawaiTTDByNIP(ctx context.Context, nip string) (string, error) {
+	row := q.db.QueryRow(ctx, getPegawaiTTDByNIP, nip)
+	var base64ttd string
+	err := row.Scan(&base64ttd)
+	return base64ttd, err
 }
 
 const getProfilePegawaiByPNSID = `-- name: GetProfilePegawaiByPNSID :one

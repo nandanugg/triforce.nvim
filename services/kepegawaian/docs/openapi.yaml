@@ -5263,6 +5263,9 @@ paths:
                   type: string
                   description: Catatan tandatangan
                   nullable: true
+                passphrase:
+                  type: string
+                  description: Passphrase tanda tangan
       responses:
         "200":
           description: Sukses.

@@ -349,6 +349,14 @@ type Pegawai struct {
 	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 }
 
+type PegawaiTtd struct {
+	PnsID     string             `db:"pns_id"`
+	Nip       string             `db:"nip"`
+	Base64ttd string             `db:"base64ttd"`
+	CreatedAt pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
+}
+
 // Riwayat perpindahan unit kerja
 type PindahUnit struct {
 	// id pindah unit
@@ -1574,7 +1582,7 @@ type SuratKeputusan struct {
 	// Jika 1, tampilkan di dikbudHR
 	TelahKirim pgtype.Bool `db:"telah_kirim"`
 	// halaman diletakan tandataangan digital
-	HalamanTtd pgtype.Bool `db:"halaman_ttd"`
+	HalamanTtd pgtype.Int2 `db:"halaman_ttd"`
 	// 0/null : tidak tampilkan (seperti semula), 1 : tampilkan qrdari bssn
 	ShowQrcode pgtype.Bool `db:"show_qrcode"`
 	// 1:tengah bawah, 2 : kiri Bawah 0: kanan bawah
