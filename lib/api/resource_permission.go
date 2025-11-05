@@ -5,6 +5,8 @@ package api
 //
 //revive:disable:var-naming
 const (
+	Kode_Allow = "*"
+
 	Kode_Pegawai_Self  = "kepegawaian.pegawai.self"
 	Kode_Pegawai_Read  = "kepegawaian.pegawai.read"
 	Kode_Pegawai_Write = "kepegawaian.pegawai.write"
@@ -20,7 +22,6 @@ const (
 	Kode_DataMaster_Read   = "kepegawaian.data-master.read"
 	Kode_DataMaster_Write  = "kepegawaian.data-master.write"
 
-	Kode_ManajemenAkses_Self  = "portal.manajemen-akses.self"
 	Kode_ManajemenAkses_Read  = "portal.manajemen-akses.read"
 	Kode_ManajemenAkses_Write = "portal.manajemen-akses.write"
 

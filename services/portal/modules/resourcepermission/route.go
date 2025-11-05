@@ -12,7 +12,7 @@ func RegisterRoutes(e *echo.Echo, repo repository, mwAuth api.AuthMiddlewareFunc
 	s := newService(repo)
 	h := newHandler(s)
 
-	e.Add(http.MethodGet, "/v1/resource-permissions/me", h.listMyResourcePermissions, mwAuth(api.Kode_ManajemenAkses_Self))
+	e.Add(http.MethodGet, "/v1/resource-permissions/me", h.listMyResourcePermissions, mwAuth(api.Kode_Allow))
 
 	e.Add(http.MethodGet, "/v1/resources", h.listResources, mwAuth(api.Kode_ManajemenAkses_Read))
 }

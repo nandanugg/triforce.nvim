@@ -93,7 +93,7 @@ func Test_handler_listMyResourcePermissions(t *testing.T) {
 	e, err := api.NewEchoServer(docs.OpenAPIBytes)
 	require.NoError(t, err)
 
-	authSvc := apitest.NewAuthService(api.Kode_ManajemenAkses_Self)
+	authSvc := apitest.NewAuthService(api.Kode_Allow)
 	RegisterRoutes(e, sqlc.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	tests := []struct {

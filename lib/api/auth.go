@@ -54,6 +54,10 @@ func NewAuthService(db *pgxpool.Pool) *AuthService {
 }
 
 func (s *AuthService) IsUserHasAccess(ctx context.Context, nip, kode string) (bool, error) {
+	if kode == Kode_Allow {
+		return true, nil
+	}
+
 	var ok bool
 	err := s.db.QueryRow(ctx, "select public.is_user_has_access($1, $2)", nip, kode).Scan(&ok)
 	return ok, err

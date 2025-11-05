@@ -102,6 +102,21 @@ func TestNewAuthMiddleware(t *testing.T) {
 		wantIDs                any
 	}{
 		{
+			name:                   "ok: allow special permission",
+			resourcePermissionKode: "*",
+			requestHeader: http.Header{
+				"Authorization": []string{generateHeader(jwt.MapClaims{
+					"sub":       "1",
+					"zimbra_id": "2",
+					"nip":       "99",
+					"aud":       "testing",
+				})},
+			},
+			wantResponseCode: http.StatusOK,
+			wantUser:         &User{NIP: "99"},
+			wantIDs:          map[string]string{"keycloakID": "1", "zimbraID": "2"},
+		},
+		{
 			name:                   "ok: valid auth header with string audience and nip with role",
 			resourcePermissionKode: "portal.page1.write",
 			requestHeader: http.Header{
