@@ -439,20 +439,21 @@ func (h *handler) tandatanganSK(c echo.Context) error {
 	}
 
 	ctx := c.Request().Context()
-	err, validationErr := h.service.tandatanganSK(ctx, tandatanganSKParams{
+	validationErr, err := h.service.tandatanganSK(ctx, tandatanganSKParams{
 		id:         req.ID,
 		statusTtd:  req.StatusTtd,
 		nip:        api.CurrentUser(c).NIP,
 		passphrase: req.Passphrase,
+		catatanTtd: req.CatatanTtd,
 	})
 	if err != nil {
 		slog.ErrorContext(ctx, "Error tandatangan surat keputusan.", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
-	if validationErr != nil {
+	if validationErr != "" {
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"message": validationErr.Error(),
+			"message": validationErr,
 		})
 	}
 

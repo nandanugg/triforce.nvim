@@ -17,3 +17,23 @@ type UploadFile struct {
 	ContentBase64 string
 	Name          string
 }
+
+type ErrorResponse struct {
+	StatusCode StatusCode `json:"status_code"`
+	Message    string     `json:"message"`
+}
+
+type StatusCode int16
+
+const (
+	StatusCodePassphraseInvalid = 2031
+)
+
+func (e StatusCode) Message() string {
+	switch e {
+	case StatusCodePassphraseInvalid:
+		return "Passphrase yang Anda masukkan salah. Silakan coba lagi."
+	default:
+		return "Terdapat kesalahan pada sistem BSRE. Silakan coba lagi."
+	}
+}

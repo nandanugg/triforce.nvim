@@ -237,3 +237,16 @@ func (s letakTTDsk) koordinat() (xAxis float64, yAxis float64) {
 	}
 	return 600, 70
 }
+
+type errorMessage string
+
+const (
+	errorMessageBelumAdaTTD      errorMessage = "Data tanda tangan digital anda belum ada"
+	errorMessageNIKNotFound      errorMessage = "NIK tidak ditemukan"
+	errorMessageBukanPegawaiTTD  errorMessage = "Anda tidak memiliki izin untuk menandatangani surat keputusan ini."
+	errorMessageStatusTtdInvalid errorMessage = "Surat keputusan ini belum siap untuk ditandatangani."
+)
+
+func (e errorMessage) Error() string {
+	return string(e)
+}

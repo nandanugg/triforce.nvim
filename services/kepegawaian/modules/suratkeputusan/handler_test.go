@@ -57,7 +57,7 @@ func Test_handler_list(t *testing.T) {
 	e, err := api.NewEchoServer(docs.OpenAPIBytes)
 	require.NoError(t, err)
 
-	mockBSRE := bsre.NewMockBSreServer(t)
+	mockBSRE := bsre.NewMockBSREServer(t)
 
 	repo := dbrepository.New(db)
 	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusan_Self)
@@ -256,7 +256,7 @@ func Test_handler_get(t *testing.T) {
 	e, err := api.NewEchoServer(docs.OpenAPIBytes)
 	require.NoError(t, err)
 
-	mockBSRE := bsre.NewMockBSreServer(t)
+	mockBSRE := bsre.NewMockBSREServer(t)
 
 	repo := dbrepository.New(db)
 	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusan_Self)
@@ -447,7 +447,7 @@ func Test_handler_getBerkas(t *testing.T) {
 	e, err := api.NewEchoServer(docs.OpenAPIBytes)
 	require.NoError(t, err)
 
-	mockBSRE := bsre.NewMockBSreServer(t)
+	mockBSRE := bsre.NewMockBSREServer(t)
 
 	repo := dbrepository.New(pgxconn)
 	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusan_Self)
@@ -646,7 +646,7 @@ func Test_handler_listAdmin(t *testing.T) {
 	e, err := api.NewEchoServer(docs.OpenAPIBytes)
 	require.NoError(t, err)
 
-	mockBSRE := bsre.NewMockBSreServer(t)
+	mockBSRE := bsre.NewMockBSREServer(t)
 
 	repo := dbrepository.New(db)
 	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusan_Read)
@@ -1277,7 +1277,7 @@ func Test_handler_getAdmin(t *testing.T) {
 	e, err := api.NewEchoServer(docs.OpenAPIBytes)
 	require.NoError(t, err)
 
-	mockBSRE := bsre.NewMockBSreServer(t)
+	mockBSRE := bsre.NewMockBSREServer(t)
 
 	repo := dbrepository.New(db)
 	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusan_Read)
@@ -1476,7 +1476,7 @@ func Test_handler_getBerkasAdmin(t *testing.T) {
 	e, err := api.NewEchoServer(docs.OpenAPIBytes)
 	require.NoError(t, err)
 
-	mockBSRE := bsre.NewMockBSreServer(t)
+	mockBSRE := bsre.NewMockBSREServer(t)
 	repo := dbrepository.New(pgxconn)
 	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusan_Read)
 	RegisterRoutes(e, repo, pgxconn, api.NewAuthMiddleware(authSvc, apitest.Keyfunc), mockBSRE)
@@ -1664,7 +1664,7 @@ func Test_handler_listKoreksi(t *testing.T) {
 	e, err := api.NewEchoServer(docs.OpenAPIBytes)
 	require.NoError(t, err)
 
-	mockBSRE := bsre.NewMockBSreServer(t)
+	mockBSRE := bsre.NewMockBSREServer(t)
 
 	repo := dbrepository.New(pgxconn)
 	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusanApproval_Review)
@@ -1984,7 +1984,7 @@ func Test_handler_listKoreksiAntrean(t *testing.T) {
 	e, err := api.NewEchoServer(docs.OpenAPIBytes)
 	require.NoError(t, err)
 
-	mockBSRE := bsre.NewMockBSreServer(t)
+	mockBSRE := bsre.NewMockBSREServer(t)
 
 	repo := dbrepository.New(pgxconn)
 	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusanApproval_Review)
@@ -2166,7 +2166,7 @@ func Test_handler_getDetailSuratKeputusan(t *testing.T) {
 	e, err := api.NewEchoServer(docs.OpenAPIBytes)
 	require.NoError(t, err)
 
-	mockBSRE := bsre.NewMockBSreServer(t)
+	mockBSRE := bsre.NewMockBSREServer(t)
 
 	repo := dbrepository.New(pgxconn)
 	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusanApproval_Read)
@@ -2464,7 +2464,7 @@ func Test_handler_getBerkasKoreksiSuratKeputusan(t *testing.T) {
 	e, err := api.NewEchoServer(docs.OpenAPIBytes)
 	require.NoError(t, err)
 
-	mockBSRE := bsre.NewMockBSreServer(t)
+	mockBSRE := bsre.NewMockBSREServer(t)
 
 	repo := dbrepository.New(pgxconn)
 	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusanApproval_Read)
@@ -2639,7 +2639,7 @@ func Test_handler_approveKoreksiSuratKeputusan(t *testing.T) {
 	e, err := api.NewEchoServer(docs.OpenAPIBytes)
 	require.NoError(t, err)
 
-	mockBSRE := bsre.NewMockBSreServer(t)
+	mockBSRE := bsre.NewMockBSREServer(t)
 
 	repo := dbrepository.New(pgxconn)
 	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusanApproval_Review)
@@ -2861,7 +2861,7 @@ func Test_handler_listTandatangan(t *testing.T) {
 	e, err := api.NewEchoServer(docs.OpenAPIBytes)
 	require.NoError(t, err)
 
-	mockBSRE := bsre.NewMockBSreServer(t)
+	mockBSRE := bsre.NewMockBSREServer(t)
 
 	repo := dbrepository.New(pgxconn)
 	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusanApproval_Sign)
@@ -3147,7 +3147,7 @@ func Test_handler_listTandatanganAntrean(t *testing.T) {
 	e, err := api.NewEchoServer(docs.OpenAPIBytes)
 	require.NoError(t, err)
 
-	mockBSRE := bsre.NewMockBSreServer(t)
+	mockBSRE := bsre.NewMockBSREServer(t)
 
 	repo := dbrepository.New(pgxconn)
 	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusanApproval_Sign)
@@ -3289,9 +3289,9 @@ func Test_handler_tandatanganSK(t *testing.T) {
 	e, err := api.NewEchoServer(docs.OpenAPIBytes)
 	require.NoError(t, err)
 
-	mockBSRE := bsre.NewMockBSreServer(t)
 	repo := dbrepository.New(pgxconn)
 	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusanApproval_Sign)
+	mockBSRE := bsre.NewMockBSREServer(t)
 	RegisterRoutes(e, repo, pgxconn, api.NewAuthMiddleware(authSvc, apitest.Keyfunc), mockBSRE)
 
 	authHeader := []string{apitest.GenerateAuthHeader("12345678")}
@@ -3302,7 +3302,8 @@ func Test_handler_tandatanganSK(t *testing.T) {
 		requestBody      string
 		wantResponseCode int
 		wantResponseBody string
-		assertDB         func(t *testing.T, db dbrepository.Queries)
+		assertDB         func(t *testing.T, db *dbrepository.Queries)
+		mockBSRE         *bsre.APIClient
 	}{
 		{
 			name:        "success: tandatangan surat keputusan",
@@ -3317,11 +3318,17 @@ func Test_handler_tandatanganSK(t *testing.T) {
 			}`,
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: ``,
-			assertDB: func(t *testing.T, db dbrepository.Queries) {
+			assertDB: func(t *testing.T, db *dbrepository.Queries) {
 				sk, err := db.GetSuratKeputusanByID(context.Background(), "sk-001")
 				require.NoError(t, err)
-				assert.Equal(t, int32(statusTtdSudahTtd), sk.StatusTtd)
-				assert.Equal(t, int32(statusSKSudahTtd), sk.StatusSk)
+				assert.Equal(t, int16(statusTtdSudahTtd), sk.StatusTtd.Int16)
+				assert.Equal(t, int16(statusSKSudahTtd), sk.StatusSk.Int16)
+
+				berkasSK, err := db.GetBerkasSuratKeputusanSignedByID(context.Background(), "sk-001")
+				require.NoError(t, err)
+				base64, err := base64.StdEncoding.DecodeString(berkasSK.String)
+				require.NoError(t, err)
+				assert.JSONEq(t, `{"result":"mocked-base64"}`, string(base64))
 			},
 		},
 		{
@@ -3337,12 +3344,12 @@ func Test_handler_tandatanganSK(t *testing.T) {
 			}`,
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: ``,
-			assertDB: func(t *testing.T, db dbrepository.Queries) {
-				sk, err := db.GetSuratKeputusanByID(context.Background(), "sk-001")
+			assertDB: func(t *testing.T, db *dbrepository.Queries) {
+				sk, err := db.GetSuratKeputusanByID(context.Background(), "sk-002")
 				require.NoError(t, err)
-				assert.Equal(t, int32(statusTtdDikembalikan), sk.StatusTtd)
-				assert.Equal(t, int32(statusSKDikembalikan), sk.StatusSk)
-				assert.Equal(t, "Catatan dikembalikan", sk.Catatan)
+				assert.Equal(t, int16(statusTtdDikembalikan), sk.StatusTtd.Int16)
+				assert.Equal(t, int16(statusSKDikembalikan), sk.StatusSk.Int16)
+				assert.Equal(t, "Catatan dikembalikan", sk.Catatan.String)
 			},
 		},
 		{
@@ -3357,7 +3364,7 @@ func Test_handler_tandatanganSK(t *testing.T) {
 				"catatan_ttd": ""
 			}`,
 			wantResponseCode: http.StatusBadRequest,
-			wantResponseBody: `{"message": "surat keputusan belum siap untuk ditandatangani"}`,
+			wantResponseBody: `{"message": "Surat keputusan ini belum siap untuk ditandatangani."}`,
 		},
 		{
 			name:        "error: status koreksi masih belum ok",
@@ -3371,7 +3378,7 @@ func Test_handler_tandatanganSK(t *testing.T) {
 				"catatan_ttd": ""
 			}`,
 			wantResponseCode: http.StatusBadRequest,
-			wantResponseBody: `{"message": "surat keputusan belum siap untuk ditandatangani"}`,
+			wantResponseBody: `{"message": "Surat keputusan ini belum siap untuk ditandatangani."}`,
 		},
 		{
 			name:        "error: bukan pegawai yang bertugas menandatangani surat keputusan ini",
@@ -3385,7 +3392,47 @@ func Test_handler_tandatanganSK(t *testing.T) {
 				"catatan_ttd": ""
 			}`,
 			wantResponseCode: http.StatusBadRequest,
-			wantResponseBody: `{"message": "bukan pegawai yang bertugas menandatangani surat keputusan ini"}`,
+			wantResponseBody: `{"message": "Anda tidak memiliki izin untuk menandatangani surat keputusan ini."}`,
+		},
+		{
+			name:        "error: bsre return 500 internal server error",
+			requestPath: "/v1/tanda-tangan-surat-keputusan/sk-006",
+			requestHeader: http.Header{
+				"Authorization": authHeader,
+				"Content-Type":  []string{"application/json"},
+			},
+			requestBody: `{
+				"status_ttd": "Tandatangan",
+				"catatan_ttd": ""
+			}`,
+			wantResponseCode: http.StatusBadRequest,
+			mockBSRE:         bsre.NewMockBSREServerWithCustomResponse(t, http.StatusInternalServerError, `{"error": "internal server error"}`),
+			wantResponseBody: `{"message": "Terdapat kesalahan pada sistem BSRE. Silakan coba lagi."}`,
+			assertDB: func(t *testing.T, db *dbrepository.Queries) {
+				sk, err := db.GetSuratKeputusanByID(context.Background(), "sk-006")
+				require.NoError(t, err)
+				assert.Equal(t, int16(statusTtdBelumTtd), sk.StatusTtd.Int16)
+			},
+		},
+		{
+			name:        "error: bsre return 400 passphrase salah",
+			requestPath: "/v1/tanda-tangan-surat-keputusan/sk-006",
+			requestHeader: http.Header{
+				"Authorization": authHeader,
+				"Content-Type":  []string{"application/json"},
+			},
+			requestBody: `{
+				"status_ttd": "Tandatangan",
+				"catatan_ttd": ""
+			}`,
+			wantResponseCode: http.StatusBadRequest,
+			mockBSRE:         bsre.NewMockBSREServerWithCustomResponse(t, http.StatusBadRequest, `{"error": "Passphrase anda salah", "status_code" : 2031}`),
+			wantResponseBody: `{"message": "Passphrase yang Anda masukkan salah. Silakan coba lagi."}`,
+			assertDB: func(t *testing.T, db *dbrepository.Queries) {
+				sk, err := db.GetSuratKeputusanByID(context.Background(), "sk-006")
+				require.NoError(t, err)
+				assert.Equal(t, int16(statusTtdBelumTtd), sk.StatusTtd.Int16)
+			},
 		},
 	}
 
@@ -3393,11 +3440,19 @@ func Test_handler_tandatanganSK(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
+			if tt.mockBSRE != nil {
+				e, err = api.NewEchoServer(docs.OpenAPIBytes)
+				require.NoError(t, err)
+				mockBSRE = tt.mockBSRE
+				RegisterRoutes(e, repo, pgxconn, api.NewAuthMiddleware(authSvc, apitest.Keyfunc), mockBSRE)
+			}
+
 			req := httptest.NewRequest(http.MethodPost, tt.requestPath, nil)
 			req.Header = tt.requestHeader
 			req.Body = io.NopCloser(bytes.NewBufferString(tt.requestBody))
 
 			rec := httptest.NewRecorder()
+
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
@@ -3405,6 +3460,10 @@ func Test_handler_tandatanganSK(t *testing.T) {
 				assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
 			} else {
 				assert.Empty(t, rec.Body.String())
+			}
+
+			if tt.assertDB != nil {
+				tt.assertDB(t, repo)
 			}
 		})
 	}
