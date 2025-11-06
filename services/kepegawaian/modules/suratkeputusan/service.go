@@ -961,7 +961,7 @@ func (s *service) signSK(
 	page := strconv.Itoa(int(sk.HalamanTtd.Int16))
 	signed, err := pdfcpu.AddSignatureToPDF(
 		berkas.String, sigBase64, x, y, 0.1,
-		[]string{page},
+		page,
 	)
 	if err != nil {
 		return "", fmt.Errorf("[suratkeputusan-signSK] pdfcpu.AddSignatureToPDF: %w", err)
