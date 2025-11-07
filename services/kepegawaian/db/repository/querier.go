@@ -63,6 +63,7 @@ type Querier interface {
 	CreateRefJenisSatker(ctx context.Context, nama pgtype.Text) (CreateRefJenisSatkerRow, error)
 	CreateRefPendidikan(ctx context.Context, arg CreateRefPendidikanParams) (string, error)
 	CreateRefTingkatPendidikan(ctx context.Context, arg CreateRefTingkatPendidikanParams) (CreateRefTingkatPendidikanRow, error)
+	CreateRiwayatKepangkatan(ctx context.Context, arg CreateRiwayatKepangkatanParams) (string, error)
 	CreateRiwayatPendidikan(ctx context.Context, arg CreateRiwayatPendidikanParams) (int32, error)
 	CreateTemplate(ctx context.Context, arg CreateTemplateParams) (CreateTemplateRow, error)
 	CreateUnitKerja(ctx context.Context, arg CreateUnitKerjaParams) (CreateUnitKerjaRow, error)
@@ -79,6 +80,7 @@ type Querier interface {
 	DeleteRefJenisSatker(ctx context.Context, id int32) (int64, error)
 	DeleteRefPendidikan(ctx context.Context, id string) (int64, error)
 	DeleteRefTingkatPendidikan(ctx context.Context, id int32) (int64, error)
+	DeleteRiwayatKepangkatan(ctx context.Context, arg DeleteRiwayatKepangkatanParams) (int64, error)
 	DeleteRiwayatPendidikan(ctx context.Context, arg DeleteRiwayatPendidikanParams) (int64, error)
 	DeleteTemplate(ctx context.Context, id int32) (int64, error)
 	DeleteUnitKerja(ctx context.Context, id string) (int64, error)
@@ -100,6 +102,7 @@ type Querier interface {
 	GetBerkasSuratKeputusanSignedByNIPAndID(ctx context.Context, arg GetBerkasSuratKeputusanSignedByNIPAndIDParams) (pgtype.Text, error)
 	GetDataPribadi(ctx context.Context, arg GetDataPribadiParams) (GetDataPribadiRow, error)
 	GetJenisKenaikanPangkat(ctx context.Context, id int32) (GetJenisKenaikanPangkatRow, error)
+	GetPegawaiByNIP(ctx context.Context, nip string) (GetPegawaiByNIPRow, error)
 	GetPegawaiNIKByNIP(ctx context.Context, nip string) (string, error)
 	GetPegawaiPNSIDByNIP(ctx context.Context, nip string) (string, error)
 	GetPegawaiTTDByNIP(ctx context.Context, nip string) (string, error)
@@ -186,10 +189,12 @@ type Querier interface {
 	UpdateRefJenisSatker(ctx context.Context, arg UpdateRefJenisSatkerParams) (UpdateRefJenisSatkerRow, error)
 	UpdateRefPendidikan(ctx context.Context, arg UpdateRefPendidikanParams) (string, error)
 	UpdateRefTingkatPendidikan(ctx context.Context, arg UpdateRefTingkatPendidikanParams) (UpdateRefTingkatPendidikanRow, error)
+	UpdateRiwayatKepangkatan(ctx context.Context, arg UpdateRiwayatKepangkatanParams) (int64, error)
 	UpdateRiwayatPendidikan(ctx context.Context, arg UpdateRiwayatPendidikanParams) (int64, error)
 	UpdateStatusSuratKeputusanByID(ctx context.Context, arg UpdateStatusSuratKeputusanByIDParams) error
 	UpdateTemplate(ctx context.Context, arg UpdateTemplateParams) (UpdateTemplateRow, error)
 	UpdateUnitKerja(ctx context.Context, arg UpdateUnitKerjaParams) (UpdateUnitKerjaRow, error)
+	UploadBerkasRiwayatKepangkatan(ctx context.Context, arg UploadBerkasRiwayatKepangkatanParams) (int64, error)
 	UploadBerkasRiwayatPendidikan(ctx context.Context, arg UploadBerkasRiwayatPendidikanParams) (int64, error)
 }
 

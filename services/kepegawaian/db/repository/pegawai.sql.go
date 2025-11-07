@@ -69,6 +69,35 @@ func (q *Queries) CountPegawaiAktif(ctx context.Context, arg CountPegawaiAktifPa
 	return count, err
 }
 
+const getPegawaiByNIP = `-- name: GetPegawaiByNIP :one
+select
+    id,
+    pns_id,
+    nip_baru as nip,
+    nama
+from pegawai
+where nip_baru = $1::varchar and deleted_at is null
+`
+
+type GetPegawaiByNIPRow struct {
+	ID    int32       `db:"id"`
+	PnsID string      `db:"pns_id"`
+	Nip   pgtype.Text `db:"nip"`
+	Nama  pgtype.Text `db:"nama"`
+}
+
+func (q *Queries) GetPegawaiByNIP(ctx context.Context, nip string) (GetPegawaiByNIPRow, error) {
+	row := q.db.QueryRow(ctx, getPegawaiByNIP, nip)
+	var i GetPegawaiByNIPRow
+	err := row.Scan(
+		&i.ID,
+		&i.PnsID,
+		&i.Nip,
+		&i.Nama,
+	)
+	return i, err
+}
+
 const getPegawaiNIKByNIP = `-- name: GetPegawaiNIKByNIP :one
 SELECT nik::text FROM pegawai WHERE nip_baru = $1::varchar AND deleted_at IS NULL
 `

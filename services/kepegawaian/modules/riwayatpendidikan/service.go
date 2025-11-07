@@ -122,7 +122,7 @@ func (s *service) update(ctx context.Context, id int32, nip string, params upser
 
 	affected, err := s.repo.UpdateRiwayatPendidikan(ctx, sqlc.UpdateRiwayatPendidikanParams{
 		ID:                  id,
-		Nip:                 pgtype.Text{String: nip, Valid: true},
+		Nip:                 nip,
 		TingkatPendidikanID: pgtype.Int2{Int16: params.TingkatPendidikanID, Valid: true},
 		PendidikanID:        pgtype.Text{String: typeutil.FromPtr(params.PendidikanID), Valid: params.PendidikanID != nil},
 		NamaSekolah:         pgtype.Text{String: params.NamaSekolah, Valid: true},
@@ -143,7 +143,7 @@ func (s *service) update(ctx context.Context, id int32, nip string, params upser
 func (s *service) delete(ctx context.Context, id int32, nip string) (bool, error) {
 	affected, err := s.repo.DeleteRiwayatPendidikan(ctx, sqlc.DeleteRiwayatPendidikanParams{
 		ID:  id,
-		Nip: pgtype.Text{String: nip, Valid: true},
+		Nip: nip,
 	})
 	if err != nil {
 		return false, fmt.Errorf("repo delete: %w", err)
@@ -155,7 +155,7 @@ func (s *service) delete(ctx context.Context, id int32, nip string) (bool, error
 func (s *service) uploadBerkas(ctx context.Context, id int32, nip, fileBase64 string) (bool, error) {
 	affected, err := s.repo.UploadBerkasRiwayatPendidikan(ctx, sqlc.UploadBerkasRiwayatPendidikanParams{
 		ID:         id,
-		Nip:        pgtype.Text{String: nip, Valid: true},
+		Nip:        nip,
 		FileBase64: pgtype.Text{String: fileBase64, Valid: true},
 	})
 	if err != nil {

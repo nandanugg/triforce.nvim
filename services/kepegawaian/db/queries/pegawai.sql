@@ -107,3 +107,12 @@ SELECT base64ttd FROM pegawai_ttd WHERE nip = @nip::varchar;
 
 -- name: GetPegawaiNIKByNIP :one
 SELECT nik::text FROM pegawai WHERE nip_baru = @nip::varchar AND deleted_at IS NULL;
+
+-- name: GetPegawaiByNIP :one
+select
+    id,
+    pns_id,
+    nip_baru as nip,
+    nama
+from pegawai
+where nip_baru = @nip::varchar and deleted_at is null;

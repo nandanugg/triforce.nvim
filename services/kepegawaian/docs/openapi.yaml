@@ -1859,7 +1859,7 @@ paths:
         $ref: "#/components/requestBodies/anak"
       responses:
         "201":
-          $ref: "#/components/responses/createdId"
+          $ref: "#/components/responses/createdIdInteger"
         "400":
           $ref: "#/components/responses/badRequest"
         "404":
@@ -1933,7 +1933,7 @@ paths:
         $ref: "#/components/requestBodies/orangTua"
       responses:
         "201":
-          $ref: "#/components/responses/createdId"
+          $ref: "#/components/responses/createdIdInteger"
         "400":
           $ref: "#/components/responses/badRequest"
         "404":
@@ -2007,7 +2007,7 @@ paths:
         $ref: "#/components/requestBodies/pasangan"
       responses:
         "201":
-          $ref: "#/components/responses/createdId"
+          $ref: "#/components/responses/createdIdInteger"
         "400":
           $ref: "#/components/responses/badRequest"
         "404":
@@ -2173,7 +2173,7 @@ paths:
         $ref: "#/components/requestBodies/riwayatPendidikan"
       responses:
         "201":
-          $ref: "#/components/responses/createdId"
+          $ref: "#/components/responses/createdIdInteger"
         "400":
           $ref: "#/components/responses/badRequest"
         "404":
@@ -2818,6 +2818,79 @@ paths:
                       $ref: "#/components/schemas/riwayatKepangkatan"
                   meta:
                     $ref: "#/components/schemas/metaPagination"
+    post:
+      tags:
+        - Riwayat Kepangkatan
+      summary: Admin - Tambah riwayat kepangkatan pegawai.
+      description: Tambah riwayat kepangkatan pegawai berdasarkan NIP oleh admin.
+      operationId: adminCreateRiwayatKepangkatan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/riwayatKepangkatan"
+      responses:
+        "201":
+          $ref: "#/components/responses/createdIdString"
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "404":
+          $ref: "#/components/responses/notFound"
+  /v1/admin/pegawai/{nip}/riwayat-kepangkatan/{id}:
+    put:
+      tags:
+        - Riwayat Kepangkatan
+      summary: Admin - Mengubah riwayat kepangkatan pegawai.
+      description: Mengubah riwayat kepangkatan pegawai berdasarkan NIP dan ID riwayat kepangkatan oleh admin.
+      operationId: adminUpdateRiwayatKepangkatan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/riwayatKepangkatan"
+      responses:
+        "204":
+          description: Sukses.
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "404":
+          $ref: "#/components/responses/notFound"
+    delete:
+      tags:
+        - Riwayat Kepangkatan
+      summary: Admin - Menghapus riwayat kepangkatan pegawai.
+      description: Menghapus riwayat kepangkatan pegawai berdasarkan NIP dan ID riwayat kepangkatan oleh admin.
+      operationId: adminDeleteRiwayatKepangkatan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Sukses.
+        "404":
+          $ref: "#/components/responses/notFound"
   /v1/admin/pegawai/{nip}/riwayat-kepangkatan/{id}/berkas:
     get:
       tags:
@@ -2848,6 +2921,46 @@ paths:
                 format: binary
         "404":
           description: Berkas riwayat kepangkatan tidak ditemukan atau User tidak mempunyai akses.
+    put:
+      tags:
+        - Riwayat Kepangkatan
+      summary: Admin - Mengunggah berkas riwayat kepangkatan pegawai.
+      description: Mengunggah berkas riwayat kepangkatan pegawai berdasarkan NIP dan ID riwayat kepangkatan oleh admin.
+      operationId: adminUploadBerkasRiwayatKepangkatan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required:
+                - file
+            encoding:
+              file:
+                contentType: application/pdf
+      responses:
+        "204":
+          description: Sukses.
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "404":
+          $ref: "#/components/responses/notFound"
   /v1/admin/pegawai/{nip}/riwayat-penghargaan:
     get:
       tags:
@@ -5671,6 +5784,51 @@ components:
               - tanggal_lahir
               - status_pernikahan_id
               - hubungan
+    riwayatKepangkatan:
+      required: true
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              jenis_kp_id:
+                type: integer
+                nullable: true
+              golongan_id:
+                type: integer
+              tmt_golongan:
+                type: string
+                format: date
+                nullable: true
+              nomor_sk:
+                type: string
+                maxLength: 100
+              tanggal_sk:
+                type: string
+                format: date
+              nomor_bkn:
+                type: string
+                maxLength: 100
+              tanggal_bkn:
+                type: string
+                format: date
+                nullable: true
+              masa_kerja_golongan_tahun:
+                type: integer
+              masa_kerja_golongan_bulan:
+                type: integer
+              jumlah_angka_kredit_utama:
+                type: integer
+                nullable: true
+              jumlah_angka_kredit_tambahan:
+                type: integer
+                nullable: true
+            required:
+              - golongan_id
+              - nomor_sk
+              - tanggal_sk
+              - masa_kerja_golongan_tahun
+              - masa_kerja_golongan_bulan
     riwayatPendidikan:
       required: true
       content:
@@ -5709,7 +5867,7 @@ components:
               - tahun_lulus
               - nomor_ijazah
   responses:
-    createdId:
+    createdIdInteger:
       description: Sukses.
       content:
         application/json:
@@ -5722,6 +5880,19 @@ components:
                 properties:
                   id:
                     type: integer
+    createdIdString:
+      description: Sukses.
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              data:
+                type: object
+                additionalProperties: false
+                properties:
+                  id:
+                    type: string
     badRequest:
       description: Request dari client tidak valid.
       content:

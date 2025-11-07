@@ -84,7 +84,7 @@ set
 from pegawai p
 where ot.pns_id = p.pns_id
     and ot.id = @id and ot.deleted_at is null
-    and p.nip_baru = @nip and p.deleted_at is null;
+    and p.nip_baru = @nip::varchar and p.deleted_at is null;
 
 -- name: DeleteOrangTua :execrows
 update orang_tua ot
@@ -92,7 +92,7 @@ set deleted_at = now()
 from pegawai p
 where ot.pns_id = p.pns_id
     and ot.id = @id and ot.deleted_at is null
-    and p.nip_baru = @nip and p.deleted_at is null;
+    and p.nip_baru = @nip::varchar and p.deleted_at is null;
 
 -- name: CreatePasangan :one
 insert into pasangan
@@ -104,7 +104,7 @@ returning id;
 select exists (
   select 1 from pasangan ps
   join pegawai p on p.pns_id = ps.pns_id and p.deleted_at is null
-  where ps.id = $1 and p.nip_baru = $2 and ps.deleted_at is null
+  where ps.id = @id and p.nip_baru = @nip::varchar and ps.deleted_at is null
 );
 
 -- name: UpdatePasangan :execrows
@@ -128,7 +128,7 @@ set
 from pegawai p
 where ps.pns_id = p.pns_id
     and ps.id = @id and ps.deleted_at is null
-    and p.nip_baru = @nip and p.deleted_at is null;
+    and p.nip_baru = @nip::varchar and p.deleted_at is null;
 
 -- name: DeletePasangan :execrows
 update pasangan ps
@@ -136,7 +136,7 @@ set deleted_at = now()
 from pegawai p
 where ps.pns_id = p.pns_id
     and ps.id = @id and ps.deleted_at is null
-    and p.nip_baru = @nip and p.deleted_at is null;
+    and p.nip_baru = @nip::varchar and p.deleted_at is null;
 
 -- name: CreateAnak :one
 insert into anak
@@ -161,7 +161,7 @@ set
 from pegawai p
 where a.pns_id = p.pns_id
     and a.id = @id and a.deleted_at is null
-    and p.nip_baru = @nip and p.deleted_at is null;
+    and p.nip_baru = @nip::varchar and p.deleted_at is null;
 
 -- name: DeleteAnak :execrows
 update anak a
@@ -169,4 +169,4 @@ set deleted_at = now()
 from pegawai p
 where a.pns_id = p.pns_id
     and a.id = @id and a.deleted_at is null
-    and p.nip_baru = @nip and p.deleted_at is null;
+    and p.nip_baru = @nip::varchar and p.deleted_at is null;

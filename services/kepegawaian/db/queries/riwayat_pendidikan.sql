@@ -47,16 +47,16 @@ set
     negara_sekolah = $8,
     tugas_belajar = $9,
     updated_at = now()
-where id = @id and nip = @nip and deleted_at is null;
+where id = @id and nip = @nip::varchar and deleted_at is null;
 
 -- name: DeleteRiwayatPendidikan :execrows
 update riwayat_pendidikan
 set deleted_at = now()
-where id = @id and nip = @nip and deleted_at is null;
+where id = @id and nip = @nip::varchar and deleted_at is null;
 
 -- name: UploadBerkasRiwayatPendidikan :execrows
 update riwayat_pendidikan
 set
     file_base64 = $1,
     updated_at = now()
-where id = @id and nip = @nip and deleted_at is null;
+where id = @id and nip = @nip::varchar and deleted_at is null;

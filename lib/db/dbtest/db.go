@@ -164,7 +164,18 @@ type Rows []map[string]any
 
 // QueryAll fetches all rows in table tableName from db.
 func QueryAll(db *pgxpool.Pool, tableName, orderBy string) (Rows, error) {
-	rows, err := db.Query(context.Background(), "select * from "+tableName+" order by "+orderBy) // nosemgrep: rules.go.sql.go_sql_rule-concat-sqli
+	sql := "select * from " + tableName + " order by " + orderBy
+	return query(db, sql)
+}
+
+// QueryWithClause fetches all rows in table tableName with additional clause.
+func QueryWithClause(db *pgxpool.Pool, tableName, clause string, args ...any) (Rows, error) {
+	sql := "select * from " + tableName + " " + clause
+	return query(db, sql, args...)
+}
+
+func query(db *pgxpool.Pool, sql string, args ...any) (Rows, error) {
+	rows, err := db.Query(context.Background(), sql, args...) // nosemgrep: rules.go.sql.go_sql_rule-concat-sqli
 	if err != nil {
 		return nil, fmt.Errorf("db query: %w", err)
 	}

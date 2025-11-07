@@ -65,12 +65,12 @@ func (q *Queries) CreateRiwayatPendidikan(ctx context.Context, arg CreateRiwayat
 const deleteRiwayatPendidikan = `-- name: DeleteRiwayatPendidikan :execrows
 update riwayat_pendidikan
 set deleted_at = now()
-where id = $1 and nip = $2 and deleted_at is null
+where id = $1 and nip = $2::varchar and deleted_at is null
 `
 
 type DeleteRiwayatPendidikanParams struct {
-	ID  int32       `db:"id"`
-	Nip pgtype.Text `db:"nip"`
+	ID  int32  `db:"id"`
+	Nip string `db:"nip"`
 }
 
 func (q *Queries) DeleteRiwayatPendidikan(ctx context.Context, arg DeleteRiwayatPendidikanParams) (int64, error) {
@@ -187,7 +187,7 @@ set
     negara_sekolah = $8,
     tugas_belajar = $9,
     updated_at = now()
-where id = $10 and nip = $11 and deleted_at is null
+where id = $10 and nip = $11::varchar and deleted_at is null
 `
 
 type UpdateRiwayatPendidikanParams struct {
@@ -201,7 +201,7 @@ type UpdateRiwayatPendidikanParams struct {
 	NegaraSekolah       pgtype.Text `db:"negara_sekolah"`
 	TugasBelajar        pgtype.Int2 `db:"tugas_belajar"`
 	ID                  int32       `db:"id"`
-	Nip                 pgtype.Text `db:"nip"`
+	Nip                 string      `db:"nip"`
 }
 
 func (q *Queries) UpdateRiwayatPendidikan(ctx context.Context, arg UpdateRiwayatPendidikanParams) (int64, error) {
@@ -229,13 +229,13 @@ update riwayat_pendidikan
 set
     file_base64 = $1,
     updated_at = now()
-where id = $2 and nip = $3 and deleted_at is null
+where id = $2 and nip = $3::varchar and deleted_at is null
 `
 
 type UploadBerkasRiwayatPendidikanParams struct {
 	FileBase64 pgtype.Text `db:"file_base64"`
 	ID         int32       `db:"id"`
-	Nip        pgtype.Text `db:"nip"`
+	Nip        string      `db:"nip"`
 }
 
 func (q *Queries) UploadBerkasRiwayatPendidikan(ctx context.Context, arg UploadBerkasRiwayatPendidikanParams) (int64, error) {

@@ -143,12 +143,12 @@ set deleted_at = now()
 from pegawai p
 where a.pns_id = p.pns_id
     and a.id = $1 and a.deleted_at is null
-    and p.nip_baru = $2 and p.deleted_at is null
+    and p.nip_baru = $2::varchar and p.deleted_at is null
 `
 
 type DeleteAnakParams struct {
-	ID  int64       `db:"id"`
-	Nip pgtype.Text `db:"nip"`
+	ID  int64  `db:"id"`
+	Nip string `db:"nip"`
 }
 
 func (q *Queries) DeleteAnak(ctx context.Context, arg DeleteAnakParams) (int64, error) {
@@ -165,12 +165,12 @@ set deleted_at = now()
 from pegawai p
 where ot.pns_id = p.pns_id
     and ot.id = $1 and ot.deleted_at is null
-    and p.nip_baru = $2 and p.deleted_at is null
+    and p.nip_baru = $2::varchar and p.deleted_at is null
 `
 
 type DeleteOrangTuaParams struct {
-	ID  int32       `db:"id"`
-	Nip pgtype.Text `db:"nip"`
+	ID  int32  `db:"id"`
+	Nip string `db:"nip"`
 }
 
 func (q *Queries) DeleteOrangTua(ctx context.Context, arg DeleteOrangTuaParams) (int64, error) {
@@ -187,12 +187,12 @@ set deleted_at = now()
 from pegawai p
 where ps.pns_id = p.pns_id
     and ps.id = $1 and ps.deleted_at is null
-    and p.nip_baru = $2 and p.deleted_at is null
+    and p.nip_baru = $2::varchar and p.deleted_at is null
 `
 
 type DeletePasanganParams struct {
-	ID  int64       `db:"id"`
-	Nip pgtype.Text `db:"nip"`
+	ID  int64  `db:"id"`
+	Nip string `db:"nip"`
 }
 
 func (q *Queries) DeletePasangan(ctx context.Context, arg DeletePasanganParams) (int64, error) {
@@ -207,17 +207,17 @@ const isPasanganExistsByIDAndNIP = `-- name: IsPasanganExistsByIDAndNIP :one
 select exists (
   select 1 from pasangan ps
   join pegawai p on p.pns_id = ps.pns_id and p.deleted_at is null
-  where ps.id = $1 and p.nip_baru = $2 and ps.deleted_at is null
+  where ps.id = $1 and p.nip_baru = $2::varchar and ps.deleted_at is null
 )
 `
 
 type IsPasanganExistsByIDAndNIPParams struct {
-	ID      int64       `db:"id"`
-	NipBaru pgtype.Text `db:"nip_baru"`
+	ID  int64  `db:"id"`
+	Nip string `db:"nip"`
 }
 
 func (q *Queries) IsPasanganExistsByIDAndNIP(ctx context.Context, arg IsPasanganExistsByIDAndNIPParams) (bool, error) {
-	row := q.db.QueryRow(ctx, isPasanganExistsByIDAndNIP, arg.ID, arg.NipBaru)
+	row := q.db.QueryRow(ctx, isPasanganExistsByIDAndNIP, arg.ID, arg.Nip)
 	var exists bool
 	err := row.Scan(&exists)
 	return exists, err
@@ -457,7 +457,7 @@ set
 from pegawai p
 where a.pns_id = p.pns_id
     and a.id = $11 and a.deleted_at is null
-    and p.nip_baru = $12 and p.deleted_at is null
+    and p.nip_baru = $12::varchar and p.deleted_at is null
 `
 
 type UpdateAnakParams struct {
@@ -472,7 +472,7 @@ type UpdateAnakParams struct {
 	StatusSekolah pgtype.Int2 `db:"status_sekolah"`
 	AnakKe        pgtype.Int2 `db:"anak_ke"`
 	ID            int64       `db:"id"`
-	Nip           pgtype.Text `db:"nip"`
+	Nip           string      `db:"nip"`
 }
 
 func (q *Queries) UpdateAnak(ctx context.Context, arg UpdateAnakParams) (int64, error) {
@@ -510,7 +510,7 @@ set
 from pegawai p
 where ot.pns_id = p.pns_id
     and ot.id = $8 and ot.deleted_at is null
-    and p.nip_baru = $9 and p.deleted_at is null
+    and p.nip_baru = $9::varchar and p.deleted_at is null
 `
 
 type UpdateOrangTuaParams struct {
@@ -522,7 +522,7 @@ type UpdateOrangTuaParams struct {
 	TanggalMeninggal pgtype.Date `db:"tanggal_meninggal"`
 	AkteMeninggal    pgtype.Text `db:"akte_meninggal"`
 	ID               int32       `db:"id"`
-	Nip              pgtype.Text `db:"nip"`
+	Nip              string      `db:"nip"`
 }
 
 func (q *Queries) UpdateOrangTua(ctx context.Context, arg UpdateOrangTuaParams) (int64, error) {
@@ -564,7 +564,7 @@ set
 from pegawai p
 where ps.pns_id = p.pns_id
     and ps.id = $15 and ps.deleted_at is null
-    and p.nip_baru = $16 and p.deleted_at is null
+    and p.nip_baru = $16::varchar and p.deleted_at is null
 `
 
 type UpdatePasanganParams struct {
@@ -583,7 +583,7 @@ type UpdatePasanganParams struct {
 	TanggalCerai     pgtype.Date `db:"tanggal_cerai"`
 	AkteCerai        pgtype.Text `db:"akte_cerai"`
 	ID               int64       `db:"id"`
-	Nip              pgtype.Text `db:"nip"`
+	Nip              string      `db:"nip"`
 }
 
 func (q *Queries) UpdatePasangan(ctx context.Context, arg UpdatePasanganParams) (int64, error) {

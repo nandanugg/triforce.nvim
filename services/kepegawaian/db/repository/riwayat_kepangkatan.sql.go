@@ -21,6 +21,77 @@ func (q *Queries) CountRiwayatKepangkatan(ctx context.Context, pnsNip string) (i
 	return count, err
 }
 
+const createRiwayatKepangkatan = `-- name: CreateRiwayatKepangkatan :one
+insert into riwayat_golongan
+    (id, jenis_kp_id, kode_jenis_kp, jenis_kp, golongan_id, golongan_nama, pangkat_nama, tmt_golongan, sk_nomor, sk_tanggal, no_bkn, tanggal_bkn, jumlah_angka_kredit_utama, jumlah_angka_kredit_tambahan, mk_golongan_tahun, mk_golongan_bulan, pns_id, pns_nip, pns_nama) values
+    (uuid_generate_v4(), $17::int, $17::varchar, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+returning id
+`
+
+type CreateRiwayatKepangkatanParams struct {
+	JenisKp                   pgtype.Text `db:"jenis_kp"`
+	GolonganID                pgtype.Int2 `db:"golongan_id"`
+	GolonganNama              pgtype.Text `db:"golongan_nama"`
+	PangkatNama               pgtype.Text `db:"pangkat_nama"`
+	TmtGolongan               pgtype.Date `db:"tmt_golongan"`
+	SkNomor                   pgtype.Text `db:"sk_nomor"`
+	SkTanggal                 pgtype.Date `db:"sk_tanggal"`
+	NoBkn                     pgtype.Text `db:"no_bkn"`
+	TanggalBkn                pgtype.Date `db:"tanggal_bkn"`
+	JumlahAngkaKreditUtama    pgtype.Int4 `db:"jumlah_angka_kredit_utama"`
+	JumlahAngkaKreditTambahan pgtype.Int4 `db:"jumlah_angka_kredit_tambahan"`
+	MkGolonganTahun           pgtype.Int2 `db:"mk_golongan_tahun"`
+	MkGolonganBulan           pgtype.Int2 `db:"mk_golongan_bulan"`
+	PnsID                     pgtype.Text `db:"pns_id"`
+	PnsNip                    pgtype.Text `db:"pns_nip"`
+	PnsNama                   pgtype.Text `db:"pns_nama"`
+	JenisKpID                 pgtype.Int4 `db:"jenis_kp_id"`
+}
+
+func (q *Queries) CreateRiwayatKepangkatan(ctx context.Context, arg CreateRiwayatKepangkatanParams) (string, error) {
+	row := q.db.QueryRow(ctx, createRiwayatKepangkatan,
+		arg.JenisKp,
+		arg.GolonganID,
+		arg.GolonganNama,
+		arg.PangkatNama,
+		arg.TmtGolongan,
+		arg.SkNomor,
+		arg.SkTanggal,
+		arg.NoBkn,
+		arg.TanggalBkn,
+		arg.JumlahAngkaKreditUtama,
+		arg.JumlahAngkaKreditTambahan,
+		arg.MkGolonganTahun,
+		arg.MkGolonganBulan,
+		arg.PnsID,
+		arg.PnsNip,
+		arg.PnsNama,
+		arg.JenisKpID,
+	)
+	var id string
+	err := row.Scan(&id)
+	return id, err
+}
+
+const deleteRiwayatKepangkatan = `-- name: DeleteRiwayatKepangkatan :execrows
+update riwayat_golongan
+set deleted_at = now()
+where id = $1 and pns_nip = $2::varchar and deleted_at is null
+`
+
+type DeleteRiwayatKepangkatanParams struct {
+	ID  string `db:"id"`
+	Nip string `db:"nip"`
+}
+
+func (q *Queries) DeleteRiwayatKepangkatan(ctx context.Context, arg DeleteRiwayatKepangkatanParams) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteRiwayatKepangkatan, arg.ID, arg.Nip)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const getBerkasRiwayatKepangkatan = `-- name: GetBerkasRiwayatKepangkatan :one
 select file_base64 from riwayat_golongan
 where pns_nip = $1 and id = $2 and deleted_at is null
@@ -121,4 +192,92 @@ func (q *Queries) ListRiwayatKepangkatan(ctx context.Context, arg ListRiwayatKep
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateRiwayatKepangkatan = `-- name: UpdateRiwayatKepangkatan :execrows
+update riwayat_golongan
+set
+    jenis_kp_id = $14::int,
+    kode_jenis_kp = $14::varchar,
+    jenis_kp = $1,
+    golongan_id = $2,
+    golongan_nama = $3,
+    pangkat_nama = $4,
+    tmt_golongan = $5,
+    sk_nomor = $6,
+    sk_tanggal = $7,
+    no_bkn = $8,
+    tanggal_bkn = $9,
+    jumlah_angka_kredit_utama = $10,
+    jumlah_angka_kredit_tambahan = $11,
+    mk_golongan_tahun = $12,
+    mk_golongan_bulan = $13,
+    updated_at = now()
+where id = $15 and pns_nip = $16::varchar and deleted_at is null
+`
+
+type UpdateRiwayatKepangkatanParams struct {
+	JenisKp                   pgtype.Text `db:"jenis_kp"`
+	GolonganID                pgtype.Int2 `db:"golongan_id"`
+	GolonganNama              pgtype.Text `db:"golongan_nama"`
+	PangkatNama               pgtype.Text `db:"pangkat_nama"`
+	TmtGolongan               pgtype.Date `db:"tmt_golongan"`
+	SkNomor                   pgtype.Text `db:"sk_nomor"`
+	SkTanggal                 pgtype.Date `db:"sk_tanggal"`
+	NoBkn                     pgtype.Text `db:"no_bkn"`
+	TanggalBkn                pgtype.Date `db:"tanggal_bkn"`
+	JumlahAngkaKreditUtama    pgtype.Int4 `db:"jumlah_angka_kredit_utama"`
+	JumlahAngkaKreditTambahan pgtype.Int4 `db:"jumlah_angka_kredit_tambahan"`
+	MkGolonganTahun           pgtype.Int2 `db:"mk_golongan_tahun"`
+	MkGolonganBulan           pgtype.Int2 `db:"mk_golongan_bulan"`
+	JenisKpID                 pgtype.Int4 `db:"jenis_kp_id"`
+	ID                        string      `db:"id"`
+	Nip                       string      `db:"nip"`
+}
+
+func (q *Queries) UpdateRiwayatKepangkatan(ctx context.Context, arg UpdateRiwayatKepangkatanParams) (int64, error) {
+	result, err := q.db.Exec(ctx, updateRiwayatKepangkatan,
+		arg.JenisKp,
+		arg.GolonganID,
+		arg.GolonganNama,
+		arg.PangkatNama,
+		arg.TmtGolongan,
+		arg.SkNomor,
+		arg.SkTanggal,
+		arg.NoBkn,
+		arg.TanggalBkn,
+		arg.JumlahAngkaKreditUtama,
+		arg.JumlahAngkaKreditTambahan,
+		arg.MkGolonganTahun,
+		arg.MkGolonganBulan,
+		arg.JenisKpID,
+		arg.ID,
+		arg.Nip,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
+const uploadBerkasRiwayatKepangkatan = `-- name: UploadBerkasRiwayatKepangkatan :execrows
+update riwayat_golongan
+set
+    file_base64 = $1,
+    updated_at = now()
+where id = $2 and pns_nip = $3::varchar and deleted_at is null
+`
+
+type UploadBerkasRiwayatKepangkatanParams struct {
+	FileBase64 pgtype.Text `db:"file_base64"`
+	ID         string      `db:"id"`
+	Nip        string      `db:"nip"`
+}
+
+func (q *Queries) UploadBerkasRiwayatKepangkatan(ctx context.Context, arg UploadBerkasRiwayatKepangkatanParams) (int64, error) {
+	result, err := q.db.Exec(ctx, uploadBerkasRiwayatKepangkatan, arg.FileBase64, arg.ID, arg.Nip)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
 }

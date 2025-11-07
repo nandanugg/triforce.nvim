@@ -154,7 +154,7 @@ func (s *service) updateOrangTua(ctx context.Context, id int32, nip string, para
 
 	affected, err := s.repo.UpdateOrangTua(ctx, repo.UpdateOrangTuaParams{
 		ID:               id,
-		Nip:              pgtype.Text{String: nip, Valid: true},
+		Nip:              nip,
 		Nama:             pgtype.Text{String: params.Nama, Valid: true},
 		JenisDokumen:     pgtype.Text{String: "KTP", Valid: params.NIK != ""},
 		NoDokumen:        pgtype.Text{String: params.NIK, Valid: params.NIK != ""},
@@ -173,7 +173,7 @@ func (s *service) updateOrangTua(ctx context.Context, id int32, nip string, para
 func (s *service) deleteOrangTua(ctx context.Context, id int32, nip string) (bool, error) {
 	affected, err := s.repo.DeleteOrangTua(ctx, repo.DeleteOrangTuaParams{
 		ID:  id,
-		Nip: pgtype.Text{String: nip, Valid: true},
+		Nip: nip,
 	})
 	if err != nil {
 		return false, fmt.Errorf("repo delete orang tua: %w", err)
@@ -241,7 +241,7 @@ func (s *service) updatePasangan(ctx context.Context, id int64, nip string, para
 
 	affected, err := s.repo.UpdatePasangan(ctx, repo.UpdatePasanganParams{
 		ID:               id,
-		Nip:              pgtype.Text{String: nip, Valid: true},
+		Nip:              nip,
 		Nama:             pgtype.Text{String: params.Nama, Valid: true},
 		Nik:              pgtype.Text{String: params.NIK, Valid: params.NIK != ""},
 		Pns:              statusPNS(params.IsPNS),
@@ -267,7 +267,7 @@ func (s *service) updatePasangan(ctx context.Context, id int64, nip string, para
 func (s *service) deletePasangan(ctx context.Context, id int64, nip string) (bool, error) {
 	affected, err := s.repo.DeletePasangan(ctx, repo.DeletePasanganParams{
 		ID:  id,
-		Nip: pgtype.Text{String: nip, Valid: true},
+		Nip: nip,
 	})
 	if err != nil {
 		return false, fmt.Errorf("repo delete pasangan: %w", err)
@@ -338,7 +338,7 @@ func (s *service) updateAnak(ctx context.Context, id int64, nip string, params u
 
 	affected, err := s.repo.UpdateAnak(ctx, repo.UpdateAnakParams{
 		ID:            id,
-		Nip:           pgtype.Text{String: nip, Valid: true},
+		Nip:           nip,
 		Nama:          pgtype.Text{String: params.Nama, Valid: true},
 		Nik:           pgtype.Text{String: params.NIK, Valid: params.NIK != ""},
 		PasanganID:    pgtype.Int8{Int64: params.PasanganOrangTuaID, Valid: true},
@@ -360,7 +360,7 @@ func (s *service) updateAnak(ctx context.Context, id int64, nip string, params u
 func (s *service) deleteAnak(ctx context.Context, id int64, nip string) (bool, error) {
 	affected, err := s.repo.DeleteAnak(ctx, repo.DeleteAnakParams{
 		ID:  id,
-		Nip: pgtype.Text{String: nip, Valid: true},
+		Nip: nip,
 	})
 	if err != nil {
 		return false, fmt.Errorf("repo delete anak: %w", err)
@@ -388,8 +388,8 @@ func (s *service) validateAnakReferences(ctx context.Context, nip string, params
 	}
 
 	if ok, err := s.repo.IsPasanganExistsByIDAndNIP(ctx, repo.IsPasanganExistsByIDAndNIPParams{
-		ID:      params.PasanganOrangTuaID,
-		NipBaru: pgtype.Text{String: nip, Valid: true},
+		ID:  params.PasanganOrangTuaID,
+		Nip: nip,
 	}); err != nil {
 		return fmt.Errorf("repo pasangan exists: %w", err)
 	} else if !ok {
