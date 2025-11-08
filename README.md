@@ -1,8 +1,20 @@
-# 🔱 Triforce.nvim
+# 🕹️ triforce.nvim
 
-**Gamify your Neovim coding experience!** Track your progress, unlock achievements, and level up as you code.
+**Hey, listen!** Triforce is a small Neovim plugin that adds a bit of RPG flavor to your coding — XP, levels, and achievements while you work.
 
-Triforce transforms your coding sessions into an RPG-like adventure with XP, levels, achievements, and detailed statistics—all while you focus on what matters: writing great code.
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/8e3258bf-b052-449f-9ddb-37c9729c12ac" />
+
+## 💭 Why I Made This
+
+I have ADHD, and coding can sometimes feel like a grind — it’s hard to stay consistent or even get started some days. That’s part of why I fell in love with Neovim: it’s customizable, expressive, and makes the act of writing code feel *fun* again.
+
+**Triforce** is actually my **first-ever Neovim plugin** (and the first plugin I’ve ever built in general). I’d always wanted to make something of my own, but I never really knew where to start. Once I got into Neovim’s Lua ecosystem, I got completely hooked. I started experimenting, tinkering, breaking things, and slowly, Triforce came to life.
+
+I made it to **gamify my coding workflow** — to turn those long, sometimes frustrating coding sessions into something that feels rewarding. Watching the XP bar fill up, unlocking achievements, and seeing my progress in real time gives me that little *dopamine boost* that helps me stay focused and motivated.
+
+I named it **Triforce** just because I love **The Legend of Zelda** — no deep reason beyond that.
+
+The UI is **heavily inspired by [siduck](https://github.com/siduck)’s gorgeous designs** and **[nvzone/typr](https://github.com/nvzone/typr)** — their aesthetic sense and clean interface ideas played a huge role in how this turned out. Building it with **Volt.nvim** made the process so much smoother and helped me focus on bringing those ideas to life.
 
 ---
 
@@ -33,7 +45,7 @@ Triforce transforms your coding sessions into an RPG-like adventure with XP, lev
 {
   "gisketch/triforce.nvim",
   dependencies = {
-    "NvChad/volt.nvim",
+    "nvzone/volt",
   },
   config = function()
     require("triforce").setup({
@@ -51,7 +63,7 @@ Triforce transforms your coding sessions into an RPG-like adventure with XP, lev
 ```lua
 use {
   "gisketch/triforce.nvim",
-  requires = { "NvChad/volt.nvim" },
+  requires = { "nvzone/volt" },
   config = function()
     require("triforce").setup({
       keymap = {
@@ -65,7 +77,7 @@ use {
 ### Using [vim-plug](https://github.com/junegunn/vim-plug)
 
 ```vim
-Plug 'NvChad/volt.nvim'
+Plug 'nvzone/volt'
 Plug 'gisketch/triforce.nvim'
 
 lua << EOF
@@ -183,15 +195,24 @@ The profile has **3 tabs**:
    - Session/time milestone progress
    - Activity heatmap (7 months)
    - Quick stats overview
+  
+<img width="1224" height="970" alt="image" src="https://github.com/user-attachments/assets/38bef3f2-9534-45c6-a0f6-8d34a166a42e" />
+
 
 2. **🏆 Achievements Tab**
    - View all unlocked achievements
    - See locked achievements with unlock requirements
    - Paginate through achievements (H/L or arrow keys)
 
+<img width="1219" height="774" alt="image" src="https://github.com/user-attachments/assets/53913333-214e-47de-af99-1da58c40fd77" />
+
+
 3. **💻 Languages Tab**
    - Bar graph showing your most-used languages
    - See character count breakdown by language
+
+<img width="1210" height="784" alt="image" src="https://github.com/user-attachments/assets/a8d3c98c-16d5-4e15-8c39-538e3bb7ce81" />
+
 
 **Keybindings in Profile:**
 - `Tab`: Cycle between tabs
@@ -333,6 +354,7 @@ The file is automatically backed up before each save to:
 
 ### Future Features
 
+- [ ] **Sounds for Achievements and Level up**: Add sfx feedback for leveling up or completing achievements for dopamine!
 - [ ] **Cloud Sync**: Sync stats across multiple devices (Firebase, GitHub Gist, or custom server)
 - [ ] **Leaderboards**: Compete with friends or the community
 - [ ] **Custom Achievements**: Define your own achievement criteria
@@ -376,8 +398,9 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ## 🙏 Acknowledgments
 
-- **[NvChad/volt.nvim](https://github.com/NvChad/volt.nvim)**: Beautiful UI framework
-- **GitHub**: Activity heatmap design inspiration
+- **[nvzone/volt](https://github.com/nvzone/volt)**: Beautiful UI framework
+- **[Typr](https://github.com/nvzone/typr)**: Beautiful Grid Design Component Inspiration
+- **[Gamify](https://github.com/GrzegorzSzczepanek/gamify.nvim)**: Another cool gamify plugin, good inspiration for achievements
 
 ---
 
