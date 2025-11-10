@@ -2,6 +2,7 @@ package keluarga
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -669,21 +670,32 @@ func Test_handler_listAdmin(t *testing.T) {
 func Test_handler_adminCreateOrangTua(t *testing.T) {
 	t.Parallel()
 
-	seedData := `
+	dbData := `
 		insert into pegawai
 			(pns_id,  nip_baru, deleted_at) values
+			('id_1a', '1a',     null),
 			('id_1c', '1c',     null),
-			('id_1d', '1d',     '2000-01-01');
+			('id_1d', '1d',     '2000-01-01'),
+			('id_1e', '1e',     null),
+			('id_1f', '1f',     null);
 		insert into ref_agama
 			(id, deleted_at) values
 			(1,  null),
 			(2,  '2000-01-01');
 	`
+	db := dbtest.New(t, dbmigrations.FS)
+	_, err := db.Exec(context.Background(), dbData)
+	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	authSvc := apitest.NewAuthService(api.Kode_Pegawai_Write)
+	RegisterRoutes(e, repo.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("2a")}
 	tests := []struct {
 		name             string
-		dbData           string
 		paramNIP         string
 		requestHeader    http.Header
 		requestBody      string
@@ -692,12 +704,7 @@ func Test_handler_adminCreateOrangTua(t *testing.T) {
 		wantDBRows       dbtest.Rows
 	}{
 		{
-			name: "ok: with all data",
-			dbData: seedData + `
-				insert into orang_tua
-					(nama,       hubungan, pns_id,  nip,  created_at,   updated_at) values
-					('John Doe', 1,        'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:          "ok: with all data",
 			paramNIP:      "1c",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
@@ -710,31 +717,11 @@ func Test_handler_adminCreateOrangTua(t *testing.T) {
 			}`,
 			wantResponseCode: http.StatusCreated,
 			wantResponseBody: `{
-				"data": { "id": 2 }
+				"data": { "id": {id} }
 			}`,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":                int32(1),
-					"nama":              "John Doe",
-					"hubungan":          int16(1),
-					"agama_id":          nil,
-					"tanggal_meninggal": nil,
-					"akte_meninggal":    nil,
-					"jenis_dokumen":     nil,
-					"no_dokumen":        nil,
-					"gelar_depan":       nil,
-					"gelar_belakang":    nil,
-					"tempat_lahir":      nil,
-					"tanggal_lahir":     nil,
-					"email":             nil,
-					"pns_id":            "id_1c",
-					"nip":               "1c",
-					"created_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":        nil,
-				},
-				{
-					"id":                int32(2),
+					"id":                "{id}",
 					"nama":              "Jane Doe",
 					"hubungan":          int16(2),
 					"agama_id":          int16(1),
@@ -757,8 +744,7 @@ func Test_handler_adminCreateOrangTua(t *testing.T) {
 		},
 		{
 			name:          "ok: with null values",
-			dbData:        seedData,
-			paramNIP:      "1c",
+			paramNIP:      "1e",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "Jane Doe",
@@ -770,11 +756,11 @@ func Test_handler_adminCreateOrangTua(t *testing.T) {
 			}`,
 			wantResponseCode: http.StatusCreated,
 			wantResponseBody: `{
-				"data": { "id": 1 }
+				"data": { "id": {id} }
 			}`,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":                int32(1),
+					"id":                "{id}",
 					"nama":              "Jane Doe",
 					"hubungan":          int16(2),
 					"agama_id":          nil,
@@ -787,8 +773,8 @@ func Test_handler_adminCreateOrangTua(t *testing.T) {
 					"tempat_lahir":      nil,
 					"tanggal_lahir":     nil,
 					"email":             nil,
-					"pns_id":            "id_1c",
-					"nip":               "1c",
+					"pns_id":            "id_1e",
+					"nip":               "1e",
 					"created_at":        "{created_at}",
 					"updated_at":        "{updated_at}",
 					"deleted_at":        nil,
@@ -797,8 +783,7 @@ func Test_handler_adminCreateOrangTua(t *testing.T) {
 		},
 		{
 			name:          "ok: required data only",
-			dbData:        seedData,
-			paramNIP:      "1c",
+			paramNIP:      "1f",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "John Doe",
@@ -806,11 +791,11 @@ func Test_handler_adminCreateOrangTua(t *testing.T) {
 			}`,
 			wantResponseCode: http.StatusCreated,
 			wantResponseBody: `{
-				"data": { "id": 1 }
+				"data": { "id": {id} }
 			}`,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":                int32(1),
+					"id":                "{id}",
 					"nama":              "John Doe",
 					"hubungan":          int16(1),
 					"agama_id":          nil,
@@ -823,8 +808,8 @@ func Test_handler_adminCreateOrangTua(t *testing.T) {
 					"tempat_lahir":      nil,
 					"tanggal_lahir":     nil,
 					"email":             nil,
-					"pns_id":            "id_1c",
-					"nip":               "1c",
+					"pns_id":            "id_1f",
+					"nip":               "1f",
 					"created_at":        "{created_at}",
 					"updated_at":        "{updated_at}",
 					"deleted_at":        nil,
@@ -833,8 +818,7 @@ func Test_handler_adminCreateOrangTua(t *testing.T) {
 		},
 		{
 			name:          "error: pegawai is not found",
-			dbData:        seedData,
-			paramNIP:      "1a",
+			paramNIP:      "1b",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "Jane Doe",
@@ -850,7 +834,6 @@ func Test_handler_adminCreateOrangTua(t *testing.T) {
 		},
 		{
 			name:          "error: pegawai is deleted",
-			dbData:        seedData,
 			paramNIP:      "1d",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
@@ -867,8 +850,7 @@ func Test_handler_adminCreateOrangTua(t *testing.T) {
 		},
 		{
 			name:          "error: agama is not found",
-			dbData:        seedData,
-			paramNIP:      "1c",
+			paramNIP:      "1a",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "John Doe",
@@ -882,8 +864,7 @@ func Test_handler_adminCreateOrangTua(t *testing.T) {
 		},
 		{
 			name:          "error: agama is deleted",
-			dbData:        seedData,
-			paramNIP:      "1c",
+			paramNIP:      "1a",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "John Doe",
@@ -899,7 +880,7 @@ func Test_handler_adminCreateOrangTua(t *testing.T) {
 		},
 		{
 			name:          "error: invalid format date, exceed length limit, unexpected enum or data type",
-			paramNIP:      "1c",
+			paramNIP:      "1a",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "` + strings.Repeat(".", 256) + `",
@@ -920,7 +901,7 @@ func Test_handler_adminCreateOrangTua(t *testing.T) {
 		},
 		{
 			name:          "error: null on required params",
-			paramNIP:      "1c",
+			paramNIP:      "1a",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": null,
@@ -933,7 +914,7 @@ func Test_handler_adminCreateOrangTua(t *testing.T) {
 		},
 		{
 			name:             "error: missing required params & have additional params",
-			paramNIP:         "1c",
+			paramNIP:         "1a",
 			requestHeader:    http.Header{"Authorization": authHeader},
 			requestBody:      `{ "id": 1 }`,
 			wantResponseCode: http.StatusBadRequest,
@@ -944,7 +925,7 @@ func Test_handler_adminCreateOrangTua(t *testing.T) {
 		},
 		{
 			name:             "error: body is empty",
-			paramNIP:         "1c",
+			paramNIP:         "1a",
 			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusBadRequest,
 			wantResponseBody: `{"message": "request body harus diisi"}`,
@@ -952,7 +933,7 @@ func Test_handler_adminCreateOrangTua(t *testing.T) {
 		},
 		{
 			name:             "error: invalid token",
-			paramNIP:         "1c",
+			paramNIP:         "1a",
 			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
@@ -963,40 +944,34 @@ func Test_handler_adminCreateOrangTua(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			db := dbtest.New(t, dbmigrations.FS)
-			_, err := db.Exec(context.Background(), tt.dbData)
-			require.NoError(t, err)
-
 			req := httptest.NewRequest(http.MethodPost, "/v1/admin/pegawai/"+tt.paramNIP+"/orang-tua", strings.NewReader(tt.requestBody))
 			req.Header = tt.requestHeader
 			req.Header.Set("Content-Type", "application/json")
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			authSvc := apitest.NewAuthService(api.Kode_Pegawai_Write)
-			RegisterRoutes(e, repo.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
-			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
 			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
 
-			actualRows, err := dbtest.QueryAll(db, "orang_tua", "id")
+			actualRows, err := dbtest.QueryWithClause(db, "orang_tua", "where nip = $1", tt.paramNIP)
 			require.NoError(t, err)
 			if len(tt.wantDBRows) == len(actualRows) {
 				for i, row := range actualRows {
-					if tt.wantDBRows[i]["created_at"] == "{created_at}" {
+					if tt.wantDBRows[i]["id"] == "{id}" {
 						assert.WithinDuration(t, time.Now(), row["created_at"].(time.Time), 10*time.Second)
 						assert.Equal(t, row["created_at"], row["updated_at"])
 
+						tt.wantDBRows[i]["id"] = row["id"]
 						tt.wantDBRows[i]["created_at"] = row["created_at"]
 						tt.wantDBRows[i]["updated_at"] = row["updated_at"]
+
+						tt.wantResponseBody = strings.ReplaceAll(tt.wantResponseBody, "{id}", fmt.Sprintf("%d", row["id"]))
 					}
 				}
 			}
 			assert.Equal(t, tt.wantDBRows, actualRows)
+			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
 		})
 	}
 }
@@ -1004,7 +979,7 @@ func Test_handler_adminCreateOrangTua(t *testing.T) {
 func Test_handler_adminUpdateOrangTua(t *testing.T) {
 	t.Parallel()
 
-	seedData := `
+	dbData := `
 		insert into pegawai
 			(pns_id,  nip_baru, deleted_at) values
 			('id_1c', '1c',     null),
@@ -1014,12 +989,56 @@ func Test_handler_adminUpdateOrangTua(t *testing.T) {
 			(id, deleted_at) values
 			(1,  null),
 			(2,  '2000-01-01');
+		insert into orang_tua
+			(id, nama,       hubungan, gelar_depan, gelar_belakang, tempat_lahir, tanggal_lahir, email,           pns_id,  nip,  created_at,   updated_at) values
+			(1,  'John Doe', 1,        'Dr.',       'S.Kom',        'Jakarta',    '1990-01-01',  'test@test.com', 'id_1c', '1c', '2000-01-01', '2000-01-01');
+		insert into orang_tua
+			(id, nama,       hubungan, agama_id, tanggal_meninggal, akte_meninggal, jenis_dokumen, no_dokumen, pns_id,  nip,  created_at,   updated_at) values
+			(2,  'Jane Doe', 2,        1,        '2000-01-01',      'akte-01',      'KTP',         '123',      'id_1c', '1c', '2000-01-01', '2000-01-01'),
+			(3,  'Jane Doe', 2,        1,        '2000-01-01',      'akte-01',      'KTP',         '123',      'id_1c', '1c', '2000-01-01', '2000-01-01');
+		insert into orang_tua
+			(id, nama,       pns_id,  nip,  created_at,   updated_at,   deleted_at) values
+			(4,  'Jane Doe', 'id_1e', '1e', '2000-01-01', '2000-01-01', null),
+			(5,  'Jane Doe', 'id_1c', '1c', '2000-01-01', '2000-01-01', '2000-01-01'),
+			(6,  'Jane Doe', 'id_1d', '1d', '2000-01-01', '2000-01-01', null),
+			(7,  'Jane Doe', 'id_1c', '1c', '2000-01-01', '2000-01-01', null);
 	`
+	db := dbtest.New(t, dbmigrations.FS)
+	_, err := db.Exec(context.Background(), dbData)
+	require.NoError(t, err)
+
+	defaultRows := dbtest.Rows{
+		{
+			"id":                int32(7),
+			"nama":              "Jane Doe",
+			"hubungan":          nil,
+			"agama_id":          nil,
+			"tanggal_meninggal": nil,
+			"akte_meninggal":    nil,
+			"jenis_dokumen":     nil,
+			"no_dokumen":        nil,
+			"gelar_depan":       nil,
+			"gelar_belakang":    nil,
+			"tempat_lahir":      nil,
+			"tanggal_lahir":     nil,
+			"email":             nil,
+			"pns_id":            "id_1c",
+			"nip":               "1c",
+			"created_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+			"updated_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+			"deleted_at":        nil,
+		},
+	}
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	authSvc := apitest.NewAuthService(api.Kode_Pegawai_Write)
+	RegisterRoutes(e, repo.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("2a")}
 	tests := []struct {
 		name             string
-		dbData           string
 		paramNIP         string
 		paramID          string
 		requestHeader    http.Header
@@ -1029,13 +1048,7 @@ func Test_handler_adminUpdateOrangTua(t *testing.T) {
 		wantDBRows       dbtest.Rows
 	}{
 		{
-			name: "ok: with all data",
-			dbData: seedData + `
-				insert into orang_tua
-					(id, nama,       hubungan, gelar_depan, gelar_belakang, tempat_lahir, tanggal_lahir, email,           pns_id,  nip,  created_at,   updated_at) values
-					(1,  'John Doe', 1,        'Dr.',       'S.Kom',        'Jakarta',    '1990-01-01',  'test@test.com', 'id_1c', '1c', '2000-01-01', '2000-01-01'),
-					(2,  'Jane Wee', 2,        null,        null,           null,         null,          null,            'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:          "ok: with all data",
 			paramNIP:      "1c",
 			paramID:       "1",
 			requestHeader: http.Header{"Authorization": authHeader},
@@ -1069,37 +1082,12 @@ func Test_handler_adminUpdateOrangTua(t *testing.T) {
 					"updated_at":        "{updated_at}",
 					"deleted_at":        nil,
 				},
-				{
-					"id":                int32(2),
-					"nama":              "Jane Wee",
-					"hubungan":          int16(2),
-					"agama_id":          nil,
-					"tanggal_meninggal": nil,
-					"akte_meninggal":    nil,
-					"jenis_dokumen":     nil,
-					"no_dokumen":        nil,
-					"gelar_depan":       nil,
-					"gelar_belakang":    nil,
-					"tempat_lahir":      nil,
-					"tanggal_lahir":     nil,
-					"email":             nil,
-					"pns_id":            "id_1c",
-					"nip":               "1c",
-					"created_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":        nil,
-				},
 			},
 		},
 		{
-			name: "ok: with null values",
-			dbData: seedData + `
-				insert into orang_tua
-					(id, nama,       hubungan, agama_id, tanggal_meninggal, akte_meninggal, jenis_dokumen, no_dokumen, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'Jane Doe', 2,        1,        '2000-01-01',      'akte-01',      'KTP',         '123',      'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:          "ok: with null values",
 			paramNIP:      "1c",
-			paramID:       "1",
+			paramID:       "2",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "Jane Doe",
@@ -1112,7 +1100,7 @@ func Test_handler_adminUpdateOrangTua(t *testing.T) {
 			wantResponseCode: http.StatusNoContent,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":                int32(1),
+					"id":                int32(2),
 					"nama":              "Jane Doe",
 					"hubungan":          int16(2),
 					"agama_id":          nil,
@@ -1134,14 +1122,9 @@ func Test_handler_adminUpdateOrangTua(t *testing.T) {
 			},
 		},
 		{
-			name: "ok: required data only",
-			dbData: seedData + `
-				insert into orang_tua
-					(id, nama,       hubungan, agama_id, tanggal_meninggal, akte_meninggal, jenis_dokumen, no_dokumen, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'Jane Doe', 2,        1,        '2000-01-01',      'akte-01',      'KTP',         '123',      'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:          "ok: required data only",
 			paramNIP:      "1c",
-			paramID:       "1",
+			paramID:       "3",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "John Doe",
@@ -1150,7 +1133,7 @@ func Test_handler_adminUpdateOrangTua(t *testing.T) {
 			wantResponseCode: http.StatusNoContent,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":                int32(1),
+					"id":                int32(3),
 					"nama":              "John Doe",
 					"hubungan":          int16(1),
 					"agama_id":          nil,
@@ -1172,14 +1155,9 @@ func Test_handler_adminUpdateOrangTua(t *testing.T) {
 			},
 		},
 		{
-			name: "error: orang tua is not found",
-			dbData: seedData + `
-				insert into orang_tua
-					(id, nama,       hubungan, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'Jane Doe', 2,        'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:          "error: orang tua is not found",
 			paramNIP:      "1c",
-			paramID:       "2",
+			paramID:       "0",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "Jane Doe",
@@ -1191,38 +1169,12 @@ func Test_handler_adminUpdateOrangTua(t *testing.T) {
 			}`,
 			wantResponseCode: http.StatusNotFound,
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
-			wantDBRows: dbtest.Rows{
-				{
-					"id":                int32(1),
-					"nama":              "Jane Doe",
-					"hubungan":          int16(2),
-					"agama_id":          nil,
-					"tanggal_meninggal": nil,
-					"akte_meninggal":    nil,
-					"jenis_dokumen":     nil,
-					"no_dokumen":        nil,
-					"gelar_depan":       nil,
-					"gelar_belakang":    nil,
-					"tempat_lahir":      nil,
-					"tanggal_lahir":     nil,
-					"email":             nil,
-					"pns_id":            "id_1c",
-					"nip":               "1c",
-					"created_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":        nil,
-				},
-			},
+			wantDBRows:       dbtest.Rows{},
 		},
 		{
-			name: "error: orang tua is owned by different pegawai",
-			dbData: seedData + `
-				insert into orang_tua
-					(id, nama,       pns_id,  nip,  created_at,   updated_at) values
-					(1,  'Jane Doe', 'id_1e', '1e', '2000-01-01', '2000-01-01');
-			`,
+			name:          "error: orang tua is owned by different pegawai",
 			paramNIP:      "1c",
-			paramID:       "1",
+			paramID:       "4",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "Jane Doe",
@@ -1236,7 +1188,7 @@ func Test_handler_adminUpdateOrangTua(t *testing.T) {
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":                int32(1),
+					"id":                int32(4),
 					"nama":              "Jane Doe",
 					"hubungan":          nil,
 					"agama_id":          nil,
@@ -1258,14 +1210,9 @@ func Test_handler_adminUpdateOrangTua(t *testing.T) {
 			},
 		},
 		{
-			name: "error: orang tua is deleted",
-			dbData: seedData + `
-				insert into orang_tua
-					(id, nama,       hubungan, pns_id,  nip,  created_at,   updated_at,   deleted_at) values
-					(1,  'Jane Doe', 2,        'id_1c', '1c', '2000-01-01', '2000-01-01', '2000-01-01');
-			`,
+			name:          "error: orang tua is deleted",
 			paramNIP:      "1c",
-			paramID:       "1",
+			paramID:       "5",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "Jane Doe",
@@ -1279,9 +1226,9 @@ func Test_handler_adminUpdateOrangTua(t *testing.T) {
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":                int32(1),
+					"id":                int32(5),
 					"nama":              "Jane Doe",
-					"hubungan":          int16(2),
+					"hubungan":          nil,
 					"agama_id":          nil,
 					"tanggal_meninggal": nil,
 					"akte_meninggal":    nil,
@@ -1301,14 +1248,9 @@ func Test_handler_adminUpdateOrangTua(t *testing.T) {
 			},
 		},
 		{
-			name: "error: pegawai is deleted",
-			dbData: seedData + `
-				insert into orang_tua
-					(id, nama,       hubungan, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'Jane Doe', 2,        'id_1d', '1d', '2000-01-01', '2000-01-01');
-			`,
+			name:          "error: pegawai is deleted",
 			paramNIP:      "1d",
-			paramID:       "1",
+			paramID:       "6",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "Jane Doe",
@@ -1322,9 +1264,9 @@ func Test_handler_adminUpdateOrangTua(t *testing.T) {
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":                int32(1),
+					"id":                int32(6),
 					"nama":              "Jane Doe",
-					"hubungan":          int16(2),
+					"hubungan":          nil,
 					"agama_id":          nil,
 					"tanggal_meninggal": nil,
 					"akte_meninggal":    nil,
@@ -1344,14 +1286,9 @@ func Test_handler_adminUpdateOrangTua(t *testing.T) {
 			},
 		},
 		{
-			name: "error: agama is not found",
-			dbData: seedData + `
-				insert into orang_tua
-					(id, nama,       hubungan, agama_id, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'Jane Doe', 2,        2,        'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:          "error: agama is not found",
 			paramNIP:      "1c",
-			paramID:       "1",
+			paramID:       "7",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "John Doe",
@@ -1361,38 +1298,12 @@ func Test_handler_adminUpdateOrangTua(t *testing.T) {
 			}`,
 			wantResponseCode: http.StatusBadRequest,
 			wantResponseBody: `{"message": "data agama tidak ditemukan"}`,
-			wantDBRows: dbtest.Rows{
-				{
-					"id":                int32(1),
-					"nama":              "Jane Doe",
-					"hubungan":          int16(2),
-					"agama_id":          int16(2),
-					"tanggal_meninggal": nil,
-					"akte_meninggal":    nil,
-					"jenis_dokumen":     nil,
-					"no_dokumen":        nil,
-					"gelar_depan":       nil,
-					"gelar_belakang":    nil,
-					"tempat_lahir":      nil,
-					"tanggal_lahir":     nil,
-					"email":             nil,
-					"pns_id":            "id_1c",
-					"nip":               "1c",
-					"created_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":        nil,
-				},
-			},
+			wantDBRows:       defaultRows,
 		},
 		{
-			name: "error: agama is deleted",
-			dbData: seedData + `
-				insert into orang_tua
-					(id, nama,       hubungan, agama_id, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'Jane Doe', 2,        1,        'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:          "error: agama is deleted",
 			paramNIP:      "1c",
-			paramID:       "1",
+			paramID:       "7",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "John Doe",
@@ -1404,33 +1315,12 @@ func Test_handler_adminUpdateOrangTua(t *testing.T) {
 			}`,
 			wantResponseCode: http.StatusBadRequest,
 			wantResponseBody: `{"message": "data agama tidak ditemukan"}`,
-			wantDBRows: dbtest.Rows{
-				{
-					"id":                int32(1),
-					"nama":              "Jane Doe",
-					"hubungan":          int16(2),
-					"agama_id":          int16(1),
-					"tanggal_meninggal": nil,
-					"akte_meninggal":    nil,
-					"jenis_dokumen":     nil,
-					"no_dokumen":        nil,
-					"gelar_depan":       nil,
-					"gelar_belakang":    nil,
-					"tempat_lahir":      nil,
-					"tanggal_lahir":     nil,
-					"email":             nil,
-					"pns_id":            "id_1c",
-					"nip":               "1c",
-					"created_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":        nil,
-				},
-			},
+			wantDBRows:       defaultRows,
 		},
 		{
 			name:          "error: invalid format date, exceed length limit, unexpected enum or data type",
 			paramNIP:      "1c",
-			paramID:       "1c",
+			paramID:       "7",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "` + strings.Repeat(".", 256) + `",
@@ -1441,19 +1331,18 @@ func Test_handler_adminUpdateOrangTua(t *testing.T) {
 				"akte_meninggal": "` + strings.Repeat(".", 101) + `"
 			}`,
 			wantResponseCode: http.StatusBadRequest,
-			wantResponseBody: `{"message": "parameter \"id\" harus dalam format yang sesuai` +
-				` | parameter \"agama_id\" harus dalam tipe integer` +
+			wantResponseBody: `{"message": "parameter \"agama_id\" harus dalam tipe integer` +
 				` | parameter \"akte_meninggal\" harus 100 karakter atau kurang` +
 				` | parameter \"hubungan\" harus salah satu dari \"Ayah\", \"Ibu\"` +
 				` | parameter \"nama\" harus 255 karakter atau kurang` +
 				` | parameter \"nik\" harus 20 karakter atau kurang` +
 				` | parameter \"tanggal_meninggal\" harus dalam format date"}`,
-			wantDBRows: dbtest.Rows{},
+			wantDBRows: defaultRows,
 		},
 		{
 			name:          "error: null on required params",
 			paramNIP:      "1c",
-			paramID:       "1",
+			paramID:       "7",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": null,
@@ -1462,64 +1351,55 @@ func Test_handler_adminUpdateOrangTua(t *testing.T) {
 			wantResponseCode: http.StatusBadRequest,
 			wantResponseBody: `{"message": "parameter \"hubungan\" harus salah satu dari \"Ayah\", \"Ibu\"` +
 				` | parameter \"nama\" tidak boleh null"}`,
-			wantDBRows: dbtest.Rows{},
+			wantDBRows: defaultRows,
 		},
 		{
 			name:             "error: missing required params & have additional params",
 			paramNIP:         "1c",
-			paramID:          "1",
+			paramID:          "7",
 			requestHeader:    http.Header{"Authorization": authHeader},
 			requestBody:      `{ "id": 1 }`,
 			wantResponseCode: http.StatusBadRequest,
 			wantResponseBody: `{"message": "parameter \"id\" tidak didukung` +
 				` | parameter \"nama\" harus diisi` +
 				` | parameter \"hubungan\" harus diisi"}`,
-			wantDBRows: dbtest.Rows{},
+			wantDBRows: defaultRows,
 		},
 		{
 			name:             "error: body is empty",
 			paramNIP:         "1c",
-			paramID:          "1",
+			paramID:          "7",
 			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusBadRequest,
 			wantResponseBody: `{"message": "request body harus diisi"}`,
-			wantDBRows:       dbtest.Rows{},
+			wantDBRows:       defaultRows,
 		},
 		{
 			name:             "error: invalid token",
 			paramNIP:         "1c",
-			paramID:          "1",
+			paramID:          "7",
 			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
-			wantDBRows:       dbtest.Rows{},
+			wantDBRows:       defaultRows,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			db := dbtest.New(t, dbmigrations.FS)
-			_, err := db.Exec(context.Background(), tt.dbData)
-			require.NoError(t, err)
-
 			req := httptest.NewRequest(http.MethodPut, "/v1/admin/pegawai/"+tt.paramNIP+"/orang-tua/"+tt.paramID, strings.NewReader(tt.requestBody))
 			req.Header = tt.requestHeader
 			req.Header.Set("Content-Type", "application/json")
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			authSvc := apitest.NewAuthService(api.Kode_Pegawai_Write)
-			RegisterRoutes(e, repo.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
 			assert.JSONEq(t, typeutil.Coalesce(tt.wantResponseBody, "null"), typeutil.Coalesce(rec.Body.String(), "null"))
 			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
 
-			actualRows, err := dbtest.QueryAll(db, "orang_tua", "id")
+			actualRows, err := dbtest.QueryWithClause(db, "orang_tua", "where id = $1", tt.paramID)
 			require.NoError(t, err)
 			if len(tt.wantDBRows) == len(actualRows) {
 				for i, row := range actualRows {
@@ -1537,17 +1417,35 @@ func Test_handler_adminUpdateOrangTua(t *testing.T) {
 func Test_handler_adminDeleteOrangTua(t *testing.T) {
 	t.Parallel()
 
-	seedData := `
+	dbData := `
 		insert into pegawai
 			(pns_id,  nip_baru, deleted_at) values
 			('id_1c', '1c',     null),
-			('id_1d', '1d',     '2000-01-01');
+			('id_1d', '1d',     '2000-01-01'),
+			('id_1e', '1e',     null);
+		insert into orang_tua
+			(id, nama,       jenis_dokumen, no_dokumen, hubungan, gelar_depan, gelar_belakang, tempat_lahir, tanggal_lahir, email,           pns_id,  nip,  created_at,   updated_at) values
+			(1,  'John Doe', 'KTP',         '123',      1,        'Dr.',       'S.Kom',        'Jakarta',    '1990-01-01',  'test@test.com', 'id_1c', '1c', '2000-01-01', '2000-01-01');
+		insert into orang_tua
+			(id, nama,       hubungan, pns_id,  nip,  created_at,   updated_at,   deleted_at) values
+			(2,  'Jane Doe', 2,        'id_1c', '1c', '2000-01-01', '2000-01-01', '2000-01-01'),
+			(3,  'Jane Doe', 2,        'id_1d', '1d', '2000-01-01', '2000-01-01', null),
+			(4,  'Jane Doe', 2,        'id_1e', '1e', '2000-01-01', '2000-01-01', null),
+			(5,  'Jane Doe', 2,        'id_1c', '1c', '2000-01-01', '2000-01-01', null);
 	`
+	db := dbtest.New(t, dbmigrations.FS)
+	_, err := db.Exec(context.Background(), dbData)
+	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	authSvc := apitest.NewAuthService(api.Kode_Pegawai_Write)
+	RegisterRoutes(e, repo.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("2a")}
 	tests := []struct {
 		name             string
-		dbData           string
 		paramNIP         string
 		paramID          string
 		requestHeader    http.Header
@@ -1556,13 +1454,7 @@ func Test_handler_adminDeleteOrangTua(t *testing.T) {
 		wantDBRows       dbtest.Rows
 	}{
 		{
-			name: "ok: success delete",
-			dbData: seedData + `
-				insert into orang_tua
-					(id, nama,       jenis_dokumen, no_dokumen, hubungan, gelar_depan, gelar_belakang, tempat_lahir, tanggal_lahir, email,           pns_id,  nip,  created_at,   updated_at) values
-					(1,  'John Doe', 'KTP',         '123',      1,        'Dr.',       'S.Kom',        'Jakarta',    '1990-01-01',  'test@test.com', 'id_1c', '1c', '2000-01-01', '2000-01-01'),
-					(2,  'Jane Doe', null,          null,       2,        null,        null,           null,         null,          null,            'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:             "ok: success delete",
 			paramNIP:         "1c",
 			paramID:          "1",
 			requestHeader:    http.Header{"Authorization": authHeader},
@@ -1588,35 +1480,19 @@ func Test_handler_adminDeleteOrangTua(t *testing.T) {
 					"updated_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
 					"deleted_at":        "{deleted_at}",
 				},
-				{
-					"id":                int32(2),
-					"nama":              "Jane Doe",
-					"hubungan":          int16(2),
-					"agama_id":          nil,
-					"tanggal_meninggal": nil,
-					"akte_meninggal":    nil,
-					"jenis_dokumen":     nil,
-					"no_dokumen":        nil,
-					"gelar_depan":       nil,
-					"gelar_belakang":    nil,
-					"tempat_lahir":      nil,
-					"tanggal_lahir":     nil,
-					"email":             nil,
-					"pns_id":            "id_1c",
-					"nip":               "1c",
-					"created_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":        nil,
-				},
 			},
 		},
 		{
-			name: "error: orang tua is not found",
-			dbData: seedData + `
-				insert into orang_tua
-					(id, nama,       hubungan, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'Jane Doe', 2,        'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:             "error: orang tua is not found",
+			paramNIP:         "1c",
+			paramID:          "0",
+			requestHeader:    http.Header{"Authorization": authHeader},
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data tidak ditemukan"}`,
+			wantDBRows:       dbtest.Rows{},
+		},
+		{
+			name:             "error: orang tua is deleted",
 			paramNIP:         "1c",
 			paramID:          "2",
 			requestHeader:    http.Header{"Authorization": authHeader},
@@ -1624,42 +1500,7 @@ func Test_handler_adminDeleteOrangTua(t *testing.T) {
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":                int32(1),
-					"nama":              "Jane Doe",
-					"hubungan":          int16(2),
-					"agama_id":          nil,
-					"tanggal_meninggal": nil,
-					"akte_meninggal":    nil,
-					"jenis_dokumen":     nil,
-					"no_dokumen":        nil,
-					"gelar_depan":       nil,
-					"gelar_belakang":    nil,
-					"tempat_lahir":      nil,
-					"tanggal_lahir":     nil,
-					"email":             nil,
-					"pns_id":            "id_1c",
-					"nip":               "1c",
-					"created_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":        nil,
-				},
-			},
-		},
-		{
-			name: "error: orang tua is deleted",
-			dbData: seedData + `
-				insert into orang_tua
-					(id, nama,       hubungan, pns_id,  nip,  created_at,   updated_at,   deleted_at) values
-					(1,  'Jane Doe', 2,        'id_1c', '1c', '2000-01-01', '2000-01-01', '2000-01-01');
-			`,
-			paramNIP:         "1c",
-			paramID:          "1",
-			requestHeader:    http.Header{"Authorization": authHeader},
-			wantResponseCode: http.StatusNotFound,
-			wantResponseBody: `{"message": "data tidak ditemukan"}`,
-			wantDBRows: dbtest.Rows{
-				{
-					"id":                int32(1),
+					"id":                int32(2),
 					"nama":              "Jane Doe",
 					"hubungan":          int16(2),
 					"agama_id":          nil,
@@ -1681,20 +1522,15 @@ func Test_handler_adminDeleteOrangTua(t *testing.T) {
 			},
 		},
 		{
-			name: "error: pegawai is deleted",
-			dbData: seedData + `
-				insert into orang_tua
-					(id, nama,       hubungan, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'Jane Doe', 2,        'id_1d', '1d', '2000-01-01', '2000-01-01');
-			`,
+			name:             "error: pegawai is deleted",
 			paramNIP:         "1d",
-			paramID:          "1",
+			paramID:          "3",
 			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusNotFound,
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":                int32(1),
+					"id":                int32(3),
 					"nama":              "Jane Doe",
 					"hubungan":          int16(2),
 					"agama_id":          nil,
@@ -1716,49 +1552,82 @@ func Test_handler_adminDeleteOrangTua(t *testing.T) {
 			},
 		},
 		{
-			name:             "error: unexpected data type",
+			name:             "error: orang tua is owned by different pegawai",
 			paramNIP:         "1c",
-			paramID:          "1c",
+			paramID:          "4",
 			requestHeader:    http.Header{"Authorization": authHeader},
-			wantResponseCode: http.StatusBadRequest,
-			wantResponseBody: `{"message": "parameter \"id\" harus dalam format yang sesuai"}`,
-			wantDBRows:       dbtest.Rows{},
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data tidak ditemukan"}`,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":                int32(4),
+					"nama":              "Jane Doe",
+					"hubungan":          int16(2),
+					"agama_id":          nil,
+					"tanggal_meninggal": nil,
+					"akte_meninggal":    nil,
+					"jenis_dokumen":     nil,
+					"no_dokumen":        nil,
+					"gelar_depan":       nil,
+					"gelar_belakang":    nil,
+					"tempat_lahir":      nil,
+					"tanggal_lahir":     nil,
+					"email":             nil,
+					"pns_id":            "id_1e",
+					"nip":               "1e",
+					"created_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":        nil,
+				},
+			},
 		},
 		{
 			name:             "error: invalid token",
 			paramNIP:         "1c",
-			paramID:          "1",
+			paramID:          "5",
 			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
-			wantDBRows:       dbtest.Rows{},
+			wantDBRows: dbtest.Rows{
+				{
+					"id":                int32(5),
+					"nama":              "Jane Doe",
+					"hubungan":          int16(2),
+					"agama_id":          nil,
+					"tanggal_meninggal": nil,
+					"akte_meninggal":    nil,
+					"jenis_dokumen":     nil,
+					"no_dokumen":        nil,
+					"gelar_depan":       nil,
+					"gelar_belakang":    nil,
+					"tempat_lahir":      nil,
+					"tanggal_lahir":     nil,
+					"email":             nil,
+					"pns_id":            "id_1c",
+					"nip":               "1c",
+					"created_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":        nil,
+				},
+			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			db := dbtest.New(t, dbmigrations.FS)
-			_, err := db.Exec(context.Background(), tt.dbData)
-			require.NoError(t, err)
-
 			req := httptest.NewRequest(http.MethodDelete, "/v1/admin/pegawai/"+tt.paramNIP+"/orang-tua/"+tt.paramID, nil)
 			req.Header = tt.requestHeader
 			req.Header.Set("Content-Type", "application/json")
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			authSvc := apitest.NewAuthService(api.Kode_Pegawai_Write)
-			RegisterRoutes(e, repo.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
 			assert.JSONEq(t, typeutil.Coalesce(tt.wantResponseBody, "null"), typeutil.Coalesce(rec.Body.String(), "null"))
 			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
 
-			actualRows, err := dbtest.QueryAll(db, "orang_tua", "id")
+			actualRows, err := dbtest.QueryWithClause(db, "orang_tua", "where id = $1", tt.paramID)
 			require.NoError(t, err)
 			if len(tt.wantDBRows) == len(actualRows) {
 				for i, row := range actualRows {
@@ -1776,11 +1645,14 @@ func Test_handler_adminDeleteOrangTua(t *testing.T) {
 func Test_handler_adminCreatePasangan(t *testing.T) {
 	t.Parallel()
 
-	seedData := `
+	dbData := `
 		insert into pegawai
 			(pns_id,  nip_baru, deleted_at) values
+			('id_1a', '1a',     null),
 			('id_1c', '1c',     null),
-			('id_1d', '1d',     '2000-01-01');
+			('id_1d', '1d',     '2000-01-01'),
+			('id_1e', '1e',     null),
+			('id_1f', '1f',     null);
 		insert into ref_agama
 			(id, deleted_at) values
 			(1,  null),
@@ -1790,11 +1662,19 @@ func Test_handler_adminCreatePasangan(t *testing.T) {
 			(1,  null),
 			(2,  '2000-01-01');
 	`
+	db := dbtest.New(t, dbmigrations.FS)
+	_, err := db.Exec(context.Background(), dbData)
+	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	authSvc := apitest.NewAuthService(api.Kode_Pegawai_Write)
+	RegisterRoutes(e, repo.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("2a")}
 	tests := []struct {
 		name             string
-		dbData           string
 		paramNIP         string
 		requestHeader    http.Header
 		requestBody      string
@@ -1803,12 +1683,7 @@ func Test_handler_adminCreatePasangan(t *testing.T) {
 		wantDBRows       dbtest.Rows
 	}{
 		{
-			name: "ok: with all data",
-			dbData: seedData + `
-				insert into pasangan
-					(nama,       hubungan, pns_id,  nip,  created_at,   updated_at) values
-					('John Doe', 2,        'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:          "ok: with all data",
 			paramNIP:      "1c",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
@@ -1829,33 +1704,11 @@ func Test_handler_adminCreatePasangan(t *testing.T) {
 			}`,
 			wantResponseCode: http.StatusCreated,
 			wantResponseBody: `{
-				"data": { "id": 2 }
+				"data": { "id": {id} }
 			}`,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":                int64(1),
-					"nama":              "John Doe",
-					"hubungan":          int16(2),
-					"tanggal_lahir":     nil,
-					"pns":               nil,
-					"nik":               nil,
-					"agama_id":          nil,
-					"tanggal_menikah":   nil,
-					"akte_nikah":        nil,
-					"tanggal_cerai":     nil,
-					"akte_cerai":        nil,
-					"tanggal_meninggal": nil,
-					"akte_meninggal":    nil,
-					"karsus":            nil,
-					"status":            nil,
-					"pns_id":            "id_1c",
-					"nip":               "1c",
-					"created_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":        nil,
-				},
-				{
-					"id":                int64(2),
+					"id":                "{id}",
 					"nama":              "Jane Doe",
 					"hubungan":          int16(1),
 					"tanggal_lahir":     time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC),
@@ -1880,8 +1733,7 @@ func Test_handler_adminCreatePasangan(t *testing.T) {
 		},
 		{
 			name:          "ok: with null values",
-			dbData:        seedData,
-			paramNIP:      "1c",
+			paramNIP:      "1e",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "Jane Doe",
@@ -1901,11 +1753,11 @@ func Test_handler_adminCreatePasangan(t *testing.T) {
 			}`,
 			wantResponseCode: http.StatusCreated,
 			wantResponseBody: `{
-				"data": { "id": 1 }
+				"data": { "id": {id} }
 			}`,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":                int64(1),
+					"id":                "{id}",
 					"nama":              "Jane Doe",
 					"hubungan":          int16(1),
 					"tanggal_lahir":     time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC),
@@ -1920,8 +1772,8 @@ func Test_handler_adminCreatePasangan(t *testing.T) {
 					"akte_meninggal":    nil,
 					"karsus":            nil,
 					"status":            int16(1),
-					"pns_id":            "id_1c",
-					"nip":               "1c",
+					"pns_id":            "id_1e",
+					"nip":               "1e",
 					"created_at":        "{created_at}",
 					"updated_at":        "{updated_at}",
 					"deleted_at":        nil,
@@ -1930,8 +1782,7 @@ func Test_handler_adminCreatePasangan(t *testing.T) {
 		},
 		{
 			name:          "ok: required data only",
-			dbData:        seedData,
-			paramNIP:      "1c",
+			paramNIP:      "1f",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "John Doe",
@@ -1941,11 +1792,11 @@ func Test_handler_adminCreatePasangan(t *testing.T) {
 			}`,
 			wantResponseCode: http.StatusCreated,
 			wantResponseBody: `{
-				"data": { "id": 1 }
+				"data": { "id": {id} }
 			}`,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":                int64(1),
+					"id":                "{id}",
 					"nama":              "John Doe",
 					"hubungan":          int16(2),
 					"tanggal_lahir":     time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC),
@@ -1960,8 +1811,8 @@ func Test_handler_adminCreatePasangan(t *testing.T) {
 					"akte_meninggal":    nil,
 					"karsus":            nil,
 					"status":            int16(1),
-					"pns_id":            "id_1c",
-					"nip":               "1c",
+					"pns_id":            "id_1f",
+					"nip":               "1f",
 					"created_at":        "{created_at}",
 					"updated_at":        "{updated_at}",
 					"deleted_at":        nil,
@@ -1970,8 +1821,7 @@ func Test_handler_adminCreatePasangan(t *testing.T) {
 		},
 		{
 			name:          "error: pegawai is not found",
-			dbData:        seedData,
-			paramNIP:      "1a",
+			paramNIP:      "1b",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "John Doe",
@@ -1985,7 +1835,6 @@ func Test_handler_adminCreatePasangan(t *testing.T) {
 		},
 		{
 			name:          "error: pegawai is deleted",
-			dbData:        seedData,
 			paramNIP:      "1d",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
@@ -2010,8 +1859,7 @@ func Test_handler_adminCreatePasangan(t *testing.T) {
 		},
 		{
 			name:          "error: agama or status pernikahan is not found",
-			dbData:        seedData,
-			paramNIP:      "1c",
+			paramNIP:      "1a",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "John Doe",
@@ -2026,8 +1874,7 @@ func Test_handler_adminCreatePasangan(t *testing.T) {
 		},
 		{
 			name:          "error: agama or status pernikahan is deleted",
-			dbData:        seedData,
-			paramNIP:      "1c",
+			paramNIP:      "1a",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "John Doe",
@@ -2051,7 +1898,7 @@ func Test_handler_adminCreatePasangan(t *testing.T) {
 		},
 		{
 			name:          "error: invalid format date, exceed length limit, unexpected enum or data type",
-			paramNIP:      "1c",
+			paramNIP:      "1a",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "` + strings.Repeat(".", 101) + `",
@@ -2088,7 +1935,7 @@ func Test_handler_adminCreatePasangan(t *testing.T) {
 		},
 		{
 			name:          "error: null on required params",
-			paramNIP:      "1c",
+			paramNIP:      "1a",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": null,
@@ -2105,7 +1952,7 @@ func Test_handler_adminCreatePasangan(t *testing.T) {
 		},
 		{
 			name:             "error: missing required params & have additional params",
-			paramNIP:         "1c",
+			paramNIP:         "1a",
 			requestHeader:    http.Header{"Authorization": authHeader},
 			requestBody:      `{ "id": 1 }`,
 			wantResponseCode: http.StatusBadRequest,
@@ -2118,7 +1965,7 @@ func Test_handler_adminCreatePasangan(t *testing.T) {
 		},
 		{
 			name:             "error: body is empty",
-			paramNIP:         "1c",
+			paramNIP:         "1a",
 			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusBadRequest,
 			wantResponseBody: `{"message": "request body harus diisi"}`,
@@ -2126,7 +1973,7 @@ func Test_handler_adminCreatePasangan(t *testing.T) {
 		},
 		{
 			name:             "error: invalid token",
-			paramNIP:         "1c",
+			paramNIP:         "1a",
 			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
@@ -2137,40 +1984,34 @@ func Test_handler_adminCreatePasangan(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			db := dbtest.New(t, dbmigrations.FS)
-			_, err := db.Exec(context.Background(), tt.dbData)
-			require.NoError(t, err)
-
 			req := httptest.NewRequest(http.MethodPost, "/v1/admin/pegawai/"+tt.paramNIP+"/pasangan", strings.NewReader(tt.requestBody))
 			req.Header = tt.requestHeader
 			req.Header.Set("Content-Type", "application/json")
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			authSvc := apitest.NewAuthService(api.Kode_Pegawai_Write)
-			RegisterRoutes(e, repo.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
-			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
 			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
 
-			actualRows, err := dbtest.QueryAll(db, "pasangan", "id")
+			actualRows, err := dbtest.QueryWithClause(db, "pasangan", "where nip = $1", tt.paramNIP)
 			require.NoError(t, err)
 			if len(tt.wantDBRows) == len(actualRows) {
 				for i, row := range actualRows {
-					if tt.wantDBRows[i]["created_at"] == "{created_at}" {
+					if tt.wantDBRows[i]["id"] == "{id}" {
 						assert.WithinDuration(t, time.Now(), row["created_at"].(time.Time), 10*time.Second)
 						assert.Equal(t, row["created_at"], row["updated_at"])
 
+						tt.wantDBRows[i]["id"] = row["id"]
 						tt.wantDBRows[i]["created_at"] = row["created_at"]
 						tt.wantDBRows[i]["updated_at"] = row["updated_at"]
+
+						tt.wantResponseBody = strings.ReplaceAll(tt.wantResponseBody, "{id}", fmt.Sprintf("%d", row["id"]))
 					}
 				}
 			}
 			assert.Equal(t, tt.wantDBRows, actualRows)
+			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
 		})
 	}
 }
@@ -2178,7 +2019,7 @@ func Test_handler_adminCreatePasangan(t *testing.T) {
 func Test_handler_adminUpdatePasangan(t *testing.T) {
 	t.Parallel()
 
-	seedData := `
+	dbData := `
 		insert into pegawai
 			(pns_id,  nip_baru, deleted_at) values
 			('id_1c', '1c',     null),
@@ -2192,12 +2033,56 @@ func Test_handler_adminUpdatePasangan(t *testing.T) {
 			(id, deleted_at) values
 			(1,  null),
 			(2,  '2000-01-01');
+		insert into pasangan
+			(id, nama,       hubungan, pns_id,  nip,  created_at,   updated_at,   deleted_at) values
+			(1,  'John Doe', 2,        'id_1c', '1c', '2000-01-01', '2000-01-01', null),
+			(4,  'Jane Doe', null,     'id_1e', '1e', '2000-01-01', '2000-01-01', null),
+			(5,  'Jane Doe', 2,        'id_1c', '1c', '2000-01-01', '2000-01-01', '2000-01-01'),
+			(6,  'Jane Doe', 1,        'id_1d', '1d', '2000-01-01', '2000-01-01', null),
+			(7,  'Jane Doe', 2,        'id_1c', '1c', '2000-01-01', '2000-01-01', null);
+		insert into pasangan
+			(id, nama,       hubungan, agama_id, nik,   karsus, tanggal_menikah, akte_nikah, tanggal_cerai, akte_cerai, tanggal_meninggal, akte_meninggal, pns_id,  nip,  created_at,   updated_at) values
+			(2,  'Jane Doe', 1,        1,        '123', '12',   '2000-01-01',    'akte-01',  '2000-01-01',  'akte-01',  '2000-01-01',      'akte-01',      'id_1c', '1c', '2000-01-01', '2000-01-01'),
+			(3,  'John Doe', 2,        1,        '123', '12',   '2000-01-01',    'akte-01',  '2000-01-01',  'akte-01',  '2000-01-01',      'akte-01',      'id_1c', '1c', '2000-01-01', '2000-01-01');
 	`
+	db := dbtest.New(t, dbmigrations.FS)
+	_, err := db.Exec(context.Background(), dbData)
+	require.NoError(t, err)
+
+	defaultRows := dbtest.Rows{
+		{
+			"id":                int64(7),
+			"nama":              "Jane Doe",
+			"hubungan":          int16(2),
+			"tanggal_lahir":     nil,
+			"pns":               nil,
+			"nik":               nil,
+			"agama_id":          nil,
+			"tanggal_menikah":   nil,
+			"akte_nikah":        nil,
+			"tanggal_cerai":     nil,
+			"akte_cerai":        nil,
+			"tanggal_meninggal": nil,
+			"akte_meninggal":    nil,
+			"karsus":            nil,
+			"status":            nil,
+			"pns_id":            "id_1c",
+			"nip":               "1c",
+			"created_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+			"updated_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+			"deleted_at":        nil,
+		},
+	}
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	authSvc := apitest.NewAuthService(api.Kode_Pegawai_Write)
+	RegisterRoutes(e, repo.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("2a")}
 	tests := []struct {
 		name             string
-		dbData           string
 		paramNIP         string
 		paramID          string
 		requestHeader    http.Header
@@ -2207,13 +2092,7 @@ func Test_handler_adminUpdatePasangan(t *testing.T) {
 		wantDBRows       dbtest.Rows
 	}{
 		{
-			name: "ok: with all data",
-			dbData: seedData + `
-				insert into pasangan
-					(id, nama,       hubungan, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'John Doe', 2,        'id_1c', '1c', '2000-01-01', '2000-01-01'),
-					(2,  'John Doe', 2,        'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:          "ok: with all data",
 			paramNIP:      "1c",
 			paramID:       "1",
 			requestHeader: http.Header{"Authorization": authHeader},
@@ -2257,39 +2136,12 @@ func Test_handler_adminUpdatePasangan(t *testing.T) {
 					"updated_at":        "{updated_at}",
 					"deleted_at":        nil,
 				},
-				{
-					"id":                int64(2),
-					"nama":              "John Doe",
-					"hubungan":          int16(2),
-					"tanggal_lahir":     nil,
-					"pns":               nil,
-					"nik":               nil,
-					"agama_id":          nil,
-					"tanggal_menikah":   nil,
-					"akte_nikah":        nil,
-					"tanggal_cerai":     nil,
-					"akte_cerai":        nil,
-					"tanggal_meninggal": nil,
-					"akte_meninggal":    nil,
-					"karsus":            nil,
-					"status":            nil,
-					"pns_id":            "id_1c",
-					"nip":               "1c",
-					"created_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":        nil,
-				},
 			},
 		},
 		{
-			name: "ok: with null values",
-			dbData: seedData + `
-				insert into pasangan
-					(id, nama,       hubungan, agama_id, nik,   karsus, tanggal_menikah, akte_nikah, tanggal_cerai, akte_cerai, tanggal_meninggal, akte_meninggal, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'Jane Doe', 1,        1,        '123', '12',   '2000-01-01',    'akte-01',  '2000-01-01',  'akte-01',  '2000-01-01',      'akte-01',      'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:          "ok: with null values",
 			paramNIP:      "1c",
-			paramID:       "1",
+			paramID:       "2",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "John Doe",
@@ -2310,7 +2162,7 @@ func Test_handler_adminUpdatePasangan(t *testing.T) {
 			wantResponseCode: http.StatusNoContent,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":                int64(1),
+					"id":                int64(2),
 					"nama":              "John Doe",
 					"hubungan":          int16(2),
 					"tanggal_lahir":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
@@ -2334,14 +2186,9 @@ func Test_handler_adminUpdatePasangan(t *testing.T) {
 			},
 		},
 		{
-			name: "ok: required data only",
-			dbData: seedData + `
-				insert into pasangan
-					(id, nama,       hubungan, agama_id, nik,   karsus, tanggal_menikah, akte_nikah, tanggal_cerai, akte_cerai, tanggal_meninggal, akte_meninggal, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'John Doe', 2,        1,        '123', '12',   '2000-01-01',    'akte-01',  '2000-01-01',  'akte-01',  '2000-01-01',      'akte-01',      'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:          "ok: required data only",
 			paramNIP:      "1c",
-			paramID:       "1",
+			paramID:       "3",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "Jane Doe",
@@ -2352,7 +2199,7 @@ func Test_handler_adminUpdatePasangan(t *testing.T) {
 			wantResponseCode: http.StatusNoContent,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":                int64(1),
+					"id":                int64(3),
 					"nama":              "Jane Doe",
 					"hubungan":          int16(1),
 					"tanggal_lahir":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
@@ -2376,14 +2223,9 @@ func Test_handler_adminUpdatePasangan(t *testing.T) {
 			},
 		},
 		{
-			name: "error: pasangan is not found",
-			dbData: seedData + `
-				insert into pasangan
-					(id, nama,       hubungan, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'Jane Doe', 2,        'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:          "error: pasangan is not found",
 			paramNIP:      "1c",
-			paramID:       "2",
+			paramID:       "0",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "John Doe",
@@ -2393,40 +2235,12 @@ func Test_handler_adminUpdatePasangan(t *testing.T) {
 			}`,
 			wantResponseCode: http.StatusNotFound,
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
-			wantDBRows: dbtest.Rows{
-				{
-					"id":                int64(1),
-					"nama":              "Jane Doe",
-					"hubungan":          int16(2),
-					"tanggal_lahir":     nil,
-					"pns":               nil,
-					"nik":               nil,
-					"agama_id":          nil,
-					"tanggal_menikah":   nil,
-					"akte_nikah":        nil,
-					"tanggal_cerai":     nil,
-					"akte_cerai":        nil,
-					"tanggal_meninggal": nil,
-					"akte_meninggal":    nil,
-					"karsus":            nil,
-					"status":            nil,
-					"pns_id":            "id_1c",
-					"nip":               "1c",
-					"created_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":        nil,
-				},
-			},
+			wantDBRows:       dbtest.Rows{},
 		},
 		{
-			name: "error: pasangan is owned by different pegawai",
-			dbData: seedData + `
-				insert into pasangan
-					(id, nama,       pns_id,  nip,  created_at,   updated_at) values
-					(1,  'Jane Doe', 'id_1e', '1e', '2000-01-01', '2000-01-01');
-			`,
+			name:          "error: pasangan is owned by different pegawai",
 			paramNIP:      "1c",
-			paramID:       "1",
+			paramID:       "4",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "John Doe",
@@ -2438,7 +2252,7 @@ func Test_handler_adminUpdatePasangan(t *testing.T) {
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":                int64(1),
+					"id":                int64(4),
 					"nama":              "Jane Doe",
 					"hubungan":          nil,
 					"tanggal_lahir":     nil,
@@ -2462,14 +2276,9 @@ func Test_handler_adminUpdatePasangan(t *testing.T) {
 			},
 		},
 		{
-			name: "error: pasangan is deleted",
-			dbData: seedData + `
-				insert into pasangan
-					(id, nama,       hubungan, pns_id,  nip,  created_at,   updated_at,   deleted_at) values
-					(1,  'Jane Doe', 2,        'id_1c', '1c', '2000-01-01', '2000-01-01', '2000-01-01');
-			`,
+			name:          "error: pasangan is deleted",
 			paramNIP:      "1c",
-			paramID:       "1",
+			paramID:       "5",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "Jane Doe",
@@ -2491,7 +2300,7 @@ func Test_handler_adminUpdatePasangan(t *testing.T) {
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":                int64(1),
+					"id":                int64(5),
 					"nama":              "Jane Doe",
 					"hubungan":          int16(2),
 					"tanggal_lahir":     nil,
@@ -2515,14 +2324,9 @@ func Test_handler_adminUpdatePasangan(t *testing.T) {
 			},
 		},
 		{
-			name: "error: pegawai is deleted",
-			dbData: seedData + `
-				insert into pasangan
-					(id, nama,       hubungan, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'Jane Doe', 1,        'id_1d', '1d', '2000-01-01', '2000-01-01');
-			`,
+			name:          "error: pegawai is deleted",
 			paramNIP:      "1d",
-			paramID:       "1",
+			paramID:       "6",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "Jane Doe",
@@ -2544,7 +2348,7 @@ func Test_handler_adminUpdatePasangan(t *testing.T) {
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":                int64(1),
+					"id":                int64(6),
 					"nama":              "Jane Doe",
 					"hubungan":          int16(1),
 					"tanggal_lahir":     nil,
@@ -2568,14 +2372,9 @@ func Test_handler_adminUpdatePasangan(t *testing.T) {
 			},
 		},
 		{
-			name: "error: agama or status pernikahan is not found",
-			dbData: seedData + `
-				insert into pasangan
-					(id, nama,       hubungan, agama_id, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'Jane Doe', 1,        2,        'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:          "error: agama or status pernikahan is not found",
 			paramNIP:      "1c",
-			paramID:       "1",
+			paramID:       "7",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "John Doe",
@@ -2586,40 +2385,12 @@ func Test_handler_adminUpdatePasangan(t *testing.T) {
 			}`,
 			wantResponseCode: http.StatusBadRequest,
 			wantResponseBody: `{"message": "data agama tidak ditemukan | data status pernikahan tidak ditemukan"}`,
-			wantDBRows: dbtest.Rows{
-				{
-					"id":                int64(1),
-					"nama":              "Jane Doe",
-					"hubungan":          int16(1),
-					"tanggal_lahir":     nil,
-					"pns":               nil,
-					"nik":               nil,
-					"agama_id":          int16(2),
-					"tanggal_menikah":   nil,
-					"akte_nikah":        nil,
-					"tanggal_cerai":     nil,
-					"akte_cerai":        nil,
-					"tanggal_meninggal": nil,
-					"akte_meninggal":    nil,
-					"karsus":            nil,
-					"status":            nil,
-					"pns_id":            "id_1c",
-					"nip":               "1c",
-					"created_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":        nil,
-				},
-			},
+			wantDBRows:       defaultRows,
 		},
 		{
-			name: "error: agama or status pernikahan is deleted",
-			dbData: seedData + `
-				insert into pasangan
-					(id, nama,       hubungan, agama_id, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'Jane Doe', 1,        1,        'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:          "error: agama or status pernikahan is deleted",
 			paramNIP:      "1c",
-			paramID:       "1",
+			paramID:       "7",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "John Doe",
@@ -2639,35 +2410,12 @@ func Test_handler_adminUpdatePasangan(t *testing.T) {
 			}`,
 			wantResponseCode: http.StatusBadRequest,
 			wantResponseBody: `{"message": "data agama tidak ditemukan | data status pernikahan tidak ditemukan"}`,
-			wantDBRows: dbtest.Rows{
-				{
-					"id":                int64(1),
-					"nama":              "Jane Doe",
-					"hubungan":          int16(1),
-					"tanggal_lahir":     nil,
-					"pns":               nil,
-					"nik":               nil,
-					"agama_id":          int16(1),
-					"tanggal_menikah":   nil,
-					"akte_nikah":        nil,
-					"tanggal_cerai":     nil,
-					"akte_cerai":        nil,
-					"tanggal_meninggal": nil,
-					"akte_meninggal":    nil,
-					"karsus":            nil,
-					"status":            nil,
-					"pns_id":            "id_1c",
-					"nip":               "1c",
-					"created_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":        nil,
-				},
-			},
+			wantDBRows:       defaultRows,
 		},
 		{
 			name:          "error: invalid format date, exceed length limit, unexpected enum or data type",
 			paramNIP:      "1c",
-			paramID:       "1",
+			paramID:       "7",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "` + strings.Repeat(".", 101) + `",
@@ -2700,12 +2448,12 @@ func Test_handler_adminUpdatePasangan(t *testing.T) {
 				` | parameter \"tanggal_lahir\" harus dalam format date` +
 				` | parameter \"tanggal_menikah\" harus dalam format date` +
 				` | parameter \"tanggal_meninggal\" harus dalam format date"}`,
-			wantDBRows: dbtest.Rows{},
+			wantDBRows: defaultRows,
 		},
 		{
 			name:          "error: null on required params",
 			paramNIP:      "1c",
-			paramID:       "1",
+			paramID:       "7",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": null,
@@ -2718,12 +2466,12 @@ func Test_handler_adminUpdatePasangan(t *testing.T) {
 				` | parameter \"nama\" tidak boleh null` +
 				` | parameter \"status_pernikahan_id\" tidak boleh null` +
 				` | parameter \"tanggal_lahir\" tidak boleh null"}`,
-			wantDBRows: dbtest.Rows{},
+			wantDBRows: defaultRows,
 		},
 		{
 			name:             "error: missing required params & have additional params",
 			paramNIP:         "1c",
-			paramID:          "1",
+			paramID:          "7",
 			requestHeader:    http.Header{"Authorization": authHeader},
 			requestBody:      `{ "id": 1 }`,
 			wantResponseCode: http.StatusBadRequest,
@@ -2732,52 +2480,43 @@ func Test_handler_adminUpdatePasangan(t *testing.T) {
 				` | parameter \"tanggal_lahir\" harus diisi` +
 				` | parameter \"status_pernikahan_id\" harus diisi` +
 				` | parameter \"hubungan\" harus diisi"}`,
-			wantDBRows: dbtest.Rows{},
+			wantDBRows: defaultRows,
 		},
 		{
 			name:             "error: body is empty",
 			paramNIP:         "1c",
-			paramID:          "1",
+			paramID:          "7",
 			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusBadRequest,
 			wantResponseBody: `{"message": "request body harus diisi"}`,
-			wantDBRows:       dbtest.Rows{},
+			wantDBRows:       defaultRows,
 		},
 		{
 			name:             "error: invalid token",
 			paramNIP:         "1c",
-			paramID:          "1",
+			paramID:          "7",
 			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
-			wantDBRows:       dbtest.Rows{},
+			wantDBRows:       defaultRows,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			db := dbtest.New(t, dbmigrations.FS)
-			_, err := db.Exec(context.Background(), tt.dbData)
-			require.NoError(t, err)
-
 			req := httptest.NewRequest(http.MethodPut, "/v1/admin/pegawai/"+tt.paramNIP+"/pasangan/"+tt.paramID, strings.NewReader(tt.requestBody))
 			req.Header = tt.requestHeader
 			req.Header.Set("Content-Type", "application/json")
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			authSvc := apitest.NewAuthService(api.Kode_Pegawai_Write)
-			RegisterRoutes(e, repo.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
 			assert.JSONEq(t, typeutil.Coalesce(tt.wantResponseBody, "null"), typeutil.Coalesce(rec.Body.String(), "null"))
 			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
 
-			actualRows, err := dbtest.QueryAll(db, "pasangan", "id")
+			actualRows, err := dbtest.QueryWithClause(db, "pasangan", "where id = $1", tt.paramID)
 			require.NoError(t, err)
 			if len(tt.wantDBRows) == len(actualRows) {
 				for i, row := range actualRows {
@@ -2795,17 +2534,35 @@ func Test_handler_adminUpdatePasangan(t *testing.T) {
 func Test_handler_adminDeletePasangan(t *testing.T) {
 	t.Parallel()
 
-	seedData := `
+	dbData := `
 		insert into pegawai
 			(pns_id,  nip_baru, deleted_at) values
 			('id_1c', '1c',     null),
-			('id_1d', '1d',     '2000-01-01');
+			('id_1d', '1d',     '2000-01-01'),
+			('id_1e', '1e',     null);
+		insert into pasangan
+			(id, nama,       hubungan, pns,  nik,   tanggal_lahir, tanggal_menikah, akte_nikah, pns_id,  nip,  created_at,   updated_at) values
+			(1,  'John Doe', 2,        1,    '123', '1990-01-01',  '2020-01-01',    'akte_01',  'id_1c', '1c', '2000-01-01', '2000-01-01');
+		insert into pasangan
+			(id, nama,       hubungan, pns_id,  nip,  created_at,   updated_at,   deleted_at) values
+			(2,  'Jane Doe', 1,        'id_1c', '1c', '2000-01-01', '2000-01-01', '2000-01-01'),
+			(3,  'Jane Doe', 1,        'id_1d', '1d', '2000-01-01', '2000-01-01', null),
+			(4,  'Jane Doe', 1,        'id_1e', '1e', '2000-01-01', '2000-01-01', null),
+			(5,  'Jane Doe', 1,        'id_1c', '1c', '2000-01-01', '2000-01-01', null);
 	`
+	db := dbtest.New(t, dbmigrations.FS)
+	_, err := db.Exec(context.Background(), dbData)
+	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	authSvc := apitest.NewAuthService(api.Kode_Pegawai_Write)
+	RegisterRoutes(e, repo.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("2a")}
 	tests := []struct {
 		name             string
-		dbData           string
 		paramNIP         string
 		paramID          string
 		requestHeader    http.Header
@@ -2814,13 +2571,7 @@ func Test_handler_adminDeletePasangan(t *testing.T) {
 		wantDBRows       dbtest.Rows
 	}{
 		{
-			name: "ok: success delete",
-			dbData: seedData + `
-				insert into pasangan
-					(id, nama,       hubungan, pns,  nik,   tanggal_lahir, tanggal_menikah, akte_nikah, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'John Doe', 2,        1,    '123', '1990-01-01',  '2020-01-01',    'akte_01',  'id_1c', '1c', '2000-01-01', '2000-01-01'),
-					(2,  'Jane Doe', 1,        null, null,  null,          null,            null,       'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:             "ok: success delete",
 			paramNIP:         "1c",
 			paramID:          "1",
 			requestHeader:    http.Header{"Authorization": authHeader},
@@ -2848,37 +2599,19 @@ func Test_handler_adminDeletePasangan(t *testing.T) {
 					"updated_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
 					"deleted_at":        "{deleted_at}",
 				},
-				{
-					"id":                int64(2),
-					"nama":              "Jane Doe",
-					"hubungan":          int16(1),
-					"tanggal_lahir":     nil,
-					"pns":               nil,
-					"nik":               nil,
-					"agama_id":          nil,
-					"tanggal_menikah":   nil,
-					"akte_nikah":        nil,
-					"tanggal_cerai":     nil,
-					"akte_cerai":        nil,
-					"tanggal_meninggal": nil,
-					"akte_meninggal":    nil,
-					"karsus":            nil,
-					"status":            nil,
-					"pns_id":            "id_1c",
-					"nip":               "1c",
-					"created_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":        nil,
-				},
 			},
 		},
 		{
-			name: "error: pasangan is not found",
-			dbData: seedData + `
-				insert into pasangan
-					(id, nama,       hubungan, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'Jane Doe', 1,        'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:             "error: pasangan is not found",
+			paramNIP:         "1c",
+			paramID:          "0",
+			requestHeader:    http.Header{"Authorization": authHeader},
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data tidak ditemukan"}`,
+			wantDBRows:       dbtest.Rows{},
+		},
+		{
+			name:             "error: pasangan is deleted",
 			paramNIP:         "1c",
 			paramID:          "2",
 			requestHeader:    http.Header{"Authorization": authHeader},
@@ -2886,44 +2619,7 @@ func Test_handler_adminDeletePasangan(t *testing.T) {
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":                int64(1),
-					"nama":              "Jane Doe",
-					"hubungan":          int16(1),
-					"tanggal_lahir":     nil,
-					"pns":               nil,
-					"nik":               nil,
-					"agama_id":          nil,
-					"tanggal_menikah":   nil,
-					"akte_nikah":        nil,
-					"tanggal_cerai":     nil,
-					"akte_cerai":        nil,
-					"tanggal_meninggal": nil,
-					"akte_meninggal":    nil,
-					"karsus":            nil,
-					"status":            nil,
-					"pns_id":            "id_1c",
-					"nip":               "1c",
-					"created_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":        nil,
-				},
-			},
-		},
-		{
-			name: "error: pasangan is deleted",
-			dbData: seedData + `
-				insert into pasangan
-					(id, nama,       hubungan, pns_id,  nip,  created_at,   updated_at,   deleted_at) values
-					(1,  'Jane Doe', 1,        'id_1c', '1c', '2000-01-01', '2000-01-01', '2000-01-01');
-			`,
-			paramNIP:         "1c",
-			paramID:          "1",
-			requestHeader:    http.Header{"Authorization": authHeader},
-			wantResponseCode: http.StatusNotFound,
-			wantResponseBody: `{"message": "data tidak ditemukan"}`,
-			wantDBRows: dbtest.Rows{
-				{
-					"id":                int64(1),
+					"id":                int64(2),
 					"nama":              "Jane Doe",
 					"hubungan":          int16(1),
 					"tanggal_lahir":     nil,
@@ -2947,20 +2643,15 @@ func Test_handler_adminDeletePasangan(t *testing.T) {
 			},
 		},
 		{
-			name: "error: pegawai is deleted",
-			dbData: seedData + `
-				insert into pasangan
-					(id, nama,       hubungan, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'Jane Doe', 1,        'id_1d', '1d', '2000-01-01', '2000-01-01');
-			`,
+			name:             "error: pegawai is deleted",
 			paramNIP:         "1d",
-			paramID:          "1",
+			paramID:          "3",
 			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusNotFound,
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":                int64(1),
+					"id":                int64(3),
 					"nama":              "Jane Doe",
 					"hubungan":          int16(1),
 					"tanggal_lahir":     nil,
@@ -2984,49 +2675,86 @@ func Test_handler_adminDeletePasangan(t *testing.T) {
 			},
 		},
 		{
-			name:             "error: unexpected data type",
+			name:             "error: pasangan is owned by different pegawai",
 			paramNIP:         "1c",
-			paramID:          "1c",
+			paramID:          "4",
 			requestHeader:    http.Header{"Authorization": authHeader},
-			wantResponseCode: http.StatusBadRequest,
-			wantResponseBody: `{"message": "parameter \"id\" harus dalam format yang sesuai"}`,
-			wantDBRows:       dbtest.Rows{},
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data tidak ditemukan"}`,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":                int64(4),
+					"nama":              "Jane Doe",
+					"hubungan":          int16(1),
+					"tanggal_lahir":     nil,
+					"pns":               nil,
+					"nik":               nil,
+					"agama_id":          nil,
+					"tanggal_menikah":   nil,
+					"akte_nikah":        nil,
+					"tanggal_cerai":     nil,
+					"akte_cerai":        nil,
+					"tanggal_meninggal": nil,
+					"akte_meninggal":    nil,
+					"karsus":            nil,
+					"status":            nil,
+					"pns_id":            "id_1e",
+					"nip":               "1e",
+					"created_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":        nil,
+				},
+			},
 		},
 		{
 			name:             "error: invalid token",
 			paramNIP:         "1c",
-			paramID:          "1",
+			paramID:          "5",
 			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
-			wantDBRows:       dbtest.Rows{},
+			wantDBRows: dbtest.Rows{
+				{
+					"id":                int64(5),
+					"nama":              "Jane Doe",
+					"hubungan":          int16(1),
+					"tanggal_lahir":     nil,
+					"pns":               nil,
+					"nik":               nil,
+					"agama_id":          nil,
+					"tanggal_menikah":   nil,
+					"akte_nikah":        nil,
+					"tanggal_cerai":     nil,
+					"akte_cerai":        nil,
+					"tanggal_meninggal": nil,
+					"akte_meninggal":    nil,
+					"karsus":            nil,
+					"status":            nil,
+					"pns_id":            "id_1c",
+					"nip":               "1c",
+					"created_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":        nil,
+				},
+			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			db := dbtest.New(t, dbmigrations.FS)
-			_, err := db.Exec(context.Background(), tt.dbData)
-			require.NoError(t, err)
-
 			req := httptest.NewRequest(http.MethodDelete, "/v1/admin/pegawai/"+tt.paramNIP+"/pasangan/"+tt.paramID, nil)
 			req.Header = tt.requestHeader
 			req.Header.Set("Content-Type", "application/json")
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			authSvc := apitest.NewAuthService(api.Kode_Pegawai_Write)
-			RegisterRoutes(e, repo.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
 			assert.JSONEq(t, typeutil.Coalesce(tt.wantResponseBody, "null"), typeutil.Coalesce(rec.Body.String(), "null"))
 			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
 
-			actualRows, err := dbtest.QueryAll(db, "pasangan", "id")
+			actualRows, err := dbtest.QueryWithClause(db, "pasangan", "where id = $1", tt.paramID)
 			require.NoError(t, err)
 			if len(tt.wantDBRows) == len(actualRows) {
 				for i, row := range actualRows {
@@ -3044,11 +2772,15 @@ func Test_handler_adminDeletePasangan(t *testing.T) {
 func Test_handler_adminCreateAnak(t *testing.T) {
 	t.Parallel()
 
-	seedData := `
+	dbData := `
 		insert into pegawai
 			(pns_id,  nip_baru, deleted_at) values
+			('id_1a', '1a',     null),
 			('id_1c', '1c',     null),
-			('id_1d', '1d',     '2000-01-01');
+			('id_1d', '1d',     '2000-01-01'),
+			('id_1e', '1e',     null),
+			('id_1f', '1f',     null),
+			('id_1g', '1g',     null);
 		insert into ref_agama
 			(id, deleted_at) values
 			(1,  null),
@@ -3060,14 +2792,25 @@ func Test_handler_adminCreateAnak(t *testing.T) {
 		insert into pasangan
 			(id, pns_id,  deleted_at) values
 			(1,  'id_1c', null),
-			(2,  'id_1c', '2000-01-01'),
-			(3,  'id_1d', null);
+			(2,  'id_1a', '2000-01-01'),
+			(3,  'id_1d', null),
+			(4,  'id_1e', null),
+			(5,  'id_1f', null),
+			(6,  'id_1g', null);
 	`
+	db := dbtest.New(t, dbmigrations.FS)
+	_, err := db.Exec(context.Background(), dbData)
+	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	authSvc := apitest.NewAuthService(api.Kode_Pegawai_Write)
+	RegisterRoutes(e, repo.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("2a")}
 	tests := []struct {
 		name             string
-		dbData           string
 		paramNIP         string
 		requestHeader    http.Header
 		requestBody      string
@@ -3076,12 +2819,7 @@ func Test_handler_adminCreateAnak(t *testing.T) {
 		wantDBRows       dbtest.Rows
 	}{
 		{
-			name: "ok: with all data",
-			dbData: seedData + `
-				insert into anak
-					(nama,       pns_id,  nip,  created_at,   updated_at) values
-					('John Doe', 'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:          "ok: with all data",
 			paramNIP:      "1c",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
@@ -3098,30 +2836,11 @@ func Test_handler_adminCreateAnak(t *testing.T) {
 			}`,
 			wantResponseCode: http.StatusCreated,
 			wantResponseBody: `{
-				"data": { "id": 2 }
+				"data": { "id": {id} }
 			}`,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":             int64(1),
-					"nama":           "John Doe",
-					"pasangan_id":    nil,
-					"nik":            nil,
-					"jenis_kelamin":  nil,
-					"tempat_lahir":   nil,
-					"tanggal_lahir":  nil,
-					"status_anak":    nil,
-					"status_sekolah": nil,
-					"agama_id":       nil,
-					"jenis_kawin_id": nil,
-					"anak_ke":        nil,
-					"pns_id":         "id_1c",
-					"nip":            "1c",
-					"created_at":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":     nil,
-				},
-				{
-					"id":             int64(2),
+					"id":             "{id}",
 					"nama":           "Jane Doe",
 					"pasangan_id":    int64(1),
 					"nik":            "123",
@@ -3143,15 +2862,14 @@ func Test_handler_adminCreateAnak(t *testing.T) {
 		},
 		{
 			name:          "ok: with different enum data and anak_ke = 0",
-			dbData:        seedData,
-			paramNIP:      "1c",
+			paramNIP:      "1e",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "Will Doe",
 				"nik": "123",
 				"jenis_kelamin": "M",
 				"tanggal_lahir": "2000-01-01",
-				"pasangan_orang_tua_id": 1,
+				"pasangan_orang_tua_id": 4,
 				"status_pernikahan_id": 1,
 				"agama_id": 1,
 				"status_anak": "Kandung",
@@ -3160,13 +2878,13 @@ func Test_handler_adminCreateAnak(t *testing.T) {
 			}`,
 			wantResponseCode: http.StatusCreated,
 			wantResponseBody: `{
-				"data": { "id": 1 }
+				"data": { "id": {id} }
 			}`,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":             int64(1),
+					"id":             "{id}",
 					"nama":           "Will Doe",
-					"pasangan_id":    int64(1),
+					"pasangan_id":    int64(4),
 					"nik":            "123",
 					"jenis_kelamin":  "M",
 					"tempat_lahir":   nil,
@@ -3176,8 +2894,8 @@ func Test_handler_adminCreateAnak(t *testing.T) {
 					"agama_id":       int16(1),
 					"jenis_kawin_id": int16(1),
 					"anak_ke":        nil,
-					"pns_id":         "id_1c",
-					"nip":            "1c",
+					"pns_id":         "id_1e",
+					"nip":            "1e",
 					"created_at":     "{created_at}",
 					"updated_at":     "{updated_at}",
 					"deleted_at":     nil,
@@ -3186,15 +2904,14 @@ func Test_handler_adminCreateAnak(t *testing.T) {
 		},
 		{
 			name:          "ok: with null values",
-			dbData:        seedData,
-			paramNIP:      "1c",
+			paramNIP:      "1f",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "Jane Doe",
 				"nik": "",
 				"jenis_kelamin": "F",
 				"tanggal_lahir": "2000-01-01",
-				"pasangan_orang_tua_id": 1,
+				"pasangan_orang_tua_id": 5,
 				"status_pernikahan_id": 1,
 				"agama_id": null,
 				"status_anak": "Angkat",
@@ -3203,13 +2920,13 @@ func Test_handler_adminCreateAnak(t *testing.T) {
 			}`,
 			wantResponseCode: http.StatusCreated,
 			wantResponseBody: `{
-				"data": { "id": 1 }
+				"data": { "id": {id} }
 			}`,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":             int64(1),
+					"id":             "{id}",
 					"nama":           "Jane Doe",
-					"pasangan_id":    int64(1),
+					"pasangan_id":    int64(5),
 					"nik":            nil,
 					"jenis_kelamin":  "F",
 					"tempat_lahir":   nil,
@@ -3219,8 +2936,8 @@ func Test_handler_adminCreateAnak(t *testing.T) {
 					"agama_id":       nil,
 					"jenis_kawin_id": int16(1),
 					"anak_ke":        nil,
-					"pns_id":         "id_1c",
-					"nip":            "1c",
+					"pns_id":         "id_1f",
+					"nip":            "1f",
 					"created_at":     "{created_at}",
 					"updated_at":     "{updated_at}",
 					"deleted_at":     nil,
@@ -3229,26 +2946,25 @@ func Test_handler_adminCreateAnak(t *testing.T) {
 		},
 		{
 			name:          "ok: required data only",
-			dbData:        seedData,
-			paramNIP:      "1c",
+			paramNIP:      "1g",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "John Doe",
 				"jenis_kelamin": "M",
 				"tanggal_lahir": "2000-01-01",
-				"pasangan_orang_tua_id": 1,
+				"pasangan_orang_tua_id": 6,
 				"status_pernikahan_id": 1,
 				"status_anak": "Kandung"
 			}`,
 			wantResponseCode: http.StatusCreated,
 			wantResponseBody: `{
-				"data": { "id": 1 }
+				"data": { "id": {id} }
 			}`,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":             int64(1),
+					"id":             "{id}",
 					"nama":           "John Doe",
-					"pasangan_id":    int64(1),
+					"pasangan_id":    int64(6),
 					"nik":            nil,
 					"jenis_kelamin":  "M",
 					"tempat_lahir":   nil,
@@ -3258,8 +2974,8 @@ func Test_handler_adminCreateAnak(t *testing.T) {
 					"agama_id":       nil,
 					"jenis_kawin_id": int16(1),
 					"anak_ke":        nil,
-					"pns_id":         "id_1c",
-					"nip":            "1c",
+					"pns_id":         "id_1g",
+					"nip":            "1g",
 					"created_at":     "{created_at}",
 					"updated_at":     "{updated_at}",
 					"deleted_at":     nil,
@@ -3268,8 +2984,7 @@ func Test_handler_adminCreateAnak(t *testing.T) {
 		},
 		{
 			name:          "error: pegawai is not found",
-			dbData:        seedData,
-			paramNIP:      "1a",
+			paramNIP:      "1b",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "John Doe",
@@ -3285,7 +3000,6 @@ func Test_handler_adminCreateAnak(t *testing.T) {
 		},
 		{
 			name:          "error: pegawai is deleted",
-			dbData:        seedData,
 			paramNIP:      "1d",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
@@ -3306,8 +3020,7 @@ func Test_handler_adminCreateAnak(t *testing.T) {
 		},
 		{
 			name:          "error: pasangan orang tua is owned by different pegawai",
-			dbData:        seedData,
-			paramNIP:      "1c",
+			paramNIP:      "1a",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "John Doe",
@@ -3323,8 +3036,7 @@ func Test_handler_adminCreateAnak(t *testing.T) {
 		},
 		{
 			name:          "error: agama or status pernikahan or pasangan orang tua is not found",
-			dbData:        seedData,
-			paramNIP:      "1c",
+			paramNIP:      "1a",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "John Doe",
@@ -3341,8 +3053,7 @@ func Test_handler_adminCreateAnak(t *testing.T) {
 		},
 		{
 			name:          "error: agama or status pernikahan or pasangan orang tua is deleted",
-			dbData:        seedData,
-			paramNIP:      "1c",
+			paramNIP:      "1a",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "John Doe",
@@ -3362,7 +3073,7 @@ func Test_handler_adminCreateAnak(t *testing.T) {
 		},
 		{
 			name:          "error: invalid format date, exceed length limit, unexpected enum or data type",
-			paramNIP:      "1c",
+			paramNIP:      "1a",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "` + strings.Repeat(".", 101) + `",
@@ -3391,7 +3102,7 @@ func Test_handler_adminCreateAnak(t *testing.T) {
 		},
 		{
 			name:          "error: null on required params",
-			paramNIP:      "1c",
+			paramNIP:      "1a",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": null,
@@ -3412,7 +3123,7 @@ func Test_handler_adminCreateAnak(t *testing.T) {
 		},
 		{
 			name:             "error: missing required params & have additional params",
-			paramNIP:         "1c",
+			paramNIP:         "1a",
 			requestHeader:    http.Header{"Authorization": authHeader},
 			requestBody:      `{ "id": 1 }`,
 			wantResponseCode: http.StatusBadRequest,
@@ -3427,7 +3138,7 @@ func Test_handler_adminCreateAnak(t *testing.T) {
 		},
 		{
 			name:             "error: body is empty",
-			paramNIP:         "1c",
+			paramNIP:         "1a",
 			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusBadRequest,
 			wantResponseBody: `{"message": "request body harus diisi"}`,
@@ -3435,7 +3146,7 @@ func Test_handler_adminCreateAnak(t *testing.T) {
 		},
 		{
 			name:             "error: invalid token",
-			paramNIP:         "1c",
+			paramNIP:         "1a",
 			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
@@ -3446,40 +3157,34 @@ func Test_handler_adminCreateAnak(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			db := dbtest.New(t, dbmigrations.FS)
-			_, err := db.Exec(context.Background(), tt.dbData)
-			require.NoError(t, err)
-
 			req := httptest.NewRequest(http.MethodPost, "/v1/admin/pegawai/"+tt.paramNIP+"/anak", strings.NewReader(tt.requestBody))
 			req.Header = tt.requestHeader
 			req.Header.Set("Content-Type", "application/json")
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			authSvc := apitest.NewAuthService(api.Kode_Pegawai_Write)
-			RegisterRoutes(e, repo.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
-			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
 			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
 
-			actualRows, err := dbtest.QueryAll(db, "anak", "id")
+			actualRows, err := dbtest.QueryWithClause(db, "anak", "where nip = $1", tt.paramNIP)
 			require.NoError(t, err)
 			if len(tt.wantDBRows) == len(actualRows) {
 				for i, row := range actualRows {
-					if tt.wantDBRows[i]["created_at"] == "{created_at}" {
+					if tt.wantDBRows[i]["id"] == "{id}" {
 						assert.WithinDuration(t, time.Now(), row["created_at"].(time.Time), 10*time.Second)
 						assert.Equal(t, row["created_at"], row["updated_at"])
 
+						tt.wantDBRows[i]["id"] = row["id"]
 						tt.wantDBRows[i]["created_at"] = row["created_at"]
 						tt.wantDBRows[i]["updated_at"] = row["updated_at"]
+
+						tt.wantResponseBody = strings.ReplaceAll(tt.wantResponseBody, "{id}", fmt.Sprintf("%d", row["id"]))
 					}
 				}
 			}
 			assert.Equal(t, tt.wantDBRows, actualRows)
+			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
 		})
 	}
 }
@@ -3487,7 +3192,7 @@ func Test_handler_adminCreateAnak(t *testing.T) {
 func Test_handler_adminUpdateAnak(t *testing.T) {
 	t.Parallel()
 
-	seedData := `
+	dbData := `
 		insert into pegawai
 			(pns_id,  nip_baru, deleted_at) values
 			('id_1c', '1c',     null),
@@ -3506,12 +3211,54 @@ func Test_handler_adminUpdateAnak(t *testing.T) {
 			(1,  'id_1c', null),
 			(2,  'id_1c', '2000-01-01'),
 			(3,  'id_1d', null);
+		insert into anak
+			(id, nama,       tempat_lahir, status_sekolah, anak_ke, agama_id, nik,   pns_id,  nip,  created_at,   updated_at) values
+			(1,  'John Doe', 'Jakarta',    null,           null,    null,     null,  'id_1c', '1c', '2000-01-01', '2000-01-01'),
+			(2,  'John Doe', null,         null,           null,    null,     null,  'id_1c', '1c', '2000-01-01', '2000-01-01'),
+			(3,  'John Doe', 'Medan',      1,              1,       1,        '123', 'id_1c', '1c', '2000-01-01', '2000-01-01'),
+			(4,  'John Doe', 'Medan',      1,              1,       1,        '123', 'id_1c', '1c', '2000-01-01', '2000-01-01');
+		insert into anak
+			(id, nama,       pns_id,  nip,  created_at,   updated_at,   deleted_at) values
+			(5,  'Jane Doe', 'id_1e', '1e', '2000-01-01', '2000-01-01', null),
+			(6,  'Jane Doe', 'id_1c', '1c', '2000-01-01', '2000-01-01', '2000-01-01'),
+			(7,  'Jane Doe', 'id_1d', '1d', '2000-01-01', '2000-01-01', null),
+			(8,  'Jane Doe', 'id_1c', '1c', '2000-01-01', '2000-01-01', null);
 	`
+	db := dbtest.New(t, dbmigrations.FS)
+	_, err := db.Exec(context.Background(), dbData)
+	require.NoError(t, err)
+
+	defaultRows := dbtest.Rows{
+		{
+			"id":             int64(8),
+			"nama":           "Jane Doe",
+			"pasangan_id":    nil,
+			"nik":            nil,
+			"jenis_kelamin":  nil,
+			"tempat_lahir":   nil,
+			"tanggal_lahir":  nil,
+			"status_anak":    nil,
+			"status_sekolah": nil,
+			"agama_id":       nil,
+			"jenis_kawin_id": nil,
+			"anak_ke":        nil,
+			"pns_id":         "id_1c",
+			"nip":            "1c",
+			"created_at":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+			"updated_at":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+			"deleted_at":     nil,
+		},
+	}
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	authSvc := apitest.NewAuthService(api.Kode_Pegawai_Write)
+	RegisterRoutes(e, repo.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("2a")}
 	tests := []struct {
 		name             string
-		dbData           string
 		paramNIP         string
 		paramID          string
 		requestHeader    http.Header
@@ -3521,13 +3268,7 @@ func Test_handler_adminUpdateAnak(t *testing.T) {
 		wantDBRows       dbtest.Rows
 	}{
 		{
-			name: "ok: with all data",
-			dbData: seedData + `
-				insert into anak
-					(id, nama,       tempat_lahir, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'John Doe', 'Jakarta',    'id_1c', '1c', '2000-01-01', '2000-01-01'),
-					(2,  'John Doe', 'Jakarta',    'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:          "ok: with all data",
 			paramNIP:      "1c",
 			paramID:       "1",
 			requestHeader: http.Header{"Authorization": authHeader},
@@ -3564,36 +3305,12 @@ func Test_handler_adminUpdateAnak(t *testing.T) {
 					"updated_at":     "{updated_at}",
 					"deleted_at":     nil,
 				},
-				{
-					"id":             int64(2),
-					"nama":           "John Doe",
-					"pasangan_id":    nil,
-					"nik":            nil,
-					"jenis_kelamin":  nil,
-					"tempat_lahir":   "Jakarta",
-					"tanggal_lahir":  nil,
-					"status_anak":    nil,
-					"status_sekolah": nil,
-					"agama_id":       nil,
-					"jenis_kawin_id": nil,
-					"anak_ke":        nil,
-					"pns_id":         "id_1c",
-					"nip":            "1c",
-					"created_at":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":     nil,
-				},
 			},
 		},
 		{
-			name: "ok: with different enum data and anak_ke = 0",
-			dbData: seedData + `
-				insert into anak
-					(id, nama,       pns_id,  nip,  created_at,   updated_at) values
-					(1,  'John Doe', 'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:          "ok: with different enum data and anak_ke = 0",
 			paramNIP:      "1c",
-			paramID:       "1",
+			paramID:       "2",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "Will Doe",
@@ -3610,7 +3327,7 @@ func Test_handler_adminUpdateAnak(t *testing.T) {
 			wantResponseCode: http.StatusNoContent,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":             int64(1),
+					"id":             int64(2),
 					"nama":           "Will Doe",
 					"pasangan_id":    int64(1),
 					"nik":            "123",
@@ -3631,14 +3348,9 @@ func Test_handler_adminUpdateAnak(t *testing.T) {
 			},
 		},
 		{
-			name: "ok: with null values",
-			dbData: seedData + `
-				insert into anak
-					(id, nama,       tempat_lahir, status_sekolah, anak_ke, agama_id, nik,   pns_id,  nip,  created_at,   updated_at) values
-					(1,  'John Doe', 'Medan',      1,              1,       1,        '123', 'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:          "ok: with null values",
 			paramNIP:      "1c",
-			paramID:       "1",
+			paramID:       "3",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "John Doe",
@@ -3655,7 +3367,7 @@ func Test_handler_adminUpdateAnak(t *testing.T) {
 			wantResponseCode: http.StatusNoContent,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":             int64(1),
+					"id":             int64(3),
 					"nama":           "John Doe",
 					"pasangan_id":    int64(1),
 					"nik":            nil,
@@ -3676,14 +3388,9 @@ func Test_handler_adminUpdateAnak(t *testing.T) {
 			},
 		},
 		{
-			name: "ok: required data only",
-			dbData: seedData + `
-				insert into anak
-					(id, nama,       tempat_lahir, status_sekolah, anak_ke, agama_id, nik,   pns_id,  nip,  created_at,   updated_at) values
-					(1,  'John Doe', 'Medan',      1,              1,       1,        '123', 'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:          "ok: required data only",
 			paramNIP:      "1c",
-			paramID:       "1",
+			paramID:       "4",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "Jane Doe",
@@ -3696,7 +3403,7 @@ func Test_handler_adminUpdateAnak(t *testing.T) {
 			wantResponseCode: http.StatusNoContent,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":             int64(1),
+					"id":             int64(4),
 					"nama":           "Jane Doe",
 					"pasangan_id":    int64(1),
 					"nik":            nil,
@@ -3717,14 +3424,9 @@ func Test_handler_adminUpdateAnak(t *testing.T) {
 			},
 		},
 		{
-			name: "error: anak is not found",
-			dbData: seedData + `
-				insert into anak
-					(id, nama,       pns_id,  nip,  created_at,   updated_at) values
-					(1,  'Jane Doe', 'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:          "error: anak is not found",
 			paramNIP:      "1c",
-			paramID:       "2",
+			paramID:       "0",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "John Doe",
@@ -3736,37 +3438,12 @@ func Test_handler_adminUpdateAnak(t *testing.T) {
 			}`,
 			wantResponseCode: http.StatusNotFound,
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
-			wantDBRows: dbtest.Rows{
-				{
-					"id":             int64(1),
-					"nama":           "Jane Doe",
-					"pasangan_id":    nil,
-					"nik":            nil,
-					"jenis_kelamin":  nil,
-					"tempat_lahir":   nil,
-					"tanggal_lahir":  nil,
-					"status_anak":    nil,
-					"status_sekolah": nil,
-					"agama_id":       nil,
-					"jenis_kawin_id": nil,
-					"anak_ke":        nil,
-					"pns_id":         "id_1c",
-					"nip":            "1c",
-					"created_at":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":     nil,
-				},
-			},
+			wantDBRows:       dbtest.Rows{},
 		},
 		{
-			name: "error: anak is owned by different pegawai",
-			dbData: seedData + `
-				insert into anak
-					(id, nama,       pns_id,  nip,  created_at,   updated_at) values
-					(1,  'Jane Doe', 'id_1e', '1e', '2000-01-01', '2000-01-01');
-			`,
+			name:          "error: anak is owned by different pegawai",
 			paramNIP:      "1c",
-			paramID:       "1",
+			paramID:       "5",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "John Doe",
@@ -3780,7 +3457,7 @@ func Test_handler_adminUpdateAnak(t *testing.T) {
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":             int64(1),
+					"id":             int64(5),
 					"nama":           "Jane Doe",
 					"pasangan_id":    nil,
 					"nik":            nil,
@@ -3801,14 +3478,9 @@ func Test_handler_adminUpdateAnak(t *testing.T) {
 			},
 		},
 		{
-			name: "error: anak is deleted",
-			dbData: seedData + `
-				insert into anak
-					(id, nama,       pns_id,  nip,  created_at,   updated_at,   deleted_at) values
-					(1,  'Jane Doe', 'id_1c', '1c', '2000-01-01', '2000-01-01', '2000-01-01');
-			`,
+			name:          "error: anak is deleted",
 			paramNIP:      "1c",
-			paramID:       "1",
+			paramID:       "6",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "John Doe",
@@ -3826,7 +3498,7 @@ func Test_handler_adminUpdateAnak(t *testing.T) {
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":             int64(1),
+					"id":             int64(6),
 					"nama":           "Jane Doe",
 					"pasangan_id":    nil,
 					"nik":            nil,
@@ -3847,14 +3519,9 @@ func Test_handler_adminUpdateAnak(t *testing.T) {
 			},
 		},
 		{
-			name: "error: pegawai is deleted",
-			dbData: seedData + `
-				insert into anak
-					(id, nama,       pns_id,  nip,  created_at,   updated_at) values
-					(1,  'Jane Doe', 'id_1d', '1d', '2000-01-01', '2000-01-01');
-			`,
+			name:          "error: pegawai is deleted",
 			paramNIP:      "1d",
-			paramID:       "1",
+			paramID:       "7",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "John Doe",
@@ -3872,7 +3539,7 @@ func Test_handler_adminUpdateAnak(t *testing.T) {
 			wantResponseBody: `{"message": "data pasangan orang tua tidak ditemukan"}`,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":             int64(1),
+					"id":             int64(7),
 					"nama":           "Jane Doe",
 					"pasangan_id":    nil,
 					"nik":            nil,
@@ -3893,56 +3560,27 @@ func Test_handler_adminUpdateAnak(t *testing.T) {
 			},
 		},
 		{
-			name: "error: pasangan orang tua is not found",
-			dbData: seedData + `
-				insert into anak
-					(id, nama,       pasangan_id, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'Jane Doe', 2,           'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:          "error: agama or status pernikahan or pasangan orang tua is not found",
 			paramNIP:      "1c",
-			paramID:       "1",
+			paramID:       "8",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "Jane Doe",
 				"jenis_kelamin": "F",
 				"tanggal_lahir": "2000-01-01",
+				"agama_id": 0,
 				"pasangan_orang_tua_id": 0,
-				"status_pernikahan_id": 1,
+				"status_pernikahan_id": 0,
 				"status_anak": "Angkat"
 			}`,
 			wantResponseCode: http.StatusBadRequest,
-			wantResponseBody: `{"message": "data pasangan orang tua tidak ditemukan"}`,
-			wantDBRows: dbtest.Rows{
-				{
-					"id":             int64(1),
-					"nama":           "Jane Doe",
-					"pasangan_id":    int64(2),
-					"nik":            nil,
-					"jenis_kelamin":  nil,
-					"tempat_lahir":   nil,
-					"tanggal_lahir":  nil,
-					"status_anak":    nil,
-					"status_sekolah": nil,
-					"agama_id":       nil,
-					"jenis_kawin_id": nil,
-					"anak_ke":        nil,
-					"pns_id":         "id_1c",
-					"nip":            "1c",
-					"created_at":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":     nil,
-				},
-			},
+			wantResponseBody: `{"message": "data agama tidak ditemukan | data status pernikahan tidak ditemukan | data pasangan orang tua tidak ditemukan"}`,
+			wantDBRows:       defaultRows,
 		},
 		{
-			name: "error: pasangan orang tua is owned by different pegawai",
-			dbData: seedData + `
-				insert into anak
-					(id, nama,       pasangan_id, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'Jane Doe', 1,           'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:          "error: pasangan orang tua is owned by different pegawai",
 			paramNIP:      "1c",
-			paramID:       "1",
+			paramID:       "8",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "Jane Doe",
@@ -3954,251 +3592,30 @@ func Test_handler_adminUpdateAnak(t *testing.T) {
 			}`,
 			wantResponseCode: http.StatusBadRequest,
 			wantResponseBody: `{"message": "data pasangan orang tua tidak ditemukan"}`,
-			wantDBRows: dbtest.Rows{
-				{
-					"id":             int64(1),
-					"nama":           "Jane Doe",
-					"pasangan_id":    int64(1),
-					"nik":            nil,
-					"jenis_kelamin":  nil,
-					"tempat_lahir":   nil,
-					"tanggal_lahir":  nil,
-					"status_anak":    nil,
-					"status_sekolah": nil,
-					"agama_id":       nil,
-					"jenis_kawin_id": nil,
-					"anak_ke":        nil,
-					"pns_id":         "id_1c",
-					"nip":            "1c",
-					"created_at":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":     nil,
-				},
-			},
+			wantDBRows:       defaultRows,
 		},
 		{
-			name: "error: pasangan orang tua is deleted",
-			dbData: seedData + `
-				insert into anak
-					(id, nama,       pasangan_id, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'Jane Doe', 1,           'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:          "error: agama or status pernikahan or pasangan orang tua is deleted",
 			paramNIP:      "1c",
-			paramID:       "1",
+			paramID:       "8",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "John Doe",
 				"jenis_kelamin": "M",
 				"tanggal_lahir": "2000-01-01",
-				"pasangan_orang_tua_id": 2,
-				"status_pernikahan_id": 1,
-				"status_anak": "Kandung"
-			}`,
-			wantResponseCode: http.StatusBadRequest,
-			wantResponseBody: `{"message": "data pasangan orang tua tidak ditemukan"}`,
-			wantDBRows: dbtest.Rows{
-				{
-					"id":             int64(1),
-					"nama":           "Jane Doe",
-					"pasangan_id":    int64(1),
-					"nik":            nil,
-					"jenis_kelamin":  nil,
-					"tempat_lahir":   nil,
-					"tanggal_lahir":  nil,
-					"status_anak":    nil,
-					"status_sekolah": nil,
-					"agama_id":       nil,
-					"jenis_kawin_id": nil,
-					"anak_ke":        nil,
-					"pns_id":         "id_1c",
-					"nip":            "1c",
-					"created_at":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":     nil,
-				},
-			},
-		},
-		{
-			name: "error: status pernikahan is not found",
-			dbData: seedData + `
-				insert into anak
-					(id, nama,       jenis_kawin_id, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'Jane Doe', 2,              'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
-			paramNIP:      "1c",
-			paramID:       "1",
-			requestHeader: http.Header{"Authorization": authHeader},
-			requestBody: `{
-				"nama": "Jane Doe",
-				"jenis_kelamin": "F",
-				"tanggal_lahir": "1990-01-01",
-				"pasangan_orang_tua_id": 1,
-				"status_pernikahan_id": 0,
-				"status_anak": "Kandung"
-			}`,
-			wantResponseCode: http.StatusBadRequest,
-			wantResponseBody: `{"message": "data status pernikahan tidak ditemukan"}`,
-			wantDBRows: dbtest.Rows{
-				{
-					"id":             int64(1),
-					"nama":           "Jane Doe",
-					"pasangan_id":    nil,
-					"nik":            nil,
-					"jenis_kelamin":  nil,
-					"tempat_lahir":   nil,
-					"tanggal_lahir":  nil,
-					"status_anak":    nil,
-					"status_sekolah": nil,
-					"agama_id":       nil,
-					"jenis_kawin_id": int16(2),
-					"anak_ke":        nil,
-					"pns_id":         "id_1c",
-					"nip":            "1c",
-					"created_at":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":     nil,
-				},
-			},
-		},
-		{
-			name: "error: status pernikahan is deleted",
-			dbData: seedData + `
-				insert into anak
-					(id, nama,       jenis_kawin_id, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'Jane Doe', 1,              'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
-			paramNIP:      "1c",
-			paramID:       "1",
-			requestHeader: http.Header{"Authorization": authHeader},
-			requestBody: `{
-				"nama": "John Doe",
-				"nik": "123",
-				"jenis_kelamin": "M",
-				"tanggal_lahir": "1990-01-01",
-				"pasangan_orang_tua_id": 1,
-				"agama_id": 1,
-				"status_pernikahan_id": 2,
-				"status_anak": "Kandung",
-				"status_sekolah": "Masih Sekolah",
-				"anak_ke": 1
-			}`,
-			wantResponseCode: http.StatusBadRequest,
-			wantResponseBody: `{"message": "data status pernikahan tidak ditemukan"}`,
-			wantDBRows: dbtest.Rows{
-				{
-					"id":             int64(1),
-					"nama":           "Jane Doe",
-					"pasangan_id":    nil,
-					"nik":            nil,
-					"jenis_kelamin":  nil,
-					"tempat_lahir":   nil,
-					"tanggal_lahir":  nil,
-					"status_anak":    nil,
-					"status_sekolah": nil,
-					"agama_id":       nil,
-					"jenis_kawin_id": int16(1),
-					"anak_ke":        nil,
-					"pns_id":         "id_1c",
-					"nip":            "1c",
-					"created_at":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":     nil,
-				},
-			},
-		},
-		{
-			name: "error: agama is not found",
-			dbData: seedData + `
-				insert into anak
-					(id, nama,       agama_id, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'Jane Doe', 2,        'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
-			paramNIP:      "1c",
-			paramID:       "1",
-			requestHeader: http.Header{"Authorization": authHeader},
-			requestBody: `{
-				"nama": "John Doe",
-				"jenis_kelamin": "M",
-				"tanggal_lahir": "1990-01-01",
-				"pasangan_orang_tua_id": 1,
-				"agama_id": 0,
-				"status_pernikahan_id": 1,
-				"status_anak": "Kandung"
-			}`,
-			wantResponseCode: http.StatusBadRequest,
-			wantResponseBody: `{"message": "data agama tidak ditemukan"}`,
-			wantDBRows: dbtest.Rows{
-				{
-					"id":             int64(1),
-					"nama":           "Jane Doe",
-					"pasangan_id":    nil,
-					"nik":            nil,
-					"jenis_kelamin":  nil,
-					"tempat_lahir":   nil,
-					"tanggal_lahir":  nil,
-					"status_anak":    nil,
-					"status_sekolah": nil,
-					"agama_id":       int16(2),
-					"jenis_kawin_id": nil,
-					"anak_ke":        nil,
-					"pns_id":         "id_1c",
-					"nip":            "1c",
-					"created_at":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":     nil,
-				},
-			},
-		},
-		{
-			name: "error: agama is deleted",
-			dbData: seedData + `
-				insert into anak
-					(id, nama,       agama_id, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'Jane Doe', 1,        'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
-			paramNIP:      "1c",
-			paramID:       "1",
-			requestHeader: http.Header{"Authorization": authHeader},
-			requestBody: `{
-				"nama": "John Doe",
-				"nik": "123",
-				"jenis_kelamin": "M",
-				"tanggal_lahir": "1990-01-01",
-				"pasangan_orang_tua_id": 1,
 				"agama_id": 2,
-				"status_pernikahan_id": 1,
-				"status_anak": "Kandung",
-				"status_sekolah": "Masih Sekolah",
-				"anak_ke": 1
+				"pasangan_orang_tua_id": 2,
+				"status_pernikahan_id": 2,
+				"status_anak": "Kandung"
 			}`,
 			wantResponseCode: http.StatusBadRequest,
-			wantResponseBody: `{"message": "data agama tidak ditemukan"}`,
-			wantDBRows: dbtest.Rows{
-				{
-					"id":             int64(1),
-					"nama":           "Jane Doe",
-					"pasangan_id":    nil,
-					"nik":            nil,
-					"jenis_kelamin":  nil,
-					"tempat_lahir":   nil,
-					"tanggal_lahir":  nil,
-					"status_anak":    nil,
-					"status_sekolah": nil,
-					"agama_id":       int16(1),
-					"jenis_kawin_id": nil,
-					"anak_ke":        nil,
-					"pns_id":         "id_1c",
-					"nip":            "1c",
-					"created_at":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":     nil,
-				},
-			},
+			wantResponseBody: `{"message": "data agama tidak ditemukan | data status pernikahan tidak ditemukan | data pasangan orang tua tidak ditemukan"}`,
+			wantDBRows:       defaultRows,
 		},
 		{
 			name:          "error: invalid format date, exceed length limit, unexpected enum or data type",
 			paramNIP:      "1c",
-			paramID:       "1",
+			paramID:       "8",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": "` + strings.Repeat(".", 101) + `",
@@ -4223,12 +3640,12 @@ func Test_handler_adminUpdateAnak(t *testing.T) {
 				` | parameter \"status_pernikahan_id\" harus dalam tipe integer` +
 				` | parameter \"status_sekolah\" harus salah satu dari \"Masih Sekolah\", \"Sudah Bekerja\", \"\"` +
 				` | parameter \"tanggal_lahir\" harus dalam format date"}`,
-			wantDBRows: dbtest.Rows{},
+			wantDBRows: defaultRows,
 		},
 		{
 			name:          "error: null on required params",
 			paramNIP:      "1c",
-			paramID:       "1",
+			paramID:       "8",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"nama": null,
@@ -4245,12 +3662,12 @@ func Test_handler_adminUpdateAnak(t *testing.T) {
 				` | parameter \"status_anak\" harus salah satu dari \"Kandung\", \"Angkat\"` +
 				` | parameter \"status_pernikahan_id\" tidak boleh null` +
 				` | parameter \"tanggal_lahir\" tidak boleh null"}`,
-			wantDBRows: dbtest.Rows{},
+			wantDBRows: defaultRows,
 		},
 		{
 			name:             "error: missing required params & have additional params",
 			paramNIP:         "1c",
-			paramID:          "1",
+			paramID:          "8",
 			requestHeader:    http.Header{"Authorization": authHeader},
 			requestBody:      `{ "id": 1 }`,
 			wantResponseCode: http.StatusBadRequest,
@@ -4261,52 +3678,43 @@ func Test_handler_adminUpdateAnak(t *testing.T) {
 				` | parameter \"pasangan_orang_tua_id\" harus diisi` +
 				` | parameter \"status_pernikahan_id\" harus diisi` +
 				` | parameter \"status_anak\" harus diisi"}`,
-			wantDBRows: dbtest.Rows{},
+			wantDBRows: defaultRows,
 		},
 		{
 			name:             "error: body is empty",
 			paramNIP:         "1c",
-			paramID:          "1",
+			paramID:          "8",
 			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusBadRequest,
 			wantResponseBody: `{"message": "request body harus diisi"}`,
-			wantDBRows:       dbtest.Rows{},
+			wantDBRows:       defaultRows,
 		},
 		{
 			name:             "error: invalid token",
 			paramNIP:         "1c",
-			paramID:          "1",
+			paramID:          "8",
 			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
-			wantDBRows:       dbtest.Rows{},
+			wantDBRows:       defaultRows,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			db := dbtest.New(t, dbmigrations.FS)
-			_, err := db.Exec(context.Background(), tt.dbData)
-			require.NoError(t, err)
-
 			req := httptest.NewRequest(http.MethodPut, "/v1/admin/pegawai/"+tt.paramNIP+"/anak/"+tt.paramID, strings.NewReader(tt.requestBody))
 			req.Header = tt.requestHeader
 			req.Header.Set("Content-Type", "application/json")
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			authSvc := apitest.NewAuthService(api.Kode_Pegawai_Write)
-			RegisterRoutes(e, repo.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
 			assert.JSONEq(t, typeutil.Coalesce(tt.wantResponseBody, "null"), typeutil.Coalesce(rec.Body.String(), "null"))
 			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
 
-			actualRows, err := dbtest.QueryAll(db, "anak", "id")
+			actualRows, err := dbtest.QueryWithClause(db, "anak", "where id = $1", tt.paramID)
 			require.NoError(t, err)
 			if len(tt.wantDBRows) == len(actualRows) {
 				for i, row := range actualRows {
@@ -4324,17 +3732,33 @@ func Test_handler_adminUpdateAnak(t *testing.T) {
 func Test_handler_adminDeleteAnak(t *testing.T) {
 	t.Parallel()
 
-	seedData := `
+	dbData := `
 		insert into pegawai
 			(pns_id,  nip_baru, deleted_at) values
 			('id_1c', '1c',     null),
-			('id_1d', '1d',     '2000-01-01');
+			('id_1d', '1d',     '2000-01-01'),
+			('id_1e', '1e',     null);
+		insert into anak
+			(id, nama,       nik,   tanggal_lahir, pns_id,  nip,  created_at,   updated_at,   deleted_at) values
+			(1,  'John Doe', '123', '1990-01-01',  'id_1c', '1c', '2000-01-01', '2000-01-01', null),
+			(2,  'Jane Doe', null,  null,          'id_1c', '1c', '2000-01-01', '2000-01-01', '2000-01-01'),
+			(3,  'Jane Doe', null,  null,          'id_1d', '1d', '2000-01-01', '2000-01-01', null),
+			(4,  'Jane Doe', null,  null,          'id_1e', '1e', '2000-01-01', '2000-01-01', null),
+			(5,  'Jane Doe', null,  null,          'id_1c', '1c', '2000-01-01', '2000-01-01', null);
 	`
+	db := dbtest.New(t, dbmigrations.FS)
+	_, err := db.Exec(context.Background(), dbData)
+	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	authSvc := apitest.NewAuthService(api.Kode_Pegawai_Write)
+	RegisterRoutes(e, repo.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("2a")}
 	tests := []struct {
 		name             string
-		dbData           string
 		paramNIP         string
 		paramID          string
 		requestHeader    http.Header
@@ -4343,13 +3767,7 @@ func Test_handler_adminDeleteAnak(t *testing.T) {
 		wantDBRows       dbtest.Rows
 	}{
 		{
-			name: "ok: success delete",
-			dbData: seedData + `
-				insert into anak
-					(id, nama,       nik,   tanggal_lahir, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'John Doe', '123', '1990-01-01',  'id_1c', '1c', '2000-01-01', '2000-01-01'),
-					(2,  'Jane Doe', null,  null,          'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:             "ok: success delete",
 			paramNIP:         "1c",
 			paramID:          "1",
 			requestHeader:    http.Header{"Authorization": authHeader},
@@ -4374,34 +3792,19 @@ func Test_handler_adminDeleteAnak(t *testing.T) {
 					"updated_at":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
 					"deleted_at":     "{deleted_at}",
 				},
-				{
-					"id":             int64(2),
-					"nama":           "Jane Doe",
-					"pasangan_id":    nil,
-					"nik":            nil,
-					"jenis_kelamin":  nil,
-					"tempat_lahir":   nil,
-					"tanggal_lahir":  nil,
-					"status_anak":    nil,
-					"status_sekolah": nil,
-					"agama_id":       nil,
-					"jenis_kawin_id": nil,
-					"anak_ke":        nil,
-					"pns_id":         "id_1c",
-					"nip":            "1c",
-					"created_at":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":     nil,
-				},
 			},
 		},
 		{
-			name: "error: anak is not found",
-			dbData: seedData + `
-				insert into anak
-					(id, nama,       pns_id,  nip,  created_at,   updated_at) values
-					(1,  'Jane Doe', 'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:             "error: anak is not found",
+			paramNIP:         "1c",
+			paramID:          "0",
+			requestHeader:    http.Header{"Authorization": authHeader},
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data tidak ditemukan"}`,
+			wantDBRows:       dbtest.Rows{},
+		},
+		{
+			name:             "error: anak is deleted",
 			paramNIP:         "1c",
 			paramID:          "2",
 			requestHeader:    http.Header{"Authorization": authHeader},
@@ -4409,41 +3812,7 @@ func Test_handler_adminDeleteAnak(t *testing.T) {
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":             int64(1),
-					"nama":           "Jane Doe",
-					"pasangan_id":    nil,
-					"nik":            nil,
-					"jenis_kelamin":  nil,
-					"tempat_lahir":   nil,
-					"tanggal_lahir":  nil,
-					"status_anak":    nil,
-					"status_sekolah": nil,
-					"agama_id":       nil,
-					"jenis_kawin_id": nil,
-					"anak_ke":        nil,
-					"pns_id":         "id_1c",
-					"nip":            "1c",
-					"created_at":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":     nil,
-				},
-			},
-		},
-		{
-			name: "error: anak is deleted",
-			dbData: seedData + `
-				insert into anak
-					(id, nama,       pns_id,  nip,  created_at,   updated_at,   deleted_at) values
-					(1,  'Jane Doe', 'id_1c', '1c', '2000-01-01', '2000-01-01', '2000-01-01');
-			`,
-			paramNIP:         "1c",
-			paramID:          "1",
-			requestHeader:    http.Header{"Authorization": authHeader},
-			wantResponseCode: http.StatusNotFound,
-			wantResponseBody: `{"message": "data tidak ditemukan"}`,
-			wantDBRows: dbtest.Rows{
-				{
-					"id":             int64(1),
+					"id":             int64(2),
 					"nama":           "Jane Doe",
 					"pasangan_id":    nil,
 					"nik":            nil,
@@ -4464,20 +3833,44 @@ func Test_handler_adminDeleteAnak(t *testing.T) {
 			},
 		},
 		{
-			name: "error: pegawai is deleted",
-			dbData: seedData + `
-				insert into anak
-					(id, nama,       pns_id,  nip,  created_at,   updated_at) values
-					(1,  'Jane Doe', 'id_1d', '1d', '2000-01-01', '2000-01-01');
-			`,
-			paramNIP:         "1d",
-			paramID:          "1",
+			name:             "error: anak is owned by another pegawai",
+			paramNIP:         "1c",
+			paramID:          "4",
 			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusNotFound,
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":             int64(1),
+					"id":             int64(4),
+					"nama":           "Jane Doe",
+					"pasangan_id":    nil,
+					"nik":            nil,
+					"jenis_kelamin":  nil,
+					"tempat_lahir":   nil,
+					"tanggal_lahir":  nil,
+					"status_anak":    nil,
+					"status_sekolah": nil,
+					"agama_id":       nil,
+					"jenis_kawin_id": nil,
+					"anak_ke":        nil,
+					"pns_id":         "id_1e",
+					"nip":            "1e",
+					"created_at":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":     nil,
+				},
+			},
+		},
+		{
+			name:             "error: pegawai is deleted",
+			paramNIP:         "1d",
+			paramID:          "3",
+			requestHeader:    http.Header{"Authorization": authHeader},
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data tidak ditemukan"}`,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":             int64(3),
 					"nama":           "Jane Doe",
 					"pasangan_id":    nil,
 					"nik":            nil,
@@ -4498,49 +3891,51 @@ func Test_handler_adminDeleteAnak(t *testing.T) {
 			},
 		},
 		{
-			name:             "error: unexpected data type",
-			paramNIP:         "1c",
-			paramID:          "1c",
-			requestHeader:    http.Header{"Authorization": authHeader},
-			wantResponseCode: http.StatusBadRequest,
-			wantResponseBody: `{"message": "parameter \"id\" harus dalam format yang sesuai"}`,
-			wantDBRows:       dbtest.Rows{},
-		},
-		{
 			name:             "error: invalid token",
 			paramNIP:         "1c",
-			paramID:          "1",
+			paramID:          "5",
 			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
-			wantDBRows:       dbtest.Rows{},
+			wantDBRows: dbtest.Rows{
+				{
+					"id":             int64(5),
+					"nama":           "Jane Doe",
+					"pasangan_id":    nil,
+					"nik":            nil,
+					"jenis_kelamin":  nil,
+					"tempat_lahir":   nil,
+					"tanggal_lahir":  nil,
+					"status_anak":    nil,
+					"status_sekolah": nil,
+					"agama_id":       nil,
+					"jenis_kawin_id": nil,
+					"anak_ke":        nil,
+					"pns_id":         "id_1c",
+					"nip":            "1c",
+					"created_at":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":     nil,
+				},
+			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			db := dbtest.New(t, dbmigrations.FS)
-			_, err := db.Exec(context.Background(), tt.dbData)
-			require.NoError(t, err)
-
 			req := httptest.NewRequest(http.MethodDelete, "/v1/admin/pegawai/"+tt.paramNIP+"/anak/"+tt.paramID, nil)
 			req.Header = tt.requestHeader
 			req.Header.Set("Content-Type", "application/json")
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			authSvc := apitest.NewAuthService(api.Kode_Pegawai_Write)
-			RegisterRoutes(e, repo.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
 			assert.JSONEq(t, typeutil.Coalesce(tt.wantResponseBody, "null"), typeutil.Coalesce(rec.Body.String(), "null"))
 			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
 
-			actualRows, err := dbtest.QueryAll(db, "anak", "id")
+			actualRows, err := dbtest.QueryWithClause(db, "anak", "where id = $1", tt.paramID)
 			require.NoError(t, err)
 			if len(tt.wantDBRows) == len(actualRows) {
 				for i, row := range actualRows {

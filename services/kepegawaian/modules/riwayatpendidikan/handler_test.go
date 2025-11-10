@@ -548,11 +548,15 @@ func Test_handler_listAdmin(t *testing.T) {
 func Test_handler_adminCreate(t *testing.T) {
 	t.Parallel()
 
-	seedData := `
+	dbData := `
 		insert into pegawai
 			(pns_id,  nip_baru, deleted_at) values
+			('id_1a', '1a',     null),
 			('id_1c', '1c',     null),
-			('id_1d', '1d',     '2000-01-01');
+			('id_1d', '1d',     '2000-01-01'),
+			('id_1e', '1e',     null),
+			('id_1f', '1f',     null),
+			('id_1g', '1g',     null);
 		insert into ref_pendidikan
 			(id,  deleted_at) values
 			('1', null),
@@ -562,11 +566,19 @@ func Test_handler_adminCreate(t *testing.T) {
 			(1,  null),
 			(2,  '2000-01-01');
 	`
+	db := dbtest.New(t, dbmigrations.FS)
+	_, err := db.Exec(context.Background(), dbData)
+	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	authSvc := apitest.NewAuthService(api.Kode_Pegawai_Write)
+	RegisterRoutes(e, sqlc.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("2a")}
 	tests := []struct {
 		name             string
-		dbData           string
 		paramNIP         string
 		requestHeader    http.Header
 		requestBody      string
@@ -575,12 +587,7 @@ func Test_handler_adminCreate(t *testing.T) {
 		wantDBRows       dbtest.Rows
 	}{
 		{
-			name: "ok: with all data",
-			dbData: seedData + `
-				insert into riwayat_pendidikan
-					(pendidikan_pertama, pendidikan_terakhir, diakui_bkn, status_satker, status_biro, tanggal_lulus, file_base64, keterangan_berkas, pns_id_3, pendidikan_id_3, pns_id,  nip,  created_at,   updated_at) values
-					('1',                1,                   1,          1,             1,           '2020-01-01',  'data:abc',  'abc',             '1a',     '2',             'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:          "ok: with all data",
 			paramNIP:      "1c",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
@@ -596,38 +603,11 @@ func Test_handler_adminCreate(t *testing.T) {
 			}`,
 			wantResponseCode: http.StatusCreated,
 			wantResponseBody: `{
-				"data": { "id": 2 }
+				"data": { "id": {id} }
 			}`,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":                    int32(1),
-					"tingkat_pendidikan_id": nil,
-					"pendidikan_id":         nil,
-					"no_ijazah":             nil,
-					"nama_sekolah":          nil,
-					"tahun_lulus":           nil,
-					"gelar_depan":           nil,
-					"gelar_belakang":        nil,
-					"tugas_belajar":         nil,
-					"pendidikan_pertama":    "1",
-					"pendidikan_terakhir":   int32(1),
-					"negara_sekolah":        nil,
-					"diakui_bkn":            int32(1),
-					"status_satker":         int32(1),
-					"status_biro":           int32(1),
-					"tanggal_lulus":         time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC),
-					"file_base64":           "data:abc",
-					"keterangan_berkas":     "abc",
-					"pns_id_3":              "1a",
-					"pendidikan_id_3":       "2",
-					"pns_id":                "id_1c",
-					"nip":                   "1c",
-					"created_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":            nil,
-				},
-				{
-					"id":                    int32(2),
+					"id":                    "{id}",
 					"tingkat_pendidikan_id": int16(1),
 					"pendidikan_id":         "1",
 					"no_ijazah":             "UI.01",
@@ -657,8 +637,7 @@ func Test_handler_adminCreate(t *testing.T) {
 		},
 		{
 			name:          "ok: with different enum data",
-			dbData:        seedData,
-			paramNIP:      "1c",
+			paramNIP:      "1e",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"tingkat_pendidikan_id": 1,
@@ -673,11 +652,11 @@ func Test_handler_adminCreate(t *testing.T) {
 			}`,
 			wantResponseCode: http.StatusCreated,
 			wantResponseBody: `{
-				"data": { "id": 1 }
+				"data": { "id": {id} }
 			}`,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":                    int32(1),
+					"id":                    "{id}",
 					"tingkat_pendidikan_id": int16(1),
 					"pendidikan_id":         "1",
 					"no_ijazah":             "UI.01",
@@ -697,8 +676,8 @@ func Test_handler_adminCreate(t *testing.T) {
 					"keterangan_berkas":     nil,
 					"pns_id_3":              nil,
 					"pendidikan_id_3":       nil,
-					"pns_id":                "id_1c",
-					"nip":                   "1c",
+					"pns_id":                "id_1e",
+					"nip":                   "1e",
 					"created_at":            "{created_at}",
 					"updated_at":            "{updated_at}",
 					"deleted_at":            nil,
@@ -707,8 +686,7 @@ func Test_handler_adminCreate(t *testing.T) {
 		},
 		{
 			name:          "ok: with null values",
-			dbData:        seedData,
-			paramNIP:      "1c",
+			paramNIP:      "1f",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"tingkat_pendidikan_id": 1,
@@ -723,11 +701,11 @@ func Test_handler_adminCreate(t *testing.T) {
 			}`,
 			wantResponseCode: http.StatusCreated,
 			wantResponseBody: `{
-				"data": { "id": 1 }
+				"data": { "id": {id} }
 			}`,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":                    int32(1),
+					"id":                    "{id}",
 					"tingkat_pendidikan_id": int16(1),
 					"pendidikan_id":         nil,
 					"no_ijazah":             "",
@@ -747,8 +725,8 @@ func Test_handler_adminCreate(t *testing.T) {
 					"keterangan_berkas":     nil,
 					"pns_id_3":              nil,
 					"pendidikan_id_3":       nil,
-					"pns_id":                "id_1c",
-					"nip":                   "1c",
+					"pns_id":                "id_1f",
+					"nip":                   "1f",
 					"created_at":            "{created_at}",
 					"updated_at":            "{updated_at}",
 					"deleted_at":            nil,
@@ -757,8 +735,7 @@ func Test_handler_adminCreate(t *testing.T) {
 		},
 		{
 			name:          "ok: required data only",
-			dbData:        seedData,
-			paramNIP:      "1c",
+			paramNIP:      "1g",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"tingkat_pendidikan_id": 1,
@@ -768,11 +745,11 @@ func Test_handler_adminCreate(t *testing.T) {
 			}`,
 			wantResponseCode: http.StatusCreated,
 			wantResponseBody: `{
-				"data": { "id": 1 }
+				"data": { "id": {id} }
 			}`,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":                    int32(1),
+					"id":                    "{id}",
 					"tingkat_pendidikan_id": int16(1),
 					"pendidikan_id":         nil,
 					"no_ijazah":             "UI.01",
@@ -792,8 +769,8 @@ func Test_handler_adminCreate(t *testing.T) {
 					"keterangan_berkas":     nil,
 					"pns_id_3":              nil,
 					"pendidikan_id_3":       nil,
-					"pns_id":                "id_1c",
-					"nip":                   "1c",
+					"pns_id":                "id_1g",
+					"nip":                   "1g",
 					"created_at":            "{created_at}",
 					"updated_at":            "{updated_at}",
 					"deleted_at":            nil,
@@ -802,8 +779,7 @@ func Test_handler_adminCreate(t *testing.T) {
 		},
 		{
 			name:          "error: pegawai is not found",
-			dbData:        seedData,
-			paramNIP:      "1a",
+			paramNIP:      "1b",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"tingkat_pendidikan_id": 1,
@@ -818,7 +794,6 @@ func Test_handler_adminCreate(t *testing.T) {
 		},
 		{
 			name:          "error: pegawai is deleted",
-			dbData:        seedData,
 			paramNIP:      "1d",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
@@ -838,8 +813,7 @@ func Test_handler_adminCreate(t *testing.T) {
 		},
 		{
 			name:          "error: tingkat pendidikan or pendidikan is not found",
-			dbData:        seedData,
-			paramNIP:      "1c",
+			paramNIP:      "1a",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"tingkat_pendidikan_id": 0,
@@ -854,8 +828,7 @@ func Test_handler_adminCreate(t *testing.T) {
 		},
 		{
 			name:          "error: tingkat pendidikan or pendidikan is deleted",
-			dbData:        seedData,
-			paramNIP:      "1c",
+			paramNIP:      "1a",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"tingkat_pendidikan_id": 2,
@@ -874,7 +847,7 @@ func Test_handler_adminCreate(t *testing.T) {
 		},
 		{
 			name:          "error: exceed length limit, unexpected enum or data type",
-			paramNIP:      "1c",
+			paramNIP:      "1a",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"tingkat_pendidikan_id": "s1",
@@ -901,7 +874,7 @@ func Test_handler_adminCreate(t *testing.T) {
 		},
 		{
 			name:          "error: null params",
-			paramNIP:      "1c",
+			paramNIP:      "1a",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"tingkat_pendidikan_id": null,
@@ -927,7 +900,7 @@ func Test_handler_adminCreate(t *testing.T) {
 		},
 		{
 			name:             "error: missing required params & have additional params",
-			paramNIP:         "1c",
+			paramNIP:         "1a",
 			requestHeader:    http.Header{"Authorization": authHeader},
 			requestBody:      `{ "id": 1 }`,
 			wantResponseCode: http.StatusBadRequest,
@@ -940,7 +913,7 @@ func Test_handler_adminCreate(t *testing.T) {
 		},
 		{
 			name:             "error: body is empty",
-			paramNIP:         "1c",
+			paramNIP:         "1a",
 			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusBadRequest,
 			wantResponseBody: `{"message": "request body harus diisi"}`,
@@ -948,7 +921,7 @@ func Test_handler_adminCreate(t *testing.T) {
 		},
 		{
 			name:             "error: invalid token",
-			paramNIP:         "1c",
+			paramNIP:         "1a",
 			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
@@ -959,40 +932,34 @@ func Test_handler_adminCreate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			db := dbtest.New(t, dbmigrations.FS)
-			_, err := db.Exec(context.Background(), tt.dbData)
-			require.NoError(t, err)
-
 			req := httptest.NewRequest(http.MethodPost, "/v1/admin/pegawai/"+tt.paramNIP+"/riwayat-pendidikan", strings.NewReader(tt.requestBody))
 			req.Header = tt.requestHeader
 			req.Header.Set("Content-Type", "application/json")
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			authSvc := apitest.NewAuthService(api.Kode_Pegawai_Write)
-			RegisterRoutes(e, sqlc.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
-			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
 			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
 
-			actualRows, err := dbtest.QueryAll(db, "riwayat_pendidikan", "id")
+			actualRows, err := dbtest.QueryWithClause(db, "riwayat_pendidikan", "where nip = $1", tt.paramNIP)
 			require.NoError(t, err)
 			if len(tt.wantDBRows) == len(actualRows) {
 				for i, row := range actualRows {
-					if tt.wantDBRows[i]["created_at"] == "{created_at}" {
+					if tt.wantDBRows[i]["id"] == "{id}" {
 						assert.WithinDuration(t, time.Now(), row["created_at"].(time.Time), 10*time.Second)
 						assert.Equal(t, row["created_at"], row["updated_at"])
 
+						tt.wantDBRows[i]["id"] = row["id"]
 						tt.wantDBRows[i]["created_at"] = row["created_at"]
 						tt.wantDBRows[i]["updated_at"] = row["updated_at"]
+
+						tt.wantResponseBody = strings.ReplaceAll(tt.wantResponseBody, "{id}", fmt.Sprintf("%d", row["id"]))
 					}
 				}
 			}
 			assert.Equal(t, tt.wantDBRows, actualRows)
+			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
 		})
 	}
 }
@@ -1000,7 +967,7 @@ func Test_handler_adminCreate(t *testing.T) {
 func Test_handler_adminUpdate(t *testing.T) {
 	t.Parallel()
 
-	seedData := `
+	dbData := `
 		insert into pegawai
 			(pns_id,  nip_baru, deleted_at) values
 			('id_1c', '1c',     null),
@@ -1014,12 +981,61 @@ func Test_handler_adminUpdate(t *testing.T) {
 			(id, deleted_at) values
 			(1,  null),
 			(2,  '2000-01-01');
+		insert into riwayat_pendidikan
+			(id, nama_sekolah, pns_id,  nip,  created_at,   updated_at,   deleted_at) values
+			(1,  'UI',         'id_1c', '1c', '2000-01-01', '2000-01-01', null),
+			(2,  'UI',         'id_1c', '1c', '2000-01-01', '2000-01-01', null),
+			(5,  'UI',         'id_1e', '1e', '2000-01-01', '2000-01-01', null),
+			(6,  'UI',         'id_1c', '1c', '2000-01-01', '2000-01-01', '2000-01-01'),
+			(7,  'UI',         'id_1c', '1c', '2000-01-01', '2000-01-01', null);
+		insert into riwayat_pendidikan
+			(id, pendidikan_pertama, pendidikan_terakhir, diakui_bkn, status_satker, status_biro, tanggal_lulus, file_base64, keterangan_berkas, pns_id_3, pendidikan_id_3, pns_id,  nip,  created_at,   updated_at) values
+			(3,  '1',                1,                   1,          1,             1,           '2020-01-01',  'data:abc',  'abc',             '1a',     '2',             'id_1c', '1c', '2000-01-01', '2000-01-01'),
+			(4,  '1',                1,                   1,          1,             1,           '2020-01-01',  'data:abc',  'abc',             '1a',     '2',             'id_1c', '1c', '2000-01-01', '2000-01-01');
 	`
+	db := dbtest.New(t, dbmigrations.FS)
+	_, err := db.Exec(context.Background(), dbData)
+	require.NoError(t, err)
+
+	defaultRows := dbtest.Rows{
+		{
+			"id":                    int32(7),
+			"tingkat_pendidikan_id": nil,
+			"pendidikan_id":         nil,
+			"no_ijazah":             nil,
+			"nama_sekolah":          "UI",
+			"tahun_lulus":           nil,
+			"gelar_depan":           nil,
+			"gelar_belakang":        nil,
+			"tugas_belajar":         nil,
+			"pendidikan_pertama":    nil,
+			"pendidikan_terakhir":   nil,
+			"negara_sekolah":        nil,
+			"diakui_bkn":            nil,
+			"status_satker":         nil,
+			"status_biro":           nil,
+			"tanggal_lulus":         nil,
+			"file_base64":           nil,
+			"keterangan_berkas":     nil,
+			"pns_id_3":              nil,
+			"pendidikan_id_3":       nil,
+			"pns_id":                "id_1c",
+			"nip":                   "1c",
+			"created_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+			"updated_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+			"deleted_at":            nil,
+		},
+	}
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	authSvc := apitest.NewAuthService(api.Kode_Pegawai_Write)
+	RegisterRoutes(e, sqlc.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("2a")}
 	tests := []struct {
 		name             string
-		dbData           string
 		paramNIP         string
 		paramID          string
 		requestHeader    http.Header
@@ -1029,13 +1045,7 @@ func Test_handler_adminUpdate(t *testing.T) {
 		wantDBRows       dbtest.Rows
 	}{
 		{
-			name: "ok: with all data",
-			dbData: seedData + `
-				insert into riwayat_pendidikan
-					(id, nama_sekolah, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'UI',         'id_1c', '1c', '2000-01-01', '2000-01-01'),
-					(2,  'UI',         'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:          "ok: with all data",
 			paramNIP:      "1c",
 			paramID:       "1",
 			requestHeader: http.Header{"Authorization": authHeader},
@@ -1079,44 +1089,12 @@ func Test_handler_adminUpdate(t *testing.T) {
 					"updated_at":            "{updated_at}",
 					"deleted_at":            nil,
 				},
-				{
-					"id":                    int32(2),
-					"tingkat_pendidikan_id": nil,
-					"pendidikan_id":         nil,
-					"no_ijazah":             nil,
-					"nama_sekolah":          "UI",
-					"tahun_lulus":           nil,
-					"gelar_depan":           nil,
-					"gelar_belakang":        nil,
-					"tugas_belajar":         nil,
-					"pendidikan_pertama":    nil,
-					"pendidikan_terakhir":   nil,
-					"negara_sekolah":        nil,
-					"diakui_bkn":            nil,
-					"status_satker":         nil,
-					"status_biro":           nil,
-					"tanggal_lulus":         nil,
-					"file_base64":           nil,
-					"keterangan_berkas":     nil,
-					"pns_id_3":              nil,
-					"pendidikan_id_3":       nil,
-					"pns_id":                "id_1c",
-					"nip":                   "1c",
-					"created_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":            nil,
-				},
 			},
 		},
 		{
-			name: "ok: with different enum data",
-			dbData: seedData + `
-				insert into riwayat_pendidikan
-					(id, nama_sekolah, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'UI',         'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:          "ok: with different enum data",
 			paramNIP:      "1c",
-			paramID:       "1",
+			paramID:       "2",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"tingkat_pendidikan_id": 1,
@@ -1132,7 +1110,7 @@ func Test_handler_adminUpdate(t *testing.T) {
 			wantResponseCode: http.StatusNoContent,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":                    int32(1),
+					"id":                    int32(2),
 					"tingkat_pendidikan_id": int16(1),
 					"pendidikan_id":         "1",
 					"no_ijazah":             "UI.01",
@@ -1161,14 +1139,9 @@ func Test_handler_adminUpdate(t *testing.T) {
 			},
 		},
 		{
-			name: "ok: with null values",
-			dbData: seedData + `
-				insert into riwayat_pendidikan
-					(id, pendidikan_pertama, pendidikan_terakhir, diakui_bkn, status_satker, status_biro, tanggal_lulus, file_base64, keterangan_berkas, pns_id_3, pendidikan_id_3, pns_id,  nip,  created_at,   updated_at) values
-					(1,  '1',                1,                   1,          1,             1,           '2020-01-01',  'data:abc',  'abc',             '1a',     '2',             'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:          "ok: with null values",
 			paramNIP:      "1c",
-			paramID:       "1",
+			paramID:       "3",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"tingkat_pendidikan_id": 1,
@@ -1184,7 +1157,7 @@ func Test_handler_adminUpdate(t *testing.T) {
 			wantResponseCode: http.StatusNoContent,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":                    int32(1),
+					"id":                    int32(3),
 					"tingkat_pendidikan_id": int16(1),
 					"pendidikan_id":         nil,
 					"no_ijazah":             "",
@@ -1213,14 +1186,9 @@ func Test_handler_adminUpdate(t *testing.T) {
 			},
 		},
 		{
-			name: "ok: required data only",
-			dbData: seedData + `
-				insert into riwayat_pendidikan
-					(id, pendidikan_pertama, pendidikan_terakhir, diakui_bkn, status_satker, status_biro, tanggal_lulus, file_base64, keterangan_berkas, pns_id_3, pendidikan_id_3, pns_id,  nip,  created_at,   updated_at) values
-					(1,  '1',                1,                   1,          1,             1,           '2020-01-01',  'data:abc',  'abc',             '1a',     '2',             'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:          "ok: required data only",
 			paramNIP:      "1c",
-			paramID:       "1",
+			paramID:       "4",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"tingkat_pendidikan_id": 1,
@@ -1231,7 +1199,7 @@ func Test_handler_adminUpdate(t *testing.T) {
 			wantResponseCode: http.StatusNoContent,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":                    int32(1),
+					"id":                    int32(4),
 					"tingkat_pendidikan_id": int16(1),
 					"pendidikan_id":         nil,
 					"no_ijazah":             "UI.01",
@@ -1260,14 +1228,9 @@ func Test_handler_adminUpdate(t *testing.T) {
 			},
 		},
 		{
-			name: "error: riwayat pendidikan is not found",
-			dbData: seedData + `
-				insert into riwayat_pendidikan
-					(id, nama_sekolah, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'UI',         'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:          "error: riwayat pendidikan is not found",
 			paramNIP:      "1c",
-			paramID:       "2",
+			paramID:       "0",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"tingkat_pendidikan_id": 1,
@@ -1277,45 +1240,12 @@ func Test_handler_adminUpdate(t *testing.T) {
 			}`,
 			wantResponseCode: http.StatusNotFound,
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
-			wantDBRows: dbtest.Rows{
-				{
-					"id":                    int32(1),
-					"tingkat_pendidikan_id": nil,
-					"pendidikan_id":         nil,
-					"no_ijazah":             nil,
-					"nama_sekolah":          "UI",
-					"tahun_lulus":           nil,
-					"gelar_depan":           nil,
-					"gelar_belakang":        nil,
-					"tugas_belajar":         nil,
-					"pendidikan_pertama":    nil,
-					"pendidikan_terakhir":   nil,
-					"negara_sekolah":        nil,
-					"diakui_bkn":            nil,
-					"status_satker":         nil,
-					"status_biro":           nil,
-					"tanggal_lulus":         nil,
-					"file_base64":           nil,
-					"keterangan_berkas":     nil,
-					"pns_id_3":              nil,
-					"pendidikan_id_3":       nil,
-					"pns_id":                "id_1c",
-					"nip":                   "1c",
-					"created_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":            nil,
-				},
-			},
+			wantDBRows:       dbtest.Rows{},
 		},
 		{
-			name: "error: riwayat pendidikan is owned by different pegawai",
-			dbData: seedData + `
-				insert into riwayat_pendidikan
-					(id, nama_sekolah, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'UI',         'id_1e', '1e', '2000-01-01', '2000-01-01');
-			`,
+			name:          "error: riwayat pendidikan is owned by different pegawai",
 			paramNIP:      "1c",
-			paramID:       "1",
+			paramID:       "5",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"tingkat_pendidikan_id": 1,
@@ -1327,7 +1257,7 @@ func Test_handler_adminUpdate(t *testing.T) {
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":                    int32(1),
+					"id":                    int32(5),
 					"tingkat_pendidikan_id": nil,
 					"pendidikan_id":         nil,
 					"no_ijazah":             nil,
@@ -1356,14 +1286,9 @@ func Test_handler_adminUpdate(t *testing.T) {
 			},
 		},
 		{
-			name: "error: riwayat pendidikan is deleted",
-			dbData: seedData + `
-				insert into riwayat_pendidikan
-					(id, nama_sekolah, pns_id,  nip,  created_at,   updated_at,   deleted_at) values
-					(1,  'UI',         'id_1c', '1c', '2000-01-01', '2000-01-01', '2000-01-01');
-			`,
+			name:          "error: riwayat pendidikan is deleted",
 			paramNIP:      "1c",
-			paramID:       "1",
+			paramID:       "6",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"tingkat_pendidikan_id": 1,
@@ -1380,7 +1305,7 @@ func Test_handler_adminUpdate(t *testing.T) {
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":                    int32(1),
+					"id":                    int32(6),
 					"tingkat_pendidikan_id": nil,
 					"pendidikan_id":         nil,
 					"no_ijazah":             nil,
@@ -1409,14 +1334,9 @@ func Test_handler_adminUpdate(t *testing.T) {
 			},
 		},
 		{
-			name: "error: tingkat pendidikan or pendidikan is not found",
-			dbData: seedData + `
-				insert into riwayat_pendidikan
-					(id, nama_sekolah, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'UI',         'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:          "error: tingkat pendidikan or pendidikan is not found",
 			paramNIP:      "1c",
-			paramID:       "1",
+			paramID:       "7",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"tingkat_pendidikan_id": 0,
@@ -1427,45 +1347,12 @@ func Test_handler_adminUpdate(t *testing.T) {
 			}`,
 			wantResponseCode: http.StatusBadRequest,
 			wantResponseBody: `{"message": "data tingkat pendidikan tidak ditemukan | data pendidikan tidak ditemukan"}`,
-			wantDBRows: dbtest.Rows{
-				{
-					"id":                    int32(1),
-					"tingkat_pendidikan_id": nil,
-					"pendidikan_id":         nil,
-					"no_ijazah":             nil,
-					"nama_sekolah":          "UI",
-					"tahun_lulus":           nil,
-					"gelar_depan":           nil,
-					"gelar_belakang":        nil,
-					"tugas_belajar":         nil,
-					"pendidikan_pertama":    nil,
-					"pendidikan_terakhir":   nil,
-					"negara_sekolah":        nil,
-					"diakui_bkn":            nil,
-					"status_satker":         nil,
-					"status_biro":           nil,
-					"tanggal_lulus":         nil,
-					"file_base64":           nil,
-					"keterangan_berkas":     nil,
-					"pns_id_3":              nil,
-					"pendidikan_id_3":       nil,
-					"pns_id":                "id_1c",
-					"nip":                   "1c",
-					"created_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":            nil,
-				},
-			},
+			wantDBRows:       defaultRows,
 		},
 		{
-			name: "error: tingkat pendidikan or pendidikan is deleted",
-			dbData: seedData + `
-				insert into riwayat_pendidikan
-					(id, nama_sekolah, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'UI',         'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:          "error: tingkat pendidikan or pendidikan is deleted",
 			paramNIP:      "1c",
-			paramID:       "1",
+			paramID:       "7",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"tingkat_pendidikan_id": 2,
@@ -1480,40 +1367,12 @@ func Test_handler_adminUpdate(t *testing.T) {
 			}`,
 			wantResponseCode: http.StatusBadRequest,
 			wantResponseBody: `{"message": "data tingkat pendidikan tidak ditemukan | data pendidikan tidak ditemukan"}`,
-			wantDBRows: dbtest.Rows{
-				{
-					"id":                    int32(1),
-					"tingkat_pendidikan_id": nil,
-					"pendidikan_id":         nil,
-					"no_ijazah":             nil,
-					"nama_sekolah":          "UI",
-					"tahun_lulus":           nil,
-					"gelar_depan":           nil,
-					"gelar_belakang":        nil,
-					"tugas_belajar":         nil,
-					"pendidikan_pertama":    nil,
-					"pendidikan_terakhir":   nil,
-					"negara_sekolah":        nil,
-					"diakui_bkn":            nil,
-					"status_satker":         nil,
-					"status_biro":           nil,
-					"tanggal_lulus":         nil,
-					"file_base64":           nil,
-					"keterangan_berkas":     nil,
-					"pns_id_3":              nil,
-					"pendidikan_id_3":       nil,
-					"pns_id":                "id_1c",
-					"nip":                   "1c",
-					"created_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":            nil,
-				},
-			},
+			wantDBRows:       defaultRows,
 		},
 		{
 			name:          "error: exceed length limit, unexpected enum or data type",
 			paramNIP:      "1c",
-			paramID:       "1",
+			paramID:       "7",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"tingkat_pendidikan_id": "s1",
@@ -1536,12 +1395,12 @@ func Test_handler_adminUpdate(t *testing.T) {
 				` | parameter \"tahun_lulus\" harus dalam tipe integer` +
 				` | parameter \"tingkat_pendidikan_id\" harus dalam tipe integer` +
 				` | parameter \"tugas_belajar\" harus salah satu dari \"Tugas Belajar\", \"Izin Belajar\", \"\""}`,
-			wantDBRows: dbtest.Rows{},
+			wantDBRows: defaultRows,
 		},
 		{
 			name:          "error: null params",
 			paramNIP:      "1c",
-			paramID:       "1",
+			paramID:       "7",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestBody: `{
 				"tingkat_pendidikan_id": null,
@@ -1563,12 +1422,12 @@ func Test_handler_adminUpdate(t *testing.T) {
 				` | parameter \"tahun_lulus\" tidak boleh null` +
 				` | parameter \"tingkat_pendidikan_id\" tidak boleh null` +
 				` | parameter \"tugas_belajar\" harus salah satu dari \"Tugas Belajar\", \"Izin Belajar\", \"\""}`,
-			wantDBRows: dbtest.Rows{},
+			wantDBRows: defaultRows,
 		},
 		{
 			name:             "error: missing required params & have additional params",
 			paramNIP:         "1c",
-			paramID:          "1",
+			paramID:          "7",
 			requestHeader:    http.Header{"Authorization": authHeader},
 			requestBody:      `{ "id": 1 }`,
 			wantResponseCode: http.StatusBadRequest,
@@ -1577,52 +1436,43 @@ func Test_handler_adminUpdate(t *testing.T) {
 				` | parameter \"nama_sekolah\" harus diisi` +
 				` | parameter \"tahun_lulus\" harus diisi` +
 				` | parameter \"nomor_ijazah\" harus diisi"}`,
-			wantDBRows: dbtest.Rows{},
+			wantDBRows: defaultRows,
 		},
 		{
 			name:             "error: body is empty",
 			paramNIP:         "1c",
-			paramID:          "1",
+			paramID:          "7",
 			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusBadRequest,
 			wantResponseBody: `{"message": "request body harus diisi"}`,
-			wantDBRows:       dbtest.Rows{},
+			wantDBRows:       defaultRows,
 		},
 		{
 			name:             "error: invalid token",
 			paramNIP:         "1c",
-			paramID:          "1",
+			paramID:          "7",
 			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
-			wantDBRows:       dbtest.Rows{},
+			wantDBRows:       defaultRows,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			db := dbtest.New(t, dbmigrations.FS)
-			_, err := db.Exec(context.Background(), tt.dbData)
-			require.NoError(t, err)
-
 			req := httptest.NewRequest(http.MethodPut, "/v1/admin/pegawai/"+tt.paramNIP+"/riwayat-pendidikan/"+tt.paramID, strings.NewReader(tt.requestBody))
 			req.Header = tt.requestHeader
 			req.Header.Set("Content-Type", "application/json")
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			authSvc := apitest.NewAuthService(api.Kode_Pegawai_Write)
-			RegisterRoutes(e, sqlc.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
 			assert.JSONEq(t, typeutil.Coalesce(tt.wantResponseBody, "null"), typeutil.Coalesce(rec.Body.String(), "null"))
 			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
 
-			actualRows, err := dbtest.QueryAll(db, "riwayat_pendidikan", "id")
+			actualRows, err := dbtest.QueryWithClause(db, "riwayat_pendidikan", "where id = $1", tt.paramID)
 			require.NoError(t, err)
 			if len(tt.wantDBRows) == len(actualRows) {
 				for i, row := range actualRows {
@@ -1640,18 +1490,62 @@ func Test_handler_adminUpdate(t *testing.T) {
 func Test_handler_adminDelete(t *testing.T) {
 	t.Parallel()
 
-	seedData := `
+	dbData := `
 		insert into pegawai
 			(pns_id,  nip_baru, deleted_at) values
 			('id_1c', '1c',     null),
 			('id_1d', '1d',     '2000-01-01'),
 			('id_1e', '1e',     null);
+		insert into riwayat_pendidikan
+			(id, nama_sekolah,     pns_id,  nip,  created_at,   updated_at,   deleted_at) values
+			(1,  'Universitas',    'id_1c', '1c', '2000-01-01', '2000-01-01', null),
+			(2,  null,             'id_1e', '1e', '2000-01-01', '2000-01-01', null),
+			(3,  null,             'id_1c', '1c', '2000-01-01', '2000-01-01', '2000-01-01'),
+			(4,  'UI',             'id_1c', '1c', '2000-01-01', '2000-01-01', null);
 	`
+	db := dbtest.New(t, dbmigrations.FS)
+	_, err := db.Exec(context.Background(), dbData)
+	require.NoError(t, err)
+
+	defaultRows := dbtest.Rows{
+		{
+			"id":                    int32(4),
+			"tingkat_pendidikan_id": nil,
+			"pendidikan_id":         nil,
+			"no_ijazah":             nil,
+			"nama_sekolah":          "UI",
+			"tahun_lulus":           nil,
+			"gelar_depan":           nil,
+			"gelar_belakang":        nil,
+			"tugas_belajar":         nil,
+			"pendidikan_pertama":    nil,
+			"pendidikan_terakhir":   nil,
+			"negara_sekolah":        nil,
+			"diakui_bkn":            nil,
+			"status_satker":         nil,
+			"status_biro":           nil,
+			"tanggal_lulus":         nil,
+			"file_base64":           nil,
+			"keterangan_berkas":     nil,
+			"pns_id_3":              nil,
+			"pendidikan_id_3":       nil,
+			"pns_id":                "id_1c",
+			"nip":                   "1c",
+			"created_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+			"updated_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+			"deleted_at":            nil,
+		},
+	}
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	authSvc := apitest.NewAuthService(api.Kode_Pegawai_Write)
+	RegisterRoutes(e, sqlc.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("2a")}
 	tests := []struct {
 		name             string
-		dbData           string
 		paramNIP         string
 		paramID          string
 		requestHeader    http.Header
@@ -1660,13 +1554,7 @@ func Test_handler_adminDelete(t *testing.T) {
 		wantDBRows       dbtest.Rows
 	}{
 		{
-			name: "ok: success delete",
-			dbData: seedData + `
-				insert into riwayat_pendidikan
-					(id, nama_sekolah,     pns_id,  nip,  created_at,   updated_at) values
-					(1,  'Universitas',    'id_1c', '1c', '2000-01-01', '2000-01-01'),
-					(2,  'Sekolah Tinggi', 'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:             "ok: success delete",
 			paramNIP:         "1c",
 			paramID:          "1",
 			requestHeader:    http.Header{"Authorization": authHeader},
@@ -1699,50 +1587,18 @@ func Test_handler_adminDelete(t *testing.T) {
 					"updated_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
 					"deleted_at":            "{deleted_at}",
 				},
-				{
-					"id":                    int32(2),
-					"tingkat_pendidikan_id": nil,
-					"pendidikan_id":         nil,
-					"no_ijazah":             nil,
-					"nama_sekolah":          "Sekolah Tinggi",
-					"tahun_lulus":           nil,
-					"gelar_depan":           nil,
-					"gelar_belakang":        nil,
-					"tugas_belajar":         nil,
-					"pendidikan_pertama":    nil,
-					"pendidikan_terakhir":   nil,
-					"negara_sekolah":        nil,
-					"diakui_bkn":            nil,
-					"status_satker":         nil,
-					"status_biro":           nil,
-					"tanggal_lulus":         nil,
-					"file_base64":           nil,
-					"keterangan_berkas":     nil,
-					"pns_id_3":              nil,
-					"pendidikan_id_3":       nil,
-					"pns_id":                "id_1c",
-					"nip":                   "1c",
-					"created_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":            nil,
-				},
 			},
 		},
 		{
-			name: "error: riwayat pendidikan is owned by other pegawai",
-			dbData: seedData + `
-				insert into riwayat_pendidikan
-					(id, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'id_1e', '1e', '2000-01-01', '2000-01-01');
-			`,
+			name:             "error: riwayat pendidikan is owned by other pegawai",
 			paramNIP:         "1c",
-			paramID:          "1",
+			paramID:          "2",
 			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusNotFound,
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":                    int32(1),
+					"id":                    int32(2),
 					"tingkat_pendidikan_id": nil,
 					"pendidikan_id":         nil,
 					"no_ijazah":             nil,
@@ -1771,62 +1627,24 @@ func Test_handler_adminDelete(t *testing.T) {
 			},
 		},
 		{
-			name: "error: riwayat pendidikan is not found",
-			dbData: seedData + `
-				insert into riwayat_pendidikan
-					(id, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:             "error: riwayat pendidikan is not found",
 			paramNIP:         "1c",
-			paramID:          "2",
+			paramID:          "0",
 			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusNotFound,
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
-			wantDBRows: dbtest.Rows{
-				{
-					"id":                    int32(1),
-					"tingkat_pendidikan_id": nil,
-					"pendidikan_id":         nil,
-					"no_ijazah":             nil,
-					"nama_sekolah":          nil,
-					"tahun_lulus":           nil,
-					"gelar_depan":           nil,
-					"gelar_belakang":        nil,
-					"tugas_belajar":         nil,
-					"pendidikan_pertama":    nil,
-					"pendidikan_terakhir":   nil,
-					"negara_sekolah":        nil,
-					"diakui_bkn":            nil,
-					"status_satker":         nil,
-					"status_biro":           nil,
-					"tanggal_lulus":         nil,
-					"file_base64":           nil,
-					"keterangan_berkas":     nil,
-					"pns_id_3":              nil,
-					"pendidikan_id_3":       nil,
-					"pns_id":                "id_1c",
-					"nip":                   "1c",
-					"created_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":            nil,
-				},
-			},
+			wantDBRows:       dbtest.Rows{},
 		},
 		{
-			name: "error: riwayat pendidikan is deleted",
-			dbData: seedData + `
-				insert into riwayat_pendidikan
-					(id, pns_id,  nip,  created_at,   updated_at,   deleted_at) values
-					(1,  'id_1c', '1c', '2000-01-01', '2000-01-01', '2000-01-01');
-			`,
+			name:             "error: riwayat pendidikan is deleted",
 			paramNIP:         "1c",
-			paramID:          "1",
+			paramID:          "3",
 			requestHeader:    http.Header{"Authorization": authHeader},
 			wantResponseCode: http.StatusNotFound,
 			wantResponseBody: `{"message": "data tidak ditemukan"}`,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":                    int32(1),
+					"id":                    int32(3),
 					"tingkat_pendidikan_id": nil,
 					"pendidikan_id":         nil,
 					"no_ijazah":             nil,
@@ -1855,49 +1673,31 @@ func Test_handler_adminDelete(t *testing.T) {
 			},
 		},
 		{
-			name:             "error: unexpected data type",
-			paramNIP:         "1c",
-			paramID:          "1c",
-			requestHeader:    http.Header{"Authorization": authHeader},
-			wantResponseCode: http.StatusBadRequest,
-			wantResponseBody: `{"message": "parameter \"id\" harus dalam format yang sesuai"}`,
-			wantDBRows:       dbtest.Rows{},
-		},
-		{
 			name:             "error: invalid token",
 			paramNIP:         "1c",
-			paramID:          "1",
+			paramID:          "4",
 			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
 			wantResponseCode: http.StatusUnauthorized,
 			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
-			wantDBRows:       dbtest.Rows{},
+			wantDBRows:       defaultRows,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			db := dbtest.New(t, dbmigrations.FS)
-			_, err := db.Exec(context.Background(), tt.dbData)
-			require.NoError(t, err)
-
 			req := httptest.NewRequest(http.MethodDelete, "/v1/admin/pegawai/"+tt.paramNIP+"/riwayat-pendidikan/"+tt.paramID, nil)
 			req.Header = tt.requestHeader
 			req.Header.Set("Content-Type", "application/json")
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			authSvc := apitest.NewAuthService(api.Kode_Pegawai_Write)
-			RegisterRoutes(e, sqlc.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
 			assert.JSONEq(t, typeutil.Coalesce(tt.wantResponseBody, "null"), typeutil.Coalesce(rec.Body.String(), "null"))
 			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
 
-			actualRows, err := dbtest.QueryAll(db, "riwayat_pendidikan", "id")
+			actualRows, err := dbtest.QueryWithClause(db, "riwayat_pendidikan", "where id = $1", tt.paramID)
 			require.NoError(t, err)
 			if len(tt.wantDBRows) == len(actualRows) {
 				for i, row := range actualRows {
@@ -1915,13 +1715,60 @@ func Test_handler_adminDelete(t *testing.T) {
 func Test_handler_adminUploadBerkas(t *testing.T) {
 	t.Parallel()
 
-	seedData := `
+	dbData := `
 		insert into pegawai
 			(pns_id,  nip_baru, deleted_at) values
 			('id_1c', '1c',     null),
 			('id_1d', '1d',     '2000-01-01'),
 			('id_1e', '1e',     null);
+		insert into riwayat_pendidikan
+			(id, nama_sekolah, pendidikan_pertama, pendidikan_terakhir, diakui_bkn, status_satker, status_biro, tanggal_lulus, file_base64, keterangan_berkas, pns_id_3, pendidikan_id_3, pns_id,  nip,  created_at,   updated_at) values
+			(1,  'UI',         '1',                1,                   1,          1,             1,           '2020-01-01',  'data:abc',  'abc',             '1a',     '2',             'id_1c', '1c', '2000-01-01', '2000-01-01');
+		insert into riwayat_pendidikan
+			(id, nama_sekolah, pns_id,  nip,  created_at,   updated_at,   deleted_at) values
+			(2,  'UI',         'id_1e', '1e', '2000-01-01', '2000-01-01', null),
+			(3,  'UI',         'id_1c', '1c', '2000-01-01', '2000-01-01', '2000-01-01'),
+			(4,  'UI',         'id_1c', '1c', '2000-01-01', '2000-01-01', null);
 	`
+	db := dbtest.New(t, dbmigrations.FS)
+	_, err := db.Exec(context.Background(), dbData)
+	require.NoError(t, err)
+
+	defaultRows := dbtest.Rows{
+		{
+			"id":                    int32(4),
+			"tingkat_pendidikan_id": nil,
+			"pendidikan_id":         nil,
+			"no_ijazah":             nil,
+			"nama_sekolah":          "UI",
+			"tahun_lulus":           nil,
+			"gelar_depan":           nil,
+			"gelar_belakang":        nil,
+			"tugas_belajar":         nil,
+			"pendidikan_pertama":    nil,
+			"pendidikan_terakhir":   nil,
+			"negara_sekolah":        nil,
+			"diakui_bkn":            nil,
+			"status_satker":         nil,
+			"status_biro":           nil,
+			"tanggal_lulus":         nil,
+			"file_base64":           nil,
+			"keterangan_berkas":     nil,
+			"pns_id_3":              nil,
+			"pendidikan_id_3":       nil,
+			"pns_id":                "id_1c",
+			"nip":                   "1c",
+			"created_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+			"updated_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+			"deleted_at":            nil,
+		},
+	}
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	authSvc := apitest.NewAuthService(api.Kode_Pegawai_Write)
+	RegisterRoutes(e, sqlc.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	defaultRequestBody := func(writer *multipart.Writer) error {
 		part, err := writer.CreateFormFile("file", "file.txt")
@@ -1935,7 +1782,6 @@ func Test_handler_adminUploadBerkas(t *testing.T) {
 	authHeader := []string{apitest.GenerateAuthHeader("2a")}
 	tests := []struct {
 		name              string
-		dbData            string
 		paramNIP          string
 		paramID           string
 		requestHeader     http.Header
@@ -1945,13 +1791,7 @@ func Test_handler_adminUploadBerkas(t *testing.T) {
 		wantDBRows        dbtest.Rows
 	}{
 		{
-			name: "ok: success upload",
-			dbData: seedData + `
-				insert into riwayat_pendidikan
-					(id, nama_sekolah, pendidikan_pertama, pendidikan_terakhir, diakui_bkn, status_satker, status_biro, tanggal_lulus, file_base64, keterangan_berkas, pns_id_3, pendidikan_id_3, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'UI',         '1',                1,                   1,          1,             1,           '2020-01-01',  'data:abc',  'abc',             '1a',     '2',             'id_1c', '1c', '2000-01-01', '2000-01-01'),
-					(2,  'ITB',        '1',                1,                   1,          1,             1,           '2020-01-01',  'data:abc',  'abc',             '1a',     '2',             'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:              "ok: success upload",
 			paramNIP:          "1c",
 			paramID:           "1",
 			requestHeader:     http.Header{"Authorization": authHeader},
@@ -1985,42 +1825,20 @@ func Test_handler_adminUploadBerkas(t *testing.T) {
 					"updated_at":            "{updated_at}",
 					"deleted_at":            nil,
 				},
-				{
-					"id":                    int32(2),
-					"tingkat_pendidikan_id": nil,
-					"pendidikan_id":         nil,
-					"no_ijazah":             nil,
-					"nama_sekolah":          "ITB",
-					"tahun_lulus":           nil,
-					"gelar_depan":           nil,
-					"gelar_belakang":        nil,
-					"tugas_belajar":         nil,
-					"pendidikan_pertama":    "1",
-					"pendidikan_terakhir":   int32(1),
-					"negara_sekolah":        nil,
-					"diakui_bkn":            int32(1),
-					"status_satker":         int32(1),
-					"status_biro":           int32(1),
-					"tanggal_lulus":         time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC),
-					"file_base64":           "data:abc",
-					"keterangan_berkas":     "abc",
-					"pns_id_3":              "1a",
-					"pendidikan_id_3":       "2",
-					"pns_id":                "id_1c",
-					"nip":                   "1c",
-					"created_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":            nil,
-				},
 			},
 		},
 		{
-			name: "error: riwayat pendidikan is not found",
-			dbData: seedData + `
-				insert into riwayat_pendidikan
-					(id, nama_sekolah, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'UI',         'id_1c', '1c', '2000-01-01', '2000-01-01');
-			`,
+			name:              "error: riwayat pendidikan is not found",
+			paramNIP:          "1c",
+			paramID:           "0",
+			requestHeader:     http.Header{"Authorization": authHeader},
+			appendRequestBody: defaultRequestBody,
+			wantResponseCode:  http.StatusNotFound,
+			wantResponseBody:  `{"message": "data tidak ditemukan"}`,
+			wantDBRows:        dbtest.Rows{},
+		},
+		{
+			name:              "error: riwayat pendidikan is owned by different pegawai",
 			paramNIP:          "1c",
 			paramID:           "2",
 			requestHeader:     http.Header{"Authorization": authHeader},
@@ -2029,50 +1847,7 @@ func Test_handler_adminUploadBerkas(t *testing.T) {
 			wantResponseBody:  `{"message": "data tidak ditemukan"}`,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":                    int32(1),
-					"tingkat_pendidikan_id": nil,
-					"pendidikan_id":         nil,
-					"no_ijazah":             nil,
-					"nama_sekolah":          "UI",
-					"tahun_lulus":           nil,
-					"gelar_depan":           nil,
-					"gelar_belakang":        nil,
-					"tugas_belajar":         nil,
-					"pendidikan_pertama":    nil,
-					"pendidikan_terakhir":   nil,
-					"negara_sekolah":        nil,
-					"diakui_bkn":            nil,
-					"status_satker":         nil,
-					"status_biro":           nil,
-					"tanggal_lulus":         nil,
-					"file_base64":           nil,
-					"keterangan_berkas":     nil,
-					"pns_id_3":              nil,
-					"pendidikan_id_3":       nil,
-					"pns_id":                "id_1c",
-					"nip":                   "1c",
-					"created_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"updated_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
-					"deleted_at":            nil,
-				},
-			},
-		},
-		{
-			name: "error: riwayat pendidikan is owned by different pegawai",
-			dbData: seedData + `
-				insert into riwayat_pendidikan
-					(id, nama_sekolah, pns_id,  nip,  created_at,   updated_at) values
-					(1,  'UI',         'id_1e', '1e', '2000-01-01', '2000-01-01');
-			`,
-			paramNIP:          "1c",
-			paramID:           "1",
-			requestHeader:     http.Header{"Authorization": authHeader},
-			appendRequestBody: defaultRequestBody,
-			wantResponseCode:  http.StatusNotFound,
-			wantResponseBody:  `{"message": "data tidak ditemukan"}`,
-			wantDBRows: dbtest.Rows{
-				{
-					"id":                    int32(1),
+					"id":                    int32(2),
 					"tingkat_pendidikan_id": nil,
 					"pendidikan_id":         nil,
 					"no_ijazah":             nil,
@@ -2101,21 +1876,16 @@ func Test_handler_adminUploadBerkas(t *testing.T) {
 			},
 		},
 		{
-			name: "error: riwayat pendidikan is deleted",
-			dbData: seedData + `
-				insert into riwayat_pendidikan
-					(id, nama_sekolah, pns_id,  nip,  created_at,   updated_at,   deleted_at) values
-					(1,  'UI',         'id_1c', '1c', '2000-01-01', '2000-01-01', '2000-01-01');
-			`,
+			name:              "error: riwayat pendidikan is deleted",
 			paramNIP:          "1c",
-			paramID:           "1",
+			paramID:           "3",
 			requestHeader:     http.Header{"Authorization": authHeader},
 			appendRequestBody: defaultRequestBody,
 			wantResponseCode:  http.StatusNotFound,
 			wantResponseBody:  `{"message": "data tidak ditemukan"}`,
 			wantDBRows: dbtest.Rows{
 				{
-					"id":                    int32(1),
+					"id":                    int32(3),
 					"tingkat_pendidikan_id": nil,
 					"pendidikan_id":         nil,
 					"no_ijazah":             nil,
@@ -2146,31 +1916,27 @@ func Test_handler_adminUploadBerkas(t *testing.T) {
 		{
 			name:              "error: missing file",
 			paramNIP:          "1c",
-			paramID:           "1",
+			paramID:           "4",
 			requestHeader:     http.Header{"Authorization": authHeader},
 			appendRequestBody: func(*multipart.Writer) error { return nil },
 			wantResponseCode:  http.StatusBadRequest,
 			wantResponseBody:  `{"message": "parameter \"file\" harus diisi"}`,
-			wantDBRows:        dbtest.Rows{},
+			wantDBRows:        defaultRows,
 		},
 		{
 			name:              "error: invalid token",
 			paramNIP:          "1c",
-			paramID:           "1",
+			paramID:           "4",
 			requestHeader:     http.Header{"Authorization": []string{"Bearer some-token"}},
 			appendRequestBody: func(*multipart.Writer) error { return nil },
 			wantResponseCode:  http.StatusUnauthorized,
 			wantResponseBody:  `{"message": "token otentikasi tidak valid"}`,
-			wantDBRows:        dbtest.Rows{},
+			wantDBRows:        defaultRows,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-
-			db := dbtest.New(t, dbmigrations.FS)
-			_, err := db.Exec(context.Background(), tt.dbData)
-			require.NoError(t, err)
 
 			var buf bytes.Buffer
 			writer := multipart.NewWriter(&buf)
@@ -2182,18 +1948,13 @@ func Test_handler_adminUploadBerkas(t *testing.T) {
 			req.Header.Set("Content-Type", writer.FormDataContentType())
 			rec := httptest.NewRecorder()
 
-			e, err := api.NewEchoServer(docs.OpenAPIBytes)
-			require.NoError(t, err)
-
-			authSvc := apitest.NewAuthService(api.Kode_Pegawai_Write)
-			RegisterRoutes(e, sqlc.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 			e.ServeHTTP(rec, req)
 
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
 			assert.JSONEq(t, typeutil.Coalesce(tt.wantResponseBody, "null"), typeutil.Coalesce(rec.Body.String(), "null"))
 			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
 
-			actualRows, err := dbtest.QueryAll(db, "riwayat_pendidikan", "id")
+			actualRows, err := dbtest.QueryWithClause(db, "riwayat_pendidikan", "where id = $1", tt.paramID)
 			require.NoError(t, err)
 			if len(tt.wantDBRows) == len(actualRows) {
 				for i, row := range actualRows {
