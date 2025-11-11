@@ -2870,6 +2870,116 @@ paths:
                       $ref: "#/components/schemas/riwayatSertifikasi"
                   meta:
                     $ref: "#/components/schemas/metaPagination"
+    post:
+      tags:
+        - Riwayat Sertifikasi
+      summary: Buat riwayat sertifikasi pegawai.
+      description: >-
+        Buat riwayat sertifikasi dari pegawai berdasarkan NIP.
+      operationId: adminCreateRiwayatSertifikasi
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - tahun
+                - nama_sertifikasi
+              properties:
+                tahun:
+                  type: integer
+                  example: 2025
+                nama_sertifikasi:
+                  type: string
+                  example: "Sertifikasi 1"
+                deskripsi:
+                  type: string
+                  example: "Deskripsi sertifikasi"
+      responses:
+        "201":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        description: ID riwayat sertifikasi yang baru dibuat
+                        example: 1
+  /v1/admin/pegawai/{nip}/riwayat-sertifikasi/{id}:
+    put:
+      tags:
+        - Riwayat Sertifikasi
+      summary: Admin - Mengubah riwayat sertifikasi pegawai.
+      description: Mengubah riwayat sertifikasi pegawai berdasarkan NIP dan ID riwayat sertifikasi oleh admin.
+      operationId: adminUpdateRiwayatSertifikasi
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - tahun
+                - nama_sertifikasi
+              properties:
+                tahun:
+                  type: integer
+                  example: 2025
+                nama_sertifikasi:
+                  type: string
+                  example: "Sertifikasi 1"
+                deskripsi:
+                  type: string
+                  example: "Deskripsi sertifikasi"
+      responses:
+        "204":
+          description: Sukses.
+    delete:
+      tags:
+        - Riwayat Sertifikasi
+      summary: Admin - Menghapus riwayat sertifikasi pegawai.
+      description: Menghapus riwayat sertifikasi pegawai berdasarkan NIP dan ID riwayat sertifikasi oleh admin.
+      operationId: adminDeleteRiwayatSertifikasi
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Sukses.
   /v1/admin/pegawai/{nip}/riwayat-sertifikasi/{id}/berkas:
     get:
       tags:
@@ -2900,6 +3010,39 @@ paths:
                 format: binary
         "404":
           description: Berkas riwayat sertifikasi tidak ditemukan atau User tidak mempunyai akses.
+    put:
+      tags:
+        - Riwayat Sertifikasi
+      summary: Admin - Mengunggah berkas riwayat sertifikasi pegawai.
+      description: Mengunggah berkas riwayat sertifikasi pegawai berdasarkan NIP dan ID riwayat sertifikasi oleh admin.
+      operationId: adminUploadBerkasRiwayatSertifikasi
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required:
+                - file
+      responses:
+        "204":
+          description: Sukses.
   /v1/admin/pegawai/{nip}/riwayat-kepangkatan:
     get:
       tags:

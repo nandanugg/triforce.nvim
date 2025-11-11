@@ -21,6 +21,53 @@ func (q *Queries) CountRiwayatSertifikasi(ctx context.Context, nip pgtype.Text) 
 	return count, err
 }
 
+const createRiwayatSertifikasi = `-- name: CreateRiwayatSertifikasi :one
+insert into 
+    riwayat_sertifikasi (nip, tahun, nama_sertifikasi, deskripsi) 
+values 
+    ($1, $2, $3, $4)
+returning id
+`
+
+type CreateRiwayatSertifikasiParams struct {
+	Nip             pgtype.Text `db:"nip"`
+	Tahun           pgtype.Int8 `db:"tahun"`
+	NamaSertifikasi pgtype.Text `db:"nama_sertifikasi"`
+	Deskripsi       pgtype.Text `db:"deskripsi"`
+}
+
+func (q *Queries) CreateRiwayatSertifikasi(ctx context.Context, arg CreateRiwayatSertifikasiParams) (int64, error) {
+	row := q.db.QueryRow(ctx, createRiwayatSertifikasi,
+		arg.Nip,
+		arg.Tahun,
+		arg.NamaSertifikasi,
+		arg.Deskripsi,
+	)
+	var id int64
+	err := row.Scan(&id)
+	return id, err
+}
+
+const deleteRiwayatSertifikasiByIDAndNIP = `-- name: DeleteRiwayatSertifikasiByIDAndNIP :execrows
+update riwayat_sertifikasi
+set
+    deleted_at = now()
+where id = $1 and nip = $2::varchar and deleted_at is null
+`
+
+type DeleteRiwayatSertifikasiByIDAndNIPParams struct {
+	ID  int64  `db:"id"`
+	Nip string `db:"nip"`
+}
+
+func (q *Queries) DeleteRiwayatSertifikasiByIDAndNIP(ctx context.Context, arg DeleteRiwayatSertifikasiByIDAndNIPParams) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteRiwayatSertifikasiByIDAndNIP, arg.ID, arg.Nip)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const getBerkasRiwayatSertifikasi = `-- name: GetBerkasRiwayatSertifikasi :one
 select file_base64 from riwayat_sertifikasi
 where nip = $1 and id = $2 and deleted_at is null
@@ -81,4 +128,58 @@ func (q *Queries) ListRiwayatSertifikasi(ctx context.Context, arg ListRiwayatSer
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateBerkasRiwayatSertifikasiByIDAndNIP = `-- name: UpdateBerkasRiwayatSertifikasiByIDAndNIP :execrows
+update riwayat_sertifikasi
+set
+    file_base64 = $1,
+    updated_at = now()
+where id = $2 and nip = $3::varchar and deleted_at is null
+`
+
+type UpdateBerkasRiwayatSertifikasiByIDAndNIPParams struct {
+	FileBase64 pgtype.Text `db:"file_base64"`
+	ID         int64       `db:"id"`
+	Nip        string      `db:"nip"`
+}
+
+func (q *Queries) UpdateBerkasRiwayatSertifikasiByIDAndNIP(ctx context.Context, arg UpdateBerkasRiwayatSertifikasiByIDAndNIPParams) (int64, error) {
+	result, err := q.db.Exec(ctx, updateBerkasRiwayatSertifikasiByIDAndNIP, arg.FileBase64, arg.ID, arg.Nip)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
+const updateRiwayatSertifikasiByIDAndNIP = `-- name: UpdateRiwayatSertifikasiByIDAndNIP :execrows
+update riwayat_sertifikasi
+set
+    tahun = $1,
+    nama_sertifikasi = $2,
+    deskripsi = $3,
+    updated_at = now()
+where id = $4 and nip = $5::varchar and deleted_at is null
+`
+
+type UpdateRiwayatSertifikasiByIDAndNIPParams struct {
+	Tahun           pgtype.Int8 `db:"tahun"`
+	NamaSertifikasi pgtype.Text `db:"nama_sertifikasi"`
+	Deskripsi       pgtype.Text `db:"deskripsi"`
+	ID              int64       `db:"id"`
+	Nip             string      `db:"nip"`
+}
+
+func (q *Queries) UpdateRiwayatSertifikasiByIDAndNIP(ctx context.Context, arg UpdateRiwayatSertifikasiByIDAndNIPParams) (int64, error) {
+	result, err := q.db.Exec(ctx, updateRiwayatSertifikasiByIDAndNIP,
+		arg.Tahun,
+		arg.NamaSertifikasi,
+		arg.Deskripsi,
+		arg.ID,
+		arg.Nip,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
 }

@@ -66,6 +66,7 @@ type Querier interface {
 	CreateRiwayatKepangkatan(ctx context.Context, arg CreateRiwayatKepangkatanParams) (string, error)
 	CreateRiwayatPelatihanSIASN(ctx context.Context, arg CreateRiwayatPelatihanSIASNParams) (int64, error)
 	CreateRiwayatPendidikan(ctx context.Context, arg CreateRiwayatPendidikanParams) (int32, error)
+	CreateRiwayatSertifikasi(ctx context.Context, arg CreateRiwayatSertifikasiParams) (int64, error)
 	CreateTemplate(ctx context.Context, arg CreateTemplateParams) (CreateTemplateRow, error)
 	CreateUnitKerja(ctx context.Context, arg CreateUnitKerjaParams) (CreateUnitKerjaRow, error)
 	DeleteAnak(ctx context.Context, arg DeleteAnakParams) (int64, error)
@@ -84,6 +85,7 @@ type Querier interface {
 	DeleteRiwayatKepangkatan(ctx context.Context, arg DeleteRiwayatKepangkatanParams) (int64, error)
 	DeleteRiwayatPelatihanSIASN(ctx context.Context, arg DeleteRiwayatPelatihanSIASNParams) (int64, error)
 	DeleteRiwayatPendidikan(ctx context.Context, arg DeleteRiwayatPendidikanParams) (int64, error)
+	DeleteRiwayatSertifikasiByIDAndNIP(ctx context.Context, arg DeleteRiwayatSertifikasiByIDAndNIPParams) (int64, error)
 	DeleteTemplate(ctx context.Context, id int32) (int64, error)
 	DeleteUnitKerja(ctx context.Context, id string) (int64, error)
 	GetBerkasRiwayatHukumanDisiplin(ctx context.Context, arg GetBerkasRiwayatHukumanDisiplinParams) (pgtype.Text, error)
@@ -178,6 +180,7 @@ type Querier interface {
 	ListUnitKerjaHierarchyByNIP(ctx context.Context, nip string) ([]ListUnitKerjaHierarchyByNIPRow, error)
 	ListUnitKerjaLengkapByIDs(ctx context.Context, ids []string) ([]ListUnitKerjaLengkapByIDsRow, error)
 	UpdateAnak(ctx context.Context, arg UpdateAnakParams) (int64, error)
+	UpdateBerkasRiwayatSertifikasiByIDAndNIP(ctx context.Context, arg UpdateBerkasRiwayatSertifikasiByIDAndNIPParams) (int64, error)
 	UpdateBerkasSuratKeputusanSignedByID(ctx context.Context, arg UpdateBerkasSuratKeputusanSignedByIDParams) error
 	UpdateJenisKenaikanPangkat(ctx context.Context, arg UpdateJenisKenaikanPangkatParams) (UpdateJenisKenaikanPangkatRow, error)
 	UpdateKorektorSuratKeputusanByID(ctx context.Context, arg UpdateKorektorSuratKeputusanByIDParams) error
@@ -195,6 +198,7 @@ type Querier interface {
 	UpdateRiwayatKepangkatan(ctx context.Context, arg UpdateRiwayatKepangkatanParams) (int64, error)
 	UpdateRiwayatPelatihanSIASN(ctx context.Context, arg UpdateRiwayatPelatihanSIASNParams) (int64, error)
 	UpdateRiwayatPendidikan(ctx context.Context, arg UpdateRiwayatPendidikanParams) (int64, error)
+	UpdateRiwayatSertifikasiByIDAndNIP(ctx context.Context, arg UpdateRiwayatSertifikasiByIDAndNIPParams) (int64, error)
 	UpdateStatusSuratKeputusanByID(ctx context.Context, arg UpdateStatusSuratKeputusanByIDParams) error
 	UpdateTemplate(ctx context.Context, arg UpdateTemplateParams) (UpdateTemplateRow, error)
 	UpdateUnitKerja(ctx context.Context, arg UpdateUnitKerjaParams) (UpdateUnitKerjaRow, error)

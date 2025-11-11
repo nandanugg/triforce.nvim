@@ -1,14 +1,21 @@
 package riwayatsertifikasi
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
+	"io"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"os"
+	"strconv"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -16,6 +23,7 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api/apitest"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db/dbtest"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/typeutil"
 	dbmigrations "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/migrations"
 	sqlc "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/docs"
@@ -571,6 +579,952 @@ func Test_handler_getBerkasAdmin(t *testing.T) {
 				assert.Equal(t, tt.wantResponseBytes, rec.Body.Bytes())
 			} else {
 				assert.JSONEq(t, string(tt.wantResponseBytes), rec.Body.String())
+			}
+		})
+	}
+}
+
+func Test_handler_adminCreate(t *testing.T) {
+	t.Parallel()
+
+	dbData := `
+		insert into pegawai
+			(pns_id,  nip_baru, deleted_at) values
+			('id_1c', '1c',     null),
+			('id_1d', '1d',     '2000-01-01'),
+			('id_1e', '1e',     null),
+			('id_1f', '1f',     null),
+			('id_1g', '1g',     null);
+		insert into riwayat_sertifikasi
+			(id, nip,  tahun, nama_sertifikasi, deskripsi, created_at,   updated_at) values
+			(1,  '1c', 2020,  'Sertifikasi 1',   'Deskripsi 1', '2000-01-01', '2000-01-01');
+		SELECT setval('riwayat_sertifikasi_id_seq', 1, true);
+	`
+	db := dbtest.New(t, dbmigrations.FS)
+	_, err := db.Exec(context.Background(), dbData)
+	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	authSvc := apitest.NewAuthService(api.Kode_Pegawai_Write)
+	RegisterRoutes(e, sqlc.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+
+	authHeader := []string{apitest.GenerateAuthHeader("2a")}
+	tests := []struct {
+		name             string
+		paramNIP         string
+		requestHeader    http.Header
+		requestBody      string
+		wantResponseCode int
+		wantResponseBody string
+		wantDBRows       dbtest.Rows
+	}{
+		{
+			name:          "ok: with all data",
+			paramNIP:      "1c",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"tahun": 2025,
+				"nama_sertifikasi": "Sertifikasi Baru",
+				"deskripsi": "Deskripsi sertifikasi baru"
+			}`,
+			wantResponseCode: http.StatusCreated,
+			wantResponseBody: `{
+				"data": { "id": {id} }
+			}`,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":               int64(1),
+					"nip":              "1c",
+					"tahun":            int64(2020),
+					"nama_sertifikasi": "Sertifikasi 1",
+					"deskripsi":        "Deskripsi 1",
+					"file_base64":      nil,
+					"created_at":       time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":       time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":       nil,
+				},
+				{
+					"id":               "{id}",
+					"nip":              "1c",
+					"tahun":            int64(2025),
+					"nama_sertifikasi": "Sertifikasi Baru",
+					"deskripsi":        "Deskripsi sertifikasi baru",
+					"file_base64":      nil,
+					"created_at":       "{created_at}",
+					"updated_at":       "{updated_at}",
+					"deleted_at":       nil,
+				},
+			},
+		},
+		{
+			name:          "ok: with null/empty values",
+			paramNIP:      "1e",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"tahun": 2020,
+				"nama_sertifikasi": "Sertifikasi",
+				"deskripsi": ""
+			}`,
+			wantResponseCode: http.StatusCreated,
+			wantResponseBody: `{
+				"data": { "id": {id} }
+			}`,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":               "{id}",
+					"nip":              "1e",
+					"tahun":            int64(2020),
+					"nama_sertifikasi": "Sertifikasi",
+					"deskripsi":        nil,
+					"file_base64":      nil,
+					"created_at":       "{created_at}",
+					"updated_at":       "{updated_at}",
+					"deleted_at":       nil,
+				},
+			},
+		},
+		{
+			name:          "ok: required data only",
+			paramNIP:      "1f",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"tahun": 2020,
+				"nama_sertifikasi": "Sertifikasi"
+			}`,
+			wantResponseCode: http.StatusCreated,
+			wantResponseBody: `{
+				"data": { "id": {id} }
+			}`,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":               "{id}",
+					"nip":              "1f",
+					"tahun":            int64(2020),
+					"nama_sertifikasi": "Sertifikasi",
+					"deskripsi":        nil,
+					"file_base64":      nil,
+					"created_at":       "{created_at}",
+					"updated_at":       "{updated_at}",
+					"deleted_at":       nil,
+				},
+			},
+		},
+		{
+			name:          "error: pegawai is not found",
+			paramNIP:      "1a",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"tahun": 2020,
+				"nama_sertifikasi": "Sertifikasi"
+			}`,
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data pegawai tidak ditemukan"}`,
+			wantDBRows:       dbtest.Rows{},
+		},
+		{
+			name:          "error: pegawai is deleted",
+			paramNIP:      "1d",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"tahun": 2020,
+				"nama_sertifikasi": "Sertifikasi",
+				"deskripsi": "Deskripsi"
+			}`,
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data pegawai tidak ditemukan"}`,
+			wantDBRows:       dbtest.Rows{},
+		},
+		{
+			name:             "error: missing required params",
+			paramNIP:         "1g",
+			requestHeader:    http.Header{"Authorization": authHeader},
+			requestBody:      `{ "deskripsi": "Deskripsi" }`,
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "parameter \"tahun\" harus diisi` +
+				` | parameter \"nama_sertifikasi\" harus diisi"}`,
+			wantDBRows: dbtest.Rows{},
+		},
+		{
+			name:          "error: wrong data type",
+			paramNIP:      "1a",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"tahun": "2020",
+				"nama_sertifikasi": 123
+			}`,
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "parameter \"nama_sertifikasi\" harus dalam tipe string` +
+				` | parameter \"tahun\" harus dalam tipe integer"}`,
+			wantDBRows: dbtest.Rows{},
+		},
+		{
+			name:          "error: null required params",
+			paramNIP:      "1a",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"tahun": null,
+				"nama_sertifikasi": null,
+				"deskripsi": null
+			}`,
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "parameter \"deskripsi\" tidak boleh null` +
+				` | parameter \"nama_sertifikasi\" tidak boleh null` +
+				` | parameter \"tahun\" tidak boleh null"}`,
+			wantDBRows: dbtest.Rows{},
+		},
+		{
+			name:             "error: missing required params & have additional params",
+			paramNIP:         "1a",
+			requestHeader:    http.Header{"Authorization": authHeader},
+			requestBody:      `{ "id": 1 }`,
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "parameter \"tahun\" harus diisi` +
+				` | parameter \"nama_sertifikasi\" harus diisi"}`,
+			wantDBRows: dbtest.Rows{},
+		},
+		{
+			name:             "error: body is empty",
+			paramNIP:         "1a",
+			requestHeader:    http.Header{"Authorization": authHeader},
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "request body harus diisi"}`,
+			wantDBRows:       dbtest.Rows{},
+		},
+		{
+			name:             "error: invalid token",
+			paramNIP:         "1a",
+			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
+			wantDBRows:       dbtest.Rows{},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			req := httptest.NewRequest(http.MethodPost, "/v1/admin/pegawai/"+tt.paramNIP+"/riwayat-sertifikasi", strings.NewReader(tt.requestBody))
+			req.Header = tt.requestHeader
+			req.Header.Set("Content-Type", "application/json")
+			rec := httptest.NewRecorder()
+
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			if strings.Contains(tt.wantResponseBody, "{id}") {
+				var resp struct {
+					Data struct {
+						ID int64 `json:"id"`
+					} `json:"data"`
+				}
+				require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+				id := resp.Data.ID
+				tt.wantResponseBody = strings.ReplaceAll(tt.wantResponseBody, "{id}", strconv.FormatInt(id, 10))
+				for i, row := range tt.wantDBRows {
+					if row["id"] == "{id}" {
+						tt.wantDBRows[i]["id"] = id
+					}
+				}
+			}
+			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
+			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+
+			actualRows, err := dbtest.QueryWithClause(db, "riwayat_sertifikasi", "where nip = $1 order by id", tt.paramNIP)
+			require.NoError(t, err)
+			if len(tt.wantDBRows) == len(actualRows) {
+				for i, row := range actualRows {
+					if tt.wantDBRows[i]["created_at"] == "{created_at}" {
+						assert.WithinDuration(t, time.Now(), row["created_at"].(time.Time), 10*time.Second)
+						assert.Equal(t, row["created_at"], row["updated_at"])
+						tt.wantDBRows[i]["created_at"] = row["created_at"]
+						tt.wantDBRows[i]["updated_at"] = row["updated_at"]
+					}
+				}
+			}
+			assert.Equal(t, tt.wantDBRows, actualRows)
+		})
+	}
+}
+
+func Test_handler_adminUpdate(t *testing.T) {
+	t.Parallel()
+
+	dbData := `
+		insert into pegawai
+			(pns_id,  nip_baru, deleted_at) values
+			('id_1c', '1c',     null),
+			('id_1d', '1d',     '2000-01-01'),
+			('id_1e', '1e',     null);
+		insert into riwayat_sertifikasi (id, nip, tahun, nama_sertifikasi, deskripsi, created_at, updated_at, deleted_at) values
+			(1,  '1c', 2020,  'Sertifikasi 1',   'Deskripsi 1', '2000-01-01', '2000-01-01', null),
+			(2,  '1c', 2021,  'Sertifikasi 2',   'Deskripsi 2', '2000-01-01', '2000-01-01', null),
+			(3,  '1c', 2020,  'Sertifikasi 1',   'Deskripsi 1', '2000-01-01', '2000-01-01', null),
+			(4,  '1c', 2020,  'Sertifikasi 1',   'Deskripsi 1', '2000-01-01', '2000-01-01', null),
+			(5,  '1c', 2020,  'Sertifikasi 1',   null,           '2000-01-01', '2000-01-01', null),
+			(6,  '1e', 2020,  'Sertifikasi 1',   null,           '2000-01-01', '2000-01-01', null),
+			(7,  '1c', 2020,  'Sertifikasi 1',   null,           '2000-01-01', '2000-01-01', '2000-01-01'),
+			(8,  '1c', 2020,  'Sertifikasi 1',   'Deskripsi 1', '2000-01-01', '2000-01-01', null),
+			(9,  '1c', 2020,  'Sertifikasi 1',   'Deskripsi 1', '2000-01-01', '2000-01-01', null),
+			(10, '1c', 2020,  'Sertifikasi 1',   'Deskripsi 1', '2000-01-01', '2000-01-01', null),
+			(11, '1c', 2020,  'Sertifikasi 1',   'Deskripsi 1', '2000-01-01', '2000-01-01', null);
+	`
+	db := dbtest.New(t, dbmigrations.FS)
+	_, err := db.Exec(context.Background(), dbData)
+	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	authSvc := apitest.NewAuthService(api.Kode_Pegawai_Write)
+	RegisterRoutes(e, sqlc.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+
+	authHeader := []string{apitest.GenerateAuthHeader("2a")}
+	tests := []struct {
+		name             string
+		paramNIP         string
+		paramID          string
+		requestHeader    http.Header
+		requestBody      string
+		wantResponseCode int
+		wantResponseBody string
+		wantDBRows       dbtest.Rows
+	}{
+		{
+			name:          "ok: with all data",
+			paramNIP:      "1c",
+			paramID:       "1",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"tahun": 2025,
+				"nama_sertifikasi": "Sertifikasi Updated",
+				"deskripsi": "Deskripsi Updated"
+			}`,
+			wantResponseCode: http.StatusNoContent,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":               int64(1),
+					"nip":              "1c",
+					"tahun":            int64(2025),
+					"nama_sertifikasi": "Sertifikasi Updated",
+					"deskripsi":        "Deskripsi Updated",
+					"file_base64":      nil,
+					"created_at":       time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":       "{updated_at}",
+					"deleted_at":       nil,
+				},
+				{
+					"id":               int64(2),
+					"nip":              "1c",
+					"tahun":            int64(2021),
+					"nama_sertifikasi": "Sertifikasi 2",
+					"deskripsi":        "Deskripsi 2",
+					"file_base64":      nil,
+					"created_at":       time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":       time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":       nil,
+				},
+			},
+		},
+		{
+			name:          "ok: with null/empty values",
+			paramNIP:      "1c",
+			paramID:       "3",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"tahun": 2025,
+				"nama_sertifikasi": "Sertifikasi Updated",
+				"deskripsi": ""
+			}`,
+			wantResponseCode: http.StatusNoContent,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":               int64(3),
+					"nip":              "1c",
+					"tahun":            int64(2025),
+					"nama_sertifikasi": "Sertifikasi Updated",
+					"deskripsi":        nil,
+					"file_base64":      nil,
+					"created_at":       time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":       "{updated_at}",
+					"deleted_at":       nil,
+				},
+			},
+		},
+		{
+			name:          "ok: required data only",
+			paramNIP:      "1c",
+			paramID:       "4",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"tahun": 2025,
+				"nama_sertifikasi": "Sertifikasi Updated"
+			}`,
+			wantResponseCode: http.StatusNoContent,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":               int64(4),
+					"nip":              "1c",
+					"tahun":            int64(2025),
+					"nama_sertifikasi": "Sertifikasi Updated",
+					"deskripsi":        nil,
+					"file_base64":      nil,
+					"created_at":       time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":       "{updated_at}",
+					"deleted_at":       nil,
+				},
+			},
+		},
+		{
+			name:          "error: riwayat sertifikasi is not found",
+			paramNIP:      "1c",
+			paramID:       "0",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"tahun": 2025,
+				"nama_sertifikasi": "Sertifikasi Updated"
+			}`,
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data tidak ditemukan"}`,
+			wantDBRows:       dbtest.Rows{},
+		},
+		{
+			name:          "error: riwayat sertifikasi is owned by different pegawai",
+			paramNIP:      "1c",
+			paramID:       "6",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"tahun": 2025,
+				"nama_sertifikasi": "Sertifikasi Updated"
+			}`,
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data tidak ditemukan"}`,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":               int64(6),
+					"nip":              "1e",
+					"tahun":            int64(2020),
+					"nama_sertifikasi": "Sertifikasi 1",
+					"deskripsi":        nil,
+					"file_base64":      nil,
+					"created_at":       time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":       time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":       nil,
+				},
+			},
+		},
+		{
+			name:          "error: riwayat sertifikasi is deleted",
+			paramNIP:      "1c",
+			paramID:       "7",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"tahun": 2025,
+				"nama_sertifikasi": "Sertifikasi Updated",
+				"deskripsi": "Deskripsi Updated"
+			}`,
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data tidak ditemukan"}`,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":               int64(7),
+					"nip":              "1c",
+					"tahun":            int64(2020),
+					"nama_sertifikasi": "Sertifikasi 1",
+					"deskripsi":        nil,
+					"file_base64":      nil,
+					"created_at":       time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":       time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":       time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+				},
+			},
+		},
+		{
+			name:             "error: missing required params",
+			paramNIP:         "1c",
+			paramID:          "8",
+			requestHeader:    http.Header{"Authorization": authHeader},
+			requestBody:      `{ "deskripsi": "Deskripsi" }`,
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "parameter \"tahun\" harus diisi` +
+				` | parameter \"nama_sertifikasi\" harus diisi"}`,
+			wantDBRows: dbtest.Rows{},
+		},
+		{
+			name:          "error: wrong data type",
+			paramNIP:      "1c",
+			paramID:       "9",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"tahun": "2020",
+				"nama_sertifikasi": 123
+			}`,
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "parameter \"nama_sertifikasi\" harus dalam tipe string` +
+				` | parameter \"tahun\" harus dalam tipe integer"}`,
+			wantDBRows: dbtest.Rows{},
+		},
+		{
+			name:          "error: null required params",
+			paramNIP:      "1c",
+			paramID:       "10",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"tahun": null,
+				"nama_sertifikasi": null,
+				"deskripsi": null
+			}`,
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "parameter \"deskripsi\" tidak boleh null` +
+				` | parameter \"nama_sertifikasi\" tidak boleh null` +
+				` | parameter \"tahun\" tidak boleh null"}`,
+			wantDBRows: dbtest.Rows{},
+		},
+		{
+			name:             "error: body is empty",
+			paramNIP:         "1c",
+			paramID:          "11",
+			requestHeader:    http.Header{"Authorization": authHeader},
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "request body harus diisi"}`,
+			wantDBRows:       dbtest.Rows{},
+		},
+		{
+			name:             "error: invalid id",
+			paramNIP:         "1c",
+			paramID:          "abc",
+			requestHeader:    http.Header{"Authorization": authHeader},
+			requestBody:      `{"tahun": 2025, "nama_sertifikasi": "Test"}`,
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "parameter \"id\" harus dalam format yang sesuai"}`,
+			wantDBRows:       dbtest.Rows{},
+		},
+		{
+			name:             "error: invalid token",
+			paramNIP:         "1c",
+			paramID:          "1",
+			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
+			requestBody:      `{"tahun": 2025, "nama_sertifikasi": "Test"}`,
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
+			wantDBRows:       dbtest.Rows{},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			req := httptest.NewRequest(http.MethodPut, "/v1/admin/pegawai/"+tt.paramNIP+"/riwayat-sertifikasi/"+tt.paramID, strings.NewReader(tt.requestBody))
+			req.Header = tt.requestHeader
+			req.Header.Set("Content-Type", "application/json")
+			rec := httptest.NewRecorder()
+
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			assert.JSONEq(t, typeutil.Coalesce(tt.wantResponseBody, "null"), typeutil.Coalesce(rec.Body.String(), "null"))
+			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+
+			if len(tt.wantDBRows) > 0 {
+				expectedIDs := make([]int64, len(tt.wantDBRows))
+				for i, wantRow := range tt.wantDBRows {
+					expectedIDs[i] = wantRow["id"].(int64)
+				}
+				actualRows, err := dbtest.QueryWithClause(db, "riwayat_sertifikasi", "where id = any($1::int8[]) order by id", expectedIDs)
+				require.NoError(t, err)
+				for i, row := range actualRows {
+					if tt.wantDBRows[i]["updated_at"] == "{updated_at}" {
+						assert.WithinDuration(t, time.Now(), row["updated_at"].(time.Time), 10*time.Second)
+						tt.wantDBRows[i]["updated_at"] = row["updated_at"]
+					}
+				}
+				assert.Equal(t, tt.wantDBRows, actualRows)
+			}
+		})
+	}
+}
+
+func Test_handler_adminDelete(t *testing.T) {
+	t.Parallel()
+
+	dbData := `
+		insert into pegawai
+			(pns_id,  nip_baru, deleted_at) values
+			('id_1c', '1c',     null),
+			('id_1d', '1d',     '2000-01-01'),
+			('id_1e', '1e',     null);
+		insert into riwayat_sertifikasi
+			(id, nip, tahun, nama_sertifikasi, created_at, updated_at, deleted_at) values
+			(1, '1c', 2020, 'Sertifikasi 1', '2000-01-01', '2000-01-01', null),
+			(2, '1c', 2021, 'Sertifikasi 2', '2000-01-01', '2000-01-01', null),
+			(3, '1e', 2020, 'Sertifikasi 1', '2000-01-01', '2000-01-01', null),
+			(4, '1c', 2020, 'Sertifikasi 1', '2000-01-01', '2000-01-01', null),
+			(5, '1c', 2020, 'Sertifikasi 1', '2000-01-01', '2000-01-01', '2000-01-01');
+	`
+	db := dbtest.New(t, dbmigrations.FS)
+	_, err := db.Exec(context.Background(), dbData)
+	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	authSvc := apitest.NewAuthService(api.Kode_Pegawai_Write)
+	RegisterRoutes(e, sqlc.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+
+	authHeader := []string{apitest.GenerateAuthHeader("2a")}
+	tests := []struct {
+		name             string
+		paramNIP         string
+		paramID          string
+		requestHeader    http.Header
+		wantResponseCode int
+		wantResponseBody string
+		wantDBRows       dbtest.Rows
+	}{
+		{
+			name:             "ok: success delete",
+			paramNIP:         "1c",
+			paramID:          "1",
+			requestHeader:    http.Header{"Authorization": authHeader},
+			wantResponseCode: http.StatusNoContent,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":               int64(1),
+					"nip":              "1c",
+					"tahun":            int64(2020),
+					"nama_sertifikasi": "Sertifikasi 1",
+					"deskripsi":        nil,
+					"file_base64":      nil,
+					"created_at":       time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":       time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":       "{deleted_at}",
+				},
+				{
+					"id":               int64(2),
+					"nip":              "1c",
+					"tahun":            int64(2021),
+					"nama_sertifikasi": "Sertifikasi 2",
+					"deskripsi":        nil,
+					"file_base64":      nil,
+					"created_at":       time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":       time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":       nil,
+				},
+			},
+		},
+		{
+			name:             "error: riwayat sertifikasi is owned by other pegawai",
+			paramNIP:         "1c",
+			paramID:          "3",
+			requestHeader:    http.Header{"Authorization": authHeader},
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data tidak ditemukan"}`,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":               int64(3),
+					"nip":              "1e",
+					"tahun":            int64(2020),
+					"nama_sertifikasi": "Sertifikasi 1",
+					"deskripsi":        nil,
+					"file_base64":      nil,
+					"created_at":       time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":       time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":       nil,
+				},
+			},
+		},
+		{
+			name:             "error: riwayat sertifikasi is not found",
+			paramNIP:         "1c",
+			paramID:          "0",
+			requestHeader:    http.Header{"Authorization": authHeader},
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data tidak ditemukan"}`,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":               int64(4),
+					"nip":              "1c",
+					"tahun":            int64(2020),
+					"nama_sertifikasi": "Sertifikasi 1",
+					"deskripsi":        nil,
+					"file_base64":      nil,
+					"created_at":       time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":       time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":       nil,
+				},
+			},
+		},
+		{
+			name:             "error: riwayat sertifikasi is deleted",
+			paramNIP:         "1c",
+			paramID:          "5",
+			requestHeader:    http.Header{"Authorization": authHeader},
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data tidak ditemukan"}`,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":               int64(5),
+					"nip":              "1c",
+					"tahun":            int64(2020),
+					"nama_sertifikasi": "Sertifikasi 1",
+					"deskripsi":        nil,
+					"file_base64":      nil,
+					"created_at":       time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":       time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":       time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+				},
+			},
+		},
+		{
+			name:             "error: unexpected data type",
+			paramNIP:         "1c",
+			paramID:          "abc",
+			requestHeader:    http.Header{"Authorization": authHeader},
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "parameter \"id\" harus dalam format yang sesuai"}`,
+			wantDBRows:       dbtest.Rows{},
+		},
+		{
+			name:             "error: invalid token",
+			paramNIP:         "1c",
+			paramID:          "1",
+			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
+			wantDBRows:       dbtest.Rows{},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			req := httptest.NewRequest(http.MethodDelete, "/v1/admin/pegawai/"+tt.paramNIP+"/riwayat-sertifikasi/"+tt.paramID, nil)
+			req.Header = tt.requestHeader
+			req.Header.Set("Content-Type", "application/json")
+			rec := httptest.NewRecorder()
+
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			assert.JSONEq(t, typeutil.Coalesce(tt.wantResponseBody, "null"), typeutil.Coalesce(rec.Body.String(), "null"))
+			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+
+			if len(tt.wantDBRows) > 0 {
+				expectedIDs := make([]int64, len(tt.wantDBRows))
+				for i, wantRow := range tt.wantDBRows {
+					expectedIDs[i] = wantRow["id"].(int64)
+				}
+				actualRows, err := dbtest.QueryWithClause(db, "riwayat_sertifikasi", "where id = any($1::int8[]) order by id", expectedIDs)
+				require.NoError(t, err)
+				for i, row := range actualRows {
+					if tt.wantDBRows[i]["deleted_at"] == "{deleted_at}" {
+						assert.WithinDuration(t, time.Now(), row["deleted_at"].(time.Time), 10*time.Second)
+						tt.wantDBRows[i]["deleted_at"] = row["deleted_at"]
+					}
+				}
+				assert.Equal(t, tt.wantDBRows, actualRows)
+			}
+		})
+	}
+}
+
+func Test_handler_adminUploadBerkas(t *testing.T) {
+	t.Parallel()
+
+	dbData := `
+		insert into pegawai
+			(pns_id,  nip_baru, deleted_at) values
+			('id_1c', '1c',     null),
+			('id_1d', '1d',     '2000-01-01'),
+			('id_1e', '1e',     null);
+		insert into riwayat_sertifikasi
+			(id, nip,  tahun, nama_sertifikasi, deskripsi, file_base64, created_at,   updated_at) values
+			(1,  '1c', 2020,  'Sertifikasi 1',   'Deskripsi 1', 'data:abc', '2000-01-01', '2000-01-01'),
+			(2,  '1c', 2021,  'Sertifikasi 2',   'Deskripsi 2', 'data:abc', '2000-01-01', '2000-01-01');
+		insert into riwayat_sertifikasi
+			(id, nip,  tahun, nama_sertifikasi, created_at,   updated_at) values
+			(3,  '1c', 2020,  'Sertifikasi 1',   '2000-01-01', '2000-01-01');
+		insert into riwayat_sertifikasi
+			(id, nip,  tahun, nama_sertifikasi, created_at,   updated_at,   deleted_at) values
+			(4,  '1c', 2020,  'Sertifikasi 1',   '2000-01-01', '2000-01-01', '2000-01-01');
+		insert into riwayat_sertifikasi
+			(id, nip,  tahun, nama_sertifikasi, deskripsi, file_base64, created_at,   updated_at) values
+			(5,  '1c', 2020,  'Sertifikasi 1',   'Deskripsi 1', 'data:abc', '2000-01-01', '2000-01-01');
+	`
+	db := dbtest.New(t, dbmigrations.FS)
+	_, err := db.Exec(context.Background(), dbData)
+	require.NoError(t, err)
+
+	defaultRows := dbtest.Rows{
+		{
+			"id":               int64(5),
+			"nip":              "1c",
+			"tahun":            int64(2020),
+			"nama_sertifikasi": "Sertifikasi 1",
+			"deskripsi":        "Deskripsi 1",
+			"file_base64":      "data:abc",
+			"created_at":       time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+			"updated_at":       time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+			"deleted_at":       nil,
+		},
+	}
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	authSvc := apitest.NewAuthService(api.Kode_Pegawai_Write)
+	RegisterRoutes(e, sqlc.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+
+	defaultRequestBody := func(writer *multipart.Writer) error {
+		part, err := writer.CreateFormFile("file", "file.txt")
+		if err != nil {
+			return err
+		}
+		_, err = io.WriteString(part, "Hello World!!")
+		return err
+	}
+
+	authHeader := []string{apitest.GenerateAuthHeader("2a")}
+	tests := []struct {
+		name              string
+		paramNIP          string
+		paramID           string
+		requestHeader     http.Header
+		appendRequestBody func(writer *multipart.Writer) error
+		wantResponseCode  int
+		wantResponseBody  string
+		wantDBRows        dbtest.Rows
+	}{
+		{
+			name:              "ok: success upload",
+			paramNIP:          "1c",
+			paramID:           "1",
+			requestHeader:     http.Header{"Authorization": authHeader},
+			appendRequestBody: defaultRequestBody,
+			wantResponseCode:  http.StatusNoContent,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":               int64(1),
+					"nip":              "1c",
+					"tahun":            int64(2020),
+					"nama_sertifikasi": "Sertifikasi 1",
+					"deskripsi":        "Deskripsi 1",
+					"file_base64":      "data:text/plain; charset=utf-8;base64,SGVsbG8gV29ybGQhIQ==",
+					"created_at":       time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":       "{updated_at}",
+					"deleted_at":       nil,
+				},
+				{
+					"id":               int64(2),
+					"nip":              "1c",
+					"tahun":            int64(2021),
+					"nama_sertifikasi": "Sertifikasi 2",
+					"deskripsi":        "Deskripsi 2",
+					"file_base64":      "data:abc",
+					"created_at":       time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":       time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":       nil,
+				},
+			},
+		},
+		{
+			name:              "error: riwayat sertifikasi is not found",
+			paramNIP:          "1c",
+			paramID:           "0",
+			requestHeader:     http.Header{"Authorization": authHeader},
+			appendRequestBody: defaultRequestBody,
+			wantResponseCode:  http.StatusNotFound,
+			wantResponseBody:  `{"message": "data tidak ditemukan"}`,
+			wantDBRows:        dbtest.Rows{},
+		},
+		{
+			name:              "error: riwayat sertifikasi is deleted",
+			paramNIP:          "1c",
+			paramID:           "4",
+			requestHeader:     http.Header{"Authorization": authHeader},
+			appendRequestBody: defaultRequestBody,
+			wantResponseCode:  http.StatusNotFound,
+			wantResponseBody:  `{"message": "data tidak ditemukan"}`,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":               int64(4),
+					"nip":              "1c",
+					"tahun":            int64(2020),
+					"nama_sertifikasi": "Sertifikasi 1",
+					"deskripsi":        nil,
+					"file_base64":      nil,
+					"created_at":       time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":       time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":       time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+				},
+			},
+		},
+		{
+			name:              "error: missing file",
+			paramNIP:          "1c",
+			paramID:           "5",
+			requestHeader:     http.Header{"Authorization": authHeader},
+			appendRequestBody: func(*multipart.Writer) error { return nil },
+			wantResponseCode:  http.StatusBadRequest,
+			wantResponseBody:  `{"message": "parameter \"file\" harus diisi"}`,
+			wantDBRows:        defaultRows,
+		},
+		{
+			name:              "error: invalid id",
+			paramNIP:          "1c",
+			paramID:           "abc",
+			requestHeader:     http.Header{"Authorization": authHeader},
+			appendRequestBody: defaultRequestBody,
+			wantResponseCode:  http.StatusBadRequest,
+			wantResponseBody:  `{"message": "parameter \"id\" harus dalam format yang sesuai"}`,
+			wantDBRows:        dbtest.Rows{},
+		},
+		{
+			name:              "error: invalid token",
+			paramNIP:          "1c",
+			paramID:           "1",
+			requestHeader:     http.Header{"Authorization": []string{"Bearer some-token"}},
+			appendRequestBody: defaultRequestBody,
+			wantResponseCode:  http.StatusUnauthorized,
+			wantResponseBody:  `{"message": "token otentikasi tidak valid"}`,
+			wantDBRows:        dbtest.Rows{},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			var buf bytes.Buffer
+			writer := multipart.NewWriter(&buf)
+			require.NoError(t, tt.appendRequestBody(writer))
+			require.NoError(t, writer.Close())
+
+			req := httptest.NewRequest(http.MethodPut, "/v1/admin/pegawai/"+tt.paramNIP+"/riwayat-sertifikasi/"+tt.paramID+"/berkas", &buf)
+			req.Header = tt.requestHeader
+			req.Header.Set("Content-Type", writer.FormDataContentType())
+			rec := httptest.NewRecorder()
+
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			assert.JSONEq(t, typeutil.Coalesce(tt.wantResponseBody, "null"), typeutil.Coalesce(rec.Body.String(), "null"))
+			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+
+			if len(tt.wantDBRows) > 0 {
+				expectedIDs := make([]int64, len(tt.wantDBRows))
+				for i, wantRow := range tt.wantDBRows {
+					expectedIDs[i] = wantRow["id"].(int64)
+				}
+				actualRows, err := dbtest.QueryWithClause(db, "riwayat_sertifikasi", "where id = any($1::int8[]) order by id", expectedIDs)
+				require.NoError(t, err)
+				for i, row := range actualRows {
+					if tt.wantDBRows[i]["updated_at"] == "{updated_at}" {
+						assert.WithinDuration(t, time.Now(), row["updated_at"].(time.Time), 10*time.Second)
+						tt.wantDBRows[i]["updated_at"] = row["updated_at"]
+					}
+				}
+				assert.Equal(t, tt.wantDBRows, actualRows)
 			}
 		})
 	}
