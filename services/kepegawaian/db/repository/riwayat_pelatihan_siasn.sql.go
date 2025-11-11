@@ -21,6 +21,65 @@ func (q *Queries) CountRiwayatPelatihanSIASN(ctx context.Context, nipBaru pgtype
 	return count, err
 }
 
+const createRiwayatPelatihanSIASN = `-- name: CreateRiwayatPelatihanSIASN :one
+insert into riwayat_diklat
+    (nama_diklat, jenis_diklat_id, jenis_diklat, institusi_penyelenggara, no_sertifikat, tanggal_mulai, tanggal_selesai, tahun_diklat, durasi_jam, sudah_kirim_siasn, pns_orang_id, nip_baru) values
+    ($1, $2, $3, $4, $5, $6, $7, $8, $9, null, $10, $11)
+returning id
+`
+
+type CreateRiwayatPelatihanSIASNParams struct {
+	NamaDiklat             pgtype.Text `db:"nama_diklat"`
+	JenisDiklatID          pgtype.Int2 `db:"jenis_diklat_id"`
+	JenisDiklat            pgtype.Text `db:"jenis_diklat"`
+	InstitusiPenyelenggara pgtype.Text `db:"institusi_penyelenggara"`
+	NoSertifikat           pgtype.Text `db:"no_sertifikat"`
+	TanggalMulai           pgtype.Date `db:"tanggal_mulai"`
+	TanggalSelesai         pgtype.Date `db:"tanggal_selesai"`
+	TahunDiklat            pgtype.Int4 `db:"tahun_diklat"`
+	DurasiJam              pgtype.Int4 `db:"durasi_jam"`
+	PnsOrangID             pgtype.Text `db:"pns_orang_id"`
+	NipBaru                pgtype.Text `db:"nip_baru"`
+}
+
+func (q *Queries) CreateRiwayatPelatihanSIASN(ctx context.Context, arg CreateRiwayatPelatihanSIASNParams) (int64, error) {
+	row := q.db.QueryRow(ctx, createRiwayatPelatihanSIASN,
+		arg.NamaDiklat,
+		arg.JenisDiklatID,
+		arg.JenisDiklat,
+		arg.InstitusiPenyelenggara,
+		arg.NoSertifikat,
+		arg.TanggalMulai,
+		arg.TanggalSelesai,
+		arg.TahunDiklat,
+		arg.DurasiJam,
+		arg.PnsOrangID,
+		arg.NipBaru,
+	)
+	var id int64
+	err := row.Scan(&id)
+	return id, err
+}
+
+const deleteRiwayatPelatihanSIASN = `-- name: DeleteRiwayatPelatihanSIASN :execrows
+update riwayat_diklat
+set deleted_at = now()
+where id = $1 and nip_baru = $2::varchar and deleted_at is null
+`
+
+type DeleteRiwayatPelatihanSIASNParams struct {
+	ID  int64  `db:"id"`
+	Nip string `db:"nip"`
+}
+
+func (q *Queries) DeleteRiwayatPelatihanSIASN(ctx context.Context, arg DeleteRiwayatPelatihanSIASNParams) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteRiwayatPelatihanSIASN, arg.ID, arg.Nip)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const getBerkasRiwayatPelatihanSIASN = `-- name: GetBerkasRiwayatPelatihanSIASN :one
 select file_base64 from riwayat_diklat
 where nip_baru = $1 and id = $2 and deleted_at is null
@@ -41,6 +100,7 @@ func (q *Queries) GetBerkasRiwayatPelatihanSIASN(ctx context.Context, arg GetBer
 const listRiwayatPelatihanSIASN = `-- name: ListRiwayatPelatihanSIASN :many
 SELECT
     rd.id,
+    rd.jenis_diklat_id,
     rjd.jenis_diklat,
     rd.nama_diklat,
     rd.no_sertifikat,
@@ -64,6 +124,7 @@ type ListRiwayatPelatihanSIASNParams struct {
 
 type ListRiwayatPelatihanSIASNRow struct {
 	ID                     int64       `db:"id"`
+	JenisDiklatID          pgtype.Int2 `db:"jenis_diklat_id"`
 	JenisDiklat            pgtype.Text `db:"jenis_diklat"`
 	NamaDiklat             pgtype.Text `db:"nama_diklat"`
 	NoSertifikat           pgtype.Text `db:"no_sertifikat"`
@@ -85,6 +146,7 @@ func (q *Queries) ListRiwayatPelatihanSIASN(ctx context.Context, arg ListRiwayat
 		var i ListRiwayatPelatihanSIASNRow
 		if err := rows.Scan(
 			&i.ID,
+			&i.JenisDiklatID,
 			&i.JenisDiklat,
 			&i.NamaDiklat,
 			&i.NoSertifikat,
@@ -102,4 +164,76 @@ func (q *Queries) ListRiwayatPelatihanSIASN(ctx context.Context, arg ListRiwayat
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateRiwayatPelatihanSIASN = `-- name: UpdateRiwayatPelatihanSIASN :execrows
+update riwayat_diklat
+set
+    nama_diklat = $1,
+    jenis_diklat_id = $2,
+    jenis_diklat = $3,
+    institusi_penyelenggara = $4,
+    no_sertifikat = $5,
+    tanggal_mulai = $6,
+    tanggal_selesai = $7,
+    tahun_diklat = $8,
+    durasi_jam = $9,
+    updated_at = now()
+where id = $10 and nip_baru = $11::varchar and deleted_at is null
+`
+
+type UpdateRiwayatPelatihanSIASNParams struct {
+	NamaDiklat             pgtype.Text `db:"nama_diklat"`
+	JenisDiklatID          pgtype.Int2 `db:"jenis_diklat_id"`
+	JenisDiklat            pgtype.Text `db:"jenis_diklat"`
+	InstitusiPenyelenggara pgtype.Text `db:"institusi_penyelenggara"`
+	NoSertifikat           pgtype.Text `db:"no_sertifikat"`
+	TanggalMulai           pgtype.Date `db:"tanggal_mulai"`
+	TanggalSelesai         pgtype.Date `db:"tanggal_selesai"`
+	TahunDiklat            pgtype.Int4 `db:"tahun_diklat"`
+	DurasiJam              pgtype.Int4 `db:"durasi_jam"`
+	ID                     int64       `db:"id"`
+	Nip                    string      `db:"nip"`
+}
+
+func (q *Queries) UpdateRiwayatPelatihanSIASN(ctx context.Context, arg UpdateRiwayatPelatihanSIASNParams) (int64, error) {
+	result, err := q.db.Exec(ctx, updateRiwayatPelatihanSIASN,
+		arg.NamaDiklat,
+		arg.JenisDiklatID,
+		arg.JenisDiklat,
+		arg.InstitusiPenyelenggara,
+		arg.NoSertifikat,
+		arg.TanggalMulai,
+		arg.TanggalSelesai,
+		arg.TahunDiklat,
+		arg.DurasiJam,
+		arg.ID,
+		arg.Nip,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
+const uploadBerkasRiwayatPelatihanSIASN = `-- name: UploadBerkasRiwayatPelatihanSIASN :execrows
+update riwayat_diklat
+set
+    file_base64 = $1,
+    updated_at = now()
+where id = $2 and nip_baru = $3::varchar and deleted_at is null
+`
+
+type UploadBerkasRiwayatPelatihanSIASNParams struct {
+	FileBase64 pgtype.Text `db:"file_base64"`
+	ID         int64       `db:"id"`
+	Nip        string      `db:"nip"`
+}
+
+func (q *Queries) UploadBerkasRiwayatPelatihanSIASN(ctx context.Context, arg UploadBerkasRiwayatPelatihanSIASNParams) (int64, error) {
+	result, err := q.db.Exec(ctx, uploadBerkasRiwayatPelatihanSIASN, arg.FileBase64, arg.ID, arg.Nip)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
 }

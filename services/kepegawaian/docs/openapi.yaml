@@ -2452,6 +2452,79 @@ paths:
                       $ref: "#/components/schemas/riwayatPelatihanSIASN"
                   meta:
                     $ref: "#/components/schemas/metaPagination"
+    post:
+      tags:
+        - Riwayat Pelatihan SIASN
+      summary: Admin - Tambah riwayat pelatihan SIASN pegawai.
+      description: Tambah riwayat pelatihan SIASN pegawai berdasarkan NIP oleh admin.
+      operationId: adminCreateRiwayatPelatihanSIASN
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/riwayatPelatihanSIASN"
+      responses:
+        "201":
+          $ref: "#/components/responses/createdIdInteger"
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "404":
+          $ref: "#/components/responses/notFound"
+  /v1/admin/pegawai/{nip}/riwayat-pelatihan-siasn/{id}:
+    put:
+      tags:
+        - Riwayat Pelatihan SIASN
+      summary: Admin - Mengubah riwayat pelatihan SIASN pegawai.
+      description: Mengubah riwayat pelatihan SIASN pegawai berdasarkan NIP dan ID riwayat pelatihan SIASN oleh admin.
+      operationId: adminUpdateRiwayatPelatihanSIASN
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        $ref: "#/components/requestBodies/riwayatPelatihanSIASN"
+      responses:
+        "204":
+          description: Sukses.
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "404":
+          $ref: "#/components/responses/notFound"
+    delete:
+      tags:
+        - Riwayat Pelatihan SIASN
+      summary: Admin - Menghapus riwayat pelatihan SIASN pegawai.
+      description: Menghapus riwayat pelatihan SIASN pegawai berdasarkan NIP dan ID riwayat pelatihan SIASN oleh admin.
+      operationId: adminDeleteRiwayatPelatihanSIASN
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Sukses.
+        "404":
+          $ref: "#/components/responses/notFound"
   /v1/admin/pegawai/{nip}/riwayat-pelatihan-siasn/{id}/berkas:
     get:
       tags:
@@ -2482,6 +2555,46 @@ paths:
                 format: binary
         "404":
           description: Berkas riwayat pelatihan SIASN tidak ditemukan atau User tidak mempunyai akses.
+    put:
+      tags:
+        - Riwayat Pelatihan SIASN
+      summary: Admin - Mengunggah berkas riwayat pelatihan SIASN pegawai.
+      description: Mengunggah berkas riwayat pelatihan SIASN pegawai berdasarkan NIP dan ID riwayat pelatihan SIASN oleh admin.
+      operationId: adminUploadBerkasRiwayatPelatihanSIASN
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required:
+                - file
+            encoding:
+              file:
+                contentType: application/pdf
+      responses:
+        "204":
+          description: Sukses.
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "404":
+          $ref: "#/components/responses/notFound"
   /v1/admin/pegawai/{nip}/riwayat-pelatihan-fungsional:
     get:
       tags:
@@ -5866,6 +5979,44 @@ components:
               - nama_sekolah
               - tahun_lulus
               - nomor_ijazah
+    riwayatPelatihanSIASN:
+      required: true
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              jenis_diklat_id:
+                type: integer
+              nama_diklat:
+                type: string
+                maxLength: 700
+              institusi_penyelenggara:
+                type: string
+                maxLength: 600
+              nomor_sertifikat:
+                type: string
+                maxLength: 600
+              tanggal_mulai:
+                type: string
+                format: date
+              tanggal_selesai:
+                type: string
+                format: date
+              tahun:
+                type: integer
+                nullable: true
+              durasi:
+                type: integer
+                description: durasi pelatihan SIASN dalam jam.
+            required:
+              - jenis_diklat_id
+              - nama_diklat
+              - institusi_penyelenggara
+              - nomor_sertifikat
+              - tanggal_mulai
+              - tanggal_selesai
+              - durasi
   responses:
     createdIdInteger:
       description: Sukses.
@@ -6022,6 +6173,9 @@ components:
       properties:
         id:
           type: integer
+        jenis_diklat_id:
+          type: integer
+          nullable: true
         jenis_diklat:
           type: string
         nama_diklat:

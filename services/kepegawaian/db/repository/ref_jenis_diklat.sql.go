@@ -10,7 +10,7 @@ import (
 )
 
 const countRefJenisDiklat = `-- name: CountRefJenisDiklat :one
-SELECT COUNT(1) 
+SELECT COUNT(1)
 FROM ref_jenis_diklat
 WHERE deleted_at IS NULL
 `
@@ -22,10 +22,28 @@ func (q *Queries) CountRefJenisDiklat(ctx context.Context) (int64, error) {
 	return count, err
 }
 
+const getRefJenisDiklat = `-- name: GetRefJenisDiklat :one
+select id, jenis_diklat
+from ref_jenis_diklat
+where id = $1 and deleted_at is null
+`
+
+type GetRefJenisDiklatRow struct {
+	ID          int32       `db:"id"`
+	JenisDiklat pgtype.Text `db:"jenis_diklat"`
+}
+
+func (q *Queries) GetRefJenisDiklat(ctx context.Context, id int32) (GetRefJenisDiklatRow, error) {
+	row := q.db.QueryRow(ctx, getRefJenisDiklat, id)
+	var i GetRefJenisDiklatRow
+	err := row.Scan(&i.ID, &i.JenisDiklat)
+	return i, err
+}
+
 const listRefJenisDiklat = `-- name: ListRefJenisDiklat :many
-SELECT 
-  id, 
-  jenis_diklat 
+SELECT
+  id,
+  jenis_diklat
 FROM ref_jenis_diklat
 WHERE deleted_at IS NULL
 LIMIT $1 OFFSET $2

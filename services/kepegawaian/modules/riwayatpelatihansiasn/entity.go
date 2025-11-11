@@ -8,6 +8,7 @@ import (
 
 type riwayatPelatihanSIASN struct {
 	ID                     int64       `json:"id"`
+	JenisDiklatID          pgtype.Int2 `json:"jenis_diklat_id"`
 	JenisDiklat            string      `json:"jenis_diklat"`
 	NamaDiklat             string      `json:"nama_diklat"`
 	InstitusiPenyelenggara string      `json:"institusi_penyelenggara"`
