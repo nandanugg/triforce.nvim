@@ -23,6 +23,59 @@ func (q *Queries) CountRiwayatPelatihanStruktural(ctx context.Context, pnsNip pg
 	return total, err
 }
 
+const createRiwayatPelatihanStruktural = `-- name: CreateRiwayatPelatihanStruktural :one
+insert into riwayat_diklat_struktural
+    (id, nama_diklat, tanggal, tahun, lama, nomor, pns_id, pns_nip, pns_nama) values
+    (uuid_generate_v4(), $1, $2, $3, $4, $5, $6, $7, $8)
+returning id
+`
+
+type CreateRiwayatPelatihanStrukturalParams struct {
+	NamaDiklat pgtype.Text   `db:"nama_diklat"`
+	Tanggal    pgtype.Date   `db:"tanggal"`
+	Tahun      pgtype.Int2   `db:"tahun"`
+	Lama       pgtype.Float4 `db:"lama"`
+	Nomor      pgtype.Text   `db:"nomor"`
+	PnsID      pgtype.Text   `db:"pns_id"`
+	PnsNip     pgtype.Text   `db:"pns_nip"`
+	PnsNama    pgtype.Text   `db:"pns_nama"`
+}
+
+func (q *Queries) CreateRiwayatPelatihanStruktural(ctx context.Context, arg CreateRiwayatPelatihanStrukturalParams) (string, error) {
+	row := q.db.QueryRow(ctx, createRiwayatPelatihanStruktural,
+		arg.NamaDiklat,
+		arg.Tanggal,
+		arg.Tahun,
+		arg.Lama,
+		arg.Nomor,
+		arg.PnsID,
+		arg.PnsNip,
+		arg.PnsNama,
+	)
+	var id string
+	err := row.Scan(&id)
+	return id, err
+}
+
+const deleteRiwayatPelatihanStruktural = `-- name: DeleteRiwayatPelatihanStruktural :execrows
+update riwayat_diklat_struktural
+set deleted_at = now()
+where id = $1 and pns_nip = $2::varchar and deleted_at is null
+`
+
+type DeleteRiwayatPelatihanStrukturalParams struct {
+	ID  string `db:"id"`
+	Nip string `db:"nip"`
+}
+
+func (q *Queries) DeleteRiwayatPelatihanStruktural(ctx context.Context, arg DeleteRiwayatPelatihanStrukturalParams) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteRiwayatPelatihanStruktural, arg.ID, arg.Nip)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const getBerkasRiwayatPelatihanStruktural = `-- name: GetBerkasRiwayatPelatihanStruktural :one
 select file_base64 from riwayat_diklat_struktural
 where pns_nip = $1 and id = $2 and deleted_at is null
@@ -95,4 +148,64 @@ func (q *Queries) ListRiwayatPelatihanStruktural(ctx context.Context, arg ListRi
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateRiwayatPelatihanStruktural = `-- name: UpdateRiwayatPelatihanStruktural :execrows
+update riwayat_diklat_struktural
+set
+    nama_diklat = $1,
+    tanggal = $2,
+    tahun = $3,
+    lama = $4,
+    nomor = $5,
+    updated_at = now()
+where id = $6 and pns_nip = $7::varchar and deleted_at is null
+`
+
+type UpdateRiwayatPelatihanStrukturalParams struct {
+	NamaDiklat pgtype.Text   `db:"nama_diklat"`
+	Tanggal    pgtype.Date   `db:"tanggal"`
+	Tahun      pgtype.Int2   `db:"tahun"`
+	Lama       pgtype.Float4 `db:"lama"`
+	Nomor      pgtype.Text   `db:"nomor"`
+	ID         string        `db:"id"`
+	Nip        string        `db:"nip"`
+}
+
+func (q *Queries) UpdateRiwayatPelatihanStruktural(ctx context.Context, arg UpdateRiwayatPelatihanStrukturalParams) (int64, error) {
+	result, err := q.db.Exec(ctx, updateRiwayatPelatihanStruktural,
+		arg.NamaDiklat,
+		arg.Tanggal,
+		arg.Tahun,
+		arg.Lama,
+		arg.Nomor,
+		arg.ID,
+		arg.Nip,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
+const uploadBerkasRiwayatPelatihanStruktural = `-- name: UploadBerkasRiwayatPelatihanStruktural :execrows
+update riwayat_diklat_struktural
+set
+    file_base64 = $1,
+    updated_at = now()
+where id = $2 and pns_nip = $3::varchar and deleted_at is null
+`
+
+type UploadBerkasRiwayatPelatihanStrukturalParams struct {
+	FileBase64 pgtype.Text `db:"file_base64"`
+	ID         string      `db:"id"`
+	Nip        string      `db:"nip"`
+}
+
+func (q *Queries) UploadBerkasRiwayatPelatihanStruktural(ctx context.Context, arg UploadBerkasRiwayatPelatihanStrukturalParams) (int64, error) {
+	result, err := q.db.Exec(ctx, uploadBerkasRiwayatPelatihanStruktural, arg.FileBase64, arg.ID, arg.Nip)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
 }

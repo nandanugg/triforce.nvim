@@ -2361,6 +2361,79 @@ paths:
                       $ref: "#/components/schemas/riwayatPelatihanStruktural"
                   meta:
                     $ref: "#/components/schemas/metaPagination"
+    post:
+      tags:
+        - Riwayat Pelatihan Struktural
+      summary: Admin - Tambah riwayat pelatihan struktural pegawai.
+      description: Tambah riwayat pelatihan struktural pegawai berdasarkan NIP oleh admin.
+      operationId: adminCreateRiwayatPelatihanStruktural
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/riwayatPelatihanStruktural"
+      responses:
+        "201":
+          $ref: "#/components/responses/createdIdString"
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "404":
+          $ref: "#/components/responses/notFound"
+  /v1/admin/pegawai/{nip}/riwayat-pelatihan-struktural/{id}:
+    put:
+      tags:
+        - Riwayat Pelatihan Struktural
+      summary: Admin - Mengubah riwayat pelatihan struktural pegawai.
+      description: Mengubah riwayat pelatihan struktural pegawai berdasarkan NIP dan ID riwayat pelatihan struktural oleh admin.
+      operationId: adminUpdateRiwayatPelatihanStruktural
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/riwayatPelatihanStruktural"
+      responses:
+        "204":
+          description: Sukses.
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "404":
+          $ref: "#/components/responses/notFound"
+    delete:
+      tags:
+        - Riwayat Pelatihan Struktural
+      summary: Admin - Menghapus riwayat pelatihan struktural pegawai.
+      description: Menghapus riwayat pelatihan struktural pegawai berdasarkan NIP dan ID riwayat pelatihan struktural oleh admin.
+      operationId: adminDeleteRiwayatPelatihanStruktural
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Sukses.
+        "404":
+          $ref: "#/components/responses/notFound"
   /v1/admin/pegawai/{nip}/riwayat-pelatihan-struktural/{id}/berkas:
     get:
       tags:
@@ -2391,6 +2464,46 @@ paths:
                 format: binary
         "404":
           description: Berkas riwayat pelatihan struktural tidak ditemukan.
+    put:
+      tags:
+        - Riwayat Pelatihan Struktural
+      summary: Admin - Mengunggah berkas riwayat pelatihan struktural pegawai.
+      description: Mengunggah berkas riwayat pelatihan struktural pegawai berdasarkan NIP dan ID riwayat pelatihan struktural oleh admin.
+      operationId: adminUploadBerkasRiwayatPelatihanStruktural
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required:
+                - file
+            encoding:
+              file:
+                contentType: application/pdf
+      responses:
+        "204":
+          description: Sukses.
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "404":
+          $ref: "#/components/responses/notFound"
   /v1/admin/pegawai/{nip}/riwayat-pelatihan-teknis/{id}/berkas:
     get:
       tags:
@@ -6160,6 +6273,32 @@ components:
               - tanggal_mulai
               - tanggal_selesai
               - durasi
+    riwayatPelatihanStruktural:
+      required: true
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              nama_diklat:
+                type: string
+                maxLength: 200
+              tanggal:
+                type: string
+                format: date
+              tahun:
+                type: integer
+              lama:
+                type: integer
+                description: durasi pelatihan struktural dalam jam.
+              nomor:
+                type: string
+                maxLength: 300
+            required:
+              - nama_diklat
+              - tanggal
+              - tahun
+              - lama
   responses:
     createdIdInteger:
       description: Sukses.
