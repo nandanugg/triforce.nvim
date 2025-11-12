@@ -18,6 +18,18 @@ Riwayat sertifikasi pegawai
 | updated_at | timestamp with time zone | now() | true |  |  | Waktu terakhir pembaruan data |
 | deleted_at | timestamp with time zone |  | true |  |  | Waktu penghapusan data |
 
+## Constraints
+
+| Name | Type | Definition |
+| ---- | ---- | ---------- |
+| riwayat_sertifikasi_pkey | PRIMARY KEY | PRIMARY KEY (id) |
+
+## Indexes
+
+| Name | Definition |
+| ---- | ---------- |
+| riwayat_sertifikasi_pkey | CREATE UNIQUE INDEX riwayat_sertifikasi_pkey ON kepegawaian.riwayat_sertifikasi USING btree (id) |
+
 ## Relations
 
 ```mermaid
