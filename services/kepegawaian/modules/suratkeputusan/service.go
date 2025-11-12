@@ -56,6 +56,8 @@ type repository interface {
 	UpdateBerkasSuratKeputusanSignedByID(ctx context.Context, arg repo.UpdateBerkasSuratKeputusanSignedByIDParams) error
 	InsertLogRequestSuratKeputusan(ctx context.Context, arg repo.InsertLogRequestSuratKeputusanParams) error
 	GetPegawaiNIKByNIP(ctx context.Context, nip string) (string, error)
+	ListLogRequestSuratKeputusan(ctx context.Context, arg repo.ListLogRequestSuratKeputusanParams) ([]repo.ListLogRequestSuratKeputusanRow, error)
+	CountLogRequestSuratKeputusan(ctx context.Context, arg repo.CountLogRequestSuratKeputusanParams) (int64, error)
 }
 
 type service struct {
@@ -1041,4 +1043,36 @@ func (s *service) signSK(
 	}
 
 	return "", nil
+}
+
+func (s *service) listLogSuratKeputusan(ctx context.Context, arg listLogSuratKeputusanRequest) ([]logBSRESuratKeputusan, uint, error) {
+	data, err := s.repo.ListLogRequestSuratKeputusan(ctx, repo.ListLogRequestSuratKeputusanParams{
+		Limit:  int32(arg.Limit),
+		Offset: int32(arg.Offset),
+		Status: arg.Status.toID(),
+		Nik:    pgtype.Text{String: arg.Nik, Valid: arg.Nik != ""},
+	})
+	if err != nil {
+		return nil, 0, fmt.Errorf("[suratkeputusan-listLogSuratKeputusan] repo ListLogRequestSuratKeputusan: %w", err)
+	}
+
+	count, err := s.repo.CountLogRequestSuratKeputusan(ctx, repo.CountLogRequestSuratKeputusanParams{
+		Status: arg.Status.toID(),
+		Nik:    pgtype.Text{String: arg.Nik, Valid: arg.Nik != ""},
+	})
+	if err != nil {
+		return nil, 0, fmt.Errorf("[suratkeputusan-listLogSuratKeputusan] repo CountLogRequestSuratKeputusan: %w", err)
+	}
+
+	result := typeutil.Map(data, func(row repo.ListLogRequestSuratKeputusanRow) logBSRESuratKeputusan {
+		return logBSRESuratKeputusan{
+			FileID:     row.FileID.String,
+			NIK:        row.Nik.String,
+			Nama:       row.Nama.String,
+			Keterangan: row.Keterangan.String,
+			Status:     labelStatusLogSuratKeputusan[row.Status.Int16],
+			Tanggal:    db.Date(row.CreatedAt.Time),
+		}
+	})
+	return result, uint(count), nil
 }

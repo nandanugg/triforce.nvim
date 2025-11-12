@@ -91,6 +91,27 @@ func (q *Queries) CountKoreksiSuratKeputusanByPNSID(ctx context.Context, arg Cou
 	return total, err
 }
 
+const countLogRequestSuratKeputusan = `-- name: CountLogRequestSuratKeputusan :one
+SELECT COUNT(1) 
+FROM log_request_surat_keputusan lrs 
+JOIN pegawai p on p.nik = lrs.nik and p.deleted_at is null 
+WHERE 
+    lrs.deleted_at IS NULL AND ($1::int2 IS NULL OR lrs.status = $1::int2)
+    AND ($2::varchar IS NULL OR p.nik = $2::varchar)
+`
+
+type CountLogRequestSuratKeputusanParams struct {
+	Status pgtype.Int2 `db:"status"`
+	Nik    pgtype.Text `db:"nik"`
+}
+
+func (q *Queries) CountLogRequestSuratKeputusan(ctx context.Context, arg CountLogRequestSuratKeputusanParams) (int64, error) {
+	row := q.db.QueryRow(ctx, countLogRequestSuratKeputusan, arg.Status, arg.Nik)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const countSuratKeputusan = `-- name: CountSuratKeputusan :one
 SELECT COUNT(*) as total
 FROM surat_keputusan fds
@@ -725,6 +746,78 @@ func (q *Queries) ListKorektorSuratKeputusanByID(ctx context.Context, id string)
 			&i.StatusKoreksi,
 			&i.CatatanKoreksi,
 			&i.PegawaiKorektorID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listLogRequestSuratKeputusan = `-- name: ListLogRequestSuratKeputusan :many
+SELECT
+    file_id,
+    p.nik,
+    p.nama,
+    keterangan,
+    status,
+    proses_cron,
+    lrs.created_at,
+    lrs.updated_at
+FROM log_request_surat_keputusan lrs
+JOIN pegawai p on p.nik = lrs.nik and p.deleted_at is null
+WHERE 
+    lrs.deleted_at IS NULL
+    AND ($3::int2 IS NULL OR lrs.status = $3::int2)
+    AND ($4::varchar IS NULL OR p.nik = $4::varchar)
+ORDER BY lrs.created_at DESC
+LIMIT $1 OFFSET $2
+`
+
+type ListLogRequestSuratKeputusanParams struct {
+	Limit  int32       `db:"limit"`
+	Offset int32       `db:"offset"`
+	Status pgtype.Int2 `db:"status"`
+	Nik    pgtype.Text `db:"nik"`
+}
+
+type ListLogRequestSuratKeputusanRow struct {
+	FileID     pgtype.Text        `db:"file_id"`
+	Nik        pgtype.Text        `db:"nik"`
+	Nama       pgtype.Text        `db:"nama"`
+	Keterangan pgtype.Text        `db:"keterangan"`
+	Status     pgtype.Int2        `db:"status"`
+	ProsesCron pgtype.Bool        `db:"proses_cron"`
+	CreatedAt  pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt  pgtype.Timestamptz `db:"updated_at"`
+}
+
+func (q *Queries) ListLogRequestSuratKeputusan(ctx context.Context, arg ListLogRequestSuratKeputusanParams) ([]ListLogRequestSuratKeputusanRow, error) {
+	rows, err := q.db.Query(ctx, listLogRequestSuratKeputusan,
+		arg.Limit,
+		arg.Offset,
+		arg.Status,
+		arg.Nik,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListLogRequestSuratKeputusanRow
+	for rows.Next() {
+		var i ListLogRequestSuratKeputusanRow
+		if err := rows.Scan(
+			&i.FileID,
+			&i.Nik,
+			&i.Nama,
+			&i.Keterangan,
+			&i.Status,
+			&i.ProsesCron,
+			&i.CreatedAt,
+			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}

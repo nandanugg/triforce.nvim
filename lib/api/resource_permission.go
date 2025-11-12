@@ -13,6 +13,7 @@ const (
 
 	Kode_SuratKeputusan_Self = "kepegawaian.surat-keputusan.self"
 	Kode_SuratKeputusan_Read = "kepegawaian.surat-keputusan.read"
+	Kode_SuratKeputusan_Log  = "kepegawaian.surat-keputusan.log"
 
 	Kode_SuratKeputusanApproval_Read   = "kepegawaian.surat-keputusan-approval.read"
 	Kode_SuratKeputusanApproval_Review = "kepegawaian.surat-keputusan-approval.review"

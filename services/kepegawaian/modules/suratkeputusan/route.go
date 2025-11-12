@@ -31,4 +31,6 @@ func RegisterRoutes(e *echo.Echo, repo repository, db *pgxpool.Pool, mwAuth api.
 	e.Add(http.MethodGet, "/v1/tanda-tangan-surat-keputusan", h.listTandatangan, mwAuth(api.Kode_SuratKeputusanApproval_Sign))
 	e.Add(http.MethodGet, "/v1/tanda-tangan-surat-keputusan/antrean", h.listTandatanganAntrean, mwAuth(api.Kode_SuratKeputusanApproval_Sign))
 	e.Add(http.MethodPost, "/v1/tanda-tangan-surat-keputusan/:id", h.tandatanganSK, mwAuth(api.Kode_SuratKeputusanApproval_Sign))
+
+	e.Add(http.MethodGet, "/v1/log-surat-keputusan", h.listLogSuratKeputusan, mwAuth(api.Kode_SuratKeputusan_Log))
 }

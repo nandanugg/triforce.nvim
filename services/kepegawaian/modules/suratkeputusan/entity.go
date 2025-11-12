@@ -3,6 +3,8 @@ package suratkeputusan
 import (
 	"time"
 
+	"github.com/jackc/pgx/v5/pgtype"
+
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
 )
 
@@ -249,4 +251,34 @@ const (
 
 func (e errorMessage) Error() string {
 	return string(e)
+}
+
+type statusLogSuratKeputusan string
+
+const (
+	statusLogSuratKeputusanGagal    statusLogSuratKeputusan = "Gagal"
+	statusLogSuratKeputusanBerhasil statusLogSuratKeputusan = "Berhasil"
+)
+
+var labelStatusLogSuratKeputusan = map[int16]statusLogSuratKeputusan{
+	1: statusLogSuratKeputusanGagal,
+	2: statusLogSuratKeputusanBerhasil,
+}
+
+func (s statusLogSuratKeputusan) toID() pgtype.Int2 {
+	for status, label := range labelStatusLogSuratKeputusan {
+		if s == label {
+			return pgtype.Int2{Int16: status, Valid: true}
+		}
+	}
+	return pgtype.Int2{}
+}
+
+type logBSRESuratKeputusan struct {
+	FileID     string                  `json:"file_id"`
+	NIK        string                  `json:"nik"`
+	Nama       string                  `json:"nama"`
+	Keterangan string                  `json:"keterangan"`
+	Status     statusLogSuratKeputusan `json:"status"`
+	Tanggal    db.Date                 `json:"tanggal"`
 }

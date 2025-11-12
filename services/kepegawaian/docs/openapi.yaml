@@ -4594,6 +4594,59 @@ paths:
                       $ref: "#/components/schemas/jenisSatker"
                   meta:
                     $ref: "#/components/schemas/metaPagination"
+  /v1/log-surat-keputusan:
+    get:
+      tags:
+        - Admin Surat Keputusan Pegawai
+      summary: Lihat log surat keputusan.
+      description: Lihat log surat keputusan.
+      operationId: listLogSuratKeputusan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+        - name: status
+          in: query
+          description: Filter berdasarkan status tanda tangan
+          required: false
+          schema:
+            type: string
+            enum: ["Berhasil", "Gagal"]
+        - name: nik
+          in: query
+          description: Filter berdasarkan NIK pemroses tanda tangan
+          required: false
+          schema:
+            type: string
+            example: "1234567890"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        file_id:
+                          type: string
+                        nik:
+                          type: string
+                        nama:
+                          type: string
+                        keterangan:
+                          type: string
+                        status:
+                          type: string
+                        tanggal:
+                          type: string
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
   /v1/keluarga:
     get:
       tags:

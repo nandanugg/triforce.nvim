@@ -3468,3 +3468,225 @@ func Test_handler_tandatanganSK(t *testing.T) {
 		})
 	}
 }
+
+func Test_handler_listLogSuratKeputusan(t *testing.T) {
+	dbData := `
+		INSERT INTO log_request_surat_keputusan (file_id, nik, keterangan, status, proses_cron, created_at, updated_at, deleted_at) values
+		('sk-001', '123456789', 'Keterangan 1', 1, true, '2024-01-15', '2024-01-15', null),
+		('sk-002', '123456788', 'Keterangan 2', 2, true, '2024-01-16', '2024-01-16', null),
+		('sk-003', '123456787', 'Keterangan 3', 1, true, '2024-01-17', '2024-01-17', null),
+		('sk-004', '123456786', 'Keterangan 4', 2, true, '2024-01-18', '2024-01-18', now()),
+		('sk-005', '123456788', 'Keterangan 5', 1, true, '2024-01-19', '2024-01-19', null);
+		INSERT INTO pegawai (nip_baru, pns_id, nik, nama, deleted_at) values
+		('123456789', '123456789', '123456789', 'pemroses 1', null),
+		('123456788', '123456788', '123456788', 'pemroses 2', null),
+		('123456787', '123456787', '123456787', 'pemroses 3', now());
+	`
+	pgxconn := dbtest.New(t, dbmigrations.FS)
+	_, err := pgxconn.Exec(context.Background(), dbData)
+	require.NoError(t, err)
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+	repo := dbrepository.New(pgxconn)
+	authSvc := apitest.NewAuthService(api.Kode_SuratKeputusan_Log)
+	mockBSRE := bsre.NewMockBSREServer(t)
+	RegisterRoutes(e, repo, pgxconn, api.NewAuthMiddleware(authSvc, apitest.Keyfunc), mockBSRE)
+
+	authHeader := []string{apitest.GenerateAuthHeader("12345678")}
+	tests := []struct {
+		name             string
+		requestPath      string
+		requestHeader    http.Header
+		requestBody      string
+		wantResponseCode int
+		wantResponseBody string
+	}{
+		{
+			name:        "success: list log surat keputusan",
+			requestPath: "/v1/log-surat-keputusan",
+			requestHeader: http.Header{
+				"Authorization": authHeader,
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{
+						"file_id": "sk-005",
+						"nik": "123456788",
+						"nama": "pemroses 2",
+						"keterangan": "Keterangan 5",
+						"status": "Gagal",
+						"tanggal": "2024-01-19"
+					},
+					{
+						"file_id": "sk-002",
+						"nik": "123456788",
+						"nama": "pemroses 2",
+						"keterangan": "Keterangan 2",
+						"status": "Berhasil",
+						"tanggal": "2024-01-16"
+					},
+					{
+						"file_id": "sk-001",
+						"nik": "123456789",
+						"nama": "pemroses 1",
+						"keterangan": "Keterangan 1",
+						"status": "Gagal",
+						"tanggal": "2024-01-15"
+					}
+				],
+				"meta": {"limit": 10, "offset": 0, "total": 3}
+			}`,
+		},
+		{
+			name:        "success: list log surat keputusan filter status",
+			requestPath: "/v1/log-surat-keputusan?status=Gagal",
+			requestHeader: http.Header{
+				"Authorization": authHeader,
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{
+						"file_id": "sk-005",
+						"nik": "123456788",
+						"nama": "pemroses 2",
+						"keterangan": "Keterangan 5",
+						"status": "Gagal",
+						"tanggal": "2024-01-19"
+					},
+					{
+						"file_id": "sk-001",
+						"nik": "123456789",
+						"nama": "pemroses 1",
+						"keterangan": "Keterangan 1",
+						"status": "Gagal",
+						"tanggal": "2024-01-15"
+					}
+				],
+				"meta": {"limit": 10, "offset": 0, "total": 2}
+			}`,
+		},
+		{
+			name:        "success: list log surat keputusan filter nik",
+			requestPath: "/v1/log-surat-keputusan?nik=123456788",
+			requestHeader: http.Header{
+				"Authorization": authHeader,
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{
+						"file_id": "sk-005",
+						"nik": "123456788",
+						"nama": "pemroses 2",
+						"keterangan": "Keterangan 5",
+						"status": "Gagal",
+						"tanggal": "2024-01-19"
+					},
+					{
+						"file_id": "sk-002",
+						"nik": "123456788",
+						"nama": "pemroses 2",
+						"keterangan": "Keterangan 2",
+						"status": "Berhasil",
+						"tanggal": "2024-01-16"
+					}
+				],
+				"meta": {"limit": 10, "offset": 0, "total": 2}
+			}`,
+		},
+		{
+			name:        "success: list log surat keputusan filter status dan nik",
+			requestPath: "/v1/log-surat-keputusan?status=Gagal&nik=123456788",
+			requestHeader: http.Header{
+				"Authorization": authHeader,
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{
+						"file_id": "sk-005",
+						"nik": "123456788",
+						"nama": "pemroses 2",
+						"keterangan": "Keterangan 5",
+						"status": "Gagal",
+						"tanggal": "2024-01-19"
+					}
+				],
+				"meta": {"limit": 10, "offset": 0, "total": 1}
+			}`,
+		},
+		{
+			name:        "success: list log surat keputusan with limit and offset",
+			requestPath: "/v1/log-surat-keputusan?limit=1&offset=1",
+			requestHeader: http.Header{
+				"Authorization": authHeader,
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{
+						"file_id": "sk-002",
+						"nik": "123456788",
+						"nama": "pemroses 2",
+						"keterangan": "Keterangan 2",
+						"status": "Berhasil",
+						"tanggal": "2024-01-16"
+					}
+				],
+				"meta": {"limit": 1, "offset": 1, "total": 3}
+			}`,
+		},
+		{
+			name:        "error: invalid status parameter",
+			requestPath: "/v1/log-surat-keputusan?status=invalid",
+			requestHeader: http.Header{
+				"Authorization": authHeader,
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "parameter \"status\" harus salah satu dari \"Berhasil\", \"Gagal\""}`,
+		},
+		{
+			name:        "error: invalid auth token",
+			requestPath: "/v1/log-surat-keputusan",
+			requestHeader: http.Header{
+				"Authorization": []string{"Bearer invalid"},
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
+		},
+		{
+			name:        "error: missing auth token",
+			requestPath: "/v1/log-surat-keputusan",
+			requestHeader: http.Header{
+				"Content-Type": []string{"application/json"},
+			},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			req := httptest.NewRequest(http.MethodGet, tt.requestPath, nil)
+			req.Header = tt.requestHeader
+
+			rec := httptest.NewRecorder()
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
+			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+		})
+	}
+}

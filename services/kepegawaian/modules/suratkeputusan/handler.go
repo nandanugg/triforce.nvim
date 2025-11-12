@@ -459,3 +459,33 @@ func (h *handler) tandatanganSK(c echo.Context) error {
 
 	return c.NoContent(http.StatusOK)
 }
+
+type listLogSuratKeputusanRequest struct {
+	api.PaginationRequest
+	Status statusLogSuratKeputusan `query:"status"`
+	Nik    string                  `query:"nik"`
+}
+
+type listLogSuratKeputusanResponse struct {
+	Data []logBSRESuratKeputusan `json:"data"`
+	Meta api.MetaPagination      `json:"meta"`
+}
+
+func (h *handler) listLogSuratKeputusan(c echo.Context) error {
+	var req listLogSuratKeputusanRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	ctx := c.Request().Context()
+	data, total, err := h.service.listLogSuratKeputusan(ctx, req)
+	if err != nil {
+		slog.ErrorContext(ctx, "Error getting list log surat keputusan.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	return c.JSON(http.StatusOK, listLogSuratKeputusanResponse{
+		Data: data,
+		Meta: api.MetaPagination{Limit: req.Limit, Offset: req.Offset, Total: total},
+	})
+}

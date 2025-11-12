@@ -443,3 +443,30 @@ INSERT INTO log_request_surat_keputusan (
     now(),
     now()
 );
+
+-- name: ListLogRequestSuratKeputusan :many
+SELECT
+    file_id,
+    p.nik,
+    p.nama,
+    keterangan,
+    status,
+    proses_cron,
+    lrs.created_at,
+    lrs.updated_at
+FROM log_request_surat_keputusan lrs
+JOIN pegawai p on p.nik = lrs.nik and p.deleted_at is null
+WHERE 
+    lrs.deleted_at IS NULL
+    AND (sqlc.narg('status')::int2 IS NULL OR lrs.status = sqlc.narg('status')::int2)
+    AND (sqlc.narg('nik')::varchar IS NULL OR p.nik = sqlc.narg('nik')::varchar)
+ORDER BY lrs.created_at DESC
+LIMIT $1 OFFSET $2;
+
+-- name: CountLogRequestSuratKeputusan :one
+SELECT COUNT(1) 
+FROM log_request_surat_keputusan lrs 
+JOIN pegawai p on p.nik = lrs.nik and p.deleted_at is null 
+WHERE 
+    lrs.deleted_at IS NULL AND (sqlc.narg('status')::int2 IS NULL OR lrs.status = sqlc.narg('status')::int2)
+    AND (sqlc.narg('nik')::varchar IS NULL OR p.nik = sqlc.narg('nik')::varchar);

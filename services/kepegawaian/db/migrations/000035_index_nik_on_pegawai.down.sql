@@ -1,0 +1,5 @@
+BEGIN;
+
+DROP INDEX IF EXISTS pegawai_nik_idx;
+
+COMMIT;
