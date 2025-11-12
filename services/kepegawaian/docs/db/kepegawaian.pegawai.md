@@ -135,6 +135,7 @@ Data utama pegawai
 | pegawai_pkey | CREATE UNIQUE INDEX pegawai_pkey ON kepegawaian.pegawai USING btree (id) |
 | pegawai_pns_id_key | CREATE UNIQUE INDEX pegawai_pns_id_key ON kepegawaian.pegawai USING btree (pns_id) |
 | pegawai_nip_baru_idx | CREATE INDEX pegawai_nip_baru_idx ON kepegawaian.pegawai USING btree (nip_baru) |
+| pegawai_nik_idx | CREATE INDEX pegawai_nik_idx ON kepegawaian.pegawai USING btree (nik) |
 
 ## Relations
 

@@ -26,7 +26,7 @@ func (q *Queries) CountRiwayatPelatihanStruktural(ctx context.Context, pnsNip pg
 const createRiwayatPelatihanStruktural = `-- name: CreateRiwayatPelatihanStruktural :one
 insert into riwayat_diklat_struktural
     (id, nama_diklat, tanggal, tahun, lama, nomor, pns_id, pns_nip, pns_nama) values
-    (uuid_generate_v4(), $1, $2, $3, $4, $5, $6, $7, $8)
+    (public.uuid_generate_v4(), $1, $2, $3, $4, $5, $6, $7, $8)
 returning id
 `
 

@@ -1,7 +1,5 @@
 BEGIN;
 
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
 CREATE TABLE ref_agama (
   id serial PRIMARY KEY,
   nama varchar(20),
@@ -561,7 +559,7 @@ CREATE TABLE riwayat_kgb (
   no_sk varchar(100),
   pejabat varchar(255),
   id bigserial PRIMARY KEY,
-  ref varchar(255) DEFAULT (uuid_generate_v4()),
+  ref varchar(255) DEFAULT (public.uuid_generate_v4()),
   tgl_sk date,
   pegawai_nama varchar(255),
   pegawai_nip varchar(20),
@@ -601,7 +599,7 @@ CREATE TABLE riwayat_kinerja (
   rating_hasil_kerja varchar(50),
   rating_perilaku_kerja varchar(50),
   predikat_kinerja varchar(100),
-  ref uuid DEFAULT (uuid_generate_v4()),
+  ref uuid DEFAULT (public.uuid_generate_v4()),
   created_at timestamptz default now(),
   updated_at timestamptz default now(),
   deleted_at timestamptz

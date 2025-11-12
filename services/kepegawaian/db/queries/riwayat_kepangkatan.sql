@@ -33,7 +33,7 @@ where pns_nip = $1 and id = $2 and deleted_at is null;
 -- name: CreateRiwayatKepangkatan :one
 insert into riwayat_golongan
     (id, jenis_kp_id, kode_jenis_kp, jenis_kp, golongan_id, golongan_nama, pangkat_nama, tmt_golongan, sk_nomor, sk_tanggal, no_bkn, tanggal_bkn, jumlah_angka_kredit_utama, jumlah_angka_kredit_tambahan, mk_golongan_tahun, mk_golongan_bulan, pns_id, pns_nip, pns_nama) values
-    (uuid_generate_v4(), sqlc.narg('jenis_kp_id')::int, sqlc.narg('jenis_kp_id')::varchar, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+    (public.uuid_generate_v4(), sqlc.narg('jenis_kp_id')::int, sqlc.narg('jenis_kp_id')::varchar, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
 returning id;
 
 -- name: UpdateRiwayatKepangkatan :execrows

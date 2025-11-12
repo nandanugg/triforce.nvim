@@ -19,10 +19,20 @@
 
 | Name | ReturnType | Arguments | Type |
 | ---- | ------- | ------- | ---- |
-| public.is_user_has_access | bool | p_nip text, p_kode text | FUNCTION |
+| public.uuid_nil | uuid |  | FUNCTION |
+| public.uuid_ns_dns | uuid |  | FUNCTION |
+| public.uuid_ns_url | uuid |  | FUNCTION |
+| public.uuid_ns_oid | uuid |  | FUNCTION |
+| public.uuid_ns_x500 | uuid |  | FUNCTION |
+| public.uuid_generate_v1 | uuid |  | FUNCTION |
+| public.uuid_generate_v1mc | uuid |  | FUNCTION |
+| public.uuid_generate_v3 | uuid | namespace uuid, name text | FUNCTION |
+| public.uuid_generate_v4 | uuid |  | FUNCTION |
+| public.uuid_generate_v5 | uuid | namespace uuid, name text | FUNCTION |
 | portal.resource_permission_set_kode | trigger |  | FUNCTION |
 | portal.resource_update_resource_permission_kode | trigger |  | FUNCTION |
 | portal.permission_update_resource_permission_kode | trigger |  | FUNCTION |
+| public.is_user_has_access | bool | p_nip text, p_kode text | FUNCTION |
 
 ## Relations
 

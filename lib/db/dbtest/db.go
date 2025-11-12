@@ -111,7 +111,11 @@ func prepareTestDB(t *testing.T, user, password, dbname, schema string) {
 	require.NoError(t, err)
 	defer d.Close()
 
-	_, err = d.Exec(context.Background(), "grant usage, create on schema public to "+user) // nosemgrep: rules.go.sql.go_sql_rule-concat-sqli
+	// nosemgrep: rules.go.sql.go_sql_rule-concat-sqli
+	_, err = d.Exec(context.Background(), fmt.Sprintf(`
+		create extension "uuid-ossp" with schema public;
+		grant usage, create on schema public to %s;
+	`, user))
 	require.NoError(t, err)
 
 	d2, err := db.New(testDBHost, testDBPort, user, password, dbname, schema, db.Options{

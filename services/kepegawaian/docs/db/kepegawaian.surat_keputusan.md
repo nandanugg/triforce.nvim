@@ -31,7 +31,7 @@
 | status_pns | varchar(20) |  | true |  |  |  |
 | tmt_sampai_dengan | date |  | true |  |  | khusus untuk Surat Perintah PLT/PLH |
 | telah_kirim | boolean |  | true |  |  | Jika 1, tampilkan di dikbudHR |
-| halaman_ttd | boolean | true | true |  |  | halaman diletakan tandataangan digital |
+| halaman_ttd | smallint |  | true |  |  | halaman diletakan tandataangan digital |
 | show_qrcode | boolean | false | true |  |  | 0/null : tidak tampilkan (seperti semula), 1 : tampilkan qrdari bssn |
 | letak_ttd | smallint | 0 | true |  |  | 1:tengah bawah, 2 : kiri Bawah 0: kanan bawah |
 | kode_unit_kerja_internal | varchar(200) |  | true |  |  | untuk menampung nama unit kerja internal via kode |
@@ -92,7 +92,7 @@ erDiagram
   varchar_20_ status_pns
   date tmt_sampai_dengan
   boolean telah_kirim
-  boolean halaman_ttd
+  smallint halaman_ttd
   boolean show_qrcode
   smallint letak_ttd
   varchar_200_ kode_unit_kerja_internal

@@ -54,21 +54,22 @@
 | [kepegawaian.riwayat_surat_keputusan](kepegawaian.riwayat_surat_keputusan.md) | 10 |  | BASE TABLE |
 | [kepegawaian.log_request_surat_keputusan](kepegawaian.log_request_surat_keputusan.md) | 10 |  | BASE TABLE |
 | [kepegawaian.ref_template](kepegawaian.ref_template.md) | 7 |  | BASE TABLE |
+| [kepegawaian.pegawai_ttd](kepegawaian.pegawai_ttd.md) | 5 |  | BASE TABLE |
 
 ## Stored procedures and functions
 
 | Name | ReturnType | Arguments | Type |
 | ---- | ------- | ------- | ---- |
-| kepegawaian.uuid_nil | uuid |  | FUNCTION |
-| kepegawaian.uuid_ns_dns | uuid |  | FUNCTION |
-| kepegawaian.uuid_ns_url | uuid |  | FUNCTION |
-| kepegawaian.uuid_ns_oid | uuid |  | FUNCTION |
-| kepegawaian.uuid_ns_x500 | uuid |  | FUNCTION |
-| kepegawaian.uuid_generate_v1 | uuid |  | FUNCTION |
-| kepegawaian.uuid_generate_v1mc | uuid |  | FUNCTION |
-| kepegawaian.uuid_generate_v3 | uuid | namespace uuid, name text | FUNCTION |
-| kepegawaian.uuid_generate_v4 | uuid |  | FUNCTION |
-| kepegawaian.uuid_generate_v5 | uuid | namespace uuid, name text | FUNCTION |
+| public.uuid_nil | uuid |  | FUNCTION |
+| public.uuid_ns_dns | uuid |  | FUNCTION |
+| public.uuid_ns_url | uuid |  | FUNCTION |
+| public.uuid_ns_oid | uuid |  | FUNCTION |
+| public.uuid_ns_x500 | uuid |  | FUNCTION |
+| public.uuid_generate_v1 | uuid |  | FUNCTION |
+| public.uuid_generate_v1mc | uuid |  | FUNCTION |
+| public.uuid_generate_v3 | uuid | namespace uuid, name text | FUNCTION |
+| public.uuid_generate_v4 | uuid |  | FUNCTION |
+| public.uuid_generate_v5 | uuid | namespace uuid, name text | FUNCTION |
 
 ## Relations
 
@@ -947,7 +948,7 @@ erDiagram
   varchar_20_ status_pns
   date tmt_sampai_dengan
   boolean telah_kirim
-  boolean halaman_ttd
+  smallint halaman_ttd
   boolean show_qrcode
   smallint letak_ttd
   varchar_200_ kode_unit_kerja_internal
@@ -1008,6 +1009,13 @@ erDiagram
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
   varchar_255_ filename
+}
+"kepegawaian.pegawai_ttd" {
+  varchar_36_ pns_id
+  varchar_20_ nip
+  text base64ttd
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
 }
 ```
 
