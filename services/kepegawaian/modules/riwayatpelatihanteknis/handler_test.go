@@ -27,18 +27,18 @@ func Test_handler_list(t *testing.T) {
 	dbData := `
 		insert into riwayat_kursus
 			(id, pns_nip, tipe_kursus, jenis_kursus, nama_kursus, tanggal_kursus, lama_kursus, institusi_penyelenggara, no_sertifikat, deleted_at) values
-			(11, '1c', 'Teknis', 'Workshop', '11a', '2000-01-01', 24, 'Institution 11', 'CERT11', null),
-			(12, '1c', 'Teknis', 'Seminar', '12a', '2001-01-01', 16, 'Institution 12', '', null),
-			(13, '1c', 'Teknis', 'Kursus', '13a', '2002-01-01', 40, 'Institution 13', 'CERT13', null),
-			(14, '2c', 'Teknis', 'Workshop', '14a', '2003-01-01', 8, 'Institution 14', 'CERT14', null),
-			(15, '1c', 'Teknis', 'Seminar', '15a', '2004-01-01', 4, 'Institution 15', 'CERT15', null),
-			(16, '1c', 'Teknis', 'Kursus', '16a', '2005-01-01', 20, 'Institution 16', null, null),
-			(17, '1c', 'Teknis', 'Workshop', '17a', '2006-01-01', 12, 'Institution 17', 'CERT17', null),
+			(11, '1c', 'kursus', 'Workshop', '11a', '2000-01-01', 24, 'Institution 11', 'CERT11', null),
+			(12, '1c', 'KURSUS', 'Seminar', '12a', '2001-01-01', 16, 'Institution 12', '', null),
+			(13, '1c', 'sertifikat', 'Kursus', '13a', '2002-01-01', 40, 'Institution 13', 'CERT13', null),
+			(14, '2c', 'Sertifikat', 'Workshop', '14a', '2003-01-01', 8, 'Institution 14', 'CERT14', null),
+			(15, '1c', 'SERTIFIKAT', 'Seminar', '15a', '2004-01-01', 4, 'Institution 15', 'CERT15', null),
+			(16, '1c', 'Sertifikat', 'Kursus', '16a', '2005-01-01', 20, 'Institution 16', null, null),
+			(17, '1c', 'Non-Serti', 'Workshop', '17a', '2006-01-01', 12, 'Institution 17', 'CERT17', null),
 			-- Null test cases
-			(18, '1c', 'Teknis', 'Workshop', '18a', '2010-01-01', null, 'Institution 18', 'CERT18', null),
-			(19, '1c', 'Teknis', 'Seminar', '19a', null, 8, 'Institution 19', 'CERT19', null),
+			(18, '1c', 'Kursus', 'Workshop', '18a', '2010-01-01', null, 'Institution 18', 'CERT18', null),
+			(19, '1c', 'Teknis', 'Seminar', '19a', null, 8, 'Institution 19', 'CERT19', now()),
 			(20, '1c', null, null, '20a', '2012-01-01', 12, 'Institution 20', 'CERT20', null),
-			(21, '1c', 'Teknis', 'Workshop', null, '2013-01-01', 16, 'Institution 21', 'CERT21', null),
+			(21, '1c', '', 'Workshop', null, '2013-01-01', 16, 'Institution 21', 'CERT21', null),
 			(22, '1c', 'Teknis', 'Seminar', '22a', '2014-01-01', 8, null, 'CERT22', null);
 	`
 	pgxconn := dbtest.New(t, dbmigrations.FS)
@@ -80,7 +80,7 @@ func Test_handler_list(t *testing.T) {
 					},
 					{
 						"id": 21,
-						"tipe_pelatihan": "Teknis",
+						"tipe_pelatihan": "",
 						"jenis_pelatihan": "Workshop",
 						"nama_pelatihan": "",
 						"tanggal_mulai": "2013-01-01",
@@ -104,7 +104,7 @@ func Test_handler_list(t *testing.T) {
 					},
 					{
 						"id": 18,
-						"tipe_pelatihan": "Teknis",
+						"tipe_pelatihan": "Non sertifikat",
 						"jenis_pelatihan": "Workshop",
 						"nama_pelatihan": "18a",
 						"tanggal_mulai": "2010-01-01",
@@ -116,7 +116,7 @@ func Test_handler_list(t *testing.T) {
 					},
 					{
 						"id": 17,
-						"tipe_pelatihan": "Teknis",
+						"tipe_pelatihan": "Non-Serti",
 						"jenis_pelatihan": "Workshop",
 						"nama_pelatihan": "17a",
 						"tanggal_mulai": "2006-01-01",
@@ -128,7 +128,7 @@ func Test_handler_list(t *testing.T) {
 					},
 					{
 						"id": 16,
-						"tipe_pelatihan": "Teknis",
+						"tipe_pelatihan": "Sertifikat",
 						"jenis_pelatihan": "Kursus",
 						"nama_pelatihan": "16a",
 						"tanggal_mulai": "2005-01-01",
@@ -140,7 +140,7 @@ func Test_handler_list(t *testing.T) {
 					},
 					{
 						"id": 15,
-						"tipe_pelatihan": "Teknis",
+						"tipe_pelatihan": "Sertifikat",
 						"jenis_pelatihan": "Seminar",
 						"nama_pelatihan": "15a",
 						"tanggal_mulai": "2004-01-01",
@@ -152,7 +152,7 @@ func Test_handler_list(t *testing.T) {
 					},
 					{
 						"id": 13,
-						"tipe_pelatihan": "Teknis",
+						"tipe_pelatihan": "Sertifikat",
 						"jenis_pelatihan": "Kursus",
 						"nama_pelatihan": "13a",
 						"tanggal_mulai": "2002-01-01",
@@ -164,7 +164,7 @@ func Test_handler_list(t *testing.T) {
 					},
 					{
 						"id": 12,
-						"tipe_pelatihan": "Teknis",
+						"tipe_pelatihan": "Non sertifikat",
 						"jenis_pelatihan": "Seminar",
 						"nama_pelatihan": "12a",
 						"tanggal_mulai": "2001-01-01",
@@ -176,7 +176,7 @@ func Test_handler_list(t *testing.T) {
 					},
 					{
 						"id": 11,
-						"tipe_pelatihan": "Teknis",
+						"tipe_pelatihan": "Non sertifikat",
 						"jenis_pelatihan": "Workshop",
 						"nama_pelatihan": "11a",
 						"tanggal_mulai": "2000-01-01",
@@ -187,7 +187,7 @@ func Test_handler_list(t *testing.T) {
 						"nomor_sertifikat": "CERT11"
 					}
 				],
-				"meta": {"limit": 10, "offset": 0, "total": 11}
+				"meta": {"limit": 10, "offset": 0, "total": 10}
 			}`,
 		},
 		{
@@ -199,7 +199,7 @@ func Test_handler_list(t *testing.T) {
 				"data": [
 					{
 						"id": 21,
-						"tipe_pelatihan": "Teknis",
+						"tipe_pelatihan": "",
 						"jenis_pelatihan": "Workshop",
 						"nama_pelatihan": "",
 						"tanggal_mulai": "2013-01-01",
@@ -210,7 +210,7 @@ func Test_handler_list(t *testing.T) {
 						"nomor_sertifikat": "CERT21"
 					}
 				],
-				"meta": {"limit": 1, "offset": 1, "total": 11}
+				"meta": {"limit": 1, "offset": 1, "total": 10}
 			}`,
 		},
 		{
@@ -407,18 +407,18 @@ func Test_handler_listAdmin(t *testing.T) {
 	dbData := `
 		insert into riwayat_kursus
 			(id, pns_nip, tipe_kursus, jenis_kursus, nama_kursus, tanggal_kursus, lama_kursus, institusi_penyelenggara, no_sertifikat, deleted_at) values
-			(11, '1c', 'Teknis', 'Workshop', '11a', '2000-01-01', 24, 'Institution 11', 'CERT11', null),
-			(12, '1c', 'Teknis', 'Seminar', '12a', '2001-01-01', 16, 'Institution 12', '', null),
-			(13, '1c', 'Teknis', 'Kursus', '13a', '2002-01-01', 40, 'Institution 13', 'CERT13', null),
-			(14, '2c', 'Teknis', 'Workshop', '14a', '2003-01-01', 8, 'Institution 14', 'CERT14', null),
-			(15, '1c', 'Teknis', 'Seminar', '15a', '2004-01-01', 4, 'Institution 15', 'CERT15', null),
-			(16, '1c', 'Teknis', 'Kursus', '16a', '2005-01-01', 20, 'Institution 16', null, null),
-			(17, '1c', 'Teknis', 'Workshop', '17a', '2006-01-01', 12, 'Institution 17', 'CERT17', null),
+			(11, '1c', 'kursus', 'Workshop', '11a', '2000-01-01', 24, 'Institution 11', 'CERT11', null),
+			(12, '1c', 'KURSUS', 'Seminar', '12a', '2001-01-01', 16, 'Institution 12', '', null),
+			(13, '1c', 'sertifikat', 'Kursus', '13a', '2002-01-01', 40, 'Institution 13', 'CERT13', null),
+			(14, '2c', 'Sertifikat', 'Workshop', '14a', '2003-01-01', 8, 'Institution 14', 'CERT14', null),
+			(15, '1c', 'SERTIFIKAT', 'Seminar', '15a', '2004-01-01', 4, 'Institution 15', 'CERT15', null),
+			(16, '1c', 'Sertifikat', 'Kursus', '16a', '2005-01-01', 20, 'Institution 16', null, null),
+			(17, '1c', 'Non-Serti', 'Workshop', '17a', '2006-01-01', 12, 'Institution 17', 'CERT17', null),
 			-- Null test cases
-			(18, '1c', 'Teknis', 'Workshop', '18a', '2010-01-01', null, 'Institution 18', 'CERT18', null),
-			(19, '1c', 'Teknis', 'Seminar', '19a', null, 8, 'Institution 19', 'CERT19', null),
+			(18, '1c', 'Kursus', 'Workshop', '18a', '2010-01-01', null, 'Institution 18', 'CERT18', null),
+			(19, '1c', 'Teknis', 'Seminar', '19a', null, 8, 'Institution 19', 'CERT19', now()),
 			(20, '1c', null, null, '20a', '2012-01-01', 12, 'Institution 20', 'CERT20', null),
-			(21, '1c', 'Teknis', 'Workshop', null, '2013-01-01', 16, 'Institution 21', 'CERT21', null),
+			(21, '1c', '', 'Workshop', null, '2013-01-01', 16, 'Institution 21', 'CERT21', null),
 			(22, '1c', 'Teknis', 'Seminar', '22a', '2014-01-01', 8, null, 'CERT22', null),
 			(23, '1d', 'Teknis', 'Workshop', '23a', '2015-01-01', 16, 'Institution 23', 'CERT23', null);
 	`
@@ -462,7 +462,7 @@ func Test_handler_listAdmin(t *testing.T) {
 					},
 					{
 						"id": 21,
-						"tipe_pelatihan": "Teknis",
+						"tipe_pelatihan": "",
 						"jenis_pelatihan": "Workshop",
 						"nama_pelatihan": "",
 						"tanggal_mulai": "2013-01-01",
@@ -486,7 +486,7 @@ func Test_handler_listAdmin(t *testing.T) {
 					},
 					{
 						"id": 18,
-						"tipe_pelatihan": "Teknis",
+						"tipe_pelatihan": "Non sertifikat",
 						"jenis_pelatihan": "Workshop",
 						"nama_pelatihan": "18a",
 						"tanggal_mulai": "2010-01-01",
@@ -498,7 +498,7 @@ func Test_handler_listAdmin(t *testing.T) {
 					},
 					{
 						"id": 17,
-						"tipe_pelatihan": "Teknis",
+						"tipe_pelatihan": "Non-Serti",
 						"jenis_pelatihan": "Workshop",
 						"nama_pelatihan": "17a",
 						"tanggal_mulai": "2006-01-01",
@@ -510,7 +510,7 @@ func Test_handler_listAdmin(t *testing.T) {
 					},
 					{
 						"id": 16,
-						"tipe_pelatihan": "Teknis",
+						"tipe_pelatihan": "Sertifikat",
 						"jenis_pelatihan": "Kursus",
 						"nama_pelatihan": "16a",
 						"tanggal_mulai": "2005-01-01",
@@ -522,7 +522,7 @@ func Test_handler_listAdmin(t *testing.T) {
 					},
 					{
 						"id": 15,
-						"tipe_pelatihan": "Teknis",
+						"tipe_pelatihan": "Sertifikat",
 						"jenis_pelatihan": "Seminar",
 						"nama_pelatihan": "15a",
 						"tanggal_mulai": "2004-01-01",
@@ -534,7 +534,7 @@ func Test_handler_listAdmin(t *testing.T) {
 					},
 					{
 						"id": 13,
-						"tipe_pelatihan": "Teknis",
+						"tipe_pelatihan": "Sertifikat",
 						"jenis_pelatihan": "Kursus",
 						"nama_pelatihan": "13a",
 						"tanggal_mulai": "2002-01-01",
@@ -546,7 +546,7 @@ func Test_handler_listAdmin(t *testing.T) {
 					},
 					{
 						"id": 12,
-						"tipe_pelatihan": "Teknis",
+						"tipe_pelatihan": "Non sertifikat",
 						"jenis_pelatihan": "Seminar",
 						"nama_pelatihan": "12a",
 						"tanggal_mulai": "2001-01-01",
@@ -558,7 +558,7 @@ func Test_handler_listAdmin(t *testing.T) {
 					},
 					{
 						"id": 11,
-						"tipe_pelatihan": "Teknis",
+						"tipe_pelatihan": "Non sertifikat",
 						"jenis_pelatihan": "Workshop",
 						"nama_pelatihan": "11a",
 						"tanggal_mulai": "2000-01-01",
@@ -569,7 +569,7 @@ func Test_handler_listAdmin(t *testing.T) {
 						"nomor_sertifikat": "CERT11"
 					}
 				],
-				"meta": {"limit": 10, "offset": 0, "total": 11}
+				"meta": {"limit": 10, "offset": 0, "total": 10}
 			}`,
 		},
 		{
@@ -582,7 +582,7 @@ func Test_handler_listAdmin(t *testing.T) {
 				"data": [
 					{
 						"id": 21,
-						"tipe_pelatihan": "Teknis",
+						"tipe_pelatihan": "",
 						"jenis_pelatihan": "Workshop",
 						"nama_pelatihan": "",
 						"tanggal_mulai": "2013-01-01",
@@ -605,7 +605,7 @@ func Test_handler_listAdmin(t *testing.T) {
 						"nomor_sertifikat": "CERT20"
 					}
 				],
-				"meta": {"limit": 2, "offset": 1, "total": 11}
+				"meta": {"limit": 2, "offset": 1, "total": 10}
 			}`,
 		},
 		{

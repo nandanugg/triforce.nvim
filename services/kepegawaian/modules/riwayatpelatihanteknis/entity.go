@@ -1,6 +1,8 @@
 package riwayatpelatihanteknis
 
 import (
+	"strings"
+
 	"github.com/jackc/pgx/v5/pgtype"
 
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
@@ -17,4 +19,15 @@ type riwayatPelatihanTeknis struct {
 	Durasi                 pgtype.Float8 `json:"durasi"` // hour
 	InstitusiPenyelenggara string        `json:"institusi_penyelenggara"`
 	NomorSertifikat        string        `json:"nomor_sertifikat"`
+}
+
+func tipePelatihan(val string) string {
+	switch strings.ToLower(val) {
+	case "sertifikat":
+		return "Sertifikat"
+	case "kursus":
+		return "Non sertifikat"
+	default:
+		return val
+	}
 }

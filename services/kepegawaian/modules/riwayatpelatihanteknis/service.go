@@ -55,7 +55,7 @@ func (s *service) list(ctx context.Context, nip string, limit, offset uint) ([]r
 
 		return riwayatPelatihanTeknis{
 			ID:                     int64(row.ID),
-			TipePelatihan:          row.TipeKursus.String,
+			TipePelatihan:          tipePelatihan(row.TipeKursus.String),
 			JenisPelatihan:         row.JenisKursus.String,
 			NamaPelatihan:          row.NamaKursus.String,
 			TanggalMulai:           db.Date(row.TanggalKursus.Time),
