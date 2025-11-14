@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -14,11 +15,11 @@ import (
 
 type repository interface {
 	ListPemberitahuan(ctx context.Context, arg sqlc.ListPemberitahuanParams) ([]sqlc.ListPemberitahuanRow, error)
+	ListActivePemberitahuan(ctx context.Context, arg sqlc.ListActivePemberitahuanParams) ([]sqlc.ListActivePemberitahuanRow, error)
 	UpdatePemberitahuan(ctx context.Context, arg sqlc.UpdatePemberitahuanParams) (sqlc.UpdatePemberitahuanRow, error)
-	CountPemberitahuan(ctx context.Context, status any) (int64, error)
+	CountPemberitahuan(ctx context.Context, arg sqlc.CountPemberitahuanParams) (int64, error)
 	CreatePemberitahuan(ctx context.Context, arg sqlc.CreatePemberitahuanParams) (sqlc.CreatePemberitahuanRow, error)
 	DeletePemberitahuan(ctx context.Context, id int64) (int64, error)
-	GetOverlappingPinnedPemberitahuan(ctx context.Context, arg sqlc.GetOverlappingPinnedPemberitahuanParams) (sqlc.GetOverlappingPinnedPemberitahuanRow, error)
 }
 
 type service struct {
@@ -29,16 +30,51 @@ func newService(r repository) *service {
 	return &service{repo: r}
 }
 
-func (s *service) list(ctx context.Context, filterPeriode Status, limit, offset uint) ([]pemberitahuan, uint, error) {
-	rows, err := s.repo.ListPemberitahuan(ctx, sqlc.ListPemberitahuanParams{
+func (s *service) listActive(ctx context.Context, limit, offset uint) ([]pemberitahuan, uint, error) {
+	rows, err := s.repo.ListActivePemberitahuan(ctx, sqlc.ListActivePemberitahuanParams{
 		Limit: int32(limit), Offset: int32(offset),
-		Status: filterPeriode,
 	})
 	if err != nil {
 		return nil, 0, fmt.Errorf("repo list: %w", err)
 	}
 
-	count, err := s.repo.CountPemberitahuan(ctx, filterPeriode)
+	count, err := s.repo.CountPemberitahuan(ctx, sqlc.CountPemberitahuanParams{
+		Status: pemberitahuanStatusActive,
+	})
+	if err != nil {
+		return nil, 0, fmt.Errorf("repo count: %w", err)
+	}
+
+	return typeutil.Map(rows, func(r sqlc.ListActivePemberitahuanRow) pemberitahuan {
+		return pemberitahuan{
+			ID:                    r.ID,
+			JudulBerita:           r.JudulBerita,
+			DeskripsiBerita:       r.DeskripsiBerita,
+			PinnedAt:              r.PinnedAt,
+			DiterbitkanPada:       r.DiterbitkanPada.Time,
+			DitarikPada:           r.DitarikPada.Time,
+			DiperbaruiOleh:        r.UpdatedBy,
+			TerakhirDiperbarui:    r.UpdatedAt.Time,
+			IsCurrentPeriodPinned: &r.IsCurrentPeriodPinned.Bool,
+			Status:                "ACTIVE",
+		}
+	}), uint(count), nil
+}
+
+func (s *service) list(ctx context.Context, filterJudul, sortBy string, limit, offset uint) ([]pemberitahuan, uint, error) {
+	rows, err := s.repo.ListPemberitahuan(ctx, sqlc.ListPemberitahuanParams{
+		Limit: int32(limit), Offset: int32(offset),
+		JudulBerita: filterJudul,
+		SortBy:      sortBy,
+	})
+	if err != nil {
+		return nil, 0, fmt.Errorf("repo list: %w", err)
+	}
+
+	count, err := s.repo.CountPemberitahuan(ctx, sqlc.CountPemberitahuanParams{
+		Status:      pemberitahuanStatusAll,
+		JudulBerita: filterJudul,
+	})
 	if err != nil {
 		return nil, 0, fmt.Errorf("repo count: %w", err)
 	}
@@ -48,12 +84,12 @@ func (s *service) list(ctx context.Context, filterPeriode Status, limit, offset 
 			ID:                 r.ID,
 			JudulBerita:        r.JudulBerita,
 			DeskripsiBerita:    r.DeskripsiBerita,
-			Pinned:             r.Pinned,
+			PinnedAt:           r.PinnedAt,
 			DiterbitkanPada:    r.DiterbitkanPada.Time,
 			DitarikPada:        r.DitarikPada.Time,
 			DiperbaruiOleh:     r.UpdatedBy,
 			TerakhirDiperbarui: r.UpdatedAt.Time,
-			Status:             r.Status,
+			Status:             s.statusFromDates(r.DiterbitkanPada.Time, r.DitarikPada.Time),
 		}
 	}), uint(count), nil
 }
@@ -68,20 +104,15 @@ type createPemberitahuanParams struct {
 }
 
 func (s *service) create(ctx context.Context, p createPemberitahuanParams) (*pemberitahuan, error) {
+	pinnedAt := pgtype.Timestamptz{Valid: false}
 	if p.Pinned {
-		if err := s.checkOverlap(ctx, sqlc.GetOverlappingPinnedPemberitahuanParams{
-			DitarikPada:     p.DitarikPada,
-			DiterbitkanPada: p.DiterbitkanPada,
-			ID:              0,
-		}); err != nil {
-			return nil, err
-		}
+		pinnedAt.Valid = true
+		pinnedAt.Time = time.Now()
 	}
-
 	r, err := s.repo.CreatePemberitahuan(ctx, sqlc.CreatePemberitahuanParams{
 		JudulBerita:     p.JudulBerita,
 		DeskripsiBerita: p.DeskripsiBerita,
-		Pinned:          p.Pinned,
+		PinnedAt:        pinnedAt,
 		DiterbitkanPada: p.DiterbitkanPada,
 		DitarikPada:     p.DitarikPada,
 		UpdatedBy:       p.DiperbaharuiOleh,
@@ -93,7 +124,7 @@ func (s *service) create(ctx context.Context, p createPemberitahuanParams) (*pem
 		ID:                 int64(r.ID),
 		JudulBerita:        r.JudulBerita,
 		DeskripsiBerita:    r.DeskripsiBerita,
-		Pinned:             r.Pinned,
+		PinnedAt:           pinnedAt,
 		DiterbitkanPada:    r.DiterbitkanPada.Time,
 		DitarikPada:        r.DitarikPada.Time,
 		DiperbaruiOleh:     r.UpdatedBy,
@@ -113,21 +144,16 @@ type updatePemberitahuanParams struct {
 }
 
 func (s *service) update(ctx context.Context, id int64, p updatePemberitahuanParams) (*pemberitahuan, error) {
+	pinnedAt := pgtype.Timestamptz{Valid: false}
 	if p.Pinned {
-		if err := s.checkOverlap(ctx, sqlc.GetOverlappingPinnedPemberitahuanParams{
-			DitarikPada:     p.DitarikPada,
-			DiterbitkanPada: p.DiterbitkanPada,
-			ID:              id,
-		}); err != nil {
-			return nil, err
-		}
+		pinnedAt.Valid = true
+		pinnedAt.Time = time.Now()
 	}
-
 	r, err := s.repo.UpdatePemberitahuan(ctx, sqlc.UpdatePemberitahuanParams{
 		ID:              id,
 		JudulBerita:     p.JudulBerita,
+		PinnedAt:        pinnedAt,
 		DeskripsiBerita: p.DeskripsiBerita,
-		Pinned:          p.Pinned,
 		DiterbitkanPada: p.DiterbitkanPada,
 		DitarikPada:     p.DitarikPada,
 		UpdatedBy:       p.DiperbaharuiOleh,
@@ -143,7 +169,7 @@ func (s *service) update(ctx context.Context, id int64, p updatePemberitahuanPar
 		ID:                 int64(r.ID),
 		JudulBerita:        r.JudulBerita,
 		DeskripsiBerita:    r.DeskripsiBerita,
-		Pinned:             r.Pinned,
+		PinnedAt:           pinnedAt,
 		DiterbitkanPada:    r.DiterbitkanPada.Time,
 		DitarikPada:        r.DitarikPada.Time,
 		DiperbaruiOleh:     r.UpdatedBy,
@@ -160,13 +186,17 @@ func (s *service) delete(ctx context.Context, id int64) (bool, error) {
 	return affected > 0, nil
 }
 
-func (s *service) checkOverlap(ctx context.Context, p sqlc.GetOverlappingPinnedPemberitahuanParams) error {
-	overlap, err := s.repo.GetOverlappingPinnedPemberitahuan(ctx, p)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil
-		}
-		return fmt.Errorf("repo check pinned duplicate: %w", err)
+func (s *service) statusFromDates(start, end time.Time) string {
+	now := time.Now()
+
+	switch {
+	case now.Before(start):
+		return "WAITING"
+	case (now.Equal(start) || now.After(start)) && now.Before(end):
+		return "ACTIVE"
+	case now.Equal(end) || now.After(end):
+		return "OVER"
+	default:
+		return "UNKNOWN"
 	}
-	return NewError(ErrConflict, fmt.Sprintf("conflict with '%s' (id=%d)", overlap.JudulBerita, overlap.ID))
 }

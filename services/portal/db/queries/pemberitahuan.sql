@@ -2,7 +2,7 @@
 INSERT INTO pemberitahuan (
     judul_berita,
     deskripsi_berita,
-    pinned,
+    pinned_at,
     diterbitkan_pada,
     ditarik_pada,
     updated_by,
@@ -14,12 +14,11 @@ RETURNING
     id,
     judul_berita,
     deskripsi_berita,
-    pinned,
+    pinned_at,
     diterbitkan_pada,
     ditarik_pada,
     updated_by,
     updated_at,
-    deleted_at,
     CASE
         WHEN NOW() < diterbitkan_pada THEN 'WAITING'
         WHEN NOW() >= diterbitkan_pada AND NOW() < ditarik_pada THEN 'ACTIVE'
@@ -27,49 +26,66 @@ RETURNING
         ELSE 'UNKNOWN'
     END AS status;
 
--- name: GetOverlappingPinnedPemberitahuan :one
+-- name: ListActivePemberitahuan :many
+WITH active_pemberitahuan AS (
+    SELECT
+        id,
+        judul_berita,
+        deskripsi_berita,
+        pinned_at,
+        diterbitkan_pada,
+        ditarik_pada,
+        updated_by,
+        updated_at,
+        ROW_NUMBER() OVER (
+            ORDER BY pinned_at DESC NULLS LAST
+        ) AS pinned_rank
+    FROM pemberitahuan
+    WHERE
+        deleted_at IS NULL
+        AND aktif_range @> now()
+)
 SELECT
     id,
-    judul_berita
-FROM pemberitahuan
-WHERE
-    deleted_at IS NULL
-    AND pinned = TRUE
-    AND diterbitkan_pada <= @ditarik_pada::timestamptz
-    AND ditarik_pada >= @diterbitkan_pada::timestamptz
-    AND (
-        @id::bigint = 0 OR id <> @id::bigint
-    )
-LIMIT 1;
+    judul_berita,
+    deskripsi_berita,
+    pinned_at,
+    diterbitkan_pada,
+    ditarik_pada,
+    updated_by,
+    updated_at,
+    (pinned_at IS NOT NULL AND pinned_rank = 1) AS is_current_period_pinned
+FROM active_pemberitahuan
+ORDER BY
+    is_current_period_pinned DESC,
+    diterbitkan_pada DESC
+LIMIT $1 OFFSET $2;
+
 
 -- name: ListPemberitahuan :many
 SELECT
     id,
     judul_berita,
     deskripsi_berita,
-    pinned,
+    pinned_at,
     diterbitkan_pada,
     ditarik_pada,
     updated_by,
     updated_at,
-    deleted_at,
-    CASE
-        WHEN NOW() < diterbitkan_pada THEN 'WAITING'
-        WHEN NOW() >= diterbitkan_pada AND NOW() < ditarik_pada THEN 'ACTIVE'
-        WHEN NOW() >= ditarik_pada THEN 'OVER'
-        ELSE 'UNKNOWN'
-    END AS status
+    aktif_range
 FROM pemberitahuan
 WHERE
     deleted_at IS NULL
     AND (
-        @status = 'ALL'
-        OR (@status = 'WAITING' AND NOW() < diterbitkan_pada)
-        OR (@status = 'ACTIVE' AND NOW() >= diterbitkan_pada AND NOW() < ditarik_pada)
-        OR (@status = 'OVER' AND NOW() >= ditarik_pada)
+        @judul_berita = '' OR judul_berita ILIKE CONCAT('%', @judul_berita, '%')
     )
 ORDER BY
-    (pinned = TRUE AND NOW() >= diterbitkan_pada AND NOW() < ditarik_pada) DESC,
+    CASE
+        WHEN @sort_by = 'pinned_asc' THEN pinned_at
+    END ASC NULLS LAST,
+    CASE
+        WHEN @sort_by = 'pinned_desc' THEN pinned_at
+    END DESC NULLS LAST,
     diterbitkan_pada DESC
 LIMIT $1 OFFSET $2;
 
@@ -80,9 +96,10 @@ WHERE
     deleted_at IS NULL
     AND (
         @status = 'ALL'
-        OR (@status = 'WAITING' AND NOW() < diterbitkan_pada)
-        OR (@status = 'ACTIVE' AND NOW() >= diterbitkan_pada AND NOW() < ditarik_pada)
-        OR (@status = 'OVER' AND NOW() >= ditarik_pada)
+        OR (@status = 'ACTIVE' AND aktif_range @> now())
+    )
+    AND (
+        @judul_berita = '' OR judul_berita ILIKE CONCAT('%', @judul_berita, '%')
     );
 
 -- name: UpdatePemberitahuan :one
@@ -90,7 +107,7 @@ UPDATE pemberitahuan
 SET
     judul_berita = $2,
     deskripsi_berita = $3,
-    pinned = $4,
+    pinned_at = $4,
     diterbitkan_pada = $5,
     ditarik_pada = $6,
     updated_by = $7,
@@ -101,7 +118,7 @@ RETURNING
     id,
     judul_berita,
     deskripsi_berita,
-    pinned,
+    pinned_at,
     diterbitkan_pada,
     ditarik_pada,
     updated_by,

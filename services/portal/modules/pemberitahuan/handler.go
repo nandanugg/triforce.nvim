@@ -32,7 +32,7 @@ func (h *handler) listPublic(c echo.Context) error {
 	}
 
 	ctx := c.Request().Context()
-	data, total, err := h.service.list(ctx, PemberitahuanStatusActive, req.Limit, req.Offset)
+	data, total, err := h.service.listActive(ctx, req.Limit, req.Offset)
 	if err != nil {
 		slog.ErrorContext(ctx, "Error getting list pemberitahuan", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
@@ -44,14 +44,20 @@ func (h *handler) listPublic(c echo.Context) error {
 	})
 }
 
+type listRequestParam struct {
+	JudulBerita string `query:"judul_berita"`
+	SortBy      string `query:"sort_by"`
+	api.PaginationRequest
+}
+
 func (h *handler) list(c echo.Context) error {
-	var req api.PaginationRequest
+	var req listRequestParam
 	if err := c.Bind(&req); err != nil {
 		return err
 	}
 
 	ctx := c.Request().Context()
-	data, total, err := h.service.list(ctx, PemberitahuanStatusAll, req.Limit, req.Offset)
+	data, total, err := h.service.list(ctx, req.JudulBerita, req.SortBy, req.Limit, req.Offset)
 	if err != nil {
 		slog.ErrorContext(ctx, "Error getting list pemberitahuan", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)

@@ -16,16 +16,17 @@ type DokumenPendukung struct {
 }
 
 type Pemberitahuan struct {
-	ID              int64              `db:"id"`
-	JudulBerita     string             `db:"judul_berita"`
-	DeskripsiBerita string             `db:"deskripsi_berita"`
-	UpdatedBy       string             `db:"updated_by"`
-	UpdatedAt       pgtype.Timestamptz `db:"updated_at"`
-	Pinned          bool               `db:"pinned"`
-	DiterbitkanPada pgtype.Timestamptz `db:"diterbitkan_pada"`
-	DitarikPada     pgtype.Timestamptz `db:"ditarik_pada"`
-	CreatedAt       pgtype.Timestamptz `db:"created_at"`
-	DeletedAt       pgtype.Timestamptz `db:"deleted_at"`
+	ID              int64                            `db:"id"`
+	JudulBerita     string                           `db:"judul_berita"`
+	DeskripsiBerita string                           `db:"deskripsi_berita"`
+	UpdatedBy       string                           `db:"updated_by"`
+	UpdatedAt       pgtype.Timestamptz               `db:"updated_at"`
+	DiterbitkanPada pgtype.Timestamptz               `db:"diterbitkan_pada"`
+	DitarikPada     pgtype.Timestamptz               `db:"ditarik_pada"`
+	CreatedAt       pgtype.Timestamptz               `db:"created_at"`
+	DeletedAt       pgtype.Timestamptz               `db:"deleted_at"`
+	PinnedAt        pgtype.Timestamptz               `db:"pinned_at"`
+	AktifRange      pgtype.Range[pgtype.Timestamptz] `db:"aktif_range"`
 }
 
 type Permission struct {

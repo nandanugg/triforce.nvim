@@ -239,6 +239,19 @@ paths:
       operationId: adminListPemberitahuan
       parameters:
         - $ref: "#/components/parameters/authRequired"
+        - name: judul_berita
+          in: query
+          description: Filter berdasarkan judul berita
+          required: false
+          schema:
+            type: string
+        - name: sort_by
+          in: query
+          description: Sort pemberitahuan
+          required: false
+          schema:
+            type: string
+            enum: ["pinned_asc", "pinned_desc", ""]
         - $ref: "#/components/parameters/limit"
         - $ref: "#/components/parameters/offset"
       responses:
@@ -292,9 +305,9 @@ paths:
                   type: string
                   description: Deskripsi pemberitahuan
                   example: "Deskripsi lengkap pengumuman..."
-                pinned:
+                is_current_period_pinned:
                   type: boolean
-                  description: Apakah pemberitahuan dipinned
+                  description: Apakah pemberitahuan dipinned pada periode saat ini
                   example: false
                 diterbitkan_pada:
                   type: string
@@ -373,9 +386,9 @@ paths:
                   type: string
                   description: Deskripsi pemberitahuan
                   example: "Deskripsi lengkap pengumuman..."
-                pinned:
+                is_current_period_pinned:
                   type: boolean
-                  description: Apakah pemberitahuan dipinned
+                  description: Apakah pemberitahuan dipinned pada periode saat ini
                   example: false
                 diterbitkan_pada:
                   type: string
@@ -914,7 +927,6 @@ components:
         - id
         - judul_berita
         - deskripsi_berita
-        - pinned
         - diterbitkan_pada
         - ditarik_pada
         - diperbarui_oleh
@@ -937,9 +949,13 @@ components:
             - WAITING
             - ACTIVE
             - OVER
-        pinned:
+        is_current_period_pinned:
           type: boolean
           example: false
+        pinned_at:
+          type: string
+          format: date-time
+          nullable: true
         diterbitkan_pada:
           type: string
           format: date-time
