@@ -16,9 +16,7 @@ WHERE
     deleted_at IS NULL
     AND (
         $1 = 'ALL'
-        OR ($1 = 'WAITING' AND NOW() < diterbitkan_pada)
         OR ($1 = 'ACTIVE' AND aktif_range @> now())
-        OR ($1 = 'OVER' AND NOW() >= ditarik_pada)
     )
     AND (
         $2 = '' OR judul_berita ILIKE CONCAT('%', $2, '%')

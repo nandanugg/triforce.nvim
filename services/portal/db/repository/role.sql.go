@@ -199,7 +199,7 @@ select
   end::int as jumlah_user
 from role r
 where r.deleted_at is null
-order by r.nama
+order by lower(r.nama)
 limit $1 offset $2
 `
 
@@ -245,27 +245,28 @@ func (q *Queries) ListRoles(ctx context.Context, arg ListRolesParams) ([]ListRol
 }
 
 const listRolesByNIPs = `-- name: ListRolesByNIPs :many
-select
-  ur.nip,
-  r.id,
-  r.nama,
-  r.is_default,
-  r.is_aktif
-from user_role ur
-join role r on r.id = ur.role_id and r.is_default is false and r.deleted_at is null
-where ur.nip = any($1::varchar[]) and ur.deleted_at is null
-union all
-select
-  t.nip,
-  r.id,
-  r.nama,
-  r.is_default,
-  r.is_aktif
-from (
-  select unnest($1::varchar[]) as nip
-) as t
-join role r on r.is_default and r.deleted_at is null
-order by nama
+select nip, id, nama, is_default, is_aktif from (
+  select
+    ur.nip,
+    r.id,
+    r.nama,
+    r.is_default,
+    r.is_aktif
+  from user_role ur
+  join role r on r.id = ur.role_id and r.is_default is false and r.deleted_at is null
+  where ur.nip = any($1::varchar[]) and ur.deleted_at is null
+  union all
+  select
+    t.nip,
+    r.id,
+    r.nama,
+    r.is_default,
+    r.is_aktif
+  from (
+    select unnest($1::varchar[]) as nip
+  ) as t
+  join role r on r.is_default and r.deleted_at is null
+) order by lower(nama)
 `
 
 type ListRolesByNIPsRow struct {

@@ -606,6 +606,8 @@ paths:
                         type: integer
         "400":
           $ref: "#/components/responses/badRequest"
+        "409":
+          $ref: "#/components/responses/conflict"
   /v1/roles/{id}:
     get:
       tags:
@@ -706,6 +708,8 @@ paths:
           $ref: "#/components/responses/badRequest"
         "404":
           $ref: "#/components/responses/notFound"
+        "409":
+          $ref: "#/components/responses/conflict"
   /v1/users:
     get:
       tags:
@@ -834,6 +838,15 @@ components:
                 type: string
     notFound:
       description: Data tidak ditemukan.
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              message:
+                type: string
+    conflict:
+      description: Data conflict.
       content:
         application/json:
           schema:

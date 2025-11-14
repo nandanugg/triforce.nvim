@@ -13,7 +13,7 @@ const countUsersGroupByNIP = `-- name: CountUsersGroupByNIP :one
 select count(distinct u.nip)
 from "user" u
 where u.deleted_at is null
-  and ($1::varchar is null or u.nip = $1::varchar)
+  and ($1::varchar is null or u.nip like concat($1::varchar, '%'))
   and (
     $2::int2 is null
     or (
@@ -196,7 +196,7 @@ select
   ) as profiles
 from "user" u
 where u.deleted_at is null
-  and ($3::varchar is null or u.nip = $3::varchar)
+  and ($3::varchar is null or u.nip like concat($3::varchar, '%'))
   and (
     $4::int2 is null
     or (

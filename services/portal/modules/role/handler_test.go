@@ -594,6 +594,78 @@ func Test_handler_create(t *testing.T) {
 			wantDBRoleResourcePermissions: dbtest.Rows{},
 		},
 		{
+			name: "ok: success create with deleted same nama",
+			dbData: seedData + `
+				insert into role
+					(nama,    created_at,   updated_at,   deleted_at) values
+					('admin', '2000-01-01', '2000-01-01', '2000-01-01');
+			`,
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"nama": "Admin"
+			}`,
+			wantResponseCode: http.StatusCreated,
+			wantResponseBody: `{
+				"data": {
+					"id": 2
+				}
+			}`,
+			wantDBRoles: dbtest.Rows{
+				{
+					"id":         int16(1),
+					"service":    nil,
+					"nama":       "admin",
+					"deskripsi":  nil,
+					"is_default": false,
+					"is_aktif":   true,
+					"created_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+				},
+				{
+					"id":         int16(2),
+					"service":    nil,
+					"nama":       "Admin",
+					"deskripsi":  "",
+					"is_default": false,
+					"is_aktif":   true,
+					"created_at": "{created_at}",
+					"updated_at": "{updated_at}",
+					"deleted_at": nil,
+				},
+			},
+			wantDBRoleResourcePermissions: dbtest.Rows{},
+		},
+		{
+			name: "error: nama already exists",
+			dbData: seedData + `
+				insert into role
+					(nama,    created_at,   updated_at) values
+					('ADMIN', '2000-01-01', '2000-01-01');
+			`,
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"nama": "Admin",
+				"resource_permission_ids": [3]
+			}`,
+			wantResponseCode: http.StatusConflict,
+			wantResponseBody: `{"message": "data dengan nama ini sudah terdaftar"}`,
+			wantDBRoles: dbtest.Rows{
+				{
+					"id":         int16(1),
+					"service":    nil,
+					"nama":       "ADMIN",
+					"deskripsi":  nil,
+					"is_default": false,
+					"is_aktif":   true,
+					"created_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at": nil,
+				},
+			},
+			wantDBRoleResourcePermissions: dbtest.Rows{},
+		},
+		{
 			name:          "error: deleted resource",
 			dbData:        seedData,
 			requestHeader: http.Header{"Authorization": authHeader},
@@ -836,6 +908,68 @@ func Test_handler_update(t *testing.T) {
 					"created_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
 					"updated_at": "{updated_at}",
 					"deleted_at": nil,
+				},
+			},
+			wantDBRoleResourcePermissions: dbtest.Rows{
+				{
+					"id":                     "{id}",
+					"role_id":                int16(1),
+					"resource_permission_id": int32(1),
+					"created_at":             "{created_at}",
+					"updated_at":             "{updated_at}",
+					"deleted_at":             nil,
+				},
+				{
+					"id":                     "{id}",
+					"role_id":                int16(1),
+					"resource_permission_id": int32(2),
+					"created_at":             "{created_at}",
+					"updated_at":             "{updated_at}",
+					"deleted_at":             nil,
+				},
+			},
+		},
+		{
+			name: "ok: success update with deleted same nama",
+			dbData: seedData + `
+				insert into role
+					(nama,          is_aktif, created_at,   updated_at,   deleted_at) values
+					('admin',       false,    '2000-01-01', '2000-01-01', null),
+					('SUPER ADMIN', false,    '2000-01-01', '2000-01-01', '2000-01-01');
+			`,
+			paramID:       "1",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"nama": "Super Admin",
+				"deskripsi": "new deskripsi",
+				"is_default": true,
+				"is_aktif": true,
+				"resource_permission_ids": [ 1, 2 ]
+			}`,
+			wantResponseCode: http.StatusNoContent,
+			wantResponseBody: `null`,
+			wantDBRoles: dbtest.Rows{
+				{
+					"id":         int16(1),
+					"service":    nil,
+					"nama":       "Super Admin",
+					"deskripsi":  "new deskripsi",
+					"is_default": true,
+					"is_aktif":   true,
+					"created_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at": "{updated_at}",
+					"deleted_at": nil,
+				},
+				{
+					"id":         int16(2),
+					"service":    nil,
+					"nama":       "SUPER ADMIN",
+					"deskripsi":  nil,
+					"is_default": false,
+					"is_aktif":   false,
+					"created_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
 				},
 			},
 			wantDBRoleResourcePermissions: dbtest.Rows{
@@ -1515,6 +1649,51 @@ func Test_handler_update(t *testing.T) {
 					"deleted_at":             nil,
 				},
 			},
+		},
+		{
+			name: "error: nama already exists",
+			dbData: seedData + `
+				insert into role
+					(nama,          created_at,   is_aktif, updated_at) values
+					('admin',       '2000-01-01', false,    '2000-01-01'),
+					('super admin', '2000-01-01', false,    '2000-01-01');
+			`,
+			paramID:       "1",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"nama": "Super Admin",
+				"deskripsi": "new deskripsi",
+				"is_default": true,
+				"is_aktif": true,
+				"resource_permission_ids": [ 1, 2 ]
+			}`,
+			wantResponseCode: http.StatusConflict,
+			wantResponseBody: `{"message": "data dengan nama ini sudah terdaftar"}`,
+			wantDBRoles: dbtest.Rows{
+				{
+					"id":         int16(1),
+					"service":    nil,
+					"nama":       "admin",
+					"deskripsi":  nil,
+					"is_default": false,
+					"is_aktif":   false,
+					"created_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at": nil,
+				},
+				{
+					"id":         int16(2),
+					"service":    nil,
+					"nama":       "super admin",
+					"deskripsi":  nil,
+					"is_default": false,
+					"is_aktif":   false,
+					"created_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at": time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at": nil,
+				},
+			},
+			wantDBRoleResourcePermissions: dbtest.Rows{},
 		},
 		{
 			name: "error: role not found",

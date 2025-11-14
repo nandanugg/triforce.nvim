@@ -28,6 +28,7 @@
 | ---- | ---------- |
 | role_pkey | CREATE UNIQUE INDEX role_pkey ON portal.role USING btree (id) |
 | role_is_default_idx | CREATE INDEX role_is_default_idx ON portal.role USING btree (is_default) |
+| role_nama_unique_idx | CREATE UNIQUE INDEX role_nama_unique_idx ON portal.role USING btree (lower((nama)::text)) WHERE (deleted_at IS NULL) |
 
 ## Relations
 

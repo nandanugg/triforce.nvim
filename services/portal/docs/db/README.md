@@ -5,7 +5,7 @@
 | Name | Columns | Comment | Type |
 | ---- | ------- | ------- | ---- |
 | [portal.schema_migrations](portal.schema_migrations.md) | 2 |  | BASE TABLE |
-| [portal.pemberitahuan](portal.pemberitahuan.md) | 10 |  | BASE TABLE |
+| [portal.pemberitahuan](portal.pemberitahuan.md) | 11 |  | BASE TABLE |
 | [portal.dokumen_pendukung](portal.dokumen_pendukung.md) | 6 |  | BASE TABLE |
 | [portal.user](portal.user.md) | 9 |  | BASE TABLE |
 | [portal.role](portal.role.md) | 9 |  | BASE TABLE |
@@ -55,11 +55,12 @@ erDiagram
   text deskripsi_berita
   text updated_by
   timestamp_with_time_zone updated_at
-  boolean pinned
   timestamp_with_time_zone diterbitkan_pada
   timestamp_with_time_zone ditarik_pada
   timestamp_with_time_zone created_at
   timestamp_with_time_zone deleted_at
+  timestamp_with_time_zone pinned_at
+  tstzrange aktif_range
 }
 "portal.dokumen_pendukung" {
   bigint id

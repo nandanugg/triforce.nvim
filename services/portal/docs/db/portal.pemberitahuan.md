@@ -4,18 +4,19 @@
 
 ## Columns
 
-| Name | Type | Default | Nullable | Children | Parents | Comment |
-| ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| id | bigint | nextval('pemberitahuan_id_seq'::regclass) | false |  |  |  |
-| judul_berita | text |  | false |  |  |  |
-| deskripsi_berita | text |  | false |  |  |  |
-| updated_by | text |  | false |  |  |  |
-| updated_at | timestamp with time zone | now() | false |  |  |  |
-| pinned | boolean | false | false |  |  |  |
-| diterbitkan_pada | timestamp with time zone |  | false |  |  |  |
-| ditarik_pada | timestamp with time zone |  | false |  |  |  |
-| created_at | timestamp with time zone | now() | false |  |  |  |
-| deleted_at | timestamp with time zone |  | true |  |  |  |
+| Name | Type | Default | Nullable | Extra Definition | Children | Parents | Comment |
+| ---- | ---- | ------- | -------- | ---------------- | -------- | ------- | ------- |
+| id | bigint | nextval('pemberitahuan_id_seq'::regclass) | false |  |  |  |  |
+| judul_berita | text |  | false |  |  |  |  |
+| deskripsi_berita | text |  | false |  |  |  |  |
+| updated_by | text |  | false |  |  |  |  |
+| updated_at | timestamp with time zone | now() | false |  |  |  |  |
+| diterbitkan_pada | timestamp with time zone |  | false |  |  |  |  |
+| ditarik_pada | timestamp with time zone |  | false |  |  |  |  |
+| created_at | timestamp with time zone | now() | false |  |  |  |  |
+| deleted_at | timestamp with time zone |  | true |  |  |  |  |
+| pinned_at | timestamp with time zone |  | true |  |  |  |  |
+| aktif_range | tstzrange |  | true | GENERATED ALWAYS AS tstzrange(diterbitkan_pada, ditarik_pada) STORED |  |  |  |
 
 ## Constraints
 
@@ -30,6 +31,7 @@
 | pemberitahuan_pkey | CREATE UNIQUE INDEX pemberitahuan_pkey ON portal.pemberitahuan USING btree (id) |
 | pemberitahuan_judul_idx | CREATE INDEX pemberitahuan_judul_idx ON portal.pemberitahuan USING btree (judul_berita) |
 | pemberitahuan_deskripsi_idx | CREATE INDEX pemberitahuan_deskripsi_idx ON portal.pemberitahuan USING btree (deskripsi_berita) |
+| idx_pemberitahuan_aktif_range | CREATE INDEX idx_pemberitahuan_aktif_range ON portal.pemberitahuan USING gist (aktif_range) WHERE (deleted_at IS NULL) |
 
 ## Relations
 
@@ -43,11 +45,12 @@ erDiagram
   text deskripsi_berita
   text updated_by
   timestamp_with_time_zone updated_at
-  boolean pinned
   timestamp_with_time_zone diterbitkan_pada
   timestamp_with_time_zone ditarik_pada
   timestamp_with_time_zone created_at
   timestamp_with_time_zone deleted_at
+  timestamp_with_time_zone pinned_at
+  tstzrange aktif_range
 }
 ```
 

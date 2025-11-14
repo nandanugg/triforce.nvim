@@ -20,7 +20,7 @@ select
   end::int as jumlah_user
 from role r
 where r.deleted_at is null
-order by r.nama
+order by lower(r.nama)
 limit $1 offset $2;
 
 -- name: CountRoles :one
@@ -97,27 +97,28 @@ where role_id = $1
   and deleted_at is null;
 
 -- name: ListRolesByNIPs :many
-select
-  ur.nip,
-  r.id,
-  r.nama,
-  r.is_default,
-  r.is_aktif
-from user_role ur
-join role r on r.id = ur.role_id and r.is_default is false and r.deleted_at is null
-where ur.nip = any(@nips::varchar[]) and ur.deleted_at is null
-union all
-select
-  t.nip,
-  r.id,
-  r.nama,
-  r.is_default,
-  r.is_aktif
-from (
-  select unnest(@nips::varchar[]) as nip
-) as t
-join role r on r.is_default and r.deleted_at is null
-order by nama;
+select * from (
+  select
+    ur.nip,
+    r.id,
+    r.nama,
+    r.is_default,
+    r.is_aktif
+  from user_role ur
+  join role r on r.id = ur.role_id and r.is_default is false and r.deleted_at is null
+  where ur.nip = any(@nips::varchar[]) and ur.deleted_at is null
+  union all
+  select
+    t.nip,
+    r.id,
+    r.nama,
+    r.is_default,
+    r.is_aktif
+  from (
+    select unnest(@nips::varchar[]) as nip
+  ) as t
+  join role r on r.is_default and r.deleted_at is null
+) order by lower(nama);
 
 -- name: CountRolesByIDs :one
 select count(1) from role

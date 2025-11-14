@@ -309,8 +309,8 @@ func Test_handler_exchangeToken(t *testing.T) {
 				insert into "user" (id, source, nip, email, nama, created_at, updated_at, last_login_at) values
 					('00000000-0000-0000-0000-000000000001', 'keycloak', '1c', '1c@test.com', 'c1', '2000-01-01', '2000-01-01', '2000-01-01');
 				insert into role (id, service, nama) values
-					(1, 'portal', 'admin'),
-					(2, 'portal', 'pegawai'),
+					(1, 'portal', 'portal_admin'),
+					(2, 'portal', 'portal_pegawai'),
 					(3, 'kepegawaian', 'admin'),
 					(4, 'kepegawaian', 'pegawai'),
 					(5, 'kepegawaian', 'guest');
@@ -338,7 +338,7 @@ func Test_handler_exchangeToken(t *testing.T) {
 			wantResponseCode: 200,
 			wantResponseBody: `{
 				"data": {
-					"access_token": "` + generateTokenWithKID(jwt.MapClaims{"sub": "00000000-0000-0000-0000-000000000001", "zimbra_id": "00000000-0000-0000-0000-000000000002", "nip": "1c", "roles": map[string]string{"portal": "admin", "kepegawaian": "pegawai"}}) + `",
+					"access_token": "` + generateTokenWithKID(jwt.MapClaims{"sub": "00000000-0000-0000-0000-000000000001", "zimbra_id": "00000000-0000-0000-0000-000000000002", "nip": "1c", "roles": map[string]string{"portal": "portal_admin", "kepegawaian": "pegawai"}}) + `",
 					"expires_in": 60,
 					"id_token": "bar",
 					"refresh_token": "baz",
@@ -683,8 +683,8 @@ func Test_handler_refreshToken(t *testing.T) {
 				insert into "user" (id, source, nip, email, nama) values
 					('00000000-0000-0000-0000-000000000001', 'keycloak', '1c', '1c@test.com', 'c1');
 				insert into role (id, service, nama) values
-					(1, 'portal', 'admin'),
-					(2, 'portal', 'pegawai'),
+					(1, 'portal', 'portal_admin'),
+					(2, 'portal', 'portal_pegawai'),
 					(3, 'kepegawaian', 'admin'),
 					(4, 'kepegawaian', 'pegawai'),
 					(5, 'kepegawaian', 'guest');
@@ -711,7 +711,7 @@ func Test_handler_refreshToken(t *testing.T) {
 			wantResponseCode: 200,
 			wantResponseBody: `{
 				"data": {
-					"access_token": "` + generateTokenWithKID(jwt.MapClaims{"sub": "00000000-0000-0000-0000-000000000001", "zimbra_id": "00000000-0000-0000-0000-000000000002", "nip": "1c", "roles": map[string]string{"portal": "admin", "kepegawaian": "pegawai"}}) + `",
+					"access_token": "` + generateTokenWithKID(jwt.MapClaims{"sub": "00000000-0000-0000-0000-000000000001", "zimbra_id": "00000000-0000-0000-0000-000000000002", "nip": "1c", "roles": map[string]string{"portal": "portal_admin", "kepegawaian": "pegawai"}}) + `",
 					"expires_in": 60,
 					"id_token": "bar",
 					"refresh_token": "baz",

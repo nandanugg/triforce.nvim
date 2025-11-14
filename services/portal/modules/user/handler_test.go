@@ -32,27 +32,28 @@ func Test_handler_list(t *testing.T) {
 			(3,  'guest',   false,      true,     '2000-01-01'),
 			(4,  'dokter',  false,      false,    null);
 		insert into user_role
-			(nip,  role_id, deleted_at) values
-			('1a', 1,       null),
-			('1a', 2,       null),
-			('1a', 3,       null),
-			('1a', 4,       null),
-			('1b', 1,       '2000-01-01'),
-			('1b', 2,       '2000-01-01'),
-			('1b', 4,       null),
-			('1c', 1,       null);
+			(nip,   role_id, deleted_at) values
+			('12a', 1,       null),
+			('12a', 2,       null),
+			('12a', 3,       null),
+			('12a', 4,       null),
+			('a12', 1,       '2000-01-01'),
+			('a12', 2,       '2000-01-01'),
+			('a12', 4,       null),
+			('12c', 1,       null);
 		insert into "user"
-			(nip,  nama,       email,               last_login_at, id,                                     source,     deleted_at) values
-			('1a', 'John Doe', 'john.doe@test.com', '2010-01-01',  '00000000-0000-0000-0000-000000000001', 'zimbra',   null),
-			('1a', 'Jane Doe', 'jane.doe@test.com', '2012-01-01',  '00000000-0000-0000-0000-000000000001', 'keycloak', null),
-			('1a', 'Will Doe', 'will.doe@test.com', null,          '00000000-0000-0000-0000-000000000002', 'zimbra',   null),
-			('1a', 'Wish Doe', 'wish.doe@test.com', '2011-01-01',  '00000000-0000-0000-0000-000000000003', 'zimbra',   null),
-			('1a', '',         '',                  '2009-01-01',  '00000000-0000-0000-0000-000000000004', 'zimbra',   null),
-			('1b', 'Will',     'will@test.com',     '2000-01-01',  '00000000-0000-0000-0000-000000000005', 'zimbra',   null),
-			('1b', 'Joy',      'joy@test.com',      '2001-01-01',  '00000000-0000-0000-0000-000000000006', 'zimbra',   '2000-01-01'),
-			('1b', '',         '',                  null,          '00000000-0000-0000-0000-000000000007', 'zimbra',   null),
-			('1c', '',         '',                  null,          '00000000-0000-0000-0000-000000000008', 'zimbra',   '2000-01-01'),
-			('1d', 'Carl',     'carl@test.com',     null,          '00000000-0000-0000-0000-000000000009', 'zimbra',   null);
+			(nip,   nama,       email,               last_login_at, id,                                     source,     deleted_at) values
+			('12a', 'John Doe', 'john.doe@test.com', '2010-01-01',  '00000000-0000-0000-0000-000000000001', 'zimbra',   null),
+			('12a', 'Jane Doe', 'jane.doe@test.com', '2012-01-01',  '00000000-0000-0000-0000-000000000001', 'keycloak', null),
+			('12a', 'Will Doe', 'will.doe@test.com', null,          '00000000-0000-0000-0000-000000000002', 'zimbra',   null),
+			('12a', 'Wish Doe', 'wish.doe@test.com', '2011-01-01',  '00000000-0000-0000-0000-000000000003', 'zimbra',   null),
+			('12a', '',         '',                  '2009-01-01',  '00000000-0000-0000-0000-000000000004', 'zimbra',   null),
+			('a12', 'Will',     'will@test.com',     '2000-01-01',  '00000000-0000-0000-0000-000000000005', 'zimbra',   null),
+			('a12', 'Joy',      'joy@test.com',      '2001-01-01',  '00000000-0000-0000-0000-000000000006', 'zimbra',   '2000-01-01'),
+			('a12', '',         '',                  null,          '00000000-0000-0000-0000-000000000007', 'zimbra',   null),
+			('12c', '',         '',                  null,          '00000000-0000-0000-0000-000000000008', 'zimbra',   '2000-01-01'),
+			('12d', 'Carl',     'carl@test.com',     null,          '00000000-0000-0000-0000-000000000009', 'zimbra',   null),
+			('12A', 'Johnson',  'johnson@test.com',  null,          '00000000-0000-0000-0000-000000000009', 'keycloak', null);
 	`
 	db := dbtest.New(t, dbmigrations.FS)
 	_, err := db.Exec(context.Background(), dbData)
@@ -79,7 +80,27 @@ func Test_handler_list(t *testing.T) {
 			wantResponseBody: `{
 				"data": [
 					{
-						"nip": "1a",
+						"nip": "12A",
+						"profiles": [
+							{
+								"id": "00000000-0000-0000-0000-000000000009",
+								"source": "keycloak",
+								"nama": "Johnson",
+								"email": "johnson@test.com",
+								"last_login_at": null
+							}
+						],
+						"roles": [
+							{
+								"id": 2,
+								"nama": "pegawai",
+								"is_default": true,
+								"is_aktif": true
+							}
+						]
+					},
+					{
+						"nip": "12a",
 						"profiles": [
 							{
 								"id": "00000000-0000-0000-0000-000000000001",
@@ -139,7 +160,27 @@ func Test_handler_list(t *testing.T) {
 						]
 					},
 					{
-						"nip": "1b",
+						"nip": "12d",
+						"profiles": [
+							{
+								"id": "00000000-0000-0000-0000-000000000009",
+								"source": "zimbra",
+								"nama": "Carl",
+								"email": "carl@test.com",
+								"last_login_at": null
+							}
+						],
+						"roles": [
+							{
+								"id": 2,
+								"nama": "pegawai",
+								"is_default": true,
+								"is_aktif": true
+							}
+						]
+					},
+					{
+						"nip": "a12",
 						"profiles": [
 							{
 								"id": "00000000-0000-0000-0000-000000000005",
@@ -163,26 +204,6 @@ func Test_handler_list(t *testing.T) {
 								"is_default": false,
 								"is_aktif": false
 							},
-							{
-								"id": 2,
-								"nama": "pegawai",
-								"is_default": true,
-								"is_aktif": true
-							}
-						]
-					},
-					{
-						"nip": "1d",
-						"profiles": [
-							{
-								"id": "00000000-0000-0000-0000-000000000009",
-								"source": "zimbra",
-								"nama": "Carl",
-								"email": "carl@test.com",
-								"last_login_at": null
-							}
-						],
-						"roles": [
 							{
 								"id": 2,
 								"nama": "pegawai",
@@ -195,7 +216,7 @@ func Test_handler_list(t *testing.T) {
 				"meta": {
 					"limit": 10,
 					"offset": 0,
-					"total": 3
+					"total": 4
 				}
 			}`,
 		},
@@ -204,13 +225,33 @@ func Test_handler_list(t *testing.T) {
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestQuery: url.Values{
 				"limit":  []string{"2"},
-				"offset": []string{"1"},
+				"offset": []string{"2"},
 			},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
 					{
-						"nip": "1b",
+						"nip": "12d",
+						"profiles": [
+							{
+								"id": "00000000-0000-0000-0000-000000000009",
+								"source": "zimbra",
+								"nama": "Carl",
+								"email": "carl@test.com",
+								"last_login_at": null
+							}
+						],
+						"roles": [
+							{
+								"id": 2,
+								"nama": "pegawai",
+								"is_default": true,
+								"is_aktif": true
+							}
+						]
+					},
+					{
+						"nip": "a12",
 						"profiles": [
 							{
 								"id": "00000000-0000-0000-0000-000000000005",
@@ -241,32 +282,12 @@ func Test_handler_list(t *testing.T) {
 								"is_aktif": true
 							}
 						]
-					},
-					{
-						"nip": "1d",
-						"profiles": [
-							{
-								"id": "00000000-0000-0000-0000-000000000009",
-								"source": "zimbra",
-								"nama": "Carl",
-								"email": "carl@test.com",
-								"last_login_at": null
-							}
-						],
-						"roles": [
-							{
-								"id": 2,
-								"nama": "pegawai",
-								"is_default": true,
-								"is_aktif": true
-							}
-						]
 					}
 				],
 				"meta": {
 					"limit": 2,
-					"offset": 1,
-					"total": 3
+					"offset": 2,
+					"total": 4
 				}
 			}`,
 		},
@@ -274,13 +295,13 @@ func Test_handler_list(t *testing.T) {
 			name:          "ok: with filter nip",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestQuery: url.Values{
-				"nip": []string{"1a"},
+				"nip": []string{"12a"},
 			},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
 					{
-						"nip": "1a",
+						"nip": "12a",
 						"profiles": [
 							{
 								"id": "00000000-0000-0000-0000-000000000001",
@@ -348,16 +369,36 @@ func Test_handler_list(t *testing.T) {
 			}`,
 		},
 		{
-			name:          "ok: with filter default role",
+			name:          "ok: with filter prefix nip",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestQuery: url.Values{
-				"role_id": []string{"2"},
+				"nip": []string{"12"},
 			},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
 					{
-						"nip": "1a",
+						"nip": "12A",
+						"profiles": [
+							{
+								"id": "00000000-0000-0000-0000-000000000009",
+								"source": "keycloak",
+								"nama": "Johnson",
+								"email": "johnson@test.com",
+								"last_login_at": null
+							}
+						],
+						"roles": [
+							{
+								"id": 2,
+								"nama": "pegawai",
+								"is_default": true,
+								"is_aktif": true
+							}
+						]
+					},
+					{
+						"nip": "12a",
 						"profiles": [
 							{
 								"id": "00000000-0000-0000-0000-000000000001",
@@ -417,7 +458,144 @@ func Test_handler_list(t *testing.T) {
 						]
 					},
 					{
-						"nip": "1b",
+						"nip": "12d",
+						"profiles": [
+							{
+								"id": "00000000-0000-0000-0000-000000000009",
+								"source": "zimbra",
+								"nama": "Carl",
+								"email": "carl@test.com",
+								"last_login_at": null
+							}
+						],
+						"roles": [
+							{
+								"id": 2,
+								"nama": "pegawai",
+								"is_default": true,
+								"is_aktif": true
+							}
+						]
+					}
+				],
+				"meta": {
+					"limit": 10,
+					"offset": 0,
+					"total": 3
+				}
+			}`,
+		},
+		{
+			name:          "ok: with filter default role",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestQuery: url.Values{
+				"role_id": []string{"2"},
+			},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{
+						"nip": "12A",
+						"profiles": [
+							{
+								"id": "00000000-0000-0000-0000-000000000009",
+								"source": "keycloak",
+								"nama": "Johnson",
+								"email": "johnson@test.com",
+								"last_login_at": null
+							}
+						],
+						"roles": [
+							{
+								"id": 2,
+								"nama": "pegawai",
+								"is_default": true,
+								"is_aktif": true
+							}
+						]
+					},
+					{
+						"nip": "12a",
+						"profiles": [
+							{
+								"id": "00000000-0000-0000-0000-000000000001",
+								"source": "keycloak",
+								"nama": "Jane Doe",
+								"email": "jane.doe@test.com",
+								"last_login_at": "2012-01-01T00:00:00Z"
+							},
+							{
+								"id": "00000000-0000-0000-0000-000000000003",
+								"source": "zimbra",
+								"nama": "Wish Doe",
+								"email": "wish.doe@test.com",
+								"last_login_at": "2011-01-01T00:00:00Z"
+							},
+							{
+								"id": "00000000-0000-0000-0000-000000000001",
+								"source": "zimbra",
+								"nama": "John Doe",
+								"email": "john.doe@test.com",
+								"last_login_at": "2010-01-01T00:00:00Z"
+							},
+							{
+								"id": "00000000-0000-0000-0000-000000000004",
+								"source": "zimbra",
+								"nama": "",
+								"email": "",
+								"last_login_at": "2009-01-01T00:00:00Z"
+							},
+							{
+								"id": "00000000-0000-0000-0000-000000000002",
+								"source": "zimbra",
+								"nama": "Will Doe",
+								"email": "will.doe@test.com",
+								"last_login_at": null
+							}
+						],
+						"roles": [
+							{
+								"id": 1,
+								"nama": "admin",
+								"is_default": false,
+								"is_aktif": true
+							},
+							{
+								"id": 4,
+								"nama": "dokter",
+								"is_default": false,
+								"is_aktif": false
+							},
+							{
+								"id": 2,
+								"nama": "pegawai",
+								"is_default": true,
+								"is_aktif": true
+							}
+						]
+					},
+					{
+						"nip": "12d",
+						"profiles": [
+							{
+								"id": "00000000-0000-0000-0000-000000000009",
+								"source": "zimbra",
+								"nama": "Carl",
+								"email": "carl@test.com",
+								"last_login_at": null
+							}
+						],
+						"roles": [
+							{
+								"id": 2,
+								"nama": "pegawai",
+								"is_default": true,
+								"is_aktif": true
+							}
+						]
+					},
+					{
+						"nip": "a12",
 						"profiles": [
 							{
 								"id": "00000000-0000-0000-0000-000000000005",
@@ -448,32 +626,12 @@ func Test_handler_list(t *testing.T) {
 								"is_aktif": true
 							}
 						]
-					},
-					{
-						"nip": "1d",
-						"profiles": [
-							{
-								"id": "00000000-0000-0000-0000-000000000009",
-								"source": "zimbra",
-								"nama": "Carl",
-								"email": "carl@test.com",
-								"last_login_at": null
-							}
-						],
-						"roles": [
-							{
-								"id": 2,
-								"nama": "pegawai",
-								"is_default": true,
-								"is_aktif": true
-							}
-						]
 					}
 				],
 				"meta": {
 					"limit": 10,
 					"offset": 0,
-					"total": 3
+					"total": 4
 				}
 			}`,
 		},
@@ -487,7 +645,7 @@ func Test_handler_list(t *testing.T) {
 			wantResponseBody: `{
 				"data": [
 					{
-						"nip": "1a",
+						"nip": "12a",
 						"profiles": [
 							{
 								"id": "00000000-0000-0000-0000-000000000001",
@@ -547,7 +705,7 @@ func Test_handler_list(t *testing.T) {
 						]
 					},
 					{
-						"nip": "1b",
+						"nip": "a12",
 						"profiles": [
 							{
 								"id": "00000000-0000-0000-0000-000000000005",
@@ -591,14 +749,14 @@ func Test_handler_list(t *testing.T) {
 			name:          "ok: with filter nip and role",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestQuery: url.Values{
-				"nip":     []string{"1b"},
+				"nip":     []string{"a12"},
 				"role_id": []string{"4"},
 			},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{
 				"data": [
 					{
-						"nip": "1b",
+						"nip": "a12",
 						"profiles": [
 							{
 								"id": "00000000-0000-0000-0000-000000000005",

@@ -31,7 +31,7 @@ select
   ) as profiles
 from "user" u
 where u.deleted_at is null
-  and (sqlc.narg('nip')::varchar is null or u.nip = sqlc.narg('nip')::varchar)
+  and (sqlc.narg('nip')::varchar is null or u.nip like concat(sqlc.narg('nip')::varchar, '%'))
   and (
     sqlc.narg('role_id')::int2 is null
     or (
@@ -51,7 +51,7 @@ limit $1 offset $2;
 select count(distinct u.nip)
 from "user" u
 where u.deleted_at is null
-  and (sqlc.narg('nip')::varchar is null or u.nip = sqlc.narg('nip')::varchar)
+  and (sqlc.narg('nip')::varchar is null or u.nip like concat(sqlc.narg('nip')::varchar, '%'))
   and (
     sqlc.narg('role_id')::int2 is null
     or (
