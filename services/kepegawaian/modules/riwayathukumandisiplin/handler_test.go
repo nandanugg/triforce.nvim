@@ -1,14 +1,19 @@
 package riwayathukumandisiplin
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
 	"fmt"
+	"io"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"os"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -84,6 +89,8 @@ func Test_handler_list(t *testing.T) {
 				"data": [
 					{
 						"id": 8,
+						"golongan_id": 2,
+						"jenis_hukuman_id": 1,
 						"jenis_hukuman": "Jenis Hukuman 1",
 						"nama_golongan": "",
 						"nama_pangkat": "",
@@ -99,6 +106,8 @@ func Test_handler_list(t *testing.T) {
 					},
 					{
 						"id": 6,
+						"golongan_id": 1,
+						"jenis_hukuman_id": 3,
 						"jenis_hukuman": "",
 						"nama_golongan": "I/a",
 						"nama_pangkat": "Juru Muda",
@@ -114,6 +123,8 @@ func Test_handler_list(t *testing.T) {
 					},
 					{
 						"id": 5,
+						"golongan_id": 1,
+						"jenis_hukuman_id": 2,
 						"jenis_hukuman": "Jenis Hukuman 2",
 						"nama_golongan": "I/a",
 						"nama_pangkat": "Juru Muda",
@@ -129,6 +140,8 @@ func Test_handler_list(t *testing.T) {
 					},
 					{
 						"id": 4,
+						"golongan_id": 1,
+						"jenis_hukuman_id": 1,
 						"jenis_hukuman": "Jenis Hukuman 1",
 						"nama_golongan": "I/a",
 						"nama_pangkat": "Juru Muda",
@@ -144,6 +157,8 @@ func Test_handler_list(t *testing.T) {
 					},
 					{
 						"id": 3,
+						"golongan_id": 1,
+						"jenis_hukuman_id": 1,
 						"jenis_hukuman": "Jenis Hukuman 1",
 						"nama_golongan": "I/a",
 						"nama_pangkat": "Juru Muda",
@@ -159,6 +174,8 @@ func Test_handler_list(t *testing.T) {
 					},
 					{
 						"id": 2,
+						"golongan_id": 1,
+						"jenis_hukuman_id": 1,
 						"jenis_hukuman": "Jenis Hukuman 1",
 						"nama_golongan": "I/a",
 						"nama_pangkat": "Juru Muda",
@@ -174,6 +191,8 @@ func Test_handler_list(t *testing.T) {
 					},
 					{
 						"id": 1,
+						"golongan_id": 1,
+						"jenis_hukuman_id": 1,
 						"jenis_hukuman": "Snapshotted Jenis Hukuman 1",
 						"nama_golongan": "I/a",
 						"nama_pangkat": "Juru Muda",
@@ -204,6 +223,8 @@ func Test_handler_list(t *testing.T) {
 				"data": [
 					{
 						"id": 5,
+						"golongan_id": 1,
+						"jenis_hukuman_id": 2,
 						"jenis_hukuman": "Jenis Hukuman 2",
 						"nama_golongan": "I/a",
 						"nama_pangkat": "Juru Muda",
@@ -465,6 +486,8 @@ func Test_handler_listAdmin(t *testing.T) {
 				"data": [
 					{
 						"id": 3,
+						"golongan_id": 1,
+						"jenis_hukuman_id": 1,
 						"jenis_hukuman": "Jenis Hukuman 1",
 						"nama_golongan": "I/a",
 						"nama_pangkat": "Juru Muda",
@@ -480,6 +503,8 @@ func Test_handler_listAdmin(t *testing.T) {
 					},
 					{
 						"id": 2,
+						"golongan_id": 1,
+						"jenis_hukuman_id": 1,
 						"jenis_hukuman": "Jenis Hukuman 1",
 						"nama_golongan": "I/a",
 						"nama_pangkat": "Juru Muda",
@@ -495,6 +520,8 @@ func Test_handler_listAdmin(t *testing.T) {
 					},
 					{
 						"id": 1,
+						"golongan_id": 1,
+						"jenis_hukuman_id": 1,
 						"jenis_hukuman": "Snapshotted Jenis Hukuman 1",
 						"nama_golongan": "I/a",
 						"nama_pangkat": "Juru Muda",
@@ -523,6 +550,8 @@ func Test_handler_listAdmin(t *testing.T) {
 				"data": [
 					{
 						"id": 2,
+						"golongan_id": 1,
+						"jenis_hukuman_id": 1,
 						"jenis_hukuman": "Jenis Hukuman 1",
 						"nama_golongan": "I/a",
 						"nama_pangkat": "Juru Muda",
@@ -755,6 +784,1170 @@ func Test_handler_getBerkasAdmin(t *testing.T) {
 			} else {
 				assert.JSONEq(t, string(tt.wantResponseBytes), rec.Body.String())
 			}
+		})
+	}
+}
+
+func Test_handler_adminCreate(t *testing.T) {
+	t.Parallel()
+
+	dbData := `
+		INSERT INTO pegawai
+			(pns_id,  nip_baru, nama, deleted_at) VALUES
+			('id_1a', '1a',     'Pegawai 1', NULL),
+			('id_1c', '1c',     'Pegawai 2', NULL),
+			('id_1d', '1d',     'Pegawai 3', '2000-01-01'),
+			('id_1e', '1e',     'Pegawai 4', NULL),
+			('id_1f', '1f',     'Pegawai 5', NULL),
+			('id_1g', '1g',     'Pegawai 6', NULL);
+		INSERT INTO ref_jenis_hukuman
+			(id, nama, deleted_at) VALUES
+			(1, 'Jenis Hukuman 1', NULL),
+			(2, 'Jenis Hukuman 2', '2000-01-01');
+		INSERT INTO ref_golongan
+			(id, nama, nama_pangkat, nama_2, gol, gol_pppk, deleted_at) VALUES
+			(1, 'I/a', 'Juru Muda', 'Ia', 1, 'I', NULL),
+			(2, 'II/a', 'Pengatur Muda', 'IIa', 2, 'II', '2000-01-01');
+	`
+	db := dbtest.New(t, dbmigrations.FS)
+	_, err := db.Exec(context.Background(), dbData)
+	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	authSvc := apitest.NewAuthService(api.Kode_Pegawai_Write)
+	RegisterRoutes(e, sqlc.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+
+	authHeader := []string{apitest.GenerateAuthHeader("2a")}
+	tests := []struct {
+		name             string
+		paramNIP         string
+		requestHeader    http.Header
+		requestBody      string
+		wantResponseCode int
+		wantResponseBody string
+		wantDBRows       dbtest.Rows
+	}{
+		{
+			name:          "ok: with all data",
+			paramNIP:      "1c",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"jenis_hukuman_id": 1,
+				"golongan_id": 1,
+				"nomor_sk": "SK-001",
+				"tanggal_sk": "2023-01-15",
+				"tanggal_mulai": "2023-01-20",
+				"tanggal_akhir": "2024-01-20",
+				"nomor_pp": "PP-001",
+				"nomor_sk_pembatalan": "SK-PEMBATALAN-001",
+				"tanggal_sk_pembatalan": "2023-01-16"
+			}`,
+			wantResponseCode: http.StatusCreated,
+			wantResponseBody: `{
+				"data": { "id": {id} }
+			}`,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":                    "{id}",
+					"jenis_hukuman_id":      int16(1),
+					"golongan_id":           int16(1),
+					"sk_nomor":              "SK-001",
+					"sk_tanggal":            time.Date(2023, 1, 15, 0, 0, 0, 0, time.UTC),
+					"tanggal_mulai_hukuman": time.Date(2023, 1, 20, 0, 0, 0, 0, time.UTC),
+					"tanggal_akhir_hukuman": time.Date(2024, 1, 20, 0, 0, 0, 0, time.UTC),
+					"masa_tahun":            int16(1),
+					"masa_bulan":            int16(0),
+					"no_pp":                 "PP-001",
+					"no_sk_pembatalan":      "SK-PEMBATALAN-001",
+					"tanggal_sk_pembatalan": time.Date(2023, 1, 16, 0, 0, 0, 0, time.UTC),
+					"bkn_id":                nil,
+					"file_base64":           nil,
+					"keterangan_berkas":     nil,
+					"nama":                  "Pegawai 2",
+					"nama_golongan":         "I/a",
+					"nama_jenis_hukuman":    "Jenis Hukuman 1",
+					"pns_id":                "id_1c",
+					"pns_nip":               "1c",
+					"created_at":            "{created_at}",
+					"updated_at":            "{updated_at}",
+					"deleted_at":            nil,
+				},
+			},
+		},
+		{
+			name:          "ok: with minimal required data",
+			paramNIP:      "1e",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"jenis_hukuman_id": 1,
+				"golongan_id": 1,
+				"nomor_sk": "SK-002",
+				"tanggal_sk": "2023-02-15",
+				"tanggal_mulai": "2023-02-20",
+				"tanggal_akhir": "2023-05-20"
+			}`,
+			wantResponseCode: http.StatusCreated,
+			wantResponseBody: `{
+				"data": { "id": {id} }
+			}`,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":                    "{id}",
+					"jenis_hukuman_id":      int16(1),
+					"golongan_id":           int16(1),
+					"sk_nomor":              "SK-002",
+					"sk_tanggal":            time.Date(2023, 2, 15, 0, 0, 0, 0, time.UTC),
+					"tanggal_mulai_hukuman": time.Date(2023, 2, 20, 0, 0, 0, 0, time.UTC),
+					"tanggal_akhir_hukuman": time.Date(2023, 5, 20, 0, 0, 0, 0, time.UTC),
+					"masa_tahun":            int16(0),
+					"masa_bulan":            int16(3),
+					"no_pp":                 "",
+					"no_sk_pembatalan":      "",
+					"tanggal_sk_pembatalan": nil,
+					"bkn_id":                nil,
+					"file_base64":           nil,
+					"keterangan_berkas":     nil,
+					"nama":                  "Pegawai 4",
+					"nama_golongan":         "I/a",
+					"nama_jenis_hukuman":    "Jenis Hukuman 1",
+					"pns_id":                "id_1e",
+					"pns_nip":               "1e",
+					"created_at":            "{created_at}",
+					"updated_at":            "{updated_at}",
+					"deleted_at":            nil,
+				},
+			},
+		},
+		{
+			name:          "ok: with empty string optional fields",
+			paramNIP:      "1f",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"jenis_hukuman_id": 1,
+				"golongan_id": 1,
+				"nomor_sk": "SK-003",
+				"tanggal_sk": "2023-03-15",
+				"tanggal_mulai": "2023-03-20",
+				"tanggal_akhir": "2023-06-20",
+				"nomor_pp": "",
+				"nomor_sk_pembatalan": ""
+			}`,
+			wantResponseCode: http.StatusCreated,
+			wantResponseBody: `{
+				"data": { "id": {id} }
+			}`,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":                    "{id}",
+					"jenis_hukuman_id":      int16(1),
+					"golongan_id":           int16(1),
+					"sk_nomor":              "SK-003",
+					"sk_tanggal":            time.Date(2023, 3, 15, 0, 0, 0, 0, time.UTC),
+					"tanggal_mulai_hukuman": time.Date(2023, 3, 20, 0, 0, 0, 0, time.UTC),
+					"tanggal_akhir_hukuman": time.Date(2023, 6, 20, 0, 0, 0, 0, time.UTC),
+					"masa_tahun":            int16(0),
+					"masa_bulan":            int16(3),
+					"no_pp":                 "",
+					"no_sk_pembatalan":      "",
+					"tanggal_sk_pembatalan": nil,
+					"bkn_id":                nil,
+					"file_base64":           nil,
+					"keterangan_berkas":     nil,
+					"nama":                  "Pegawai 5",
+					"nama_golongan":         "I/a",
+					"nama_jenis_hukuman":    "Jenis Hukuman 1",
+					"pns_id":                "id_1f",
+					"pns_nip":               "1f",
+					"created_at":            "{created_at}",
+					"updated_at":            "{updated_at}",
+					"deleted_at":            nil,
+				},
+			},
+		},
+		{
+			name:          "error: pegawai is not found",
+			paramNIP:      "1b",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"jenis_hukuman_id": 1,
+				"golongan_id": 1,
+				"nomor_sk": "SK-001",
+				"tanggal_sk": "2023-01-15",
+				"tanggal_mulai": "2023-01-20",
+				"tanggal_akhir": "2024-01-20"
+			}`,
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data pegawai tidak ditemukan"}`,
+			wantDBRows:       dbtest.Rows{},
+		},
+		{
+			name:          "error: pegawai is deleted",
+			paramNIP:      "1d",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"jenis_hukuman_id": 1,
+				"golongan_id": 1,
+				"nomor_sk": "SK-001",
+				"tanggal_sk": "2023-01-15",
+				"tanggal_mulai": "2023-01-20",
+				"tanggal_akhir": "2024-01-20"
+			}`,
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data pegawai tidak ditemukan"}`,
+			wantDBRows:       dbtest.Rows{},
+		},
+		{
+			name:          "error: golongan or jenis hukuman is not found",
+			paramNIP:      "1a",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"jenis_hukuman_id": 0,
+				"golongan_id": 0,
+				"nomor_sk": "SK-001",
+				"tanggal_sk": "2023-01-15",
+				"tanggal_mulai": "2023-01-20",
+				"tanggal_akhir": "2024-01-20"
+			}`,
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "data golongan tidak ditemukan | data jenis hukuman tidak ditemukan"}`,
+			wantDBRows:       dbtest.Rows{},
+		},
+		{
+			name:          "error: golongan or jenis hukuman is deleted",
+			paramNIP:      "1a",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"jenis_hukuman_id": 2,
+				"golongan_id": 2,
+				"nomor_sk": "SK-001",
+				"tanggal_sk": "2023-01-15",
+				"tanggal_mulai": "2023-01-20",
+				"tanggal_akhir": "2024-01-20"
+			}`,
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "data golongan tidak ditemukan | data jenis hukuman tidak ditemukan"}`,
+			wantDBRows:       dbtest.Rows{},
+		},
+		{
+			name:          "error: tanggal akhir sebelum tanggal mulai",
+			paramNIP:      "1a",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"jenis_hukuman_id": 1,
+				"golongan_id": 1,
+				"nomor_sk": "SK-001",
+				"tanggal_sk": "2023-01-15",
+				"tanggal_mulai": "2023-01-20",
+				"tanggal_akhir": "2023-01-10"
+			}`,
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "masa hukuman tidak valid"}`,
+			wantDBRows:       dbtest.Rows{},
+		},
+		{
+			name:             "error: missing required params",
+			paramNIP:         "1a",
+			requestHeader:    http.Header{"Authorization": authHeader},
+			requestBody:      `{ "id": 1 }`,
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "parameter \"id\" tidak didukung` +
+				` | parameter \"jenis_hukuman_id\" harus diisi` +
+				` | parameter \"golongan_id\" harus diisi` +
+				` | parameter \"nomor_sk\" harus diisi` +
+				` | parameter \"tanggal_sk\" harus diisi` +
+				` | parameter \"tanggal_mulai\" harus diisi` +
+				` | parameter \"tanggal_akhir\" harus diisi"}`,
+			wantDBRows: dbtest.Rows{},
+		},
+		{
+			name:             "error: body is empty",
+			paramNIP:         "1a",
+			requestHeader:    http.Header{"Authorization": authHeader},
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "request body harus diisi"}`,
+			wantDBRows:       dbtest.Rows{},
+		},
+		{
+			name:             "error: invalid token",
+			paramNIP:         "1a",
+			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
+			wantDBRows:       dbtest.Rows{},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			req := httptest.NewRequest(http.MethodPost, "/v1/admin/pegawai/"+tt.paramNIP+"/riwayat-hukuman-disiplin", strings.NewReader(tt.requestBody))
+			req.Header = tt.requestHeader
+			req.Header.Set("Content-Type", "application/json")
+			rec := httptest.NewRecorder()
+
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+
+			actualRows, err := dbtest.QueryWithClause(db, "riwayat_hukuman_disiplin", "where pns_nip = $1", tt.paramNIP)
+			require.NoError(t, err)
+			if len(tt.wantDBRows) == len(actualRows) {
+				for i, row := range actualRows {
+					if tt.wantDBRows[i]["id"] == "{id}" {
+						assert.WithinDuration(t, time.Now(), row["created_at"].(time.Time), 10*time.Second)
+						assert.Equal(t, row["created_at"], row["updated_at"])
+
+						tt.wantDBRows[i]["id"] = row["id"]
+						tt.wantDBRows[i]["created_at"] = row["created_at"]
+						tt.wantDBRows[i]["updated_at"] = row["updated_at"]
+
+						tt.wantResponseBody = strings.ReplaceAll(tt.wantResponseBody, "{id}", fmt.Sprintf("%d", row["id"]))
+					}
+				}
+			}
+			assert.Equal(t, tt.wantDBRows, actualRows)
+			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
+		})
+	}
+}
+
+func Test_handler_adminUpdate(t *testing.T) {
+	t.Parallel()
+
+	dbData := `
+		INSERT INTO pegawai
+			(pns_id,  nip_baru, deleted_at) VALUES
+			('id_1c', '1c',     NULL),
+			('id_1d', '1d',     '2000-01-01'),
+			('id_1e', '1e',     NULL);
+		INSERT INTO ref_jenis_hukuman
+			(id, nama, deleted_at) VALUES
+			(1, 'Jenis Hukuman 1', NULL),
+			(2, 'Jenis Hukuman 2', '2000-01-01');
+		INSERT INTO ref_golongan
+			(id, nama, nama_pangkat, nama_2, gol, gol_pppk, deleted_at) VALUES
+			(1, 'I/a', 'Juru Muda', 'Ia', 1, 'I', NULL),
+			(2, 'II/a', 'Pengatur Muda', 'IIa', 2, 'II', '2000-01-01');
+		INSERT INTO riwayat_hukuman_disiplin
+			(id, pns_id, pns_nip, nama, golongan_id, nama_golongan, jenis_hukuman_id, nama_jenis_hukuman, sk_nomor, sk_tanggal, tanggal_mulai_hukuman, masa_tahun, masa_bulan, tanggal_akhir_hukuman, no_pp, no_sk_pembatalan, tanggal_sk_pembatalan, created_at, updated_at, deleted_at) VALUES
+			(1, 'id_1c', '1c', 'Budi', 1, 'I/a', 1, 'Jenis Hukuman 1', 'SK1', '2000-01-01', '2000-01-10', 0, 1, '2000-02-10', NULL, NULL, NULL, '2000-01-01', '2000-01-01', NULL),
+			(2, 'id_1c', '1c', 'Budi', 1, 'I/a', 1, 'Jenis Hukuman 1', 'SK2', '2000-01-01', '2000-01-10', 0, 1, '2000-02-10', NULL, NULL, NULL, '2000-01-01', '2000-01-01', NULL),
+			(5, 'id_1e', '1e', 'Ani', 1, 'I/a', 1, 'Jenis Hukuman 1', 'SK5', '2000-01-01', '2000-01-10', 0, 1, '2000-02-10', NULL, NULL, NULL, '2000-01-01', '2000-01-01', NULL),
+			(6, 'id_1c', '1c', 'Budi', 1, 'I/a', 1, 'Jenis Hukuman 1', 'SK6', '2000-01-01', '2000-01-10', 0, 1, '2000-02-10', NULL, NULL, NULL, '2000-01-01', '2000-01-01', '2000-01-01'),
+			(7, 'id_1c', '1c', 'Budi', 1, 'I/a', 1, 'Jenis Hukuman 1', 'SK7', '2000-01-01', '2000-01-10', 0, 1, '2000-02-10', NULL, NULL, NULL, '2000-01-01', '2000-01-01', NULL);
+	`
+	db := dbtest.New(t, dbmigrations.FS)
+	_, err := db.Exec(context.Background(), dbData)
+	require.NoError(t, err)
+
+	defaultRows := dbtest.Rows{
+		{
+			"id":                    int64(7),
+			"jenis_hukuman_id":      int16(1),
+			"golongan_id":           int16(1),
+			"sk_nomor":              "SK7",
+			"sk_tanggal":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
+			"tanggal_mulai_hukuman": time.Date(2000, 1, 10, 0, 0, 0, 0, time.UTC),
+			"tanggal_akhir_hukuman": time.Date(2000, 2, 10, 0, 0, 0, 0, time.UTC),
+			"masa_tahun":            int16(0),
+			"masa_bulan":            int16(1),
+			"no_pp":                 nil,
+			"no_sk_pembatalan":      nil,
+			"tanggal_sk_pembatalan": nil,
+			"bkn_id":                nil,
+			"file_base64":           nil,
+			"keterangan_berkas":     nil,
+			"nama":                  "Budi",
+			"nama_golongan":         "I/a",
+			"nama_jenis_hukuman":    "Jenis Hukuman 1",
+			"pns_id":                "id_1c",
+			"pns_nip":               "1c",
+			"created_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+			"updated_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+			"deleted_at":            nil,
+		},
+	}
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	authSvc := apitest.NewAuthService(api.Kode_Pegawai_Write)
+	RegisterRoutes(e, sqlc.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+
+	authHeader := []string{apitest.GenerateAuthHeader("2a")}
+	tests := []struct {
+		name             string
+		paramNIP         string
+		paramID          string
+		requestHeader    http.Header
+		requestBody      string
+		wantResponseCode int
+		wantResponseBody string
+		wantDBRows       dbtest.Rows
+	}{
+		{
+			name:          "ok: with all data",
+			paramNIP:      "1c",
+			paramID:       "1",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"jenis_hukuman_id": 1,
+				"golongan_id": 1,
+				"nomor_sk": "SK-UPDATED",
+				"tanggal_sk": "2023-01-15",
+				"tanggal_mulai": "2023-01-20",
+				"tanggal_akhir": "2024-01-20",
+				"nomor_pp": "PP-UPDATED",
+				"nomor_sk_pembatalan": "SK-PEMBATALAN-UPDATED",
+				"tanggal_sk_pembatalan": "2023-01-16"
+			}`,
+			wantResponseCode: http.StatusNoContent,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":                    int64(1),
+					"jenis_hukuman_id":      int16(1),
+					"golongan_id":           int16(1),
+					"sk_nomor":              "SK-UPDATED",
+					"sk_tanggal":            time.Date(2023, 1, 15, 0, 0, 0, 0, time.UTC),
+					"tanggal_mulai_hukuman": time.Date(2023, 1, 20, 0, 0, 0, 0, time.UTC),
+					"tanggal_akhir_hukuman": time.Date(2024, 1, 20, 0, 0, 0, 0, time.UTC),
+					"masa_tahun":            int16(1),
+					"masa_bulan":            int16(0),
+					"no_pp":                 "PP-UPDATED",
+					"no_sk_pembatalan":      "SK-PEMBATALAN-UPDATED",
+					"tanggal_sk_pembatalan": time.Date(2023, 1, 16, 0, 0, 0, 0, time.UTC),
+					"bkn_id":                nil,
+					"file_base64":           nil,
+					"keterangan_berkas":     nil,
+					"nama":                  "Budi",
+					"nama_golongan":         "I/a",
+					"nama_jenis_hukuman":    "Jenis Hukuman 1",
+					"pns_id":                "id_1c",
+					"pns_nip":               "1c",
+					"created_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":            "{updated_at}",
+					"deleted_at":            nil,
+				},
+			},
+		},
+		{
+			name:          "ok: with empty string optional fields",
+			paramNIP:      "1c",
+			paramID:       "2",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"jenis_hukuman_id": 1,
+				"golongan_id": 1,
+				"nomor_sk": "SK-UPDATED-2",
+				"tanggal_sk": "2023-02-15",
+				"tanggal_mulai": "2023-02-20",
+				"tanggal_akhir": "2023-05-20",
+				"nomor_pp": "",
+				"nomor_sk_pembatalan": ""
+			}`,
+			wantResponseCode: http.StatusNoContent,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":                    int64(2),
+					"jenis_hukuman_id":      int16(1),
+					"golongan_id":           int16(1),
+					"sk_nomor":              "SK-UPDATED-2",
+					"sk_tanggal":            time.Date(2023, 2, 15, 0, 0, 0, 0, time.UTC),
+					"tanggal_mulai_hukuman": time.Date(2023, 2, 20, 0, 0, 0, 0, time.UTC),
+					"tanggal_akhir_hukuman": time.Date(2023, 5, 20, 0, 0, 0, 0, time.UTC),
+					"masa_tahun":            int16(0),
+					"masa_bulan":            int16(3),
+					"no_pp":                 "",
+					"no_sk_pembatalan":      "",
+					"tanggal_sk_pembatalan": nil,
+					"bkn_id":                nil,
+					"file_base64":           nil,
+					"keterangan_berkas":     nil,
+					"nama":                  "Budi",
+					"nama_golongan":         "I/a",
+					"nama_jenis_hukuman":    "Jenis Hukuman 1",
+					"pns_id":                "id_1c",
+					"pns_nip":               "1c",
+					"created_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":            "{updated_at}",
+					"deleted_at":            nil,
+				},
+			},
+		},
+		{
+			name:          "error: riwayat hukuman disiplin is not found",
+			paramNIP:      "1c",
+			paramID:       "0",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"jenis_hukuman_id": 1,
+				"golongan_id": 1,
+				"nomor_sk": "SK-UPDATED",
+				"tanggal_sk": "2023-01-15",
+				"tanggal_mulai": "2023-01-20",
+				"tanggal_akhir": "2024-01-20"
+			}`,
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data tidak ditemukan"}`,
+			wantDBRows:       dbtest.Rows{},
+		},
+		{
+			name:          "error: riwayat hukuman disiplin is owned by different pegawai",
+			paramNIP:      "1c",
+			paramID:       "5",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"jenis_hukuman_id": 1,
+				"golongan_id": 1,
+				"nomor_sk": "SK-UPDATED",
+				"tanggal_sk": "2023-01-15",
+				"tanggal_mulai": "2023-01-20",
+				"tanggal_akhir": "2024-01-20"
+			}`,
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data tidak ditemukan"}`,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":                    int64(5),
+					"jenis_hukuman_id":      int16(1),
+					"golongan_id":           int16(1),
+					"sk_nomor":              "SK5",
+					"sk_tanggal":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
+					"tanggal_mulai_hukuman": time.Date(2000, 1, 10, 0, 0, 0, 0, time.UTC),
+					"tanggal_akhir_hukuman": time.Date(2000, 2, 10, 0, 0, 0, 0, time.UTC),
+					"masa_tahun":            int16(0),
+					"masa_bulan":            int16(1),
+					"no_pp":                 nil,
+					"no_sk_pembatalan":      nil,
+					"tanggal_sk_pembatalan": nil,
+					"bkn_id":                nil,
+					"file_base64":           nil,
+					"keterangan_berkas":     nil,
+					"nama":                  "Ani",
+					"nama_golongan":         "I/a",
+					"nama_jenis_hukuman":    "Jenis Hukuman 1",
+					"pns_id":                "id_1e",
+					"pns_nip":               "1e",
+					"created_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":            nil,
+				},
+			},
+		},
+		{
+			name:          "error: riwayat hukuman disiplin is deleted",
+			paramNIP:      "1c",
+			paramID:       "6",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"jenis_hukuman_id": 1,
+				"golongan_id": 1,
+				"nomor_sk": "SK-UPDATED",
+				"tanggal_sk": "2023-01-15",
+				"tanggal_mulai": "2023-01-20",
+				"tanggal_akhir": "2024-01-20"
+			}`,
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data tidak ditemukan"}`,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":                    int64(6),
+					"jenis_hukuman_id":      int16(1),
+					"golongan_id":           int16(1),
+					"sk_nomor":              "SK6",
+					"sk_tanggal":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
+					"tanggal_mulai_hukuman": time.Date(2000, 1, 10, 0, 0, 0, 0, time.UTC),
+					"tanggal_akhir_hukuman": time.Date(2000, 2, 10, 0, 0, 0, 0, time.UTC),
+					"masa_tahun":            int16(0),
+					"masa_bulan":            int16(1),
+					"no_pp":                 nil,
+					"no_sk_pembatalan":      nil,
+					"tanggal_sk_pembatalan": nil,
+					"bkn_id":                nil,
+					"file_base64":           nil,
+					"keterangan_berkas":     nil,
+					"nama":                  "Budi",
+					"nama_golongan":         "I/a",
+					"nama_jenis_hukuman":    "Jenis Hukuman 1",
+					"pns_id":                "id_1c",
+					"pns_nip":               "1c",
+					"created_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+				},
+			},
+		},
+		{
+			name:          "error: golongan or jenis hukuman is not found",
+			paramNIP:      "1c",
+			paramID:       "7",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"jenis_hukuman_id": 0,
+				"golongan_id": 0,
+				"nomor_sk": "SK-UPDATED",
+				"tanggal_sk": "2023-01-15",
+				"tanggal_mulai": "2023-01-20",
+				"tanggal_akhir": "2024-01-20"
+			}`,
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "data golongan tidak ditemukan | data jenis hukuman tidak ditemukan"}`,
+			wantDBRows:       defaultRows,
+		},
+		{
+			name:          "error: tanggal akhir sebelum tanggal mulai",
+			paramNIP:      "1c",
+			paramID:       "7",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"jenis_hukuman_id": 1,
+				"golongan_id": 1,
+				"nomor_sk": "SK-UPDATED",
+				"tanggal_sk": "2023-01-15",
+				"tanggal_mulai": "2023-01-20",
+				"tanggal_akhir": "2023-01-10"
+			}`,
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "masa hukuman tidak valid"}`,
+			wantDBRows:       defaultRows,
+		},
+		{
+			name:             "error: missing required params",
+			paramNIP:         "1c",
+			paramID:          "7",
+			requestHeader:    http.Header{"Authorization": authHeader},
+			requestBody:      `{ "id": 1 }`,
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "parameter \"id\" tidak didukung` +
+				` | parameter \"jenis_hukuman_id\" harus diisi` +
+				` | parameter \"golongan_id\" harus diisi` +
+				` | parameter \"nomor_sk\" harus diisi` +
+				` | parameter \"tanggal_sk\" harus diisi` +
+				` | parameter \"tanggal_mulai\" harus diisi` +
+				` | parameter \"tanggal_akhir\" harus diisi"}`,
+			wantDBRows: defaultRows,
+		},
+		{
+			name:             "error: body is empty",
+			paramNIP:         "1c",
+			paramID:          "7",
+			requestHeader:    http.Header{"Authorization": authHeader},
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "request body harus diisi"}`,
+			wantDBRows:       defaultRows,
+		},
+		{
+			name:             "error: invalid token",
+			paramNIP:         "1c",
+			paramID:          "7",
+			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
+			wantDBRows:       defaultRows,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			req := httptest.NewRequest(http.MethodPut, "/v1/admin/pegawai/"+tt.paramNIP+"/riwayat-hukuman-disiplin/"+tt.paramID, strings.NewReader(tt.requestBody))
+			req.Header = tt.requestHeader
+			req.Header.Set("Content-Type", "application/json")
+			rec := httptest.NewRecorder()
+
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+
+			actualRows, err := dbtest.QueryWithClause(db, "riwayat_hukuman_disiplin", "where id = $1", tt.paramID)
+			require.NoError(t, err)
+			if len(tt.wantDBRows) == len(actualRows) {
+				for i, row := range actualRows {
+					if tt.wantDBRows[i]["updated_at"] == "{updated_at}" {
+						assert.WithinDuration(t, time.Now(), row["updated_at"].(time.Time), 10*time.Second)
+						tt.wantDBRows[i]["updated_at"] = row["updated_at"]
+					}
+				}
+			}
+			assert.Equal(t, tt.wantDBRows, actualRows)
+		})
+	}
+}
+
+func Test_handler_adminDelete(t *testing.T) {
+	t.Parallel()
+
+	dbData := `
+		INSERT INTO ref_jenis_hukuman
+			(id, nama, deleted_at) VALUES
+			(1, 'Jenis Hukuman 1', NULL);
+		INSERT INTO ref_golongan
+			(id, nama, nama_pangkat, nama_2, gol, gol_pppk, deleted_at) VALUES
+			(1, 'I/a', 'Juru Muda', 'Ia', 1, 'I', NULL);
+		INSERT INTO pegawai
+			(pns_id,  nip_baru, deleted_at) VALUES
+			('id_1c', '1c',     NULL),
+			('id_1d', '1d',     '2000-01-01'),
+			('id_1e', '1e',     NULL);
+		INSERT INTO riwayat_hukuman_disiplin
+			(id, pns_id, pns_nip, nama, golongan_id, nama_golongan, jenis_hukuman_id, nama_jenis_hukuman, sk_nomor, sk_tanggal, tanggal_mulai_hukuman, masa_tahun, masa_bulan, tanggal_akhir_hukuman, no_pp, no_sk_pembatalan, tanggal_sk_pembatalan, created_at, updated_at, deleted_at) VALUES
+			(1, 'id_1c', '1c', 'Budi', 1, 'I/a', 1, 'Jenis Hukuman 1', 'SK1', '2000-01-01', '2000-01-10', 0, 1, '2000-02-10', NULL, NULL, NULL, '2000-01-01', '2000-01-01', NULL),
+			(2, 'id_1e', '1e', 'Ani', 1, 'I/a', 1, 'Jenis Hukuman 1', 'SK2', '2000-01-01', '2000-01-10', 0, 1, '2000-02-10', NULL, NULL, NULL, '2000-01-01', '2000-01-01', NULL),
+			(3, 'id_1c', '1c', 'Budi', 1, 'I/a', 1, 'Jenis Hukuman 1', 'SK3', '2000-01-01', '2000-01-10', 0, 1, '2000-02-10', NULL, NULL, NULL, '2000-01-01', '2000-01-01', '2000-01-01'),
+			(4, 'id_1c', '1c', 'Budi', 1, 'I/a', 1, 'Jenis Hukuman 1', 'SK4', '2000-01-01', '2000-01-10', 0, 1, '2000-02-10', NULL, NULL, NULL, '2000-01-01', '2000-01-01', NULL);
+	`
+	db := dbtest.New(t, dbmigrations.FS)
+	_, err := db.Exec(context.Background(), dbData)
+	require.NoError(t, err)
+
+	defaultRows := dbtest.Rows{
+		{
+			"id":                    int64(4),
+			"jenis_hukuman_id":      int16(1),
+			"golongan_id":           int16(1),
+			"sk_nomor":              "SK4",
+			"sk_tanggal":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
+			"tanggal_mulai_hukuman": time.Date(2000, 1, 10, 0, 0, 0, 0, time.UTC),
+			"tanggal_akhir_hukuman": time.Date(2000, 2, 10, 0, 0, 0, 0, time.UTC),
+			"masa_tahun":            int16(0),
+			"masa_bulan":            int16(1),
+			"no_pp":                 nil,
+			"no_sk_pembatalan":      nil,
+			"tanggal_sk_pembatalan": nil,
+			"bkn_id":                nil,
+			"file_base64":           nil,
+			"keterangan_berkas":     nil,
+			"nama":                  "Budi",
+			"nama_golongan":         "I/a",
+			"nama_jenis_hukuman":    "Jenis Hukuman 1",
+			"pns_id":                "id_1c",
+			"pns_nip":               "1c",
+			"created_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+			"updated_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+			"deleted_at":            nil,
+		},
+	}
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	authSvc := apitest.NewAuthService(api.Kode_Pegawai_Write)
+	RegisterRoutes(e, sqlc.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+
+	authHeader := []string{apitest.GenerateAuthHeader("2a")}
+	tests := []struct {
+		name             string
+		paramNIP         string
+		paramID          string
+		requestHeader    http.Header
+		wantResponseCode int
+		wantResponseBody string
+		wantDBRows       dbtest.Rows
+	}{
+		{
+			name:             "ok: success delete",
+			paramNIP:         "1c",
+			paramID:          "1",
+			requestHeader:    http.Header{"Authorization": authHeader},
+			wantResponseCode: http.StatusNoContent,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":                    int64(1),
+					"jenis_hukuman_id":      int16(1),
+					"golongan_id":           int16(1),
+					"sk_nomor":              "SK1",
+					"sk_tanggal":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
+					"tanggal_mulai_hukuman": time.Date(2000, 1, 10, 0, 0, 0, 0, time.UTC),
+					"tanggal_akhir_hukuman": time.Date(2000, 2, 10, 0, 0, 0, 0, time.UTC),
+					"masa_tahun":            int16(0),
+					"masa_bulan":            int16(1),
+					"no_pp":                 nil,
+					"no_sk_pembatalan":      nil,
+					"tanggal_sk_pembatalan": nil,
+					"bkn_id":                nil,
+					"file_base64":           nil,
+					"keterangan_berkas":     nil,
+					"nama":                  "Budi",
+					"nama_golongan":         "I/a",
+					"nama_jenis_hukuman":    "Jenis Hukuman 1",
+					"pns_id":                "id_1c",
+					"pns_nip":               "1c",
+					"created_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":            "{deleted_at}",
+				},
+			},
+		},
+		{
+			name:             "error: riwayat hukuman disiplin is owned by other pegawai",
+			paramNIP:         "1c",
+			paramID:          "2",
+			requestHeader:    http.Header{"Authorization": authHeader},
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data tidak ditemukan"}`,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":                    int64(2),
+					"jenis_hukuman_id":      int16(1),
+					"golongan_id":           int16(1),
+					"sk_nomor":              "SK2",
+					"sk_tanggal":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
+					"tanggal_mulai_hukuman": time.Date(2000, 1, 10, 0, 0, 0, 0, time.UTC),
+					"tanggal_akhir_hukuman": time.Date(2000, 2, 10, 0, 0, 0, 0, time.UTC),
+					"masa_tahun":            int16(0),
+					"masa_bulan":            int16(1),
+					"no_pp":                 nil,
+					"no_sk_pembatalan":      nil,
+					"tanggal_sk_pembatalan": nil,
+					"bkn_id":                nil,
+					"file_base64":           nil,
+					"keterangan_berkas":     nil,
+					"nama":                  "Ani",
+					"nama_golongan":         "I/a",
+					"nama_jenis_hukuman":    "Jenis Hukuman 1",
+					"pns_id":                "id_1e",
+					"pns_nip":               "1e",
+					"created_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":            nil,
+				},
+			},
+		},
+		{
+			name:             "error: riwayat hukuman disiplin is not found",
+			paramNIP:         "1c",
+			paramID:          "0",
+			requestHeader:    http.Header{"Authorization": authHeader},
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data tidak ditemukan"}`,
+			wantDBRows:       dbtest.Rows{},
+		},
+		{
+			name:             "error: riwayat hukuman disiplin is deleted",
+			paramNIP:         "1c",
+			paramID:          "3",
+			requestHeader:    http.Header{"Authorization": authHeader},
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data tidak ditemukan"}`,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":                    int64(3),
+					"jenis_hukuman_id":      int16(1),
+					"golongan_id":           int16(1),
+					"sk_nomor":              "SK3",
+					"sk_tanggal":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
+					"tanggal_mulai_hukuman": time.Date(2000, 1, 10, 0, 0, 0, 0, time.UTC),
+					"tanggal_akhir_hukuman": time.Date(2000, 2, 10, 0, 0, 0, 0, time.UTC),
+					"masa_tahun":            int16(0),
+					"masa_bulan":            int16(1),
+					"no_pp":                 nil,
+					"no_sk_pembatalan":      nil,
+					"tanggal_sk_pembatalan": nil,
+					"bkn_id":                nil,
+					"file_base64":           nil,
+					"keterangan_berkas":     nil,
+					"nama":                  "Budi",
+					"nama_golongan":         "I/a",
+					"nama_jenis_hukuman":    "Jenis Hukuman 1",
+					"pns_id":                "id_1c",
+					"pns_nip":               "1c",
+					"created_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+				},
+			},
+		},
+		{
+			name:             "error: invalid token",
+			paramNIP:         "1c",
+			paramID:          "4",
+			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
+			wantDBRows:       defaultRows,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			req := httptest.NewRequest(http.MethodDelete, "/v1/admin/pegawai/"+tt.paramNIP+"/riwayat-hukuman-disiplin/"+tt.paramID, nil)
+			req.Header = tt.requestHeader
+			req.Header.Set("Content-Type", "application/json")
+			rec := httptest.NewRecorder()
+
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+
+			actualRows, err := dbtest.QueryWithClause(db, "riwayat_hukuman_disiplin", "where id = $1", tt.paramID)
+			require.NoError(t, err)
+			if len(tt.wantDBRows) == len(actualRows) {
+				for i, row := range actualRows {
+					if tt.wantDBRows[i]["deleted_at"] == "{deleted_at}" {
+						assert.WithinDuration(t, time.Now(), row["deleted_at"].(time.Time), 10*time.Second)
+						tt.wantDBRows[i]["deleted_at"] = row["deleted_at"]
+					}
+				}
+			}
+			assert.Equal(t, tt.wantDBRows, actualRows)
+		})
+	}
+}
+
+func Test_handler_adminUploadBerkas(t *testing.T) {
+	t.Parallel()
+
+	dbData := `
+		INSERT INTO ref_jenis_hukuman
+			(id, nama, deleted_at) VALUES
+			(1, 'Jenis Hukuman 1', NULL);
+		INSERT INTO ref_golongan
+			(id, nama, nama_pangkat, nama_2, gol, gol_pppk, deleted_at) VALUES
+			(1, 'I/a', 'Juru Muda', 'Ia', 1, 'I', NULL);
+		INSERT INTO pegawai
+			(pns_id,  nip_baru, deleted_at) VALUES
+			('id_1c', '1c',     NULL),
+			('id_1d', '1d',     '2000-01-01'),
+			('id_1e', '1e',     NULL);
+		INSERT INTO riwayat_hukuman_disiplin
+			(id, pns_id, pns_nip, nama, golongan_id, nama_golongan, jenis_hukuman_id, nama_jenis_hukuman, sk_nomor, sk_tanggal, tanggal_mulai_hukuman, masa_tahun, masa_bulan, tanggal_akhir_hukuman, no_pp, no_sk_pembatalan, tanggal_sk_pembatalan, file_base64, keterangan_berkas, created_at, updated_at, deleted_at) VALUES
+			(1, 'id_1c', '1c', 'Budi', 1, 'I/a', 1, 'Jenis Hukuman 1', 'SK1', '2000-01-01', '2000-01-10', 0, 1, '2000-02-10', NULL, NULL, NULL, 'data:abc', 'abc', '2000-01-01', '2000-01-01', NULL),
+			(2, 'id_1e', '1e', 'Ani', 1, 'I/a', 1, 'Jenis Hukuman 1', 'SK2', '2000-01-01', '2000-01-10', 0, 1, '2000-02-10', NULL, NULL, NULL, NULL, NULL, '2000-01-01', '2000-01-01', NULL),
+			(3, 'id_1c', '1c', 'Budi', 1, 'I/a', 1, 'Jenis Hukuman 1', 'SK3', '2000-01-01', '2000-01-10', 0, 1, '2000-02-10', NULL, NULL, NULL, NULL, NULL, '2000-01-01', '2000-01-01', '2000-01-01'),
+			(4, 'id_1c', '1c', 'Budi', 1, 'I/a', 1, 'Jenis Hukuman 1', 'SK4', '2000-01-01', '2000-01-10', 0, 1, '2000-02-10', NULL, NULL, NULL, NULL, NULL, '2000-01-01', '2000-01-01', NULL);
+	`
+	db := dbtest.New(t, dbmigrations.FS)
+	_, err := db.Exec(context.Background(), dbData)
+	require.NoError(t, err)
+
+	defaultRows := dbtest.Rows{
+		{
+			"id":                    int64(4),
+			"jenis_hukuman_id":      int16(1),
+			"golongan_id":           int16(1),
+			"sk_nomor":              "SK4",
+			"sk_tanggal":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
+			"tanggal_mulai_hukuman": time.Date(2000, 1, 10, 0, 0, 0, 0, time.UTC),
+			"tanggal_akhir_hukuman": time.Date(2000, 2, 10, 0, 0, 0, 0, time.UTC),
+			"masa_tahun":            int16(0),
+			"masa_bulan":            int16(1),
+			"no_pp":                 nil,
+			"no_sk_pembatalan":      nil,
+			"tanggal_sk_pembatalan": nil,
+			"bkn_id":                nil,
+			"file_base64":           nil,
+			"keterangan_berkas":     nil,
+			"nama":                  "Budi",
+			"nama_golongan":         "I/a",
+			"nama_jenis_hukuman":    "Jenis Hukuman 1",
+			"pns_id":                "id_1c",
+			"pns_nip":               "1c",
+			"created_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+			"updated_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+			"deleted_at":            nil,
+		},
+	}
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	authSvc := apitest.NewAuthService(api.Kode_Pegawai_Write)
+	RegisterRoutes(e, sqlc.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+
+	defaultRequestBody := func(writer *multipart.Writer) error {
+		part, err := writer.CreateFormFile("file", "file.txt")
+		if err != nil {
+			return err
+		}
+		_, err = io.WriteString(part, "Hello World!!")
+		return err
+	}
+
+	authHeader := []string{apitest.GenerateAuthHeader("2a")}
+	tests := []struct {
+		name              string
+		paramNIP          string
+		paramID           string
+		requestHeader     http.Header
+		appendRequestBody func(writer *multipart.Writer) error
+		wantResponseCode  int
+		wantResponseBody  string
+		wantDBRows        dbtest.Rows
+	}{
+		{
+			name:              "ok: success upload",
+			paramNIP:          "1c",
+			paramID:           "1",
+			requestHeader:     http.Header{"Authorization": authHeader},
+			appendRequestBody: defaultRequestBody,
+			wantResponseCode:  http.StatusNoContent,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":                    int64(1),
+					"jenis_hukuman_id":      int16(1),
+					"golongan_id":           int16(1),
+					"sk_nomor":              "SK1",
+					"sk_tanggal":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
+					"tanggal_mulai_hukuman": time.Date(2000, 1, 10, 0, 0, 0, 0, time.UTC),
+					"tanggal_akhir_hukuman": time.Date(2000, 2, 10, 0, 0, 0, 0, time.UTC),
+					"masa_tahun":            int16(0),
+					"masa_bulan":            int16(1),
+					"no_pp":                 nil,
+					"no_sk_pembatalan":      nil,
+					"tanggal_sk_pembatalan": nil,
+					"bkn_id":                nil,
+					"file_base64":           "data:text/plain; charset=utf-8;base64,SGVsbG8gV29ybGQhIQ==",
+					"keterangan_berkas":     "abc",
+					"nama":                  "Budi",
+					"nama_golongan":         "I/a",
+					"nama_jenis_hukuman":    "Jenis Hukuman 1",
+					"pns_id":                "id_1c",
+					"pns_nip":               "1c",
+					"created_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":            "{updated_at}",
+					"deleted_at":            nil,
+				},
+			},
+		},
+		{
+			name:              "error: riwayat hukuman disiplin is not found",
+			paramNIP:          "1c",
+			paramID:           "0",
+			requestHeader:     http.Header{"Authorization": authHeader},
+			appendRequestBody: defaultRequestBody,
+			wantResponseCode:  http.StatusNotFound,
+			wantResponseBody:  `{"message": "data tidak ditemukan"}`,
+			wantDBRows:        dbtest.Rows{},
+		},
+		{
+			name:              "error: riwayat hukuman disiplin is owned by different pegawai",
+			paramNIP:          "1c",
+			paramID:           "2",
+			requestHeader:     http.Header{"Authorization": authHeader},
+			appendRequestBody: defaultRequestBody,
+			wantResponseCode:  http.StatusNotFound,
+			wantResponseBody:  `{"message": "data tidak ditemukan"}`,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":                    int64(2),
+					"jenis_hukuman_id":      int16(1),
+					"golongan_id":           int16(1),
+					"sk_nomor":              "SK2",
+					"sk_tanggal":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
+					"tanggal_mulai_hukuman": time.Date(2000, 1, 10, 0, 0, 0, 0, time.UTC),
+					"tanggal_akhir_hukuman": time.Date(2000, 2, 10, 0, 0, 0, 0, time.UTC),
+					"masa_tahun":            int16(0),
+					"masa_bulan":            int16(1),
+					"no_pp":                 nil,
+					"no_sk_pembatalan":      nil,
+					"tanggal_sk_pembatalan": nil,
+					"bkn_id":                nil,
+					"file_base64":           nil,
+					"keterangan_berkas":     nil,
+					"nama":                  "Ani",
+					"nama_golongan":         "I/a",
+					"nama_jenis_hukuman":    "Jenis Hukuman 1",
+					"pns_id":                "id_1e",
+					"pns_nip":               "1e",
+					"created_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":            nil,
+				},
+			},
+		},
+		{
+			name:              "error: riwayat hukuman disiplin is deleted",
+			paramNIP:          "1c",
+			paramID:           "3",
+			requestHeader:     http.Header{"Authorization": authHeader},
+			appendRequestBody: defaultRequestBody,
+			wantResponseCode:  http.StatusNotFound,
+			wantResponseBody:  `{"message": "data tidak ditemukan"}`,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":                    int64(3),
+					"jenis_hukuman_id":      int16(1),
+					"golongan_id":           int16(1),
+					"sk_nomor":              "SK3",
+					"sk_tanggal":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
+					"tanggal_mulai_hukuman": time.Date(2000, 1, 10, 0, 0, 0, 0, time.UTC),
+					"tanggal_akhir_hukuman": time.Date(2000, 2, 10, 0, 0, 0, 0, time.UTC),
+					"masa_tahun":            int16(0),
+					"masa_bulan":            int16(1),
+					"no_pp":                 nil,
+					"no_sk_pembatalan":      nil,
+					"tanggal_sk_pembatalan": nil,
+					"bkn_id":                nil,
+					"file_base64":           nil,
+					"keterangan_berkas":     nil,
+					"nama":                  "Budi",
+					"nama_golongan":         "I/a",
+					"nama_jenis_hukuman":    "Jenis Hukuman 1",
+					"pns_id":                "id_1c",
+					"pns_nip":               "1c",
+					"created_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+				},
+			},
+		},
+		{
+			name:              "error: missing file",
+			paramNIP:          "1c",
+			paramID:           "4",
+			requestHeader:     http.Header{"Authorization": authHeader},
+			appendRequestBody: func(*multipart.Writer) error { return nil },
+			wantResponseCode:  http.StatusBadRequest,
+			wantResponseBody:  `{"message": "parameter \"file\" harus diisi"}`,
+			wantDBRows:        defaultRows,
+		},
+		{
+			name:              "error: invalid token",
+			paramNIP:          "1c",
+			paramID:           "4",
+			requestHeader:     http.Header{"Authorization": []string{"Bearer some-token"}},
+			appendRequestBody: func(*multipart.Writer) error { return nil },
+			wantResponseCode:  http.StatusUnauthorized,
+			wantResponseBody:  `{"message": "token otentikasi tidak valid"}`,
+			wantDBRows:        defaultRows,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			var buf bytes.Buffer
+			writer := multipart.NewWriter(&buf)
+			require.NoError(t, tt.appendRequestBody(writer))
+			require.NoError(t, writer.Close())
+
+			req := httptest.NewRequest(http.MethodPut, "/v1/admin/pegawai/"+tt.paramNIP+"/riwayat-hukuman-disiplin/"+tt.paramID+"/berkas", &buf)
+			req.Header = tt.requestHeader
+			req.Header.Set("Content-Type", writer.FormDataContentType())
+			rec := httptest.NewRecorder()
+
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+
+			actualRows, err := dbtest.QueryWithClause(db, "riwayat_hukuman_disiplin", "where id = $1", tt.paramID)
+			require.NoError(t, err)
+			if len(tt.wantDBRows) == len(actualRows) {
+				for i, row := range actualRows {
+					if tt.wantDBRows[i]["updated_at"] == "{updated_at}" {
+						assert.WithinDuration(t, time.Now(), row["updated_at"].(time.Time), 10*time.Second)
+						tt.wantDBRows[i]["updated_at"] = row["updated_at"]
+					}
+				}
+			}
+			assert.Equal(t, tt.wantDBRows, actualRows)
 		})
 	}
 }

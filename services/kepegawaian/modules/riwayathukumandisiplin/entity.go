@@ -5,7 +5,9 @@ import "gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
 type riwayatHukumanDisiplin struct {
 	ID                  int64   `json:"id"`
 	JenisHukuman        string  `json:"jenis_hukuman"`
+	JenisHukumanID      int16   `json:"jenis_hukuman_id"`
 	NamaGolongan        string  `json:"nama_golongan"`
+	GolonganID          int16   `json:"golongan_id"`
 	NamaPangkat         string  `json:"nama_pangkat"`
 	NomorSK             string  `json:"nomor_sk"`
 	TanggalSK           db.Date `json:"tanggal_sk"`

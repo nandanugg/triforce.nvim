@@ -2922,6 +2922,89 @@ paths:
                       $ref: "#/components/schemas/riwayatHukumanDisiplin"
                   meta:
                     $ref: "#/components/schemas/metaPagination"
+    post:
+      tags:
+        - Riwayat Hukuman Disiplin
+      summary: Admin - Tambah riwayat hukuman disiplin pegawai.
+      description: Tambah riwayat hukuman disiplin pegawai berdasarkan NIP oleh admin.
+      operationId: adminCreateRiwayatHukumanDisiplin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/riwayatHukumanDisiplin"
+      responses:
+        "201":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        description: ID riwayat hukuman disiplin yang baru dibuat
+                        example: 1
+        "400":
+              $ref: "#/components/responses/badRequest"
+  /v1/admin/pegawai/{nip}/riwayat-hukuman-disiplin/{id}:
+    put:
+      tags:
+        - Riwayat Hukuman Disiplin
+      summary: Admin - Mengubah riwayat hukuman disiplin pegawai.
+      description: Mengubah riwayat hukuman disiplin pegawai berdasarkan NIP dan ID riwayat hukuman disiplin oleh admin.
+      operationId: adminUpdateRiwayatHukumanDisiplin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        $ref: "#/components/requestBodies/riwayatHukumanDisiplin"
+      responses:
+        "204":
+          description: Sukses.
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "404":
+          $ref: "#/components/responses/notFound"
+    delete:
+      tags:
+        - Riwayat Hukuman Disiplin
+      summary: Admin - Menghapus riwayat hukuman disiplin pegawai.
+      description: Menghapus riwayat hukuman disiplin pegawai berdasarkan NIP dan ID riwayat hukuman disiplin oleh admin.
+      operationId: adminDeleteRiwayatHukumanDisiplin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Sukses.
+        "404":
+          $ref: "#/components/responses/notFound"
   /v1/admin/pegawai/{nip}/riwayat-hukuman-disiplin/{id}/berkas:
     get:
       tags:
@@ -2952,6 +3035,39 @@ paths:
                 format: binary
         "404":
           description: Berkas riwayat hukuman disiplin tidak ditemukan atau User tidak mempunyai akses.
+    put:
+      tags:
+        - Riwayat Hukuman Disiplin
+      summary: Admin - Mengunggah berkas riwayat hukuman disiplin pegawai.
+      description: Mengunggah berkas riwayat hukuman disiplin pegawai berdasarkan NIP dan ID riwayat hukuman disiplin oleh admin.
+      operationId: adminUploadBerkasRiwayatHukumanDisiplin
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required:
+                - file
+      responses:
+        "204":
+          description: Sukses.
   /v1/admin/pegawai/{nip}/riwayat-sertifikasi:
     get:
       tags:
@@ -6206,6 +6322,45 @@ components:
               - tanggal_lahir
               - status_pernikahan_id
               - hubungan
+    riwayatHukumanDisiplin:
+      required: true
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              jenis_hukuman_id:
+                type: integer
+              golongan_id:
+                type: integer
+              nomor_sk:
+                type: string
+                maxLength: 100
+              tanggal_sk:
+                type: string
+                format: date
+              tanggal_mulai:
+                type: string
+                format: date
+              tanggal_akhir:
+                type: string
+                format: date
+              nomor_pp:
+                type: string
+                maxLength: 100
+              nomor_sk_pembatalan:
+                type: string
+                maxLength: 100
+              tanggal_sk_pembatalan:
+                type: string
+                format: date
+            required:
+              - jenis_hukuman_id
+              - golongan_id
+              - nomor_sk
+              - tanggal_sk
+              - tanggal_mulai
+              - tanggal_akhir
     riwayatKepangkatan:
       required: true
       content:
@@ -7002,8 +7157,12 @@ components:
           type: integer
         jenis_hukuman:
           type: string
+        jenis_hukuman_id:
+          type: integer
         nama_golongan:
           type: string
+        golongan_id:
+          type: integer
         nama_pangkat:
           type: string
         nomor_sk:

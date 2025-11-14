@@ -23,6 +23,110 @@ func (q *Queries) CountRiwayatHukumanDisiplin(ctx context.Context, pnsNip pgtype
 	return count, err
 }
 
+const createRiwayatHukumanDisiplin = `-- name: CreateRiwayatHukumanDisiplin :one
+INSERT INTO riwayat_hukuman_disiplin (
+  pns_id,
+  pns_nip,
+  nama,
+  golongan_id,
+  nama_golongan,
+  jenis_hukuman_id,
+  nama_jenis_hukuman,
+  sk_nomor,
+  sk_tanggal,
+  tanggal_mulai_hukuman,
+  masa_tahun,
+  masa_bulan,
+  tanggal_akhir_hukuman,
+  no_pp,
+  no_sk_pembatalan,
+  tanggal_sk_pembatalan
+)
+VALUES (
+  $1,
+  $2,
+  $3,
+  $4,
+  $5,
+  $6,
+  $7,
+  $8,
+  $9,
+  $10,
+  $11,
+  $12,
+  $13,
+  $14,
+  $15,
+  $16
+)
+RETURNING id
+`
+
+type CreateRiwayatHukumanDisiplinParams struct {
+	PnsID               pgtype.Text `db:"pns_id"`
+	PnsNip              pgtype.Text `db:"pns_nip"`
+	Nama                pgtype.Text `db:"nama"`
+	GolonganID          pgtype.Int2 `db:"golongan_id"`
+	NamaGolongan        pgtype.Text `db:"nama_golongan"`
+	JenisHukumanID      pgtype.Int2 `db:"jenis_hukuman_id"`
+	NamaJenisHukuman    pgtype.Text `db:"nama_jenis_hukuman"`
+	SkNomor             pgtype.Text `db:"sk_nomor"`
+	SkTanggal           pgtype.Date `db:"sk_tanggal"`
+	TanggalMulaiHukuman pgtype.Date `db:"tanggal_mulai_hukuman"`
+	MasaTahun           pgtype.Int2 `db:"masa_tahun"`
+	MasaBulan           pgtype.Int2 `db:"masa_bulan"`
+	TanggalAkhirHukuman pgtype.Date `db:"tanggal_akhir_hukuman"`
+	NoPp                pgtype.Text `db:"no_pp"`
+	NoSkPembatalan      pgtype.Text `db:"no_sk_pembatalan"`
+	TanggalSkPembatalan pgtype.Date `db:"tanggal_sk_pembatalan"`
+}
+
+func (q *Queries) CreateRiwayatHukumanDisiplin(ctx context.Context, arg CreateRiwayatHukumanDisiplinParams) (int64, error) {
+	row := q.db.QueryRow(ctx, createRiwayatHukumanDisiplin,
+		arg.PnsID,
+		arg.PnsNip,
+		arg.Nama,
+		arg.GolonganID,
+		arg.NamaGolongan,
+		arg.JenisHukumanID,
+		arg.NamaJenisHukuman,
+		arg.SkNomor,
+		arg.SkTanggal,
+		arg.TanggalMulaiHukuman,
+		arg.MasaTahun,
+		arg.MasaBulan,
+		arg.TanggalAkhirHukuman,
+		arg.NoPp,
+		arg.NoSkPembatalan,
+		arg.TanggalSkPembatalan,
+	)
+	var id int64
+	err := row.Scan(&id)
+	return id, err
+}
+
+const deleteRiwayatHukumanDisiplin = `-- name: DeleteRiwayatHukumanDisiplin :execrows
+UPDATE riwayat_hukuman_disiplin
+SET
+  deleted_at = now()
+WHERE id = $1::integer and pns_nip = $2::varchar
+  AND deleted_at is null
+`
+
+type DeleteRiwayatHukumanDisiplinParams struct {
+	ID  int32  `db:"id"`
+	Nip string `db:"nip"`
+}
+
+func (q *Queries) DeleteRiwayatHukumanDisiplin(ctx context.Context, arg DeleteRiwayatHukumanDisiplinParams) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteRiwayatHukumanDisiplin, arg.ID, arg.Nip)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const getBerkasRiwayatHukumanDisiplin = `-- name: GetBerkasRiwayatHukumanDisiplin :one
 SELECT file_base64
 FROM riwayat_hukuman_disiplin rh
@@ -47,8 +151,10 @@ const listRiwayatHukumanDisiplin = `-- name: ListRiwayatHukumanDisiplin :many
 SELECT
   rh.id,
   COALESCE(rh.nama_jenis_hukuman, rjh.nama) as jenis_hukuman,
+  rh.jenis_hukuman_id,
   rg.nama as nama_golongan,
   rg.nama_pangkat,
+  rh.golongan_id,
   tanggal_mulai_hukuman,
   tanggal_akhir_hukuman,
   masa_tahun,
@@ -76,8 +182,10 @@ type ListRiwayatHukumanDisiplinParams struct {
 type ListRiwayatHukumanDisiplinRow struct {
 	ID                  int64       `db:"id"`
 	JenisHukuman        pgtype.Text `db:"jenis_hukuman"`
+	JenisHukumanID      pgtype.Int2 `db:"jenis_hukuman_id"`
 	NamaGolongan        pgtype.Text `db:"nama_golongan"`
 	NamaPangkat         pgtype.Text `db:"nama_pangkat"`
+	GolonganID          pgtype.Int2 `db:"golongan_id"`
 	TanggalMulaiHukuman pgtype.Date `db:"tanggal_mulai_hukuman"`
 	TanggalAkhirHukuman pgtype.Date `db:"tanggal_akhir_hukuman"`
 	MasaTahun           pgtype.Int2 `db:"masa_tahun"`
@@ -101,8 +209,10 @@ func (q *Queries) ListRiwayatHukumanDisiplin(ctx context.Context, arg ListRiwaya
 		if err := rows.Scan(
 			&i.ID,
 			&i.JenisHukuman,
+			&i.JenisHukumanID,
 			&i.NamaGolongan,
 			&i.NamaPangkat,
+			&i.GolonganID,
 			&i.TanggalMulaiHukuman,
 			&i.TanggalAkhirHukuman,
 			&i.MasaTahun,
@@ -121,4 +231,90 @@ func (q *Queries) ListRiwayatHukumanDisiplin(ctx context.Context, arg ListRiwaya
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateRiwayatHukumanDisiplin = `-- name: UpdateRiwayatHukumanDisiplin :execrows
+UPDATE riwayat_hukuman_disiplin
+SET
+  golongan_id = $1,
+  jenis_hukuman_id = $2,
+  nama_golongan = $3,
+  nama_jenis_hukuman = $4,
+  sk_nomor = $5,
+  sk_tanggal = $6,
+  tanggal_mulai_hukuman = $7,
+  masa_tahun = $8,
+  masa_bulan = $9,
+  tanggal_akhir_hukuman = $10,
+  no_pp = $11,
+  no_sk_pembatalan = $12,
+  tanggal_sk_pembatalan = $13,
+  updated_at = now()
+WHERE id = $14::integer and pns_nip = $15::varchar
+  AND deleted_at is null
+`
+
+type UpdateRiwayatHukumanDisiplinParams struct {
+	GolonganID          pgtype.Int2 `db:"golongan_id"`
+	JenisHukumanID      pgtype.Int2 `db:"jenis_hukuman_id"`
+	NamaGolongan        pgtype.Text `db:"nama_golongan"`
+	NamaJenisHukuman    pgtype.Text `db:"nama_jenis_hukuman"`
+	SkNomor             pgtype.Text `db:"sk_nomor"`
+	SkTanggal           pgtype.Date `db:"sk_tanggal"`
+	TanggalMulaiHukuman pgtype.Date `db:"tanggal_mulai_hukuman"`
+	MasaTahun           pgtype.Int2 `db:"masa_tahun"`
+	MasaBulan           pgtype.Int2 `db:"masa_bulan"`
+	TanggalAkhirHukuman pgtype.Date `db:"tanggal_akhir_hukuman"`
+	NoPp                pgtype.Text `db:"no_pp"`
+	NoSkPembatalan      pgtype.Text `db:"no_sk_pembatalan"`
+	TanggalSkPembatalan pgtype.Date `db:"tanggal_sk_pembatalan"`
+	ID                  int32       `db:"id"`
+	Nip                 string      `db:"nip"`
+}
+
+func (q *Queries) UpdateRiwayatHukumanDisiplin(ctx context.Context, arg UpdateRiwayatHukumanDisiplinParams) (int64, error) {
+	result, err := q.db.Exec(ctx, updateRiwayatHukumanDisiplin,
+		arg.GolonganID,
+		arg.JenisHukumanID,
+		arg.NamaGolongan,
+		arg.NamaJenisHukuman,
+		arg.SkNomor,
+		arg.SkTanggal,
+		arg.TanggalMulaiHukuman,
+		arg.MasaTahun,
+		arg.MasaBulan,
+		arg.TanggalAkhirHukuman,
+		arg.NoPp,
+		arg.NoSkPembatalan,
+		arg.TanggalSkPembatalan,
+		arg.ID,
+		arg.Nip,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
+const uploadBerkasRiwayatHukumanDisiplin = `-- name: UploadBerkasRiwayatHukumanDisiplin :execrows
+UPDATE riwayat_hukuman_disiplin
+SET
+  file_base64 = $1,
+  updated_at = now()
+WHERE id = $2 and pns_nip = $3::varchar
+  AND deleted_at is null
+`
+
+type UploadBerkasRiwayatHukumanDisiplinParams struct {
+	FileBase64 pgtype.Text `db:"file_base64"`
+	ID         int64       `db:"id"`
+	Nip        string      `db:"nip"`
+}
+
+func (q *Queries) UploadBerkasRiwayatHukumanDisiplin(ctx context.Context, arg UploadBerkasRiwayatHukumanDisiplinParams) (int64, error) {
+	result, err := q.db.Exec(ctx, uploadBerkasRiwayatHukumanDisiplin, arg.FileBase64, arg.ID, arg.Nip)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
 }
