@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -507,11 +508,11 @@ func Test_handler_adminCreatePemberitahuan(t *testing.T) {
 		wantResponseBody string
 	}{
 		{
-			name: "ok: create pemberitahuan",
+			name: "ok: create pinned pemberitahuan",
 			requestBody: `{
 				"judul_berita":"New Notice",
 				"deskripsi_berita":"Some desc",
-				"is_current_period_pinned":false,
+				"pinned":true,
 				"diterbitkan_pada":"` + getDate(2) + `",
 				"ditarik_pada":"` + getDate(5) + `"
 			}`,
@@ -522,7 +523,35 @@ func Test_handler_adminCreatePemberitahuan(t *testing.T) {
 			wantResponseCode: http.StatusCreated,
 			wantResponseBody: `{
 				"data": {
-					"id": 1,
+					"id": "{id}",
+					"judul_berita": "New Notice",
+					"deskripsi_berita": "Some desc",
+					"status": "WAITING",
+					"pinned_at": "{pinned_at}",
+					"diterbitkan_pada":"` + getDate(2) + `",
+					"ditarik_pada":"` + getDate(5) + `",
+					"diperbarui_oleh": "123456789",
+					"terakhir_diperbarui": "{updated_at}"
+				}
+			}`,
+		},
+		{
+			name: "ok: create pemberitahuan",
+			requestBody: `{
+				"judul_berita":"New Notice",
+				"deskripsi_berita":"Some desc",
+				"pinned":false,
+				"diterbitkan_pada":"` + getDate(2) + `",
+				"ditarik_pada":"` + getDate(5) + `"
+			}`,
+			requestHeader: http.Header{
+				"Authorization": authHeader,
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusCreated,
+			wantResponseBody: `{
+				"data": {
+					"id": "{id}",
 					"judul_berita": "New Notice",
 					"deskripsi_berita": "Some desc",
 					"status": "WAITING",
@@ -552,6 +581,13 @@ func Test_handler_adminCreatePemberitahuan(t *testing.T) {
 				var resp createUpdateResponse
 				err := json.Unmarshal(rec.Body.Bytes(), &resp)
 				require.NoError(t, err)
+
+				tt.wantResponseBody = strings.ReplaceAll(tt.wantResponseBody, "\"{id}\"", strconv.Itoa((int(resp.Data.ID))))
+
+				if resp.Data.PinnedAt.Valid {
+					assert.WithinDuration(t, time.Now(), resp.Data.PinnedAt.Time, 10*time.Second)
+					tt.wantResponseBody = strings.ReplaceAll(tt.wantResponseBody, "{pinned_at}", resp.Data.PinnedAt.Time.Format(time.RFC3339Nano))
+				}
 
 				assert.WithinDuration(t, time.Now(), resp.Data.TerakhirDiperbarui, 10*time.Second)
 				tt.wantResponseBody = strings.ReplaceAll(tt.wantResponseBody, "{updated_at}", resp.Data.TerakhirDiperbarui.Format(time.RFC3339Nano))
@@ -596,7 +632,7 @@ func Test_handler_adminUpdatePemberitahuan(t *testing.T) {
 			requestBody: `{
 				"judul_berita":"New Notice",
 				"deskripsi_berita":"Some desc",
-				"is_current_period_pinned":false,
+				"pinned":false,
 				"diterbitkan_pada":"` + getDate(2) + `",
 				"ditarik_pada":"` + getDate(5) + `"
 			}`,
@@ -616,12 +652,37 @@ func Test_handler_adminUpdatePemberitahuan(t *testing.T) {
 			}`,
 		},
 		{
+			name: "ok: update pemberitahuan to pinned",
+			id:   "1",
+			requestBody: `{
+				"judul_berita":"New Notice",
+				"deskripsi_berita":"Some desc",
+				"pinned":true,
+				"diterbitkan_pada":"` + getDate(2) + `",
+				"ditarik_pada":"` + getDate(5) + `"
+			}`,
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": {
+					"id": 1,
+					"judul_berita": "New Notice",
+					"deskripsi_berita": "Some desc",
+					"pinned_at": "{pinned_at}",
+					"status": "WAITING",
+					"diterbitkan_pada":"` + getDate(2) + `",
+					"ditarik_pada":"` + getDate(5) + `",
+					"diperbarui_oleh": "123456789",
+					"terakhir_diperbarui": "{updated_at}"
+				}
+			}`,
+		},
+		{
 			name: "error: deleted id",
 			id:   "2",
 			requestBody: `{
 				"judul_berita":"New Notice",
 				"deskripsi_berita":"Some desc",
-				"is_current_period_pinned":false,
+				"pinned":false,
 				"diterbitkan_pada":"2024-01-01T00:00:00Z",
 				"ditarik_pada":"2024-01-02T00:00:00Z"
 			}`,
@@ -634,7 +695,7 @@ func Test_handler_adminUpdatePemberitahuan(t *testing.T) {
 			requestBody: `{
 				"judul_berita":"New Notice",
 				"deskripsi_berita":"Some desc",
-				"is_current_period_pinned":false,
+				"pinned":false,
 				"diterbitkan_pada":"2024-01-01T00:00:00Z",
 				"ditarik_pada":"2024-01-02T00:00:00Z"
 			}`,
@@ -662,6 +723,11 @@ func Test_handler_adminUpdatePemberitahuan(t *testing.T) {
 				var resp createUpdateResponse
 				err := json.Unmarshal(rec.Body.Bytes(), &resp)
 				require.NoError(t, err)
+
+				if resp.Data.PinnedAt.Valid {
+					assert.WithinDuration(t, time.Now(), resp.Data.PinnedAt.Time, 10*time.Second)
+					tt.wantResponseBody = strings.ReplaceAll(tt.wantResponseBody, "{pinned_at}", resp.Data.PinnedAt.Time.Format(time.RFC3339Nano))
+				}
 
 				assert.WithinDuration(t, time.Now(), resp.Data.TerakhirDiperbarui, 10*time.Second)
 				tt.wantResponseBody = strings.ReplaceAll(tt.wantResponseBody, "{updated_at}", resp.Data.TerakhirDiperbarui.Format(time.RFC3339Nano))

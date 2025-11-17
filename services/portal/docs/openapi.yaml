@@ -305,9 +305,9 @@ paths:
                   type: string
                   description: Deskripsi pemberitahuan
                   example: "Deskripsi lengkap pengumuman..."
-                is_current_period_pinned:
+                pinned:
                   type: boolean
-                  description: Apakah pemberitahuan dipinned pada periode saat ini
+                  description: Apakah pemberitahuan dipinned
                   example: false
                 diterbitkan_pada:
                   type: string
@@ -333,20 +333,6 @@ paths:
           description: Token otentikasi tidak valid.
         "403":
           description: Tidak memiliki akses admin.
-        "409":
-          description: duplikat pemberitahuan pinned di periode waktu yang sama
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: false
-                properties:
-                  message:
-                    type: string
-                    description: Pesan error detail
-                    example: "Conflict with 'Pengumuman Penting' (id=12)"
-              example:
-                message: "Conflict with 'Pengumuman Penting' (id=12)"
         "500":
           description: Error internal server.
   /v1/admin/pemberitahuan/{id}:
@@ -386,9 +372,9 @@ paths:
                   type: string
                   description: Deskripsi pemberitahuan
                   example: "Deskripsi lengkap pengumuman..."
-                is_current_period_pinned:
+                pinned:
                   type: boolean
-                  description: Apakah pemberitahuan dipinned pada periode saat ini
+                  description: Apakah pemberitahuan dipinned
                   example: false
                 diterbitkan_pada:
                   type: string
@@ -416,20 +402,6 @@ paths:
           description: Tidak memiliki akses admin.
         "404":
           description: Pemberitahuan tidak ditemukan.
-        "409":
-          description: duplikat pemberitahuan pinned di periode waktu yang sama
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: false
-                properties:
-                  message:
-                    type: string
-                    description: Pesan error detail
-                    example: "Conflict with 'Pengumuman Penting' (id=12)"
-              example:
-                message: "Conflict with 'Pengumuman Penting' (id=12)"
         "500":
           description: Error internal server.
 

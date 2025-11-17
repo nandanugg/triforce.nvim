@@ -3,6 +3,7 @@ package agama
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -308,7 +309,14 @@ func Test_handler_adminGetRefAgama(t *testing.T) {
 func Test_handler_adminCreateRefAgama(t *testing.T) {
 	t.Parallel()
 
+	dbData := `
+		insert into ref_agama ("id", "nama", "created_at", "updated_at", "deleted_at") values
+		(11, 'Islam', '2024-01-01', '2024-01-01', null),
+		(12, 'Kristen', '2024-01-01', '2024-01-01', now());
+	`
 	pgx := dbtest.New(t, dbmigrations.FS)
+	_, err := pgx.Exec(context.Background(), dbData)
+	require.NoError(t, err)
 
 	e, err := api.NewEchoServer(docs.OpenAPIBytes)
 	require.NoError(t, err)
@@ -326,14 +334,28 @@ func Test_handler_adminCreateRefAgama(t *testing.T) {
 		wantResponseBody string
 	}{
 		{
-			name:        "ok: admin create agama",
-			requestBody: `{"nama": "Zoroastrian"}`,
+			name:             "ok: admin create agama",
+			requestBody:      `{"nama": "Zoroastrian"}`,
+			requestHeader:    http.Header{"Authorization": authHeader, "Content-Type": []string{"application/json"}},
+			wantResponseCode: http.StatusCreated,
+			wantResponseBody: `{"data": {"id": "{id}", "nama": "Zoroastrian", "created_at": "{created_at}", "updated_at":"{updated_at}"}}`,
+		},
+		{
+			name:             "ok: admin create agama with deleted name",
+			requestBody:      `{"nama": "Kristen"}`,
+			requestHeader:    http.Header{"Authorization": authHeader, "Content-Type": []string{"application/json"}},
+			wantResponseCode: http.StatusCreated,
+			wantResponseBody: `{"data": {"id": "{id}", "nama": "Kristen", "created_at": "{created_at}", "updated_at":"{updated_at}"}}`,
+		},
+		{
+			name:        "error: duplicate agama name",
+			requestBody: `{"nama": "islam"}`,
 			requestHeader: http.Header{
 				"Authorization": authHeader,
 				"Content-Type":  []string{"application/json"},
 			},
-			wantResponseCode: http.StatusCreated,
-			wantResponseBody: `{"data": {"id": 1, "nama": "Zoroastrian", "created_at": "{created_at}", "updated_at":"{updated_at}"}}`,
+			wantResponseCode: http.StatusConflict,
+			wantResponseBody: `{"message": "data dengan nama ini sudah terdaftar"}`,
 		},
 		{
 			name:        "error: invalid token",
@@ -367,14 +389,22 @@ func Test_handler_adminCreateRefAgama(t *testing.T) {
 
 				data, ok := got["data"].(map[string]any)
 				if ok {
-					for _, field := range []string{"created_at", "updated_at"} {
-						if val, ok := data[field].(string); ok {
-							parsed, err := time.Parse(time.RFC3339, val)
-							require.NoErrorf(t, err, "invalid timestamp for %s", field)
+					for _, field := range []string{"created_at", "updated_at", "id"} {
+						val, exists := data[field]
+						if !exists {
+							continue
+						}
 
+						switch v := val.(type) {
+						case string:
+							parsed, err := time.Parse(time.RFC3339, v)
+							require.NoErrorf(t, err, "invalid timestamp for %s", field)
 							assert.WithinDuration(t, time.Now(), parsed, 10*time.Second)
 
-							wantBody = strings.ReplaceAll(wantBody, "{"+field+"}", val)
+							wantBody = strings.ReplaceAll(wantBody, "{"+field+"}", v)
+
+						case int, int32, int64, float32, float64:
+							wantBody = strings.ReplaceAll(wantBody, "\"{"+field+"}\"", fmt.Sprintf("%v", v))
 						}
 					}
 				}
@@ -392,10 +422,12 @@ func Test_handler_adminUpdateRefAgama(t *testing.T) {
 	dbData := `
 		insert into ref_agama ("id", "nama", "created_at", "updated_at", "deleted_at") values
 		(1, 'Islam', '2024-01-01', now(), null),
-		(2, 'Kristen', '2024-01-01', now(), now());
+		(2, 'Katolik', '2024-01-01', now(), null),
+		(3, 'Kristen', '2024-01-01', now(), null),
+		(4, 'Hindu', '2024-01-01', now(), now());
 	`
 	pgx := dbtest.New(t, dbmigrations.FS)
-	_, err := pgx.Exec(context.Background(), dbData)
+	_, err := pgx.Exec(t.Context(), dbData)
 	require.NoError(t, err)
 
 	e, err := api.NewEchoServer(docs.OpenAPIBytes)
@@ -417,20 +449,44 @@ func Test_handler_adminUpdateRefAgama(t *testing.T) {
 	}{
 		{
 			name:        "ok: admin update agama",
-			id:          "1",
-			requestBody: `{"nama": "Islam Updated"}`,
+			id:          "3",
+			requestBody: `{"nama": "Zoroastrian"}`,
 			requestHeader: http.Header{
 				"Authorization": authHeader,
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusOK,
 			wantResponseBody: `{"data":
-				{"id": 1, "nama": "Islam Updated", "created_at": "` + defaulTimestamptz + `", "updated_at":"{updated_at}"}
+				{"id": 3, "nama": "Zoroastrian", "created_at": "` + defaulTimestamptz + `", "updated_at":"{updated_at}"}
 			}`,
 		},
 		{
-			name:        "error: id not found if deleted",
+			name:        "ok: admin update agama with deleted name",
 			id:          "2",
+			requestBody: `{"nama": "Hindu"}`,
+			requestHeader: http.Header{
+				"Authorization": authHeader,
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{"data":
+				{"id": 2, "nama": "Hindu", "created_at": "` + defaulTimestamptz + `", "updated_at":"{updated_at}"}
+			}`,
+		},
+		{
+			name:        "error: duplicate agama name",
+			id:          "3",
+			requestBody: `{"nama": "islam"}`,
+			requestHeader: http.Header{
+				"Authorization": authHeader,
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusConflict,
+			wantResponseBody: `{"message": "data dengan nama ini sudah terdaftar"}`,
+		},
+		{
+			name:        "error: id not found if deleted",
+			id:          "4",
 			requestBody: `{"nama": "Unknown"}`,
 			requestHeader: http.Header{
 				"Authorization": authHeader,

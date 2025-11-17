@@ -727,6 +727,19 @@ func Test_handler_adminCreateTemplate(t *testing.T) {
 			}}`,
 		},
 		{
+			name: "error: filename is too long",
+			formFields: map[string]string{
+				"nama": strings.Repeat("a", 101),
+			},
+			files: map[string][]byte{
+				"file": pngBytes,
+			},
+			fileContentType:  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+			requestHeader:    http.Header{"Authorization": authHeader},
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "parameter \"nama\" harus 100 karakter atau kurang"}`,
+		},
+		{
 			name: "error: file with invalid type",
 			formFields: map[string]string{
 				"nama": "master 1",

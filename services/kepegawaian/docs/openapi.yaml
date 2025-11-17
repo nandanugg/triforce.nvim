@@ -120,7 +120,7 @@ paths:
                   description: Name of the template
                   example: "Invoice Template"
                   minLength: 1
-                  maxLength: 255
+                  maxLength: 100
                 file:
                   type: string
                   format: binary

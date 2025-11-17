@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
 )
 
 type handler struct {
@@ -78,6 +79,9 @@ func (h *handler) create(c echo.Context) error {
 	ctx := c.Request().Context()
 	data, err := h.service.create(ctx, req.Nama)
 	if err != nil {
+		if db.IsPgErrorCode(err, db.PgErrUniqueViolation) {
+			return echo.NewHTTPError(http.StatusConflict, "data dengan nama ini sudah terdaftar")
+		}
 		slog.ErrorContext(ctx, "Error creating agama", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
@@ -102,6 +106,9 @@ func (h *handler) update(c echo.Context) error {
 	ctx := c.Request().Context()
 	data, err := h.service.update(ctx, req.ID, req.Nama)
 	if err != nil {
+		if db.IsPgErrorCode(err, db.PgErrUniqueViolation) {
+			return echo.NewHTTPError(http.StatusConflict, "data dengan nama ini sudah terdaftar")
+		}
 		slog.ErrorContext(ctx, "Error updating agama", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
