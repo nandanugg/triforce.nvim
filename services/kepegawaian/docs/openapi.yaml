@@ -7671,6 +7671,14 @@ components:
           type: string
           description: NIP pemilik surat keputusan
           example: "1234567890"
+        nama_golongan_pemilik:
+          type: string
+          description: Nama golongan pemilik surat keputusan
+          example: "I/d"
+        pangkat_golongan_pemilik:
+          type: string
+          description: Pangkat golongan pemilik surat keputusan
+          example: "Juru Muda"
         kategori_sk:
           type: string
           description: Kategori surat keputusan

@@ -596,6 +596,8 @@ SELECT
     fds.file_id,
     p.nama as nama_pemilik_sk,
     p.nip_baru as nip_pemilik_sk,
+    g.nama as nama_golongan_pemilik,
+    g.nama_pangkat as pangkat_golongan_pemilik,
     fds.kategori AS kategori_sk,
     fds.no_sk,
     fds.tanggal_sk,
@@ -604,6 +606,7 @@ FROM koreksi_surat_keputusan fdc
 JOIN surat_keputusan fds ON fds.file_id = fdc.file_id AND fds.deleted_at IS NULL
 JOIN pegawai p ON fds.nip_sk = p.nip_baru AND p.deleted_at IS NULL
 LEFT JOIN ref_unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
+LEFT JOIN ref_golongan g ON p.gol_id = g.id AND g.deleted_at IS NULL
 WHERE fdc.deleted_at IS NULL
     AND ($3::VARCHAR IS NULL
         OR $3::VARCHAR = uk.id
@@ -642,13 +645,15 @@ type ListKoreksiSuratKeputusanByPNSIDParams struct {
 }
 
 type ListKoreksiSuratKeputusanByPNSIDRow struct {
-	FileID        string      `db:"file_id"`
-	NamaPemilikSk pgtype.Text `db:"nama_pemilik_sk"`
-	NipPemilikSk  pgtype.Text `db:"nip_pemilik_sk"`
-	KategoriSk    pgtype.Text `db:"kategori_sk"`
-	NoSk          pgtype.Text `db:"no_sk"`
-	TanggalSk     pgtype.Date `db:"tanggal_sk"`
-	UnorID        pgtype.Text `db:"unor_id"`
+	FileID                 string      `db:"file_id"`
+	NamaPemilikSk          pgtype.Text `db:"nama_pemilik_sk"`
+	NipPemilikSk           pgtype.Text `db:"nip_pemilik_sk"`
+	NamaGolonganPemilik    pgtype.Text `db:"nama_golongan_pemilik"`
+	PangkatGolonganPemilik pgtype.Text `db:"pangkat_golongan_pemilik"`
+	KategoriSk             pgtype.Text `db:"kategori_sk"`
+	NoSk                   pgtype.Text `db:"no_sk"`
+	TanggalSk              pgtype.Date `db:"tanggal_sk"`
+	UnorID                 pgtype.Text `db:"unor_id"`
 }
 
 func (q *Queries) ListKoreksiSuratKeputusanByPNSID(ctx context.Context, arg ListKoreksiSuratKeputusanByPNSIDParams) ([]ListKoreksiSuratKeputusanByPNSIDRow, error) {
@@ -676,6 +681,8 @@ func (q *Queries) ListKoreksiSuratKeputusanByPNSID(ctx context.Context, arg List
 			&i.FileID,
 			&i.NamaPemilikSk,
 			&i.NipPemilikSk,
+			&i.NamaGolonganPemilik,
+			&i.PangkatGolonganPemilik,
 			&i.KategoriSk,
 			&i.NoSk,
 			&i.TanggalSk,
@@ -1089,6 +1096,8 @@ SELECT
     fds.file_id,
     p.nama as nama_pemilik_sk,
     p.nip_baru as nip_pemilik_sk,
+    g.nama as nama_golongan_pemilik,
+    g.nama_pangkat as pangkat_golongan_pemilik,
     fds.kategori AS kategori_sk,
     fds.no_sk,
     fds.tanggal_sk,
@@ -1096,6 +1105,7 @@ SELECT
 FROM surat_keputusan fds
 JOIN pegawai p ON fds.nip_sk = p.nip_baru AND p.deleted_at IS NULL
 LEFT JOIN ref_unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
+LEFT JOIN ref_golongan g ON p.gol_id = g.id AND g.deleted_at IS NULL
 WHERE fds.deleted_at IS NULL
     AND ($3::VARCHAR IS NULL
         OR $3::VARCHAR = uk.id
@@ -1132,13 +1142,15 @@ type ListTandaTanganSuratKeputusanByPNSIDParams struct {
 }
 
 type ListTandaTanganSuratKeputusanByPNSIDRow struct {
-	FileID        string      `db:"file_id"`
-	NamaPemilikSk pgtype.Text `db:"nama_pemilik_sk"`
-	NipPemilikSk  pgtype.Text `db:"nip_pemilik_sk"`
-	KategoriSk    pgtype.Text `db:"kategori_sk"`
-	NoSk          pgtype.Text `db:"no_sk"`
-	TanggalSk     pgtype.Date `db:"tanggal_sk"`
-	UnorID        pgtype.Text `db:"unor_id"`
+	FileID                 string      `db:"file_id"`
+	NamaPemilikSk          pgtype.Text `db:"nama_pemilik_sk"`
+	NipPemilikSk           pgtype.Text `db:"nip_pemilik_sk"`
+	NamaGolonganPemilik    pgtype.Text `db:"nama_golongan_pemilik"`
+	PangkatGolonganPemilik pgtype.Text `db:"pangkat_golongan_pemilik"`
+	KategoriSk             pgtype.Text `db:"kategori_sk"`
+	NoSk                   pgtype.Text `db:"no_sk"`
+	TanggalSk              pgtype.Date `db:"tanggal_sk"`
+	UnorID                 pgtype.Text `db:"unor_id"`
 }
 
 func (q *Queries) ListTandaTanganSuratKeputusanByPNSID(ctx context.Context, arg ListTandaTanganSuratKeputusanByPNSIDParams) ([]ListTandaTanganSuratKeputusanByPNSIDRow, error) {
@@ -1166,6 +1178,8 @@ func (q *Queries) ListTandaTanganSuratKeputusanByPNSID(ctx context.Context, arg 
 			&i.FileID,
 			&i.NamaPemilikSk,
 			&i.NipPemilikSk,
+			&i.NamaGolonganPemilik,
+			&i.PangkatGolonganPemilik,
 			&i.KategoriSk,
 			&i.NoSk,
 			&i.TanggalSk,

@@ -171,6 +171,8 @@ SELECT
     fds.file_id,
     p.nama as nama_pemilik_sk,
     p.nip_baru as nip_pemilik_sk,
+    g.nama as nama_golongan_pemilik,
+    g.nama_pangkat as pangkat_golongan_pemilik,
     fds.kategori AS kategori_sk,
     fds.no_sk,
     fds.tanggal_sk,
@@ -179,6 +181,7 @@ FROM koreksi_surat_keputusan fdc
 JOIN surat_keputusan fds ON fds.file_id = fdc.file_id AND fds.deleted_at IS NULL
 JOIN pegawai p ON fds.nip_sk = p.nip_baru AND p.deleted_at IS NULL
 LEFT JOIN ref_unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
+LEFT JOIN ref_golongan g ON p.gol_id = g.id AND g.deleted_at IS NULL
 WHERE fdc.deleted_at IS NULL
     AND (sqlc.narg('unit_kerja_id')::VARCHAR IS NULL
         OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.id
@@ -336,6 +339,8 @@ SELECT
     fds.file_id,
     p.nama as nama_pemilik_sk,
     p.nip_baru as nip_pemilik_sk,
+    g.nama as nama_golongan_pemilik,
+    g.nama_pangkat as pangkat_golongan_pemilik,
     fds.kategori AS kategori_sk,
     fds.no_sk,
     fds.tanggal_sk,
@@ -343,6 +348,7 @@ SELECT
 FROM surat_keputusan fds
 JOIN pegawai p ON fds.nip_sk = p.nip_baru AND p.deleted_at IS NULL
 LEFT JOIN ref_unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
+LEFT JOIN ref_golongan g ON p.gol_id = g.id AND g.deleted_at IS NULL
 WHERE fds.deleted_at IS NULL
     AND (sqlc.narg('unit_kerja_id')::VARCHAR IS NULL
         OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.id

@@ -407,13 +407,15 @@ func (s *service) listKoreksi(ctx context.Context, arg listKoreksiParams) ([]kor
 
 	result := typeutil.Map(data, func(row repo.ListKoreksiSuratKeputusanByPNSIDRow) koreksiSuratKeputusan {
 		return koreksiSuratKeputusan{
-			IDSK:        row.FileID,
-			NamaPemilik: row.NamaPemilikSk.String,
-			NIPPemilik:  row.NipPemilikSk.String,
-			KategoriSK:  row.KategoriSk.String,
-			NoSK:        row.NoSk.String,
-			TanggalSK:   db.Date(row.TanggalSk.Time),
-			UnitKerja:   unorLengkapByID[row.UnorID.String],
+			IDSK:                   row.FileID,
+			NamaPemilik:            row.NamaPemilikSk.String,
+			NIPPemilik:             row.NipPemilikSk.String,
+			KategoriSK:             row.KategoriSk.String,
+			NoSK:                   row.NoSk.String,
+			TanggalSK:              db.Date(row.TanggalSk.Time),
+			UnitKerja:              unorLengkapByID[row.UnorID.String],
+			NamaGolonganPemilik:    row.NamaGolonganPemilik.String,
+			PangkatGolonganPemilik: row.PangkatGolonganPemilik.String,
 		}
 	})
 	return result, uint(count), nil
@@ -784,13 +786,15 @@ func (s *service) listTandatangan(ctx context.Context, arg listTandatanganParams
 
 	result := typeutil.Map(data, func(row repo.ListTandaTanganSuratKeputusanByPNSIDRow) koreksiSuratKeputusan {
 		return koreksiSuratKeputusan{
-			IDSK:        row.FileID,
-			NamaPemilik: row.NamaPemilikSk.String,
-			NIPPemilik:  row.NipPemilikSk.String,
-			KategoriSK:  row.KategoriSk.String,
-			NoSK:        row.NoSk.String,
-			TanggalSK:   db.Date(row.TanggalSk.Time),
-			UnitKerja:   unorLengkapByID[row.UnorID.String],
+			IDSK:                   row.FileID,
+			NamaPemilik:            row.NamaPemilikSk.String,
+			NIPPemilik:             row.NipPemilikSk.String,
+			KategoriSK:             row.KategoriSk.String,
+			NoSK:                   row.NoSk.String,
+			TanggalSK:              db.Date(row.TanggalSk.Time),
+			UnitKerja:              unorLengkapByID[row.UnorID.String],
+			NamaGolonganPemilik:    row.NamaGolonganPemilik.String,
+			PangkatGolonganPemilik: row.PangkatGolonganPemilik.String,
 		}
 	})
 	return result, uint(count), nil

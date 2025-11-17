@@ -1697,7 +1697,9 @@ func Test_handler_listKoreksi(t *testing.T) {
 						"kategori_sk": "Kenaikan Gaji",
 						"no_sk": "SK-003/2024",
 						"tanggal_sk": "2024-03-10",
-						"unit_kerja": "Bawah - Tengah - Paling Atas"
+						"unit_kerja": "Bawah - Tengah - Paling Atas",
+						"nama_golongan_pemilik": "I/a",
+						"pangkat_golongan_pemilik": "Juru Muda"
 					},
 					{
 						"id_sk": "sk-004",
@@ -1706,7 +1708,9 @@ func Test_handler_listKoreksi(t *testing.T) {
 						"kategori_sk": "Kenaikan Gaji",
 						"no_sk": "SK-004/2024",
 						"tanggal_sk": "2024-03-10",
-						"unit_kerja": "Bawah - Tengah - Paling Atas"
+						"unit_kerja": "Bawah - Tengah - Paling Atas",
+						"nama_golongan_pemilik": "I/a",
+						"pangkat_golongan_pemilik": "Juru Muda"
 					},
 					{
 						"id_sk": "sk-007",
@@ -1715,7 +1719,9 @@ func Test_handler_listKoreksi(t *testing.T) {
 						"kategori_sk": "Kenaikan Gaji",
 						"no_sk": "SK-007/2024",
 						"tanggal_sk": "2024-03-10",
-						"unit_kerja": "Bawah 2"
+						"unit_kerja": "Bawah 2",
+						"nama_golongan_pemilik": "I/b",
+						"pangkat_golongan_pemilik": "Juru Muda Tingkat I"
 					},
 					{
 						"id_sk": "sk-002",
@@ -1724,7 +1730,9 @@ func Test_handler_listKoreksi(t *testing.T) {
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-002/2024",
 						"tanggal_sk": "2024-02-20",
-						"unit_kerja": "Bawah 2"
+						"unit_kerja": "Bawah 2",
+						"nama_golongan_pemilik": "I/b",
+						"pangkat_golongan_pemilik": "Juru Muda Tingkat I"
 					}
 				],
 				"meta": {
@@ -1751,7 +1759,9 @@ func Test_handler_listKoreksi(t *testing.T) {
 						"kategori_sk": "Kenaikan Pangkat",
 						"no_sk": "SK-001/2024",
 						"tanggal_sk": "2024-01-15",
-						"unit_kerja": "Bawah - Tengah - Paling Atas"
+						"unit_kerja": "Bawah - Tengah - Paling Atas",
+						"nama_golongan_pemilik": "I/a",
+						"pangkat_golongan_pemilik": "Juru Muda"
 					}
 				],
 				"meta": {
@@ -1780,7 +1790,9 @@ func Test_handler_listKoreksi(t *testing.T) {
 						"kategori_sk": "Kenaikan Gaji",
 						"no_sk": "SK-004/2024",
 						"tanggal_sk": "2024-03-10",
-						"unit_kerja": "Bawah - Tengah - Paling Atas"
+						"unit_kerja": "Bawah - Tengah - Paling Atas",
+						"nama_golongan_pemilik": "I/a",
+						"pangkat_golongan_pemilik": "Juru Muda"
 					}
 				],
 				"meta": {
@@ -1814,7 +1826,9 @@ func Test_handler_listKoreksi(t *testing.T) {
 						"kategori_sk": "Kenaikan Gaji",
 						"no_sk": "SK-003/2024",
 						"tanggal_sk": "2024-03-10",
-						"unit_kerja": "Bawah - Tengah - Paling Atas"
+						"unit_kerja": "Bawah - Tengah - Paling Atas",
+						"nama_golongan_pemilik": "I/a",
+						"pangkat_golongan_pemilik": "Juru Muda"
 					}
 				],
 				"meta": {
@@ -1842,7 +1856,9 @@ func Test_handler_listKoreksi(t *testing.T) {
 						"kategori_sk": "Kenaikan Gaji",
 						"no_sk": "SK-007/2024",
 						"tanggal_sk": "2024-03-10",
-						"unit_kerja": "Bawah 2"
+						"unit_kerja": "Bawah 2",
+						"nama_golongan_pemilik": "I/b",
+						"pangkat_golongan_pemilik": "Juru Muda Tingkat I"
 					},
 					{
 						"id_sk": "sk-002",
@@ -1851,7 +1867,9 @@ func Test_handler_listKoreksi(t *testing.T) {
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-002/2024",
 						"tanggal_sk": "2024-02-20",
-						"unit_kerja": "Bawah 2"
+						"unit_kerja": "Bawah 2",
+						"nama_golongan_pemilik": "I/b",
+						"pangkat_golongan_pemilik": "Juru Muda Tingkat I"
 					}
 				],
 				"meta": {
@@ -1878,7 +1896,9 @@ func Test_handler_listKoreksi(t *testing.T) {
 						"kategori_sk": "Kenaikan Gaji",
 						"no_sk": "SK-005/2024",
 						"tanggal_sk": "2024-03-10",
-						"unit_kerja": "Bawah 2"
+						"unit_kerja": "Bawah 2",
+						"nama_golongan_pemilik": "I/b",
+						"pangkat_golongan_pemilik": "Juru Muda Tingkat I"
 					}
 				],
 				"meta": {
@@ -2894,7 +2914,9 @@ func Test_handler_listTandatangan(t *testing.T) {
 						"kategori_sk": "Kenaikan Gaji",
 						"no_sk": "SK-003/2024",
 						"tanggal_sk": "2024-03-10",
-						"unit_kerja": "Bawah - Tengah - Paling Atas"
+						"unit_kerja": "Bawah - Tengah - Paling Atas",
+						"nama_golongan_pemilik": "I/a",
+						"pangkat_golongan_pemilik": "Juru Muda"
 					},
 					{
 						"id_sk": "sk-002",
@@ -2903,7 +2925,9 @@ func Test_handler_listTandatangan(t *testing.T) {
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-002/2024",
 						"tanggal_sk": "2024-02-20",
-						"unit_kerja": "Bawah 2"
+						"unit_kerja": "Bawah 2",
+						"nama_golongan_pemilik": "I/b",
+						"pangkat_golongan_pemilik": "Juru Muda Tingkat I"
 					}
 				],
 				"meta": {
@@ -2930,7 +2954,9 @@ func Test_handler_listTandatangan(t *testing.T) {
 						"kategori_sk": "Kenaikan Pangkat",
 						"no_sk": "SK-001/2024",
 						"tanggal_sk": "2024-01-15",
-						"unit_kerja": "Bawah - Tengah - Paling Atas"
+						"unit_kerja": "Bawah - Tengah - Paling Atas",
+						"nama_golongan_pemilik": "I/a",
+						"pangkat_golongan_pemilik": "Juru Muda"
 					}
 				],
 				"meta": {
@@ -2959,7 +2985,9 @@ func Test_handler_listTandatangan(t *testing.T) {
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-002/2024",
 						"tanggal_sk": "2024-02-20",
-						"unit_kerja": "Bawah 2"
+						"unit_kerja": "Bawah 2",
+						"nama_golongan_pemilik": "I/b",
+						"pangkat_golongan_pemilik": "Juru Muda Tingkat I"
 					}
 				],
 				"meta": {
@@ -2993,7 +3021,9 @@ func Test_handler_listTandatangan(t *testing.T) {
 						"kategori_sk": "Kenaikan Gaji",
 						"no_sk": "SK-003/2024",
 						"tanggal_sk": "2024-03-10",
-						"unit_kerja": "Bawah - Tengah - Paling Atas"
+						"unit_kerja": "Bawah - Tengah - Paling Atas",
+						"nama_golongan_pemilik": "I/a",
+						"pangkat_golongan_pemilik": "Juru Muda"
 					}
 				],
 				"meta": {
@@ -3021,7 +3051,9 @@ func Test_handler_listTandatangan(t *testing.T) {
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-002/2024",
 						"tanggal_sk": "2024-02-20",
-						"unit_kerja": "Bawah 2"
+						"unit_kerja": "Bawah 2",
+						"nama_golongan_pemilik": "I/b",
+						"pangkat_golongan_pemilik": "Juru Muda Tingkat I"
 					}
 				],
 				"meta": {
@@ -3048,7 +3080,9 @@ func Test_handler_listTandatangan(t *testing.T) {
 						"kategori_sk": "Kenaikan Gaji",
 						"no_sk": "SK-005/2024",
 						"tanggal_sk": "2024-03-10",
-						"unit_kerja": "Bawah 2"
+						"unit_kerja": "Bawah 2",
+						"nama_golongan_pemilik": "I/b",
+						"pangkat_golongan_pemilik": "Juru Muda Tingkat I"
 					}
 				],
 				"meta": {

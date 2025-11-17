@@ -58,17 +58,19 @@ func statusSKText(statusSK int16) string {
 }
 
 type koreksiSuratKeputusan struct {
-	IDSK         string                   `json:"id_sk"`
-	KategoriSK   string                   `json:"kategori_sk"`
-	NoSK         string                   `json:"no_sk"`
-	TanggalSK    db.Date                  `json:"tanggal_sk"`
-	UnitKerja    string                   `json:"unit_kerja"`
-	NamaPemilik  string                   `json:"nama_pemilik"`
-	NIPPemilik   string                   `json:"nip_pemilik"`
-	StatusSK     string                   `json:"status_sk,omitempty"`
-	ListKorektor []korektorSuratKeputusan `json:"list_korektor,omitempty"`
-	Aksi         *string                  `json:"aksi,omitempty"`
-	KorektorKe   int                      `json:"korektor_ke,omitempty"`
+	IDSK                   string                   `json:"id_sk"`
+	KategoriSK             string                   `json:"kategori_sk"`
+	NoSK                   string                   `json:"no_sk"`
+	TanggalSK              db.Date                  `json:"tanggal_sk"`
+	UnitKerja              string                   `json:"unit_kerja"`
+	NamaPemilik            string                   `json:"nama_pemilik"`
+	NIPPemilik             string                   `json:"nip_pemilik"`
+	PangkatGolonganPemilik string                   `json:"pangkat_golongan_pemilik,omitempty"`
+	NamaGolonganPemilik    string                   `json:"nama_golongan_pemilik,omitempty"`
+	StatusSK               string                   `json:"status_sk,omitempty"`
+	ListKorektor           []korektorSuratKeputusan `json:"list_korektor,omitempty"`
+	Aksi                   *string                  `json:"aksi,omitempty"`
+	KorektorKe             int                      `json:"korektor_ke,omitempty"`
 }
 
 type korektorSuratKeputusan struct {
