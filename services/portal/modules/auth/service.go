@@ -21,7 +21,6 @@ import (
 
 type repository interface {
 	GetUserNIPByIDAndSource(ctx context.Context, arg sqlc.GetUserNIPByIDAndSourceParams) (string, error)
-	ListUserRoleByNIP(ctx context.Context, nip string) ([]sqlc.ListUserRoleByNIPRow, error)
 	UpdateLastLoginAt(ctx context.Context, arg sqlc.UpdateLastLoginAtParams) error
 }
 
@@ -201,9 +200,6 @@ func (s *service) enrichTokenWithAdditionalUserData(ctx context.Context, accessT
 	}
 
 	claims["nip"] = user.nip
-	if len(user.roles) > 0 {
-		claims["roles"] = user.roles
-	}
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 	token.Header["kid"] = s.keycloak.KID
 
@@ -226,20 +222,9 @@ func (s *service) getUser(ctx context.Context, id pgtype.UUID, source string) (*
 		return nil, fmt.Errorf("repo get user nip: %w", err)
 	}
 
-	rows, err := s.repo.ListUserRoleByNIP(ctx, nip)
-	if err != nil {
-		return nil, fmt.Errorf("repo list user role: %w", err)
-	}
-
-	roles := make(map[string]string, len(rows))
-	for _, row := range rows {
-		roles[row.Service.String] = row.Nama
-	}
-
 	return &user{
 		id:     id,
 		source: source,
 		nip:    nip,
-		roles:  roles,
 	}, nil
 }

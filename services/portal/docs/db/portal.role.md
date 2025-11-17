@@ -7,7 +7,6 @@
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
 | id | smallint | nextval('role_id_seq'::regclass) | false | [portal.user_role](portal.user_role.md) [portal.role_resource_permission](portal.role_resource_permission.md) |  |  |
-| service | varchar(50) |  | true |  |  | deprecated |
 | nama | varchar(100) |  | false |  |  |  |
 | created_at | timestamp with time zone | now() | true |  |  |  |
 | updated_at | timestamp with time zone | now() | true |  |  |  |
@@ -40,7 +39,6 @@ erDiagram
 
 "portal.role" {
   smallint id
-  varchar_50_ service
   varchar_100_ nama
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at

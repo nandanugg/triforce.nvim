@@ -8,7 +8,7 @@
 | [portal.pemberitahuan](portal.pemberitahuan.md) | 11 |  | BASE TABLE |
 | [portal.dokumen_pendukung](portal.dokumen_pendukung.md) | 6 |  | BASE TABLE |
 | [portal.user](portal.user.md) | 9 |  | BASE TABLE |
-| [portal.role](portal.role.md) | 9 |  | BASE TABLE |
+| [portal.role](portal.role.md) | 8 |  | BASE TABLE |
 | [portal.user_role](portal.user_role.md) | 6 |  | BASE TABLE |
 | [portal.resource](portal.resource.md) | 7 |  | BASE TABLE |
 | [portal.permission](portal.permission.md) | 6 |  | BASE TABLE |
@@ -83,7 +83,6 @@ erDiagram
 }
 "portal.role" {
   smallint id
-  varchar_50_ service
   varchar_100_ nama
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at

@@ -59,9 +59,7 @@ type ResourcePermission struct {
 }
 
 type Role struct {
-	ID int16 `db:"id"`
-	// deprecated
-	Service   pgtype.Text        `db:"service"`
+	ID        int16              `db:"id"`
 	Nama      string             `db:"nama"`
 	CreatedAt pgtype.Timestamptz `db:"created_at"`
 	UpdatedAt pgtype.Timestamptz `db:"updated_at"`

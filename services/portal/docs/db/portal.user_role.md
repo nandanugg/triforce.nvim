@@ -45,7 +45,6 @@ erDiagram
 }
 "portal.role" {
   smallint id
-  varchar_50_ service
   varchar_100_ nama
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at

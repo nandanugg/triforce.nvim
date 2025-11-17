@@ -173,7 +173,7 @@ func Test_handler_exchangeToken(t *testing.T) {
 		wantDBRows       dbtest.Rows
 	}{
 		{
-			name: "success exchange token user without roles using keycloak_id without forwarded header",
+			name: "success exchange token user using keycloak_id without forwarded header",
 			dbData: `
 				insert into "user" (id, source, nip, email, nama, created_at, updated_at) values
 					('00000000-0000-0000-0000-000000000001', 'keycloak', '1c', '1c@test.com', 'c1', '2000-01-01', '2000-01-01'),
@@ -241,18 +241,11 @@ func Test_handler_exchangeToken(t *testing.T) {
 			},
 		},
 		{
-			name: "success exchange token user without deleted roles using zimbra_id as priority with forwarded header without redirect_uri",
+			name: "success exchange token user using zimbra_id as priority with forwarded header without redirect_uri",
 			dbData: `
 				insert into "user" (id, source, nip, email, nama, created_at, updated_at) values
 					('00000000-0000-0000-0000-000000000001', 'keycloak', '1c', '1c@test.com', 'c1', '2000-01-01', '2000-01-01'),
 					('00000000-0000-0000-0000-000000000002', 'zimbra', '1b', '1b@test.com', 'b1', '2000-01-01', '2000-01-01');
-				insert into role (id, service, nama, deleted_at) values
-					(1, 'portal', 'admin', '2000-01-01'),
-					(2, 'portal', 'admin', null);
-				insert into user_role (nip, role_id, deleted_at) values
-					('1c', 2, null),
-					('1b', 1, null),
-					('1b', 2, '2000-01-01');
 			`,
 			requestBody:      `{"code": "my-code"}`,
 			keycloakRespCode: 200,
@@ -304,22 +297,10 @@ func Test_handler_exchangeToken(t *testing.T) {
 			},
 		},
 		{
-			name: "success exchange token user with multiple roles order by updated_at fallback using keycloak_id when user zimbra is not found with forwarded host only and with redirect_uri",
+			name: "success exchange token user fallback using keycloak_id when user zimbra is not found with forwarded host only and with redirect_uri",
 			dbData: `
 				insert into "user" (id, source, nip, email, nama, created_at, updated_at, last_login_at) values
 					('00000000-0000-0000-0000-000000000001', 'keycloak', '1c', '1c@test.com', 'c1', '2000-01-01', '2000-01-01', '2000-01-01');
-				insert into role (id, service, nama) values
-					(1, 'portal', 'portal_admin'),
-					(2, 'portal', 'portal_pegawai'),
-					(3, 'kepegawaian', 'admin'),
-					(4, 'kepegawaian', 'pegawai'),
-					(5, 'kepegawaian', 'guest');
-				insert into user_role (nip, role_id, updated_at, deleted_at) values
-					('1c', 1, '2000-01-02', null),
-					('1c', 2, '2000-01-01', null),
-					('1c', 3, '2000-01-01', null),
-					('1c', 4, '2000-01-02', null),
-					('1c', 5, '2000-01-03', '2000-01-03');
 			`,
 			requestBody:      `{"code": "my-code", "redirect_uri": "http://localhost:5173/callback"}`,
 			keycloakRespCode: 200,
@@ -338,7 +319,7 @@ func Test_handler_exchangeToken(t *testing.T) {
 			wantResponseCode: 200,
 			wantResponseBody: `{
 				"data": {
-					"access_token": "` + generateTokenWithKID(jwt.MapClaims{"sub": "00000000-0000-0000-0000-000000000001", "zimbra_id": "00000000-0000-0000-0000-000000000002", "nip": "1c", "roles": map[string]string{"portal": "portal_admin", "kepegawaian": "pegawai"}}) + `",
+					"access_token": "` + generateTokenWithKID(jwt.MapClaims{"sub": "00000000-0000-0000-0000-000000000001", "zimbra_id": "00000000-0000-0000-0000-000000000002", "nip": "1c"}) + `",
 					"expires_in": 60,
 					"id_token": "bar",
 					"refresh_token": "baz",
@@ -610,7 +591,7 @@ func Test_handler_refreshToken(t *testing.T) {
 		wantResponseBody string
 	}{
 		{
-			name: "success refresh token user without roles using keycloak_id",
+			name: "success refresh token user using keycloak_id",
 			dbData: `
 				insert into "user" (id, source, nip, email, nama) values
 					('00000000-0000-0000-0000-000000000001', 'keycloak', '1c', '1c@test.com', 'c1');
@@ -640,18 +621,11 @@ func Test_handler_refreshToken(t *testing.T) {
 			}`,
 		},
 		{
-			name: "success refresh token user without deleted roles using zimbra_id as priority",
+			name: "success refresh token user using zimbra_id as priority",
 			dbData: `
 				insert into "user" (id, source, nip, email, nama) values
 					('00000000-0000-0000-0000-000000000001', 'keycloak', '1c', '1c@test.com', 'c1'),
 					('00000000-0000-0000-0000-000000000002', 'zimbra', '1b', '1b@test.com', 'b1');
-				insert into role (id, service, nama, deleted_at) values
-					(1, 'portal', 'admin', '2000-01-01'),
-					(2, 'portal', 'admin', null);
-				insert into user_role (nip, role_id, deleted_at) values
-					('1c', 2, null),
-					('1b', 1, null),
-					('1b', 2, '2000-01-01');
 			`,
 			requestBody:      `{"refresh_token": "my-code"}`,
 			keycloakRespCode: 200,
@@ -678,22 +652,10 @@ func Test_handler_refreshToken(t *testing.T) {
 			}`,
 		},
 		{
-			name: "success refresh token user with multiple roles order by updated_at fallback using keycloak_id when user zimbra is not found",
+			name: "success refresh token user fallback using keycloak_id when user zimbra is not found",
 			dbData: `
 				insert into "user" (id, source, nip, email, nama) values
 					('00000000-0000-0000-0000-000000000001', 'keycloak', '1c', '1c@test.com', 'c1');
-				insert into role (id, service, nama) values
-					(1, 'portal', 'portal_admin'),
-					(2, 'portal', 'portal_pegawai'),
-					(3, 'kepegawaian', 'admin'),
-					(4, 'kepegawaian', 'pegawai'),
-					(5, 'kepegawaian', 'guest');
-				insert into user_role (nip, role_id, updated_at, deleted_at) values
-					('1c', 1, '2000-01-02', null),
-					('1c', 2, '2000-01-01', null),
-					('1c', 3, '2000-01-01', null),
-					('1c', 4, '2000-01-02', null),
-					('1c', 5, '2000-01-03', '2000-01-03');
 			`,
 			requestBody:      `{"refresh_token": "my-code"}`,
 			keycloakRespCode: 200,
@@ -711,7 +673,7 @@ func Test_handler_refreshToken(t *testing.T) {
 			wantResponseCode: 200,
 			wantResponseBody: `{
 				"data": {
-					"access_token": "` + generateTokenWithKID(jwt.MapClaims{"sub": "00000000-0000-0000-0000-000000000001", "zimbra_id": "00000000-0000-0000-0000-000000000002", "nip": "1c", "roles": map[string]string{"portal": "portal_admin", "kepegawaian": "pegawai"}}) + `",
+					"access_token": "` + generateTokenWithKID(jwt.MapClaims{"sub": "00000000-0000-0000-0000-000000000001", "zimbra_id": "00000000-0000-0000-0000-000000000002", "nip": "1c"}) + `",
 					"expires_in": 60,
 					"id_token": "bar",
 					"refresh_token": "baz",

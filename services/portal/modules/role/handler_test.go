@@ -445,7 +445,6 @@ func Test_handler_create(t *testing.T) {
 			wantDBRoles: dbtest.Rows{
 				{
 					"id":         int16(1),
-					"service":    nil,
 					"nama":       "Super Admin",
 					"deskripsi":  "Deskripsi 1",
 					"is_default": false,
@@ -517,7 +516,6 @@ func Test_handler_create(t *testing.T) {
 			wantDBRoles: dbtest.Rows{
 				{
 					"id":         int16(1),
-					"service":    nil,
 					"nama":       "admin",
 					"deskripsi":  nil,
 					"is_default": false,
@@ -528,7 +526,6 @@ func Test_handler_create(t *testing.T) {
 				},
 				{
 					"id":         int16(2),
-					"service":    nil,
 					"nama":       "Pegawai",
 					"deskripsi":  "deskripsi",
 					"is_default": true,
@@ -581,7 +578,6 @@ func Test_handler_create(t *testing.T) {
 			wantDBRoles: dbtest.Rows{
 				{
 					"id":         int16(1),
-					"service":    nil,
 					"nama":       "Admin Kepegawaian",
 					"deskripsi":  "",
 					"is_default": false,
@@ -613,7 +609,6 @@ func Test_handler_create(t *testing.T) {
 			wantDBRoles: dbtest.Rows{
 				{
 					"id":         int16(1),
-					"service":    nil,
 					"nama":       "admin",
 					"deskripsi":  nil,
 					"is_default": false,
@@ -624,7 +619,6 @@ func Test_handler_create(t *testing.T) {
 				},
 				{
 					"id":         int16(2),
-					"service":    nil,
 					"nama":       "Admin",
 					"deskripsi":  "",
 					"is_default": false,
@@ -653,7 +647,6 @@ func Test_handler_create(t *testing.T) {
 			wantDBRoles: dbtest.Rows{
 				{
 					"id":         int16(1),
-					"service":    nil,
 					"nama":       "ADMIN",
 					"deskripsi":  nil,
 					"is_default": false,
@@ -900,7 +893,6 @@ func Test_handler_update(t *testing.T) {
 			wantDBRoles: dbtest.Rows{
 				{
 					"id":         int16(1),
-					"service":    nil,
 					"nama":       "super_admin",
 					"deskripsi":  "new deskripsi",
 					"is_default": true,
@@ -951,7 +943,6 @@ func Test_handler_update(t *testing.T) {
 			wantDBRoles: dbtest.Rows{
 				{
 					"id":         int16(1),
-					"service":    nil,
 					"nama":       "Super Admin",
 					"deskripsi":  "new deskripsi",
 					"is_default": true,
@@ -962,7 +953,6 @@ func Test_handler_update(t *testing.T) {
 				},
 				{
 					"id":         int16(2),
-					"service":    nil,
 					"nama":       "SUPER ADMIN",
 					"deskripsi":  nil,
 					"is_default": false,
@@ -995,8 +985,8 @@ func Test_handler_update(t *testing.T) {
 			name: "ok: with empty resource permissions",
 			dbData: seedData + `
 				insert into role
-					(nama,    deskripsi, service, is_default, created_at,   updated_at) values
-					('admin', 'desc',    'svc',   true,       '2000-01-01', '2000-01-01');
+					(nama,    deskripsi, is_default, created_at,   updated_at) values
+					('admin', 'desc',    true,       '2000-01-01', '2000-01-01');
 				insert into role_resource_permission
 					(role_id, resource_permission_id, created_at,   updated_at,   deleted_at) values
 					(1,       1,                      '2000-01-01', '2000-01-01', null),
@@ -1017,7 +1007,6 @@ func Test_handler_update(t *testing.T) {
 			wantDBRoles: dbtest.Rows{
 				{
 					"id":         int16(1),
-					"service":    "svc",
 					"nama":       "new_admin",
 					"deskripsi":  "new desc",
 					"is_default": false,
@@ -1080,7 +1069,6 @@ func Test_handler_update(t *testing.T) {
 			wantDBRoles: dbtest.Rows{
 				{
 					"id":         int16(1),
-					"service":    nil,
 					"nama":       "admin",
 					"deskripsi":  "desc",
 					"is_default": false,
@@ -1091,7 +1079,6 @@ func Test_handler_update(t *testing.T) {
 				},
 				{
 					"id":         int16(2),
-					"service":    nil,
 					"nama":       "pegawai",
 					"deskripsi":  "new desc",
 					"is_default": true,
@@ -1178,7 +1165,6 @@ func Test_handler_update(t *testing.T) {
 			wantDBRoles: dbtest.Rows{
 				{
 					"id":         int16(1),
-					"service":    nil,
 					"nama":       "admin",
 					"deskripsi":  "desc",
 					"is_default": false,
@@ -1238,7 +1224,6 @@ func Test_handler_update(t *testing.T) {
 			wantDBRoles: dbtest.Rows{
 				{
 					"id":         int16(1),
-					"service":    nil,
 					"nama":       "admin",
 					"deskripsi":  nil,
 					"is_default": false,
@@ -1323,7 +1308,6 @@ func Test_handler_update(t *testing.T) {
 			wantDBRoles: dbtest.Rows{
 				{
 					"id":         int16(1),
-					"service":    nil,
 					"nama":       "super_admin",
 					"deskripsi":  "new desc",
 					"is_default": false,
@@ -1372,7 +1356,6 @@ func Test_handler_update(t *testing.T) {
 			wantDBRoles: dbtest.Rows{
 				{
 					"id":         int16(1),
-					"service":    nil,
 					"nama":       "super_admin",
 					"deskripsi":  "desc",
 					"is_default": true,
@@ -1413,7 +1396,6 @@ func Test_handler_update(t *testing.T) {
 			wantDBRoles: dbtest.Rows{
 				{
 					"id":         int16(1),
-					"service":    nil,
 					"nama":       "admin",
 					"deskripsi":  "new desc",
 					"is_default": false,
@@ -1454,7 +1436,6 @@ func Test_handler_update(t *testing.T) {
 			wantDBRoles: dbtest.Rows{
 				{
 					"id":         int16(1),
-					"service":    nil,
 					"nama":       "admin",
 					"deskripsi":  "",
 					"is_default": false,
@@ -1495,7 +1476,6 @@ func Test_handler_update(t *testing.T) {
 			wantDBRoles: dbtest.Rows{
 				{
 					"id":         int16(1),
-					"service":    nil,
 					"nama":       "admin",
 					"deskripsi":  nil,
 					"is_default": true,
@@ -1565,7 +1545,6 @@ func Test_handler_update(t *testing.T) {
 			wantDBRoles: dbtest.Rows{
 				{
 					"id":         int16(1),
-					"service":    nil,
 					"nama":       "admin",
 					"deskripsi":  nil,
 					"is_default": true,
@@ -1672,7 +1651,6 @@ func Test_handler_update(t *testing.T) {
 			wantDBRoles: dbtest.Rows{
 				{
 					"id":         int16(1),
-					"service":    nil,
 					"nama":       "admin",
 					"deskripsi":  nil,
 					"is_default": false,
@@ -1683,7 +1661,6 @@ func Test_handler_update(t *testing.T) {
 				},
 				{
 					"id":         int16(2),
-					"service":    nil,
 					"nama":       "super admin",
 					"deskripsi":  nil,
 					"is_default": false,
@@ -1710,7 +1687,6 @@ func Test_handler_update(t *testing.T) {
 			wantDBRoles: dbtest.Rows{
 				{
 					"id":         int16(1),
-					"service":    nil,
 					"nama":       "admin",
 					"deskripsi":  nil,
 					"is_default": false,
@@ -1743,7 +1719,6 @@ func Test_handler_update(t *testing.T) {
 			wantDBRoles: dbtest.Rows{
 				{
 					"id":         int16(1),
-					"service":    nil,
 					"nama":       "admin",
 					"deskripsi":  nil,
 					"is_default": false,
@@ -1776,7 +1751,6 @@ func Test_handler_update(t *testing.T) {
 			wantDBRoles: dbtest.Rows{
 				{
 					"id":         int16(1),
-					"service":    nil,
 					"nama":       "admin",
 					"deskripsi":  nil,
 					"is_default": false,
@@ -1807,7 +1781,6 @@ func Test_handler_update(t *testing.T) {
 			wantDBRoles: dbtest.Rows{
 				{
 					"id":         int16(1),
-					"service":    nil,
 					"nama":       "admin",
 					"deskripsi":  nil,
 					"is_default": false,

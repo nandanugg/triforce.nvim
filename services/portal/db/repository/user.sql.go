@@ -13,7 +13,7 @@ const countUsersGroupByNIP = `-- name: CountUsersGroupByNIP :one
 select count(distinct u.nip)
 from "user" u
 where u.deleted_at is null
-  and ($1::varchar is null or u.nip like concat($1::varchar, '%'))
+  and ($1::varchar is null or u.nip like $1::varchar || '%')
   and (
     $2::int2 is null
     or (
@@ -146,41 +146,6 @@ func (q *Queries) IsUserExistsByNIP(ctx context.Context, nip string) (bool, erro
 	return exists, err
 }
 
-const listUserRoleByNIP = `-- name: ListUserRoleByNIP :many
-select distinct on (r.service)
-  r.service,
-  r.nama
-from user_role ur
-join role r on r.id = ur.role_id and r.deleted_at is null
-where ur.nip = $1 and ur.deleted_at is null
-order by r.service, ur.updated_at desc
-`
-
-type ListUserRoleByNIPRow struct {
-	Service pgtype.Text `db:"service"`
-	Nama    string      `db:"nama"`
-}
-
-func (q *Queries) ListUserRoleByNIP(ctx context.Context, nip string) ([]ListUserRoleByNIPRow, error) {
-	rows, err := q.db.Query(ctx, listUserRoleByNIP, nip)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []ListUserRoleByNIPRow
-	for rows.Next() {
-		var i ListUserRoleByNIPRow
-		if err := rows.Scan(&i.Service, &i.Nama); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const listUsersGroupByNIP = `-- name: ListUsersGroupByNIP :many
 select
   u.nip,
@@ -196,7 +161,7 @@ select
   ) as profiles
 from "user" u
 where u.deleted_at is null
-  and ($3::varchar is null or u.nip like concat($3::varchar, '%'))
+  and ($3::varchar is null or u.nip like $3::varchar || '%')
   and (
     $4::int2 is null
     or (

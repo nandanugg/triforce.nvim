@@ -2,15 +2,6 @@
 select nip from "user"
 where id = $1 and source = $2 and deleted_at is null;
 
--- name: ListUserRoleByNIP :many
-select distinct on (r.service)
-  r.service,
-  r.nama
-from user_role ur
-join role r on r.id = ur.role_id and r.deleted_at is null
-where ur.nip = $1 and ur.deleted_at is null
-order by r.service, ur.updated_at desc;
-
 -- name: UpdateLastLoginAt :exec
 update "user"
 set last_login_at = now()
@@ -31,7 +22,7 @@ select
   ) as profiles
 from "user" u
 where u.deleted_at is null
-  and (sqlc.narg('nip')::varchar is null or u.nip like concat(sqlc.narg('nip')::varchar, '%'))
+  and (sqlc.narg('nip')::varchar is null or u.nip like sqlc.narg('nip')::varchar || '%')
   and (
     sqlc.narg('role_id')::int2 is null
     or (
@@ -51,7 +42,7 @@ limit $1 offset $2;
 select count(distinct u.nip)
 from "user" u
 where u.deleted_at is null
-  and (sqlc.narg('nip')::varchar is null or u.nip like concat(sqlc.narg('nip')::varchar, '%'))
+  and (sqlc.narg('nip')::varchar is null or u.nip like sqlc.narg('nip')::varchar || '%')
   and (
     sqlc.narg('role_id')::int2 is null
     or (

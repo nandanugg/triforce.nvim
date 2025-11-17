@@ -19,5 +19,4 @@ type user struct {
 	id     pgtype.UUID
 	source string
 	nip    string
-	roles  map[string]string
 }
