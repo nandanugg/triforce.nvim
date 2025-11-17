@@ -74,7 +74,6 @@ with recursive unit_kerja_path as (
       on uk.id = ukp.diatasan_id
     where ukp.depth < 10 and uk.deleted_at is null
 )
-
 select
     start_id as id,
     path as nama_unor_lengkap

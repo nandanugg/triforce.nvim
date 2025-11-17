@@ -14,14 +14,14 @@ WHERE (sqlc.narg('nama')::varchar IS NULL OR nama_jabatan ILIKE sqlc.narg('nama'
 SELECT j.kode_jabatan, j.id, j.nama_jabatan, j.nama_jabatan_full, j.jenis_jabatan, rj.nama as jenis_jabatan_nama, j.kelas, j.pensiun, j.kode_bkn, j.nama_jabatan_bkn, j.kategori_jabatan, j.bkn_id, j.tunjangan_jabatan, j.created_at, j.updated_at
 FROM ref_jabatan j
 LEFT JOIN ref_jenis_jabatan rj ON rj.id = j.jenis_jabatan and rj.deleted_at IS NULL
-WHERE 
+WHERE
   (sqlc.narg('keyword')::varchar IS NULL OR nama_jabatan ILIKE '%' || sqlc.narg('keyword')::varchar || '%' OR kategori_jabatan ILIKE '%' || sqlc.narg('keyword')::varchar || '%')
   AND j.deleted_at IS NULL
 LIMIT $1 OFFSET $2;
 
 -- name: CountRefJabatanWithKeyword :one
 SELECT COUNT(1) FROM ref_jabatan
-WHERE 
+WHERE
   (sqlc.narg('keyword')::varchar IS NULL OR nama_jabatan ILIKE '%' || sqlc.narg('keyword')::varchar || '%' OR kategori_jabatan ILIKE '%' || sqlc.narg('keyword')::varchar || '%')
   AND deleted_at IS NULL;
 
@@ -30,17 +30,27 @@ SELECT kode_jabatan, id, nama_jabatan, nama_jabatan_full, jenis_jabatan, kelas, 
 FROM ref_jabatan
 WHERE id = @id::int AND deleted_at IS NULL;
 
+-- name: GetRefJabatanByKode :one
+select
+  kode_jabatan as kode,
+  nama_jabatan as nama,
+  jenis_jabatan as jenis,
+  kelas,
+  kode_bkn
+from ref_jabatan
+where kode_jabatan = $1 and deleted_at is null;
+
 -- name: CreateRefJabatan :one
-INSERT INTO 
+INSERT INTO
   ref_jabatan (kode_jabatan, nama_jabatan, nama_jabatan_full, jenis_jabatan, kelas, pensiun, kode_bkn, nama_jabatan_bkn, kategori_jabatan, bkn_id, tunjangan_jabatan)
-VALUES 
+VALUES
   (@kode_jabatan, @nama_jabatan, @nama_jabatan_full, @jenis_jabatan, @kelas, @pensiun, @kode_bkn, @nama_jabatan_bkn, @kategori_jabatan, @bkn_id, @tunjangan_jabatan)
-RETURNING 
+RETURNING
   id, kode_jabatan, nama_jabatan, nama_jabatan_full, jenis_jabatan, kelas, pensiun, kode_bkn, nama_jabatan_bkn, kategori_jabatan, bkn_id, tunjangan_jabatan, created_at, updated_at;
 
 -- name: UpdateRefJabatan :one
 UPDATE ref_jabatan
-SET 
+SET
   nama_jabatan = @nama_jabatan,
   nama_jabatan_full = @nama_jabatan_full,
   jenis_jabatan = @jenis_jabatan,
@@ -53,9 +63,9 @@ SET
   updated_at = NOW(),
   kode_jabatan = @kode_jabatan,
   tunjangan_jabatan = @tunjangan_jabatan
-WHERE 
+WHERE
   id = @id::int AND deleted_at IS NULL
-RETURNING 
+RETURNING
   kode_jabatan, id, nama_jabatan, nama_jabatan_full, jenis_jabatan, kelas, pensiun, kode_bkn, nama_jabatan_bkn, kategori_jabatan, bkn_id, tunjangan_jabatan, created_at, updated_at;
 
 -- name: DeleteRefJabatan :execrows

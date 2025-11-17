@@ -24,7 +24,7 @@ func (q *Queries) CountRefJabatan(ctx context.Context, nama pgtype.Text) (int64,
 
 const countRefJabatanWithKeyword = `-- name: CountRefJabatanWithKeyword :one
 SELECT COUNT(1) FROM ref_jabatan
-WHERE 
+WHERE
   ($1::varchar IS NULL OR nama_jabatan ILIKE '%' || $1::varchar || '%' OR kategori_jabatan ILIKE '%' || $1::varchar || '%')
   AND deleted_at IS NULL
 `
@@ -37,11 +37,11 @@ func (q *Queries) CountRefJabatanWithKeyword(ctx context.Context, keyword pgtype
 }
 
 const createRefJabatan = `-- name: CreateRefJabatan :one
-INSERT INTO 
+INSERT INTO
   ref_jabatan (kode_jabatan, nama_jabatan, nama_jabatan_full, jenis_jabatan, kelas, pensiun, kode_bkn, nama_jabatan_bkn, kategori_jabatan, bkn_id, tunjangan_jabatan)
-VALUES 
+VALUES
   ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-RETURNING 
+RETURNING
   id, kode_jabatan, nama_jabatan, nama_jabatan_full, jenis_jabatan, kelas, pensiun, kode_bkn, nama_jabatan_bkn, kategori_jabatan, bkn_id, tunjangan_jabatan, created_at, updated_at
 `
 
@@ -169,6 +169,38 @@ func (q *Queries) GetRefJabatan(ctx context.Context, id int32) (GetRefJabatanRow
 	return i, err
 }
 
+const getRefJabatanByKode = `-- name: GetRefJabatanByKode :one
+select
+  kode_jabatan as kode,
+  nama_jabatan as nama,
+  jenis_jabatan as jenis,
+  kelas,
+  kode_bkn
+from ref_jabatan
+where kode_jabatan = $1 and deleted_at is null
+`
+
+type GetRefJabatanByKodeRow struct {
+	Kode    string      `db:"kode"`
+	Nama    pgtype.Text `db:"nama"`
+	Jenis   pgtype.Int2 `db:"jenis"`
+	Kelas   pgtype.Int2 `db:"kelas"`
+	KodeBkn pgtype.Text `db:"kode_bkn"`
+}
+
+func (q *Queries) GetRefJabatanByKode(ctx context.Context, kodeJabatan string) (GetRefJabatanByKodeRow, error) {
+	row := q.db.QueryRow(ctx, getRefJabatanByKode, kodeJabatan)
+	var i GetRefJabatanByKodeRow
+	err := row.Scan(
+		&i.Kode,
+		&i.Nama,
+		&i.Jenis,
+		&i.Kelas,
+		&i.KodeBkn,
+	)
+	return i, err
+}
+
 const listRefJabatan = `-- name: ListRefJabatan :many
 SELECT kode_jabatan, id, nama_jabatan, nama_jabatan_full, jenis_jabatan, kelas, pensiun, kode_bkn, nama_jabatan_bkn, kategori_jabatan, bkn_id, tunjangan_jabatan, created_at, updated_at
 FROM ref_jabatan
@@ -239,7 +271,7 @@ const listRefJabatanWithKeyword = `-- name: ListRefJabatanWithKeyword :many
 SELECT j.kode_jabatan, j.id, j.nama_jabatan, j.nama_jabatan_full, j.jenis_jabatan, rj.nama as jenis_jabatan_nama, j.kelas, j.pensiun, j.kode_bkn, j.nama_jabatan_bkn, j.kategori_jabatan, j.bkn_id, j.tunjangan_jabatan, j.created_at, j.updated_at
 FROM ref_jabatan j
 LEFT JOIN ref_jenis_jabatan rj ON rj.id = j.jenis_jabatan and rj.deleted_at IS NULL
-WHERE 
+WHERE
   ($3::varchar IS NULL OR nama_jabatan ILIKE '%' || $3::varchar || '%' OR kategori_jabatan ILIKE '%' || $3::varchar || '%')
   AND j.deleted_at IS NULL
 LIMIT $1 OFFSET $2
@@ -307,7 +339,7 @@ func (q *Queries) ListRefJabatanWithKeyword(ctx context.Context, arg ListRefJaba
 
 const updateRefJabatan = `-- name: UpdateRefJabatan :one
 UPDATE ref_jabatan
-SET 
+SET
   nama_jabatan = $1,
   nama_jabatan_full = $2,
   jenis_jabatan = $3,
@@ -320,9 +352,9 @@ SET
   updated_at = NOW(),
   kode_jabatan = $10,
   tunjangan_jabatan = $11
-WHERE 
+WHERE
   id = $12::int AND deleted_at IS NULL
-RETURNING 
+RETURNING
   kode_jabatan, id, nama_jabatan, nama_jabatan_full, jenis_jabatan, kelas, pensiun, kode_bkn, nama_jabatan_bkn, kategori_jabatan, bkn_id, tunjangan_jabatan, created_at, updated_at
 `
 

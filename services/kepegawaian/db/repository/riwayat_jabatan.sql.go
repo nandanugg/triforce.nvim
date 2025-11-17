@@ -22,6 +22,79 @@ func (q *Queries) CountRiwayatJabatan(ctx context.Context, pnsNip string) (int64
 	return count, err
 }
 
+const createRiwayatJabatan = `-- name: CreateRiwayatJabatan :one
+insert into riwayat_jabatan
+    (jenis_jabatan_id, jenis_jabatan, jabatan_id, nama_jabatan, jabatan_id_bkn, satuan_kerja_id, unor_id, unor_id_bkn, unor, tmt_jabatan, no_sk, tanggal_sk, status_plt, periode_jabatan_start_date, periode_jabatan_end_date, pns_id, pns_nip, pns_nama) values
+    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
+returning id
+`
+
+type CreateRiwayatJabatanParams struct {
+	JenisJabatanID          pgtype.Int4 `db:"jenis_jabatan_id"`
+	JenisJabatan            pgtype.Text `db:"jenis_jabatan"`
+	JabatanID               pgtype.Text `db:"jabatan_id"`
+	NamaJabatan             pgtype.Text `db:"nama_jabatan"`
+	JabatanIDBkn            pgtype.Text `db:"jabatan_id_bkn"`
+	SatuanKerjaID           pgtype.Text `db:"satuan_kerja_id"`
+	UnorID                  pgtype.Text `db:"unor_id"`
+	UnorIDBkn               pgtype.Text `db:"unor_id_bkn"`
+	Unor                    pgtype.Text `db:"unor"`
+	TmtJabatan              pgtype.Date `db:"tmt_jabatan"`
+	NoSk                    pgtype.Text `db:"no_sk"`
+	TanggalSk               pgtype.Date `db:"tanggal_sk"`
+	StatusPlt               pgtype.Bool `db:"status_plt"`
+	PeriodeJabatanStartDate pgtype.Date `db:"periode_jabatan_start_date"`
+	PeriodeJabatanEndDate   pgtype.Date `db:"periode_jabatan_end_date"`
+	PnsID                   pgtype.Text `db:"pns_id"`
+	PnsNip                  pgtype.Text `db:"pns_nip"`
+	PnsNama                 pgtype.Text `db:"pns_nama"`
+}
+
+func (q *Queries) CreateRiwayatJabatan(ctx context.Context, arg CreateRiwayatJabatanParams) (int64, error) {
+	row := q.db.QueryRow(ctx, createRiwayatJabatan,
+		arg.JenisJabatanID,
+		arg.JenisJabatan,
+		arg.JabatanID,
+		arg.NamaJabatan,
+		arg.JabatanIDBkn,
+		arg.SatuanKerjaID,
+		arg.UnorID,
+		arg.UnorIDBkn,
+		arg.Unor,
+		arg.TmtJabatan,
+		arg.NoSk,
+		arg.TanggalSk,
+		arg.StatusPlt,
+		arg.PeriodeJabatanStartDate,
+		arg.PeriodeJabatanEndDate,
+		arg.PnsID,
+		arg.PnsNip,
+		arg.PnsNama,
+	)
+	var id int64
+	err := row.Scan(&id)
+	return id, err
+}
+
+const deleteRiwayatJabatan = `-- name: DeleteRiwayatJabatan :execrows
+update riwayat_jabatan
+set deleted_at = now()
+where id = $1 and pns_nip = $2::varchar and deleted_at is null
+`
+
+type DeleteRiwayatJabatanParams struct {
+	ID  int64  `db:"id"`
+	Nip string `db:"nip"`
+}
+
+func (q *Queries) DeleteRiwayatJabatan(ctx context.Context, arg DeleteRiwayatJabatanParams) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteRiwayatJabatan, arg.ID, arg.Nip)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const getBerkasRiwayatJabatan = `-- name: GetBerkasRiwayatJabatan :one
 select file_base64 from riwayat_jabatan
 where pns_nip = $1 and id = $2 and deleted_at is null
@@ -42,17 +115,21 @@ func (q *Queries) GetBerkasRiwayatJabatan(ctx context.Context, arg GetBerkasRiwa
 const listRiwayatJabatan = `-- name: ListRiwayatJabatan :many
 SELECT
     riwayat_jabatan.id,
+    jenis_jabatan_id,
     ref_jenis_jabatan.nama as jenis_jabatan,
     riwayat_jabatan.jabatan_id as id_jabatan,
     ref_jabatan.nama_jabatan,
     tmt_jabatan,
     no_sk,
     tanggal_sk,
+    satuan_kerja_id,
     ref_unit_kerja.nama_unor as satuan_kerja,
     status_plt,
+    kelas_jabatan_id,
     ref_kelas_jabatan.kelas_jabatan,
     periode_jabatan_start_date,
     periode_jabatan_end_date,
+    unor_id as unit_organisasi_id,
     unit_organisasi.nama_unor as unit_organisasi
 FROM riwayat_jabatan
 LEFT JOIN ref_unit_kerja on riwayat_jabatan.satuan_kerja_id = ref_unit_kerja.id AND ref_unit_kerja.deleted_at IS NULL
@@ -73,17 +150,21 @@ type ListRiwayatJabatanParams struct {
 
 type ListRiwayatJabatanRow struct {
 	ID                      int64       `db:"id"`
+	JenisJabatanID          pgtype.Int4 `db:"jenis_jabatan_id"`
 	JenisJabatan            pgtype.Text `db:"jenis_jabatan"`
 	IDJabatan               pgtype.Text `db:"id_jabatan"`
 	NamaJabatan             pgtype.Text `db:"nama_jabatan"`
 	TmtJabatan              pgtype.Date `db:"tmt_jabatan"`
 	NoSk                    pgtype.Text `db:"no_sk"`
 	TanggalSk               pgtype.Date `db:"tanggal_sk"`
+	SatuanKerjaID           pgtype.Text `db:"satuan_kerja_id"`
 	SatuanKerja             pgtype.Text `db:"satuan_kerja"`
 	StatusPlt               pgtype.Bool `db:"status_plt"`
+	KelasJabatanID          pgtype.Int4 `db:"kelas_jabatan_id"`
 	KelasJabatan            pgtype.Text `db:"kelas_jabatan"`
 	PeriodeJabatanStartDate pgtype.Date `db:"periode_jabatan_start_date"`
 	PeriodeJabatanEndDate   pgtype.Date `db:"periode_jabatan_end_date"`
+	UnitOrganisasiID        pgtype.Text `db:"unit_organisasi_id"`
 	UnitOrganisasi          pgtype.Text `db:"unit_organisasi"`
 }
 
@@ -98,17 +179,21 @@ func (q *Queries) ListRiwayatJabatan(ctx context.Context, arg ListRiwayatJabatan
 		var i ListRiwayatJabatanRow
 		if err := rows.Scan(
 			&i.ID,
+			&i.JenisJabatanID,
 			&i.JenisJabatan,
 			&i.IDJabatan,
 			&i.NamaJabatan,
 			&i.TmtJabatan,
 			&i.NoSk,
 			&i.TanggalSk,
+			&i.SatuanKerjaID,
 			&i.SatuanKerja,
 			&i.StatusPlt,
+			&i.KelasJabatanID,
 			&i.KelasJabatan,
 			&i.PeriodeJabatanStartDate,
 			&i.PeriodeJabatanEndDate,
+			&i.UnitOrganisasiID,
 			&i.UnitOrganisasi,
 		); err != nil {
 			return nil, err
@@ -119,4 +204,94 @@ func (q *Queries) ListRiwayatJabatan(ctx context.Context, arg ListRiwayatJabatan
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateRiwayatJabatan = `-- name: UpdateRiwayatJabatan :execrows
+update riwayat_jabatan
+set
+    jenis_jabatan_id = $1,
+    jenis_jabatan = $2,
+    jabatan_id = $3,
+    nama_jabatan = $4,
+    jabatan_id_bkn = $5,
+    satuan_kerja_id = $6,
+    unor_id = $7,
+    unor_id_bkn = $8,
+    unor = $9,
+    tmt_jabatan = $10,
+    no_sk = $11,
+    tanggal_sk = $12,
+    status_plt = $13,
+    periode_jabatan_start_date = $14,
+    periode_jabatan_end_date = $15,
+    updated_at = now()
+where id = $16 and pns_nip = $17::varchar and deleted_at is null
+`
+
+type UpdateRiwayatJabatanParams struct {
+	JenisJabatanID          pgtype.Int4 `db:"jenis_jabatan_id"`
+	JenisJabatan            pgtype.Text `db:"jenis_jabatan"`
+	JabatanID               pgtype.Text `db:"jabatan_id"`
+	NamaJabatan             pgtype.Text `db:"nama_jabatan"`
+	JabatanIDBkn            pgtype.Text `db:"jabatan_id_bkn"`
+	SatuanKerjaID           pgtype.Text `db:"satuan_kerja_id"`
+	UnorID                  pgtype.Text `db:"unor_id"`
+	UnorIDBkn               pgtype.Text `db:"unor_id_bkn"`
+	Unor                    pgtype.Text `db:"unor"`
+	TmtJabatan              pgtype.Date `db:"tmt_jabatan"`
+	NoSk                    pgtype.Text `db:"no_sk"`
+	TanggalSk               pgtype.Date `db:"tanggal_sk"`
+	StatusPlt               pgtype.Bool `db:"status_plt"`
+	PeriodeJabatanStartDate pgtype.Date `db:"periode_jabatan_start_date"`
+	PeriodeJabatanEndDate   pgtype.Date `db:"periode_jabatan_end_date"`
+	ID                      int64       `db:"id"`
+	Nip                     string      `db:"nip"`
+}
+
+func (q *Queries) UpdateRiwayatJabatan(ctx context.Context, arg UpdateRiwayatJabatanParams) (int64, error) {
+	result, err := q.db.Exec(ctx, updateRiwayatJabatan,
+		arg.JenisJabatanID,
+		arg.JenisJabatan,
+		arg.JabatanID,
+		arg.NamaJabatan,
+		arg.JabatanIDBkn,
+		arg.SatuanKerjaID,
+		arg.UnorID,
+		arg.UnorIDBkn,
+		arg.Unor,
+		arg.TmtJabatan,
+		arg.NoSk,
+		arg.TanggalSk,
+		arg.StatusPlt,
+		arg.PeriodeJabatanStartDate,
+		arg.PeriodeJabatanEndDate,
+		arg.ID,
+		arg.Nip,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
+const uploadBerkasRiwayatJabatan = `-- name: UploadBerkasRiwayatJabatan :execrows
+update riwayat_jabatan
+set
+    file_base64 = $1,
+    updated_at = now()
+where id = $2 and pns_nip = $3::varchar and deleted_at is null
+`
+
+type UploadBerkasRiwayatJabatanParams struct {
+	FileBase64 pgtype.Text `db:"file_base64"`
+	ID         int64       `db:"id"`
+	Nip        string      `db:"nip"`
+}
+
+func (q *Queries) UploadBerkasRiwayatJabatan(ctx context.Context, arg UploadBerkasRiwayatJabatanParams) (int64, error) {
+	result, err := q.db.Exec(ctx, uploadBerkasRiwayatJabatan, arg.FileBase64, arg.ID, arg.Nip)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
 }
