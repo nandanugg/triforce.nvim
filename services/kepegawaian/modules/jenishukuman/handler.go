@@ -1,6 +1,7 @@
 package jenishukuman
 
 import (
+	"errors"
 	"log/slog"
 	"net/http"
 
@@ -144,6 +145,9 @@ func (h *handler) adminDelete(c echo.Context) error {
 	ctx := c.Request().Context()
 	found, err := h.service.delete(ctx, req.ID)
 	if err != nil {
+		if errors.Is(err, errJenisHukumanReferenced) {
+			return echo.NewHTTPError(http.StatusBadRequest, errJenisHukumanReferenced.Error())
+		}
 		slog.ErrorContext(ctx, "Error deleting jenis satker.", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}

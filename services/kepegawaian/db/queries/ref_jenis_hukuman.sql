@@ -37,3 +37,11 @@ LIMIT $1 OFFSET $2;
 SELECT COUNT(1) 
 FROM ref_jenis_hukuman
 WHERE deleted_at IS NULL;
+
+-- name: IsExistReferencesRiwayatHukumanDisiplinByID :one
+SELECT EXISTS (
+    SELECT 1
+    FROM riwayat_hukuman_disiplin
+    WHERE jenis_hukuman_id = $1::int
+      AND deleted_at IS NULL
+) AS exists;

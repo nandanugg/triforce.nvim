@@ -81,6 +81,22 @@ func (q *Queries) GetRefJenisHukuman(ctx context.Context, id int32) (GetRefJenis
 	return i, err
 }
 
+const isExistReferencesRiwayatHukumanDisiplinByID = `-- name: IsExistReferencesRiwayatHukumanDisiplinByID :one
+SELECT EXISTS (
+    SELECT 1
+    FROM riwayat_hukuman_disiplin
+    WHERE jenis_hukuman_id = $1::int
+      AND deleted_at IS NULL
+) AS exists
+`
+
+func (q *Queries) IsExistReferencesRiwayatHukumanDisiplinByID(ctx context.Context, dollar_1 int32) (bool, error) {
+	row := q.db.QueryRow(ctx, isExistReferencesRiwayatHukumanDisiplinByID, dollar_1)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const listRefJenisHukuman = `-- name: ListRefJenisHukuman :many
 SELECT 
   id, 

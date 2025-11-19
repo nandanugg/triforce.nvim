@@ -137,6 +137,8 @@ type Querier interface {
 	GetUnitKerja(ctx context.Context, id string) (GetUnitKerjaRow, error)
 	InsertLogRequestSuratKeputusan(ctx context.Context, arg InsertLogRequestSuratKeputusanParams) error
 	InsertRiwayatSuratKeputusan(ctx context.Context, arg InsertRiwayatSuratKeputusanParams) error
+	IsExistReferencesPegawaiByID(ctx context.Context, id int32) (bool, error)
+	IsExistReferencesRiwayatHukumanDisiplinByID(ctx context.Context, dollar_1 int32) (bool, error)
 	IsPasanganExistsByIDAndNIP(ctx context.Context, arg IsPasanganExistsByIDAndNIPParams) (bool, error)
 	ListAkarUnitKerja(ctx context.Context, arg ListAkarUnitKerjaParams) ([]ListAkarUnitKerjaRow, error)
 	ListAnakByNip(ctx context.Context, nipBaru pgtype.Text) ([]ListAnakByNipRow, error)

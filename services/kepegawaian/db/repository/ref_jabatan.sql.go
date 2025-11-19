@@ -201,6 +201,25 @@ func (q *Queries) GetRefJabatanByKode(ctx context.Context, kodeJabatan string) (
 	return i, err
 }
 
+const isExistReferencesPegawaiByID = `-- name: IsExistReferencesPegawaiByID :one
+SELECT EXISTS (
+    SELECT 1
+    FROM pegawai
+    JOIN ref_jabatan 
+      ON ref_jabatan.kode_jabatan = pegawai.jabatan_instansi_id
+     AND ref_jabatan.deleted_at IS NULL
+    WHERE ref_jabatan.id = $1::int
+      AND pegawai.deleted_at IS NULL
+) AS exists
+`
+
+func (q *Queries) IsExistReferencesPegawaiByID(ctx context.Context, id int32) (bool, error) {
+	row := q.db.QueryRow(ctx, isExistReferencesPegawaiByID, id)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const listRefJabatan = `-- name: ListRefJabatan :many
 SELECT kode_jabatan, id, nama_jabatan, nama_jabatan_full, jenis_jabatan, kelas, pensiun, kode_bkn, nama_jabatan_bkn, kategori_jabatan, bkn_id, tunjangan_jabatan, created_at, updated_at
 FROM ref_jabatan

@@ -21,6 +21,7 @@ type repository interface {
 	CreateRefJabatan(ctx context.Context, arg sqlc.CreateRefJabatanParams) (sqlc.CreateRefJabatanRow, error)
 	UpdateRefJabatan(ctx context.Context, arg sqlc.UpdateRefJabatanParams) (sqlc.UpdateRefJabatanRow, error)
 	DeleteRefJabatan(ctx context.Context, id int32) (int64, error)
+	IsExistReferencesPegawaiByID(ctx context.Context, id int32) (bool, error)
 }
 
 type service struct {
@@ -228,6 +229,13 @@ func (s *service) update(ctx context.Context, id int32, params updateParams) (*j
 }
 
 func (s *service) delete(ctx context.Context, id int32) (bool, error) {
+	isExist, err := s.repo.IsExistReferencesPegawaiByID(ctx, id)
+	if err != nil {
+		return false, fmt.Errorf("[delete] error IsExistReferencesPegawaiByID: %w", err)
+	}
+	if isExist {
+		return false, errJabatanReferenced
+	}
 	rowsAffected, err := s.repo.DeleteRefJabatan(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {

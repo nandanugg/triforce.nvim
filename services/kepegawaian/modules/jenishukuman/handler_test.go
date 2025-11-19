@@ -457,6 +457,11 @@ func Test_handler_adminDeleteJenisHukuman(t *testing.T) {
 		(1, 'Jenis Hukuman 1', now(), now(), NULL),
 		(2, 'Jenis Hukuman 2', now(), now(), NULL),
 		(3, 'Jenis Hukuman 3', now(), now(), now());
+
+		INSERT INTO riwayat_hukuman_disiplin  (jenis_hukuman_id, deleted_at) VALUES
+		(1, now()),
+		(2, null),
+		(3, now());
 	`
 	pgxconn := dbtest.New(t, dbmigrations.FS)
 	_, err := pgxconn.Exec(context.Background(), dbData)
@@ -485,6 +490,16 @@ func Test_handler_adminDeleteJenisHukuman(t *testing.T) {
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusNoContent,
+		},
+		{
+			name: "error: delete jenis hukuman referenced",
+			id:   "2",
+			requestHeader: http.Header{
+				"Authorization": authHeader,
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "jenis hukuman masih digunakan oleh riwayat hukuman disiplin"}`,
 		},
 		{
 			name: "error: delete not found jenis hukuman",

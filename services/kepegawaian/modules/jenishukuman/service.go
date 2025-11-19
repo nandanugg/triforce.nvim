@@ -19,6 +19,7 @@ type repository interface {
 	DeleteRefJenisHukuman(ctx context.Context, id int32) (int64, error)
 	GetRefJenisHukuman(ctx context.Context, id int32) (sqlc.GetRefJenisHukumanRow, error)
 	UpdateRefJenisHukuman(ctx context.Context, arg sqlc.UpdateRefJenisHukumanParams) (sqlc.UpdateRefJenisHukumanRow, error)
+	IsExistReferencesRiwayatHukumanDisiplinByID(ctx context.Context, id int32) (bool, error)
 }
 
 type service struct {
@@ -123,6 +124,13 @@ func (s *service) update(ctx context.Context, params updateParams) (*jenisHukuma
 }
 
 func (s *service) delete(ctx context.Context, id int32) (bool, error) {
+	isExist, err := s.repo.IsExistReferencesRiwayatHukumanDisiplinByID(ctx, id)
+	if err != nil {
+		return false, fmt.Errorf("[delete] error IsExistReferencesRiwayatHukumanDisiplinByID: %w", err)
+	}
+	if isExist {
+		return false, errJenisHukumanReferenced
+	}
 	affected, err := s.repo.DeleteRefJenisHukuman(ctx, id)
 	if err != nil {
 		return false, fmt.Errorf("[delete] error deleteJenisHukuman: %w", err)

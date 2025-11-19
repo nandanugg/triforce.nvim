@@ -72,3 +72,14 @@ RETURNING
 UPDATE ref_jabatan
 SET deleted_at = NOW()
 WHERE id = @id::int AND deleted_at IS NULL;
+
+-- name: IsExistReferencesPegawaiByID :one
+SELECT EXISTS (
+    SELECT 1
+    FROM pegawai
+    JOIN ref_jabatan 
+      ON ref_jabatan.kode_jabatan = pegawai.jabatan_instansi_id
+     AND ref_jabatan.deleted_at IS NULL
+    WHERE ref_jabatan.id = @id::int
+      AND pegawai.deleted_at IS NULL
+) AS exists;

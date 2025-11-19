@@ -1,6 +1,7 @@
 package jabatan
 
 import (
+	"errors"
 	"log/slog"
 	"net/http"
 
@@ -212,6 +213,9 @@ func (h *handler) delete(c echo.Context) error {
 	ctx := c.Request().Context()
 	success, err := h.service.delete(ctx, req.ID)
 	if err != nil {
+		if errors.Is(err, errJabatanReferenced) {
+			return echo.NewHTTPError(http.StatusBadRequest, errJabatanReferenced.Error())
+		}
 		slog.ErrorContext(ctx, "Error deleting jabatan.", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}

@@ -777,6 +777,8 @@ paths:
                   type: integer
                   format: int16
                   description: Status pensiun
+                  maximum: 100
+                  minimum: 0
                   example: 0
                 kode_bkn:
                   type: string
@@ -902,6 +904,8 @@ paths:
                   format: int16
                   description: Status pensiun
                   example: 0
+                  maximum: 100
+                  minimum: 0
                 kode_bkn:
                   type: string
                   description: Kode BKN
