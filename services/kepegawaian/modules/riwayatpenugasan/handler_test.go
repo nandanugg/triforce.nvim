@@ -1,13 +1,17 @@
 package riwayatpenugasan
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
 	"fmt"
+	"io"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -599,6 +603,874 @@ func Test_handler_getBerkasAdmin(t *testing.T) {
 			} else {
 				assert.JSONEq(t, string(tt.wantResponseBytes), rec.Body.String())
 			}
+		})
+	}
+}
+
+func Test_handler_adminCreate(t *testing.T) {
+	t.Parallel()
+
+	dbData := `
+		INSERT INTO pegawai
+			(pns_id,  nip_baru, nama, deleted_at) VALUES
+			('id_1a', '1a',     'Pegawai 1', NULL),
+			('id_1c', '1c',     'Pegawai 2', NULL),
+			('id_1d', '1d',     'Pegawai 3', '2000-01-01'),
+			('id_1e', '1e',     'Pegawai 4', NULL),
+			('id_1f', '1f',     'Pegawai 5', NULL),
+			('id_1g', '1g',     'Pegawai 6', NULL);
+	`
+	db := dbtest.New(t, dbmigrations.FS)
+	_, err := db.Exec(context.Background(), dbData)
+	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	authSvc := apitest.NewAuthService(api.Kode_Pegawai_Write)
+	RegisterRoutes(e, sqlc.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+
+	authHeader := []string{apitest.GenerateAuthHeader("2a")}
+	tests := []struct {
+		name             string
+		paramNIP         string
+		requestHeader    http.Header
+		requestBody      string
+		wantResponseCode int
+		wantResponseBody string
+		wantDBRows       dbtest.Rows
+	}{
+		{
+			name:          "ok: with all data",
+			paramNIP:      "1c",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"tipe_jabatan": "Struktural",
+				"nama_jabatan": "Kepala Bagian",
+				"deskripsi_jabatan": "Deskripsi Jabatan 1",
+				"tanggal_mulai": "2023-01-15",
+				"tanggal_selesai": "2024-01-15",
+				"is_menjabat": false
+			}`,
+			wantResponseCode: http.StatusCreated,
+			wantResponseBody: `{
+				"data": { "id": {id} }
+			}`,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":                "{id}",
+					"nip":               "1c",
+					"tipe_jabatan":      "Struktural",
+					"nama_jabatan":      "Kepala Bagian",
+					"deskripsi_jabatan": "Deskripsi Jabatan 1",
+					"tanggal_mulai":     time.Date(2023, 1, 15, 0, 0, 0, 0, time.UTC),
+					"tanggal_selesai":   time.Date(2024, 1, 15, 0, 0, 0, 0, time.UTC),
+					"is_menjabat":       false,
+					"file_base64":       nil,
+					"created_at":        "{created_at}",
+					"updated_at":        "{updated_at}",
+					"deleted_at":        nil,
+				},
+			},
+		},
+		{
+			name:          "ok: with minimal required data",
+			paramNIP:      "1e",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"tipe_jabatan": "Fungsional",
+				"nama_jabatan": "Analis Kepegawaian",
+				"tanggal_mulai": "2023-02-15",
+				"tanggal_selesai": "2023-05-15",
+				"is_menjabat": false
+			}`,
+			wantResponseCode: http.StatusCreated,
+			wantResponseBody: `{
+				"data": { "id": {id} }
+			}`,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":                "{id}",
+					"nip":               "1e",
+					"tipe_jabatan":      "Fungsional",
+					"nama_jabatan":      "Analis Kepegawaian",
+					"deskripsi_jabatan": nil,
+					"tanggal_mulai":     time.Date(2023, 2, 15, 0, 0, 0, 0, time.UTC),
+					"tanggal_selesai":   time.Date(2023, 5, 15, 0, 0, 0, 0, time.UTC),
+					"is_menjabat":       false,
+					"file_base64":       nil,
+					"created_at":        "{created_at}",
+					"updated_at":        "{updated_at}",
+					"deleted_at":        nil,
+				},
+			},
+		},
+		{
+			name:          "ok: with empty string optional fields",
+			paramNIP:      "1f",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"tipe_jabatan": "Struktural",
+				"nama_jabatan": "Kepala Sub Bagian",
+				"deskripsi_jabatan": "",
+				"tanggal_mulai": "2023-03-15",
+				"tanggal_selesai": "2023-06-15",
+				"is_menjabat": true
+			}`,
+			wantResponseCode: http.StatusCreated,
+			wantResponseBody: `{
+				"data": { "id": {id} }
+			}`,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":                "{id}",
+					"nip":               "1f",
+					"tipe_jabatan":      "Struktural",
+					"nama_jabatan":      "Kepala Sub Bagian",
+					"deskripsi_jabatan": nil,
+					"tanggal_mulai":     time.Date(2023, 3, 15, 0, 0, 0, 0, time.UTC),
+					"tanggal_selesai":   time.Date(2023, 6, 15, 0, 0, 0, 0, time.UTC),
+					"is_menjabat":       true,
+					"file_base64":       nil,
+					"created_at":        "{created_at}",
+					"updated_at":        "{updated_at}",
+					"deleted_at":        nil,
+				},
+			},
+		},
+		{
+			name:          "error: pegawai is not found",
+			paramNIP:      "1b",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"tipe_jabatan": "Struktural",
+				"nama_jabatan": "Kepala Bagian",
+				"tanggal_mulai": "2023-01-15",
+				"tanggal_selesai": "2024-01-15",
+				"is_menjabat": false
+			}`,
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "pegawai tidak ditemukan"}`,
+			wantDBRows:       dbtest.Rows{},
+		},
+		{
+			name:          "error: pegawai is deleted",
+			paramNIP:      "1d",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"tipe_jabatan": "Struktural",
+				"nama_jabatan": "Kepala Bagian",
+				"tanggal_mulai": "2023-01-15",
+				"tanggal_selesai": "2024-01-15",
+				"is_menjabat": false
+			}`,
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "pegawai tidak ditemukan"}`,
+			wantDBRows:       dbtest.Rows{},
+		},
+		{
+			name:             "error: missing required params",
+			paramNIP:         "1a",
+			requestHeader:    http.Header{"Authorization": authHeader},
+			requestBody:      `{ "id": 1 }`,
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "parameter \"id\" tidak didukung` +
+				` | parameter \"tipe_jabatan\" harus diisi` +
+				` | parameter \"nama_jabatan\" harus diisi"}`,
+			wantDBRows: dbtest.Rows{},
+		},
+		{
+			name:             "error: body is empty",
+			paramNIP:         "1a",
+			requestHeader:    http.Header{"Authorization": authHeader},
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "request body harus diisi"}`,
+			wantDBRows:       dbtest.Rows{},
+		},
+		{
+			name:             "error: invalid token",
+			paramNIP:         "1a",
+			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
+			wantDBRows:       dbtest.Rows{},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			req := httptest.NewRequest(http.MethodPost, "/v1/admin/pegawai/"+tt.paramNIP+"/riwayat-penugasan", strings.NewReader(tt.requestBody))
+			req.Header = tt.requestHeader
+			req.Header.Set("Content-Type", "application/json")
+			rec := httptest.NewRecorder()
+
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+
+			actualRows, err := dbtest.QueryWithClause(db, "riwayat_penugasan", "where nip = $1", tt.paramNIP)
+			require.NoError(t, err)
+			if len(tt.wantDBRows) == len(actualRows) {
+				for i, row := range actualRows {
+					if tt.wantDBRows[i]["id"] == "{id}" {
+						assert.WithinDuration(t, time.Now(), row["created_at"].(time.Time), 10*time.Second)
+						assert.Equal(t, row["created_at"], row["updated_at"])
+
+						tt.wantDBRows[i]["id"] = row["id"]
+						tt.wantDBRows[i]["created_at"] = row["created_at"]
+						tt.wantDBRows[i]["updated_at"] = row["updated_at"]
+
+						tt.wantResponseBody = strings.ReplaceAll(tt.wantResponseBody, "{id}", fmt.Sprintf("%d", row["id"]))
+					}
+				}
+			}
+			assert.Equal(t, tt.wantDBRows, actualRows)
+			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
+		})
+	}
+}
+
+func Test_handler_adminUpdate(t *testing.T) {
+	t.Parallel()
+
+	dbData := `
+		INSERT INTO pegawai
+			(pns_id,  nip_baru, deleted_at) VALUES
+			('id_1c', '1c',     NULL),
+			('id_1d', '1d',     '2000-01-01'),
+			('id_1e', '1e',     NULL);
+		INSERT INTO riwayat_penugasan
+			(id, nip, tipe_jabatan, nama_jabatan, deskripsi_jabatan, tanggal_mulai, tanggal_selesai, is_menjabat, created_at, updated_at, deleted_at) VALUES
+			(1, '1c', 'Struktural', 'Kepala Bagian', 'Deskripsi Jabatan 1', '2000-01-01', '2000-12-31', false, '2000-01-01', '2000-01-01', NULL),
+			(2, '1c', 'Fungsional', 'Analis Kepegawaian', 'Deskripsi Jabatan 2', '2000-01-01', NULL, false, '2000-01-01', '2000-01-01', NULL),
+			(5, '1e', 'Struktural', 'Kepala Bagian', 'Deskripsi Jabatan 5', '2000-01-01', '2000-12-31', false, '2000-01-01', '2000-01-01', NULL),
+			(6, '1c', 'Struktural', 'Kepala Sub Bagian', 'Deskripsi Jabatan 6', '2000-01-01', '2000-12-31', false, '2000-01-01', '2000-01-01', '2000-01-01'),
+			(7, '1c', 'Struktural', 'Kepala Bagian', 'Deskripsi Jabatan 7', '2000-01-01', '2000-12-31', false, '2000-01-01', '2000-01-01', NULL);
+	`
+	db := dbtest.New(t, dbmigrations.FS)
+	_, err := db.Exec(context.Background(), dbData)
+	require.NoError(t, err)
+
+	defaultRows := dbtest.Rows{
+		{
+			"id":                int32(7),
+			"nip":               "1c",
+			"tipe_jabatan":      "Struktural",
+			"nama_jabatan":      "Kepala Bagian",
+			"deskripsi_jabatan": "Deskripsi Jabatan 7",
+			"tanggal_mulai":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
+			"tanggal_selesai":   time.Date(2000, 12, 31, 0, 0, 0, 0, time.UTC),
+			"is_menjabat":       false,
+			"file_base64":       nil,
+			"created_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+			"updated_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+			"deleted_at":        nil,
+		},
+	}
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	authSvc := apitest.NewAuthService(api.Kode_Pegawai_Write)
+	RegisterRoutes(e, sqlc.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+
+	authHeader := []string{apitest.GenerateAuthHeader("2a")}
+	tests := []struct {
+		name             string
+		paramNIP         string
+		paramID          string
+		requestHeader    http.Header
+		requestBody      string
+		wantResponseCode int
+		wantResponseBody string
+		wantDBRows       dbtest.Rows
+	}{
+		{
+			name:          "ok: with all data",
+			paramNIP:      "1c",
+			paramID:       "1",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"tipe_jabatan": "Struktural",
+				"nama_jabatan": "Kepala Bagian Updated",
+				"deskripsi_jabatan": "Deskripsi Jabatan Updated",
+				"tanggal_mulai": "2023-01-15",
+				"tanggal_selesai": "2024-01-15",
+				"is_menjabat": true
+			}`,
+			wantResponseCode: http.StatusNoContent,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":                int32(1),
+					"nip":               "1c",
+					"tipe_jabatan":      "Struktural",
+					"nama_jabatan":      "Kepala Bagian Updated",
+					"deskripsi_jabatan": "Deskripsi Jabatan Updated",
+					"tanggal_mulai":     time.Date(2023, 1, 15, 0, 0, 0, 0, time.UTC),
+					"tanggal_selesai":   time.Date(2024, 1, 15, 0, 0, 0, 0, time.UTC),
+					"is_menjabat":       true,
+					"file_base64":       nil,
+					"created_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":        "{updated_at}",
+					"deleted_at":        nil,
+				},
+			},
+		},
+		{
+			name:          "ok: with empty string optional fields",
+			paramNIP:      "1c",
+			paramID:       "2",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"tipe_jabatan": "Fungsional",
+				"nama_jabatan": "Analis Kepegawaian Updated",
+				"deskripsi_jabatan": "",
+				"tanggal_mulai": "2023-02-15",
+				"tanggal_selesai": "2023-05-15",
+				"is_menjabat": false
+			}`,
+			wantResponseCode: http.StatusNoContent,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":                int32(2),
+					"nip":               "1c",
+					"tipe_jabatan":      "Fungsional",
+					"nama_jabatan":      "Analis Kepegawaian Updated",
+					"deskripsi_jabatan": nil,
+					"tanggal_mulai":     time.Date(2023, 2, 15, 0, 0, 0, 0, time.UTC),
+					"tanggal_selesai":   time.Date(2023, 5, 15, 0, 0, 0, 0, time.UTC),
+					"is_menjabat":       false,
+					"file_base64":       nil,
+					"created_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":        "{updated_at}",
+					"deleted_at":        nil,
+				},
+			},
+		},
+		{
+			name:          "error: riwayat penugasan is not found",
+			paramNIP:      "1c",
+			paramID:       "0",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"tipe_jabatan": "Struktural",
+				"nama_jabatan": "Kepala Bagian",
+				"tanggal_mulai": "2023-01-15",
+				"tanggal_selesai": "2024-01-15",
+				"is_menjabat": false
+			}`,
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data tidak ditemukan"}`,
+			wantDBRows:       dbtest.Rows{},
+		},
+		{
+			name:          "error: riwayat penugasan is owned by different pegawai",
+			paramNIP:      "1c",
+			paramID:       "5",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"tipe_jabatan": "Struktural",
+				"nama_jabatan": "Kepala Bagian",
+				"tanggal_mulai": "2023-01-15",
+				"tanggal_selesai": "2024-01-15",
+				"is_menjabat": false
+			}`,
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data tidak ditemukan"}`,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":                int32(5),
+					"nip":               "1e",
+					"tipe_jabatan":      "Struktural",
+					"nama_jabatan":      "Kepala Bagian",
+					"deskripsi_jabatan": "Deskripsi Jabatan 5",
+					"tanggal_mulai":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
+					"tanggal_selesai":   time.Date(2000, 12, 31, 0, 0, 0, 0, time.UTC),
+					"is_menjabat":       false,
+					"file_base64":       nil,
+					"created_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":        nil,
+				},
+			},
+		},
+		{
+			name:          "error: riwayat penugasan is deleted",
+			paramNIP:      "1c",
+			paramID:       "6",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"tipe_jabatan": "Struktural",
+				"nama_jabatan": "Kepala Bagian",
+				"tanggal_mulai": "2023-01-15",
+				"tanggal_selesai": "2024-01-15",
+				"is_menjabat": false
+			}`,
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data tidak ditemukan"}`,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":                int32(6),
+					"nip":               "1c",
+					"tipe_jabatan":      "Struktural",
+					"nama_jabatan":      "Kepala Sub Bagian",
+					"deskripsi_jabatan": "Deskripsi Jabatan 6",
+					"tanggal_mulai":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
+					"tanggal_selesai":   time.Date(2000, 12, 31, 0, 0, 0, 0, time.UTC),
+					"is_menjabat":       false,
+					"file_base64":       nil,
+					"created_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+				},
+			},
+		},
+		{
+			name:          "error: pegawai is not found",
+			paramNIP:      "1b",
+			paramID:       "7",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"tipe_jabatan": "Struktural",
+				"nama_jabatan": "Kepala Bagian",
+				"tanggal_mulai": "2023-01-15",
+				"tanggal_selesai": "2024-01-15",
+				"is_menjabat": false
+			}`,
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "pegawai tidak ditemukan"}`,
+			wantDBRows:       defaultRows,
+		},
+		{
+			name:             "error: missing required params",
+			paramNIP:         "1c",
+			paramID:          "7",
+			requestHeader:    http.Header{"Authorization": authHeader},
+			requestBody:      `{ "id": 1 }`,
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "parameter \"id\" tidak didukung` +
+				` | parameter \"tipe_jabatan\" harus diisi` +
+				` | parameter \"nama_jabatan\" harus diisi"}`,
+			wantDBRows: defaultRows,
+		},
+		{
+			name:             "error: body is empty",
+			paramNIP:         "1c",
+			paramID:          "7",
+			requestHeader:    http.Header{"Authorization": authHeader},
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "request body harus diisi"}`,
+			wantDBRows:       defaultRows,
+		},
+		{
+			name:             "error: invalid token",
+			paramNIP:         "1c",
+			paramID:          "7",
+			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
+			wantDBRows:       defaultRows,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			req := httptest.NewRequest(http.MethodPut, "/v1/admin/pegawai/"+tt.paramNIP+"/riwayat-penugasan/"+tt.paramID, strings.NewReader(tt.requestBody))
+			req.Header = tt.requestHeader
+			req.Header.Set("Content-Type", "application/json")
+			rec := httptest.NewRecorder()
+
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+
+			actualRows, err := dbtest.QueryWithClause(db, "riwayat_penugasan", "where id = $1", tt.paramID)
+			require.NoError(t, err)
+			if len(tt.wantDBRows) == len(actualRows) {
+				for i, row := range actualRows {
+					if tt.wantDBRows[i]["updated_at"] == "{updated_at}" {
+						assert.WithinDuration(t, time.Now(), row["updated_at"].(time.Time), 10*time.Second)
+						tt.wantDBRows[i]["updated_at"] = row["updated_at"]
+					}
+				}
+			}
+			assert.Equal(t, tt.wantDBRows, actualRows)
+		})
+	}
+}
+
+func Test_handler_adminDelete(t *testing.T) {
+	t.Parallel()
+
+	dbData := `
+		INSERT INTO pegawai
+			(pns_id,  nip_baru, deleted_at) VALUES
+			('id_1c', '1c',     NULL),
+			('id_1d', '1d',     '2000-01-01'),
+			('id_1e', '1e',     NULL);
+		INSERT INTO riwayat_penugasan
+			(id, nip, tipe_jabatan, nama_jabatan, deskripsi_jabatan, tanggal_mulai, tanggal_selesai, is_menjabat, created_at, updated_at, deleted_at) VALUES
+			(1, '1c', 'Struktural', 'Kepala Bagian', 'Deskripsi Jabatan 1', '2000-01-01', '2000-12-31', false, '2000-01-01', '2000-01-01', NULL),
+			(2, '1e', 'Fungsional', 'Analis Kepegawaian', 'Deskripsi Jabatan 2', '2000-01-01', NULL, false, '2000-01-01', '2000-01-01', NULL),
+			(3, '1c', 'Struktural', 'Kepala Sub Bagian', 'Deskripsi Jabatan 3', '2000-01-01', '2000-12-31', false, '2000-01-01', '2000-01-01', '2000-01-01'),
+			(4, '1c', 'Struktural', 'Kepala Bagian', 'Deskripsi Jabatan 4', '2000-01-01', '2000-12-31', false, '2000-01-01', '2000-01-01', NULL);
+	`
+	db := dbtest.New(t, dbmigrations.FS)
+	_, err := db.Exec(context.Background(), dbData)
+	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	authSvc := apitest.NewAuthService(api.Kode_Pegawai_Write)
+	RegisterRoutes(e, sqlc.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+
+	authHeader := []string{apitest.GenerateAuthHeader("2a")}
+	tests := []struct {
+		name             string
+		paramNIP         string
+		paramID          string
+		requestHeader    http.Header
+		wantResponseCode int
+		wantResponseBody string
+		wantDBRows       dbtest.Rows
+	}{
+		{
+			name:             "ok: success delete",
+			paramNIP:         "1c",
+			paramID:          "1",
+			requestHeader:    http.Header{"Authorization": authHeader},
+			wantResponseCode: http.StatusNoContent,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":                int32(1),
+					"nip":               "1c",
+					"tipe_jabatan":      "Struktural",
+					"nama_jabatan":      "Kepala Bagian",
+					"deskripsi_jabatan": "Deskripsi Jabatan 1",
+					"tanggal_mulai":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
+					"tanggal_selesai":   time.Date(2000, 12, 31, 0, 0, 0, 0, time.UTC),
+					"is_menjabat":       false,
+					"file_base64":       nil,
+					"created_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":        "{deleted_at}",
+				},
+			},
+		},
+		{
+			name:             "error: riwayat penugasan is owned by other pegawai",
+			paramNIP:         "1c",
+			paramID:          "2",
+			requestHeader:    http.Header{"Authorization": authHeader},
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data tidak ditemukan"}`,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":                int32(2),
+					"nip":               "1e",
+					"tipe_jabatan":      "Fungsional",
+					"nama_jabatan":      "Analis Kepegawaian",
+					"deskripsi_jabatan": "Deskripsi Jabatan 2",
+					"tanggal_mulai":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
+					"tanggal_selesai":   nil,
+					"is_menjabat":       false,
+					"file_base64":       nil,
+					"created_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":        nil,
+				},
+			},
+		},
+		{
+			name:             "error: riwayat penugasan is not found",
+			paramNIP:         "1c",
+			paramID:          "0",
+			requestHeader:    http.Header{"Authorization": authHeader},
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data tidak ditemukan"}`,
+			wantDBRows:       dbtest.Rows{},
+		},
+		{
+			name:             "error: riwayat penugasan is deleted",
+			paramNIP:         "1c",
+			paramID:          "3",
+			requestHeader:    http.Header{"Authorization": authHeader},
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data tidak ditemukan"}`,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":                int32(3),
+					"nip":               "1c",
+					"tipe_jabatan":      "Struktural",
+					"nama_jabatan":      "Kepala Sub Bagian",
+					"deskripsi_jabatan": "Deskripsi Jabatan 3",
+					"tanggal_mulai":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
+					"tanggal_selesai":   time.Date(2000, 12, 31, 0, 0, 0, 0, time.UTC),
+					"is_menjabat":       false,
+					"file_base64":       nil,
+					"created_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+				},
+			},
+		},
+		{
+			name:             "error: invalid token",
+			paramNIP:         "1c",
+			paramID:          "4",
+			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":                int32(4),
+					"nip":               "1c",
+					"tipe_jabatan":      "Struktural",
+					"nama_jabatan":      "Kepala Bagian",
+					"deskripsi_jabatan": "Deskripsi Jabatan 4",
+					"tanggal_mulai":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
+					"tanggal_selesai":   time.Date(2000, 12, 31, 0, 0, 0, 0, time.UTC),
+					"is_menjabat":       false,
+					"file_base64":       nil,
+					"created_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":        nil,
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			req := httptest.NewRequest(http.MethodDelete, "/v1/admin/pegawai/"+tt.paramNIP+"/riwayat-penugasan/"+tt.paramID, nil)
+			req.Header = tt.requestHeader
+			req.Header.Set("Content-Type", "application/json")
+			rec := httptest.NewRecorder()
+
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+
+			actualRows, err := dbtest.QueryWithClause(db, "riwayat_penugasan", "where id = $1", tt.paramID)
+			require.NoError(t, err)
+			if len(tt.wantDBRows) == len(actualRows) {
+				for i, row := range actualRows {
+					if tt.wantDBRows[i]["deleted_at"] == "{deleted_at}" {
+						assert.WithinDuration(t, time.Now(), row["deleted_at"].(time.Time), 10*time.Second)
+						tt.wantDBRows[i]["deleted_at"] = row["deleted_at"]
+					}
+				}
+			}
+			assert.Equal(t, tt.wantDBRows, actualRows)
+		})
+	}
+}
+
+func Test_handler_adminUploadBerkas(t *testing.T) {
+	t.Parallel()
+
+	dbData := `
+		INSERT INTO pegawai
+			(pns_id,  nip_baru, deleted_at) VALUES
+			('id_1c', '1c',     NULL),
+			('id_1d', '1d',     '2000-01-01'),
+			('id_1e', '1e',     NULL);
+		INSERT INTO riwayat_penugasan
+			(id, nip, tipe_jabatan, nama_jabatan, deskripsi_jabatan, tanggal_mulai, tanggal_selesai, is_menjabat, file_base64, created_at, updated_at, deleted_at) VALUES
+			(1, '1c', 'Struktural', 'Kepala Bagian', 'Deskripsi Jabatan 1', '2000-01-01', '2000-12-31', false, 'data:abc', '2000-01-01', '2000-01-01', NULL),
+			(2, '1e', 'Fungsional', 'Analis Kepegawaian', 'Deskripsi Jabatan 2', '2000-01-01', NULL, false, NULL, '2000-01-01', '2000-01-01', NULL),
+			(3, '1c', 'Struktural', 'Kepala Sub Bagian', 'Deskripsi Jabatan 3', '2000-01-01', '2000-12-31', false, NULL, '2000-01-01', '2000-01-01', '2000-01-01'),
+			(4, '1c', 'Struktural', 'Kepala Bagian', 'Deskripsi Jabatan 4', '2000-01-01', '2000-12-31', false, NULL, '2000-01-01', '2000-01-01', NULL);
+	`
+	db := dbtest.New(t, dbmigrations.FS)
+	_, err := db.Exec(context.Background(), dbData)
+	require.NoError(t, err)
+
+	defaultRows := dbtest.Rows{
+		{
+			"id":                int32(4),
+			"nip":               "1c",
+			"tipe_jabatan":      "Struktural",
+			"nama_jabatan":      "Kepala Bagian",
+			"deskripsi_jabatan": "Deskripsi Jabatan 4",
+			"tanggal_mulai":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
+			"tanggal_selesai":   time.Date(2000, 12, 31, 0, 0, 0, 0, time.UTC),
+			"is_menjabat":       false,
+			"file_base64":       nil,
+			"created_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+			"updated_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+			"deleted_at":        nil,
+		},
+	}
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	authSvc := apitest.NewAuthService(api.Kode_Pegawai_Write)
+	RegisterRoutes(e, sqlc.New(db), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+
+	defaultRequestBody := func(writer *multipart.Writer) error {
+		part, err := writer.CreateFormFile("file", "file.txt")
+		if err != nil {
+			return err
+		}
+		_, err = io.WriteString(part, "Hello World!!")
+		return err
+	}
+
+	authHeader := []string{apitest.GenerateAuthHeader("2a")}
+	tests := []struct {
+		name              string
+		paramNIP          string
+		paramID           string
+		requestHeader     http.Header
+		appendRequestBody func(writer *multipart.Writer) error
+		wantResponseCode  int
+		wantResponseBody  string
+		wantDBRows        dbtest.Rows
+	}{
+		{
+			name:              "ok: success upload",
+			paramNIP:          "1c",
+			paramID:           "1",
+			requestHeader:     http.Header{"Authorization": authHeader},
+			appendRequestBody: defaultRequestBody,
+			wantResponseCode:  http.StatusNoContent,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":                int32(1),
+					"nip":               "1c",
+					"tipe_jabatan":      "Struktural",
+					"nama_jabatan":      "Kepala Bagian",
+					"deskripsi_jabatan": "Deskripsi Jabatan 1",
+					"tanggal_mulai":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
+					"tanggal_selesai":   time.Date(2000, 12, 31, 0, 0, 0, 0, time.UTC),
+					"is_menjabat":       false,
+					"file_base64":       "data:text/plain; charset=utf-8;base64,SGVsbG8gV29ybGQhIQ==",
+					"created_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":        "{updated_at}",
+					"deleted_at":        nil,
+				},
+			},
+		},
+		{
+			name:              "error: riwayat penugasan is not found",
+			paramNIP:          "1c",
+			paramID:           "0",
+			requestHeader:     http.Header{"Authorization": authHeader},
+			appendRequestBody: defaultRequestBody,
+			wantResponseCode:  http.StatusNotFound,
+			wantResponseBody:  `{"message": "data tidak ditemukan"}`,
+			wantDBRows:        dbtest.Rows{},
+		},
+		{
+			name:              "error: riwayat penugasan is owned by different pegawai",
+			paramNIP:          "1c",
+			paramID:           "2",
+			requestHeader:     http.Header{"Authorization": authHeader},
+			appendRequestBody: defaultRequestBody,
+			wantResponseCode:  http.StatusNotFound,
+			wantResponseBody:  `{"message": "data tidak ditemukan"}`,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":                int32(2),
+					"nip":               "1e",
+					"tipe_jabatan":      "Fungsional",
+					"nama_jabatan":      "Analis Kepegawaian",
+					"deskripsi_jabatan": "Deskripsi Jabatan 2",
+					"tanggal_mulai":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
+					"tanggal_selesai":   nil,
+					"is_menjabat":       false,
+					"file_base64":       nil,
+					"created_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":        nil,
+				},
+			},
+		},
+		{
+			name:              "error: riwayat penugasan is deleted",
+			paramNIP:          "1c",
+			paramID:           "3",
+			requestHeader:     http.Header{"Authorization": authHeader},
+			appendRequestBody: defaultRequestBody,
+			wantResponseCode:  http.StatusNotFound,
+			wantResponseBody:  `{"message": "data tidak ditemukan"}`,
+			wantDBRows: dbtest.Rows{
+				{
+					"id":                int32(3),
+					"nip":               "1c",
+					"tipe_jabatan":      "Struktural",
+					"nama_jabatan":      "Kepala Sub Bagian",
+					"deskripsi_jabatan": "Deskripsi Jabatan 3",
+					"tanggal_mulai":     time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
+					"tanggal_selesai":   time.Date(2000, 12, 31, 0, 0, 0, 0, time.UTC),
+					"is_menjabat":       false,
+					"file_base64":       nil,
+					"created_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+				},
+			},
+		},
+		{
+			name:              "error: missing file",
+			paramNIP:          "1c",
+			paramID:           "4",
+			requestHeader:     http.Header{"Authorization": authHeader},
+			appendRequestBody: func(*multipart.Writer) error { return nil },
+			wantResponseCode:  http.StatusBadRequest,
+			wantResponseBody:  `{"message": "parameter \"file\" harus diisi"}`,
+			wantDBRows:        defaultRows,
+		},
+		{
+			name:              "error: invalid token",
+			paramNIP:          "1c",
+			paramID:           "4",
+			requestHeader:     http.Header{"Authorization": []string{"Bearer some-token"}},
+			appendRequestBody: func(*multipart.Writer) error { return nil },
+			wantResponseCode:  http.StatusUnauthorized,
+			wantResponseBody:  `{"message": "token otentikasi tidak valid"}`,
+			wantDBRows:        defaultRows,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			var buf bytes.Buffer
+			writer := multipart.NewWriter(&buf)
+			require.NoError(t, tt.appendRequestBody(writer))
+			require.NoError(t, writer.Close())
+
+			req := httptest.NewRequest(http.MethodPut, "/v1/admin/pegawai/"+tt.paramNIP+"/riwayat-penugasan/"+tt.paramID+"/berkas", &buf)
+			req.Header = tt.requestHeader
+			req.Header.Set("Content-Type", writer.FormDataContentType())
+			rec := httptest.NewRecorder()
+
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+
+			actualRows, err := dbtest.QueryWithClause(db, "riwayat_penugasan", "where id = $1", tt.paramID)
+			require.NoError(t, err)
+			if len(tt.wantDBRows) == len(actualRows) {
+				for i, row := range actualRows {
+					if tt.wantDBRows[i]["updated_at"] == "{updated_at}" {
+						assert.WithinDuration(t, time.Now(), row["updated_at"].(time.Time), 10*time.Second)
+						tt.wantDBRows[i]["updated_at"] = row["updated_at"]
+					}
+				}
+			}
+			assert.Equal(t, tt.wantDBRows, actualRows)
 		})
 	}
 }

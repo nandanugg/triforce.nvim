@@ -1,12 +1,14 @@
 package riwayatpenugasan
 
 import (
+	"errors"
 	"log/slog"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
 )
 
 type handler struct {
@@ -114,4 +116,127 @@ func (h *handler) getBerkasAdmin(c echo.Context) error {
 
 	c.Response().Header().Set("Content-Disposition", "inline")
 	return c.Blob(http.StatusOK, mimeType, blob)
+}
+
+type upsertParams struct {
+	TipeJabatan      string  `json:"tipe_jabatan"`
+	NamaJabatan      string  `json:"nama_jabatan"`
+	DeskripsiJabatan string  `json:"deskripsi_jabatan"`
+	TanggalMulai     db.Date `json:"tanggal_mulai"`
+	TanggalSelesai   db.Date `json:"tanggal_selesai"`
+	IsMenjabat       bool    `json:"is_menjabat"`
+}
+
+type adminCreateRequest struct {
+	NIP string `param:"nip"`
+	upsertParams
+}
+
+type adminCreateResponse struct {
+	Data struct {
+		ID int32 `json:"id"`
+	} `json:"data"`
+}
+
+func (h *handler) adminCreate(c echo.Context) error {
+	var req adminCreateRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	ctx := c.Request().Context()
+	id, err := h.service.create(ctx, req)
+	if err != nil {
+		if errors.Is(err, errPegawaiNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, "pegawai tidak ditemukan")
+		}
+		slog.ErrorContext(ctx, "Error creating riwayat penugasan.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	var resp adminCreateResponse
+	resp.Data.ID = id
+	return c.JSON(http.StatusCreated, resp)
+}
+
+type adminUpdateRequest struct {
+	NIP string `param:"nip"`
+	ID  int32  `param:"id"`
+	upsertParams
+}
+
+func (h *handler) adminUpdate(c echo.Context) error {
+	var req adminUpdateRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	ctx := c.Request().Context()
+	found, err := h.service.update(ctx, req)
+	if err != nil {
+		if errors.Is(err, errPegawaiNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, "pegawai tidak ditemukan")
+		}
+		slog.ErrorContext(ctx, "Error updating riwayat penugasan.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	if !found {
+		return echo.NewHTTPError(http.StatusNotFound, "data tidak ditemukan")
+	}
+	return c.NoContent(http.StatusNoContent)
+}
+
+type adminDeleteRequest struct {
+	NIP string `param:"nip"`
+	ID  int32  `param:"id"`
+}
+
+func (h *handler) adminDelete(c echo.Context) error {
+	var req adminDeleteRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	ctx := c.Request().Context()
+	found, err := h.service.delete(ctx, req)
+	if err != nil {
+		slog.ErrorContext(ctx, "Error deleting riwayat penugasan.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	if !found {
+		return echo.NewHTTPError(http.StatusNotFound, "data tidak ditemukan")
+	}
+	return c.NoContent(http.StatusNoContent)
+}
+
+type adminUploadBerkasRequest struct {
+	NIP string `param:"nip"`
+	ID  int32  `param:"id"`
+}
+
+func (h *handler) adminUploadBerkas(c echo.Context) error {
+	var req adminUploadBerkasRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	ctx := c.Request().Context()
+	fileBase64, _, err := api.GetFileBase64(c)
+	if err != nil {
+		return err
+	}
+
+	found, err := h.service.uploadBerkas(ctx, req.ID, req.NIP, fileBase64)
+	if err != nil {
+		slog.ErrorContext(ctx, "Error uploading berkas riwayat penugasan.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	if !found {
+		return echo.NewHTTPError(http.StatusNotFound, "data tidak ditemukan")
+	}
+
+	return c.NoContent(http.StatusNoContent)
 }

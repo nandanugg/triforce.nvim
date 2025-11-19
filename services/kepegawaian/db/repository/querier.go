@@ -70,6 +70,7 @@ type Querier interface {
 	CreateRiwayatPelatihanSIASN(ctx context.Context, arg CreateRiwayatPelatihanSIASNParams) (int64, error)
 	CreateRiwayatPelatihanStruktural(ctx context.Context, arg CreateRiwayatPelatihanStrukturalParams) (string, error)
 	CreateRiwayatPendidikan(ctx context.Context, arg CreateRiwayatPendidikanParams) (int32, error)
+	CreateRiwayatPenugasan(ctx context.Context, arg CreateRiwayatPenugasanParams) (int32, error)
 	CreateRiwayatSertifikasi(ctx context.Context, arg CreateRiwayatSertifikasiParams) (int64, error)
 	CreateTemplate(ctx context.Context, arg CreateTemplateParams) (CreateTemplateRow, error)
 	CreateUnitKerja(ctx context.Context, arg CreateUnitKerjaParams) (CreateUnitKerjaRow, error)
@@ -92,6 +93,7 @@ type Querier interface {
 	DeleteRiwayatPelatihanSIASN(ctx context.Context, arg DeleteRiwayatPelatihanSIASNParams) (int64, error)
 	DeleteRiwayatPelatihanStruktural(ctx context.Context, arg DeleteRiwayatPelatihanStrukturalParams) (int64, error)
 	DeleteRiwayatPendidikan(ctx context.Context, arg DeleteRiwayatPendidikanParams) (int64, error)
+	DeleteRiwayatPenugasan(ctx context.Context, arg DeleteRiwayatPenugasanParams) (int64, error)
 	DeleteRiwayatSertifikasiByIDAndNIP(ctx context.Context, arg DeleteRiwayatSertifikasiByIDAndNIPParams) (int64, error)
 	DeleteTemplate(ctx context.Context, id int32) (int64, error)
 	DeleteUnitKerja(ctx context.Context, id string) (int64, error)
@@ -212,6 +214,7 @@ type Querier interface {
 	UpdateRiwayatPelatihanSIASN(ctx context.Context, arg UpdateRiwayatPelatihanSIASNParams) (int64, error)
 	UpdateRiwayatPelatihanStruktural(ctx context.Context, arg UpdateRiwayatPelatihanStrukturalParams) (int64, error)
 	UpdateRiwayatPendidikan(ctx context.Context, arg UpdateRiwayatPendidikanParams) (int64, error)
+	UpdateRiwayatPenugasan(ctx context.Context, arg UpdateRiwayatPenugasanParams) (int64, error)
 	UpdateRiwayatSertifikasiByIDAndNIP(ctx context.Context, arg UpdateRiwayatSertifikasiByIDAndNIPParams) (int64, error)
 	UpdateStatusSuratKeputusanByID(ctx context.Context, arg UpdateStatusSuratKeputusanByIDParams) error
 	UpdateTemplate(ctx context.Context, arg UpdateTemplateParams) (UpdateTemplateRow, error)
@@ -222,6 +225,7 @@ type Querier interface {
 	UploadBerkasRiwayatPelatihanSIASN(ctx context.Context, arg UploadBerkasRiwayatPelatihanSIASNParams) (int64, error)
 	UploadBerkasRiwayatPelatihanStruktural(ctx context.Context, arg UploadBerkasRiwayatPelatihanStrukturalParams) (int64, error)
 	UploadBerkasRiwayatPendidikan(ctx context.Context, arg UploadBerkasRiwayatPendidikanParams) (int64, error)
+	UploadBerkasRiwayatPenugasan(ctx context.Context, arg UploadBerkasRiwayatPenugasanParams) (int64, error)
 }
 
 var _ Querier = (*Queries)(nil)

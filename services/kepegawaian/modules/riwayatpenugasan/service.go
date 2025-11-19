@@ -19,6 +19,11 @@ type repository interface {
 	ListRiwayatPenugasan(ctx context.Context, arg sqlc.ListRiwayatPenugasanParams) ([]sqlc.ListRiwayatPenugasanRow, error)
 	CountRiwayatPenugasan(ctx context.Context, nip pgtype.Text) (int64, error)
 	GetBerkasRiwayatPenugasan(ctx context.Context, arg sqlc.GetBerkasRiwayatPenugasanParams) (pgtype.Text, error)
+	CreateRiwayatPenugasan(ctx context.Context, arg sqlc.CreateRiwayatPenugasanParams) (int32, error)
+	UpdateRiwayatPenugasan(ctx context.Context, arg sqlc.UpdateRiwayatPenugasanParams) (int64, error)
+	DeleteRiwayatPenugasan(ctx context.Context, arg sqlc.DeleteRiwayatPenugasanParams) (int64, error)
+	UploadBerkasRiwayatPenugasan(ctx context.Context, arg sqlc.UploadBerkasRiwayatPenugasanParams) (int64, error)
+	GetPegawaiByNIP(ctx context.Context, nip string) (sqlc.GetPegawaiByNIPRow, error)
 }
 
 type service struct {
@@ -73,4 +78,76 @@ func (s *service) getBerkas(ctx context.Context, nip string, id int32) (string, 
 	}
 
 	return api.GetMimeTypeAndDecodedData(res.String)
+}
+
+func (s *service) create(ctx context.Context, req adminCreateRequest) (int32, error) {
+	_, err := s.repo.GetPegawaiByNIP(ctx, req.NIP)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return 0, errPegawaiNotFound
+		}
+		return 0, fmt.Errorf("[riwayatpenugasan-create] repo get pegawai: %w", err)
+	}
+
+	id, err := s.repo.CreateRiwayatPenugasan(ctx, sqlc.CreateRiwayatPenugasanParams{
+		Nip:              pgtype.Text{String: req.NIP, Valid: true},
+		TipeJabatan:      pgtype.Text{String: req.TipeJabatan, Valid: true},
+		NamaJabatan:      pgtype.Text{String: req.NamaJabatan, Valid: true},
+		DeskripsiJabatan: pgtype.Text{String: req.DeskripsiJabatan, Valid: req.DeskripsiJabatan != ""},
+		TanggalMulai:     req.TanggalMulai.ToPgtypeDate(),
+		TanggalSelesai:   req.TanggalSelesai.ToPgtypeDate(),
+		IsMenjabat:       pgtype.Bool{Bool: req.IsMenjabat, Valid: true},
+	})
+	if err != nil {
+		return 0, fmt.Errorf("[riwayatpenugasan-create] repo create: %w", err)
+	}
+	return id, nil
+}
+
+func (s *service) update(ctx context.Context, req adminUpdateRequest) (bool, error) {
+	_, err := s.repo.GetPegawaiByNIP(ctx, req.NIP)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return false, errPegawaiNotFound
+		}
+		return false, fmt.Errorf("[riwayatpenugasan-update] repo get pegawai: %w", err)
+	}
+
+	affected, err := s.repo.UpdateRiwayatPenugasan(ctx, sqlc.UpdateRiwayatPenugasanParams{
+		ID:               req.ID,
+		Nip:              req.NIP,
+		TipeJabatan:      pgtype.Text{String: req.TipeJabatan, Valid: true},
+		NamaJabatan:      pgtype.Text{String: req.NamaJabatan, Valid: true},
+		DeskripsiJabatan: pgtype.Text{String: req.DeskripsiJabatan, Valid: req.DeskripsiJabatan != ""},
+		TanggalMulai:     req.TanggalMulai.ToPgtypeDate(),
+		TanggalSelesai:   req.TanggalSelesai.ToPgtypeDate(),
+		IsMenjabat:       pgtype.Bool{Bool: req.IsMenjabat, Valid: true},
+	})
+	if err != nil {
+		return false, fmt.Errorf("[riwayatpenugasan-update] repo update: %w", err)
+	}
+	return affected == 1, nil
+}
+
+func (s *service) delete(ctx context.Context, req adminDeleteRequest) (bool, error) {
+	affected, err := s.repo.DeleteRiwayatPenugasan(ctx, sqlc.DeleteRiwayatPenugasanParams{
+		ID:  req.ID,
+		Nip: req.NIP,
+	})
+	if err != nil {
+		return false, fmt.Errorf("[riwayatpenugasan-delete] repo delete: %w", err)
+	}
+	return affected == 1, nil
+}
+
+func (s *service) uploadBerkas(ctx context.Context, id int32, nip, fileBase64 string) (bool, error) {
+	affected, err := s.repo.UploadBerkasRiwayatPenugasan(ctx, sqlc.UploadBerkasRiwayatPenugasanParams{
+		ID:         id,
+		Nip:        nip,
+		FileBase64: pgtype.Text{String: fileBase64, Valid: true},
+	})
+	if err != nil {
+		return false, fmt.Errorf("[riwayatpenugasan-upload-berkas] repo upload berkas: %w", err)
+	}
+	return affected == 1, nil
 }

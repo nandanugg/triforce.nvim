@@ -21,6 +21,56 @@ func (q *Queries) CountRiwayatPenugasan(ctx context.Context, nip pgtype.Text) (i
 	return count, err
 }
 
+const createRiwayatPenugasan = `-- name: CreateRiwayatPenugasan :one
+insert into riwayat_penugasan (tipe_jabatan, nama_jabatan, deskripsi_jabatan, tanggal_mulai, tanggal_selesai, nip, is_menjabat)
+values ($1, $2, $3, $4, $5, $6, $7)
+returning id
+`
+
+type CreateRiwayatPenugasanParams struct {
+	TipeJabatan      pgtype.Text `db:"tipe_jabatan"`
+	NamaJabatan      pgtype.Text `db:"nama_jabatan"`
+	DeskripsiJabatan pgtype.Text `db:"deskripsi_jabatan"`
+	TanggalMulai     pgtype.Date `db:"tanggal_mulai"`
+	TanggalSelesai   pgtype.Date `db:"tanggal_selesai"`
+	Nip              pgtype.Text `db:"nip"`
+	IsMenjabat       pgtype.Bool `db:"is_menjabat"`
+}
+
+func (q *Queries) CreateRiwayatPenugasan(ctx context.Context, arg CreateRiwayatPenugasanParams) (int32, error) {
+	row := q.db.QueryRow(ctx, createRiwayatPenugasan,
+		arg.TipeJabatan,
+		arg.NamaJabatan,
+		arg.DeskripsiJabatan,
+		arg.TanggalMulai,
+		arg.TanggalSelesai,
+		arg.Nip,
+		arg.IsMenjabat,
+	)
+	var id int32
+	err := row.Scan(&id)
+	return id, err
+}
+
+const deleteRiwayatPenugasan = `-- name: DeleteRiwayatPenugasan :execrows
+update riwayat_penugasan
+set deleted_at = now()
+where id = $1 and nip = $2::varchar and deleted_at is null
+`
+
+type DeleteRiwayatPenugasanParams struct {
+	ID  int32  `db:"id"`
+	Nip string `db:"nip"`
+}
+
+func (q *Queries) DeleteRiwayatPenugasan(ctx context.Context, arg DeleteRiwayatPenugasanParams) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteRiwayatPenugasan, arg.ID, arg.Nip)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const getBerkasRiwayatPenugasan = `-- name: GetBerkasRiwayatPenugasan :one
 select file_base64 from riwayat_penugasan
 where nip = $1 and id = $2 and deleted_at is null
@@ -95,4 +145,67 @@ func (q *Queries) ListRiwayatPenugasan(ctx context.Context, arg ListRiwayatPenug
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateRiwayatPenugasan = `-- name: UpdateRiwayatPenugasan :execrows
+update 
+  riwayat_penugasan
+set 
+  tipe_jabatan = $1, 
+  nama_jabatan = $2, 
+  deskripsi_jabatan = $3, 
+  tanggal_mulai = $4, 
+  tanggal_selesai = $5, 
+  is_menjabat = $6,
+  updated_at = now()
+where 
+  id = $7 and nip = $8::varchar and deleted_at is null
+`
+
+type UpdateRiwayatPenugasanParams struct {
+	TipeJabatan      pgtype.Text `db:"tipe_jabatan"`
+	NamaJabatan      pgtype.Text `db:"nama_jabatan"`
+	DeskripsiJabatan pgtype.Text `db:"deskripsi_jabatan"`
+	TanggalMulai     pgtype.Date `db:"tanggal_mulai"`
+	TanggalSelesai   pgtype.Date `db:"tanggal_selesai"`
+	IsMenjabat       pgtype.Bool `db:"is_menjabat"`
+	ID               int32       `db:"id"`
+	Nip              string      `db:"nip"`
+}
+
+func (q *Queries) UpdateRiwayatPenugasan(ctx context.Context, arg UpdateRiwayatPenugasanParams) (int64, error) {
+	result, err := q.db.Exec(ctx, updateRiwayatPenugasan,
+		arg.TipeJabatan,
+		arg.NamaJabatan,
+		arg.DeskripsiJabatan,
+		arg.TanggalMulai,
+		arg.TanggalSelesai,
+		arg.IsMenjabat,
+		arg.ID,
+		arg.Nip,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
+const uploadBerkasRiwayatPenugasan = `-- name: UploadBerkasRiwayatPenugasan :execrows
+update riwayat_penugasan
+set file_base64 = $1, updated_at = now()
+where id = $2 and nip = $3::varchar and deleted_at is null
+`
+
+type UploadBerkasRiwayatPenugasanParams struct {
+	FileBase64 pgtype.Text `db:"file_base64"`
+	ID         int32       `db:"id"`
+	Nip        string      `db:"nip"`
+}
+
+func (q *Queries) UploadBerkasRiwayatPenugasan(ctx context.Context, arg UploadBerkasRiwayatPenugasanParams) (int64, error) {
+	result, err := q.db.Exec(ctx, uploadBerkasRiwayatPenugasan, arg.FileBase64, arg.ID, arg.Nip)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
 }

@@ -3655,6 +3655,87 @@ paths:
                       $ref: "#/components/schemas/riwayatPenugasan"
                   meta:
                     $ref: "#/components/schemas/metaPagination"
+    post:
+      tags:
+        - Riwayat Penugasan
+      summary: Admin - Tambah riwayat penugasan pegawai.
+      description: Tambah riwayat penugasan pegawai berdasarkan NIP oleh admin.
+      operationId: adminCreateRiwayatPenugasan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/riwayatPenugasan"
+      responses:
+        "201":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        description: ID riwayat penugasan yang baru dibuat
+                        example: 1
+  /v1/admin/pegawai/{nip}/riwayat-penugasan/{id}:
+    put:
+      tags:
+        - Riwayat Penugasan
+      summary: Admin - Mengubah riwayat penugasan pegawai.
+      description: Mengubah riwayat penugasan pegawai berdasarkan NIP dan ID riwayat penugasan oleh admin.
+      operationId: adminUpdateRiwayatPenugasan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        $ref: "#/components/requestBodies/riwayatPenugasan"
+      responses:
+        "204":
+          description: Sukses.
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "404":
+          $ref: "#/components/responses/notFound"
+    delete:
+      tags:
+        - Riwayat Penugasan
+      summary: Admin - Menghapus riwayat penugasan pegawai.
+      description: Menghapus riwayat penugasan pegawai berdasarkan NIP dan ID riwayat penugasan oleh admin.
+      operationId: adminDeleteRiwayatPenugasan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Sukses.
+        "404":
+          $ref: "#/components/responses/notFound"
   /v1/admin/pegawai/{nip}/riwayat-penugasan/{id}/berkas:
     get:
       tags:
@@ -3685,6 +3766,43 @@ paths:
                 format: binary
         "404":
           description: Berkas riwayat penugasan tidak ditemukan atau User tidak mempunyai akses.
+    put:
+      tags:
+        - Riwayat Penugasan
+      summary: Admin - Mengunggah berkas riwayat penugasan pegawai.
+      description: Mengunggah berkas riwayat penugasan pegawai berdasarkan NIP dan ID riwayat penugasan oleh admin.
+      operationId: adminUploadBerkasRiwayatPenugasan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required:
+                - file
+      responses:
+        "204":
+          description: Sukses.
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "404":
+          $ref: "#/components/responses/notFound"
   /v1/admin/pendidikan:
     get:
       tags:
@@ -6604,6 +6722,34 @@ components:
               - nama_sekolah
               - tahun_lulus
               - nomor_ijazah
+    riwayatPenugasan:
+      required: true
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              tipe_jabatan:
+                type: string
+                example: "Ketua"
+              nama_jabatan:
+                type: string
+                example: "Ketua Komisi"
+              deskripsi_jabatan:
+                type: string
+                example: "Mengawasi dan mengelola kegiatan komisi"
+              tanggal_mulai:
+                type: string
+                format: date
+              tanggal_selesai:
+                type: string
+                format: date
+              is_menjabat:
+                type: boolean
+                example: true
+            required:
+              - tipe_jabatan
+              - nama_jabatan
     riwayatPelatihanSIASN:
       required: true
       content:
