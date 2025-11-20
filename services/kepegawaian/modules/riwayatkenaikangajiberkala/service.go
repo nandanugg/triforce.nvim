@@ -238,14 +238,16 @@ func (s *service) validateReferences(ctx context.Context, nip, unitKerjaIndukID 
 	}
 	ref.golongan = golongan
 
-	unitKerja, err := s.repo.GetUnitKerja(ctx, unitKerjaIndukID)
-	if err != nil {
-		if !errors.Is(err, pgx.ErrNoRows) {
-			return nil, fmt.Errorf("repo get unit kerja: %w", err)
+	if unitKerjaIndukID != "" {
+		unitKerja, err := s.repo.GetUnitKerja(ctx, unitKerjaIndukID)
+		if err != nil {
+			if !errors.Is(err, pgx.ErrNoRows) {
+				return nil, fmt.Errorf("repo get unit kerja: %w", err)
+			}
+			errs = append(errs, errUnitKerjaNotFound)
 		}
-		errs = append(errs, errUnitKerjaNotFound)
+		ref.unitKerja = unitKerja
 	}
-	ref.unitKerja = unitKerja
 
 	if len(errs) > 0 {
 		return nil, api.NewMultiError(errs)

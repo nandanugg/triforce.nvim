@@ -3,7 +3,7 @@ package riwayatkenaikangajiberkala
 import "errors"
 
 var (
-	errPegawaiNotFound   = errors.New("pegawai not found")
-	errGolonganNotFound  = errors.New("golongan not found")
-	errUnitKerjaNotFound = errors.New("unit kerja not found")
+	errPegawaiNotFound   = errors.New("data pegawai tidak ditemukan")
+	errGolonganNotFound  = errors.New("data golongan tidak ditemukan")
+	errUnitKerjaNotFound = errors.New("data unit kerja tidak ditemukan")
 )

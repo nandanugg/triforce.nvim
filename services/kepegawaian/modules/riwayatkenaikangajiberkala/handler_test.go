@@ -1031,8 +1031,7 @@ func Test_handler_adminCreate(t *testing.T) {
 				"nomor_sk": "SK/127/2025",
 				"tanggal_sk": "2025-01-15",
 				"gaji_pokok": 3500000,
-				"tmt_kenaikan_gaji_berkala": "2025-01-15",
-				"unit_kerja_induk_id": "1"
+				"tmt_kenaikan_gaji_berkala": "2025-01-15"
 			}`,
 			wantResponseCode: http.StatusCreated,
 			wantResponseBody: `{
@@ -1060,7 +1059,7 @@ func Test_handler_adminCreate(t *testing.T) {
 					"pendidikan_terakhir":               nil,
 					"tanggal_lulus_pendidikan_terakhir": nil,
 					"kantor_pembayaran":                 nil,
-					"unit_kerja_induk_id":               "1",
+					"unit_kerja_induk_id":               nil,
 					"pejabat":                           nil,
 					"created_at":                        "{created_at}",
 					"updated_at":                        "{updated_at}",
@@ -1070,7 +1069,7 @@ func Test_handler_adminCreate(t *testing.T) {
 					"alasan":                            nil,
 					"n_gapok":                           nil,
 					"keterangan_berkas":                 nil,
-					"unit_kerja_induk_text":             "Unit Kerja 1",
+					"unit_kerja_induk_text":             nil,
 					"mv_kgb_id":                         nil,
 				},
 			},
@@ -1091,7 +1090,7 @@ func Test_handler_adminCreate(t *testing.T) {
 				"unit_kerja_induk_id": "1"
 			}`,
 			wantResponseCode: http.StatusNotFound,
-			wantResponseBody: `{"message": "pegawai not found"}`,
+			wantResponseBody: `{"message": "data pegawai tidak ditemukan"}`,
 			wantDBRows:       dbtest.Rows{},
 		},
 		{
@@ -1110,7 +1109,26 @@ func Test_handler_adminCreate(t *testing.T) {
 				"unit_kerja_induk_id": "1"
 			}`,
 			wantResponseCode: http.StatusNotFound,
-			wantResponseBody: `{"message": "pegawai not found"}`,
+			wantResponseBody: `{"message": "data pegawai tidak ditemukan"}`,
+			wantDBRows:       dbtest.Rows{},
+		},
+		{
+			name:          "error: unit kerja is not found",
+			paramNIP:      "1g",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"golongan_id": 1,
+				"tmt_golongan": "2025-01-15",
+				"masa_kerja_golongan_tahun": 1,
+				"masa_kerja_golongan_bulan": 0,
+				"nomor_sk": "SK/129/2025",
+				"tanggal_sk": "2025-01-15",
+				"gaji_pokok": 3500000,
+				"tmt_kenaikan_gaji_berkala": "2025-01-15",
+				"unit_kerja_induk_id": "0"
+			}`,
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "data unit kerja tidak ditemukan"}`,
 			wantDBRows:       dbtest.Rows{},
 		},
 		{
@@ -1361,8 +1379,7 @@ func Test_handler_adminUpdate(t *testing.T) {
 				"nomor_sk": "SK/127/2025",
 				"tanggal_sk": "2025-01-15",
 				"gaji_pokok": 3500000,
-				"tmt_kenaikan_gaji_berkala": "2025-01-15",
-				"unit_kerja_induk_id": "1"
+				"tmt_kenaikan_gaji_berkala": "2025-01-15"
 			}`,
 			wantResponseCode: http.StatusNoContent,
 			wantDBRows: dbtest.Rows{
@@ -1394,8 +1411,8 @@ func Test_handler_adminUpdate(t *testing.T) {
 					"tmt_golongan":                      time.Date(2025, time.January, 15, 0, 0, 0, 0, time.UTC),
 					"tmt_jabatan":                       nil,
 					"tmt_sk":                            time.Date(2025, time.January, 15, 0, 0, 0, 0, time.UTC),
-					"unit_kerja_induk_id":               "1",
-					"unit_kerja_induk_text":             "Unit Kerja 1",
+					"unit_kerja_induk_id":               nil,
+					"unit_kerja_induk_text":             nil,
 					"created_at":                        time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
 					"updated_at":                        "{updated_at}",
 					"deleted_at":                        nil,

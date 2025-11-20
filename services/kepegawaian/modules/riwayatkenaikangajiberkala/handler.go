@@ -159,6 +159,12 @@ func (h *handler) createAdmin(c echo.Context) error {
 		if errors.Is(err, errPegawaiNotFound) {
 			return echo.NewHTTPError(http.StatusNotFound, errPegawaiNotFound.Error())
 		}
+
+		var multiErr *api.MultiError
+		if errors.As(err, &multiErr) {
+			return echo.NewHTTPError(http.StatusBadRequest, multiErr.Error())
+		}
+
 		slog.ErrorContext(c.Request().Context(), "Error admin creating riwayat kenaikan gaji berkala.", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
@@ -186,6 +192,12 @@ func (h *handler) updateAdmin(c echo.Context) error {
 		if errors.Is(err, errPegawaiNotFound) {
 			return echo.NewHTTPError(http.StatusNotFound, errPegawaiNotFound.Error())
 		}
+
+		var multiErr *api.MultiError
+		if errors.As(err, &multiErr) {
+			return echo.NewHTTPError(http.StatusBadRequest, multiErr.Error())
+		}
+
 		slog.ErrorContext(c.Request().Context(), "Error admin updating riwayat kenaikan gaji berkala.", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
