@@ -71,19 +71,24 @@ func (q *Queries) CountPegawaiAktif(ctx context.Context, arg CountPegawaiAktifPa
 
 const getPegawaiByNIP = `-- name: GetPegawaiByNIP :one
 select
-    id,
+    pegawai.id as id,
     pns_id,
     nip_baru as nip,
-    nama
-from pegawai
-where nip_baru = $1::varchar and deleted_at is null
+    pegawai.nama as nama,
+    tanggal_lahir,
+    coalesce(ref_lokasi.nama, tempat_lahir) as tempat_lahir
+FROM pegawai
+LEFT JOIN ref_lokasi on ref_lokasi.id = pegawai.tempat_lahir_id and ref_lokasi.deleted_at is null
+where nip_baru = $1::varchar and pegawai.deleted_at is null
 `
 
 type GetPegawaiByNIPRow struct {
-	ID    int32       `db:"id"`
-	PnsID string      `db:"pns_id"`
-	Nip   pgtype.Text `db:"nip"`
-	Nama  pgtype.Text `db:"nama"`
+	ID           int32       `db:"id"`
+	PnsID        string      `db:"pns_id"`
+	Nip          pgtype.Text `db:"nip"`
+	Nama         pgtype.Text `db:"nama"`
+	TanggalLahir pgtype.Date `db:"tanggal_lahir"`
+	TempatLahir  pgtype.Text `db:"tempat_lahir"`
 }
 
 func (q *Queries) GetPegawaiByNIP(ctx context.Context, nip string) (GetPegawaiByNIPRow, error) {
@@ -94,6 +99,8 @@ func (q *Queries) GetPegawaiByNIP(ctx context.Context, nip string) (GetPegawaiBy
 		&i.PnsID,
 		&i.Nip,
 		&i.Nama,
+		&i.TanggalLahir,
+		&i.TempatLahir,
 	)
 	return i, err
 }

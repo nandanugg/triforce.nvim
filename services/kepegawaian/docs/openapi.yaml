@@ -2978,6 +2978,92 @@ paths:
                       $ref: "#/components/schemas/riwayatKenaikanGajiBerkala"
                   meta:
                     $ref: "#/components/schemas/metaPagination"
+    post:
+      tags:
+        - Riwayat Kenaikan Gaji Berkala
+      summary: Admin - Tambah riwayat kenaikan gaji berkala pegawai.
+      description: Tambah riwayat kenaikan gaji berkala pegawai berdasarkan NIP oleh admin.
+      operationId: adminCreateRiwayatKenaikanGajiBerkala
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/riwayatKenaikanGajiBerkala"
+      responses:
+        "201":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: false
+                    properties:
+                      id:
+                        type: integer
+                        description: ID riwayat kenaikan gaji berkala yang baru dibuat
+                        example: 1
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "404":
+          $ref: "#/components/responses/notFound"
+  /v1/admin/pegawai/{nip}/riwayat-kenaikan-gaji-berkala/{id}:
+    put:
+      tags:
+        - Riwayat Kenaikan Gaji Berkala
+      summary: Admin - Mengubah riwayat kenaikan gaji berkala pegawai.
+      description: Mengubah riwayat kenaikan gaji berkala pegawai berdasarkan NIP dan ID riwayat kenaikan gaji berkala oleh admin.
+      operationId: adminUpdateRiwayatKenaikanGajiBerkala
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        $ref: "#/components/requestBodies/riwayatKenaikanGajiBerkala"
+      responses:
+        "204":
+          description: Sukses.
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "404":
+          $ref: "#/components/responses/notFound"
+    delete:
+      tags:
+        - Riwayat Kenaikan Gaji Berkala
+      summary: Admin - Menghapus riwayat kenaikan gaji berkala pegawai.
+      description: Menghapus riwayat kenaikan gaji berkala pegawai berdasarkan NIP dan ID riwayat kenaikan gaji berkala oleh admin.
+      operationId: adminDeleteRiwayatKenaikanGajiBerkala
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Sukses.
+        "404":
+          $ref: "#/components/responses/notFound"
   /v1/admin/pegawai/{nip}/riwayat-kenaikan-gaji-berkala/{id}/berkas:
     get:
       tags:
@@ -3008,6 +3094,39 @@ paths:
                 format: binary
         "404":
           description: Berkas riwayat kenaikan gaji berkala tidak ditemukan atau User tidak mempunyai akses.
+    put:
+      tags:
+        - Riwayat Kenaikan Gaji Berkala
+      summary: Admin - Mengunggah berkas riwayat kenaikan gaji berkala pegawai.
+      description: Mengunggah berkas riwayat kenaikan gaji berkala pegawai berdasarkan NIP dan ID riwayat kenaikan gaji berkala oleh admin.
+      operationId: adminUploadBerkasRiwayatKenaikanGajiBerkala
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required:
+                - file
+      responses:
+        "204":
+          description: Sukses.
   /v1/admin/pegawai/{nip}/riwayat-hukuman-disiplin:
     get:
       tags:
@@ -6640,6 +6759,65 @@ components:
               - no_sk
               - tanggal_sk
               - tmt_jabatan
+    riwayatKenaikanGajiBerkala:
+      required: true
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              golongan_id:
+                type: integer
+              tmt_golongan:
+                type: string
+                format: date
+              masa_kerja_golongan_tahun:
+                type: integer
+              masa_kerja_golongan_bulan:
+                type: integer
+              nomor_sk:
+                type: string
+                maxLength: 100
+              tanggal_sk:
+                type: string
+                format: date
+              gaji_pokok:
+                type: integer
+              jabatan:
+                type: string
+                maxLength: 200
+              tmt_jabatan:
+                type: string
+                format: date
+                nullable: true
+              tmt_kenaikan_gaji_berkala:
+                type: string
+                format: date
+              pendidikan:
+                type: string
+                maxLength: 200
+              tanggal_lulus:
+                type: string
+                format: date
+                nullable: true
+              kantor_pembayaran:
+                type: string
+                maxLength: 200
+              pejabat:
+                type: string
+                maxLength: 255
+              unit_kerja_induk_id:
+                type: string
+                maxLength: 200
+            required:
+              - golongan_id
+              - tmt_golongan
+              - masa_kerja_golongan_tahun
+              - masa_kerja_golongan_bulan
+              - nomor_sk
+              - tanggal_sk
+              - gaji_pokok
+              - tmt_kenaikan_gaji_berkala
     riwayatKepangkatan:
       required: true
       content:

@@ -28,6 +28,134 @@ func (q *Queries) CountRiwayatKenaikanGajiBerkala(ctx context.Context, nipBaru p
 	return count, err
 }
 
+const createRiwayatKenaikanGajiBerkala = `-- name: CreateRiwayatKenaikanGajiBerkala :one
+insert into riwayat_kenaikan_gaji_berkala (
+    pegawai_id,
+    tmt_sk,
+    no_sk,
+    pejabat,
+    tanggal_sk,
+    pegawai_nama,
+    pegawai_nip,
+    tempat_lahir,
+    tanggal_lahir,
+    n_gol_ruang,
+    tmt_golongan,
+    masa_kerja_golongan_tahun,
+    masa_kerja_golongan_bulan,
+    jabatan,
+    tmt_jabatan,
+    golongan_id,
+    unit_kerja_induk_text,
+    unit_kerja_induk_id,
+    kantor_pembayaran,
+    pendidikan_terakhir,
+    tanggal_lulus_pendidikan_terakhir,
+    created_at,
+    updated_at,
+    gaji_pokok
+) values (
+    $1,
+    $2,
+    $3,
+    $4,
+    $5,
+    $6,
+    $7,
+    $8,
+    $9,
+    $10,
+    $11,
+    $12,
+    $13,
+    $14,
+    $15,
+    $16,
+    $17,
+    $18,
+    $19,
+    $20,
+    $21,
+    now(),
+    now(),
+    $22
+) returning id
+`
+
+type CreateRiwayatKenaikanGajiBerkalaParams struct {
+	PegawaiID                      pgtype.Int4 `db:"pegawai_id"`
+	TmtSk                          pgtype.Date `db:"tmt_sk"`
+	NoSk                           pgtype.Text `db:"no_sk"`
+	Pejabat                        pgtype.Text `db:"pejabat"`
+	TanggalSk                      pgtype.Date `db:"tanggal_sk"`
+	PegawaiNama                    pgtype.Text `db:"pegawai_nama"`
+	PegawaiNip                     pgtype.Text `db:"pegawai_nip"`
+	TempatLahir                    pgtype.Text `db:"tempat_lahir"`
+	TanggalLahir                   pgtype.Date `db:"tanggal_lahir"`
+	NGolRuang                      pgtype.Text `db:"n_gol_ruang"`
+	TmtGolongan                    pgtype.Date `db:"tmt_golongan"`
+	MasaKerjaGolonganTahun         pgtype.Int2 `db:"masa_kerja_golongan_tahun"`
+	MasaKerjaGolonganBulan         pgtype.Int2 `db:"masa_kerja_golongan_bulan"`
+	Jabatan                        pgtype.Text `db:"jabatan"`
+	TmtJabatan                     pgtype.Date `db:"tmt_jabatan"`
+	GolonganID                     pgtype.Int4 `db:"golongan_id"`
+	UnitKerjaIndukText             pgtype.Text `db:"unit_kerja_induk_text"`
+	UnitKerjaIndukID               pgtype.Text `db:"unit_kerja_induk_id"`
+	KantorPembayaran               pgtype.Text `db:"kantor_pembayaran"`
+	PendidikanTerakhir             pgtype.Text `db:"pendidikan_terakhir"`
+	TanggalLulusPendidikanTerakhir pgtype.Date `db:"tanggal_lulus_pendidikan_terakhir"`
+	GajiPokok                      pgtype.Int4 `db:"gaji_pokok"`
+}
+
+func (q *Queries) CreateRiwayatKenaikanGajiBerkala(ctx context.Context, arg CreateRiwayatKenaikanGajiBerkalaParams) (int64, error) {
+	row := q.db.QueryRow(ctx, createRiwayatKenaikanGajiBerkala,
+		arg.PegawaiID,
+		arg.TmtSk,
+		arg.NoSk,
+		arg.Pejabat,
+		arg.TanggalSk,
+		arg.PegawaiNama,
+		arg.PegawaiNip,
+		arg.TempatLahir,
+		arg.TanggalLahir,
+		arg.NGolRuang,
+		arg.TmtGolongan,
+		arg.MasaKerjaGolonganTahun,
+		arg.MasaKerjaGolonganBulan,
+		arg.Jabatan,
+		arg.TmtJabatan,
+		arg.GolonganID,
+		arg.UnitKerjaIndukText,
+		arg.UnitKerjaIndukID,
+		arg.KantorPembayaran,
+		arg.PendidikanTerakhir,
+		arg.TanggalLulusPendidikanTerakhir,
+		arg.GajiPokok,
+	)
+	var id int64
+	err := row.Scan(&id)
+	return id, err
+}
+
+const deleteRiwayatKenaikanGajiBerkala = `-- name: DeleteRiwayatKenaikanGajiBerkala :execrows
+update riwayat_kenaikan_gaji_berkala set
+    deleted_at = now()
+where id = $1 and pegawai_id = $2 and deleted_at is null
+`
+
+type DeleteRiwayatKenaikanGajiBerkalaParams struct {
+	ID        int64       `db:"id"`
+	PegawaiID pgtype.Int4 `db:"pegawai_id"`
+}
+
+func (q *Queries) DeleteRiwayatKenaikanGajiBerkala(ctx context.Context, arg DeleteRiwayatKenaikanGajiBerkalaParams) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteRiwayatKenaikanGajiBerkala, arg.ID, arg.PegawaiID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const getBerkasRiwayatKenaikanGajiBerkala = `-- name: GetBerkasRiwayatKenaikanGajiBerkala :one
 SELECT
     file_base64
@@ -156,4 +284,98 @@ func (q *Queries) ListRiwayatKenaikanGajiBerkala(ctx context.Context, arg ListRi
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateRiwayatKenaikanGajiBerkala = `-- name: UpdateRiwayatKenaikanGajiBerkala :execrows
+update riwayat_kenaikan_gaji_berkala set
+    tmt_sk = $1,
+    no_sk = $2,
+    pejabat = $3,
+    tanggal_sk = $4,
+    n_gol_ruang = $5,
+    tmt_golongan = $6,
+    masa_kerja_golongan_tahun = $7,
+    masa_kerja_golongan_bulan = $8,
+    jabatan = $9,
+    tmt_jabatan = $10,
+    golongan_id = $11,
+    unit_kerja_induk_text = $12,
+    unit_kerja_induk_id = $13,
+    kantor_pembayaran = $14,
+    pendidikan_terakhir = $15,
+    tanggal_lulus_pendidikan_terakhir = $16,
+    gaji_pokok = $17,
+    updated_at = now()
+where id = $18 and pegawai_id = $19 and deleted_at is null
+`
+
+type UpdateRiwayatKenaikanGajiBerkalaParams struct {
+	TmtSk                          pgtype.Date `db:"tmt_sk"`
+	NoSk                           pgtype.Text `db:"no_sk"`
+	Pejabat                        pgtype.Text `db:"pejabat"`
+	TanggalSk                      pgtype.Date `db:"tanggal_sk"`
+	NGolRuang                      pgtype.Text `db:"n_gol_ruang"`
+	TmtGolongan                    pgtype.Date `db:"tmt_golongan"`
+	MasaKerjaGolonganTahun         pgtype.Int2 `db:"masa_kerja_golongan_tahun"`
+	MasaKerjaGolonganBulan         pgtype.Int2 `db:"masa_kerja_golongan_bulan"`
+	Jabatan                        pgtype.Text `db:"jabatan"`
+	TmtJabatan                     pgtype.Date `db:"tmt_jabatan"`
+	GolonganID                     pgtype.Int4 `db:"golongan_id"`
+	UnitKerjaIndukText             pgtype.Text `db:"unit_kerja_induk_text"`
+	UnitKerjaIndukID               pgtype.Text `db:"unit_kerja_induk_id"`
+	KantorPembayaran               pgtype.Text `db:"kantor_pembayaran"`
+	PendidikanTerakhir             pgtype.Text `db:"pendidikan_terakhir"`
+	TanggalLulusPendidikanTerakhir pgtype.Date `db:"tanggal_lulus_pendidikan_terakhir"`
+	GajiPokok                      pgtype.Int4 `db:"gaji_pokok"`
+	ID                             int64       `db:"id"`
+	PegawaiID                      pgtype.Int4 `db:"pegawai_id"`
+}
+
+func (q *Queries) UpdateRiwayatKenaikanGajiBerkala(ctx context.Context, arg UpdateRiwayatKenaikanGajiBerkalaParams) (int64, error) {
+	result, err := q.db.Exec(ctx, updateRiwayatKenaikanGajiBerkala,
+		arg.TmtSk,
+		arg.NoSk,
+		arg.Pejabat,
+		arg.TanggalSk,
+		arg.NGolRuang,
+		arg.TmtGolongan,
+		arg.MasaKerjaGolonganTahun,
+		arg.MasaKerjaGolonganBulan,
+		arg.Jabatan,
+		arg.TmtJabatan,
+		arg.GolonganID,
+		arg.UnitKerjaIndukText,
+		arg.UnitKerjaIndukID,
+		arg.KantorPembayaran,
+		arg.PendidikanTerakhir,
+		arg.TanggalLulusPendidikanTerakhir,
+		arg.GajiPokok,
+		arg.ID,
+		arg.PegawaiID,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
+const uploadBerkasRiwayatKenaikanGajiBerkala = `-- name: UploadBerkasRiwayatKenaikanGajiBerkala :execrows
+update riwayat_kenaikan_gaji_berkala set
+    file_base64 = $1,
+    updated_at = now()
+where id = $2 and pegawai_id = $3 and deleted_at is null
+`
+
+type UploadBerkasRiwayatKenaikanGajiBerkalaParams struct {
+	FileBase64 pgtype.Text `db:"file_base64"`
+	ID         int64       `db:"id"`
+	PegawaiID  pgtype.Int4 `db:"pegawai_id"`
+}
+
+func (q *Queries) UploadBerkasRiwayatKenaikanGajiBerkala(ctx context.Context, arg UploadBerkasRiwayatKenaikanGajiBerkalaParams) (int64, error) {
+	result, err := q.db.Exec(ctx, uploadBerkasRiwayatKenaikanGajiBerkala, arg.FileBase64, arg.ID, arg.PegawaiID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
 }

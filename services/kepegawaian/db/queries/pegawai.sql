@@ -110,9 +110,12 @@ SELECT nik::text FROM pegawai WHERE nip_baru = @nip::varchar AND deleted_at IS N
 
 -- name: GetPegawaiByNIP :one
 select
-    id,
+    pegawai.id as id,
     pns_id,
     nip_baru as nip,
-    nama
-from pegawai
-where nip_baru = @nip::varchar and deleted_at is null;
+    pegawai.nama as nama,
+    tanggal_lahir,
+    coalesce(ref_lokasi.nama, tempat_lahir) as tempat_lahir
+FROM pegawai
+LEFT JOIN ref_lokasi on ref_lokasi.id = pegawai.tempat_lahir_id and ref_lokasi.deleted_at is null
+where nip_baru = @nip::varchar and pegawai.deleted_at is null;

@@ -17,4 +17,9 @@ func RegisterRoutes(e *echo.Echo, repo repository, mwAuth api.AuthMiddlewareFunc
 
 	e.Add(http.MethodGet, "/v1/admin/pegawai/:nip/riwayat-kenaikan-gaji-berkala", h.listAdmin, mwAuth(api.Kode_Pegawai_Read))
 	e.Add(http.MethodGet, "/v1/admin/pegawai/:nip/riwayat-kenaikan-gaji-berkala/:id/berkas", h.getBerkasAdmin, mwAuth(api.Kode_Pegawai_Read))
+
+	e.Add(http.MethodPost, "/v1/admin/pegawai/:nip/riwayat-kenaikan-gaji-berkala", h.createAdmin, mwAuth(api.Kode_Pegawai_Write))
+	e.Add(http.MethodPut, "/v1/admin/pegawai/:nip/riwayat-kenaikan-gaji-berkala/:id", h.updateAdmin, mwAuth(api.Kode_Pegawai_Write))
+	e.Add(http.MethodDelete, "/v1/admin/pegawai/:nip/riwayat-kenaikan-gaji-berkala/:id", h.deleteAdmin, mwAuth(api.Kode_Pegawai_Write))
+	e.Add(http.MethodPut, "/v1/admin/pegawai/:nip/riwayat-kenaikan-gaji-berkala/:id/berkas", h.adminUploadBerkas, mwAuth(api.Kode_Pegawai_Write))
 }

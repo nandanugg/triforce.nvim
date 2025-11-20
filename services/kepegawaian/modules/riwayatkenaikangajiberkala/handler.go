@@ -1,12 +1,14 @@
 package riwayatkenaikangajiberkala
 
 import (
+	"errors"
 	"log/slog"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
 )
 
 type handler struct {
@@ -114,4 +116,142 @@ func (h *handler) getBerkasAdmin(c echo.Context) error {
 
 	c.Response().Header().Set("Content-Disposition", "inline")
 	return c.Blob(http.StatusOK, mimeType, blob)
+}
+
+type upsertParams struct {
+	GolonganID             int32   `json:"golongan_id"`
+	TMTGolongan            db.Date `json:"tmt_golongan"`
+	MasaKerjaGolonganTahun int16   `json:"masa_kerja_golongan_tahun"`
+	MasaKerjaGolonganBulan int16   `json:"masa_kerja_golongan_bulan"`
+	NomorSK                string  `json:"nomor_sk"`
+	TanggalSK              db.Date `json:"tanggal_sk"`
+	GajiPokok              int32   `json:"gaji_pokok"`
+	Jabatan                string  `json:"jabatan"`
+	TMTJabatan             db.Date `json:"tmt_jabatan"`
+	TMTKenaikanGajiBerkala db.Date `json:"tmt_kenaikan_gaji_berkala"`
+	Pendidikan             string  `json:"pendidikan"`
+	TanggalLulus           db.Date `json:"tanggal_lulus"`
+	KantorPembayaran       string  `json:"kantor_pembayaran"`
+	Pejabat                string  `json:"pejabat"`
+	UnitKerjaIndukID       string  `json:"unit_kerja_induk_id"`
+}
+
+type adminCreateRequest struct {
+	NIP string `param:"nip"`
+	upsertParams
+}
+
+type adminCreateResponse struct {
+	Data struct {
+		ID int64 `json:"id"`
+	} `json:"data"`
+}
+
+func (h *handler) createAdmin(c echo.Context) error {
+	var req adminCreateRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	ctx := c.Request().Context()
+	id, err := h.service.create(ctx, req)
+	if err != nil {
+		if errors.Is(err, errPegawaiNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, errPegawaiNotFound.Error())
+		}
+		slog.ErrorContext(c.Request().Context(), "Error admin creating riwayat kenaikan gaji berkala.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	var resp adminCreateResponse
+	resp.Data.ID = id
+	return c.JSON(http.StatusCreated, resp)
+}
+
+type adminUpdateRequest struct {
+	ID  int64  `param:"id"`
+	NIP string `param:"nip"`
+	upsertParams
+}
+
+func (h *handler) updateAdmin(c echo.Context) error {
+	var req adminUpdateRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	ctx := c.Request().Context()
+	found, err := h.service.update(ctx, req)
+	if err != nil {
+		if errors.Is(err, errPegawaiNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, errPegawaiNotFound.Error())
+		}
+		slog.ErrorContext(c.Request().Context(), "Error admin updating riwayat kenaikan gaji berkala.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	if !found {
+		return echo.NewHTTPError(http.StatusNotFound, "data tidak ditemukan")
+	}
+
+	return c.NoContent(http.StatusNoContent)
+}
+
+type adminDeleteRequest struct {
+	ID  int64  `param:"id"`
+	NIP string `param:"nip"`
+}
+
+func (h *handler) deleteAdmin(c echo.Context) error {
+	var req adminDeleteRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	ctx := c.Request().Context()
+	found, err := h.service.delete(ctx, req.NIP, req.ID)
+	if err != nil {
+		if errors.Is(err, errPegawaiNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, errPegawaiNotFound.Error())
+		}
+		slog.ErrorContext(c.Request().Context(), "Error admin deleting riwayat kenaikan gaji berkala.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	if !found {
+		return echo.NewHTTPError(http.StatusNotFound, "data tidak ditemukan")
+	}
+	return c.NoContent(http.StatusNoContent)
+}
+
+type adminUploadBerkasRequest struct {
+	ID  int64  `param:"id"`
+	NIP string `param:"nip"`
+}
+
+func (h *handler) adminUploadBerkas(c echo.Context) error {
+	var req adminUploadBerkasRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	fileBase64, _, err := api.GetFileBase64(c)
+	if err != nil {
+		return err
+	}
+
+	found, err := h.service.uploadBerkas(c.Request().Context(), req.ID, req.NIP, fileBase64)
+	if err != nil {
+		if errors.Is(err, errPegawaiNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, errPegawaiNotFound.Error())
+		}
+		slog.ErrorContext(c.Request().Context(), "Error admin uploading berkas riwayat kenaikan gaji berkala.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	if !found {
+		return echo.NewHTTPError(http.StatusNotFound, "data tidak ditemukan")
+	}
+
+	return c.NoContent(http.StatusNoContent)
 }
