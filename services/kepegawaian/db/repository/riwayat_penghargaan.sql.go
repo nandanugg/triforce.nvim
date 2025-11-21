@@ -22,6 +22,55 @@ func (q *Queries) CountRiwayatPenghargaan(ctx context.Context, nip string) (int6
 	return count, err
 }
 
+const createRiwayatPenghargaan = `-- name: CreateRiwayatPenghargaan :one
+insert into 
+    riwayat_penghargaan_umum (nip, nama_penghargaan, jenis_penghargaan, deskripsi_penghargaan, tanggal_penghargaan) 
+values 
+    ($1, $2, $3, $4, $5)
+returning id
+`
+
+type CreateRiwayatPenghargaanParams struct {
+	Nip                  pgtype.Text `db:"nip"`
+	NamaPenghargaan      pgtype.Text `db:"nama_penghargaan"`
+	JenisPenghargaan     pgtype.Text `db:"jenis_penghargaan"`
+	DeskripsiPenghargaan pgtype.Text `db:"deskripsi_penghargaan"`
+	TanggalPenghargaan   pgtype.Date `db:"tanggal_penghargaan"`
+}
+
+func (q *Queries) CreateRiwayatPenghargaan(ctx context.Context, arg CreateRiwayatPenghargaanParams) (int32, error) {
+	row := q.db.QueryRow(ctx, createRiwayatPenghargaan,
+		arg.Nip,
+		arg.NamaPenghargaan,
+		arg.JenisPenghargaan,
+		arg.DeskripsiPenghargaan,
+		arg.TanggalPenghargaan,
+	)
+	var id int32
+	err := row.Scan(&id)
+	return id, err
+}
+
+const deleteRiwayatPenghargaan = `-- name: DeleteRiwayatPenghargaan :execrows
+update riwayat_penghargaan_umum
+set
+    deleted_at = now()
+where id = $1 and nip = $2::varchar and deleted_at is null
+`
+
+type DeleteRiwayatPenghargaanParams struct {
+	ID  int32  `db:"id"`
+	Nip string `db:"nip"`
+}
+
+func (q *Queries) DeleteRiwayatPenghargaan(ctx context.Context, arg DeleteRiwayatPenghargaanParams) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteRiwayatPenghargaan, arg.ID, arg.Nip)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const getBerkasRiwayatPenghargaan = `-- name: GetBerkasRiwayatPenghargaan :one
 SELECT file_base64
 FROM riwayat_penghargaan_umum rpu
@@ -93,4 +142,60 @@ func (q *Queries) ListRiwayatPenghargaan(ctx context.Context, arg ListRiwayatPen
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateRiwayatPenghargaan = `-- name: UpdateRiwayatPenghargaan :execrows
+update riwayat_penghargaan_umum
+set
+    nip = $2,
+    nama_penghargaan = $3,
+    jenis_penghargaan = $4,
+    deskripsi_penghargaan = $5,
+    tanggal_penghargaan = $6
+where id = $1 AND deleted_at IS NULL
+`
+
+type UpdateRiwayatPenghargaanParams struct {
+	ID                   int32       `db:"id"`
+	Nip                  pgtype.Text `db:"nip"`
+	NamaPenghargaan      pgtype.Text `db:"nama_penghargaan"`
+	JenisPenghargaan     pgtype.Text `db:"jenis_penghargaan"`
+	DeskripsiPenghargaan pgtype.Text `db:"deskripsi_penghargaan"`
+	TanggalPenghargaan   pgtype.Date `db:"tanggal_penghargaan"`
+}
+
+func (q *Queries) UpdateRiwayatPenghargaan(ctx context.Context, arg UpdateRiwayatPenghargaanParams) (int64, error) {
+	result, err := q.db.Exec(ctx, updateRiwayatPenghargaan,
+		arg.ID,
+		arg.Nip,
+		arg.NamaPenghargaan,
+		arg.JenisPenghargaan,
+		arg.DeskripsiPenghargaan,
+		arg.TanggalPenghargaan,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
+const updateRiwayatPenghargaanBerkas = `-- name: UpdateRiwayatPenghargaanBerkas :execrows
+update riwayat_penghargaan_umum
+set
+    file_base64 = $1
+where id = $2 AND nip = $3::varchar AND riwayat_penghargaan_umum.deleted_at IS NULL
+`
+
+type UpdateRiwayatPenghargaanBerkasParams struct {
+	FileBase64 pgtype.Text `db:"file_base64"`
+	ID         int32       `db:"id"`
+	Nip        string      `db:"nip"`
+}
+
+func (q *Queries) UpdateRiwayatPenghargaanBerkas(ctx context.Context, arg UpdateRiwayatPenghargaanBerkasParams) (int64, error) {
+	result, err := q.db.Exec(ctx, updateRiwayatPenghargaanBerkas, arg.FileBase64, arg.ID, arg.Nip)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
 }

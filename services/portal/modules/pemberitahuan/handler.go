@@ -1,7 +1,6 @@
 package pemberitahuan
 
 import (
-	"errors"
 	"log/slog"
 	"net/http"
 	"time"
@@ -97,10 +96,6 @@ func (h *handler) create(c echo.Context) error {
 		DiperbaharuiOleh: usr.NIP,
 	})
 	if err != nil {
-		if errors.Is(err, ErrConflict) {
-			slog.ErrorContext(ctx, "Error creating pemberitahuan", "error", err)
-			return echo.NewHTTPError(http.StatusConflict, err)
-		}
 		slog.ErrorContext(ctx, "Error creating pemberitahuan", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
@@ -129,10 +124,6 @@ func (h *handler) update(c echo.Context) error {
 		DiperbaharuiOleh: usr.NIP,
 	})
 	if err != nil {
-		if errors.Is(err, ErrConflict) {
-			slog.ErrorContext(ctx, "Error updating pemberitahuan", "error", err)
-			return echo.NewHTTPError(http.StatusConflict, err)
-		}
 		slog.ErrorContext(ctx, "Error updating pemberitahuan", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}

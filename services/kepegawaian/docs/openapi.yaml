@@ -3697,6 +3697,7 @@ paths:
           required: true
           schema:
             type: string
+            minLength: 1
         - $ref: "#/components/parameters/limit"
         - $ref: "#/components/parameters/offset"
       responses:
@@ -3713,7 +3714,137 @@ paths:
                       $ref: "#/components/schemas/riwayatPenghargaan"
                   meta:
                     $ref: "#/components/schemas/metaPagination"
+    post:
+      tags:
+        - Riwayat Penghargaan
+      summary: Admin - Tambah riwayat penghargaan pegawai.
+      description: Tambah riwayat penghargaan pegawai berdasarkan NIP oleh admin.
+      operationId: adminCreateRiwayatPenghargaan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      requestBody:
+        $ref: "#/components/requestBodies/riwayatPenghargaan"
+      responses:
+        "201":
+          $ref: "#/components/responses/createdIdNumber"
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "404":
+          $ref: "#/components/responses/notFound"
+  /v1/admin/pegawai/{nip}/riwayat-penghargaan/{id}:
+    put:
+      tags:
+        - Riwayat Penghargaan
+      summary: Admin - Mengubah riwayat penghargaan pegawai.
+      description: Mengubah riwayat penghargaan pegawai berdasarkan NIP dan ID riwayat kepangkatan oleh admin.
+      operationId: adminUpdateRiwayatPenghargaan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      requestBody:
+        $ref: "#/components/requestBodies/riwayatPenghargaan"
+      responses:
+        "204":
+          description: Sukses.
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "404":
+          $ref: "#/components/responses/notFound"
+    delete:
+      tags:
+        - Riwayat Penghargaan
+      summary: Admin - Menghapus riwayat penghargaan pegawai.
+      description: Menghapus riwayat penghargaan pegawai berdasarkan NIP dan ID riwayat kepangkatan oleh admin.
+      operationId: adminDeleteRiwayatPenghargaan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        "204":
+          description: Sukses.
+        "404":
+          $ref: "#/components/responses/notFound"
   /v1/admin/pegawai/{nip}/riwayat-penghargaan/{id}/berkas:
+    post:
+      tags:
+        - Riwayat Penghargaan
+      summary: Admin - Upload file riwayat penghargaan pegawai.
+      description: Upload file riwayat penghargaan pegawai berdasarkan NIP dan ID riwayat kepangkatan oleh admin.
+      operationId: adminUploadFileRiwayatPenghargaan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            encoding:
+              file:
+                contentType: >-
+                  application/vnd.openxmlformats-officedocument.wordprocessingml.document,
+                  application/vnd.openxmlformats-officedocument.presentationml.presentation,
+                  application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,
+                  application/msword,
+                  application/vnd.ms-excel,
+                  application/vnd.ms-powerpoint,
+                  application/pdf,
+                  image/jpeg,
+                  image/png
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The uploaded file content
+              required:
+                - file
+      responses:
+        "204":
+          description: Sukses.
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "404":
+          $ref: "#/components/responses/notFound"
     get:
       tags:
         - Riwayat Penghargaan
@@ -3728,11 +3859,13 @@ paths:
           required: true
           schema:
             type: string
+            minLength: 1
         - name: id
           in: path
           required: true
           schema:
-            type: integer
+            type: string
+            minLength: 1
       responses:
         "200":
           description: Sukses.
@@ -6992,6 +7125,26 @@ components:
               - tanggal
               - tahun
               - lama
+    riwayatPenghargaan:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: false
+            properties:
+              jenis_penghargaan:
+                type: string
+                minLength: 1
+              nama_penghargaan:
+                type: string
+                minLength: 1
+              deskripsi:
+                type: string
+              tanggal:
+                type: string
+                format: date
+                nullable: true
   responses:
     createdIdInteger:
       description: Sukses.
@@ -7006,6 +7159,19 @@ components:
                 properties:
                   id:
                     type: integer
+    createdIdNumber:
+      description: Sukses.
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              data:
+                type: object
+                additionalProperties: false
+                properties:
+                  id:
+                    type: number
     createdIdString:
       description: Sukses.
       content:
@@ -7756,8 +7922,10 @@ components:
           type: integer
         jenis_penghargaan:
           type: string
+          minLength: 1
         nama_penghargaan:
           type: string
+          minLength: 1
         deskripsi:
           type: string
         tanggal:
