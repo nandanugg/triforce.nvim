@@ -30,3 +30,11 @@ LIMIT $1 OFFSET $2;
 -- name: CountRefJenisJabatan :one
 SELECT COUNT(1) FROM ref_jenis_jabatan
 WHERE deleted_at IS NULL;
+
+-- name: IsExistReferencesJabatanByID :one
+SELECT EXISTS (
+    SELECT 1
+    FROM ref_jabatan
+    WHERE jenis_jabatan = @id::int4
+      AND deleted_at IS NULL
+) AS exists;

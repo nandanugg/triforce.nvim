@@ -19,6 +19,7 @@ type repository interface {
 	DeleteRefJenisJabatan(ctx context.Context, id int32) (int64, error)
 	GetRefJenisJabatan(ctx context.Context, id int32) (repo.GetRefJenisJabatanRow, error)
 	UpdateRefJenisJabatan(ctx context.Context, arg repo.UpdateRefJenisJabatanParams) (repo.UpdateRefJenisJabatanRow, error)
+	IsExistReferencesJabatanByID(ctx context.Context, id int32) (bool, error)
 }
 
 type service struct {
@@ -112,6 +113,14 @@ func (s *service) update(ctx context.Context, params updateParams) (*jenisJabata
 }
 
 func (s *service) delete(ctx context.Context, id int32) (bool, error) {
+	exists, err := s.repo.IsExistReferencesJabatanByID(ctx, id)
+	if err != nil {
+		return false, fmt.Errorf("[delete] error IsExistReferencesJabatanByID: %w", err)
+	}
+	if exists {
+		return false, errJenisJabatanReferenced
+	}
+
 	affected, err := s.repo.DeleteRefJenisJabatan(ctx, id)
 	if err != nil {
 		return false, fmt.Errorf("[delete] error deleteJenisJabatan: %w", err)

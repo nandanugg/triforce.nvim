@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 
@@ -18,10 +20,11 @@ type repository interface {
 	CountRefJabatan(ctx context.Context, nama pgtype.Text) (int64, error)
 	CountRefJabatanWithKeyword(ctx context.Context, keyword pgtype.Text) (int64, error)
 	GetRefJabatan(ctx context.Context, id int32) (sqlc.GetRefJabatanRow, error)
+	GetRefJabatanByKode(ctx context.Context, kode string) (sqlc.GetRefJabatanByKodeRow, error)
 	CreateRefJabatan(ctx context.Context, arg sqlc.CreateRefJabatanParams) (sqlc.CreateRefJabatanRow, error)
 	UpdateRefJabatan(ctx context.Context, arg sqlc.UpdateRefJabatanParams) (sqlc.UpdateRefJabatanRow, error)
-	DeleteRefJabatan(ctx context.Context, id int32) (int64, error)
-	IsExistReferencesPegawaiByID(ctx context.Context, id int32) (bool, error)
+	DeleteRefJabatan(ctx context.Context, arg sqlc.DeleteRefJabatanParams) (int64, error)
+	IsExistReferencesPegawaiByID(ctx context.Context, kode pgtype.Text) (bool, error)
 }
 
 type service struct {
@@ -141,6 +144,15 @@ type createParams struct {
 }
 
 func (s *service) create(ctx context.Context, params createParams) (*jabatan, error) {
+	jabatanExists, err := s.repo.GetRefJabatanByKode(ctx, params.kodeJabatan)
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+		return nil, fmt.Errorf("[create] error GetRefJabatanByKode: %w", err)
+	}
+
+	if jabatanExists.Kode != "" {
+		return nil, errJabatanExists
+	}
+
 	row, err := s.repo.CreateRefJabatan(ctx, sqlc.CreateRefJabatanParams{
 		KodeJabatan:      params.kodeJabatan,
 		NamaJabatan:      s.stringToPgtypeText(params.namaJabatan),
@@ -191,6 +203,14 @@ type updateParams struct {
 }
 
 func (s *service) update(ctx context.Context, id int32, params updateParams) (*jabatan, error) {
+	jabatanExists, err := s.repo.GetRefJabatanByKode(ctx, params.kodeJabatan)
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+		return nil, fmt.Errorf("[update] error GetRefJabatanByKode: %w", err)
+	}
+	if jabatanExists.Kode != "" && jabatanExists.ID != id {
+		return nil, errJabatanExists
+	}
+
 	row, err := s.repo.UpdateRefJabatan(ctx, sqlc.UpdateRefJabatanParams{
 		ID:               id,
 		KodeJabatan:      params.kodeJabatan,
@@ -229,14 +249,24 @@ func (s *service) update(ctx context.Context, id int32, params updateParams) (*j
 }
 
 func (s *service) delete(ctx context.Context, id int32) (bool, error) {
-	isExist, err := s.repo.IsExistReferencesPegawaiByID(ctx, id)
+	row, err := s.repo.GetRefJabatan(ctx, id)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return false, nil
+		}
+		return false, fmt.Errorf("[delete] error GetRefJabatan: %w", err)
+	}
+	isExist, err := s.repo.IsExistReferencesPegawaiByID(ctx, pgtype.Text{Valid: true, String: row.KodeJabatan})
 	if err != nil {
 		return false, fmt.Errorf("[delete] error IsExistReferencesPegawaiByID: %w", err)
 	}
 	if isExist {
 		return false, errJabatanReferenced
 	}
-	rowsAffected, err := s.repo.DeleteRefJabatan(ctx, id)
+	rowsAffected, err := s.repo.DeleteRefJabatan(ctx, sqlc.DeleteRefJabatanParams{
+		ID:           id,
+		RandomString: strings.ReplaceAll(uuid.New().String(), "-", "")[:6],
+	})
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return false, nil

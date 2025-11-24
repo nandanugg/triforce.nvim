@@ -143,6 +143,9 @@ func (h *handler) create(c echo.Context) error {
 		tunjanganJabatan: req.TunjanganJabatan,
 	})
 	if err != nil {
+		if errors.Is(err, errJabatanExists) {
+			return echo.NewHTTPError(http.StatusBadRequest, errJabatanExists.Error())
+		}
 		slog.ErrorContext(ctx, "Error creating jabatan.", "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}

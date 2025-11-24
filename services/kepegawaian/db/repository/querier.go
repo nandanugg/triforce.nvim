@@ -82,7 +82,7 @@ type Querier interface {
 	DeletePasangan(ctx context.Context, arg DeletePasanganParams) (int64, error)
 	DeleteRefAgama(ctx context.Context, id int32) (int64, error)
 	DeleteRefGolongan(ctx context.Context, id int32) (int64, error)
-	DeleteRefJabatan(ctx context.Context, id int32) (int64, error)
+	DeleteRefJabatan(ctx context.Context, arg DeleteRefJabatanParams) (int64, error)
 	DeleteRefJenisHukuman(ctx context.Context, id int32) (int64, error)
 	DeleteRefJenisJabatan(ctx context.Context, id int32) (int64, error)
 	DeleteRefJenisPenghargaan(ctx context.Context, id int32) (int64, error)
@@ -143,7 +143,8 @@ type Querier interface {
 	GetUnitKerja(ctx context.Context, id string) (GetUnitKerjaRow, error)
 	InsertLogRequestSuratKeputusan(ctx context.Context, arg InsertLogRequestSuratKeputusanParams) error
 	InsertRiwayatSuratKeputusan(ctx context.Context, arg InsertRiwayatSuratKeputusanParams) error
-	IsExistReferencesPegawaiByID(ctx context.Context, id int32) (bool, error)
+	IsExistReferencesJabatanByID(ctx context.Context, id int32) (bool, error)
+	IsExistReferencesPegawaiByID(ctx context.Context, jabatanInstansiID pgtype.Text) (bool, error)
 	IsExistReferencesRiwayatHukumanDisiplinByID(ctx context.Context, dollar_1 int32) (bool, error)
 	IsPasanganExistsByIDAndNIP(ctx context.Context, arg IsPasanganExistsByIDAndNIPParams) (bool, error)
 	ListAkarUnitKerja(ctx context.Context, arg ListAkarUnitKerjaParams) ([]ListAkarUnitKerjaRow, error)

@@ -406,6 +406,11 @@ func Test_handler_adminDeleteJenisJabatan(t *testing.T) {
 		(1, 'Jenis Jabatan 1', now(), now(), NULL),
 		(2, 'Jenis Jabatan 2', now(), now(), NULL),
 		(3, 'Jenis Jabatan 3', now(), now(), now());
+
+		INSERT into ref_jabatan (kode_jabatan, jenis_jabatan, deleted_at) VALUES
+		('K001', 1, now()),
+		('K002', 2, null),
+		('K003', 1, now());
 	`
 	pgxconn := dbtest.New(t, dbmigrations.FS)
 	_, err := pgxconn.Exec(context.Background(), dbData)
@@ -434,6 +439,16 @@ func Test_handler_adminDeleteJenisJabatan(t *testing.T) {
 				"Content-Type":  []string{"application/json"},
 			},
 			wantResponseCode: http.StatusNoContent,
+		},
+		{
+			name: "error: delete jenis jabatan referenced",
+			id:   "2",
+			requestHeader: http.Header{
+				"Authorization": authHeader,
+				"Content-Type":  []string{"application/json"},
+			},
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "jenis jabatan masih digunakan oleh data jabatan"}`,
 		},
 		{
 			name: "error: delete not found jenis jabatan",

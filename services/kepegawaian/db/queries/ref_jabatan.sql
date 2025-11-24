@@ -32,6 +32,7 @@ WHERE id = @id::int AND deleted_at IS NULL;
 
 -- name: GetRefJabatanByKode :one
 select
+  id,
   kode_jabatan as kode,
   nama_jabatan as nama,
   jenis_jabatan as jenis,
@@ -69,17 +70,16 @@ RETURNING
   kode_jabatan, id, nama_jabatan, nama_jabatan_full, jenis_jabatan, kelas, pensiun, kode_bkn, nama_jabatan_bkn, kategori_jabatan, bkn_id, tunjangan_jabatan, created_at, updated_at;
 
 -- name: DeleteRefJabatan :execrows
-UPDATE ref_jabatan
-SET deleted_at = NOW()
+UPDATE 
+  ref_jabatan
+SET 
+  deleted_at = NOW(),
+  kode_jabatan = @random_string::varchar || '-' || kode_jabatan
 WHERE id = @id::int AND deleted_at IS NULL;
 
 -- name: IsExistReferencesPegawaiByID :one
 SELECT EXISTS (
     SELECT 1
     FROM pegawai
-    JOIN ref_jabatan 
-      ON ref_jabatan.kode_jabatan = pegawai.jabatan_instansi_id
-     AND ref_jabatan.deleted_at IS NULL
-    WHERE ref_jabatan.id = @id::int
-      AND pegawai.deleted_at IS NULL
+    WHERE jabatan_instansi_id = $1 OR jabatan_instansi_real_id = $1
 ) AS exists;

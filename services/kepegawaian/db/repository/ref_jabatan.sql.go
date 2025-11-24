@@ -111,13 +111,21 @@ func (q *Queries) CreateRefJabatan(ctx context.Context, arg CreateRefJabatanPara
 }
 
 const deleteRefJabatan = `-- name: DeleteRefJabatan :execrows
-UPDATE ref_jabatan
-SET deleted_at = NOW()
-WHERE id = $1::int AND deleted_at IS NULL
+UPDATE 
+  ref_jabatan
+SET 
+  deleted_at = NOW(),
+  kode_jabatan = $1::varchar || '-' || kode_jabatan
+WHERE id = $2::int AND deleted_at IS NULL
 `
 
-func (q *Queries) DeleteRefJabatan(ctx context.Context, id int32) (int64, error) {
-	result, err := q.db.Exec(ctx, deleteRefJabatan, id)
+type DeleteRefJabatanParams struct {
+	RandomString string `db:"random_string"`
+	ID           int32  `db:"id"`
+}
+
+func (q *Queries) DeleteRefJabatan(ctx context.Context, arg DeleteRefJabatanParams) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteRefJabatan, arg.RandomString, arg.ID)
 	if err != nil {
 		return 0, err
 	}
@@ -171,6 +179,7 @@ func (q *Queries) GetRefJabatan(ctx context.Context, id int32) (GetRefJabatanRow
 
 const getRefJabatanByKode = `-- name: GetRefJabatanByKode :one
 select
+  id,
   kode_jabatan as kode,
   nama_jabatan as nama,
   jenis_jabatan as jenis,
@@ -181,6 +190,7 @@ where kode_jabatan = $1 and deleted_at is null
 `
 
 type GetRefJabatanByKodeRow struct {
+	ID      int32       `db:"id"`
 	Kode    string      `db:"kode"`
 	Nama    pgtype.Text `db:"nama"`
 	Jenis   pgtype.Int2 `db:"jenis"`
@@ -192,6 +202,7 @@ func (q *Queries) GetRefJabatanByKode(ctx context.Context, kodeJabatan string) (
 	row := q.db.QueryRow(ctx, getRefJabatanByKode, kodeJabatan)
 	var i GetRefJabatanByKodeRow
 	err := row.Scan(
+		&i.ID,
 		&i.Kode,
 		&i.Nama,
 		&i.Jenis,
@@ -205,16 +216,12 @@ const isExistReferencesPegawaiByID = `-- name: IsExistReferencesPegawaiByID :one
 SELECT EXISTS (
     SELECT 1
     FROM pegawai
-    JOIN ref_jabatan 
-      ON ref_jabatan.kode_jabatan = pegawai.jabatan_instansi_id
-     AND ref_jabatan.deleted_at IS NULL
-    WHERE ref_jabatan.id = $1::int
-      AND pegawai.deleted_at IS NULL
+    WHERE jabatan_instansi_id = $1 OR jabatan_instansi_real_id = $1
 ) AS exists
 `
 
-func (q *Queries) IsExistReferencesPegawaiByID(ctx context.Context, id int32) (bool, error) {
-	row := q.db.QueryRow(ctx, isExistReferencesPegawaiByID, id)
+func (q *Queries) IsExistReferencesPegawaiByID(ctx context.Context, jabatanInstansiID pgtype.Text) (bool, error) {
+	row := q.db.QueryRow(ctx, isExistReferencesPegawaiByID, jabatanInstansiID)
 	var exists bool
 	err := row.Scan(&exists)
 	return exists, err
