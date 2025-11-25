@@ -53,9 +53,15 @@ func (c *APIClient) Sign(query SignParams, files []UploadFile) (string, int, err
 		fullURL     = c.cfg.Host + signURL
 	)
 
-	// not using url.Parse because it will escape the query parameters and the bsre server will not parse it correctly
-	u, _ := url.Parse(fullURL)
-	u.RawQuery = "passphrase=" + query.Passphrase + "&nik=" + query.NIK + "&tampilan=" + query.Tampilan
+	u, err := url.Parse(fullURL)
+	if err != nil {
+		return "", 0, fmt.Errorf("parse URL: %w", err)
+	}
+	q := u.Query()
+	q.Set("passphrase", query.Passphrase)
+	q.Set("nik", query.NIK)
+	q.Set("tampilan", query.Tampilan)
+	u.RawQuery = q.Encode()
 	fullURL = u.String()
 
 	if len(files) > 0 {
