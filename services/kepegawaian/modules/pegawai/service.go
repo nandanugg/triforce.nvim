@@ -17,6 +17,8 @@ type repository interface {
 	GetProfilePegawaiByPNSID(ctx context.Context, pnsID string) (sqlc.GetProfilePegawaiByPNSIDRow, error)
 	ListUnitKerjaHierarchy(ctx context.Context, id string) ([]sqlc.ListUnitKerjaHierarchyRow, error)
 	ListPegawaiAktif(ctx context.Context, arg sqlc.ListPegawaiAktifParams) ([]sqlc.ListPegawaiAktifRow, error)
+	ListPegawaiNonAktif(ctx context.Context, arg sqlc.ListPegawaiNonAktifParams) ([]sqlc.ListPegawaiNonAktifRow, error)
+	ListPegawaiPPNPN(ctx context.Context, arg sqlc.ListPegawaiPPNPNParams) ([]sqlc.ListPegawaiPPNPNRow, error)
 	ListUnitKerjaLengkapByIDs(ctx context.Context, ids []string) ([]sqlc.ListUnitKerjaLengkapByIDsRow, error)
 	CountPegawaiAktif(ctx context.Context, arg sqlc.CountPegawaiAktifParams) (int64, error)
 	GetDataPribadi(ctx context.Context, arg sqlc.GetDataPribadiParams) (sqlc.GetDataPribadiRow, error)

@@ -158,6 +158,8 @@ type Querier interface {
 	ListOrangTuaByNip(ctx context.Context, nipBaru pgtype.Text) ([]ListOrangTuaByNipRow, error)
 	ListPasanganByNip(ctx context.Context, nipBaru pgtype.Text) ([]ListPasanganByNipRow, error)
 	ListPegawaiAktif(ctx context.Context, arg ListPegawaiAktifParams) ([]ListPegawaiAktifRow, error)
+	ListPegawaiNonAktif(ctx context.Context, arg ListPegawaiNonAktifParams) ([]ListPegawaiNonAktifRow, error)
+	ListPegawaiPPNPN(ctx context.Context, arg ListPegawaiPPNPNParams) ([]ListPegawaiPPNPNRow, error)
 	ListRefAgama(ctx context.Context, arg ListRefAgamaParams) ([]ListRefAgamaRow, error)
 	ListRefGolongan(ctx context.Context, arg ListRefGolonganParams) ([]ListRefGolonganRow, error)
 	ListRefJabatan(ctx context.Context, arg ListRefJabatanParams) ([]ListRefJabatanRow, error)
