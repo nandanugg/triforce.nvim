@@ -6,7 +6,7 @@
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| id | integer | nextval('file_digital_signature_corrector_id_seq'::regclass) | false |  |  |  |
+| id | integer | nextval('file_digital_signature_corrector_id_seq1'::regclass) | false |  |  |  |
 | korektor_ke | smallint |  | true |  |  |  |
 | pegawai_korektor_id | varchar(100) |  | true |  |  |  |
 | status_kembali | smallint |  | true |  |  | 1=dikembalikan, 0/null = sudah oke |

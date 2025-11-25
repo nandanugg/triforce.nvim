@@ -47,12 +47,16 @@
 | updated_at | timestamp with time zone | now() | true |  |  |  |
 | deleted_at | timestamp with time zone |  | true |  |  |  |
 | status_sk | smallint |  | true |  |  |  |
+| s3_file_id | bigint |  | true |  | [kepegawaian.s3_files](kepegawaian.s3_files.md) |  |
+| s3_file_sign_id | bigint |  | true |  | [kepegawaian.s3_files](kepegawaian.s3_files.md) |  |
 
 ## Constraints
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
 | file_digital_signature_pkey | PRIMARY KEY | PRIMARY KEY (file_id) |
+| surat_keputusan_s3_file_id_fkey | FOREIGN KEY | FOREIGN KEY (s3_file_id) REFERENCES s3_files(id) |
+| surat_keputusan_s3_file_sign_id_fkey | FOREIGN KEY | FOREIGN KEY (s3_file_sign_id) REFERENCES s3_files(id) |
 
 ## Indexes
 
@@ -65,6 +69,8 @@
 ```mermaid
 erDiagram
 
+"kepegawaian.surat_keputusan" }o--o| "kepegawaian.s3_files" : "FOREIGN KEY (s3_file_id) REFERENCES s3_files(id)"
+"kepegawaian.surat_keputusan" }o--o| "kepegawaian.s3_files" : "FOREIGN KEY (s3_file_sign_id) REFERENCES s3_files(id)"
 
 "kepegawaian.surat_keputusan" {
   varchar_200_ file_id
@@ -108,6 +114,16 @@ erDiagram
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
   smallint status_sk
+  bigint s3_file_id FK
+  bigint s3_file_sign_id FK
+}
+"kepegawaian.s3_files" {
+  bigint id
+  text object_bucket
+  text object_key
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
 }
 ```
 

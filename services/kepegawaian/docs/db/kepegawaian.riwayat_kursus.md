@@ -25,6 +25,7 @@ Riwayat kursus pegawai
 | deleted_at | timestamp with time zone |  | true |  |  | Waktu penghapusan data |
 | file_base64 | text |  | true |  |  |  |
 | keterangan_berkas | varchar(200) |  | true |  |  |  |
+| s3_file_id | bigint |  | true |  | [kepegawaian.s3_files](kepegawaian.s3_files.md) |  |
 
 ## Constraints
 
@@ -32,6 +33,7 @@ Riwayat kursus pegawai
 | ---- | ---- | ---------- |
 | fk_riwayat_kursus_pns_id | FOREIGN KEY | FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id) |
 | riwayat_kursus_pkey | PRIMARY KEY | PRIMARY KEY (id) |
+| riwayat_kursus_s3_file_id_fkey | FOREIGN KEY | FOREIGN KEY (s3_file_id) REFERENCES s3_files(id) |
 
 ## Indexes
 
@@ -45,6 +47,7 @@ Riwayat kursus pegawai
 erDiagram
 
 "kepegawaian.riwayat_kursus" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
+"kepegawaian.riwayat_kursus" }o--o| "kepegawaian.s3_files" : "FOREIGN KEY (s3_file_id) REFERENCES s3_files(id)"
 
 "kepegawaian.riwayat_kursus" {
   integer id
@@ -64,6 +67,7 @@ erDiagram
   timestamp_with_time_zone deleted_at
   text file_base64
   varchar_200_ keterangan_berkas
+  bigint s3_file_id FK
 }
 "kepegawaian.pegawai" {
   integer id
@@ -162,6 +166,14 @@ erDiagram
   smallint status_pegawai_backup
   varchar_50_ masa_kerja
   varchar_50_ kartu_asn
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
+}
+"kepegawaian.s3_files" {
+  bigint id
+  text object_bucket
+  text object_key
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at

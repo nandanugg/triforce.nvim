@@ -45,6 +45,7 @@ Riwayat golongan pegawai
 | updated_at | timestamp with time zone | now() | true |  |  | Waktu terakhir pembaruan |
 | deleted_at | timestamp with time zone |  | true |  |  | Waktu penghapusan data |
 | jenis_kp_id | integer |  | true |  | [kepegawaian.ref_jenis_kenaikan_pangkat](kepegawaian.ref_jenis_kenaikan_pangkat.md) | Jenis kp (rujuk ref_jenis_kp) |
+| s3_file_id | bigint |  | true |  | [kepegawaian.s3_files](kepegawaian.s3_files.md) |  |
 
 ## Constraints
 
@@ -54,6 +55,7 @@ Riwayat golongan pegawai
 | fk_riwayat_golongan_jenis_kp | FOREIGN KEY | FOREIGN KEY (jenis_kp_id) REFERENCES ref_jenis_kenaikan_pangkat(id) |
 | fk_riwayat_golongan_pns_id | FOREIGN KEY | FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id) |
 | riwayat_golongan_pkey | PRIMARY KEY | PRIMARY KEY (id) |
+| riwayat_golongan_s3_file_id_fkey | FOREIGN KEY | FOREIGN KEY (s3_file_id) REFERENCES s3_files(id) |
 
 ## Indexes
 
@@ -69,6 +71,7 @@ erDiagram
 "kepegawaian.riwayat_golongan" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
 "kepegawaian.riwayat_golongan" }o--o| "kepegawaian.ref_golongan" : "FOREIGN KEY (golongan_id) REFERENCES ref_golongan(id)"
 "kepegawaian.riwayat_golongan" }o--o| "kepegawaian.ref_jenis_kenaikan_pangkat" : "FOREIGN KEY (jenis_kp_id) REFERENCES ref_jenis_kenaikan_pangkat(id)"
+"kepegawaian.riwayat_golongan" }o--o| "kepegawaian.s3_files" : "FOREIGN KEY (s3_file_id) REFERENCES s3_files(id)"
 
 "kepegawaian.riwayat_golongan" {
   varchar_36_ id
@@ -108,6 +111,7 @@ erDiagram
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
   integer jenis_kp_id FK
+  bigint s3_file_id FK
 }
 "kepegawaian.pegawai" {
   integer id
@@ -225,6 +229,14 @@ erDiagram
   integer id
   varchar_4_ dikbud_hr_id
   varchar_100_ nama
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
+}
+"kepegawaian.s3_files" {
+  bigint id
+  text object_bucket
+  text object_key
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at

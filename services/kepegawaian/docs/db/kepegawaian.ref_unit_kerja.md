@@ -298,6 +298,7 @@ erDiagram
   date periode_jabatan_end_date
   text file_base64
   varchar_200_ keterangan_berkas
+  bigint s3_file_id FK
 }
 "kepegawaian.ref_instansi" {
   varchar_36_ id

@@ -6,7 +6,7 @@
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| id | integer | nextval('log_digital_signature_id_seq'::regclass) | false |  |  |  |
+| id | integer | nextval('log_digital_signature_id_seq1'::regclass) | false |  |  |  |
 | file_id | varchar(32) |  | true |  |  |  |
 | nik | varchar(30) |  | true |  |  |  |
 | keterangan | varchar(255) |  | true |  |  |  |

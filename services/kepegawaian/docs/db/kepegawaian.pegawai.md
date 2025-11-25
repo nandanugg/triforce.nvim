@@ -378,6 +378,7 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  bigint s3_file_id FK
 }
 "kepegawaian.riwayat_diklat_struktural" {
   varchar_36_ id
@@ -397,6 +398,7 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  bigint s3_file_id FK
 }
 "kepegawaian.riwayat_golongan" {
   varchar_36_ id
@@ -436,6 +438,7 @@ erDiagram
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
   integer jenis_kp_id FK
+  bigint s3_file_id FK
 }
 "kepegawaian.riwayat_hukuman_disiplin" {
   bigint id
@@ -461,6 +464,7 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  bigint s3_file_id FK
 }
 "kepegawaian.riwayat_jabatan" {
   varchar_36_ bkn_id
@@ -502,6 +506,7 @@ erDiagram
   date periode_jabatan_end_date
   text file_base64
   varchar_200_ keterangan_berkas
+  bigint s3_file_id FK
 }
 "kepegawaian.riwayat_kursus" {
   integer id
@@ -521,6 +526,7 @@ erDiagram
   timestamp_with_time_zone deleted_at
   text file_base64
   varchar_200_ keterangan_berkas
+  bigint s3_file_id FK
 }
 "kepegawaian.riwayat_pendidikan" {
   integer id
@@ -548,6 +554,7 @@ erDiagram
   smallint tugas_belajar
   text file_base64
   varchar_200_ keterangan_berkas
+  bigint s3_file_id FK
 }
 "kepegawaian.riwayat_pindah_unit_kerja" {
   bigint id
@@ -569,6 +576,7 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  bigint s3_file_id FK
 }
 "kepegawaian.ref_unit_kerja" {
   varchar_60_ id

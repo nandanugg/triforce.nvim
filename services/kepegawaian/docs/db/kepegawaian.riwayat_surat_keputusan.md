@@ -6,7 +6,7 @@
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| id | bigint | nextval('file_digital_signature_riwayat_id_seq'::regclass) | false |  |  |  |
+| id | bigint | nextval('file_digital_signature_riwayat_id_seq1'::regclass) | false |  |  |  |
 | file_id | varchar(200) |  | true |  |  |  |
 | nip_pemroses | varchar(255) |  | true |  |  |  |
 | tindakan | text |  | true |  |  |  |

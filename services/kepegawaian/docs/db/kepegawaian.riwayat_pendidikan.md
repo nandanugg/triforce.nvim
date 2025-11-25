@@ -33,6 +33,7 @@ Riwayat pendidikan pegawai
 | tugas_belajar | smallint |  | true |  |  | Tugas belajar |
 | file_base64 | text |  | true |  |  | File berkas dalam format base64 |
 | keterangan_berkas | varchar(200) |  | true |  |  | Keterangan berkas |
+| s3_file_id | bigint |  | true |  | [kepegawaian.s3_files](kepegawaian.s3_files.md) |  |
 
 ## Constraints
 
@@ -42,6 +43,7 @@ Riwayat pendidikan pegawai
 | fk_riwayat_pendidikan_pendidikan | FOREIGN KEY | FOREIGN KEY (pendidikan_id) REFERENCES ref_pendidikan(id) |
 | riwayat_pendidikan_pkey | PRIMARY KEY | PRIMARY KEY (id) |
 | fk_riwayat_pendidikan_tingkat | FOREIGN KEY | FOREIGN KEY (tingkat_pendidikan_id) REFERENCES ref_tingkat_pendidikan(id) |
+| riwayat_pendidikan_s3_file_id_fkey | FOREIGN KEY | FOREIGN KEY (s3_file_id) REFERENCES s3_files(id) |
 
 ## Indexes
 
@@ -57,6 +59,7 @@ erDiagram
 "kepegawaian.riwayat_pendidikan" }o--o| "kepegawaian.ref_tingkat_pendidikan" : "FOREIGN KEY (tingkat_pendidikan_id) REFERENCES ref_tingkat_pendidikan(id)"
 "kepegawaian.riwayat_pendidikan" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
 "kepegawaian.riwayat_pendidikan" }o--o| "kepegawaian.ref_pendidikan" : "FOREIGN KEY (pendidikan_id) REFERENCES ref_pendidikan(id)"
+"kepegawaian.riwayat_pendidikan" }o--o| "kepegawaian.s3_files" : "FOREIGN KEY (s3_file_id) REFERENCES s3_files(id)"
 
 "kepegawaian.riwayat_pendidikan" {
   integer id
@@ -84,6 +87,7 @@ erDiagram
   smallint tugas_belajar
   text file_base64
   varchar_200_ keterangan_berkas
+  bigint s3_file_id FK
 }
 "kepegawaian.ref_tingkat_pendidikan" {
   integer id
@@ -201,6 +205,14 @@ erDiagram
   varchar_36_ id
   smallint tingkat_pendidikan_id FK
   varchar_200_ nama
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
+}
+"kepegawaian.s3_files" {
+  bigint id
+  text object_bucket
+  text object_key
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at

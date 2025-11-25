@@ -70,6 +70,7 @@ erDiagram
   smallint tugas_belajar
   text file_base64
   varchar_200_ keterangan_berkas
+  bigint s3_file_id FK
 }
 "kepegawaian.ref_tingkat_pendidikan" {
   integer id

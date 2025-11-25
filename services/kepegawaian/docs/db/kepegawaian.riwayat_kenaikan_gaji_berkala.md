@@ -40,12 +40,14 @@ Riwayat kenaikan gaji berkala pegawai
 | file_base64 | text |  | true |  |  |  |
 | keterangan_berkas | varchar(200) |  | true |  |  |  |
 | gaji_pokok | integer |  | true |  |  |  |
+| s3_file_id | bigint |  | true |  | [kepegawaian.s3_files](kepegawaian.s3_files.md) |  |
 
 ## Constraints
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
 | riwayat_kgb_pkey | PRIMARY KEY | PRIMARY KEY (id) |
+| riwayat_kenaikan_gaji_berkala_s3_file_id_fkey | FOREIGN KEY | FOREIGN KEY (s3_file_id) REFERENCES s3_files(id) |
 
 ## Indexes
 
@@ -58,6 +60,7 @@ Riwayat kenaikan gaji berkala pegawai
 ```mermaid
 erDiagram
 
+"kepegawaian.riwayat_kenaikan_gaji_berkala" }o--o| "kepegawaian.s3_files" : "FOREIGN KEY (s3_file_id) REFERENCES s3_files(id)"
 
 "kepegawaian.riwayat_kenaikan_gaji_berkala" {
   integer pegawai_id
@@ -92,6 +95,15 @@ erDiagram
   text file_base64
   varchar_200_ keterangan_berkas
   integer gaji_pokok
+  bigint s3_file_id FK
+}
+"kepegawaian.s3_files" {
+  bigint id
+  text object_bucket
+  text object_key
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
 }
 ```
 

@@ -29,32 +29,33 @@
 | [kepegawaian.ref_pendidikan](kepegawaian.ref_pendidikan.md) | 6 | Referensi pendidikan | BASE TABLE |
 | [kepegawaian.pindah_unit](kepegawaian.pindah_unit.md) | 23 | Riwayat perpindahan unit kerja | BASE TABLE |
 | [kepegawaian.riwayat_asesmen](kepegawaian.riwayat_asesmen.md) | 22 | Riwayat asesmen pegawai | BASE TABLE |
-| [kepegawaian.riwayat_diklat](kepegawaian.riwayat_diklat.md) | 21 | Riwayat diklat pegawai | BASE TABLE |
-| [kepegawaian.riwayat_diklat_fungsional](kepegawaian.riwayat_diklat_fungsional.md) | 20 | Riwayat diklat fungsional pegawai | BASE TABLE |
-| [kepegawaian.riwayat_diklat_struktural](kepegawaian.riwayat_diklat_struktural.md) | 17 | Riwayat diklat struktural pegawai | BASE TABLE |
-| [kepegawaian.riwayat_golongan](kepegawaian.riwayat_golongan.md) | 37 | Riwayat golongan pegawai | BASE TABLE |
-| [kepegawaian.riwayat_hukuman_disiplin](kepegawaian.riwayat_hukuman_disiplin.md) | 23 | Riwayat hukuman disiplin pegawai | BASE TABLE |
-| [kepegawaian.riwayat_jabatan](kepegawaian.riwayat_jabatan.md) | 39 | Riwayat jabatan pegawai | BASE TABLE |
-| [kepegawaian.riwayat_kenaikan_gaji_berkala](kepegawaian.riwayat_kenaikan_gaji_berkala.md) | 32 | Riwayat kenaikan gaji berkala pegawai | BASE TABLE |
+| [kepegawaian.riwayat_diklat](kepegawaian.riwayat_diklat.md) | 22 | Riwayat diklat pegawai | BASE TABLE |
+| [kepegawaian.riwayat_diklat_fungsional](kepegawaian.riwayat_diklat_fungsional.md) | 21 | Riwayat diklat fungsional pegawai | BASE TABLE |
+| [kepegawaian.riwayat_diklat_struktural](kepegawaian.riwayat_diklat_struktural.md) | 18 | Riwayat diklat struktural pegawai | BASE TABLE |
+| [kepegawaian.riwayat_golongan](kepegawaian.riwayat_golongan.md) | 38 | Riwayat golongan pegawai | BASE TABLE |
+| [kepegawaian.riwayat_hukuman_disiplin](kepegawaian.riwayat_hukuman_disiplin.md) | 24 | Riwayat hukuman disiplin pegawai | BASE TABLE |
+| [kepegawaian.riwayat_jabatan](kepegawaian.riwayat_jabatan.md) | 40 | Riwayat jabatan pegawai | BASE TABLE |
+| [kepegawaian.riwayat_kenaikan_gaji_berkala](kepegawaian.riwayat_kenaikan_gaji_berkala.md) | 33 | Riwayat kenaikan gaji berkala pegawai | BASE TABLE |
 | [kepegawaian.riwayat_kinerja](kepegawaian.riwayat_kinerja.md) | 19 | Riwayat kinerja pegawai | BASE TABLE |
-| [kepegawaian.riwayat_kursus](kepegawaian.riwayat_kursus.md) | 17 | Riwayat kursus pegawai | BASE TABLE |
+| [kepegawaian.riwayat_kursus](kepegawaian.riwayat_kursus.md) | 18 | Riwayat kursus pegawai | BASE TABLE |
 | [kepegawaian.riwayat_asesmen_nine_box](kepegawaian.riwayat_asesmen_nine_box.md) | 10 | Riwayat asesmen nine box pegawai | BASE TABLE |
-| [kepegawaian.riwayat_pendidikan](kepegawaian.riwayat_pendidikan.md) | 25 | Riwayat pendidikan pegawai | BASE TABLE |
-| [kepegawaian.riwayat_penghargaan_umum](kepegawaian.riwayat_penghargaan_umum.md) | 11 | Riwayat penghargaan umum pegawai | BASE TABLE |
-| [kepegawaian.riwayat_pindah_unit_kerja](kepegawaian.riwayat_pindah_unit_kerja.md) | 19 | Riwayat pindah unit kerja pegawai | BASE TABLE |
+| [kepegawaian.riwayat_pendidikan](kepegawaian.riwayat_pendidikan.md) | 26 | Riwayat pendidikan pegawai | BASE TABLE |
+| [kepegawaian.riwayat_penghargaan_umum](kepegawaian.riwayat_penghargaan_umum.md) | 12 | Riwayat penghargaan umum pegawai | BASE TABLE |
+| [kepegawaian.riwayat_pindah_unit_kerja](kepegawaian.riwayat_pindah_unit_kerja.md) | 20 | Riwayat pindah unit kerja pegawai | BASE TABLE |
 | [kepegawaian.riwayat_uji_kompetensi](kepegawaian.riwayat_uji_kompetensi.md) | 9 | Riwayat uji kompetensi pegawai | BASE TABLE |
 | [kepegawaian.ref_tingkat_pendidikan](kepegawaian.ref_tingkat_pendidikan.md) | 9 | Referensi tingkat pendidikan | BASE TABLE |
 | [kepegawaian.ref_unit_kerja](kepegawaian.ref_unit_kerja.md) | 34 | Referensi referensi unit kerja | BASE TABLE |
 | [kepegawaian.update_mandiri](kepegawaian.update_mandiri.md) | 15 | Riwayat pembaruan data secara mandiri oleh pegawai | BASE TABLE |
-| [kepegawaian.riwayat_sertifikasi](kepegawaian.riwayat_sertifikasi.md) | 9 | Riwayat sertifikasi pegawai | BASE TABLE |
-| [kepegawaian.riwayat_penugasan](kepegawaian.riwayat_penugasan.md) | 12 | Riwayat penugasan pegawai | BASE TABLE |
+| [kepegawaian.riwayat_sertifikasi](kepegawaian.riwayat_sertifikasi.md) | 10 | Riwayat sertifikasi pegawai | BASE TABLE |
+| [kepegawaian.riwayat_penugasan](kepegawaian.riwayat_penugasan.md) | 13 | Riwayat penugasan pegawai | BASE TABLE |
 | [kepegawaian.ref_kelas_jabatan](kepegawaian.ref_kelas_jabatan.md) | 6 | Referensi kelas jabatan | BASE TABLE |
-| [kepegawaian.surat_keputusan](kepegawaian.surat_keputusan.md) | 41 |  | BASE TABLE |
+| [kepegawaian.surat_keputusan](kepegawaian.surat_keputusan.md) | 43 |  | BASE TABLE |
 | [kepegawaian.koreksi_surat_keputusan](kepegawaian.koreksi_surat_keputusan.md) | 10 |  | BASE TABLE |
 | [kepegawaian.riwayat_surat_keputusan](kepegawaian.riwayat_surat_keputusan.md) | 10 |  | BASE TABLE |
 | [kepegawaian.log_request_surat_keputusan](kepegawaian.log_request_surat_keputusan.md) | 10 |  | BASE TABLE |
 | [kepegawaian.ref_template](kepegawaian.ref_template.md) | 7 |  | BASE TABLE |
 | [kepegawaian.pegawai_ttd](kepegawaian.pegawai_ttd.md) | 5 |  | BASE TABLE |
+| [kepegawaian.s3_files](kepegawaian.s3_files.md) | 6 |  | BASE TABLE |
 
 ## Stored procedures and functions
 
@@ -103,26 +104,41 @@ erDiagram
 "kepegawaian.riwayat_asesmen" }o--o| "kepegawaian.ref_unit_kerja" : "FOREIGN KEY (unit_org_id) REFERENCES ref_unit_kerja(id)"
 "kepegawaian.riwayat_diklat" }o--o| "kepegawaian.ref_jenis_diklat" : "FOREIGN KEY (jenis_diklat_id) REFERENCES ref_jenis_diklat(id)"
 "kepegawaian.riwayat_diklat" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_orang_id) REFERENCES pegawai(pns_id)"
+"kepegawaian.riwayat_diklat" }o--o| "kepegawaian.s3_files" : "FOREIGN KEY (s3_file_id) REFERENCES s3_files(id)"
+"kepegawaian.riwayat_diklat_fungsional" }o--o| "kepegawaian.s3_files" : "FOREIGN KEY (s3_file_id) REFERENCES s3_files(id)"
 "kepegawaian.riwayat_diklat_struktural" }o--o| "kepegawaian.ref_jenis_diklat_struktural" : "FOREIGN KEY (jenis_diklat_id) REFERENCES ref_jenis_diklat_struktural(id)"
 "kepegawaian.riwayat_diklat_struktural" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
+"kepegawaian.riwayat_diklat_struktural" }o--o| "kepegawaian.s3_files" : "FOREIGN KEY (s3_file_id) REFERENCES s3_files(id)"
 "kepegawaian.riwayat_golongan" }o--o| "kepegawaian.ref_golongan" : "FOREIGN KEY (golongan_id) REFERENCES ref_golongan(id)"
 "kepegawaian.riwayat_golongan" }o--o| "kepegawaian.ref_jenis_kenaikan_pangkat" : "FOREIGN KEY (jenis_kp_id) REFERENCES ref_jenis_kenaikan_pangkat(id)"
 "kepegawaian.riwayat_golongan" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
+"kepegawaian.riwayat_golongan" }o--o| "kepegawaian.s3_files" : "FOREIGN KEY (s3_file_id) REFERENCES s3_files(id)"
 "kepegawaian.riwayat_hukuman_disiplin" }o--o| "kepegawaian.ref_jenis_hukuman" : "FOREIGN KEY (jenis_hukuman_id) REFERENCES ref_jenis_hukuman(id)"
 "kepegawaian.riwayat_hukuman_disiplin" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
+"kepegawaian.riwayat_hukuman_disiplin" }o--o| "kepegawaian.s3_files" : "FOREIGN KEY (s3_file_id) REFERENCES s3_files(id)"
 "kepegawaian.riwayat_jabatan" }o--o| "kepegawaian.ref_jabatan" : "FOREIGN KEY (jabatan_id) REFERENCES ref_jabatan(kode_jabatan)"
 "kepegawaian.riwayat_jabatan" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
 "kepegawaian.riwayat_jabatan" }o--o| "kepegawaian.ref_kelas_jabatan" : "FOREIGN KEY (kelas_jabatan_id) REFERENCES ref_kelas_jabatan(id)"
 "kepegawaian.riwayat_jabatan" }o--o| "kepegawaian.ref_unit_kerja" : "FOREIGN KEY (satuan_kerja_id) REFERENCES ref_unit_kerja(id)"
+"kepegawaian.riwayat_jabatan" }o--o| "kepegawaian.s3_files" : "FOREIGN KEY (s3_file_id) REFERENCES s3_files(id)"
+"kepegawaian.riwayat_kenaikan_gaji_berkala" }o--o| "kepegawaian.s3_files" : "FOREIGN KEY (s3_file_id) REFERENCES s3_files(id)"
 "kepegawaian.riwayat_kursus" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
+"kepegawaian.riwayat_kursus" }o--o| "kepegawaian.s3_files" : "FOREIGN KEY (s3_file_id) REFERENCES s3_files(id)"
 "kepegawaian.riwayat_pendidikan" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
 "kepegawaian.riwayat_pendidikan" }o--o| "kepegawaian.ref_pendidikan" : "FOREIGN KEY (pendidikan_id) REFERENCES ref_pendidikan(id)"
 "kepegawaian.riwayat_pendidikan" }o--o| "kepegawaian.ref_tingkat_pendidikan" : "FOREIGN KEY (tingkat_pendidikan_id) REFERENCES ref_tingkat_pendidikan(id)"
+"kepegawaian.riwayat_pendidikan" }o--o| "kepegawaian.s3_files" : "FOREIGN KEY (s3_file_id) REFERENCES s3_files(id)"
+"kepegawaian.riwayat_penghargaan_umum" }o--o| "kepegawaian.s3_files" : "FOREIGN KEY (s3_file_id) REFERENCES s3_files(id)"
 "kepegawaian.riwayat_pindah_unit_kerja" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
+"kepegawaian.riwayat_pindah_unit_kerja" }o--o| "kepegawaian.s3_files" : "FOREIGN KEY (s3_file_id) REFERENCES s3_files(id)"
 "kepegawaian.ref_unit_kerja" }o--o| "kepegawaian.ref_instansi" : "FOREIGN KEY (instansi_id) REFERENCES ref_instansi(id)"
 "kepegawaian.ref_unit_kerja" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pemimpin_pns_id) REFERENCES pegawai(pns_id)"
 "kepegawaian.ref_unit_kerja" }o--o| "kepegawaian.ref_unit_kerja" : "FOREIGN KEY (diatasan_id) REFERENCES ref_unit_kerja(id)"
 "kepegawaian.update_mandiri" }o--o| "kepegawaian.pegawai" : "FOREIGN KEY (pns_id) REFERENCES pegawai(pns_id)"
+"kepegawaian.riwayat_sertifikasi" }o--o| "kepegawaian.s3_files" : "FOREIGN KEY (s3_file_id) REFERENCES s3_files(id)"
+"kepegawaian.riwayat_penugasan" }o--o| "kepegawaian.s3_files" : "FOREIGN KEY (s3_file_id) REFERENCES s3_files(id)"
+"kepegawaian.surat_keputusan" }o--o| "kepegawaian.s3_files" : "FOREIGN KEY (s3_file_id) REFERENCES s3_files(id)"
+"kepegawaian.surat_keputusan" }o--o| "kepegawaian.s3_files" : "FOREIGN KEY (s3_file_sign_id) REFERENCES s3_files(id)"
 
 "kepegawaian.schema_migrations" {
   bigint version
@@ -520,6 +536,7 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  bigint s3_file_id FK
 }
 "kepegawaian.riwayat_diklat_fungsional" {
   varchar_36_ id
@@ -542,6 +559,7 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  bigint s3_file_id FK
 }
 "kepegawaian.riwayat_diklat_struktural" {
   varchar_36_ id
@@ -561,6 +579,7 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  bigint s3_file_id FK
 }
 "kepegawaian.riwayat_golongan" {
   varchar_36_ id
@@ -600,6 +619,7 @@ erDiagram
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
   integer jenis_kp_id FK
+  bigint s3_file_id FK
 }
 "kepegawaian.riwayat_hukuman_disiplin" {
   bigint id
@@ -625,6 +645,7 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  bigint s3_file_id FK
 }
 "kepegawaian.riwayat_jabatan" {
   varchar_36_ bkn_id
@@ -666,6 +687,7 @@ erDiagram
   date periode_jabatan_end_date
   text file_base64
   varchar_200_ keterangan_berkas
+  bigint s3_file_id FK
 }
 "kepegawaian.riwayat_kenaikan_gaji_berkala" {
   integer pegawai_id
@@ -700,6 +722,7 @@ erDiagram
   text file_base64
   varchar_200_ keterangan_berkas
   integer gaji_pokok
+  bigint s3_file_id FK
 }
 "kepegawaian.riwayat_kinerja" {
   integer id
@@ -740,6 +763,7 @@ erDiagram
   timestamp_with_time_zone deleted_at
   text file_base64
   varchar_200_ keterangan_berkas
+  bigint s3_file_id FK
 }
 "kepegawaian.riwayat_asesmen_nine_box" {
   integer id
@@ -779,6 +803,7 @@ erDiagram
   smallint tugas_belajar
   text file_base64
   varchar_200_ keterangan_berkas
+  bigint s3_file_id FK
 }
 "kepegawaian.riwayat_penghargaan_umum" {
   integer id
@@ -792,6 +817,7 @@ erDiagram
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
   varchar_50_ jenis_penghargaan
+  bigint s3_file_id FK
 }
 "kepegawaian.riwayat_pindah_unit_kerja" {
   bigint id
@@ -813,6 +839,7 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  bigint s3_file_id FK
 }
 "kepegawaian.riwayat_uji_kompetensi" {
   bigint id
@@ -899,6 +926,7 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  bigint s3_file_id FK
 }
 "kepegawaian.riwayat_penugasan" {
   integer id
@@ -913,6 +941,7 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  bigint s3_file_id FK
 }
 "kepegawaian.ref_kelas_jabatan" {
   integer id
@@ -964,6 +993,8 @@ erDiagram
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
   smallint status_sk
+  bigint s3_file_id FK
+  bigint s3_file_sign_id FK
 }
 "kepegawaian.koreksi_surat_keputusan" {
   integer id
@@ -1016,6 +1047,14 @@ erDiagram
   text base64ttd
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
+}
+"kepegawaian.s3_files" {
+  bigint id
+  text object_bucket
+  text object_key
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
 }
 ```
 

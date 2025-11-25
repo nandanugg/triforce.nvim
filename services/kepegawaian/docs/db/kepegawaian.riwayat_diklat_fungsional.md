@@ -28,12 +28,14 @@ Riwayat diklat fungsional pegawai
 | created_at | timestamp with time zone | now() | true |  |  |  |
 | updated_at | timestamp with time zone | now() | true |  |  |  |
 | deleted_at | timestamp with time zone |  | true |  |  |  |
+| s3_file_id | bigint |  | true |  | [kepegawaian.s3_files](kepegawaian.s3_files.md) |  |
 
 ## Constraints
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
 | riwayat_diklat_fungsional_pkey | PRIMARY KEY | PRIMARY KEY (id) |
+| riwayat_diklat_fungsional_s3_file_id_fkey | FOREIGN KEY | FOREIGN KEY (s3_file_id) REFERENCES s3_files(id) |
 
 ## Indexes
 
@@ -46,6 +48,7 @@ Riwayat diklat fungsional pegawai
 ```mermaid
 erDiagram
 
+"kepegawaian.riwayat_diklat_fungsional" }o--o| "kepegawaian.s3_files" : "FOREIGN KEY (s3_file_id) REFERENCES s3_files(id)"
 
 "kepegawaian.riwayat_diklat_fungsional" {
   varchar_36_ id
@@ -65,6 +68,15 @@ erDiagram
   varchar_300_ keterangan_berkas
   real lama
   varchar_36_ siasn_id
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
+  bigint s3_file_id FK
+}
+"kepegawaian.s3_files" {
+  bigint id
+  text object_bucket
+  text object_key
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
