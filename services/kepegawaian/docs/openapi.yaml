@@ -803,6 +803,19 @@ paths:
                 tunjangan_jabatan:
                   type: integer
                   example: 1000000
+              required:
+                - kode_jabatan
+                - nama_jabatan
+                - nama_jabatan_full
+                - jenis_jabatan
+                - kelas
+                - pensiun
+                - kode_bkn
+                - nama_jabatan_bkn
+                - kategori_jabatan
+                - bkn_id
+                - tunjangan_jabatan
+                
       responses:
         "201":
           description: Jabatan berhasil dibuat.
