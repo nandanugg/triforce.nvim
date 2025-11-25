@@ -3793,7 +3793,7 @@ paths:
         "404":
           $ref: "#/components/responses/notFound"
   /v1/admin/pegawai/{nip}/riwayat-penghargaan/{id}/berkas:
-    post:
+    put:
       tags:
         - Riwayat Penghargaan
       summary: Admin - Upload file riwayat penghargaan pegawai.
@@ -7136,6 +7136,12 @@ components:
               jenis_penghargaan:
                 type: string
                 minLength: 1
+                enum: 
+                  - "Internasional"
+                  - "Unit Kerja (eselon 2 ke bawah)"
+                  - "Unit Utama"
+                  - "Nasional"
+                  - "Instansional (Kementerian/Lembaga)"
               nama_penghargaan:
                 type: string
                 minLength: 1

@@ -36,13 +36,15 @@ set
     nama_penghargaan = $3,
     jenis_penghargaan = $4,
     deskripsi_penghargaan = $5,
-    tanggal_penghargaan = $6
+    tanggal_penghargaan = $6,
+    updated_at = now()
 where id = $1 AND deleted_at IS NULL;
 
 -- name: UpdateRiwayatPenghargaanBerkas :execrows
 update riwayat_penghargaan_umum
 set
-    file_base64 = @file_base64
+    file_base64 = @file_base64,
+    updated_at = now()
 where id = @id AND nip = @nip::varchar AND riwayat_penghargaan_umum.deleted_at IS NULL;
 
 -- name: DeleteRiwayatPenghargaan :execrows
