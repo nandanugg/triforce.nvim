@@ -70,11 +70,21 @@ SELECT p.*, ruk.nama_unor
 FROM pegawai p
          LEFT JOIN ref_unit_kerja as ruk ON p.unor_id = ruk.id
 WHERE p.status_pegawai = 3
-	AND sqlc.narg('unit_kerja_id')::VARCHAR IS NULL OR ruk.id = sqlc.narg('unit_kerja_id')::VARCHAR 
+	AND sqlc.narg('unit_kerja_id')::VARCHAR IS NULL OR p.unor_id = sqlc.narg('unit_kerja_id')::VARCHAR 
 	AND sqlc.narg('nama')::VARCHAR IS NULL OR p.nama ILIKE '%' || sqlc.narg('nama')::VARCHAR || '%'
 	AND sqlc.narg('nip')::VARCHAR IS NULL OR p.nip_baru = sqlc.narg('nip')::VARCHAR
 ORDER BY p.nama ASC
-LIMIT 10;
+LIMIT $1 OFFSET $2;
+
+-- name: CountPegawaiPPNPN :one
+SELECT COUNT(1)
+FROM pegawai p
+WHERE p.status_pegawai = 3
+	AND sqlc.narg('unit_kerja_id')::VARCHAR IS NULL OR p.unor_id = sqlc.narg('unit_kerja_id')::VARCHAR 
+	AND sqlc.narg('nama')::VARCHAR IS NULL OR p.nama ILIKE '%' || sqlc.narg('nama')::VARCHAR || '%'
+	AND sqlc.narg('nip')::VARCHAR IS NULL OR p.nip_baru = sqlc.narg('nip')::VARCHAR
+ORDER BY p.nama ASC
+LIMIT $1 OFFSET $2;
 
 -- name: ListPegawaiNonAktif :many
 SELECT p.id,
@@ -95,14 +105,29 @@ FROM pegawai p
          LEFT JOIN ref_jabatan ON p.jabatan_instansi_id = ref_jabatan.kode_jabatan
 WHERE p.id is not null
   AND (p.kedudukan_hukum_id = '99' or p.status_pegawai = '3')
-	AND sqlc.narg('unit_kerja_id')::VARCHAR IS NULL OR ruk.id = sqlc.narg('unit_kerja_id')::VARCHAR 
+	AND sqlc.narg('unit_kerja_id')::VARCHAR IS NULL OR p.unor_id = sqlc.narg('unit_kerja_id')::VARCHAR 
 	AND sqlc.narg('nama')::VARCHAR IS NULL OR p.nama ILIKE '%' || sqlc.narg('nama')::VARCHAR || '%'
 	AND sqlc.narg('nip')::VARCHAR IS NULL OR p.nip_baru = sqlc.narg('nip')::VARCHAR
 	AND sqlc.narg('golongan_id')::VARCHAR IS NULL OR p.gol_id = sqlc.narg('golongan_id')::VARCHAR
 	AND sqlc.narg('tingkat_pendidikan_id')::VARCHAR IS NULL OR p.tingkat_pendidikan_id = sqlc.narg('tingkat_pendidikan_id')::VARCHAR
 	AND sqlc.narg('jabatan_id')::VARCHAR IS NULL OR p.jabatan_id = sqlc.narg('jabatan_id')::VARCHAR
 ORDER BY p.nama ASC
-LIMIT 10;
+LIMIT $1 OFFSET $2;
+
+-- name: CountPegawaiNonAktif :one
+SELECT COUNT(1)
+FROM pegawai p
+         LEFT JOIN ref_jabatan ON p.jabatan_instansi_id = ref_jabatan.kode_jabatan
+WHERE p.id is not null
+  AND (p.kedudukan_hukum_id = '99' or p.status_pegawai = '3')
+	AND sqlc.narg('unit_kerja_id')::VARCHAR IS NULL OR p.unor_id = sqlc.narg('unit_kerja_id')::VARCHAR 
+	AND sqlc.narg('nama')::VARCHAR IS NULL OR p.nama ILIKE '%' || sqlc.narg('nama')::VARCHAR || '%'
+	AND sqlc.narg('nip')::VARCHAR IS NULL OR p.nip_baru = sqlc.narg('nip')::VARCHAR
+	AND sqlc.narg('golongan_id')::VARCHAR IS NULL OR p.gol_id = sqlc.narg('golongan_id')::VARCHAR
+	AND sqlc.narg('tingkat_pendidikan_id')::VARCHAR IS NULL OR p.tingkat_pendidikan_id = sqlc.narg('tingkat_pendidikan_id')::VARCHAR
+	AND sqlc.narg('jabatan_id')::VARCHAR IS NULL OR p.jabatan_id = sqlc.narg('jabatan_id')::VARCHAR
+ORDER BY p.nama ASC
+LIMIT $1 OFFSET $2;
 
 -- name: CountPegawaiAktif :one
 SELECT

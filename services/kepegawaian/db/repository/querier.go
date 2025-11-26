@@ -15,6 +15,8 @@ type Querier interface {
 	CountKoreksiSuratKeputusanByPNSID(ctx context.Context, arg CountKoreksiSuratKeputusanByPNSIDParams) (int64, error)
 	CountLogRequestSuratKeputusan(ctx context.Context, arg CountLogRequestSuratKeputusanParams) (int64, error)
 	CountPegawaiAktif(ctx context.Context, arg CountPegawaiAktifParams) (int64, error)
+	CountPegawaiNonAktif(ctx context.Context, arg CountPegawaiNonAktifParams) (int64, error)
+	CountPegawaiPPNPN(ctx context.Context, arg CountPegawaiPPNPNParams) (int64, error)
 	CountRefAgama(ctx context.Context) (int64, error)
 	CountRefGolongan(ctx context.Context) (int64, error)
 	CountRefJabatan(ctx context.Context, nama pgtype.Text) (int64, error)

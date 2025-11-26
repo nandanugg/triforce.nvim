@@ -21,6 +21,8 @@ type repository interface {
 	ListPegawaiPPNPN(ctx context.Context, arg sqlc.ListPegawaiPPNPNParams) ([]sqlc.ListPegawaiPPNPNRow, error)
 	ListUnitKerjaLengkapByIDs(ctx context.Context, ids []string) ([]sqlc.ListUnitKerjaLengkapByIDsRow, error)
 	CountPegawaiAktif(ctx context.Context, arg sqlc.CountPegawaiAktifParams) (int64, error)
+	CountPegawaiNonAktif(ctx context.Context, arg sqlc.CountPegawaiNonAktifParams) (int64, error)
+	CountPegawaiPPNPN(ctx context.Context, arg sqlc.CountPegawaiPPNPNParams) (int64, error)
 	GetDataPribadi(ctx context.Context, arg sqlc.GetDataPribadiParams) (sqlc.GetDataPribadiRow, error)
 }
 
@@ -65,6 +67,57 @@ func (s *service) getProfileByPNSID(ctx context.Context, pnsID string) (*profile
 		UnitOrganisasi: unitOrganisasi,
 		Photo:          data.Foto,
 	}, nil
+}
+
+type adminListPegawaiPPNPNParams struct {
+	limit  uint
+	offset uint
+	nama   string
+	unitID string
+	nip    string
+}
+
+func (s *service) adminListPegawaiPPNPN(ctx context.Context, arg adminListPegawaiPPNPNParams) ([]pegawai, uint, error) {
+	data, err := s.repo.ListPegawaiPPNPN(ctx, sqlc.ListPegawaiPPNPNParams{
+		Limit:       int32(arg.limit),
+		Offset:      int32(arg.offset),
+		Nama:        pgtype.Text{Valid: arg.nama != "", String: arg.nama},
+		UnitKerjaID: pgtype.Text{Valid: arg.unitID != "", String: arg.unitID},
+		Nip:         pgtype.Text{Valid: arg.nip != "", String: arg.nip},
+	})
+	if err != nil {
+		return nil, 0, fmt.Errorf("[pegawai-adminListPegawaiPPNPN] repo ListPegawaiPPNPN: %w", err)
+	}
+
+	uniqUnorIDs := typeutil.UniqMap(data, func(row sqlc.ListPegawaiPPNPNRow, _ int) string {
+		return row.UnorID.String
+	})
+
+	count, err := s.repo.CountPegawaiPPNPN(ctx, sqlc.CountPegawaiPPNPNParams{
+		Nama:        pgtype.Text{Valid: arg.nama != "", String: arg.nama},
+		UnitKerjaID: pgtype.Text{Valid: arg.unitID != "", String: arg.unitID},
+		Nip:         pgtype.Text{Valid: arg.nip != "", String: arg.nip},
+	})
+	if err != nil {
+		return nil, 0, fmt.Errorf("[pegawai-adminListPegawai] repo CountPegawaiAktif: %w", err)
+	}
+
+	result := typeutil.Map(data, func(row sqlc.ListPegawaiPPNPNRow) pegawai {
+		return pegawai{
+			PNSID:         row.PnsID,
+			NIP:           row.NipBaru.String,
+			GelarDepan:    row.GelarDepan.String,
+			Nama:          row.Nama.String,
+			GelarBelakang: row.GelarBelakang.String,
+			Golongan:      row.Golongan.String,
+			Jabatan:       row.Jabatan.String,
+			UnitKerja:     unorLengkapByID[row.UnorID.String],
+			Status:        getLabelStatusPNS(row.NamaKedudukuanHukum.String, row.StatusCpnsPns.String),
+			Photo:         row.Foto,
+		}
+	})
+
+	return result, uint(count), nil
 }
 
 type adminListPegawaiParams struct {

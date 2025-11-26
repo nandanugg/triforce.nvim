@@ -34,6 +34,19 @@ type pegawai struct {
 	Photo         pgtype.Text `json:"photo"`
 }
 
+type pegawaiPPNPN struct {
+	PNSID         string      `json:"pns_id"`
+	NIP           string      `json:"nip"`
+	GelarDepan    string      `json:"gelar_depan"`
+	GelarBelakang string      `json:"gelar_belakang"`
+	Nama          string      `json:"nama"`
+	Golongan      string      `json:"golongan"`
+	Jabatan       string      `json:"jabatan"`
+	UnitKerja     string      `json:"unit_kerja"`
+	Status        string      `json:"status"`
+	Photo         pgtype.Text `json:"photo"`
+}
+
 const (
 	statusKedudukanHukumMPP = "Masa Persiapan Pensiun"
 	statusPNSLabel          = "PNS"
