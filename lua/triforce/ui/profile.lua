@@ -621,6 +621,7 @@ end
 local function setup_highlights()
   local get_hl = require('volt.utils').get_hl
   local mix = require('volt.color').mix
+  local triforce = require('triforce')
 
   -- Get base colors
   local normal_bg = get_hl('Normal').bg
@@ -640,12 +641,6 @@ local function setup_highlights()
   vim.api.nvim_set_hl(M.ns, 'TriforceBlue', { link = 'Identifier' })
   vim.api.nvim_set_hl(M.ns, 'TriforcePurple', { link = 'Number' })
 
-  -- Activity heatmap gradient (using mix function like typr)
-  local red_fg = get_hl('Keyword').fg
-
-  -- Fallback color when theme doesn't provide red
-  local DEFAULT_RED = '#E66868'
-
   -- Heat levels: index maps to highlight group number and mix percentage
   local heat_levels = {
     { name = 0, mix_pct = 0 },
@@ -655,12 +650,20 @@ local function setup_highlights()
     { name = 4, mix_pct = 80 },
   }
 
-  local base_color = red_fg or DEFAULT_RED
-
+  local heat_hls = (triforce.config and triforce.config.heat_highlights)
+    or (triforce.defaults and triforce.defaults.heat_highlights)
+    or {}
   for _, level in ipairs(heat_levels) do
-    vim.api.nvim_set_hl(M.ns, ('TriforceHeat%d'):format(level.name), { fg = mix(base_color, normal_bg, level.mix_pct) })
-  end
+    local hl = ('TriforceHeat%d'):format(level.name)
+    local fg = heat_hls[hl]
 
+    -- If fg is a group name (string without leading '#'), link to that group.
+    -- Otherwise treat it as a color (hex string, number, etc.) and set fg.
+    if fg then
+      local key = (type(fg) == 'string' and fg:sub(1, 1) ~= '#') and 'link' or 'fg'
+      vim.api.nvim_set_hl(M.ns, hl, { [key] = fg })
+    end
+  end
   -- Link to standard highlights
   vim.api.nvim_set_hl(M.ns, 'FloatBorder', { link = 'TriforceBorder' })
   vim.api.nvim_set_hl(M.ns, 'Normal', { link = 'TriforceNormal' })
