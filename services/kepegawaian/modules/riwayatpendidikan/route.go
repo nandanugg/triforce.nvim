@@ -7,9 +7,10 @@ import (
 
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
 	sqlc "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/usulanperubahandata"
 )
 
-func RegisterRoutes(e *echo.Echo, sqlc sqlc.Querier, mwAuth api.AuthMiddlewareFunc) {
+func RegisterRoutes(e *echo.Echo, sqlc sqlc.Querier, mwAuth api.AuthMiddlewareFunc, svcRoute usulanperubahandata.ServiceRouteInterface) {
 	s := newService(sqlc)
 	h := newHandler(s)
 
@@ -23,4 +24,7 @@ func RegisterRoutes(e *echo.Echo, sqlc sqlc.Querier, mwAuth api.AuthMiddlewareFu
 	e.Add(http.MethodPut, "/v1/admin/pegawai/:nip/riwayat-pendidikan/:id", h.adminUpdate, mwAuth(api.Kode_Pegawai_Write))
 	e.Add(http.MethodDelete, "/v1/admin/pegawai/:nip/riwayat-pendidikan/:id", h.adminDelete, mwAuth(api.Kode_Pegawai_Write))
 	e.Add(http.MethodPut, "/v1/admin/pegawai/:nip/riwayat-pendidikan/:id/berkas", h.adminUploadBerkas, mwAuth(api.Kode_Pegawai_Write))
+
+	// register usulan perubahan data service route
+	svcRoute.Register(e, mwAuth, s, "riwayat-pendidikan")
 }

@@ -19,6 +19,25 @@ where rp.nip = $1 and rp.deleted_at is null
 order by rp.tahun_lulus desc nulls last
 limit $2 offset $3;
 
+-- name: GetRiwayatPendidikan :one
+select
+    rp.id,
+    rp.nama_sekolah,
+    rp.tahun_lulus,
+    rp.no_ijazah,
+    rp.gelar_depan,
+    rp.gelar_belakang,
+    rp.tugas_belajar,
+    rp.negara_sekolah,
+    rp.tingkat_pendidikan_id,
+    tk.nama as tingkat_pendidikan,
+    rp.pendidikan_id,
+    pend.nama as pendidikan
+from riwayat_pendidikan rp
+left join ref_tingkat_pendidikan tk on tk.id = rp.tingkat_pendidikan_id and tk.deleted_at is null
+left join ref_pendidikan pend on pend.id = rp.pendidikan_id and pend.deleted_at is null
+where rp.nip = @nip::varchar and rp.id = @id and rp.deleted_at is null;
+
 -- name: CountRiwayatPendidikan :one
 select count(1)
 from riwayat_pendidikan

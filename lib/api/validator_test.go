@@ -158,7 +158,7 @@ components:
 			requestMethod:      http.MethodGet,
 			requestPath:        "/schema-not-found",
 			wantResponseStatus: 404,
-			wantResponseBody:   `{"message": "openapi route tidak ditemukan"}`,
+			wantResponseBody:   `{"message": "route tidak ditemukan pada openapi"}`,
 		},
 		{
 			name:          "error: invalid parameter values",

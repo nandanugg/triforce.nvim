@@ -105,8 +105,7 @@ func validateRequestToken(c echo.Context, keyfunc *Keyfunc) (jwt.MapClaims, erro
 
 	token := strings.TrimPrefix(header, "Bearer ")
 	claims := jwt.MapClaims{}
-	_, err := jwt.ParseWithClaims(token, &claims, keyfunc.Keyfunc)
-	if err != nil {
+	if _, err := jwt.ParseWithClaims(token, &claims, keyfunc.Keyfunc); err != nil {
 		msg := "akses ditolak"
 		switch {
 		case errors.Is(err, jwt.ErrTokenMalformed):

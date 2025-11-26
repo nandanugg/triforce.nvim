@@ -1663,3 +1663,18 @@ type UpdateMandiri struct {
 	// Waktu penghapusan data
 	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 }
+
+type UsulanPerubahanDatum struct {
+	ID            int64              `db:"id"`
+	Nip           string             `db:"nip"`
+	JenisData     string             `db:"jenis_data"`
+	DataID        pgtype.Text        `db:"data_id"`
+	PerubahanData []byte             `db:"perubahan_data"`
+	Action        string             `db:"action"`
+	Status        string             `db:"status"`
+	Catatan       pgtype.Text        `db:"catatan"`
+	ReadAt        pgtype.Timestamptz `db:"read_at"`
+	CreatedAt     pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt     pgtype.Timestamptz `db:"updated_at"`
+	DeletedAt     pgtype.Timestamptz `db:"deleted_at"`
+}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/rsa"
+	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
 
@@ -31,6 +32,16 @@ func GenerateAuthHeader(nip string) string {
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 	tokenString, _ := token.SignedString(JwtPrivateKey)
 	return "Bearer " + tokenString
+}
+
+func GetNIPFromAuthHeader(authHeader string) string {
+	token := strings.TrimPrefix(authHeader, "Bearer ")
+	claims := jwt.MapClaims{}
+	if _, err := jwt.ParseWithClaims(token, &claims, Keyfunc.Keyfunc); err != nil {
+		return ""
+	}
+	nip, _ := claims["nip"].(string)
+	return nip
 }
 
 type AuthService struct {

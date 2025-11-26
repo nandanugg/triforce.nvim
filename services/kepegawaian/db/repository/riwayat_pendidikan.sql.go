@@ -98,6 +98,66 @@ func (q *Queries) GetBerkasRiwayatPendidikan(ctx context.Context, arg GetBerkasR
 	return file_base64, err
 }
 
+const getRiwayatPendidikan = `-- name: GetRiwayatPendidikan :one
+select
+    rp.id,
+    rp.nama_sekolah,
+    rp.tahun_lulus,
+    rp.no_ijazah,
+    rp.gelar_depan,
+    rp.gelar_belakang,
+    rp.tugas_belajar,
+    rp.negara_sekolah,
+    rp.tingkat_pendidikan_id,
+    tk.nama as tingkat_pendidikan,
+    rp.pendidikan_id,
+    pend.nama as pendidikan
+from riwayat_pendidikan rp
+left join ref_tingkat_pendidikan tk on tk.id = rp.tingkat_pendidikan_id and tk.deleted_at is null
+left join ref_pendidikan pend on pend.id = rp.pendidikan_id and pend.deleted_at is null
+where rp.nip = $1::varchar and rp.id = $2 and rp.deleted_at is null
+`
+
+type GetRiwayatPendidikanParams struct {
+	Nip string `db:"nip"`
+	ID  int32  `db:"id"`
+}
+
+type GetRiwayatPendidikanRow struct {
+	ID                  int32       `db:"id"`
+	NamaSekolah         pgtype.Text `db:"nama_sekolah"`
+	TahunLulus          pgtype.Int2 `db:"tahun_lulus"`
+	NoIjazah            pgtype.Text `db:"no_ijazah"`
+	GelarDepan          pgtype.Text `db:"gelar_depan"`
+	GelarBelakang       pgtype.Text `db:"gelar_belakang"`
+	TugasBelajar        pgtype.Int2 `db:"tugas_belajar"`
+	NegaraSekolah       pgtype.Text `db:"negara_sekolah"`
+	TingkatPendidikanID pgtype.Int2 `db:"tingkat_pendidikan_id"`
+	TingkatPendidikan   pgtype.Text `db:"tingkat_pendidikan"`
+	PendidikanID        pgtype.Text `db:"pendidikan_id"`
+	Pendidikan          pgtype.Text `db:"pendidikan"`
+}
+
+func (q *Queries) GetRiwayatPendidikan(ctx context.Context, arg GetRiwayatPendidikanParams) (GetRiwayatPendidikanRow, error) {
+	row := q.db.QueryRow(ctx, getRiwayatPendidikan, arg.Nip, arg.ID)
+	var i GetRiwayatPendidikanRow
+	err := row.Scan(
+		&i.ID,
+		&i.NamaSekolah,
+		&i.TahunLulus,
+		&i.NoIjazah,
+		&i.GelarDepan,
+		&i.GelarBelakang,
+		&i.TugasBelajar,
+		&i.NegaraSekolah,
+		&i.TingkatPendidikanID,
+		&i.TingkatPendidikan,
+		&i.PendidikanID,
+		&i.Pendidikan,
+	)
+	return i, err
+}
+
 const listRiwayatPendidikan = `-- name: ListRiwayatPendidikan :many
 select
     rp.id,

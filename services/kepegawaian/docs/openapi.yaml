@@ -56,6 +56,7 @@ tags:
   - name: Riwayat Sertifikasi
   - name: Surat Keputusan Pegawai
   - name: Unit Kerja
+  - name: Usulan Perubahan Data
 paths:
   /v1/admin/template:
     get:
@@ -6102,6 +6103,390 @@ paths:
                 format: binary
         "404":
           description: Berkas riwayat pendidikan tidak ditemukan atau User tidak mempunyai akses.
+  /v1/admin/usulan-perubahan-data:
+    get:
+      tags:
+        - Usulan Perubahan Data
+      summary: Admin - Lihat daftar usulan perubahan data pegawai.
+      description: Lihat daftar usulan perubahan data pegawai oleh admin.
+      operationId: adminListUsulanPerubahanData
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nama
+          in: query
+          schema:
+            type: string
+        - name: nip
+          in: query
+          schema:
+            type: string
+        - name: jenis_data
+          in: query
+          schema:
+            type: string
+        - name: kode_jabatan
+          in: query
+          schema:
+            type: string
+        - name: golongan_id
+          in: query
+          schema:
+            type: integer
+        - name: unit_kerja_id
+          in: query
+          schema:
+            type: string
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        id:
+                          type: integer
+                        jenis_data:
+                          type: string
+                        pegawai:
+                          type: object
+                          additionalProperties: false
+                          properties:
+                            nip:
+                              type: string
+                            nama:
+                              type: string
+                            gelar_depan:
+                              type: string
+                            gelar_belakang:
+                              type: string
+                            unit_kerja:
+                              type: string
+                        created_at:
+                          type: string
+                          format: date-time
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/admin/usulan-perubahan-data/{jenis_data}/{id}:
+    get:
+      tags:
+        - Usulan Perubahan Data
+      summary: Admin - Detail usulan perubahan data pegawai.
+      description: Detail usulan perubahan data pegawai oleh admin.
+      operationId: adminDetailUsulanPerubahanData
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: jenis_data
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: false
+                    properties:
+                      id:
+                        type: integer
+                      jenis_data:
+                        type: string
+                      action:
+                        type: string
+                        enum: ["CREATE", "UPDATE", "DELETE"]
+                      status:
+                        type: string
+                        enum: ["Diusulkan", "Disetujui", "Ditolak"]
+                      data_id:
+                        type: string
+                        nullable: true
+                      perubahan_data:
+                        type: object
+                        additionalProperties:
+                          oneOf:
+                            - $ref: '#/components/schemas/beforeAfterInt'
+                            - $ref: '#/components/schemas/beforeAfterString'
+                            - $ref: '#/components/schemas/beforeAfterBool'
+                            - $ref: '#/components/schemas/beforeAfterDate'
+                      pegawai:
+                        type: object
+                        additionalProperties: false
+                        properties:
+                          nip:
+                            type: string
+                          nama:
+                            type: string
+                          gelar_depan:
+                            type: string
+                          gelar_belakang:
+                            type: string
+                          unit_kerja:
+                            type: string
+                          golongan:
+                            type: string
+                          jabatan:
+                            type: string
+                          photo:
+                            type: string
+                            nullable: true
+                          status_pns:
+                            type: string
+                      created_at:
+                        type: string
+                        format: date-time
+        "404":
+          $ref: "#/components/responses/notFound"
+  /v1/admin/usulan-perubahan-data/{jenis_data}/{id}/approve:
+    post:
+      tags:
+        - Usulan Perubahan Data
+      summary: Admin - Setujui usulan perubahan data pegawai.
+      description: Setujui usulan perubahan data pegawai oleh admin.
+      operationId: approveUsulanPerubahanData
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: jenis_data
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Sukses.
+        "404":
+          $ref: "#/components/responses/notFound"
+        "422":
+          $ref: "#/components/responses/unprocessableContent"
+  /v1/admin/usulan-perubahan-data/{jenis_data}/{id}/reject:
+    post:
+      tags:
+        - Usulan Perubahan Data
+      summary: Admin - Tolak usulan perubahan data pegawai.
+      description: Tolak usulan perubahan data pegawai oleh admin.
+      operationId: rejectUsulanPerubahanData
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: jenis_data
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              properties:
+                catatan:
+                  type: string
+                  maxLength: 200
+              required:
+                - catatan
+      responses:
+        "204":
+          description: Sukses.
+        "404":
+          $ref: "#/components/responses/notFound"
+        "422":
+          $ref: "#/components/responses/unprocessableContent"
+  /v1/usulan-perubahan-data/{jenis_data}/{id}:
+    delete:
+      tags:
+        - Usulan Perubahan Data
+      summary: Hapus usulan perubahan data pegawai.
+      description: Hapus usulan perubahan data pegawai.
+      operationId: deleteUsulanPerubahanData
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: jenis_data
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Sukses.
+        "404":
+          $ref: "#/components/responses/notFound"
+        "422":
+          $ref: "#/components/responses/unprocessableContent"
+  /v1/usulan-perubahan-data/{jenis_data}/{id}/read:
+    post:
+      tags:
+        - Usulan Perubahan Data
+      summary: Tandai telah dibaca usulan perubahan data pegawai.
+      description: Tandai telah dibaca usulan perubahan data pegawai.
+      operationId: markAsReadUsulanPerubahanData
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: jenis_data
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Sukses.
+        "404":
+          $ref: "#/components/responses/notFound"
+        "422":
+          $ref: "#/components/responses/unprocessableContent"
+  /v1/usulan-perubahan-data/riwayat-pendidikan:
+    get:
+      tags:
+        - Riwayat Pendidikan
+        - Usulan Perubahan Data
+      summary: Lihat daftar usulan perubahan data riwayat pendidikan pegawai.
+      description: Lihat daftar usulan perubahan data riwayat pendidikan pegawai.
+      operationId: listUsulanPerubahanDataRiwayatPendidikan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/usulanPerubahanDataDefault'
+                        - type: object
+                          properties:
+                            perubahan_data:
+                              type: object
+                              additionalProperties: false
+                              properties:
+                                tingkat_pendidikan_id:
+                                  $ref: '#/components/schemas/beforeAfterInt'
+                                jenjang_pendidikan:
+                                  $ref: '#/components/schemas/beforeAfterString'
+                                pendidikan_id:
+                                  $ref: '#/components/schemas/beforeAfterString'
+                                jurusan:
+                                  $ref: '#/components/schemas/beforeAfterString'
+                                nama_sekolah:
+                                  $ref: '#/components/schemas/beforeAfterString'
+                                tahun_lulus:
+                                  $ref: '#/components/schemas/beforeAfterInt'
+                                nomor_ijazah:
+                                  $ref: '#/components/schemas/beforeAfterString'
+                                gelar_depan:
+                                  $ref: '#/components/schemas/beforeAfterString'
+                                gelar_belakang:
+                                  $ref: '#/components/schemas/beforeAfterString'
+                                tugas_belajar:
+                                  $ref: '#/components/schemas/beforeAfterString'
+                                negara_sekolah:
+                                  $ref: '#/components/schemas/beforeAfterString'
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+    post:
+      tags:
+        - Riwayat Pendidikan
+        - Usulan Perubahan Data
+      summary: Usulan perubahan data riwayat pendidikan pegawai.
+      description: Usulan perubahan data riwayat pendidikan pegawai.
+      operationId: createUsulanPerubahanDataRiwayatPendidikan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - title: CREATE
+                  type: object
+                  additionalProperties: false
+                  properties:
+                    action:
+                      type: string
+                      enum: ["CREATE"]
+                    data:
+                      $ref: "#/components/schemas/riwayatPendidikanRequest"
+                  required:
+                    - action
+                    - data
+                - title: UPDATE
+                  type: object
+                  additionalProperties: false
+                  properties:
+                    action:
+                      type: string
+                      enum: ["UPDATE"]
+                    data_id:
+                      type: string
+                    data:
+                      $ref: "#/components/schemas/riwayatPendidikanRequest"
+                  required:
+                    - action
+                    - data_id
+                    - data
+                - title: DELETE
+                  type: object
+                  additionalProperties: false
+                  properties:
+                    action:
+                      type: string
+                      enum: ["DELETE"]
+                    data_id:
+                      type: string
+                  required:
+                    - action
+                    - data_id
+      responses:
+        "204":
+          description: Sukses.
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "409":
+          $ref: "#/components/responses/conflict"
   /v1/riwayat-penghargaan:
     get:
       tags:
@@ -7023,38 +7408,7 @@ components:
       content:
         application/json:
           schema:
-            additionalProperties: false
-            properties:
-              tingkat_pendidikan_id:
-                type: integer
-              pendidikan_id:
-                type: string
-                nullable: true
-              nama_sekolah:
-                type: string
-                maxLength: 200
-              tahun_lulus:
-                type: integer
-              nomor_ijazah:
-                type: string
-                maxLength: 100
-              gelar_depan:
-                type: string
-                maxLength: 50
-              gelar_belakang:
-                type: string
-                maxLength: 60
-              tugas_belajar:
-                type: string
-                enum: ["Tugas Belajar", "Izin Belajar", ""]
-              negara_sekolah:
-                type: string
-                enum: ["Dalam Negeri", "Luar Negeri", ""]
-            required:
-              - tingkat_pendidikan_id
-              - nama_sekolah
-              - tahun_lulus
-              - nomor_ijazah
+            $ref: "#/components/schemas/riwayatPendidikanRequest"
     riwayatPenugasan:
       required: true
       content:
@@ -7222,8 +7576,26 @@ components:
             properties:
               message:
                 type: string
+    unprocessableContent:
+      description: Request dari client tidak dapat diproses.
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              message:
+                type: string
     notFound:
       description: Data tidak ditemukan.
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              message:
+                type: string
+    conflict:
+      description: Data conflict.
       content:
         application/json:
           schema:
@@ -7306,6 +7678,40 @@ components:
           type: string
         keterangan_pendidikan:
           type: string
+    riwayatPendidikanRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        tingkat_pendidikan_id:
+          type: integer
+        pendidikan_id:
+          type: string
+          nullable: true
+        nama_sekolah:
+          type: string
+          maxLength: 200
+        tahun_lulus:
+          type: integer
+        nomor_ijazah:
+          type: string
+          maxLength: 100
+        gelar_depan:
+          type: string
+          maxLength: 50
+        gelar_belakang:
+          type: string
+          maxLength: 60
+        tugas_belajar:
+          type: string
+          enum: ["Tugas Belajar", "Izin Belajar", ""]
+        negara_sekolah:
+          type: string
+          enum: ["Dalam Negeri", "Luar Negeri", ""]
+      required:
+        - tingkat_pendidikan_id
+        - nama_sekolah
+        - tahun_lulus
+        - nomor_ijazah
     riwayatPelatihanTeknis:
       type: object
       additionalProperties: false
@@ -8350,6 +8756,24 @@ components:
             nama_diatasan:
               type: string
               example: "unit kerja teratas"
+    usulanPerubahanDataDefault:
+      type: object
+      properties:
+        id:
+          type: integer
+        jenis_data:
+          type: string
+        action:
+          type: string
+          enum: ["CREATE", "UPDATE", "DELETE"]
+        status:
+          type: string
+          enum: ["Diusulkan", "Disetujui", "Ditolak"]
+        catatan:
+          type: string
+        data_id:
+          type: string
+          nullable: true
     koreksiSuratKeputusan:
       type: object
       properties:
@@ -8446,3 +8870,32 @@ components:
               enum: ["Belum Dikoreksi","Sedang Dikoreksi","Sudah Dikoreksi & Dikembalikan","Sudah dikoreksi dan menunggu TTD","Sudah TTD","Sudah dikirim"]
               example: "Sedang Dikoreksi"
               description: Status SK
+    beforeAfterBool:
+      type: array
+      minItems: 2
+      maxItems: 2
+      items:
+        type: boolean
+        nullable: true
+    beforeAfterString:
+      type: array
+      minItems: 2
+      maxItems: 2
+      items:
+        type: string
+        nullable: true
+    beforeAfterDate:
+      type: array
+      minItems: 2
+      maxItems: 2
+      items:
+        type: string
+        format: date
+        nullable: true
+    beforeAfterInt:
+      type: array
+      minItems: 2
+      maxItems: 2
+      items:
+        type: integer
+        nullable: true

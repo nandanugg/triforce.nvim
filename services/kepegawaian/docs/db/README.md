@@ -56,6 +56,7 @@
 | [kepegawaian.ref_template](kepegawaian.ref_template.md) | 7 |  | BASE TABLE |
 | [kepegawaian.pegawai_ttd](kepegawaian.pegawai_ttd.md) | 5 |  | BASE TABLE |
 | [kepegawaian.s3_files](kepegawaian.s3_files.md) | 7 |  | BASE TABLE |
+| [kepegawaian.usulan_perubahan_data](kepegawaian.usulan_perubahan_data.md) | 12 |  | BASE TABLE |
 
 ## Stored procedures and functions
 
@@ -1056,6 +1057,20 @@ erDiagram
   timestamp_with_time_zone deleted_at
   varchar_20_ nip_uploader
   boolean is_used
+}
+"kepegawaian.usulan_perubahan_data" {
+  bigint id
+  varchar_20_ nip
+  varchar_100_ jenis_data
+  text data_id
+  jsonb perubahan_data
+  varchar_10_ action
+  varchar_50_ status
+  varchar_200_ catatan
+  timestamp_with_time_zone read_at
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
 }
 ```
 

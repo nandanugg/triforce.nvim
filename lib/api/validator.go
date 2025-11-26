@@ -71,7 +71,7 @@ func (b *EchoBinder) Bind(i any, c echo.Context) error {
 func validateRequest(req *http.Request, router routers.Router) error {
 	route, pathParams, err := router.FindRoute(req)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "openapi route tidak ditemukan")
+		return echo.NewHTTPError(http.StatusNotFound, "route tidak ditemukan pada openapi")
 	}
 
 	if err := openapi3filter.ValidateRequest(req.Context(), &openapi3filter.RequestValidationInput{
@@ -178,8 +178,6 @@ func schemaErrorMessage(err *openapi3.SchemaError) string {
 		msg = "harus dalam tipe " + strings.Join(*err.Schema.Type, ", ")
 	case "nullable":
 		msg = "tidak boleh null"
-	case "allOf", "anyOf", "oneOf":
-		msg = "parameter tidak valid"
 	default:
 		return err.Error()
 	}
