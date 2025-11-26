@@ -181,11 +181,12 @@ erDiagram
 }
 "kepegawaian.s3_files" {
   bigint id
-  text object_bucket
   text object_key
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  varchar_20_ nip_uploader
+  boolean is_used
 }
 ```
 

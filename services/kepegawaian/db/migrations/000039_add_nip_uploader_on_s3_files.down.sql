@@ -1,0 +1,11 @@
+BEGIN;
+
+ALTER TABLE s3_files
+ALTER COLUMN updated_at DROP NOT NULL,
+ALTER COLUMN created_at DROP NOT NULL,
+ALTER COLUMN object_key DROP NOT NULL,
+ALTER COLUMN object_key TYPE varchar(255),
+DROP COLUMN is_used,
+DROP COLUMN nip_uploader;
+
+COMMIT;

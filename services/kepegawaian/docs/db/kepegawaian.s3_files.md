@@ -7,11 +7,12 @@
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
 | id | bigint | nextval('s3_files_id_seq'::regclass) | false | [kepegawaian.riwayat_diklat](kepegawaian.riwayat_diklat.md) [kepegawaian.riwayat_diklat_fungsional](kepegawaian.riwayat_diklat_fungsional.md) [kepegawaian.riwayat_diklat_struktural](kepegawaian.riwayat_diklat_struktural.md) [kepegawaian.riwayat_golongan](kepegawaian.riwayat_golongan.md) [kepegawaian.riwayat_hukuman_disiplin](kepegawaian.riwayat_hukuman_disiplin.md) [kepegawaian.riwayat_jabatan](kepegawaian.riwayat_jabatan.md) [kepegawaian.riwayat_kenaikan_gaji_berkala](kepegawaian.riwayat_kenaikan_gaji_berkala.md) [kepegawaian.riwayat_kursus](kepegawaian.riwayat_kursus.md) [kepegawaian.riwayat_pendidikan](kepegawaian.riwayat_pendidikan.md) [kepegawaian.riwayat_penghargaan_umum](kepegawaian.riwayat_penghargaan_umum.md) [kepegawaian.riwayat_pindah_unit_kerja](kepegawaian.riwayat_pindah_unit_kerja.md) [kepegawaian.riwayat_sertifikasi](kepegawaian.riwayat_sertifikasi.md) [kepegawaian.riwayat_penugasan](kepegawaian.riwayat_penugasan.md) [kepegawaian.surat_keputusan](kepegawaian.surat_keputusan.md) |  |  |
-| object_bucket | text |  | true |  |  |  |
-| object_key | text |  | true |  |  |  |
-| created_at | timestamp with time zone | now() | true |  |  |  |
-| updated_at | timestamp with time zone | now() | true |  |  |  |
+| object_key | text |  | false |  |  |  |
+| created_at | timestamp with time zone | now() | false |  |  |  |
+| updated_at | timestamp with time zone | now() | false |  |  |  |
 | deleted_at | timestamp with time zone |  | true |  |  |  |
+| nip_uploader | varchar(20) |  | false |  |  |  |
+| is_used | boolean | false | false |  |  |  |
 
 ## Constraints
 
@@ -48,11 +49,12 @@ erDiagram
 
 "kepegawaian.s3_files" {
   bigint id
-  text object_bucket
   text object_key
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  varchar_20_ nip_uploader
+  boolean is_used
 }
 "kepegawaian.riwayat_diklat" {
   bigint id

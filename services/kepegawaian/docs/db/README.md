@@ -55,7 +55,7 @@
 | [kepegawaian.log_request_surat_keputusan](kepegawaian.log_request_surat_keputusan.md) | 10 |  | BASE TABLE |
 | [kepegawaian.ref_template](kepegawaian.ref_template.md) | 7 |  | BASE TABLE |
 | [kepegawaian.pegawai_ttd](kepegawaian.pegawai_ttd.md) | 5 |  | BASE TABLE |
-| [kepegawaian.s3_files](kepegawaian.s3_files.md) | 6 |  | BASE TABLE |
+| [kepegawaian.s3_files](kepegawaian.s3_files.md) | 7 |  | BASE TABLE |
 
 ## Stored procedures and functions
 
@@ -1050,11 +1050,12 @@ erDiagram
 }
 "kepegawaian.s3_files" {
   bigint id
-  text object_bucket
   text object_key
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  varchar_20_ nip_uploader
+  boolean is_used
 }
 ```
 
