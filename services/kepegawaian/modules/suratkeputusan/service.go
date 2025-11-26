@@ -265,14 +265,17 @@ func (s *service) listAdmin(ctx context.Context, arg listAdminParams) ([]suratKe
 
 	result := typeutil.Map(data, func(row repo.ListSuratKeputusanRow) suratKeputusan {
 		return suratKeputusan{
-			IDSK:        row.FileID,
-			NamaPemilik: row.NamaPemilikSk.String,
-			NIPPemilik:  row.NipPemilikSk.String,
-			KategoriSK:  row.KategoriSk.String,
-			NoSK:        row.NoSk.String,
-			TanggalSK:   db.Date(row.TanggalSk.Time),
-			UnitKerja:   unorLengkapByID[row.UnorID.String],
-			StatusSK:    statusSKText(row.StatusSk.Int16),
+			IDSK:                   row.FileID,
+			NamaPemilik:            row.NamaPemilikSk.String,
+			NIPPemilik:             row.NipPemilikSk.String,
+			KategoriSK:             row.KategoriSk.String,
+			NoSK:                   row.NoSk.String,
+			TanggalSK:              db.Date(row.TanggalSk.Time),
+			UnitKerja:              unorLengkapByID[row.UnorID.String],
+			StatusSK:               statusSKText(row.StatusSk.Int16),
+			JabatanPemilik:         &row.JabatanPemilik.String,
+			GolonganPemilik:        &row.GolonganPemilik.String,
+			PangkatGolonganPemilik: &row.PangkatGolonganPemilik.String,
 		}
 	})
 
@@ -416,6 +419,7 @@ func (s *service) listKoreksi(ctx context.Context, arg listKoreksiParams) ([]kor
 			UnitKerja:              unorLengkapByID[row.UnorID.String],
 			NamaGolonganPemilik:    row.NamaGolonganPemilik.String,
 			PangkatGolonganPemilik: row.PangkatGolonganPemilik.String,
+			JabatanPemilik:         &row.JabatanPemilik.String,
 		}
 	})
 	return result, uint(count), nil
@@ -795,6 +799,7 @@ func (s *service) listTandatangan(ctx context.Context, arg listTandatanganParams
 			UnitKerja:              unorLengkapByID[row.UnorID.String],
 			NamaGolonganPemilik:    row.NamaGolonganPemilik.String,
 			PangkatGolonganPemilik: row.PangkatGolonganPemilik.String,
+			JabatanPemilik:         &row.JabatanPemilik.String,
 		}
 	})
 	return result, uint(count), nil

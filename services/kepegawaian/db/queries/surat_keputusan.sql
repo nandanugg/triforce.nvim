@@ -79,10 +79,15 @@ SELECT
     fds.no_sk,
     fds.tanggal_sk,
     p.unor_id,
-    fds.status_sk
+    fds.status_sk,
+    rj.nama_jabatan as jabatan_pemilik,
+    rg.nama as golongan_pemilik,
+    rg.nama_pangkat as pangkat_golongan_pemilik
 FROM surat_keputusan fds
 JOIN pegawai p ON fds.nip_sk = p.nip_baru AND p.deleted_at IS NULL
 LEFT JOIN ref_unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
+LEFT JOIN ref_jabatan rj ON rj.kode_jabatan = p.jabatan_instansi_id AND rj.deleted_at IS NULL
+LEFT JOIN ref_golongan rg on rg.id = p.gol_id and rg.deleted_at is null
 WHERE fds.deleted_at IS NULL
     AND (sqlc.narg('unit_kerja_id')::VARCHAR IS NULL
         OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.id
@@ -173,6 +178,7 @@ SELECT
     p.nip_baru as nip_pemilik_sk,
     g.nama as nama_golongan_pemilik,
     g.nama_pangkat as pangkat_golongan_pemilik,
+    rj.nama_jabatan as jabatan_pemilik,
     fds.kategori AS kategori_sk,
     fds.no_sk,
     fds.tanggal_sk,
@@ -182,6 +188,7 @@ JOIN surat_keputusan fds ON fds.file_id = fdc.file_id AND fds.deleted_at IS NULL
 JOIN pegawai p ON fds.nip_sk = p.nip_baru AND p.deleted_at IS NULL
 LEFT JOIN ref_unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
 LEFT JOIN ref_golongan g ON p.gol_id = g.id AND g.deleted_at IS NULL
+LEFT JOIN ref_jabatan rj on p.jabatan_instansi_id = rj.kode_jabatan and rj.deleted_at is null
 WHERE fdc.deleted_at IS NULL
     AND (sqlc.narg('unit_kerja_id')::VARCHAR IS NULL
         OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.id
@@ -341,6 +348,7 @@ SELECT
     p.nip_baru as nip_pemilik_sk,
     g.nama as nama_golongan_pemilik,
     g.nama_pangkat as pangkat_golongan_pemilik,
+    rj.nama_jabatan as jabatan_pemilik,
     fds.kategori AS kategori_sk,
     fds.no_sk,
     fds.tanggal_sk,
@@ -349,6 +357,7 @@ FROM surat_keputusan fds
 JOIN pegawai p ON fds.nip_sk = p.nip_baru AND p.deleted_at IS NULL
 LEFT JOIN ref_unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
 LEFT JOIN ref_golongan g ON p.gol_id = g.id AND g.deleted_at IS NULL
+LEFT JOIN ref_jabatan rj on p.jabatan_instansi_id = rj.kode_jabatan and rj.deleted_at is null
 WHERE fds.deleted_at IS NULL
     AND (sqlc.narg('unit_kerja_id')::VARCHAR IS NULL
         OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.id

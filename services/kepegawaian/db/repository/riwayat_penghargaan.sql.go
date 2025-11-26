@@ -151,7 +151,8 @@ set
     nama_penghargaan = $3,
     jenis_penghargaan = $4,
     deskripsi_penghargaan = $5,
-    tanggal_penghargaan = $6
+    tanggal_penghargaan = $6,
+    updated_at = now()
 where id = $1 AND deleted_at IS NULL
 `
 
@@ -182,7 +183,8 @@ func (q *Queries) UpdateRiwayatPenghargaan(ctx context.Context, arg UpdateRiwaya
 const updateRiwayatPenghargaanBerkas = `-- name: UpdateRiwayatPenghargaanBerkas :execrows
 update riwayat_penghargaan_umum
 set
-    file_base64 = $1
+    file_base64 = $1,
+    updated_at = now()
 where id = $2 AND nip = $3::varchar AND riwayat_penghargaan_umum.deleted_at IS NULL
 `
 

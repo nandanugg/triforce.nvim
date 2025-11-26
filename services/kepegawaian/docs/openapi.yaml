@@ -4304,6 +4304,15 @@ paths:
                             nip_pemilik:
                               type: string
                               description: NIP pemilik SK
+                            jabatan_pemilik:
+                              type: string
+                              description: Jabatan pemilik SK
+                            golongan_pemilik:
+                              type: string
+                              description: Golongan pemilik SK
+                            pangkat_golongan_pemilik:
+                              type: string
+                              description: Pangkat golongan pemilik SK
                   meta:
                     $ref: "#/components/schemas/metaPagination"
   /v1/admin/surat-keputusan/{id}:
@@ -8364,6 +8373,10 @@ components:
           type: string
           description: Pangkat golongan pemilik surat keputusan
           example: "Juru Muda"
+        jabatan_pemilik:
+          type: string
+          description: Jabatan pemilik surat keputusan
+          example: "Kepala Bagian"
         kategori_sk:
           type: string
           description: Kategori surat keputusan

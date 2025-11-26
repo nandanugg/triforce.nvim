@@ -14,17 +14,20 @@ type logSuratKeputusan struct {
 	Timestamp time.Time `json:"timestamp"`
 }
 type suratKeputusan struct {
-	IDSK                 string               `json:"id_sk"`
-	KategoriSK           string               `json:"kategori_sk"`
-	NoSK                 string               `json:"no_sk"`
-	TanggalSK            db.Date              `json:"tanggal_sk"`
-	StatusSK             string               `json:"status_sk"`
-	UnitKerja            string               `json:"unit_kerja"`
-	NamaPemilik          string               `json:"nama_pemilik,omitempty"`
-	NIPPemilik           string               `json:"nip_pemilik,omitempty"`
-	NamaPenandaTangan    string               `json:"nama_penandatangan,omitempty"`
-	JabatanPenandaTangan string               `json:"jabatan_penandatangan,omitempty"`
-	Logs                 *[]logSuratKeputusan `json:"logs,omitempty"`
+	IDSK                   string               `json:"id_sk"`
+	KategoriSK             string               `json:"kategori_sk"`
+	NoSK                   string               `json:"no_sk"`
+	TanggalSK              db.Date              `json:"tanggal_sk"`
+	StatusSK               string               `json:"status_sk"`
+	UnitKerja              string               `json:"unit_kerja"`
+	JabatanPemilik         *string              `json:"jabatan_pemilik,omitempty"`
+	GolonganPemilik        *string              `json:"golongan_pemilik,omitempty"`
+	PangkatGolonganPemilik *string              `json:"pangkat_golongan_pemilik,omitempty"`
+	NamaPemilik            string               `json:"nama_pemilik,omitempty"`
+	NIPPemilik             string               `json:"nip_pemilik,omitempty"`
+	NamaPenandaTangan      string               `json:"nama_penandatangan,omitempty"`
+	JabatanPenandaTangan   string               `json:"jabatan_penandatangan,omitempty"`
+	Logs                   *[]logSuratKeputusan `json:"logs,omitempty"`
 }
 
 type statusSK int16
@@ -65,6 +68,7 @@ type koreksiSuratKeputusan struct {
 	UnitKerja              string                   `json:"unit_kerja"`
 	NamaPemilik            string                   `json:"nama_pemilik"`
 	NIPPemilik             string                   `json:"nip_pemilik"`
+	JabatanPemilik         *string                  `json:"jabatan_pemilik,omitempty"`
 	PangkatGolonganPemilik string                   `json:"pangkat_golongan_pemilik,omitempty"`
 	NamaGolonganPemilik    string                   `json:"nama_golongan_pemilik,omitempty"`
 	StatusSK               string                   `json:"status_sk,omitempty"`
