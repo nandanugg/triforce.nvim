@@ -1759,6 +1759,12 @@ paths:
             type: string
             enum: ["PNS", "CPNS", "MPP"]
             description: Status pegawai untuk memfilter data
+        - name: tipe
+          in: query
+          schema:
+            type: string
+            enum: ["aktif", "ppnpn", "nonaktif"]
+            description: Status pegawai untuk memfilter data
       responses:
         "200":
           description: Sukses.
