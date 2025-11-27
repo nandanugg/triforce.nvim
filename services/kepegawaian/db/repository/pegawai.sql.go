@@ -72,39 +72,61 @@ func (q *Queries) CountPegawaiAktif(ctx context.Context, arg CountPegawaiAktifPa
 const countPegawaiNonAktif = `-- name: CountPegawaiNonAktif :one
 SELECT COUNT(1)
 FROM pegawai p
+	JOIN ref_kedudukan_hukum
+	    ON ref_kedudukan_hukum.id = p.kedudukan_hukum_id AND ref_kedudukan_hukum.deleted_at IS NULL
 WHERE p.id is not null
   AND (p.kedudukan_hukum_id = '99' or p.status_pegawai = '3')
-	AND $3::VARCHAR IS NULL OR p.unor_id = $3::VARCHAR 
-	AND $4::VARCHAR IS NULL OR p.nama ILIKE '%' || $4::VARCHAR || '%'
-	AND $5::VARCHAR IS NULL OR p.nip_baru = $5::VARCHAR
-	AND $6::VARCHAR IS NULL OR p.gol_id = $6::VARCHAR
-	AND $7::VARCHAR IS NULL OR p.tingkat_pendidikan_id = $7::VARCHAR
-	AND $8::VARCHAR IS NULL OR p.jabatan_id = $8::VARCHAR
+	AND ($3::varchar is null or ref_kedudukan_hukum.nama = $3::varchar)
+	AND (
+	    $4::VARCHAR IS NULL
+	    OR $4::VARCHAR = uk.id
+	    OR $4::VARCHAR = uk.eselon_1
+	    OR $4::VARCHAR = uk.eselon_2
+	    OR $4::VARCHAR = uk.eselon_3
+	    OR $4::VARCHAR = uk.eselon_4
+	)
+	AND $5::VARCHAR IS NULL 
+		OR (
+		    pegawai.nama ILIKE '%' || $5::VARCHAR || '%'
+		    OR pegawai.nip_baru ILIKE '%' || $5::VARCHAR || '%'
+		)
+	AND $6::VARCHAR IS NULL OR p.nip_baru = $6::VARCHAR
+	AND ( $7::INTEGER IS NULL OR p.gol_id = $7::INTEGER )
+	AND ( $8::VARCHAR IS NULL OR p.jabatan_instansi_id = $8::VARCHAR )
+	AND (
+		$9::varchar[] IS NULL
+		OR ( p.status_cpns_pns = ANY($9::VARCHAR[]) AND ref_kedudukan_hukum.nama <> $10::varchar )
+	    )
+	AND p.deleted_at IS NULL
 ORDER BY p.nama ASC
 LIMIT $1 OFFSET $2
 `
 
 type CountPegawaiNonAktifParams struct {
-	Limit               int32       `db:"limit"`
-	Offset              int32       `db:"offset"`
-	UnitKerjaID         pgtype.Text `db:"unit_kerja_id"`
-	Nama                pgtype.Text `db:"nama"`
-	Nip                 pgtype.Text `db:"nip"`
-	GolonganID          pgtype.Text `db:"golongan_id"`
-	TingkatPendidikanID pgtype.Text `db:"tingkat_pendidikan_id"`
-	JabatanID           pgtype.Text `db:"jabatan_id"`
+	Limit       int32       `db:"limit"`
+	Offset      int32       `db:"offset"`
+	StatusHukum pgtype.Text `db:"status_hukum"`
+	UnitKerjaID pgtype.Text `db:"unit_kerja_id"`
+	Keyword     pgtype.Text `db:"keyword"`
+	Nip         pgtype.Text `db:"nip"`
+	GolonganID  pgtype.Int4 `db:"golongan_id"`
+	JabatanID   pgtype.Text `db:"jabatan_id"`
+	StatusPns   []string    `db:"status_pns"`
+	Mpp         string      `db:"mpp"`
 }
 
 func (q *Queries) CountPegawaiNonAktif(ctx context.Context, arg CountPegawaiNonAktifParams) (int64, error) {
 	row := q.db.QueryRow(ctx, countPegawaiNonAktif,
 		arg.Limit,
 		arg.Offset,
+		arg.StatusHukum,
 		arg.UnitKerjaID,
-		arg.Nama,
+		arg.Keyword,
 		arg.Nip,
 		arg.GolonganID,
-		arg.TingkatPendidikanID,
 		arg.JabatanID,
+		arg.StatusPns,
+		arg.Mpp,
 	)
 	var count int64
 	err := row.Scan(&count)
@@ -114,10 +136,31 @@ func (q *Queries) CountPegawaiNonAktif(ctx context.Context, arg CountPegawaiNonA
 const countPegawaiPPNPN = `-- name: CountPegawaiPPNPN :one
 SELECT COUNT(1)
 FROM pegawai p
+	JOIN ref_kedudukan_hukum
+	    ON ref_kedudukan_hukum.id = p.kedudukan_hukum_id AND ref_kedudukan_hukum.deleted_at IS NULL
 WHERE p.status_pegawai = 3
-	AND $3::VARCHAR IS NULL OR p.unor_id = $3::VARCHAR 
-	AND $4::VARCHAR IS NULL OR p.nama ILIKE '%' || $4::VARCHAR || '%'
-	AND $5::VARCHAR IS NULL OR p.nip_baru = $5::VARCHAR
+	AND ($3::varchar is null or ref_kedudukan_hukum.nama = $3::varchar)
+	AND (
+	    $4::VARCHAR IS NULL
+	    OR $4::VARCHAR = uk.id
+	    OR $4::VARCHAR = uk.eselon_1
+	    OR $4::VARCHAR = uk.eselon_2
+	    OR $4::VARCHAR = uk.eselon_3
+	    OR $4::VARCHAR = uk.eselon_4
+	)
+	AND $5::VARCHAR IS NULL 
+		OR (
+		    pegawai.nama ILIKE '%' || $5::VARCHAR || '%'
+		    OR pegawai.nip_baru ILIKE '%' || $5::VARCHAR || '%'
+		)
+	AND $6::VARCHAR IS NULL OR p.nip_baru = $6::VARCHAR
+	AND ( $7::INTEGER IS NULL OR p.gol_id = $7::INTEGER )
+	AND ( $8::VARCHAR IS NULL OR p.jabatan_instansi_id = $8::VARCHAR )
+	AND (
+		$9::varchar[] IS NULL
+		OR ( p.status_cpns_pns = ANY($9::VARCHAR[]) AND ref_kedudukan_hukum.nama <> $10::varchar )
+	    )
+	AND p.deleted_at IS NULL
 ORDER BY p.nama ASC
 LIMIT $1 OFFSET $2
 `
@@ -125,18 +168,28 @@ LIMIT $1 OFFSET $2
 type CountPegawaiPPNPNParams struct {
 	Limit       int32       `db:"limit"`
 	Offset      int32       `db:"offset"`
+	StatusHukum pgtype.Text `db:"status_hukum"`
 	UnitKerjaID pgtype.Text `db:"unit_kerja_id"`
-	Nama        pgtype.Text `db:"nama"`
+	Keyword     pgtype.Text `db:"keyword"`
 	Nip         pgtype.Text `db:"nip"`
+	GolonganID  pgtype.Int4 `db:"golongan_id"`
+	JabatanID   pgtype.Text `db:"jabatan_id"`
+	StatusPns   []string    `db:"status_pns"`
+	Mpp         string      `db:"mpp"`
 }
 
 func (q *Queries) CountPegawaiPPNPN(ctx context.Context, arg CountPegawaiPPNPNParams) (int64, error) {
 	row := q.db.QueryRow(ctx, countPegawaiPPNPN,
 		arg.Limit,
 		arg.Offset,
+		arg.StatusHukum,
 		arg.UnitKerjaID,
-		arg.Nama,
+		arg.Keyword,
 		arg.Nip,
+		arg.GolonganID,
+		arg.JabatanID,
+		arg.StatusPns,
+		arg.Mpp,
 	)
 	var count int64
 	err := row.Scan(&count)
@@ -381,70 +434,95 @@ func (q *Queries) ListPegawaiAktif(ctx context.Context, arg ListPegawaiAktifPara
 }
 
 const listPegawaiNonAktif = `-- name: ListPegawaiNonAktif :many
-SELECT p.id,
-       p.pns_id,
-       p.nip_baru,
-       p.nama,
-       ruk.nama_unor,
-       ref_golongan.nama as nama_golongan,
-       nama_pangkat,
-       eselon_4,
-       eselon_3,
-       eselon_2,
-       eselon_1,
-       kategori_jabatan
+SELECT 
+	p.pns_id,
+	p.nip_baru AS nip,
+	p.nama,
+	p.gelar_depan,
+	p.gelar_belakang,
+	p.foto,
+	p.unor_id,
+	p.status_cpns_pns,
+	uk.nama_unor,
+	ref_golongan_akhir.nama AS golongan,
+	ref_jabatan.nama_jabatan AS jabatan,
+	ref_kedudukan_hukum.nama as nama_kedudukuan_hukum
 FROM pegawai p
-         LEFT JOIN ref_unit_kerja as ruk ON p.unor_id = ruk.id
-         LEFT JOIN ref_golongan ON p.gol_id = ref_golongan.id
-         LEFT JOIN ref_jabatan ON p.jabatan_instansi_id = ref_jabatan.kode_jabatan
+	LEFT JOIN ref_unit_kerja as uk ON p.unor_id = ruk.id
+	JOIN ref_kedudukan_hukum
+	    ON ref_kedudukan_hukum.id = p.kedudukan_hukum_id AND ref_kedudukan_hukum.deleted_at IS NULL
+	LEFT JOIN ref_jabatan
+	    ON ref_jabatan.kode_jabatan = p.jabatan_instansi_id AND ref_jabatan.deleted_at IS NULL
+	LEFT JOIN ref_golongan ref_golongan_akhir
+	    ON ref_golongan_akhir.id = p.gol_id AND ref_golongan_akhir.deleted_at IS NULL
 WHERE p.id is not null
   AND (p.kedudukan_hukum_id = '99' or p.status_pegawai = '3')
-	AND $3::VARCHAR IS NULL OR p.unor_id = $3::VARCHAR 
-	AND $4::VARCHAR IS NULL OR p.nama ILIKE '%' || $4::VARCHAR || '%'
-	AND $5::VARCHAR IS NULL OR p.nip_baru = $5::VARCHAR
-	AND $6::VARCHAR IS NULL OR p.gol_id = $6::VARCHAR
-	AND $7::VARCHAR IS NULL OR p.tingkat_pendidikan_id = $7::VARCHAR
-	AND $8::VARCHAR IS NULL OR p.jabatan_id = $8::VARCHAR
+	AND ($3::varchar is null or ref_kedudukan_hukum.nama = $3::varchar)
+	AND (
+	    $4::VARCHAR IS NULL
+	    OR $4::VARCHAR = uk.id
+	    OR $4::VARCHAR = uk.eselon_1
+	    OR $4::VARCHAR = uk.eselon_2
+	    OR $4::VARCHAR = uk.eselon_3
+	    OR $4::VARCHAR = uk.eselon_4
+	)
+	AND $5::VARCHAR IS NULL 
+		OR (
+		    pegawai.nama ILIKE '%' || $5::VARCHAR || '%'
+		    OR pegawai.nip_baru ILIKE '%' || $5::VARCHAR || '%'
+		)
+	AND $6::VARCHAR IS NULL OR p.nip_baru = $6::VARCHAR
+	AND ( $7::INTEGER IS NULL OR p.gol_id = $7::INTEGER )
+	AND ( $8::VARCHAR IS NULL OR p.jabatan_instansi_id = $8::VARCHAR )
+	AND (
+		$9::varchar[] IS NULL
+		OR ( p.status_cpns_pns = ANY($9::VARCHAR[]) AND ref_kedudukan_hukum.nama <> $10::varchar )
+	    )
+	AND p.deleted_at IS NULL
 ORDER BY p.nama ASC
 LIMIT $1 OFFSET $2
 `
 
 type ListPegawaiNonAktifParams struct {
-	Limit               int32       `db:"limit"`
-	Offset              int32       `db:"offset"`
-	UnitKerjaID         pgtype.Text `db:"unit_kerja_id"`
-	Nama                pgtype.Text `db:"nama"`
-	Nip                 pgtype.Text `db:"nip"`
-	GolonganID          pgtype.Text `db:"golongan_id"`
-	TingkatPendidikanID pgtype.Text `db:"tingkat_pendidikan_id"`
-	JabatanID           pgtype.Text `db:"jabatan_id"`
+	Limit       int32       `db:"limit"`
+	Offset      int32       `db:"offset"`
+	StatusHukum pgtype.Text `db:"status_hukum"`
+	UnitKerjaID pgtype.Text `db:"unit_kerja_id"`
+	Keyword     pgtype.Text `db:"keyword"`
+	Nip         pgtype.Text `db:"nip"`
+	GolonganID  pgtype.Int4 `db:"golongan_id"`
+	JabatanID   pgtype.Text `db:"jabatan_id"`
+	StatusPns   []string    `db:"status_pns"`
+	Mpp         string      `db:"mpp"`
 }
 
 type ListPegawaiNonAktifRow struct {
-	ID              int32       `db:"id"`
-	PnsID           string      `db:"pns_id"`
-	NipBaru         pgtype.Text `db:"nip_baru"`
-	Nama            pgtype.Text `db:"nama"`
-	NamaUnor        pgtype.Text `db:"nama_unor"`
-	NamaGolongan    pgtype.Text `db:"nama_golongan"`
-	NamaPangkat     pgtype.Text `db:"nama_pangkat"`
-	Eselon4         pgtype.Text `db:"eselon_4"`
-	Eselon3         pgtype.Text `db:"eselon_3"`
-	Eselon2         pgtype.Text `db:"eselon_2"`
-	Eselon1         pgtype.Text `db:"eselon_1"`
-	KategoriJabatan pgtype.Text `db:"kategori_jabatan"`
+	PnsID               string      `db:"pns_id"`
+	Nip                 pgtype.Text `db:"nip"`
+	Nama                pgtype.Text `db:"nama"`
+	GelarDepan          pgtype.Text `db:"gelar_depan"`
+	GelarBelakang       pgtype.Text `db:"gelar_belakang"`
+	Foto                pgtype.Text `db:"foto"`
+	UnorID              pgtype.Text `db:"unor_id"`
+	StatusCpnsPns       pgtype.Text `db:"status_cpns_pns"`
+	NamaUnor            pgtype.Text `db:"nama_unor"`
+	Golongan            pgtype.Text `db:"golongan"`
+	Jabatan             pgtype.Text `db:"jabatan"`
+	NamaKedudukuanHukum pgtype.Text `db:"nama_kedudukuan_hukum"`
 }
 
 func (q *Queries) ListPegawaiNonAktif(ctx context.Context, arg ListPegawaiNonAktifParams) ([]ListPegawaiNonAktifRow, error) {
 	rows, err := q.db.Query(ctx, listPegawaiNonAktif,
 		arg.Limit,
 		arg.Offset,
+		arg.StatusHukum,
 		arg.UnitKerjaID,
-		arg.Nama,
+		arg.Keyword,
 		arg.Nip,
 		arg.GolonganID,
-		arg.TingkatPendidikanID,
 		arg.JabatanID,
+		arg.StatusPns,
+		arg.Mpp,
 	)
 	if err != nil {
 		return nil, err
@@ -454,18 +532,18 @@ func (q *Queries) ListPegawaiNonAktif(ctx context.Context, arg ListPegawaiNonAkt
 	for rows.Next() {
 		var i ListPegawaiNonAktifRow
 		if err := rows.Scan(
-			&i.ID,
 			&i.PnsID,
-			&i.NipBaru,
+			&i.Nip,
 			&i.Nama,
+			&i.GelarDepan,
+			&i.GelarBelakang,
+			&i.Foto,
+			&i.UnorID,
+			&i.StatusCpnsPns,
 			&i.NamaUnor,
-			&i.NamaGolongan,
-			&i.NamaPangkat,
-			&i.Eselon4,
-			&i.Eselon3,
-			&i.Eselon2,
-			&i.Eselon1,
-			&i.KategoriJabatan,
+			&i.Golongan,
+			&i.Jabatan,
+			&i.NamaKedudukuanHukum,
 		); err != nil {
 			return nil, err
 		}
@@ -478,13 +556,50 @@ func (q *Queries) ListPegawaiNonAktif(ctx context.Context, arg ListPegawaiNonAkt
 }
 
 const listPegawaiPPNPN = `-- name: ListPegawaiPPNPN :many
-SELECT p.id, p.pns_id, p.nip_lama, p.nip_baru, p.nama, p.gelar_depan, p.gelar_belakang, p.tempat_lahir_id, p.tanggal_lahir, p.jenis_kelamin, p.agama_id, p.jenis_kawin_id, p.nik, p.no_darurat, p.no_hp, p.email, p.alamat, p.npwp, p.bpjs, p.jenis_pegawai_id, p.kedudukan_hukum_id, p.status_cpns_pns, p.kartu_pegawai, p.no_sk_cpns, p.tanggal_sk_cpns, p.tmt_cpns, p.tmt_pns, p.gol_awal_id, p.gol_id, p.tmt_golongan, p.mk_tahun, p.mk_bulan, p.jabatan_id, p.tmt_jabatan, p.pendidikan_id, p.tahun_lulus, p.kpkn_id, p.lokasi_kerja_id, p.unor_id, p.unor_induk_id, p.instansi_induk_id, p.instansi_kerja_id, p.satuan_kerja_induk_id, p.satuan_kerja_id, p.golongan_darah, p.foto, p.tmt_pensiun, p.lokasi_kerja, p.jml_pasangan, p.jml_anak, p.no_surat_dokter, p.tanggal_surat_dokter, p.no_bebas_narkoba, p.tanggal_bebas_narkoba, p.no_catatan_polisi, p.tanggal_catatan_polisi, p.akte_kelahiran, p.status_hidup, p.akte_meninggal, p.tanggal_meninggal, p.no_askes, p.no_taspen, p.tanggal_npwp, p.tempat_lahir, p.tingkat_pendidikan_id, p.tempat_lahir_nama, p.jenis_jabatan_nama, p.jabatan_nama, p.kpkn_nama, p.instansi_induk_nama, p.instansi_kerja_nama, p.satuan_kerja_induk_nama, p.satuan_kerja_nama, p.jabatan_instansi_id, p.bup, p.jabatan_instansi_nama, p.jenis_jabatan_id, p.terminated_date, p.status_pegawai, p.jabatan_ppnpn, p.jabatan_instansi_real_id, p.created_by, p.updated_by, p.email_dikbud_bak, p.email_dikbud, p.kodecepat, p.is_dosen, p.mk_tahun_swasta, p.mk_bulan_swasta, p.kk, p.nidn, p.ket, p.no_sk_pemberhentian, p.status_pegawai_backup, p.masa_kerja, p.kartu_asn, p.created_at, p.updated_at, p.deleted_at, ruk.nama_unor
+SELECT 
+	p.pns_id,
+	p.nip_baru AS nip,
+	p.nama,
+	p.gelar_depan,
+	p.gelar_belakang,
+	p.foto,
+	p.unor_id,
+	p.status_cpns_pns,
+	uk.nama_unor,
+	ref_golongan_akhir.nama AS golongan,
+	ref_jabatan.nama_jabatan AS jabatan,
+	ref_kedudukan_hukum.nama as nama_kedudukuan_hukum
 FROM pegawai p
-         LEFT JOIN ref_unit_kerja as ruk ON p.unor_id = ruk.id
+	LEFT JOIN ref_unit_kerja as uk ON p.unor_id = ruk.id
+	JOIN ref_kedudukan_hukum
+	    ON ref_kedudukan_hukum.id = p.kedudukan_hukum_id AND ref_kedudukan_hukum.deleted_at IS NULL
+	LEFT JOIN ref_jabatan
+	    ON ref_jabatan.kode_jabatan = p.jabatan_instansi_id AND ref_jabatan.deleted_at IS NULL
+	LEFT JOIN ref_golongan ref_golongan_akhir
+	    ON ref_golongan_akhir.id = p.gol_id AND ref_golongan_akhir.deleted_at IS NULL
 WHERE p.status_pegawai = 3
-	AND $3::VARCHAR IS NULL OR p.unor_id = $3::VARCHAR 
-	AND $4::VARCHAR IS NULL OR p.nama ILIKE '%' || $4::VARCHAR || '%'
-	AND $5::VARCHAR IS NULL OR p.nip_baru = $5::VARCHAR
+	AND ($3::varchar is null or ref_kedudukan_hukum.nama = $3::varchar)
+	AND (
+	    $4::VARCHAR IS NULL
+	    OR $4::VARCHAR = uk.id
+	    OR $4::VARCHAR = uk.eselon_1
+	    OR $4::VARCHAR = uk.eselon_2
+	    OR $4::VARCHAR = uk.eselon_3
+	    OR $4::VARCHAR = uk.eselon_4
+	)
+	AND $5::VARCHAR IS NULL 
+		OR (
+		    pegawai.nama ILIKE '%' || $5::VARCHAR || '%'
+		    OR pegawai.nip_baru ILIKE '%' || $5::VARCHAR || '%'
+		)
+	AND $6::VARCHAR IS NULL OR p.nip_baru = $6::VARCHAR
+	AND ( $7::INTEGER IS NULL OR p.gol_id = $7::INTEGER )
+	AND ( $8::VARCHAR IS NULL OR p.jabatan_instansi_id = $8::VARCHAR )
+	AND (
+		$9::varchar[] IS NULL
+		OR ( p.status_cpns_pns = ANY($9::VARCHAR[]) AND ref_kedudukan_hukum.nama <> $10::varchar )
+	    )
+	AND p.deleted_at IS NULL
 ORDER BY p.nama ASC
 LIMIT $1 OFFSET $2
 `
@@ -492,121 +607,43 @@ LIMIT $1 OFFSET $2
 type ListPegawaiPPNPNParams struct {
 	Limit       int32       `db:"limit"`
 	Offset      int32       `db:"offset"`
+	StatusHukum pgtype.Text `db:"status_hukum"`
 	UnitKerjaID pgtype.Text `db:"unit_kerja_id"`
-	Nama        pgtype.Text `db:"nama"`
+	Keyword     pgtype.Text `db:"keyword"`
 	Nip         pgtype.Text `db:"nip"`
+	GolonganID  pgtype.Int4 `db:"golongan_id"`
+	JabatanID   pgtype.Text `db:"jabatan_id"`
+	StatusPns   []string    `db:"status_pns"`
+	Mpp         string      `db:"mpp"`
 }
 
 type ListPegawaiPPNPNRow struct {
-	ID                    int32              `db:"id"`
-	PnsID                 string             `db:"pns_id"`
-	NipLama               pgtype.Text        `db:"nip_lama"`
-	NipBaru               pgtype.Text        `db:"nip_baru"`
-	Nama                  pgtype.Text        `db:"nama"`
-	GelarDepan            pgtype.Text        `db:"gelar_depan"`
-	GelarBelakang         pgtype.Text        `db:"gelar_belakang"`
-	TempatLahirID         pgtype.Text        `db:"tempat_lahir_id"`
-	TanggalLahir          pgtype.Date        `db:"tanggal_lahir"`
-	JenisKelamin          pgtype.Text        `db:"jenis_kelamin"`
-	AgamaID               pgtype.Int2        `db:"agama_id"`
-	JenisKawinID          pgtype.Int2        `db:"jenis_kawin_id"`
-	Nik                   pgtype.Text        `db:"nik"`
-	NoDarurat             pgtype.Text        `db:"no_darurat"`
-	NoHp                  pgtype.Text        `db:"no_hp"`
-	Email                 pgtype.Text        `db:"email"`
-	Alamat                pgtype.Text        `db:"alamat"`
-	Npwp                  pgtype.Text        `db:"npwp"`
-	Bpjs                  pgtype.Text        `db:"bpjs"`
-	JenisPegawaiID        pgtype.Int2        `db:"jenis_pegawai_id"`
-	KedudukanHukumID      pgtype.Int4        `db:"kedudukan_hukum_id"`
-	StatusCpnsPns         pgtype.Text        `db:"status_cpns_pns"`
-	KartuPegawai          pgtype.Text        `db:"kartu_pegawai"`
-	NoSkCpns              pgtype.Text        `db:"no_sk_cpns"`
-	TanggalSkCpns         pgtype.Date        `db:"tanggal_sk_cpns"`
-	TmtCpns               pgtype.Date        `db:"tmt_cpns"`
-	TmtPns                pgtype.Date        `db:"tmt_pns"`
-	GolAwalID             pgtype.Int2        `db:"gol_awal_id"`
-	GolID                 pgtype.Int2        `db:"gol_id"`
-	TmtGolongan           pgtype.Date        `db:"tmt_golongan"`
-	MkTahun               pgtype.Int2        `db:"mk_tahun"`
-	MkBulan               pgtype.Int2        `db:"mk_bulan"`
-	JabatanID             pgtype.Text        `db:"jabatan_id"`
-	TmtJabatan            pgtype.Date        `db:"tmt_jabatan"`
-	PendidikanID          pgtype.Text        `db:"pendidikan_id"`
-	TahunLulus            pgtype.Int2        `db:"tahun_lulus"`
-	KpknID                pgtype.Text        `db:"kpkn_id"`
-	LokasiKerjaID         pgtype.Text        `db:"lokasi_kerja_id"`
-	UnorID                pgtype.Text        `db:"unor_id"`
-	UnorIndukID           pgtype.Text        `db:"unor_induk_id"`
-	InstansiIndukID       pgtype.Text        `db:"instansi_induk_id"`
-	InstansiKerjaID       pgtype.Text        `db:"instansi_kerja_id"`
-	SatuanKerjaIndukID    pgtype.Text        `db:"satuan_kerja_induk_id"`
-	SatuanKerjaID         pgtype.Text        `db:"satuan_kerja_id"`
-	GolonganDarah         pgtype.Text        `db:"golongan_darah"`
-	Foto                  pgtype.Text        `db:"foto"`
-	TmtPensiun            pgtype.Date        `db:"tmt_pensiun"`
-	LokasiKerja           pgtype.Text        `db:"lokasi_kerja"`
-	JmlPasangan           pgtype.Int2        `db:"jml_pasangan"`
-	JmlAnak               pgtype.Int2        `db:"jml_anak"`
-	NoSuratDokter         pgtype.Text        `db:"no_surat_dokter"`
-	TanggalSuratDokter    pgtype.Date        `db:"tanggal_surat_dokter"`
-	NoBebasNarkoba        pgtype.Text        `db:"no_bebas_narkoba"`
-	TanggalBebasNarkoba   pgtype.Date        `db:"tanggal_bebas_narkoba"`
-	NoCatatanPolisi       pgtype.Text        `db:"no_catatan_polisi"`
-	TanggalCatatanPolisi  pgtype.Date        `db:"tanggal_catatan_polisi"`
-	AkteKelahiran         pgtype.Text        `db:"akte_kelahiran"`
-	StatusHidup           pgtype.Text        `db:"status_hidup"`
-	AkteMeninggal         pgtype.Text        `db:"akte_meninggal"`
-	TanggalMeninggal      pgtype.Date        `db:"tanggal_meninggal"`
-	NoAskes               pgtype.Text        `db:"no_askes"`
-	NoTaspen              pgtype.Text        `db:"no_taspen"`
-	TanggalNpwp           pgtype.Date        `db:"tanggal_npwp"`
-	TempatLahir           pgtype.Text        `db:"tempat_lahir"`
-	TingkatPendidikanID   pgtype.Int2        `db:"tingkat_pendidikan_id"`
-	TempatLahirNama       pgtype.Text        `db:"tempat_lahir_nama"`
-	JenisJabatanNama      pgtype.Text        `db:"jenis_jabatan_nama"`
-	JabatanNama           pgtype.Text        `db:"jabatan_nama"`
-	KpknNama              pgtype.Text        `db:"kpkn_nama"`
-	InstansiIndukNama     pgtype.Text        `db:"instansi_induk_nama"`
-	InstansiKerjaNama     pgtype.Text        `db:"instansi_kerja_nama"`
-	SatuanKerjaIndukNama  pgtype.Text        `db:"satuan_kerja_induk_nama"`
-	SatuanKerjaNama       pgtype.Text        `db:"satuan_kerja_nama"`
-	JabatanInstansiID     pgtype.Text        `db:"jabatan_instansi_id"`
-	Bup                   pgtype.Int2        `db:"bup"`
-	JabatanInstansiNama   pgtype.Text        `db:"jabatan_instansi_nama"`
-	JenisJabatanID        pgtype.Int2        `db:"jenis_jabatan_id"`
-	TerminatedDate        pgtype.Date        `db:"terminated_date"`
-	StatusPegawai         pgtype.Int2        `db:"status_pegawai"`
-	JabatanPpnpn          pgtype.Text        `db:"jabatan_ppnpn"`
-	JabatanInstansiRealID pgtype.Text        `db:"jabatan_instansi_real_id"`
-	CreatedBy             pgtype.Int4        `db:"created_by"`
-	UpdatedBy             pgtype.Int4        `db:"updated_by"`
-	EmailDikbudBak        pgtype.Text        `db:"email_dikbud_bak"`
-	EmailDikbud           pgtype.Text        `db:"email_dikbud"`
-	Kodecepat             pgtype.Text        `db:"kodecepat"`
-	IsDosen               pgtype.Int2        `db:"is_dosen"`
-	MkTahunSwasta         pgtype.Int2        `db:"mk_tahun_swasta"`
-	MkBulanSwasta         pgtype.Int2        `db:"mk_bulan_swasta"`
-	Kk                    pgtype.Text        `db:"kk"`
-	Nidn                  pgtype.Text        `db:"nidn"`
-	Ket                   pgtype.Text        `db:"ket"`
-	NoSkPemberhentian     pgtype.Text        `db:"no_sk_pemberhentian"`
-	StatusPegawaiBackup   pgtype.Int2        `db:"status_pegawai_backup"`
-	MasaKerja             pgtype.Text        `db:"masa_kerja"`
-	KartuAsn              pgtype.Text        `db:"kartu_asn"`
-	CreatedAt             pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt             pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt             pgtype.Timestamptz `db:"deleted_at"`
-	NamaUnor              pgtype.Text        `db:"nama_unor"`
+	PnsID               string      `db:"pns_id"`
+	Nip                 pgtype.Text `db:"nip"`
+	Nama                pgtype.Text `db:"nama"`
+	GelarDepan          pgtype.Text `db:"gelar_depan"`
+	GelarBelakang       pgtype.Text `db:"gelar_belakang"`
+	Foto                pgtype.Text `db:"foto"`
+	UnorID              pgtype.Text `db:"unor_id"`
+	StatusCpnsPns       pgtype.Text `db:"status_cpns_pns"`
+	NamaUnor            pgtype.Text `db:"nama_unor"`
+	Golongan            pgtype.Text `db:"golongan"`
+	Jabatan             pgtype.Text `db:"jabatan"`
+	NamaKedudukuanHukum pgtype.Text `db:"nama_kedudukuan_hukum"`
 }
 
 func (q *Queries) ListPegawaiPPNPN(ctx context.Context, arg ListPegawaiPPNPNParams) ([]ListPegawaiPPNPNRow, error) {
 	rows, err := q.db.Query(ctx, listPegawaiPPNPN,
 		arg.Limit,
 		arg.Offset,
+		arg.StatusHukum,
 		arg.UnitKerjaID,
-		arg.Nama,
+		arg.Keyword,
 		arg.Nip,
+		arg.GolonganID,
+		arg.JabatanID,
+		arg.StatusPns,
+		arg.Mpp,
 	)
 	if err != nil {
 		return nil, err
@@ -616,106 +653,18 @@ func (q *Queries) ListPegawaiPPNPN(ctx context.Context, arg ListPegawaiPPNPNPara
 	for rows.Next() {
 		var i ListPegawaiPPNPNRow
 		if err := rows.Scan(
-			&i.ID,
 			&i.PnsID,
-			&i.NipLama,
-			&i.NipBaru,
+			&i.Nip,
 			&i.Nama,
 			&i.GelarDepan,
 			&i.GelarBelakang,
-			&i.TempatLahirID,
-			&i.TanggalLahir,
-			&i.JenisKelamin,
-			&i.AgamaID,
-			&i.JenisKawinID,
-			&i.Nik,
-			&i.NoDarurat,
-			&i.NoHp,
-			&i.Email,
-			&i.Alamat,
-			&i.Npwp,
-			&i.Bpjs,
-			&i.JenisPegawaiID,
-			&i.KedudukanHukumID,
-			&i.StatusCpnsPns,
-			&i.KartuPegawai,
-			&i.NoSkCpns,
-			&i.TanggalSkCpns,
-			&i.TmtCpns,
-			&i.TmtPns,
-			&i.GolAwalID,
-			&i.GolID,
-			&i.TmtGolongan,
-			&i.MkTahun,
-			&i.MkBulan,
-			&i.JabatanID,
-			&i.TmtJabatan,
-			&i.PendidikanID,
-			&i.TahunLulus,
-			&i.KpknID,
-			&i.LokasiKerjaID,
-			&i.UnorID,
-			&i.UnorIndukID,
-			&i.InstansiIndukID,
-			&i.InstansiKerjaID,
-			&i.SatuanKerjaIndukID,
-			&i.SatuanKerjaID,
-			&i.GolonganDarah,
 			&i.Foto,
-			&i.TmtPensiun,
-			&i.LokasiKerja,
-			&i.JmlPasangan,
-			&i.JmlAnak,
-			&i.NoSuratDokter,
-			&i.TanggalSuratDokter,
-			&i.NoBebasNarkoba,
-			&i.TanggalBebasNarkoba,
-			&i.NoCatatanPolisi,
-			&i.TanggalCatatanPolisi,
-			&i.AkteKelahiran,
-			&i.StatusHidup,
-			&i.AkteMeninggal,
-			&i.TanggalMeninggal,
-			&i.NoAskes,
-			&i.NoTaspen,
-			&i.TanggalNpwp,
-			&i.TempatLahir,
-			&i.TingkatPendidikanID,
-			&i.TempatLahirNama,
-			&i.JenisJabatanNama,
-			&i.JabatanNama,
-			&i.KpknNama,
-			&i.InstansiIndukNama,
-			&i.InstansiKerjaNama,
-			&i.SatuanKerjaIndukNama,
-			&i.SatuanKerjaNama,
-			&i.JabatanInstansiID,
-			&i.Bup,
-			&i.JabatanInstansiNama,
-			&i.JenisJabatanID,
-			&i.TerminatedDate,
-			&i.StatusPegawai,
-			&i.JabatanPpnpn,
-			&i.JabatanInstansiRealID,
-			&i.CreatedBy,
-			&i.UpdatedBy,
-			&i.EmailDikbudBak,
-			&i.EmailDikbud,
-			&i.Kodecepat,
-			&i.IsDosen,
-			&i.MkTahunSwasta,
-			&i.MkBulanSwasta,
-			&i.Kk,
-			&i.Nidn,
-			&i.Ket,
-			&i.NoSkPemberhentian,
-			&i.StatusPegawaiBackup,
-			&i.MasaKerja,
-			&i.KartuAsn,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-			&i.DeletedAt,
+			&i.UnorID,
+			&i.StatusCpnsPns,
 			&i.NamaUnor,
+			&i.Golongan,
+			&i.Jabatan,
+			&i.NamaKedudukuanHukum,
 		); err != nil {
 			return nil, err
 		}

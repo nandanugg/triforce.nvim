@@ -65,70 +65,6 @@ WHERE
     AND pegawai.deleted_at IS NULL
 LIMIT $1 OFFSET $2;
 
--- name: ListPegawaiPPNPN :many
-SELECT p.*, ruk.nama_unor
-FROM pegawai p
-         LEFT JOIN ref_unit_kerja as ruk ON p.unor_id = ruk.id
-WHERE p.status_pegawai = 3
-	AND sqlc.narg('unit_kerja_id')::VARCHAR IS NULL OR p.unor_id = sqlc.narg('unit_kerja_id')::VARCHAR 
-	AND sqlc.narg('nama')::VARCHAR IS NULL OR p.nama ILIKE '%' || sqlc.narg('nama')::VARCHAR || '%'
-	AND sqlc.narg('nip')::VARCHAR IS NULL OR p.nip_baru = sqlc.narg('nip')::VARCHAR
-ORDER BY p.nama ASC
-LIMIT $1 OFFSET $2;
-
--- name: CountPegawaiPPNPN :one
-SELECT COUNT(1)
-FROM pegawai p
-WHERE p.status_pegawai = 3
-	AND sqlc.narg('unit_kerja_id')::VARCHAR IS NULL OR p.unor_id = sqlc.narg('unit_kerja_id')::VARCHAR 
-	AND sqlc.narg('nama')::VARCHAR IS NULL OR p.nama ILIKE '%' || sqlc.narg('nama')::VARCHAR || '%'
-	AND sqlc.narg('nip')::VARCHAR IS NULL OR p.nip_baru = sqlc.narg('nip')::VARCHAR
-ORDER BY p.nama ASC
-LIMIT $1 OFFSET $2;
-
--- name: ListPegawaiNonAktif :many
-SELECT p.id,
-       p.pns_id,
-       p.nip_baru,
-       p.nama,
-       ruk.nama_unor,
-       ref_golongan.nama as nama_golongan,
-       nama_pangkat,
-       eselon_4,
-       eselon_3,
-       eselon_2,
-       eselon_1,
-       kategori_jabatan
-FROM pegawai p
-         LEFT JOIN ref_unit_kerja as ruk ON p.unor_id = ruk.id
-         LEFT JOIN ref_golongan ON p.gol_id = ref_golongan.id
-         LEFT JOIN ref_jabatan ON p.jabatan_instansi_id = ref_jabatan.kode_jabatan
-WHERE p.id is not null
-  AND (p.kedudukan_hukum_id = '99' or p.status_pegawai = '3')
-	AND sqlc.narg('unit_kerja_id')::VARCHAR IS NULL OR p.unor_id = sqlc.narg('unit_kerja_id')::VARCHAR 
-	AND sqlc.narg('nama')::VARCHAR IS NULL OR p.nama ILIKE '%' || sqlc.narg('nama')::VARCHAR || '%'
-	AND sqlc.narg('nip')::VARCHAR IS NULL OR p.nip_baru = sqlc.narg('nip')::VARCHAR
-	AND sqlc.narg('golongan_id')::VARCHAR IS NULL OR p.gol_id = sqlc.narg('golongan_id')::VARCHAR
-	AND sqlc.narg('tingkat_pendidikan_id')::VARCHAR IS NULL OR p.tingkat_pendidikan_id = sqlc.narg('tingkat_pendidikan_id')::VARCHAR
-	AND sqlc.narg('jabatan_id')::VARCHAR IS NULL OR p.jabatan_id = sqlc.narg('jabatan_id')::VARCHAR
-ORDER BY p.nama ASC
-LIMIT $1 OFFSET $2;
-
--- name: CountPegawaiNonAktif :one
-SELECT COUNT(1)
-FROM pegawai p
-         LEFT JOIN ref_jabatan ON p.jabatan_instansi_id = ref_jabatan.kode_jabatan
-WHERE p.id is not null
-  AND (p.kedudukan_hukum_id = '99' or p.status_pegawai = '3')
-	AND sqlc.narg('unit_kerja_id')::VARCHAR IS NULL OR p.unor_id = sqlc.narg('unit_kerja_id')::VARCHAR 
-	AND sqlc.narg('nama')::VARCHAR IS NULL OR p.nama ILIKE '%' || sqlc.narg('nama')::VARCHAR || '%'
-	AND sqlc.narg('nip')::VARCHAR IS NULL OR p.nip_baru = sqlc.narg('nip')::VARCHAR
-	AND sqlc.narg('golongan_id')::VARCHAR IS NULL OR p.gol_id = sqlc.narg('golongan_id')::VARCHAR
-	AND sqlc.narg('tingkat_pendidikan_id')::VARCHAR IS NULL OR p.tingkat_pendidikan_id = sqlc.narg('tingkat_pendidikan_id')::VARCHAR
-	AND sqlc.narg('jabatan_id')::VARCHAR IS NULL OR p.jabatan_id = sqlc.narg('jabatan_id')::VARCHAR
-ORDER BY p.nama ASC
-LIMIT $1 OFFSET $2;
-
 -- name: CountPegawaiAktif :one
 SELECT
   COUNT(1)
@@ -162,6 +98,167 @@ WHERE
         OR ( pegawai.status_cpns_pns = ANY(sqlc.narg('status_pns')::VARCHAR[]) AND ref_kedudukan_hukum.nama <> @mpp::varchar )
     )
     AND pegawai.deleted_at IS NULL;
+
+-- name: ListPegawaiPPNPN :many
+SELECT 
+	p.pns_id,
+	p.nip_baru AS nip,
+	p.nama,
+	p.gelar_depan,
+	p.gelar_belakang,
+	p.foto,
+	p.unor_id,
+	p.status_cpns_pns,
+	uk.nama_unor,
+	ref_golongan_akhir.nama AS golongan,
+	ref_jabatan.nama_jabatan AS jabatan,
+	ref_kedudukan_hukum.nama as nama_kedudukuan_hukum
+FROM pegawai p
+	LEFT JOIN ref_unit_kerja as uk ON p.unor_id = ruk.id
+	JOIN ref_kedudukan_hukum
+	    ON ref_kedudukan_hukum.id = p.kedudukan_hukum_id AND ref_kedudukan_hukum.deleted_at IS NULL
+	LEFT JOIN ref_jabatan
+	    ON ref_jabatan.kode_jabatan = p.jabatan_instansi_id AND ref_jabatan.deleted_at IS NULL
+	LEFT JOIN ref_golongan ref_golongan_akhir
+	    ON ref_golongan_akhir.id = p.gol_id AND ref_golongan_akhir.deleted_at IS NULL
+WHERE p.status_pegawai = 3
+	AND (sqlc.narg('status_hukum')::varchar is null or ref_kedudukan_hukum.nama = sqlc.narg('status_hukum')::varchar)
+	AND (
+	    sqlc.narg('unit_kerja_id')::VARCHAR IS NULL
+	    OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.id
+	    OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_1
+	    OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_2
+	    OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_3
+	    OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_4
+	)
+	AND sqlc.narg('keyword')::VARCHAR IS NULL 
+		OR (
+		    pegawai.nama ILIKE '%' || sqlc.narg('keyword')::VARCHAR || '%'
+		    OR pegawai.nip_baru ILIKE '%' || sqlc.narg('keyword')::VARCHAR || '%'
+		)
+	AND sqlc.narg('nip')::VARCHAR IS NULL OR p.nip_baru = sqlc.narg('nip')::VARCHAR
+	AND ( sqlc.narg('golongan_id')::INTEGER IS NULL OR p.gol_id = sqlc.narg('golongan_id')::INTEGER )
+	AND ( sqlc.narg('jabatan_id')::VARCHAR IS NULL OR p.jabatan_instansi_id = sqlc.narg('jabatan_id')::VARCHAR )
+	AND (
+		sqlc.narg('status_pns')::varchar[] IS NULL
+		OR ( p.status_cpns_pns = ANY(sqlc.narg('status_pns')::VARCHAR[]) AND ref_kedudukan_hukum.nama <> @mpp::varchar )
+	    )
+	AND p.deleted_at IS NULL
+ORDER BY p.nama ASC
+LIMIT $1 OFFSET $2;
+
+-- name: CountPegawaiPPNPN :one
+SELECT COUNT(1)
+FROM pegawai p
+	JOIN ref_kedudukan_hukum
+	    ON ref_kedudukan_hukum.id = p.kedudukan_hukum_id AND ref_kedudukan_hukum.deleted_at IS NULL
+WHERE p.status_pegawai = 3
+	AND (sqlc.narg('status_hukum')::varchar is null or ref_kedudukan_hukum.nama = sqlc.narg('status_hukum')::varchar)
+	AND (
+	    sqlc.narg('unit_kerja_id')::VARCHAR IS NULL
+	    OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.id
+	    OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_1
+	    OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_2
+	    OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_3
+	    OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_4
+	)
+	AND sqlc.narg('keyword')::VARCHAR IS NULL 
+		OR (
+		    pegawai.nama ILIKE '%' || sqlc.narg('keyword')::VARCHAR || '%'
+		    OR pegawai.nip_baru ILIKE '%' || sqlc.narg('keyword')::VARCHAR || '%'
+		)
+	AND sqlc.narg('nip')::VARCHAR IS NULL OR p.nip_baru = sqlc.narg('nip')::VARCHAR
+	AND ( sqlc.narg('golongan_id')::INTEGER IS NULL OR p.gol_id = sqlc.narg('golongan_id')::INTEGER )
+	AND ( sqlc.narg('jabatan_id')::VARCHAR IS NULL OR p.jabatan_instansi_id = sqlc.narg('jabatan_id')::VARCHAR )
+	AND (
+		sqlc.narg('status_pns')::varchar[] IS NULL
+		OR ( p.status_cpns_pns = ANY(sqlc.narg('status_pns')::VARCHAR[]) AND ref_kedudukan_hukum.nama <> @mpp::varchar )
+	    )
+	AND p.deleted_at IS NULL
+ORDER BY p.nama ASC
+LIMIT $1 OFFSET $2;
+
+-- name: ListPegawaiNonAktif :many
+SELECT 
+	p.pns_id,
+	p.nip_baru AS nip,
+	p.nama,
+	p.gelar_depan,
+	p.gelar_belakang,
+	p.foto,
+	p.unor_id,
+	p.status_cpns_pns,
+	uk.nama_unor,
+	ref_golongan_akhir.nama AS golongan,
+	ref_jabatan.nama_jabatan AS jabatan,
+	ref_kedudukan_hukum.nama as nama_kedudukuan_hukum
+FROM pegawai p
+	LEFT JOIN ref_unit_kerja as uk ON p.unor_id = ruk.id
+	JOIN ref_kedudukan_hukum
+	    ON ref_kedudukan_hukum.id = p.kedudukan_hukum_id AND ref_kedudukan_hukum.deleted_at IS NULL
+	LEFT JOIN ref_jabatan
+	    ON ref_jabatan.kode_jabatan = p.jabatan_instansi_id AND ref_jabatan.deleted_at IS NULL
+	LEFT JOIN ref_golongan ref_golongan_akhir
+	    ON ref_golongan_akhir.id = p.gol_id AND ref_golongan_akhir.deleted_at IS NULL
+WHERE p.id is not null
+  AND (p.kedudukan_hukum_id = '99' or p.status_pegawai = '3')
+	AND (sqlc.narg('status_hukum')::varchar is null or ref_kedudukan_hukum.nama = sqlc.narg('status_hukum')::varchar)
+	AND (
+	    sqlc.narg('unit_kerja_id')::VARCHAR IS NULL
+	    OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.id
+	    OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_1
+	    OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_2
+	    OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_3
+	    OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_4
+	)
+	AND sqlc.narg('keyword')::VARCHAR IS NULL 
+		OR (
+		    pegawai.nama ILIKE '%' || sqlc.narg('keyword')::VARCHAR || '%'
+		    OR pegawai.nip_baru ILIKE '%' || sqlc.narg('keyword')::VARCHAR || '%'
+		)
+	AND sqlc.narg('nip')::VARCHAR IS NULL OR p.nip_baru = sqlc.narg('nip')::VARCHAR
+	AND ( sqlc.narg('golongan_id')::INTEGER IS NULL OR p.gol_id = sqlc.narg('golongan_id')::INTEGER )
+	AND ( sqlc.narg('jabatan_id')::VARCHAR IS NULL OR p.jabatan_instansi_id = sqlc.narg('jabatan_id')::VARCHAR )
+	AND (
+		sqlc.narg('status_pns')::varchar[] IS NULL
+		OR ( p.status_cpns_pns = ANY(sqlc.narg('status_pns')::VARCHAR[]) AND ref_kedudukan_hukum.nama <> @mpp::varchar )
+	    )
+	AND p.deleted_at IS NULL
+ORDER BY p.nama ASC
+LIMIT $1 OFFSET $2;
+
+-- name: CountPegawaiNonAktif :one
+SELECT COUNT(1)
+FROM pegawai p
+	JOIN ref_kedudukan_hukum
+	    ON ref_kedudukan_hukum.id = p.kedudukan_hukum_id AND ref_kedudukan_hukum.deleted_at IS NULL
+WHERE p.id is not null
+  AND (p.kedudukan_hukum_id = '99' or p.status_pegawai = '3')
+	AND (sqlc.narg('status_hukum')::varchar is null or ref_kedudukan_hukum.nama = sqlc.narg('status_hukum')::varchar)
+	AND (
+	    sqlc.narg('unit_kerja_id')::VARCHAR IS NULL
+	    OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.id
+	    OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_1
+	    OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_2
+	    OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_3
+	    OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_4
+	)
+	AND sqlc.narg('keyword')::VARCHAR IS NULL 
+		OR (
+		    pegawai.nama ILIKE '%' || sqlc.narg('keyword')::VARCHAR || '%'
+		    OR pegawai.nip_baru ILIKE '%' || sqlc.narg('keyword')::VARCHAR || '%'
+		)
+	AND sqlc.narg('nip')::VARCHAR IS NULL OR p.nip_baru = sqlc.narg('nip')::VARCHAR
+	AND ( sqlc.narg('golongan_id')::INTEGER IS NULL OR p.gol_id = sqlc.narg('golongan_id')::INTEGER )
+	AND ( sqlc.narg('jabatan_id')::VARCHAR IS NULL OR p.jabatan_instansi_id = sqlc.narg('jabatan_id')::VARCHAR )
+	AND (
+		sqlc.narg('status_pns')::varchar[] IS NULL
+		OR ( p.status_cpns_pns = ANY(sqlc.narg('status_pns')::VARCHAR[]) AND ref_kedudukan_hukum.nama <> @mpp::varchar )
+	    )
+	AND p.deleted_at IS NULL
+ORDER BY p.nama ASC
+LIMIT $1 OFFSET $2;
+
 
 -- name: GetPegawaiPNSIDByNIP :one
 SELECT pns_id FROM pegawai WHERE nip_baru = @nip::varchar AND deleted_at IS NULL;

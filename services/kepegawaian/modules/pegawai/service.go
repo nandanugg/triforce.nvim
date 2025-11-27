@@ -69,43 +69,62 @@ func (s *service) getProfileByPNSID(ctx context.Context, pnsID string) (*profile
 	}, nil
 }
 
-type adminListPegawaiPPNPNParams struct {
-	limit  uint
-	offset uint
-	nama   string
-	unitID string
-	nip    string
+type adminListPegawaiParams struct {
+	limit      uint
+	offset     uint
+	keyword    string
+	unitID     string
+	golonganID int32
+	jabatanID  string
+	status     string
 }
 
-func (s *service) adminListPegawaiPPNPN(ctx context.Context, arg adminListPegawaiPPNPNParams) ([]pegawai, uint, error) {
-	data, err := s.repo.ListPegawaiPPNPN(ctx, sqlc.ListPegawaiPPNPNParams{
+func (s *service) adminListPegawaiNonAktif(ctx context.Context, arg adminListPegawaiParams) ([]pegawai, uint, error) {
+	statusHukum := getStatusHukum(arg.status)
+	data, err := s.repo.ListPegawaiNonAktif(ctx, sqlc.ListPegawaiNonAktifParams{
 		Limit:       int32(arg.limit),
 		Offset:      int32(arg.offset),
-		Nama:        pgtype.Text{Valid: arg.nama != "", String: arg.nama},
+		Keyword:     pgtype.Text{Valid: arg.keyword != "", String: arg.keyword},
 		UnitKerjaID: pgtype.Text{Valid: arg.unitID != "", String: arg.unitID},
-		Nip:         pgtype.Text{Valid: arg.nip != "", String: arg.nip},
+		GolonganID:  pgtype.Int4{Valid: arg.golonganID != 0, Int32: arg.golonganID},
+		JabatanID:   pgtype.Text{Valid: arg.jabatanID != "", String: arg.jabatanID},
+		StatusHukum: pgtype.Text{Valid: statusHukum != "", String: statusHukum},
+		StatusPns:   getStatusPNSDB(arg.status),
+		Mpp:         statusKedudukanHukumMPP,
 	})
 	if err != nil {
-		return nil, 0, fmt.Errorf("[pegawai-adminListPegawaiPPNPN] repo ListPegawaiPPNPN: %w", err)
+		return nil, 0, fmt.Errorf("[pegawai-adminListPegawaiNonAktif] repo ListPegawaiNonAktif: %w", err)
 	}
 
-	uniqUnorIDs := typeutil.UniqMap(data, func(row sqlc.ListPegawaiPPNPNRow, _ int) string {
+	uniqUnorIDs := typeutil.UniqMap(data, func(row sqlc.ListPegawaiNonAktifRow, _ int) string {
 		return row.UnorID.String
 	})
 
-	count, err := s.repo.CountPegawaiPPNPN(ctx, sqlc.CountPegawaiPPNPNParams{
-		Nama:        pgtype.Text{Valid: arg.nama != "", String: arg.nama},
+	listUnorLengkap, err := s.repo.ListUnitKerjaLengkapByIDs(ctx, uniqUnorIDs)
+	if err != nil {
+		return nil, 0, fmt.Errorf("[pegawai-adminListPegawaiNonAktif] repo ListUnitKerjaLengkapByIDs: %w", err)
+	}
+	unorLengkapByID := typeutil.SliceToMap(listUnorLengkap, func(unorLengkap sqlc.ListUnitKerjaLengkapByIDsRow) (string, string) {
+		return unorLengkap.ID, unorLengkap.NamaUnorLengkap
+	})
+
+	count, err := s.repo.CountPegawaiNonAktif(ctx, sqlc.CountPegawaiNonAktifParams{
+		Keyword:     pgtype.Text{Valid: arg.keyword != "", String: arg.keyword},
 		UnitKerjaID: pgtype.Text{Valid: arg.unitID != "", String: arg.unitID},
-		Nip:         pgtype.Text{Valid: arg.nip != "", String: arg.nip},
+		GolonganID:  pgtype.Int4{Valid: arg.golonganID != 0, Int32: arg.golonganID},
+		JabatanID:   pgtype.Text{Valid: arg.jabatanID != "", String: arg.jabatanID},
+		StatusHukum: pgtype.Text{Valid: statusHukum != "", String: statusHukum},
+		StatusPns:   getStatusPNSDB(arg.status),
+		Mpp:         statusKedudukanHukumMPP,
 	})
 	if err != nil {
-		return nil, 0, fmt.Errorf("[pegawai-adminListPegawai] repo CountPegawaiAktif: %w", err)
+		return nil, 0, fmt.Errorf("[pegawai-adminListPegawaiNonAktif] repo CountPegawaiNonAktif: %w", err)
 	}
 
-	result := typeutil.Map(data, func(row sqlc.ListPegawaiPPNPNRow) pegawai {
+	result := typeutil.Map(data, func(row sqlc.ListPegawaiNonAktifRow) pegawai {
 		return pegawai{
 			PNSID:         row.PnsID,
-			NIP:           row.NipBaru.String,
+			NIP:           row.Nip.String,
 			GelarDepan:    row.GelarDepan.String,
 			Nama:          row.Nama.String,
 			GelarBelakang: row.GelarBelakang.String,
@@ -120,14 +139,64 @@ func (s *service) adminListPegawaiPPNPN(ctx context.Context, arg adminListPegawa
 	return result, uint(count), nil
 }
 
-type adminListPegawaiParams struct {
-	limit      uint
-	offset     uint
-	keyword    string
-	unitID     string
-	golonganID int32
-	jabatanID  string
-	status     string
+func (s *service) adminListPegawaiPPNPN(ctx context.Context, arg adminListPegawaiParams) ([]pegawai, uint, error) {
+	statusHukum := getStatusHukum(arg.status)
+	data, err := s.repo.ListPegawaiPPNPN(ctx, sqlc.ListPegawaiPPNPNParams{
+		Limit:       int32(arg.limit),
+		Offset:      int32(arg.offset),
+		Keyword:     pgtype.Text{Valid: arg.keyword != "", String: arg.keyword},
+		UnitKerjaID: pgtype.Text{Valid: arg.unitID != "", String: arg.unitID},
+		GolonganID:  pgtype.Int4{Valid: arg.golonganID != 0, Int32: arg.golonganID},
+		JabatanID:   pgtype.Text{Valid: arg.jabatanID != "", String: arg.jabatanID},
+		StatusHukum: pgtype.Text{Valid: statusHukum != "", String: statusHukum},
+		StatusPns:   getStatusPNSDB(arg.status),
+		Mpp:         statusKedudukanHukumMPP,
+	})
+	if err != nil {
+		return nil, 0, fmt.Errorf("[pegawai-adminListPegawaiPPNPN] repo ListPegawaiPPNPN: %w", err)
+	}
+
+	uniqUnorIDs := typeutil.UniqMap(data, func(row sqlc.ListPegawaiPPNPNRow, _ int) string {
+		return row.UnorID.String
+	})
+
+	listUnorLengkap, err := s.repo.ListUnitKerjaLengkapByIDs(ctx, uniqUnorIDs)
+	if err != nil {
+		return nil, 0, fmt.Errorf("[pegawai-adminListPegawaiPPNPN] repo ListUnitKerjaLengkapByIDs: %w", err)
+	}
+	unorLengkapByID := typeutil.SliceToMap(listUnorLengkap, func(unorLengkap sqlc.ListUnitKerjaLengkapByIDsRow) (string, string) {
+		return unorLengkap.ID, unorLengkap.NamaUnorLengkap
+	})
+
+	count, err := s.repo.CountPegawaiPPNPN(ctx, sqlc.CountPegawaiPPNPNParams{
+		Keyword:     pgtype.Text{Valid: arg.keyword != "", String: arg.keyword},
+		UnitKerjaID: pgtype.Text{Valid: arg.unitID != "", String: arg.unitID},
+		GolonganID:  pgtype.Int4{Valid: arg.golonganID != 0, Int32: arg.golonganID},
+		JabatanID:   pgtype.Text{Valid: arg.jabatanID != "", String: arg.jabatanID},
+		StatusHukum: pgtype.Text{Valid: statusHukum != "", String: statusHukum},
+		StatusPns:   getStatusPNSDB(arg.status),
+		Mpp:         statusKedudukanHukumMPP,
+	})
+	if err != nil {
+		return nil, 0, fmt.Errorf("[pegawai-adminListPegawai] repo CountPegawaiPPNPN: %w", err)
+	}
+
+	result := typeutil.Map(data, func(row sqlc.ListPegawaiPPNPNRow) pegawai {
+		return pegawai{
+			PNSID:         row.PnsID,
+			NIP:           row.Nip.String,
+			GelarDepan:    row.GelarDepan.String,
+			Nama:          row.Nama.String,
+			GelarBelakang: row.GelarBelakang.String,
+			Golongan:      row.Golongan.String,
+			Jabatan:       row.Jabatan.String,
+			UnitKerja:     unorLengkapByID[row.UnorID.String],
+			Status:        getLabelStatusPNS(row.NamaKedudukuanHukum.String, row.StatusCpnsPns.String),
+			Photo:         row.Foto,
+		}
+	})
+
+	return result, uint(count), nil
 }
 
 func (s *service) adminListPegawai(ctx context.Context, arg adminListPegawaiParams) ([]pegawai, uint, error) {

@@ -62,6 +62,7 @@ type listAdminRequest struct {
 	GolonganID int32  `query:"golongan_id"`
 	JabatanID  string `query:"jabatan_id"`
 	Status     string `query:"status"`
+	Tipe       string `query:"tipe"`
 }
 
 type listAdminResponse struct {
@@ -76,7 +77,10 @@ func (h *handler) listAdmin(c echo.Context) error {
 	}
 
 	ctx := c.Request().Context()
-	data, count, err := h.service.adminListPegawai(ctx, adminListPegawaiParams{
+	var data []pegawai
+	var count uint
+	var err error
+	params := adminListPegawaiParams{
 		limit:      req.Limit,
 		offset:     req.Offset,
 		keyword:    req.Keyword,
@@ -84,10 +88,27 @@ func (h *handler) listAdmin(c echo.Context) error {
 		golonganID: req.GolonganID,
 		jabatanID:  req.JabatanID,
 		status:     req.Status,
-	})
-	if err != nil {
-		slog.ErrorContext(ctx, "Error getting data list pegawai aktif.", "error", err)
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	switch req.Tipe {
+	case "", tipePegawaiAktif:
+		data, count, err = h.service.adminListPegawai(ctx, params)
+		if err != nil {
+			slog.ErrorContext(ctx, "Error getting data list pegawai aktif.", "error", err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+	case tipePegawaiPPNPN:
+		data, count, err = h.service.adminListPegawaiPPNPN(ctx, params)
+		if err != nil {
+			slog.ErrorContext(ctx, "Error getting data list pegawai ppnpn.", "error", err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
+	case tipePegawaiNonAktif:
+		data, count, err = h.service.adminListPegawaiNonAktif(ctx, params)
+		if err != nil {
+			slog.ErrorContext(ctx, "Error getting data list pegawai nonaktif.", "error", err)
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		}
 	}
 
 	return c.JSON(http.StatusOK, listAdminResponse{
