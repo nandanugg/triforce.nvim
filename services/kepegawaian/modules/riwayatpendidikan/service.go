@@ -2,8 +2,10 @@ package riwayatpendidikan
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -11,6 +13,7 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/typeutil"
 	sqlc "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
+	upd "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/usulanperubahandata"
 )
 
 type repository interface {
@@ -20,6 +23,7 @@ type repository interface {
 	GetPegawaiPNSIDByNIP(ctx context.Context, nip string) (string, error)
 	GetRefPendidikan(ctx context.Context, id string) (sqlc.GetRefPendidikanRow, error)
 	GetRefTingkatPendidikan(ctx context.Context, id int32) (sqlc.GetRefTingkatPendidikanRow, error)
+	GetRiwayatPendidikan(ctx context.Context, arg sqlc.GetRiwayatPendidikanParams) (sqlc.GetRiwayatPendidikanRow, error)
 
 	CreateRiwayatPendidikan(ctx context.Context, arg sqlc.CreateRiwayatPendidikanParams) (int32, error)
 	UpdateRiwayatPendidikan(ctx context.Context, arg sqlc.UpdateRiwayatPendidikanParams) (int64, error)
@@ -91,7 +95,7 @@ func (s *service) create(ctx context.Context, nip string, params upsertParams) (
 		return 0, errPegawaiNotFound
 	}
 
-	if err := s.validateReferences(ctx, params); err != nil {
+	if _, err := s.validateReferences(ctx, params); err != nil {
 		return 0, err
 	}
 
@@ -116,7 +120,7 @@ func (s *service) create(ctx context.Context, nip string, params upsertParams) (
 }
 
 func (s *service) update(ctx context.Context, id int32, nip string, params upsertParams) (bool, error) {
-	if err := s.validateReferences(ctx, params); err != nil {
+	if _, err := s.validateReferences(ctx, params); err != nil {
 		return false, err
 	}
 
@@ -165,26 +169,174 @@ func (s *service) uploadBerkas(ctx context.Context, id int32, nip, fileBase64 st
 	return affected > 0, nil
 }
 
-func (s *service) validateReferences(ctx context.Context, params upsertParams) error {
+type references struct {
+	tingkatPendidikan sqlc.GetRefTingkatPendidikanRow
+	pendidikan        sqlc.GetRefPendidikanRow
+}
+
+func (s *service) validateReferences(ctx context.Context, params upsertParams) (*references, error) {
 	var errs []error
-	if _, err := s.repo.GetRefTingkatPendidikan(ctx, int32(params.TingkatPendidikanID)); err != nil {
+	var err error
+
+	var ref references
+	if ref.tingkatPendidikan, err = s.repo.GetRefTingkatPendidikan(ctx, int32(params.TingkatPendidikanID)); err != nil {
 		if !errors.Is(err, pgx.ErrNoRows) {
-			return fmt.Errorf("repo get tingkat pendidikan: %w", err)
+			return nil, fmt.Errorf("repo get tingkat pendidikan: %w", err)
 		}
 		errs = append(errs, errTingkatPendidikanNotFound)
 	}
 
 	if params.PendidikanID != nil {
-		if _, err := s.repo.GetRefPendidikan(ctx, *params.PendidikanID); err != nil {
+		if ref.pendidikan, err = s.repo.GetRefPendidikan(ctx, *params.PendidikanID); err != nil {
 			if !errors.Is(err, pgx.ErrNoRows) {
-				return fmt.Errorf("repo get pendidikan: %w", err)
+				return nil, fmt.Errorf("repo get pendidikan: %w", err)
 			}
 			errs = append(errs, errPendidikanNotFound)
 		}
 	}
 
 	if len(errs) > 0 {
-		return api.NewMultiError(errs)
+		return nil, api.NewMultiError(errs)
 	}
+	return &ref, nil
+}
+
+// GeneratePerubahanData implements usulanperubahandata.ServiceInterface
+func (s *service) GeneratePerubahanData(ctx context.Context, nip, action, dataID string, requestData json.RawMessage) ([]byte, error) {
+	var data usulanPerubahanData
+	if action == upd.ActionUpdate || action == upd.ActionDelete {
+		id, err := strconv.ParseInt(dataID, 10, 32)
+		if err != nil {
+			return nil, api.NewMultiError([]error{errors.New(`parameter "data_id" harus dalam format yang sesuai`)})
+		}
+
+		prevData, err := s.repo.GetRiwayatPendidikan(ctx, sqlc.GetRiwayatPendidikanParams{
+			Nip: nip,
+			ID:  int32(id),
+		})
+		if err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				return nil, api.NewMultiError([]error{errors.New("data riwayat pendidikan tidak ditemukan")})
+			}
+			return nil, err
+		}
+
+		data.TingkatPendidikanID[0] = prevData.TingkatPendidikanID
+		data.TingkatPendidikan[0] = prevData.TingkatPendidikan
+		data.PendidikanID[0] = prevData.PendidikanID
+		data.Pendidikan[0] = prevData.Pendidikan
+		data.NamaSekolah[0] = prevData.NamaSekolah
+		data.TahunLulus[0] = prevData.TahunLulus
+		data.NomorIjazah[0] = prevData.NoIjazah
+		data.GelarDepan[0] = prevData.GelarDepan
+		data.GelarBelakang[0] = prevData.GelarBelakang
+		data.TugasBelajar[0] = pgtype.Text{
+			String: string(labelStatusBelajar[prevData.TugasBelajar.Int16]),
+			Valid:  prevData.TugasBelajar.Valid,
+		}
+		data.NegaraSekolah[0] = prevData.NegaraSekolah
+	}
+
+	if action == upd.ActionCreate || action == upd.ActionUpdate {
+		var req upsertParams
+		if err := json.Unmarshal(requestData, &req); err != nil {
+			return nil, err
+		}
+
+		ref, err := s.validateReferences(ctx, req)
+		if err != nil {
+			return nil, err
+		}
+
+		data.TingkatPendidikanID[1] = pgtype.Int2{Int16: req.TingkatPendidikanID, Valid: true}
+		data.TingkatPendidikan[1] = ref.tingkatPendidikan.Nama
+		data.PendidikanID[1] = pgtype.Text{String: typeutil.FromPtr(req.PendidikanID), Valid: req.PendidikanID != nil}
+		data.Pendidikan[1] = ref.pendidikan.Nama
+		data.NamaSekolah[1] = pgtype.Text{String: req.NamaSekolah, Valid: true}
+		data.TahunLulus[1] = pgtype.Int2{Int16: req.TahunLulus, Valid: true}
+		data.NomorIjazah[1] = pgtype.Text{String: req.NomorIjazah, Valid: true}
+		data.GelarDepan[1] = pgtype.Text{String: req.GelarDepan, Valid: req.GelarDepan != ""}
+		data.GelarBelakang[1] = pgtype.Text{String: req.GelarBelakang, Valid: req.GelarBelakang != ""}
+		data.TugasBelajar[1] = pgtype.Text{String: string(req.TugasBelajar), Valid: req.TugasBelajar.toID().Valid}
+		data.NegaraSekolah[1] = pgtype.Text{String: req.NegaraSekolah, Valid: req.NegaraSekolah != ""}
+	}
+
+	bytes, err := json.Marshal(data)
+	if err != nil {
+		return nil, err
+	}
+	return bytes, nil
+}
+
+// SyncPerubahanData implements usulanperubahandata.ServiceInterface
+func (*service) SyncPerubahanData(ctx context.Context, sqlcTx *sqlc.Queries, nip, action, dataID string, perubahanData []byte) error {
+	var id int32
+	if action == upd.ActionUpdate || action == upd.ActionDelete {
+		idInt, err := strconv.ParseInt(dataID, 10, 32)
+		if err != nil {
+			return fmt.Errorf("parse id: %w", err)
+		}
+		id = int32(idInt)
+	}
+
+	var data usulanPerubahanData
+	if action == upd.ActionCreate || action == upd.ActionUpdate {
+		if err := json.Unmarshal(perubahanData, &data); err != nil {
+			return fmt.Errorf("json unmarshal: %w", err)
+		}
+	}
+
+	switch action {
+	case upd.ActionCreate:
+		pnsID, err := sqlcTx.GetPegawaiPNSIDByNIP(ctx, nip)
+		if err != nil {
+			return fmt.Errorf("repo get pegawai: %w", err)
+		}
+
+		if _, err := sqlcTx.CreateRiwayatPendidikan(ctx, sqlc.CreateRiwayatPendidikanParams{
+			TingkatPendidikanID: data.TingkatPendidikanID[1],
+			PendidikanID:        data.PendidikanID[1],
+			NamaSekolah:         data.NamaSekolah[1],
+			TahunLulus:          data.TahunLulus[1],
+			NoIjazah:            data.NomorIjazah[1],
+			GelarDepan:          data.GelarDepan[1],
+			GelarBelakang:       data.GelarBelakang[1],
+			NegaraSekolah:       data.NegaraSekolah[1],
+			TugasBelajar:        statusBelajar(data.TugasBelajar[1].String).toID(),
+			PnsID:               pgtype.Text{String: pnsID, Valid: true},
+			Nip:                 pgtype.Text{String: nip, Valid: true},
+		}); err != nil {
+			return fmt.Errorf("repo create: %w", err)
+		}
+
+	case upd.ActionUpdate:
+		if _, err := sqlcTx.UpdateRiwayatPendidikan(ctx, sqlc.UpdateRiwayatPendidikanParams{
+			ID:                  id,
+			Nip:                 nip,
+			TingkatPendidikanID: data.TingkatPendidikanID[1],
+			PendidikanID:        data.PendidikanID[1],
+			NamaSekolah:         data.NamaSekolah[1],
+			TahunLulus:          data.TahunLulus[1],
+			NoIjazah:            data.NomorIjazah[1],
+			GelarDepan:          data.GelarDepan[1],
+			GelarBelakang:       data.GelarBelakang[1],
+			NegaraSekolah:       data.NegaraSekolah[1],
+			TugasBelajar:        statusBelajar(data.TugasBelajar[1].String).toID(),
+		}); err != nil {
+			return fmt.Errorf("repo update: %w", err)
+		}
+
+	case upd.ActionDelete:
+		if _, err := sqlcTx.DeleteRiwayatPendidikan(ctx, sqlc.DeleteRiwayatPendidikanParams{
+			ID:  id,
+			Nip: nip,
+		}); err != nil {
+			return fmt.Errorf("repo delete: %w", err)
+		}
+
+	default:
+		return errors.New("unimplemented action")
+	}
+
 	return nil
 }

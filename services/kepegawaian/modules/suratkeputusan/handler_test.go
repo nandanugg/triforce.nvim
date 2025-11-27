@@ -594,25 +594,25 @@ func Test_handler_listAdmin(t *testing.T) {
 			('unor-6', 'unor-1', 'Bawah 3', 'Atasan 6', null, null, null, 'unor-1', null, null),
 			('unor-7', null, 'Paling Atas 2', 'Atasan 7', null, null, null, null, null, null);
 
-		INSERT INTO ref_golongan (id, nama, nama_pangkat, nama_2, gol, gol_pppk)
+		INSERT INTO ref_golongan (id, nama, nama_pangkat, nama_2, gol, gol_pppk, deleted_at)
 		VALUES
-			(1, 'I/a', 'Juru Muda', 'I/a', 1, 'I/a'),
-			(2, 'I/b', 'Juru Muda Tingkat I', 'I/b', 2, 'I/b'),
-			(3, 'II/a', 'Pengatur Muda', 'II/a', 3, 'II/a'),
-			(4, 'II/b', 'Pengatur Muda Tingkat I', 'II/b', 4, 'II/b'),
-			(5, 'III/a', 'Penata Muda', 'III/a', 5, 'III/a'),
-			(6, 'III/b', 'Penata Muda Tingkat I', 'III/b', 6, 'III/b'),
-			(7, 'IV/a', 'Pembina', 'IV/a', 7, 'IV/a');
+			(1, 'I/a', 'Juru Muda', 'I/a', 1, 'I/a', null),
+			(2, 'I/b', 'Juru Muda Tingkat I', 'I/b', 2, 'I/b', null),
+			(3, 'II/a', 'Pengatur Muda', 'II/a', 3, 'II/a', now()),
+			(4, 'II/b', 'Pengatur Muda Tingkat I', 'II/b', 4, 'II/b', null),
+			(5, 'III/a', 'Penata Muda', 'III/a', 5, 'III/a', null),
+			(6, 'III/b', 'Penata Muda Tingkat I', 'III/b', 6, 'III/b', null),
+			(7, 'IV/a', 'Pembina', 'IV/a', 7, 'IV/a', null);
 
-		INSERT INTO ref_jabatan (kode_jabatan, id, nama_jabatan, nama_jabatan_full, jenis_jabatan, kelas, pensiun, kode_bkn, nama_jabatan_bkn, kategori_jabatan, bkn_id)
+		INSERT INTO ref_jabatan (kode_jabatan, id, nama_jabatan, nama_jabatan_full, jenis_jabatan, kelas, pensiun, kode_bkn, nama_jabatan_bkn, kategori_jabatan, bkn_id, deleted_at)
 		VALUES
-			('JAB-01', 1, 'Kepala Bagian', 'Kepala Bagian Administrasi', 1, 3, 60, 'BKN-01', 'Kepala Bagian BKN', 'Struktural', 'BKN-01'),
-			('JAB-02', 2, 'Kepala Subbag', 'Kepala Subbag Umum', 1, 2, 60, 'BKN-02', 'Kepala Subbag BKN', 'Struktural', 'BKN-02'),
-			('JAB-03', 3, 'Pengawas', 'Pengawas Pelayanan', 2, 2, 58, 'BKN-03', 'Pengawas BKN', 'Fungsional', 'BKN-03'),
-			('JAB-04', 4, 'Staf Ahli', 'Staf Ahli Bidang Kepegawaian', 2, 3, 58, 'BKN-04', 'Staf Ahli BKN', 'Fungsional', 'BKN-04'),
-			('JAB-05', 5, 'Kepala Seksi', 'Kepala Seksi Administrasi', 1, 2, 60, 'BKN-05', 'Kepala Seksi BKN', 'Struktural', 'BKN-05'),
-			('JAB-06', 6, 'Analis', 'Analis Kepegawaian', 2, 1, 58, 'BKN-06', 'Analis BKN', 'Fungsional', 'BKN-06'),
-			('JAB-07', 7, 'Operator', 'Operator Sistem', 2, 1, 58, 'BKN-07', 'Operator BKN', 'Fungsional', 'BKN-07');
+			('JAB-01', 1, 'Kepala Bagian', 'Kepala Bagian Administrasi', 1, 3, 60, 'BKN-01', 'Kepala Bagian BKN', 'Struktural', 'BKN-01', now()),
+			('JAB-02', 2, 'Kepala Subbag', 'Kepala Subbag Umum', 1, 2, 60, 'BKN-02', 'Kepala Subbag BKN', 'Struktural', 'BKN-02', null),
+			('JAB-03', 3, 'Pengawas', 'Pengawas Pelayanan', 2, 2, 58, 'BKN-03', 'Pengawas BKN', 'Fungsional', 'BKN-03', null),
+			('JAB-04', 4, 'Staf Ahli', 'Staf Ahli Bidang Kepegawaian', 2, 3, 58, 'BKN-04', 'Staf Ahli BKN', 'Fungsional', 'BKN-04', null),
+			('JAB-05', 5, 'Kepala Seksi', 'Kepala Seksi Administrasi', 1, 2, 60, 'BKN-05', 'Kepala Seksi BKN', 'Struktural', 'BKN-05', null),
+			('JAB-06', 6, 'Analis', 'Analis Kepegawaian', 2, 1, 58, 'BKN-06', 'Analis BKN', 'Fungsional', 'BKN-06', null),
+			('JAB-07', 7, 'Operator', 'Operator Sistem', 2, 1, 58, 'BKN-07', 'Operator BKN', 'Fungsional', 'BKN-07', null);
 
 		INSERT INTO pegawai ("nip_baru", "pns_id", "unor_id", "nama", "gol_id", "jabatan_instansi_id", deleted_at)
 		VALUES
@@ -670,6 +670,9 @@ func Test_handler_listAdmin(t *testing.T) {
 						"id_sk": "sk-010",
 						"nama_pemilik": "Gledi",
 						"nip_pemilik": "123456783",
+						"jabatan_pemilik": "Operator",
+						"golongan_pemilik": "IV/a",
+						"pangkat_golongan_pemilik": "Pembina",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-010/2024",
 						"tanggal_sk": "2024-03-16",
@@ -680,6 +683,9 @@ func Test_handler_listAdmin(t *testing.T) {
 						"id_sk": "sk-009",
 						"nama_pemilik": "Fredi",
 						"nip_pemilik": "123456784",
+						"jabatan_pemilik": "Analis",
+						"golongan_pemilik": "III/b",
+						"pangkat_golongan_pemilik": "Penata Muda Tingkat I",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-009/2024",
 						"tanggal_sk": "2024-03-15",
@@ -690,6 +696,9 @@ func Test_handler_listAdmin(t *testing.T) {
 						"id_sk": "sk-008",
 						"nama_pemilik": "Edi",
 						"nip_pemilik": "123456785",
+						"jabatan_pemilik": "Kepala Seksi",
+						"golongan_pemilik": "III/a",
+						"pangkat_golongan_pemilik": "Penata Muda",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-008/2024",
 						"tanggal_sk": "2024-03-14",
@@ -700,6 +709,9 @@ func Test_handler_listAdmin(t *testing.T) {
 						"id_sk": "sk-007",
 						"nama_pemilik": "Dedi",
 						"nip_pemilik": "123456786",
+						"jabatan_pemilik": "Staf Ahli",
+						"golongan_pemilik": "II/b",
+						"pangkat_golongan_pemilik": "Pengatur Muda Tingkat I",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-007/2024",
 						"tanggal_sk": "2024-03-13",
@@ -710,6 +722,9 @@ func Test_handler_listAdmin(t *testing.T) {
 						"id_sk": "sk-006",
 						"nama_pemilik": "Candi",
 						"nip_pemilik": "123456787",
+						"jabatan_pemilik": "Pengawas",
+						"golongan_pemilik": "",
+						"pangkat_golongan_pemilik": "",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-006/2024",
 						"tanggal_sk": "2024-03-12",
@@ -720,6 +735,9 @@ func Test_handler_listAdmin(t *testing.T) {
 						"id_sk": "sk-005",
 						"nama_pemilik": "Budi",
 						"nip_pemilik": "123456788",
+						"jabatan_pemilik": "Kepala Subbag",
+						"golongan_pemilik": "I/b",
+						"pangkat_golongan_pemilik": "Juru Muda Tingkat I",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-005/2024",
 						"tanggal_sk": "2024-03-11",
@@ -730,6 +748,9 @@ func Test_handler_listAdmin(t *testing.T) {
 						"id_sk": "sk-003",
 						"nama_pemilik": "Andi",
 						"nip_pemilik": "123456789",
+						"jabatan_pemilik": "",
+						"golongan_pemilik": "I/a",
+						"pangkat_golongan_pemilik": "Juru Muda",
 						"kategori_sk": "Kenaikan Gaji",
 						"no_sk": "SK-003/2024",
 						"tanggal_sk": "2024-03-10",
@@ -740,6 +761,9 @@ func Test_handler_listAdmin(t *testing.T) {
 						"id_sk": "sk-002",
 						"nama_pemilik": "Andi",
 						"nip_pemilik": "123456789",
+						"jabatan_pemilik": "",
+						"golongan_pemilik": "I/a",
+						"pangkat_golongan_pemilik": "Juru Muda",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-002/2024",
 						"tanggal_sk": "2024-02-20",
@@ -750,6 +774,9 @@ func Test_handler_listAdmin(t *testing.T) {
 						"id_sk": "sk-001",
 						"nama_pemilik": "Andi",
 						"nip_pemilik": "123456789",
+						"jabatan_pemilik": "",
+						"golongan_pemilik": "I/a",
+						"pangkat_golongan_pemilik": "Juru Muda",
 						"kategori_sk": "Kenaikan Pangkat",
 						"no_sk": "SK-001/2024",
 						"tanggal_sk": "2024-01-15",
@@ -775,6 +802,9 @@ func Test_handler_listAdmin(t *testing.T) {
 						"id_sk": "sk-010",
 						"nama_pemilik": "Gledi",
 						"nip_pemilik": "123456783",
+						"jabatan_pemilik": "Operator",
+						"golongan_pemilik": "IV/a",
+						"pangkat_golongan_pemilik": "Pembina",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-010/2024",
 						"tanggal_sk": "2024-03-16",
@@ -785,6 +815,9 @@ func Test_handler_listAdmin(t *testing.T) {
 						"id_sk": "sk-009",
 						"nama_pemilik": "Fredi",
 						"nip_pemilik": "123456784",
+						"jabatan_pemilik": "Analis",
+						"golongan_pemilik": "III/b",
+						"pangkat_golongan_pemilik": "Penata Muda Tingkat I",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-009/2024",
 						"tanggal_sk": "2024-03-15",
@@ -795,6 +828,9 @@ func Test_handler_listAdmin(t *testing.T) {
 						"id_sk": "sk-007",
 						"nama_pemilik": "Dedi",
 						"nip_pemilik": "123456786",
+						"jabatan_pemilik": "Staf Ahli",
+						"golongan_pemilik": "II/b",
+						"pangkat_golongan_pemilik": "Pengatur Muda Tingkat I",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-007/2024",
 						"tanggal_sk": "2024-03-13",
@@ -805,6 +841,9 @@ func Test_handler_listAdmin(t *testing.T) {
 						"id_sk": "sk-006",
 						"nama_pemilik": "Candi",
 						"nip_pemilik": "123456787",
+						"jabatan_pemilik": "Pengawas",
+						"golongan_pemilik": "",
+						"pangkat_golongan_pemilik": "",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-006/2024",
 						"tanggal_sk": "2024-03-12",
@@ -815,6 +854,9 @@ func Test_handler_listAdmin(t *testing.T) {
 						"id_sk": "sk-003",
 						"nama_pemilik": "Andi",
 						"nip_pemilik": "123456789",
+						"jabatan_pemilik": "",
+						"golongan_pemilik": "I/a",
+						"pangkat_golongan_pemilik": "Juru Muda",
 						"kategori_sk": "Kenaikan Gaji",
 						"no_sk": "SK-003/2024",
 						"tanggal_sk": "2024-03-10",
@@ -825,6 +867,9 @@ func Test_handler_listAdmin(t *testing.T) {
 						"id_sk": "sk-002",
 						"nama_pemilik": "Andi",
 						"nip_pemilik": "123456789",
+						"jabatan_pemilik": "",
+						"golongan_pemilik": "I/a",
+						"pangkat_golongan_pemilik": "Juru Muda",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-002/2024",
 						"tanggal_sk": "2024-02-20",
@@ -835,6 +880,9 @@ func Test_handler_listAdmin(t *testing.T) {
 						"id_sk": "sk-001",
 						"nama_pemilik": "Andi",
 						"nip_pemilik": "123456789",
+						"jabatan_pemilik": "",
+						"golongan_pemilik": "I/a",
+						"pangkat_golongan_pemilik": "Juru Muda",
 						"kategori_sk": "Kenaikan Pangkat",
 						"no_sk": "SK-001/2024",
 						"tanggal_sk": "2024-01-15",
@@ -860,6 +908,9 @@ func Test_handler_listAdmin(t *testing.T) {
 						"id_sk": "sk-010",
 						"nama_pemilik": "Gledi",
 						"nip_pemilik": "123456783",
+						"jabatan_pemilik": "Operator",
+						"golongan_pemilik": "IV/a",
+						"pangkat_golongan_pemilik": "Pembina",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-010/2024",
 						"tanggal_sk": "2024-03-16",
@@ -870,6 +921,9 @@ func Test_handler_listAdmin(t *testing.T) {
 						"id_sk": "sk-009",
 						"nama_pemilik": "Fredi",
 						"nip_pemilik": "123456784",
+						"jabatan_pemilik": "Analis",
+						"golongan_pemilik": "III/b",
+						"pangkat_golongan_pemilik": "Penata Muda Tingkat I",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-009/2024",
 						"tanggal_sk": "2024-03-15",
@@ -880,6 +934,9 @@ func Test_handler_listAdmin(t *testing.T) {
 						"id_sk": "sk-008",
 						"nama_pemilik": "Edi",
 						"nip_pemilik": "123456785",
+						"jabatan_pemilik": "Kepala Seksi",
+						"golongan_pemilik": "III/a",
+						"pangkat_golongan_pemilik": "Penata Muda",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-008/2024",
 						"tanggal_sk": "2024-03-14",
@@ -890,6 +947,9 @@ func Test_handler_listAdmin(t *testing.T) {
 						"id_sk": "sk-007",
 						"nama_pemilik": "Dedi",
 						"nip_pemilik": "123456786",
+						"jabatan_pemilik": "Staf Ahli",
+						"golongan_pemilik": "II/b",
+						"pangkat_golongan_pemilik": "Pengatur Muda Tingkat I",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-007/2024",
 						"tanggal_sk": "2024-03-13",
@@ -915,6 +975,9 @@ func Test_handler_listAdmin(t *testing.T) {
 						"id_sk": "sk-010",
 						"nama_pemilik": "Gledi",
 						"nip_pemilik": "123456783",
+						"jabatan_pemilik": "Operator",
+						"golongan_pemilik": "IV/a",
+						"pangkat_golongan_pemilik": "Pembina",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-010/2024",
 						"tanggal_sk": "2024-03-16",
@@ -940,6 +1003,9 @@ func Test_handler_listAdmin(t *testing.T) {
 						"id_sk": "sk-008",
 						"nama_pemilik": "Edi",
 						"nip_pemilik": "123456785",
+						"jabatan_pemilik": "Kepala Seksi",
+						"golongan_pemilik": "III/a",
+						"pangkat_golongan_pemilik": "Penata Muda",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-008/2024",
 						"tanggal_sk": "2024-03-14",
@@ -965,6 +1031,9 @@ func Test_handler_listAdmin(t *testing.T) {
 						"id_sk": "sk-007",
 						"nama_pemilik": "Dedi",
 						"nip_pemilik": "123456786",
+						"jabatan_pemilik": "Staf Ahli",
+						"golongan_pemilik": "II/b",
+						"pangkat_golongan_pemilik": "Pengatur Muda Tingkat I",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-007/2024",
 						"tanggal_sk": "2024-03-13",
@@ -990,6 +1059,9 @@ func Test_handler_listAdmin(t *testing.T) {
 						"id_sk": "sk-003",
 						"nama_pemilik": "Andi",
 						"nip_pemilik": "123456789",
+						"jabatan_pemilik": "",
+						"golongan_pemilik": "I/a",
+						"pangkat_golongan_pemilik": "Juru Muda",
 						"kategori_sk": "Kenaikan Gaji",
 						"no_sk": "SK-003/2024",
 						"tanggal_sk": "2024-03-10",
@@ -1015,6 +1087,9 @@ func Test_handler_listAdmin(t *testing.T) {
 						"id_sk": "sk-008",
 						"nama_pemilik": "Edi",
 						"nip_pemilik": "123456785",
+						"jabatan_pemilik": "Kepala Seksi",
+						"golongan_pemilik": "III/a",
+						"pangkat_golongan_pemilik": "Penata Muda",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-008/2024",
 						"tanggal_sk": "2024-03-14",
@@ -1025,6 +1100,9 @@ func Test_handler_listAdmin(t *testing.T) {
 						"id_sk": "sk-007",
 						"nama_pemilik": "Dedi",
 						"nip_pemilik": "123456786",
+						"jabatan_pemilik": "Staf Ahli",
+						"golongan_pemilik": "II/b",
+						"pangkat_golongan_pemilik": "Pengatur Muda Tingkat I",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-007/2024",
 						"tanggal_sk": "2024-03-13",
@@ -1035,6 +1113,9 @@ func Test_handler_listAdmin(t *testing.T) {
 						"id_sk": "sk-006",
 						"nama_pemilik": "Candi",
 						"nip_pemilik": "123456787",
+						"jabatan_pemilik": "Pengawas",
+						"golongan_pemilik": "",
+						"pangkat_golongan_pemilik": "",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-006/2024",
 						"tanggal_sk": "2024-03-12",
@@ -1060,6 +1141,9 @@ func Test_handler_listAdmin(t *testing.T) {
 						"id_sk": "sk-006",
 						"nama_pemilik": "Candi",
 						"nip_pemilik": "123456787",
+						"jabatan_pemilik": "Pengawas",
+						"golongan_pemilik": "",
+						"pangkat_golongan_pemilik": "",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-006/2024",
 						"tanggal_sk": "2024-03-12",
@@ -1085,6 +1169,9 @@ func Test_handler_listAdmin(t *testing.T) {
 						"id_sk": "sk-006",
 						"nama_pemilik": "Candi",
 						"nip_pemilik": "123456787",
+						"jabatan_pemilik": "Pengawas",
+						"golongan_pemilik": "",
+						"pangkat_golongan_pemilik": "",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-006/2024",
 						"tanggal_sk": "2024-03-12",
@@ -1095,6 +1182,9 @@ func Test_handler_listAdmin(t *testing.T) {
 						"id_sk": "sk-005",
 						"nama_pemilik": "Budi",
 						"nip_pemilik": "123456788",
+						"jabatan_pemilik": "Kepala Subbag",
+						"golongan_pemilik": "I/b",
+						"pangkat_golongan_pemilik": "Juru Muda Tingkat I",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-005/2024",
 						"tanggal_sk": "2024-03-11",
@@ -1130,6 +1220,9 @@ func Test_handler_listAdmin(t *testing.T) {
 						"id_sk": "sk-007",
 						"nama_pemilik": "Dedi",
 						"nip_pemilik": "123456786",
+						"jabatan_pemilik": "Staf Ahli",
+						"golongan_pemilik": "II/b",
+						"pangkat_golongan_pemilik": "Pengatur Muda Tingkat I",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-007/2024",
 						"tanggal_sk": "2024-03-13",
@@ -1155,6 +1248,9 @@ func Test_handler_listAdmin(t *testing.T) {
 						"id_sk": "sk-007",
 						"nama_pemilik": "Dedi",
 						"nip_pemilik": "123456786",
+						"jabatan_pemilik": "Staf Ahli",
+						"golongan_pemilik": "II/b",
+						"pangkat_golongan_pemilik": "Pengatur Muda Tingkat I",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-007/2024",
 						"tanggal_sk": "2024-03-13",
@@ -1165,6 +1261,9 @@ func Test_handler_listAdmin(t *testing.T) {
 						"id_sk": "sk-006",
 						"nama_pemilik": "Candi",
 						"nip_pemilik": "123456787",
+						"jabatan_pemilik": "Pengawas",
+						"golongan_pemilik": "",
+						"pangkat_golongan_pemilik": "",
 						"kategori_sk": "Mutasi",
 						"no_sk": "SK-006/2024",
 						"tanggal_sk": "2024-03-12",
@@ -1640,15 +1739,15 @@ func Test_handler_listKoreksi(t *testing.T) {
 			(5, 'III/a', 'Penata Muda', 'III/a', 5, 'III/a'),
 			(6, 'III/b', 'Penata Muda Tingkat I', 'III/b', 6, 'III/b'),
 			(7, 'IV/a', 'Pembina', 'IV/a', 7, 'IV/a');
-		INSERT INTO ref_jabatan (kode_jabatan, id, nama_jabatan, nama_jabatan_full, jenis_jabatan, kelas, pensiun, kode_bkn, nama_jabatan_bkn, kategori_jabatan, bkn_id)
+		INSERT INTO ref_jabatan (kode_jabatan, id, nama_jabatan, nama_jabatan_full, jenis_jabatan, kelas, pensiun, kode_bkn, nama_jabatan_bkn, kategori_jabatan, bkn_id, deleted_at)
 		VALUES
-			('JAB-01', 1, 'Kepala Bagian', 'Kepala Bagian Administrasi', 1, 3, 60, 'BKN-01', 'Kepala Bagian BKN', 'Struktural', 'BKN-01'),
-			('JAB-02', 2, 'Kepala Subbag', 'Kepala Subbag Umum', 1, 2, 60, 'BKN-02', 'Kepala Subbag BKN', 'Struktural', 'BKN-02'),
-			('JAB-03', 3, 'Pengawas', 'Pengawas Pelayanan', 2, 2, 58, 'BKN-03', 'Pengawas BKN', 'Fungsional', 'BKN-03'),
-			('JAB-04', 4, 'Staf Ahli', 'Staf Ahli Bidang Kepegawaian', 2, 3, 58, 'BKN-04', 'Staf Ahli BKN', 'Fungsional', 'BKN-04'),
-			('JAB-05', 5, 'Kepala Seksi', 'Kepala Seksi Administrasi', 1, 2, 60, 'BKN-05', 'Kepala Seksi BKN', 'Struktural', 'BKN-05'),
-			('JAB-06', 6, 'Analis', 'Analis Kepegawaian', 2, 1, 58, 'BKN-06', 'Analis BKN', 'Fungsional', 'BKN-06'),
-			('JAB-07', 7, 'Operator', 'Operator Sistem', 2, 1, 58, 'BKN-07', 'Operator BKN', 'Fungsional', 'BKN-07');
+			('JAB-01', 1, 'Kepala Bagian', 'Kepala Bagian Administrasi', 1, 3, 60, 'BKN-01', 'Kepala Bagian BKN', 'Struktural', 'BKN-01', now()),
+			('JAB-02', 2, 'Kepala Subbag', 'Kepala Subbag Umum', 1, 2, 60, 'BKN-02', 'Kepala Subbag BKN', 'Struktural', 'BKN-02', null),
+			('JAB-03', 3, 'Pengawas', 'Pengawas Pelayanan', 2, 2, 58, 'BKN-03', 'Pengawas BKN', 'Fungsional', 'BKN-03', null),
+			('JAB-04', 4, 'Staf Ahli', 'Staf Ahli Bidang Kepegawaian', 2, 3, 58, 'BKN-04', 'Staf Ahli BKN', 'Fungsional', 'BKN-04', null),
+			('JAB-05', 5, 'Kepala Seksi', 'Kepala Seksi Administrasi', 1, 2, 60, 'BKN-05', 'Kepala Seksi BKN', 'Struktural', 'BKN-05', null),
+			('JAB-06', 6, 'Analis', 'Analis Kepegawaian', 2, 1, 58, 'BKN-06', 'Analis BKN', 'Fungsional', 'BKN-06', null),
+			('JAB-07', 7, 'Operator', 'Operator Sistem', 2, 1, 58, 'BKN-07', 'Operator BKN', 'Fungsional', 'BKN-07', null);
 		INSERT INTO pegawai
 			("nip_baru","pns_id","unor_id","nama", "gol_id", "jabatan_instansi_id", deleted_at) values
 			('123456789','123456789','unor-3','pemilik_sk', 1, 'JAB-01', null),
@@ -1692,6 +1791,7 @@ func Test_handler_listKoreksi(t *testing.T) {
 				"data": [
 					{
 						"id_sk": "sk-003",
+						"jabatan_pemilik": "",
 						"nama_pemilik": "pemilik_sk",
 						"nip_pemilik": "123456789",
 						"kategori_sk": "Kenaikan Gaji",
@@ -1703,6 +1803,7 @@ func Test_handler_listKoreksi(t *testing.T) {
 					},
 					{
 						"id_sk": "sk-004",
+						"jabatan_pemilik": "",
 						"nama_pemilik": "pemilik_sk",
 						"nip_pemilik": "123456789",
 						"kategori_sk": "Kenaikan Gaji",
@@ -1714,6 +1815,7 @@ func Test_handler_listKoreksi(t *testing.T) {
 					},
 					{
 						"id_sk": "sk-007",
+						"jabatan_pemilik": "Kepala Subbag",
 						"nama_pemilik": "pemilik_sk_2",
 						"nip_pemilik": "123456788",
 						"kategori_sk": "Kenaikan Gaji",
@@ -1725,6 +1827,7 @@ func Test_handler_listKoreksi(t *testing.T) {
 					},
 					{
 						"id_sk": "sk-002",
+						"jabatan_pemilik": "Kepala Subbag",
 						"nama_pemilik": "pemilik_sk_2",
 						"nip_pemilik": "123456788",
 						"kategori_sk": "Mutasi",
@@ -1754,6 +1857,7 @@ func Test_handler_listKoreksi(t *testing.T) {
 				"data": [
 					{
 						"id_sk": "sk-001",
+						"jabatan_pemilik": "",
 						"nama_pemilik": "pemilik_sk",
 						"nip_pemilik": "123456789",
 						"kategori_sk": "Kenaikan Pangkat",
@@ -1785,6 +1889,7 @@ func Test_handler_listKoreksi(t *testing.T) {
 				"data": [
 					{
 						"id_sk": "sk-004",
+						"jabatan_pemilik": "",
 						"nama_pemilik": "pemilik_sk",
 						"nip_pemilik": "123456789",
 						"kategori_sk": "Kenaikan Gaji",
@@ -1821,6 +1926,7 @@ func Test_handler_listKoreksi(t *testing.T) {
 				"data": [
 					{
 						"id_sk": "sk-003",
+						"jabatan_pemilik": "",
 						"nama_pemilik": "pemilik_sk",
 						"nip_pemilik": "123456789",
 						"kategori_sk": "Kenaikan Gaji",
@@ -1851,6 +1957,7 @@ func Test_handler_listKoreksi(t *testing.T) {
 				"data": [
 					{
 						"id_sk": "sk-007",
+						"jabatan_pemilik": "Kepala Subbag",
 						"nama_pemilik": "pemilik_sk_2",
 						"nip_pemilik": "123456788",
 						"kategori_sk": "Kenaikan Gaji",
@@ -1862,6 +1969,7 @@ func Test_handler_listKoreksi(t *testing.T) {
 					},
 					{
 						"id_sk": "sk-002",
+						"jabatan_pemilik": "Kepala Subbag",
 						"nama_pemilik": "pemilik_sk_2",
 						"nip_pemilik": "123456788",
 						"kategori_sk": "Mutasi",
@@ -1891,6 +1999,7 @@ func Test_handler_listKoreksi(t *testing.T) {
 				"data": [
 					{
 						"id_sk": "sk-005",
+						"jabatan_pemilik": "Kepala Subbag",
 						"nama_pemilik": "pemilik_sk_2",
 						"nip_pemilik": "123456788",
 						"kategori_sk": "Kenaikan Gaji",
@@ -2857,15 +2966,15 @@ func Test_handler_listTandatangan(t *testing.T) {
 			(5, 'III/a', 'Penata Muda', 'III/a', 5, 'III/a'),
 			(6, 'III/b', 'Penata Muda Tingkat I', 'III/b', 6, 'III/b'),
 			(7, 'IV/a', 'Pembina', 'IV/a', 7, 'IV/a');
-		INSERT INTO ref_jabatan (kode_jabatan, id, nama_jabatan, nama_jabatan_full, jenis_jabatan, kelas, pensiun, kode_bkn, nama_jabatan_bkn, kategori_jabatan, bkn_id)
+		INSERT INTO ref_jabatan (kode_jabatan, id, nama_jabatan, nama_jabatan_full, jenis_jabatan, kelas, pensiun, kode_bkn, nama_jabatan_bkn, kategori_jabatan, bkn_id, deleted_at)
 		VALUES
-			('JAB-01', 1, 'Kepala Bagian', 'Kepala Bagian Administrasi', 1, 3, 60, 'BKN-01', 'Kepala Bagian BKN', 'Struktural', 'BKN-01'),
-			('JAB-02', 2, 'Kepala Subbag', 'Kepala Subbag Umum', 1, 2, 60, 'BKN-02', 'Kepala Subbag BKN', 'Struktural', 'BKN-02'),
-			('JAB-03', 3, 'Pengawas', 'Pengawas Pelayanan', 2, 2, 58, 'BKN-03', 'Pengawas BKN', 'Fungsional', 'BKN-03'),
-			('JAB-04', 4, 'Staf Ahli', 'Staf Ahli Bidang Kepegawaian', 2, 3, 58, 'BKN-04', 'Staf Ahli BKN', 'Fungsional', 'BKN-04'),
-			('JAB-05', 5, 'Kepala Seksi', 'Kepala Seksi Administrasi', 1, 2, 60, 'BKN-05', 'Kepala Seksi BKN', 'Struktural', 'BKN-05'),
-			('JAB-06', 6, 'Analis', 'Analis Kepegawaian', 2, 1, 58, 'BKN-06', 'Analis BKN', 'Fungsional', 'BKN-06'),
-			('JAB-07', 7, 'Operator', 'Operator Sistem', 2, 1, 58, 'BKN-07', 'Operator BKN', 'Fungsional', 'BKN-07');
+			('JAB-01', 1, 'Kepala Bagian', 'Kepala Bagian Administrasi', 1, 3, 60, 'BKN-01', 'Kepala Bagian BKN', 'Struktural', 'BKN-01', now()),
+			('JAB-02', 2, 'Kepala Subbag', 'Kepala Subbag Umum', 1, 2, 60, 'BKN-02', 'Kepala Subbag BKN', 'Struktural', 'BKN-02', null),
+			('JAB-03', 3, 'Pengawas', 'Pengawas Pelayanan', 2, 2, 58, 'BKN-03', 'Pengawas BKN', 'Fungsional', 'BKN-03', null),
+			('JAB-04', 4, 'Staf Ahli', 'Staf Ahli Bidang Kepegawaian', 2, 3, 58, 'BKN-04', 'Staf Ahli BKN', 'Fungsional', 'BKN-04', null),
+			('JAB-05', 5, 'Kepala Seksi', 'Kepala Seksi Administrasi', 1, 2, 60, 'BKN-05', 'Kepala Seksi BKN', 'Struktural', 'BKN-05', null),
+			('JAB-06', 6, 'Analis', 'Analis Kepegawaian', 2, 1, 58, 'BKN-06', 'Analis BKN', 'Fungsional', 'BKN-06', null),
+			('JAB-07', 7, 'Operator', 'Operator Sistem', 2, 1, 58, 'BKN-07', 'Operator BKN', 'Fungsional', 'BKN-07', null);
 		INSERT INTO pegawai
 			("nip_baru","pns_id","unor_id","nama", "gol_id", "jabatan_instansi_id", deleted_at) values
 			('123456789','123456789','unor-3','pemilik_sk', 1, 'JAB-01', null),
@@ -2909,6 +3018,7 @@ func Test_handler_listTandatangan(t *testing.T) {
 				"data": [
 					{
 						"id_sk": "sk-003",
+						"jabatan_pemilik": "",
 						"nama_pemilik": "pemilik_sk",
 						"nip_pemilik": "123456789",
 						"kategori_sk": "Kenaikan Gaji",
@@ -2920,6 +3030,7 @@ func Test_handler_listTandatangan(t *testing.T) {
 					},
 					{
 						"id_sk": "sk-002",
+						"jabatan_pemilik": "Kepala Subbag",
 						"nama_pemilik": "pemilik_sk_2",
 						"nip_pemilik": "123456788",
 						"kategori_sk": "Mutasi",
@@ -2949,6 +3060,7 @@ func Test_handler_listTandatangan(t *testing.T) {
 				"data": [
 					{
 						"id_sk": "sk-001",
+						"jabatan_pemilik": "",
 						"nama_pemilik": "pemilik_sk",
 						"nip_pemilik": "123456789",
 						"kategori_sk": "Kenaikan Pangkat",
@@ -2980,6 +3092,7 @@ func Test_handler_listTandatangan(t *testing.T) {
 				"data": [
 					{
 						"id_sk": "sk-002",
+						"jabatan_pemilik": "Kepala Subbag",
 						"nama_pemilik": "pemilik_sk_2",
 						"nip_pemilik": "123456788",
 						"kategori_sk": "Mutasi",
@@ -3016,6 +3129,7 @@ func Test_handler_listTandatangan(t *testing.T) {
 				"data": [
 					{
 						"id_sk": "sk-003",
+						"jabatan_pemilik": "",
 						"nama_pemilik": "pemilik_sk",
 						"nip_pemilik": "123456789",
 						"kategori_sk": "Kenaikan Gaji",
@@ -3046,6 +3160,7 @@ func Test_handler_listTandatangan(t *testing.T) {
 				"data": [
 					{
 						"id_sk": "sk-002",
+						"jabatan_pemilik": "Kepala Subbag",
 						"nama_pemilik": "pemilik_sk_2",
 						"nip_pemilik": "123456788",
 						"kategori_sk": "Mutasi",
@@ -3075,6 +3190,7 @@ func Test_handler_listTandatangan(t *testing.T) {
 				"data": [
 					{
 						"id_sk": "sk-005",
+						"jabatan_pemilik": "Kepala Subbag",
 						"nama_pemilik": "pemilik_sk_2",
 						"nip_pemilik": "123456788",
 						"kategori_sk": "Kenaikan Gaji",

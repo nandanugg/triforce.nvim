@@ -496,6 +496,27 @@ func (q *Queries) UpdateAnak(ctx context.Context, arg UpdateAnakParams) (int64, 
 	return result.RowsAffected(), nil
 }
 
+const updateAnakNIPByNIP = `-- name: UpdateAnakNIPByNIP :exec
+UPDATE anak
+SET 
+    nip = $1::varchar,
+    updated_at = now()
+WHERE nip = $2::varchar AND deleted_at IS NULL
+AND (
+    ($1::varchar IS NOT NULL AND $1::varchar IS DISTINCT FROM nip)
+)
+`
+
+type UpdateAnakNIPByNIPParams struct {
+	NipBaru string `db:"nip_baru"`
+	Nip     string `db:"nip"`
+}
+
+func (q *Queries) UpdateAnakNIPByNIP(ctx context.Context, arg UpdateAnakNIPByNIPParams) error {
+	_, err := q.db.Exec(ctx, updateAnakNIPByNIP, arg.NipBaru, arg.Nip)
+	return err
+}
+
 const updateOrangTua = `-- name: UpdateOrangTua :execrows
 update orang_tua ot
 set
@@ -541,6 +562,27 @@ func (q *Queries) UpdateOrangTua(ctx context.Context, arg UpdateOrangTuaParams) 
 		return 0, err
 	}
 	return result.RowsAffected(), nil
+}
+
+const updateOrangTuaNIPByNIP = `-- name: UpdateOrangTuaNIPByNIP :exec
+UPDATE orang_tua
+SET 
+    nip = $1::varchar,
+    updated_at = now()
+WHERE nip = $2::varchar AND deleted_at IS NULL
+AND (
+    ($1::varchar IS NOT NULL AND $1::varchar IS DISTINCT FROM nip)
+)
+`
+
+type UpdateOrangTuaNIPByNIPParams struct {
+	NipBaru string `db:"nip_baru"`
+	Nip     string `db:"nip"`
+}
+
+func (q *Queries) UpdateOrangTuaNIPByNIP(ctx context.Context, arg UpdateOrangTuaNIPByNIPParams) error {
+	_, err := q.db.Exec(ctx, updateOrangTuaNIPByNIP, arg.NipBaru, arg.Nip)
+	return err
 }
 
 const updatePasangan = `-- name: UpdatePasangan :execrows
@@ -609,4 +651,25 @@ func (q *Queries) UpdatePasangan(ctx context.Context, arg UpdatePasanganParams) 
 		return 0, err
 	}
 	return result.RowsAffected(), nil
+}
+
+const updatePasanganNIPByNIP = `-- name: UpdatePasanganNIPByNIP :exec
+UPDATE pasangan
+SET 
+    nip = $1::varchar,
+    updated_at = now()
+WHERE nip = $2::varchar AND deleted_at IS NULL
+AND (
+    ($1::varchar IS NOT NULL AND $1::varchar IS DISTINCT FROM nip)
+)
+`
+
+type UpdatePasanganNIPByNIPParams struct {
+	NipBaru string `db:"nip_baru"`
+	Nip     string `db:"nip"`
+}
+
+func (q *Queries) UpdatePasanganNIPByNIP(ctx context.Context, arg UpdatePasanganNIPByNIPParams) error {
+	_, err := q.db.Exec(ctx, updatePasanganNIPByNIP, arg.NipBaru, arg.Nip)
+	return err
 }

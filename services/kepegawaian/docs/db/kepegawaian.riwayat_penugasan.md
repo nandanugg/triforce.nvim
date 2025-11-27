@@ -20,12 +20,14 @@ Riwayat penugasan pegawai
 | created_at | timestamp with time zone | now() | true |  |  | Waktu perekaman data |
 | updated_at | timestamp with time zone | now() | true |  |  | Waktu terakhir pembaruan data |
 | deleted_at | timestamp with time zone |  | true |  |  | Waktu penghapusan data |
+| s3_file_id | bigint |  | true |  | [kepegawaian.s3_files](kepegawaian.s3_files.md) |  |
 
 ## Constraints
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
 | riwayat_penugasan_pkey | PRIMARY KEY | PRIMARY KEY (id) |
+| riwayat_penugasan_s3_file_id_fkey | FOREIGN KEY | FOREIGN KEY (s3_file_id) REFERENCES s3_files(id) |
 
 ## Indexes
 
@@ -38,6 +40,7 @@ Riwayat penugasan pegawai
 ```mermaid
 erDiagram
 
+"kepegawaian.riwayat_penugasan" }o--o| "kepegawaian.s3_files" : "FOREIGN KEY (s3_file_id) REFERENCES s3_files(id)"
 
 "kepegawaian.riwayat_penugasan" {
   integer id
@@ -52,6 +55,16 @@ erDiagram
   timestamp_with_time_zone created_at
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
+  bigint s3_file_id FK
+}
+"kepegawaian.s3_files" {
+  bigint id
+  text object_key
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
+  varchar_20_ nip_uploader
+  boolean is_used
 }
 ```
 

@@ -664,7 +664,7 @@ func Test_handler_adminUploadBerkas(t *testing.T) {
 
 			require.NoError(t, writer.Close())
 
-			req := httptest.NewRequest(http.MethodPost, "/v1/admin/pegawai/"+tt.paramNIP+"/riwayat-penghargaan/"+tt.paramID+"/berkas", &buf)
+			req := httptest.NewRequest(http.MethodPut, "/v1/admin/pegawai/"+tt.paramNIP+"/riwayat-penghargaan/"+tt.paramID+"/berkas", &buf)
 			req.Header = tt.requestHeader
 			req.Header.Set("Content-Type", writer.FormDataContentType())
 
@@ -770,7 +770,7 @@ func Test_handler_adminCreate(t *testing.T) {
 			}`,
 			wantResponseCode: http.StatusBadRequest,
 			wantResponseBody: `{
-				"message": "jenis penghargaan tidak valid"
+				"message": "parameter \"jenis_penghargaan\" harus salah satu dari \"Internasional\", \"Unit Kerja (eselon 2 ke bawah)\", \"Unit Utama\", \"Nasional\", \"Instansional (Kementerian/Lembaga)\""
 			}`,
 		},
 		{
@@ -901,7 +901,7 @@ func Test_handler_adminUpdate(t *testing.T) {
 			}`,
 			wantResponseCode: http.StatusBadRequest,
 			wantResponseBody: `{
-				"message": "jenis penghargaan tidak valid"
+				"message": "parameter \"jenis_penghargaan\" harus salah satu dari \"Internasional\", \"Unit Kerja (eselon 2 ke bawah)\", \"Unit Utama\", \"Nasional\", \"Instansional (Kementerian/Lembaga)\""
 			}`,
 		},
 		{

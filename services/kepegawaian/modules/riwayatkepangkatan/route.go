@@ -6,9 +6,10 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/api"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/usulanperubahandata"
 )
 
-func RegisterRoutes(e *echo.Echo, r repository, mwAuth api.AuthMiddlewareFunc) {
+func RegisterRoutes(e *echo.Echo, r repository, mwAuth api.AuthMiddlewareFunc, svcRoute usulanperubahandata.ServiceRouteInterface) {
 	s := newService(r)
 	h := newHandler(s)
 
@@ -22,4 +23,7 @@ func RegisterRoutes(e *echo.Echo, r repository, mwAuth api.AuthMiddlewareFunc) {
 	e.Add(http.MethodPut, "/v1/admin/pegawai/:nip/riwayat-kepangkatan/:id", h.adminUpdate, mwAuth(api.Kode_Pegawai_Write))
 	e.Add(http.MethodDelete, "/v1/admin/pegawai/:nip/riwayat-kepangkatan/:id", h.adminDelete, mwAuth(api.Kode_Pegawai_Write))
 	e.Add(http.MethodPut, "/v1/admin/pegawai/:nip/riwayat-kepangkatan/:id/berkas", h.adminUploadBerkas, mwAuth(api.Kode_Pegawai_Write))
+
+	// register usulan perubahan data service route
+	svcRoute.Register(e, mwAuth, s, "riwayat-kepangkatan")
 }

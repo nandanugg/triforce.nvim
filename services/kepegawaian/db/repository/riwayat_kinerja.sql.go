@@ -73,3 +73,27 @@ func (q *Queries) ListRiwayatKinerja(ctx context.Context, arg ListRiwayatKinerja
 	}
 	return items, nil
 }
+
+const updateRiwayatKinerjaNamaNipByPNSID = `-- name: UpdateRiwayatKinerjaNamaNipByPNSID :exec
+UPDATE riwayat_kinerja
+SET     
+    nip = $1::varchar,
+    nama = $2::varchar,
+    updated_at = now()
+WHERE nip = $3::varchar AND deleted_at IS NULL
+AND (
+    ($1::varchar IS NOT NULL AND $1::varchar IS DISTINCT FROM nip)
+    OR ($2::varchar IS NOT NULL AND $2::varchar IS DISTINCT FROM nama)
+)
+`
+
+type UpdateRiwayatKinerjaNamaNipByPNSIDParams struct {
+	NipBaru string `db:"nip_baru"`
+	Nama    string `db:"nama"`
+	Nip     string `db:"nip"`
+}
+
+func (q *Queries) UpdateRiwayatKinerjaNamaNipByPNSID(ctx context.Context, arg UpdateRiwayatKinerjaNamaNipByPNSIDParams) error {
+	_, err := q.db.Exec(ctx, updateRiwayatKinerjaNamaNipByPNSID, arg.NipBaru, arg.Nama, arg.Nip)
+	return err
+}

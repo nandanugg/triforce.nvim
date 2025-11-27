@@ -19,12 +19,14 @@ Riwayat penghargaan umum pegawai
 | updated_at | timestamp with time zone | now() | true |  |  | Waktu terakhir pembaruan data |
 | deleted_at | timestamp with time zone |  | true |  |  | Waktu penghapusan data |
 | jenis_penghargaan | varchar(50) |  | true |  |  |  |
+| s3_file_id | bigint |  | true |  | [kepegawaian.s3_files](kepegawaian.s3_files.md) |  |
 
 ## Constraints
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
 | riwayat_penghargaan_umum_pkey | PRIMARY KEY | PRIMARY KEY (id) |
+| riwayat_penghargaan_umum_s3_file_id_fkey | FOREIGN KEY | FOREIGN KEY (s3_file_id) REFERENCES s3_files(id) |
 
 ## Indexes
 
@@ -37,6 +39,7 @@ Riwayat penghargaan umum pegawai
 ```mermaid
 erDiagram
 
+"kepegawaian.riwayat_penghargaan_umum" }o--o| "kepegawaian.s3_files" : "FOREIGN KEY (s3_file_id) REFERENCES s3_files(id)"
 
 "kepegawaian.riwayat_penghargaan_umum" {
   integer id
@@ -50,6 +53,16 @@ erDiagram
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
   varchar_50_ jenis_penghargaan
+  bigint s3_file_id FK
+}
+"kepegawaian.s3_files" {
+  bigint id
+  text object_key
+  timestamp_with_time_zone created_at
+  timestamp_with_time_zone updated_at
+  timestamp_with_time_zone deleted_at
+  varchar_20_ nip_uploader
+  boolean is_used
 }
 ```
 

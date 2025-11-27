@@ -189,6 +189,7 @@ erDiagram
   timestamp_with_time_zone updated_at
   timestamp_with_time_zone deleted_at
   integer jenis_kp_id FK
+  bigint s3_file_id FK
 }
 ```
 

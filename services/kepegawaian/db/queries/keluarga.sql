@@ -170,3 +170,33 @@ from pegawai p
 where a.pns_id = p.pns_id
     and a.id = @id and a.deleted_at is null
     and p.nip_baru = @nip::varchar and p.deleted_at is null;
+
+-- name: UpdateAnakNIPByNIP :exec
+UPDATE anak
+SET 
+    nip = @nip_baru::varchar,
+    updated_at = now()
+WHERE nip = @nip::varchar AND deleted_at IS NULL
+AND (
+    (@nip_baru::varchar IS NOT NULL AND @nip_baru::varchar IS DISTINCT FROM nip)
+);
+
+-- name: UpdateOrangTuaNIPByNIP :exec
+UPDATE orang_tua
+SET 
+    nip = @nip_baru::varchar,
+    updated_at = now()
+WHERE nip = @nip::varchar AND deleted_at IS NULL
+AND (
+    (@nip_baru::varchar IS NOT NULL AND @nip_baru::varchar IS DISTINCT FROM nip)
+);
+
+-- name: UpdatePasanganNIPByNIP :exec
+UPDATE pasangan
+SET 
+    nip = @nip_baru::varchar,
+    updated_at = now()
+WHERE nip = @nip::varchar AND deleted_at IS NULL
+AND (
+    (@nip_baru::varchar IS NOT NULL AND @nip_baru::varchar IS DISTINCT FROM nip)
+);

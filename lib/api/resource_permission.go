@@ -11,6 +11,9 @@ const (
 	Kode_Pegawai_Read  = "kepegawaian.pegawai.read"
 	Kode_Pegawai_Write = "kepegawaian.pegawai.write"
 
+	Kode_PegawaiPerubahanData_Request = "kepegawaian.pegawai-perubahan-data.request"
+	Kode_PegawaiPerubahanData_Verify  = "kepegawaian.pegawai-perubahan-data.verify"
+
 	Kode_SuratKeputusan_Self = "kepegawaian.surat-keputusan.self"
 	Kode_SuratKeputusan_Read = "kepegawaian.surat-keputusan.read"
 	Kode_SuratKeputusan_Log  = "kepegawaian.surat-keputusan.log"

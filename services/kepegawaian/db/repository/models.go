@@ -947,6 +947,7 @@ type RiwayatDiklat struct {
 	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
 	// Waktu penghapusan data
 	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
+	S3FileID  pgtype.Int8        `db:"s3_file_id"`
 }
 
 // Riwayat diklat fungsional pegawai
@@ -971,6 +972,7 @@ type RiwayatDiklatFungsional struct {
 	CreatedAt              pgtype.Timestamptz `db:"created_at"`
 	UpdatedAt              pgtype.Timestamptz `db:"updated_at"`
 	DeletedAt              pgtype.Timestamptz `db:"deleted_at"`
+	S3FileID               pgtype.Int8        `db:"s3_file_id"`
 }
 
 // Riwayat diklat struktural pegawai
@@ -992,6 +994,7 @@ type RiwayatDiklatStruktural struct {
 	CreatedAt        pgtype.Timestamptz `db:"created_at"`
 	UpdatedAt        pgtype.Timestamptz `db:"updated_at"`
 	DeletedAt        pgtype.Timestamptz `db:"deleted_at"`
+	S3FileID         pgtype.Int8        `db:"s3_file_id"`
 }
 
 // Riwayat golongan pegawai
@@ -1070,6 +1073,7 @@ type RiwayatGolongan struct {
 	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 	// Jenis kp (rujuk ref_jenis_kp)
 	JenisKpID pgtype.Int4 `db:"jenis_kp_id"`
+	S3FileID  pgtype.Int8 `db:"s3_file_id"`
 }
 
 // Riwayat hukuman disiplin pegawai
@@ -1120,6 +1124,7 @@ type RiwayatHukumanDisiplin struct {
 	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
 	// Waktu penghapusan data
 	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
+	S3FileID  pgtype.Int8        `db:"s3_file_id"`
 }
 
 // Riwayat jabatan pegawai
@@ -1200,6 +1205,7 @@ type RiwayatJabatan struct {
 	PeriodeJabatanEndDate pgtype.Date `db:"periode_jabatan_end_date"`
 	FileBase64            pgtype.Text `db:"file_base64"`
 	KeteranganBerkas      pgtype.Text `db:"keterangan_berkas"`
+	S3FileID              pgtype.Int8 `db:"s3_file_id"`
 }
 
 // Riwayat kenaikan gaji berkala pegawai
@@ -1265,6 +1271,7 @@ type RiwayatKenaikanGajiBerkala struct {
 	FileBase64       pgtype.Text        `db:"file_base64"`
 	KeteranganBerkas pgtype.Text        `db:"keterangan_berkas"`
 	GajiPokok        pgtype.Int4        `db:"gaji_pokok"`
+	S3FileID         pgtype.Int8        `db:"s3_file_id"`
 }
 
 // Riwayat kinerja pegawai
@@ -1343,6 +1350,7 @@ type RiwayatKursu struct {
 	DeletedAt        pgtype.Timestamptz `db:"deleted_at"`
 	FileBase64       pgtype.Text        `db:"file_base64"`
 	KeteranganBerkas pgtype.Text        `db:"keterangan_berkas"`
+	S3FileID         pgtype.Int8        `db:"s3_file_id"`
 }
 
 // Riwayat pendidikan pegawai
@@ -1397,6 +1405,7 @@ type RiwayatPendidikan struct {
 	FileBase64 pgtype.Text `db:"file_base64"`
 	// Keterangan berkas
 	KeteranganBerkas pgtype.Text `db:"keterangan_berkas"`
+	S3FileID         pgtype.Int8 `db:"s3_file_id"`
 }
 
 // Riwayat penghargaan umum pegawai
@@ -1422,6 +1431,7 @@ type RiwayatPenghargaanUmum struct {
 	// Waktu penghapusan data
 	DeletedAt        pgtype.Timestamptz `db:"deleted_at"`
 	JenisPenghargaan pgtype.Text        `db:"jenis_penghargaan"`
+	S3FileID         pgtype.Int8        `db:"s3_file_id"`
 }
 
 // Riwayat penugasan pegawai
@@ -1450,6 +1460,7 @@ type RiwayatPenugasan struct {
 	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
 	// Waktu penghapusan data
 	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
+	S3FileID  pgtype.Int8        `db:"s3_file_id"`
 }
 
 // Riwayat pindah unit kerja pegawai
@@ -1492,6 +1503,7 @@ type RiwayatPindahUnitKerja struct {
 	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
 	// Waktu penghapusan data
 	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
+	S3FileID  pgtype.Int8        `db:"s3_file_id"`
 }
 
 // Riwayat sertifikasi pegawai
@@ -1514,6 +1526,7 @@ type RiwayatSertifikasi struct {
 	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
 	// Waktu penghapusan data
 	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
+	S3FileID  pgtype.Int8        `db:"s3_file_id"`
 }
 
 type RiwayatSuratKeputusan struct {
@@ -1549,6 +1562,16 @@ type RiwayatUjiKompetensi struct {
 	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
 	// Waktu penghapusan data
 	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
+}
+
+type S3File struct {
+	ID          int64              `db:"id"`
+	ObjectKey   string             `db:"object_key"`
+	CreatedAt   pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `db:"updated_at"`
+	DeletedAt   pgtype.Timestamptz `db:"deleted_at"`
+	NipUploader string             `db:"nip_uploader"`
+	IsUsed      bool               `db:"is_used"`
 }
 
 type SuratKeputusan struct {
@@ -1605,6 +1628,8 @@ type SuratKeputusan struct {
 	UpdatedAt          pgtype.Timestamptz `db:"updated_at"`
 	DeletedAt          pgtype.Timestamptz `db:"deleted_at"`
 	StatusSk           pgtype.Int2        `db:"status_sk"`
+	S3FileID           pgtype.Int8        `db:"s3_file_id"`
+	S3FileSignID       pgtype.Int8        `db:"s3_file_sign_id"`
 }
 
 // Riwayat pembaruan data secara mandiri oleh pegawai
@@ -1639,4 +1664,19 @@ type UpdateMandiri struct {
 	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
 	// Waktu penghapusan data
 	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
+}
+
+type UsulanPerubahanDatum struct {
+	ID            int64              `db:"id"`
+	Nip           string             `db:"nip"`
+	JenisData     string             `db:"jenis_data"`
+	DataID        pgtype.Text        `db:"data_id"`
+	PerubahanData []byte             `db:"perubahan_data"`
+	Action        string             `db:"action"`
+	Status        string             `db:"status"`
+	Catatan       pgtype.Text        `db:"catatan"`
+	ReadAt        pgtype.Timestamptz `db:"read_at"`
+	CreatedAt     pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt     pgtype.Timestamptz `db:"updated_at"`
+	DeletedAt     pgtype.Timestamptz `db:"deleted_at"`
 }

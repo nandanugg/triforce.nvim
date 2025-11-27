@@ -359,6 +359,38 @@ func (q *Queries) UpdateRiwayatKenaikanGajiBerkala(ctx context.Context, arg Upda
 	return result.RowsAffected(), nil
 }
 
+const updateRiwayatKenaikanGajiBerkalaNamaNipByPNSID = `-- name: UpdateRiwayatKenaikanGajiBerkalaNamaNipByPNSID :exec
+UPDATE riwayat_kenaikan_gaji_berkala
+SET 
+    pegawai_nama = $1::varchar,
+    pegawai_nip = $2::varchar,
+    tanggal_lahir = $3::date,
+    updated_at = now()
+WHERE pegawai_nip = $4::varchar AND deleted_at IS NULL
+AND (
+    ($2::varchar IS NOT NULL AND $2::varchar IS DISTINCT FROM pegawai_nip)
+    OR ($1::varchar IS NOT NULL AND $1::varchar IS DISTINCT FROM pegawai_nama)
+    OR ($3::date IS NOT NULL AND $3::date IS DISTINCT FROM tanggal_lahir)
+)
+`
+
+type UpdateRiwayatKenaikanGajiBerkalaNamaNipByPNSIDParams struct {
+	Nama         string      `db:"nama"`
+	NipBaru      string      `db:"nip_baru"`
+	TanggalLahir pgtype.Date `db:"tanggal_lahir"`
+	Nip          string      `db:"nip"`
+}
+
+func (q *Queries) UpdateRiwayatKenaikanGajiBerkalaNamaNipByPNSID(ctx context.Context, arg UpdateRiwayatKenaikanGajiBerkalaNamaNipByPNSIDParams) error {
+	_, err := q.db.Exec(ctx, updateRiwayatKenaikanGajiBerkalaNamaNipByPNSID,
+		arg.Nama,
+		arg.NipBaru,
+		arg.TanggalLahir,
+		arg.Nip,
+	)
+	return err
+}
+
 const uploadBerkasRiwayatKenaikanGajiBerkala = `-- name: UploadBerkasRiwayatKenaikanGajiBerkala :execrows
 update riwayat_kenaikan_gaji_berkala set
     file_base64 = $1,

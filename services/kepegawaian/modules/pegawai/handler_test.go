@@ -7,9 +7,11 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strings"
 	"testing"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -71,7 +73,7 @@ func Test_handler_getProfile(t *testing.T) {
 	require.NoError(t, err)
 
 	authSvc := apitest.NewAuthService("")
-	RegisterRoutes(e, sqlc.New(pgxconn), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+	RegisterRoutes(e, sqlc.New(pgxconn), pgxconn, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	tests := []struct {
 		name             string
@@ -244,7 +246,7 @@ func Test_handler_listAdmin(t *testing.T) {
 	require.NoError(t, err)
 
 	authSvc := apitest.NewAuthService(api.Kode_Pegawai_Read)
-	RegisterRoutes(e, sqlc.New(pgxconn), api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+	RegisterRoutes(e, sqlc.New(pgxconn), pgxconn, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
 
 	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
 	tests := []struct {
@@ -895,7 +897,8 @@ func Test_handler_getAdmin(t *testing.T) {
 
 	repo := sqlc.New(pgxconn)
 	authSvc := apitest.NewAuthService(api.Kode_Pegawai_Read)
-	RegisterRoutes(e, repo, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+	mwAuth := api.NewAuthMiddleware(authSvc, apitest.Keyfunc)
+	RegisterRoutes(e, repo, pgxconn, mwAuth)
 
 	masaKerjaKeseluruhan := func(date time.Time, tahun, bulan int) string {
 		tahun += time.Now().Year() - date.Year()
@@ -1285,6 +1288,664 @@ func Test_handler_getAdmin(t *testing.T) {
 			assert.Equal(t, tt.wantResponseCode, rec.Code)
 			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
 			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+		})
+	}
+}
+
+func Test_handler_putAdmin(t *testing.T) {
+	t.Parallel()
+
+	dbData := `
+		insert into pegawai
+			(pns_id,  nip_baru, nama,      deleted_at) values
+			('id_1a', '1a',     'User 1a', null),
+			('id_1c', '1c',     'User 1c', null),
+			('id_1d', '1d',     'User 1d', '2000-01-01');
+		
+		insert into ref_agama
+			(id, nama, deleted_at) values
+			(1, 'Islam', null),
+			(2, 'Kristen', null),
+			(3, 'Deleted', '2000-01-01');
+		
+		insert into ref_golongan
+			(id, nama, deleted_at) values
+			(1, 'I/a', null),
+			(2, 'I/b', null),
+			(3, 'Deleted', '2000-01-01');
+		
+		insert into ref_jenis_kawin
+			(id, nama, deleted_at) values
+			(1, 'Belum Kawin', null),
+			(2, 'Kawin', null),
+			(3, 'Deleted', '2000-01-01');
+		
+		insert into ref_tingkat_pendidikan
+			(id, nama, deleted_at) values
+			(1, 'S1', null),
+			(2, 'S2', null),
+			(3, 'Deleted', '2000-01-01');
+		
+		insert into ref_jenis_jabatan
+			(id, nama, deleted_at) values
+			(1, 'Struktural', null),
+			(2, 'Fungsional', null),
+			(3, 'Deleted', '2000-01-01');
+		
+		insert into ref_jabatan
+			(id, kode_jabatan, nama_jabatan, deleted_at) values
+			(1, '1', 'Jabatan 1', null),
+			(2, '2', 'Jabatan 2', null),
+			(3, '3', 'Jabatan 3', '2000-01-01');
+		
+		insert into ref_lokasi
+			(id, nama, deleted_at) values
+			('3101', 'Jakarta Pusat', null),
+			('LOK001', 'Lokasi 1', null),
+			('LOK002', 'Lokasi 2', null),
+			('LOK003', 'Lokasi 3', '2000-01-01');
+		
+		insert into ref_pendidikan
+			(id, nama, deleted_at) values
+			('1', 'Pendidikan 1', null),
+			('2', 'Pendidikan 2', null),
+			('3', 'Pendidikan 3', '2000-01-01');
+		
+		insert into ref_unit_kerja
+			(id, nama_unor, deleted_at) values
+			('UNOR001', 'Unit Organisasi 1', null),
+			('UNOR002', 'Unit Organisasi 2', null),
+			('UNOR003', 'Unit Organisasi 3', '2000-01-01');
+		
+		-- Add test data for related tables that will be updated when NIP changes
+		insert into riwayat_asesmen
+			(id, pns_id, pns_nip, nama_lengkap, created_at, updated_at, deleted_at) values
+			(1, 'id_1a', '1a', 'User 1a', '2000-01-01', '2000-01-01', null);
+		
+		insert into riwayat_asesmen_nine_box
+			(id, pns_nip, nama, created_at, updated_at, deleted_at) values
+			(1, '1a', 'User 1a', '2000-01-01', '2000-01-01', null);
+		
+		insert into riwayat_diklat
+			(id, pns_orang_id, nip_baru, created_at, updated_at, deleted_at) values
+			(1, 'id_1a', '1a', '2000-01-01', '2000-01-01', null);
+		
+		insert into riwayat_diklat_fungsional
+			(id, nip_baru, created_at, updated_at, deleted_at) values
+			(1, '1a', '2000-01-01', '2000-01-01', null);
+		
+		insert into riwayat_diklat_struktural
+			(id, pns_id, pns_nip, pns_nama, created_at, updated_at, deleted_at) values
+			(1, 'id_1a', '1a', 'User 1a', '2000-01-01', '2000-01-01', null);
+		
+		insert into riwayat_golongan
+			(id, pns_id, pns_nip, pns_nama, created_at, updated_at, deleted_at) values
+			(1, 'id_1a', '1a', 'User 1a', '2000-01-01', '2000-01-01', null);
+		
+		insert into riwayat_hukuman_disiplin
+			(id, pns_id, pns_nip, nama, created_at, updated_at, deleted_at) values
+			(1, 'id_1a', '1a', 'User 1a', '2000-01-01', '2000-01-01', null);
+		
+		insert into riwayat_jabatan
+			(id, pns_id, pns_nip, pns_nama, created_at, updated_at, deleted_at) values
+			(1, 'id_1a', '1a', 'User 1a', '2000-01-01', '2000-01-01', null);
+		
+		insert into riwayat_kenaikan_gaji_berkala
+			(id, pegawai_nip, pegawai_nama, tempat_lahir, tanggal_lahir, created_at, updated_at, deleted_at) values
+			(1, '1a', 'User 1a', 'Jakarta', '1990-01-01', '2000-01-01', '2000-01-01', null);
+		
+		insert into riwayat_kinerja
+			(id, nip, nama, created_at, updated_at, deleted_at) values
+			(1, '1a', 'User 1a', '2000-01-01', '2000-01-01', null);
+		
+		insert into riwayat_kursus
+			(id, pns_id, pns_nip, created_at, updated_at, deleted_at) values
+			(1, 'id_1a', '1a', '2000-01-01', '2000-01-01', null);
+		
+		insert into riwayat_pendidikan
+			(id, pns_id, nip, created_at, updated_at, deleted_at) values
+			(1, 'id_1a', '1a', '2000-01-01', '2000-01-01', null);
+		
+		insert into riwayat_penghargaan_umum
+			(id, nip, created_at, updated_at, deleted_at) values
+			(1, '1a', '2000-01-01', '2000-01-01', null);
+		
+		insert into riwayat_penugasan
+			(id, nip, created_at, updated_at, deleted_at) values
+			(1, '1a', '2000-01-01', '2000-01-01', null);
+		
+		insert into riwayat_pindah_unit_kerja
+			(id, pns_nip, pns_nama, created_at, updated_at, deleted_at) values
+			(1, '1a', 'User 1a', '2000-01-01', '2000-01-01', null);
+		
+		insert into riwayat_sertifikasi
+			(id, nip, created_at, updated_at, deleted_at) values
+			(1, '1a', '2000-01-01', '2000-01-01', null);
+		
+		insert into riwayat_surat_keputusan
+			(id, nip_pemroses, created_at, updated_at, deleted_at) values
+			(1, '1a', '2000-01-01', '2000-01-01', null);
+		
+		insert into riwayat_uji_kompetensi
+			(id, nip_baru, created_at, updated_at, deleted_at) values
+			(1, '1a', '2000-01-01', '2000-01-01', null);
+		
+		-- Add test data for keluarga tables
+		insert into orang_tua
+			(id, pns_id, nip, nama, hubungan, agama_id, created_at, updated_at, deleted_at) values
+			(1, 'id_1a', '1a', 'Ayah User 1a', 1, 1, '2000-01-01', '2000-01-01', null);
+		
+		insert into pasangan
+			(id, pns_id, nip, nama, nik, status, agama_id, created_at, updated_at, deleted_at) values
+			(1, 'id_1a', '1a', 'Pasangan User 1a', '1234567890123456', 2, 1, '2000-01-01', '2000-01-01', null);
+		
+		insert into anak
+			(id, pns_id, nip, pasangan_id, nama, jenis_kelamin, tanggal_lahir, anak_ke, created_at, updated_at, deleted_at) values
+			(1, 'id_1a', '1a', 1, 'Anak User 1a', 'L', '2010-01-01', 1, '2000-01-01', '2000-01-01', null);
+	`
+	db := dbtest.New(t, dbmigrations.FS)
+	_, err := db.Exec(context.Background(), dbData)
+	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	authSvc := apitest.NewAuthService(api.Kode_Pegawai_Write)
+	RegisterRoutes(e, sqlc.New(db), db, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+
+	authHeader := []string{apitest.GenerateAuthHeader("2a")}
+	tests := []struct {
+		name             string
+		paramNIP         string
+		requestHeader    http.Header
+		requestBody      string
+		wantResponseCode int
+		wantResponseBody string
+		assertDB         func(t *testing.T, db *pgxpool.Pool)
+	}{
+		{
+			name:          "ok: update with all fields",
+			paramNIP:      "1c",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"nama": "Updated Name",
+				"gelar_depan": "Dr.",
+				"gelar_belakang": "M.Kom",
+				"nip": "1c",
+				"jenis_kelamin": "M",
+				"tanggal_lahir": "1990-01-01",
+				"nik": "1234567890123456",
+				"nomor_kk": "1234567890123456",
+				"tempat_lahir_id": "3101",
+				"tingkat_pendidikan_id": 1,
+				"pendidikan_id": "1",
+				"status_pernikahan_id": 2,
+				"agama_id": 1,
+				"jenis_pegawai_id": 1,
+				"masa_kerja_golongan": "10 Tahun 0 Bulan",
+				"jenis_jabatan_id": 1,
+				"jabatan_id": "1",
+				"unit_organisasi_id": "UNOR001",
+				"lokasi_kerja_id": "LOK001",
+				"golongan_ruang_awal_id": 1,
+				"golongan_ruang_akhir_id": 2,
+				"tmt_golongan": "2020-01-01",
+				"tmt_asn": "2015-01-01",
+				"nomor_sk_asn": "SK/CPNS/001/2015",
+				"status_pns": "PNS",
+				"email_dikbud": "user@kemdikbud.go.id",
+				"email_pribadi": "user@example.com",
+				"alamat": "Jl. Test No. 123",
+				"no_hp": "081234567890",
+				"no_kontak_darurat": "081234567891",
+				"nomor_surat_dokter": "DOK/001/2024",
+				"tanggal_surat_dokter": "2024-01-01",
+				"nomor_surat_bebas_narkoba": "NAR/001/2024",
+				"tanggal_surat_bebas_narkoba": "2024-01-01",
+				"nomor_catatan_polisi": "POL/001/2024",
+				"tanggal_catatan_polisi": "2024-01-01",
+				"akte_kelahiran": "AKTE/001/1990",
+				"nomor_bpjs": "0001234567890",
+				"npwp": "123456789012345",
+				"tanggal_npwp": "2015-01-01",
+				"nomor_taspen": "TASPEN001",
+				"mk_bulan": 6,
+				"mk_tahun": 5,
+				"mk_bulan_swasta": 3,
+				"mk_tahun_swasta": 2
+			}`,
+			wantResponseCode: http.StatusNoContent,
+			wantResponseBody: ``,
+			assertDB: func(t *testing.T, db *pgxpool.Pool) {
+				actualRows, err := dbtest.QueryWithClause(db, "pegawai", "where nip_baru = $1 AND deleted_at IS NULL", "1c")
+				require.NoError(t, err)
+				require.Len(t, actualRows, 1)
+
+				row := actualRows[0]
+				assert.Equal(t, "Updated Name", row["nama"])
+				assert.Equal(t, "Dr.", row["gelar_depan"])
+				assert.Equal(t, "M.Kom", row["gelar_belakang"])
+				assert.Equal(t, "M", row["jenis_kelamin"])
+				assert.Equal(t, "1234567890123456", row["nik"])
+				assert.Equal(t, "1234567890123456", row["kk"])
+				assert.Equal(t, "3101", row["tempat_lahir_id"])
+				assert.Equal(t, int16(1), row["tingkat_pendidikan_id"])
+				assert.Equal(t, "1", row["pendidikan_id"])
+				assert.Equal(t, int16(2), row["jenis_kawin_id"])
+				assert.Equal(t, int16(1), row["agama_id"])
+				assert.Equal(t, int16(1), row["jenis_pegawai_id"])
+				assert.Equal(t, "10 Tahun 0 Bulan", row["masa_kerja"])
+				assert.Equal(t, int16(1), row["jenis_jabatan_id"])
+				assert.Equal(t, "1", row["jabatan_instansi_id"])
+				assert.Equal(t, "UNOR001", row["unor_id"])
+				assert.Equal(t, "LOK001", row["lokasi_kerja_id"])
+				assert.Equal(t, int16(1), row["gol_awal_id"])
+				assert.Equal(t, int16(2), row["gol_id"])
+				assert.Equal(t, "SK/CPNS/001/2015", row["no_sk_cpns"])
+				assert.Equal(t, "PNS", row["status_cpns_pns"])
+				assert.Equal(t, "user@kemdikbud.go.id", row["email_dikbud"])
+				assert.Equal(t, "user@example.com", row["email"])
+				assert.Equal(t, "Jl. Test No. 123", row["alamat"])
+				assert.Equal(t, "081234567890", row["no_hp"])
+				assert.Equal(t, "081234567891", row["no_darurat"])
+				assert.Equal(t, int16(6), row["mk_bulan"])
+				assert.Equal(t, int16(5), row["mk_tahun"])
+				assert.Equal(t, int16(3), row["mk_bulan_swasta"])
+				assert.Equal(t, int16(2), row["mk_tahun_swasta"])
+			},
+		},
+		{
+			name:          "ok: update NIP and verify related tables",
+			paramNIP:      "1a",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"nama": "Updated User Name",
+				"gelar_depan": "",
+				"gelar_belakang": "",
+				"nip": "1e",
+				"jenis_kelamin": "M",
+				"tanggal_lahir": "1995-05-05",
+				"nik": "9876543210123456",
+				"nomor_kk": "1234567890123456",
+				"tempat_lahir_id": "3101",
+				"tingkat_pendidikan_id": 1,
+				"pendidikan_id": "1",
+				"status_pernikahan_id": 1,
+				"agama_id": 1,
+				"jenis_pegawai_id": 1,
+				"masa_kerja_golongan": "5 Tahun 0 Bulan",
+				"jenis_jabatan_id": 1,
+				"jabatan_id": "1",
+				"unit_organisasi_id": "UNOR001",
+				"lokasi_kerja_id": "LOK001",
+				"golongan_ruang_awal_id": 1,
+				"golongan_ruang_akhir_id": 1,
+				"tmt_golongan": "2020-01-01",
+				"tmt_asn": "2015-01-01",
+				"nomor_sk_asn": "SK001",
+				"status_pns": "PNS",
+				"email_dikbud": "updated@kemdikbud.go.id",
+				"email_pribadi": "updated@example.com",
+				"alamat": "Jl. Updated",
+				"no_hp": "081234567890",
+				"no_kontak_darurat": "081234567891",
+				"nomor_surat_dokter": "",
+				"tanggal_surat_dokter": "2024-01-01",
+				"nomor_surat_bebas_narkoba": "",
+				"tanggal_surat_bebas_narkoba": "2024-01-01",
+				"nomor_catatan_polisi": "",
+				"tanggal_catatan_polisi": "2024-01-01",
+				"akte_kelahiran": "",
+				"nomor_bpjs": "",
+				"npwp": "",
+				"tanggal_npwp": "2015-01-01",
+				"nomor_taspen": "",
+				"mk_bulan": 0,
+				"mk_tahun": 0,
+				"mk_bulan_swasta": 0,
+				"mk_tahun_swasta": 0
+			}`,
+			wantResponseCode: http.StatusNoContent,
+			wantResponseBody: ``,
+			assertDB: func(t *testing.T, db *pgxpool.Pool) {
+				pegawaiRows, err := dbtest.QueryWithClause(db, "pegawai", "where pns_id = $1 AND deleted_at IS NULL", "id_1a")
+				require.NoError(t, err)
+				require.Len(t, pegawaiRows, 1)
+				assert.Equal(t, "1e", pegawaiRows[0]["nip_baru"])
+				assert.Equal(t, "Updated User Name", pegawaiRows[0]["nama"])
+				assert.Equal(t, int16(0), pegawaiRows[0]["mk_bulan"])
+				assert.Equal(t, int16(0), pegawaiRows[0]["mk_tahun"])
+				assert.Equal(t, int16(0), pegawaiRows[0]["mk_bulan_swasta"])
+				assert.Equal(t, int16(0), pegawaiRows[0]["mk_tahun_swasta"])
+
+				asesmenRows, err := dbtest.QueryWithClause(db, "riwayat_asesmen", "where pns_id = $1 AND deleted_at IS NULL", "id_1a")
+				require.NoError(t, err)
+				require.Len(t, asesmenRows, 1)
+				assert.Equal(t, "1e", asesmenRows[0]["pns_nip"])
+				assert.Equal(t, "Updated User Name", asesmenRows[0]["nama_lengkap"])
+
+				// Verify riwayat_asesmen_nine_box was updated
+				nineBoxRows, err := dbtest.QueryWithClause(db, "riwayat_asesmen_nine_box", "where id = $1::int8 AND deleted_at IS NULL", "1")
+				require.NoError(t, err)
+				require.Len(t, nineBoxRows, 1)
+				assert.Equal(t, "1e", nineBoxRows[0]["pns_nip"])
+				assert.Equal(t, "Updated User Name", nineBoxRows[0]["nama"])
+
+				// Verify riwayat_diklat was updated
+				diklatRows, err := dbtest.QueryWithClause(db, "riwayat_diklat", "where pns_orang_id = $1 AND deleted_at IS NULL", "id_1a")
+				require.NoError(t, err)
+				require.Len(t, diklatRows, 1)
+				// assert.Equal(t, "1e", diklatRows[0]["nip_baru"])
+
+				// Verify riwayat_diklat_fungsional was updated
+				diklatFungsionalRows, err := dbtest.QueryWithClause(db, "riwayat_diklat_fungsional", "where id = $1 AND deleted_at IS NULL", "1")
+				require.NoError(t, err)
+				require.Len(t, diklatFungsionalRows, 1)
+				assert.Equal(t, "1e", diklatFungsionalRows[0]["nip_baru"])
+
+				// Verify riwayat_diklat_struktural was updated
+				diklatStrukturalRows, err := dbtest.QueryWithClause(db, "riwayat_diklat_struktural", "where pns_id = $1 AND deleted_at IS NULL", "id_1a")
+				require.NoError(t, err)
+				require.Len(t, diklatStrukturalRows, 1)
+				assert.Equal(t, "1e", diklatStrukturalRows[0]["pns_nip"])
+				assert.Equal(t, "Updated User Name", diklatStrukturalRows[0]["pns_nama"])
+
+				// Verify riwayat_golongan was updated
+				golonganRows, err := dbtest.QueryWithClause(db, "riwayat_golongan", "where pns_id = $1 AND deleted_at IS NULL", "id_1a")
+				require.NoError(t, err)
+				require.Len(t, golonganRows, 1)
+				assert.Equal(t, "1e", golonganRows[0]["pns_nip"])
+				assert.Equal(t, "Updated User Name", golonganRows[0]["pns_nama"])
+
+				// Verify riwayat_hukuman_disiplin was updated
+				hukumanRows, err := dbtest.QueryWithClause(db, "riwayat_hukuman_disiplin", "where id = $1::int8 AND deleted_at IS NULL", "1")
+				require.NoError(t, err)
+				require.Len(t, hukumanRows, 1)
+				assert.Equal(t, "1e", hukumanRows[0]["pns_nip"])
+				assert.Equal(t, "Updated User Name", hukumanRows[0]["nama"])
+
+				// Verify riwayat_jabatan was updated
+				jabatanRows, err := dbtest.QueryWithClause(db, "riwayat_jabatan", "where pns_id = $1 AND deleted_at IS NULL", "id_1a")
+				require.NoError(t, err)
+				require.Len(t, jabatanRows, 1)
+				assert.Equal(t, "1e", jabatanRows[0]["pns_nip"])
+				assert.Equal(t, "Updated User Name", jabatanRows[0]["pns_nama"])
+
+				// Verify riwayat_kenaikan_gaji_berkala was updated
+				kgbRows, err := dbtest.QueryWithClause(db, "riwayat_kenaikan_gaji_berkala", "where id = $1::int8 AND deleted_at IS NULL", "1")
+				require.NoError(t, err)
+				require.Len(t, kgbRows, 1)
+				assert.Equal(t, "1e", kgbRows[0]["pegawai_nip"])
+				assert.Equal(t, "Updated User Name", kgbRows[0]["pegawai_nama"])
+
+				// Verify riwayat_kinerja was updated
+				kinerjaRows, err := dbtest.QueryWithClause(db, "riwayat_kinerja", "where id = $1::int8 AND deleted_at IS NULL", "1")
+				require.NoError(t, err)
+				require.Len(t, kinerjaRows, 1)
+				assert.Equal(t, "1e", kinerjaRows[0]["nip"])
+				assert.Equal(t, "Updated User Name", kinerjaRows[0]["nama"])
+
+				// Verify riwayat_kursus was updated
+				kursusRows, err := dbtest.QueryWithClause(db, "riwayat_kursus", "where id = $1::int8 AND deleted_at IS NULL", "1")
+				require.NoError(t, err)
+				require.Len(t, kursusRows, 1)
+				assert.Equal(t, "1e", kursusRows[0]["pns_nip"])
+
+				// Verify riwayat_pendidikan was updated
+				pendidikanRows, err := dbtest.QueryWithClause(db, "riwayat_pendidikan", "where pns_id = $1 AND deleted_at IS NULL", "id_1a")
+				require.NoError(t, err)
+				require.Len(t, pendidikanRows, 1)
+				assert.Equal(t, "1e", pendidikanRows[0]["nip"])
+
+				// Verify riwayat_penghargaan_umum was updated
+				penghargaanRows, err := dbtest.QueryWithClause(db, "riwayat_penghargaan_umum", "where id = $1::int8 AND deleted_at IS NULL", "1")
+				require.NoError(t, err)
+				require.Len(t, penghargaanRows, 1)
+				assert.Equal(t, "1e", penghargaanRows[0]["nip"])
+
+				// Verify riwayat_penugasan was updated
+				penugasanRows, err := dbtest.QueryWithClause(db, "riwayat_penugasan", "where id = $1::int8 AND deleted_at IS NULL", "1")
+				require.NoError(t, err)
+				require.Len(t, penugasanRows, 1)
+				assert.Equal(t, "1e", penugasanRows[0]["nip"])
+
+				// Verify riwayat_pindah_unit_kerja was updated
+				pindahRows, err := dbtest.QueryWithClause(db, "riwayat_pindah_unit_kerja", "where id = $1::int8 AND deleted_at IS NULL", "1")
+				require.NoError(t, err)
+				require.Len(t, pindahRows, 1)
+				assert.Equal(t, "1e", pindahRows[0]["pns_nip"])
+				assert.Equal(t, "Updated User Name", pindahRows[0]["pns_nama"])
+
+				// Verify riwayat_sertifikasi was updated
+				sertifikasiRows, err := dbtest.QueryWithClause(db, "riwayat_sertifikasi", "where id = $1::int8 AND deleted_at IS NULL", "1")
+				require.NoError(t, err)
+				require.Len(t, sertifikasiRows, 1)
+				assert.Equal(t, "1e", sertifikasiRows[0]["nip"])
+
+				// Verify riwayat_surat_keputusan was updated
+				skRows, err := dbtest.QueryWithClause(db, "riwayat_surat_keputusan", "where id = $1::int8 AND deleted_at IS NULL", "1")
+				require.NoError(t, err)
+				require.Len(t, skRows, 1)
+				assert.Equal(t, "1e", skRows[0]["nip_pemroses"])
+
+				// Verify riwayat_uji_kompetensi was updated
+				kompetensiRows, err := dbtest.QueryWithClause(db, "riwayat_uji_kompetensi", "where id = $1::int8 AND deleted_at IS NULL", "1")
+				require.NoError(t, err)
+				require.Len(t, kompetensiRows, 1)
+				assert.Equal(t, "1e", kompetensiRows[0]["nip_baru"])
+
+				// Verify orang_tua was updated
+				orangTuaRows, err := dbtest.QueryWithClause(db, "orang_tua", "where id = $1::int8 AND deleted_at IS NULL", "1")
+				require.NoError(t, err)
+				require.Len(t, orangTuaRows, 1)
+				assert.Equal(t, "1e", orangTuaRows[0]["nip"])
+
+				// Verify pasangan was updated
+				pasanganRows, err := dbtest.QueryWithClause(db, "pasangan", "where id = $1::int8 AND deleted_at IS NULL", "1")
+				require.NoError(t, err)
+				require.Len(t, pasanganRows, 1)
+				assert.Equal(t, "1e", pasanganRows[0]["nip"])
+
+				// Verify anak was updated
+				anakRows, err := dbtest.QueryWithClause(db, "anak", "where id = $1::int8 AND deleted_at IS NULL", "1")
+				require.NoError(t, err)
+				require.Len(t, anakRows, 1)
+				assert.Equal(t, "1e", anakRows[0]["nip"])
+			},
+		},
+		{
+			name:          "error: pegawai not found",
+			paramNIP:      "999",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"nama": "Test",
+				"nip": "999",
+				"nik": "1234567890123456",
+				"email_dikbud": "test@kemdikbud.go.id"
+			}`,
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data tidak ditemukan"}`,
+		},
+		{
+			name:          "error: pegawai deleted",
+			paramNIP:      "1d",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"nama": "Test",
+				"nip": "1d",
+				"nik": "1234567890123456",
+				"email_dikbud": "test@kemdikbud.go.id"
+			}`,
+			wantResponseCode: http.StatusNotFound,
+			wantResponseBody: `{"message": "data tidak ditemukan"}`,
+		},
+		{
+			name:          "error: agama not found",
+			paramNIP:      "1c",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"nama": "Test",
+				"nip": "1c",
+				"nik": "1234567890123456",
+				"email_dikbud": "test@kemdikbud.go.id",
+				"agama_id": 999
+			}`,
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "data agama tidak ditemukan"}`,
+		},
+		{
+			name:          "error: agama deleted",
+			paramNIP:      "1c",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"nama": "Test",
+				"nip": "1c",
+				"nik": "1234567890123456",
+				"email_dikbud": "test@kemdikbud.go.id",
+				"agama_id": 3
+			}`,
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "data agama tidak ditemukan"}`,
+		},
+		{
+			name:          "error: golongan awal not found",
+			paramNIP:      "1c",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"nama": "Test",
+				"nip": "1c",
+				"nik": "1234567890123456",
+				"email_dikbud": "test@kemdikbud.go.id",
+				"golongan_ruang_awal_id": 999
+			}`,
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "data golongan awal tidak ditemukan"}`,
+		},
+		{
+			name:          "error: golongan akhir not found",
+			paramNIP:      "1c",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"nama": "Test",
+				"nip": "1c",
+				"nik": "1234567890123456",
+				"email_dikbud": "test@kemdikbud.go.id",
+				"golongan_ruang_akhir_id": 999
+			}`,
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "data golongan akhir tidak ditemukan"}`,
+		},
+		{
+			name:          "error: status pernikahan not found",
+			paramNIP:      "1c",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"nama": "Test",
+				"nip": "1c",
+				"nik": "1234567890123456",
+				"email_dikbud": "test@kemdikbud.go.id",
+				"status_pernikahan_id": 999
+			}`,
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "data status pernikahan tidak ditemukan"}`,
+		},
+		{
+			name:          "error: tingkat pendidikan not found",
+			paramNIP:      "1c",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"nama": "Test",
+				"nip": "1c",
+				"nik": "1234567890123456",
+				"email_dikbud": "test@kemdikbud.go.id",
+				"tingkat_pendidikan_id": 999
+			}`,
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "data tingkat pendidikan tidak ditemukan"}`,
+		},
+		{
+			name:          "error: jenis jabatan not found",
+			paramNIP:      "1c",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"nama": "Test",
+				"nip": "1c",
+				"nik": "1234567890123456",
+				"email_dikbud": "test@kemdikbud.go.id",
+				"jenis_jabatan_id": 999
+			}`,
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "data jenis jabatan tidak ditemukan"}`,
+		},
+		{
+			name:          "error: multiple validation errors",
+			paramNIP:      "1c",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestBody: `{
+				"nama": "Test",
+				"nip": "1c",
+				"nik": "1234567890123456",
+				"email_dikbud": "test@kemdikbud.go.id",
+				"agama_id": 999,
+				"golongan_ruang_awal_id": 999,
+				"status_pernikahan_id": 999
+			}`,
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "data agama tidak ditemukan | data golongan awal tidak ditemukan | data status pernikahan tidak ditemukan"}`,
+		},
+		{
+			name:             "error: empty body",
+			paramNIP:         "1c",
+			requestHeader:    http.Header{"Authorization": authHeader},
+			requestBody:      ``,
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "request body harus diisi"}`,
+		},
+		{
+			name:             "error: invalid json",
+			paramNIP:         "1c",
+			requestHeader:    http.Header{"Authorization": authHeader},
+			requestBody:      `{invalid json}`,
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message": "request body harus dalam format yang sesuai"}`,
+		},
+		{
+			name:             "error: invalid token",
+			paramNIP:         "1c",
+			requestHeader:    http.Header{"Authorization": []string{"Bearer invalid-token"}},
+			requestBody:      `{"nama": "Test", "nip": "1a"}`,
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			req := httptest.NewRequest(http.MethodPut, "/v1/admin/pegawai/"+tt.paramNIP, strings.NewReader(tt.requestBody))
+			req.Header = tt.requestHeader
+			if tt.requestBody != "" {
+				req.Header.Set("Content-Type", "application/json")
+			}
+			rec := httptest.NewRecorder()
+
+			e.ServeHTTP(rec, req)
+
+			if tt.wantResponseCode != rec.Code {
+				fmt.Printf("\n\n\n%s\n\n\n\n", rec.Body.String())
+			}
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			if tt.wantResponseBody != "" {
+				assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
+			}
+			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+
+			// Assert database state if assertDB is provided
+			if tt.assertDB != nil {
+				tt.assertDB(t, db)
+			}
 		})
 	}
 }

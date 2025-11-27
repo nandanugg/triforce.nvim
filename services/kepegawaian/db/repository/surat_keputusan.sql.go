@@ -598,6 +598,7 @@ SELECT
     p.nip_baru as nip_pemilik_sk,
     g.nama as nama_golongan_pemilik,
     g.nama_pangkat as pangkat_golongan_pemilik,
+    rj.nama_jabatan as jabatan_pemilik,
     fds.kategori AS kategori_sk,
     fds.no_sk,
     fds.tanggal_sk,
@@ -607,6 +608,7 @@ JOIN surat_keputusan fds ON fds.file_id = fdc.file_id AND fds.deleted_at IS NULL
 JOIN pegawai p ON fds.nip_sk = p.nip_baru AND p.deleted_at IS NULL
 LEFT JOIN ref_unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
 LEFT JOIN ref_golongan g ON p.gol_id = g.id AND g.deleted_at IS NULL
+LEFT JOIN ref_jabatan rj on p.jabatan_instansi_id = rj.kode_jabatan and rj.deleted_at is null
 WHERE fdc.deleted_at IS NULL
     AND ($3::VARCHAR IS NULL
         OR $3::VARCHAR = uk.id
@@ -650,6 +652,7 @@ type ListKoreksiSuratKeputusanByPNSIDRow struct {
 	NipPemilikSk           pgtype.Text `db:"nip_pemilik_sk"`
 	NamaGolonganPemilik    pgtype.Text `db:"nama_golongan_pemilik"`
 	PangkatGolonganPemilik pgtype.Text `db:"pangkat_golongan_pemilik"`
+	JabatanPemilik         pgtype.Text `db:"jabatan_pemilik"`
 	KategoriSk             pgtype.Text `db:"kategori_sk"`
 	NoSk                   pgtype.Text `db:"no_sk"`
 	TanggalSk              pgtype.Date `db:"tanggal_sk"`
@@ -683,6 +686,7 @@ func (q *Queries) ListKoreksiSuratKeputusanByPNSID(ctx context.Context, arg List
 			&i.NipPemilikSk,
 			&i.NamaGolonganPemilik,
 			&i.PangkatGolonganPemilik,
+			&i.JabatanPemilik,
 			&i.KategoriSk,
 			&i.NoSk,
 			&i.TanggalSk,
@@ -882,10 +886,15 @@ SELECT
     fds.no_sk,
     fds.tanggal_sk,
     p.unor_id,
-    fds.status_sk
+    fds.status_sk,
+    rj.nama_jabatan as jabatan_pemilik,
+    rg.nama as golongan_pemilik,
+    rg.nama_pangkat as pangkat_golongan_pemilik
 FROM surat_keputusan fds
 JOIN pegawai p ON fds.nip_sk = p.nip_baru AND p.deleted_at IS NULL
 LEFT JOIN ref_unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
+LEFT JOIN ref_jabatan rj ON rj.kode_jabatan = p.jabatan_instansi_id AND rj.deleted_at IS NULL
+LEFT JOIN ref_golongan rg on rg.id = p.gol_id and rg.deleted_at is null
 WHERE fds.deleted_at IS NULL
     AND ($3::VARCHAR IS NULL
         OR $3::VARCHAR = uk.id
@@ -921,14 +930,17 @@ type ListSuratKeputusanParams struct {
 }
 
 type ListSuratKeputusanRow struct {
-	FileID        string      `db:"file_id"`
-	NamaPemilikSk pgtype.Text `db:"nama_pemilik_sk"`
-	NipPemilikSk  pgtype.Text `db:"nip_pemilik_sk"`
-	KategoriSk    pgtype.Text `db:"kategori_sk"`
-	NoSk          pgtype.Text `db:"no_sk"`
-	TanggalSk     pgtype.Date `db:"tanggal_sk"`
-	UnorID        pgtype.Text `db:"unor_id"`
-	StatusSk      pgtype.Int2 `db:"status_sk"`
+	FileID                 string      `db:"file_id"`
+	NamaPemilikSk          pgtype.Text `db:"nama_pemilik_sk"`
+	NipPemilikSk           pgtype.Text `db:"nip_pemilik_sk"`
+	KategoriSk             pgtype.Text `db:"kategori_sk"`
+	NoSk                   pgtype.Text `db:"no_sk"`
+	TanggalSk              pgtype.Date `db:"tanggal_sk"`
+	UnorID                 pgtype.Text `db:"unor_id"`
+	StatusSk               pgtype.Int2 `db:"status_sk"`
+	JabatanPemilik         pgtype.Text `db:"jabatan_pemilik"`
+	GolonganPemilik        pgtype.Text `db:"golongan_pemilik"`
+	PangkatGolonganPemilik pgtype.Text `db:"pangkat_golongan_pemilik"`
 }
 
 func (q *Queries) ListSuratKeputusan(ctx context.Context, arg ListSuratKeputusanParams) ([]ListSuratKeputusanRow, error) {
@@ -961,6 +973,9 @@ func (q *Queries) ListSuratKeputusan(ctx context.Context, arg ListSuratKeputusan
 			&i.TanggalSk,
 			&i.UnorID,
 			&i.StatusSk,
+			&i.JabatanPemilik,
+			&i.GolonganPemilik,
+			&i.PangkatGolonganPemilik,
 		); err != nil {
 			return nil, err
 		}
@@ -1098,6 +1113,7 @@ SELECT
     p.nip_baru as nip_pemilik_sk,
     g.nama as nama_golongan_pemilik,
     g.nama_pangkat as pangkat_golongan_pemilik,
+    rj.nama_jabatan as jabatan_pemilik,
     fds.kategori AS kategori_sk,
     fds.no_sk,
     fds.tanggal_sk,
@@ -1106,6 +1122,7 @@ FROM surat_keputusan fds
 JOIN pegawai p ON fds.nip_sk = p.nip_baru AND p.deleted_at IS NULL
 LEFT JOIN ref_unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
 LEFT JOIN ref_golongan g ON p.gol_id = g.id AND g.deleted_at IS NULL
+LEFT JOIN ref_jabatan rj on p.jabatan_instansi_id = rj.kode_jabatan and rj.deleted_at is null
 WHERE fds.deleted_at IS NULL
     AND ($3::VARCHAR IS NULL
         OR $3::VARCHAR = uk.id
@@ -1147,6 +1164,7 @@ type ListTandaTanganSuratKeputusanByPNSIDRow struct {
 	NipPemilikSk           pgtype.Text `db:"nip_pemilik_sk"`
 	NamaGolonganPemilik    pgtype.Text `db:"nama_golongan_pemilik"`
 	PangkatGolonganPemilik pgtype.Text `db:"pangkat_golongan_pemilik"`
+	JabatanPemilik         pgtype.Text `db:"jabatan_pemilik"`
 	KategoriSk             pgtype.Text `db:"kategori_sk"`
 	NoSk                   pgtype.Text `db:"no_sk"`
 	TanggalSk              pgtype.Date `db:"tanggal_sk"`
@@ -1180,6 +1198,7 @@ func (q *Queries) ListTandaTanganSuratKeputusanByPNSID(ctx context.Context, arg 
 			&i.NipPemilikSk,
 			&i.NamaGolonganPemilik,
 			&i.PangkatGolonganPemilik,
+			&i.JabatanPemilik,
 			&i.KategoriSk,
 			&i.NoSk,
 			&i.TanggalSk,
@@ -1241,6 +1260,27 @@ func (q *Queries) UpdateKorektorSuratKeputusanByID(ctx context.Context, arg Upda
 	return err
 }
 
+const updateRiwayatSuratKeputusanNamaNipPemrosesByNIP = `-- name: UpdateRiwayatSuratKeputusanNamaNipPemrosesByNIP :exec
+UPDATE riwayat_surat_keputusan
+SET
+    nip_pemroses = $1::varchar,
+    updated_at = now()
+WHERE nip_pemroses = $2::varchar AND deleted_at IS NULL
+AND (
+        ($1::varchar IS NOT NULL AND $1::varchar IS DISTINCT FROM nip_pemroses)
+    )
+`
+
+type UpdateRiwayatSuratKeputusanNamaNipPemrosesByNIPParams struct {
+	NipBaru string `db:"nip_baru"`
+	Nip     string `db:"nip"`
+}
+
+func (q *Queries) UpdateRiwayatSuratKeputusanNamaNipPemrosesByNIP(ctx context.Context, arg UpdateRiwayatSuratKeputusanNamaNipPemrosesByNIPParams) error {
+	_, err := q.db.Exec(ctx, updateRiwayatSuratKeputusanNamaNipPemrosesByNIP, arg.NipBaru, arg.Nip)
+	return err
+}
+
 const updateStatusSuratKeputusanByID = `-- name: UpdateStatusSuratKeputusanByID :exec
 UPDATE 
     surat_keputusan
@@ -1272,5 +1312,50 @@ func (q *Queries) UpdateStatusSuratKeputusanByID(ctx context.Context, arg Update
 		arg.Catatan,
 		arg.ID,
 	)
+	return err
+}
+
+const updateSuratKeputusanNamaNipPemilikByNIP = `-- name: UpdateSuratKeputusanNamaNipPemilikByNIP :exec
+UPDATE surat_keputusan
+SET 
+    nip_sk = $1::varchar,
+    nama_pemilik_sk = $2::varchar,
+    updated_at = now()
+WHERE nip_sk = $3::varchar AND deleted_at IS NULL
+AND (
+    ($1::varchar IS NOT NULL AND $1::varchar IS DISTINCT FROM nip_sk)
+    OR ($2::varchar IS NOT NULL AND $2::varchar IS DISTINCT FROM nama_pemilik_sk)
+)
+`
+
+type UpdateSuratKeputusanNamaNipPemilikByNIPParams struct {
+	NipBaru string `db:"nip_baru"`
+	Nama    string `db:"nama"`
+	Nip     string `db:"nip"`
+}
+
+func (q *Queries) UpdateSuratKeputusanNamaNipPemilikByNIP(ctx context.Context, arg UpdateSuratKeputusanNamaNipPemilikByNIPParams) error {
+	_, err := q.db.Exec(ctx, updateSuratKeputusanNamaNipPemilikByNIP, arg.NipBaru, arg.Nama, arg.Nip)
+	return err
+}
+
+const updateSuratKeputusanNipPemrosesByNIP = `-- name: UpdateSuratKeputusanNipPemrosesByNIP :exec
+UPDATE surat_keputusan
+SET 
+    nip_pemroses = $1::varchar,
+    updated_at = now()
+WHERE nip_pemroses = $2::varchar AND deleted_at IS NULL
+AND (
+    ($1::varchar IS NOT NULL AND $1::varchar IS DISTINCT FROM nip_pemroses)
+)
+`
+
+type UpdateSuratKeputusanNipPemrosesByNIPParams struct {
+	NipBaru string `db:"nip_baru"`
+	Nip     string `db:"nip"`
+}
+
+func (q *Queries) UpdateSuratKeputusanNipPemrosesByNIP(ctx context.Context, arg UpdateSuratKeputusanNipPemrosesByNIPParams) error {
+	_, err := q.db.Exec(ctx, updateSuratKeputusanNipPemrosesByNIP, arg.NipBaru, arg.Nip)
 	return err
 }

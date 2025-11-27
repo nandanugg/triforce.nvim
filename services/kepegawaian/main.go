@@ -45,6 +45,7 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/template"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/tingkatpendidikan"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/unitkerja"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/usulanperubahandata"
 )
 
 func main() {
@@ -67,6 +68,8 @@ func main() {
 
 	bsreClient := bsre.New(c.BSRE.Host, c.BSRE.BasicAuthUsername, c.BSRE.BasicAuthPassword)
 
+	svcRoute := usulanperubahandata.RegisterRoutes(e, db, dbRepository, mwAuth)
+
 	agama.RegisterRoutes(e, dbRepository, mwAuth)
 	datapribadi.RegisterRoutes(e, dbRepository, mwAuth)
 	golongan.RegisterRoutes(e, dbRepository, mwAuth)
@@ -82,19 +85,19 @@ func main() {
 	jenissatker.RegisterRoutes(e, dbRepository, mwAuth)
 	keluarga.RegisterRoutes(e, dbRepository, mwAuth)
 	template.RegisterRoutes(e, dbRepository, mwAuth)
-	pegawai.RegisterRoutes(e, dbRepository, mwAuth)
+	pegawai.RegisterRoutes(e, dbRepository, db, mwAuth)
 	pendidikan.RegisterRoutes(e, dbRepository, mwAuth)
 	riwayatasesmenninebox.RegisterRoutes(e, dbRepository, mwAuth)
 	riwayathukumandisiplin.RegisterRoutes(e, dbRepository, mwAuth)
 	riwayatjabatan.RegisterRoutes(e, dbRepository, mwAuth)
 	riwayatkenaikangajiberkala.RegisterRoutes(e, dbRepository, mwAuth)
-	riwayatkepangkatan.RegisterRoutes(e, dbRepository, mwAuth)
+	riwayatkepangkatan.RegisterRoutes(e, dbRepository, mwAuth, svcRoute)
 	riwayatkinerja.RegisterRoutes(e, dbRepository, mwAuth)
 	riwayatpelatihanfungsional.RegisterRoutes(e, dbRepository, mwAuth)
 	riwayatpelatihansiasn.RegisterRoutes(e, dbRepository, mwAuth)
 	riwayatpelatihanstruktural.RegisterRoutes(e, dbRepository, mwAuth)
 	riwayatpelatihanteknis.RegisterRoutes(e, dbRepository, mwAuth)
-	riwayatpendidikan.RegisterRoutes(e, dbRepository, mwAuth)
+	riwayatpendidikan.RegisterRoutes(e, dbRepository, mwAuth, svcRoute)
 	riwayatpenghargaan.RegisterRoutes(e, dbRepository, mwAuth)
 	riwayatpenugasan.RegisterRoutes(e, dbRepository, mwAuth)
 	riwayatsertifikasi.RegisterRoutes(e, dbRepository, mwAuth)

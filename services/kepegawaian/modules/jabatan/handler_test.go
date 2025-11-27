@@ -296,18 +296,19 @@ func Test_handler_adminCreateJabatan(t *testing.T) {
 			wantResponseBody: `{"data": {"kode": "K001", "nama": "Jabatan A", "nama_full": "Jabatan A Full", "jenis": 1, "kelas": 2, "pensiun": 60, "kode_bkn": "BKN101", "nama_bkn": "Jabatan A BKN", "kategori": "Struktural", "bkn_id": "BKNID101", "tunjangan" : 1000000}}`,
 		},
 		{
-			name:        "ok: create jabatan with minimalis data",
+			name:        "error: create jabatan with missing required data",
 			requestBody: `{"kode_jabatan": "K002", "nama_jabatan": "Jabatan A", "nama_jabatan_full": "Jabatan A Full"}`,
 			requestHeader: http.Header{
 				"Authorization": authHeader,
 				"Content-Type":  []string{"application/json"},
 			},
-			wantResponseCode: http.StatusCreated,
-			wantResponseBody: `{"data": {"kode": "K002", "nama": "Jabatan A", "nama_full": "Jabatan A Full", "jenis": null, "kelas": null, "pensiun": null, "kode_bkn": "", "nama_bkn": "", "kategori": "", "bkn_id": "", "tunjangan" : 0}}`,
+			wantResponseCode: http.StatusBadRequest,
+			wantResponseBody: `{"message" : "parameter \"jenis_jabatan\" harus diisi | parameter \"kelas\" harus diisi | parameter \"pensiun\" harus diisi | parameter \"kode_bkn\" harus diisi | parameter \"nama_jabatan_bkn\" harus diisi | parameter \"kategori_jabatan\" harus diisi | parameter \"bkn_id\" harus diisi | parameter \"tunjangan_jabatan\" harus diisi"}`,
 		},
+
 		{
 			name:        "error: create jabatan with kode jabatan already exists",
-			requestBody: `{"kode_jabatan": "K099", "nama_jabatan": "Jabatan A", "nama_jabatan_full": "Jabatan A Full"}`,
+			requestBody: `{"kode_jabatan": "K099", "nama_jabatan": "Jabatan A", "nama_jabatan_full": "Jabatan A Full", "jenis_jabatan": 1, "kelas": 2, "pensiun": 60, "kode_bkn": "BKN101", "nama_jabatan_bkn": "Jabatan A BKN", "kategori_jabatan": "Struktural", "bkn_id": "BKNID101", "tunjangan_jabatan" : 1000000}`,
 			requestHeader: http.Header{
 				"Authorization": authHeader,
 				"Content-Type":  []string{"application/json"},
@@ -317,7 +318,7 @@ func Test_handler_adminCreateJabatan(t *testing.T) {
 		},
 		{
 			name:        "error: create jabatan pensiun out of range",
-			requestBody: `{"kode_jabatan": "K001", "nama_jabatan": "Jabatan A", "nama_jabatan_full": "Jabatan A Full", "pensiun" : 101}`,
+			requestBody: `{"kode_jabatan": "K001", "nama_jabatan": "Jabatan A", "nama_jabatan_full": "Jabatan A Full", "jenis_jabatan": 1, "kelas": 2, "pensiun": 101, "kode_bkn": "BKN101", "nama_jabatan_bkn": "Jabatan A BKN", "kategori_jabatan": "Struktural", "bkn_id": "BKNID101", "tunjangan_jabatan" : 1000000}`,
 			requestHeader: http.Header{
 				"Authorization": authHeader,
 				"Content-Type":  []string{"application/json"},

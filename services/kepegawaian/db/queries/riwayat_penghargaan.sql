@@ -22,6 +22,15 @@ WHERE nip = $1
   AND rpu.id = $2
   AND rpu.deleted_at is null;
 
+-- name: UpdateRiwayatPenghargaanNamaNipByNIP :exec
+UPDATE riwayat_penghargaan_umum
+SET     
+    nip = @nip_baru::varchar,
+    updated_at = now()
+WHERE nip = @nip::varchar AND deleted_at IS NULL
+AND (
+    (@nip_baru::varchar IS NOT NULL AND @nip_baru::varchar IS DISTINCT FROM nip)
+);
 -- name: CreateRiwayatPenghargaan :one
 insert into 
     riwayat_penghargaan_umum (nip, nama_penghargaan, jenis_penghargaan, deskripsi_penghargaan, tanggal_penghargaan) 
@@ -36,13 +45,15 @@ set
     nama_penghargaan = $3,
     jenis_penghargaan = $4,
     deskripsi_penghargaan = $5,
-    tanggal_penghargaan = $6
+    tanggal_penghargaan = $6,
+    updated_at = now()
 where id = $1 AND deleted_at IS NULL;
 
 -- name: UpdateRiwayatPenghargaanBerkas :execrows
 update riwayat_penghargaan_umum
 set
-    file_base64 = @file_base64
+    file_base64 = @file_base64,
+    updated_at = now()
 where id = @id AND nip = @nip::varchar AND riwayat_penghargaan_umum.deleted_at IS NULL;
 
 -- name: DeleteRiwayatPenghargaan :execrows

@@ -142,3 +142,17 @@ update riwayat_kenaikan_gaji_berkala set
     file_base64 = @file_base64,
     updated_at = now()
 where id = @id and pegawai_id = @pegawai_id and deleted_at is null;
+
+-- name: UpdateRiwayatKenaikanGajiBerkalaNamaNipByPNSID :exec
+UPDATE riwayat_kenaikan_gaji_berkala
+SET 
+    pegawai_nama = @nama::varchar,
+    pegawai_nip = @nip_baru::varchar,
+    tanggal_lahir = @tanggal_lahir::date,
+    updated_at = now()
+WHERE pegawai_nip = @nip::varchar AND deleted_at IS NULL
+AND (
+    (@nip_baru::varchar IS NOT NULL AND @nip_baru::varchar IS DISTINCT FROM pegawai_nip)
+    OR (@nama::varchar IS NOT NULL AND @nama::varchar IS DISTINCT FROM pegawai_nama)
+    OR (@tanggal_lahir::date IS NOT NULL AND @tanggal_lahir::date IS DISTINCT FROM tanggal_lahir)
+);

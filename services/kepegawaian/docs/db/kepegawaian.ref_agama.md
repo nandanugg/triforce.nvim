@@ -25,6 +25,7 @@ Referensi agama
 | Name | Definition |
 | ---- | ---------- |
 | ref_agama_pkey | CREATE UNIQUE INDEX ref_agama_pkey ON kepegawaian.ref_agama USING btree (id) |
+| agama_nama_unique_idx | CREATE UNIQUE INDEX agama_nama_unique_idx ON kepegawaian.ref_agama USING btree (lower((nama)::text)) WHERE (deleted_at IS NULL) |
 
 ## Relations
 
