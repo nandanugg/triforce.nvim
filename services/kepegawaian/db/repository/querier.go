@@ -140,6 +140,7 @@ type Querier interface {
 	GetRefJenisSatker(ctx context.Context, id int32) (GetRefJenisSatkerRow, error)
 	GetRefPendidikan(ctx context.Context, id string) (GetRefPendidikanRow, error)
 	GetRefTingkatPendidikan(ctx context.Context, id int32) (GetRefTingkatPendidikanRow, error)
+	GetRiwayatKepangkatan(ctx context.Context, arg GetRiwayatKepangkatanParams) (GetRiwayatKepangkatanRow, error)
 	GetRiwayatPendidikan(ctx context.Context, arg GetRiwayatPendidikanParams) (GetRiwayatPendidikanRow, error)
 	GetSuratKeputusanByID(ctx context.Context, id string) (GetSuratKeputusanByIDRow, error)
 	GetSuratKeputusanByNIPAndID(ctx context.Context, arg GetSuratKeputusanByNIPAndIDParams) (GetSuratKeputusanByNIPAndIDRow, error)

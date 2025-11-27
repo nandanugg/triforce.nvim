@@ -109,6 +109,75 @@ func (q *Queries) GetBerkasRiwayatKepangkatan(ctx context.Context, arg GetBerkas
 	return file_base64, err
 }
 
+const getRiwayatKepangkatan = `-- name: GetRiwayatKepangkatan :one
+select
+    rg.id,
+    rg.jenis_kp_id,
+    jkp.nama as nama_jenis_kp,
+    rg.golongan_id,
+    g.nama as nama_golongan,
+    g.nama_pangkat as nama_golongan_pangkat,
+    rg.tmt_golongan,
+    rg.sk_nomor,
+    rg.sk_tanggal,
+    rg.mk_golongan_tahun,
+    rg.mk_golongan_bulan,
+    rg.no_bkn,
+    rg.tanggal_bkn,
+    rg.jumlah_angka_kredit_tambahan,
+    rg.jumlah_angka_kredit_utama
+from riwayat_golongan rg
+left join ref_jenis_kenaikan_pangkat jkp on rg.jenis_kp_id = jkp.id and jkp.deleted_at is null
+left join ref_golongan g on rg.golongan_id = g.id and g.deleted_at is null
+where rg.pns_nip = $1::varchar and rg.id = $2 and rg.deleted_at is null
+`
+
+type GetRiwayatKepangkatanParams struct {
+	PnsNip string `db:"pns_nip"`
+	ID     string `db:"id"`
+}
+
+type GetRiwayatKepangkatanRow struct {
+	ID                        string      `db:"id"`
+	JenisKpID                 pgtype.Int4 `db:"jenis_kp_id"`
+	NamaJenisKp               pgtype.Text `db:"nama_jenis_kp"`
+	GolonganID                pgtype.Int2 `db:"golongan_id"`
+	NamaGolongan              pgtype.Text `db:"nama_golongan"`
+	NamaGolonganPangkat       pgtype.Text `db:"nama_golongan_pangkat"`
+	TmtGolongan               pgtype.Date `db:"tmt_golongan"`
+	SkNomor                   pgtype.Text `db:"sk_nomor"`
+	SkTanggal                 pgtype.Date `db:"sk_tanggal"`
+	MkGolonganTahun           pgtype.Int2 `db:"mk_golongan_tahun"`
+	MkGolonganBulan           pgtype.Int2 `db:"mk_golongan_bulan"`
+	NoBkn                     pgtype.Text `db:"no_bkn"`
+	TanggalBkn                pgtype.Date `db:"tanggal_bkn"`
+	JumlahAngkaKreditTambahan pgtype.Int4 `db:"jumlah_angka_kredit_tambahan"`
+	JumlahAngkaKreditUtama    pgtype.Int4 `db:"jumlah_angka_kredit_utama"`
+}
+
+func (q *Queries) GetRiwayatKepangkatan(ctx context.Context, arg GetRiwayatKepangkatanParams) (GetRiwayatKepangkatanRow, error) {
+	row := q.db.QueryRow(ctx, getRiwayatKepangkatan, arg.PnsNip, arg.ID)
+	var i GetRiwayatKepangkatanRow
+	err := row.Scan(
+		&i.ID,
+		&i.JenisKpID,
+		&i.NamaJenisKp,
+		&i.GolonganID,
+		&i.NamaGolongan,
+		&i.NamaGolonganPangkat,
+		&i.TmtGolongan,
+		&i.SkNomor,
+		&i.SkTanggal,
+		&i.MkGolonganTahun,
+		&i.MkGolonganBulan,
+		&i.NoBkn,
+		&i.TanggalBkn,
+		&i.JumlahAngkaKreditTambahan,
+		&i.JumlahAngkaKreditUtama,
+	)
+	return i, err
+}
+
 const listRiwayatKepangkatan = `-- name: ListRiwayatKepangkatan :many
 select
     rg.id,

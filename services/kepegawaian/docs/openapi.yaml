@@ -816,7 +816,7 @@ paths:
                 - kategori_jabatan
                 - bkn_id
                 - tunjangan_jabatan
-                
+
       responses:
         "201":
           description: Jabatan berhasil dibuat.
@@ -6371,6 +6371,128 @@ paths:
           $ref: "#/components/responses/notFound"
         "422":
           $ref: "#/components/responses/unprocessableContent"
+  /v1/usulan-perubahan-data/riwayat-kepangkatan:
+    get:
+      tags:
+        - Riwayat Kepangkatan
+        - Usulan Perubahan Data
+      summary: Lihat daftar usulan perubahan data riwayat kepangkatan pegawai.
+      description: Lihat daftar usulan perubahan data riwayat kepangkatan pegawai.
+      operationId: listUsulanPerubahanDataRiwayatKepangkatan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/usulanPerubahanDataDefault'
+                        - type: object
+                          properties:
+                            perubahan_data:
+                              type: object
+                              additionalProperties: false
+                              properties:
+                                jenis_kp_id:
+                                  $ref: '#/components/schemas/beforeAfterInt'
+                                nama_jenis_kp:
+                                  $ref: '#/components/schemas/beforeAfterString'
+                                golongan_id:
+                                  $ref: '#/components/schemas/beforeAfterInt'
+                                nama_golongan:
+                                  $ref: '#/components/schemas/beforeAfterString'
+                                nama_golongan_pangkat:
+                                  $ref: '#/components/schemas/beforeAfterString'
+                                tmt_golongan:
+                                  $ref: '#/components/schemas/beforeAfterDate'
+                                nomor_sk:
+                                  $ref: '#/components/schemas/beforeAfterString'
+                                tanggal_sk:
+                                  $ref: '#/components/schemas/beforeAfterDate'
+                                nomor_bkn:
+                                  $ref: '#/components/schemas/beforeAfterString'
+                                tanggal_bkn:
+                                  $ref: '#/components/schemas/beforeAfterDate'
+                                masa_kerja_golongan_tahun:
+                                  $ref: '#/components/schemas/beforeAfterInt'
+                                masa_kerja_golongan_bulan:
+                                  $ref: '#/components/schemas/beforeAfterInt'
+                                jumlah_angka_kredit_utama:
+                                  $ref: '#/components/schemas/beforeAfterInt'
+                                jumlah_angka_kredit_tambahan:
+                                  $ref: '#/components/schemas/beforeAfterInt'
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+    post:
+      tags:
+        - Riwayat Kepangkatan
+        - Usulan Perubahan Data
+      summary: Usulan perubahan data riwayat kepangkatan pegawai.
+      description: Usulan perubahan data riwayat kepangkatan pegawai.
+      operationId: createUsulanPerubahanDataRiwayatKepangkatan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - title: CREATE
+                  type: object
+                  additionalProperties: false
+                  properties:
+                    action:
+                      type: string
+                      enum: ["CREATE"]
+                    data:
+                      $ref: "#/components/schemas/riwayatKepangkatanRequest"
+                  required:
+                    - action
+                    - data
+                - title: UPDATE
+                  type: object
+                  additionalProperties: false
+                  properties:
+                    action:
+                      type: string
+                      enum: ["UPDATE"]
+                    data_id:
+                      type: string
+                    data:
+                      $ref: "#/components/schemas/riwayatKepangkatanRequest"
+                  required:
+                    - action
+                    - data_id
+                    - data
+                - title: DELETE
+                  type: object
+                  additionalProperties: false
+                  properties:
+                    action:
+                      type: string
+                      enum: ["DELETE"]
+                    data_id:
+                      type: string
+                  required:
+                    - action
+                    - data_id
+      responses:
+        "204":
+          description: Sukses.
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "409":
+          $ref: "#/components/responses/conflict"
   /v1/usulan-perubahan-data/riwayat-pendidikan:
     get:
       tags:
@@ -7363,46 +7485,7 @@ components:
       content:
         application/json:
           schema:
-            additionalProperties: false
-            properties:
-              jenis_kp_id:
-                type: integer
-                nullable: true
-              golongan_id:
-                type: integer
-              tmt_golongan:
-                type: string
-                format: date
-                nullable: true
-              nomor_sk:
-                type: string
-                maxLength: 100
-              tanggal_sk:
-                type: string
-                format: date
-              nomor_bkn:
-                type: string
-                maxLength: 100
-              tanggal_bkn:
-                type: string
-                format: date
-                nullable: true
-              masa_kerja_golongan_tahun:
-                type: integer
-              masa_kerja_golongan_bulan:
-                type: integer
-              jumlah_angka_kredit_utama:
-                type: integer
-                nullable: true
-              jumlah_angka_kredit_tambahan:
-                type: integer
-                nullable: true
-            required:
-              - golongan_id
-              - nomor_sk
-              - tanggal_sk
-              - masa_kerja_golongan_tahun
-              - masa_kerja_golongan_bulan
+            $ref: "#/components/schemas/riwayatKepangkatanRequest"
     riwayatPendidikan:
       required: true
       content:
@@ -7512,7 +7595,7 @@ components:
               jenis_penghargaan:
                 type: string
                 minLength: 1
-                enum: 
+                enum:
                   - "Internasional"
                   - "Unit Kerja (eselon 2 ke bawah)"
                   - "Unit Utama"
@@ -8348,6 +8431,47 @@ components:
         jumlah_angka_kredit_utama:
           type: integer
           nullable: true
+    riwayatKepangkatanRequest:
+      additionalProperties: false
+      properties:
+        jenis_kp_id:
+          type: integer
+          nullable: true
+        golongan_id:
+          type: integer
+        tmt_golongan:
+          type: string
+          format: date
+          nullable: true
+        nomor_sk:
+          type: string
+          maxLength: 100
+        tanggal_sk:
+          type: string
+          format: date
+        nomor_bkn:
+          type: string
+          maxLength: 100
+        tanggal_bkn:
+          type: string
+          format: date
+          nullable: true
+        masa_kerja_golongan_tahun:
+          type: integer
+        masa_kerja_golongan_bulan:
+          type: integer
+        jumlah_angka_kredit_utama:
+          type: integer
+          nullable: true
+        jumlah_angka_kredit_tambahan:
+          type: integer
+          nullable: true
+      required:
+        - golongan_id
+        - nomor_sk
+        - tanggal_sk
+        - masa_kerja_golongan_tahun
+        - masa_kerja_golongan_bulan
     riwayatPenghargaan:
       type: object
       additionalProperties: false

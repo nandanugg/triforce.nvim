@@ -1565,11 +1565,13 @@ type RiwayatUjiKompetensi struct {
 }
 
 type S3File struct {
-	ID        int64              `db:"id"`
-	ObjectKey pgtype.Text        `db:"object_key"`
-	CreatedAt pgtype.Timestamptz `db:"created_at"`
-	UpdatedAt pgtype.Timestamptz `db:"updated_at"`
-	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
+	ID          int64              `db:"id"`
+	ObjectKey   string             `db:"object_key"`
+	CreatedAt   pgtype.Timestamptz `db:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `db:"updated_at"`
+	DeletedAt   pgtype.Timestamptz `db:"deleted_at"`
+	NipUploader string             `db:"nip_uploader"`
+	IsUsed      bool               `db:"is_used"`
 }
 
 type SuratKeputusan struct {

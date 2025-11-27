@@ -2020,7 +2020,9 @@ func Test_handler_usulanPerubahanData(t *testing.T) {
 			('id_1c', '1c'),
 			('id_1d', '1d'),
 			('id_1e', '1e'),
-			('id_1f', '1f');
+			('id_1f', '1f'),
+			('id_1g', '1g'),
+			('id_1h', '1h');
 		insert into ref_pendidikan
 			(id,  nama,   deleted_at) values
 			('1', 'PD 1', null),
@@ -2038,6 +2040,10 @@ func Test_handler_usulanPerubahanData(t *testing.T) {
 			(tingkat_pendidikan_id, pendidikan_id, no_ijazah, nama_sekolah, tahun_lulus, gelar_depan, gelar_belakang, tugas_belajar, negara_sekolah, pendidikan_pertama, pendidikan_terakhir, diakui_bkn, status_satker, status_biro, tanggal_lulus, file_base64, keterangan_berkas, pns_id_3, pendidikan_id_3, pns_id,  nip,  created_at,   updated_at) values
 			(2,                     2,             'IZ1',     'ITB',        2000,        'Dr.',       'S.Kom',        1,             'Dalam Negeri', '1',                1,                   1,          1,             1,           '2020-01-01',  'data:abc',  'abc',             '1a',     '2',             'id_1d', '1d', '2000-01-01', '2000-01-01'),
 			(1,                     1,             'IZ1',     'ITB',        2000,        'Dr.',       'S.Kom',        2,             'Luar Negeri',  '1',                1,                   1,          1,             1,           '2020-01-01',  'data:abc',  'abc',             '1a',     '2',             'id_1e', '1e', '2000-01-01', '2000-01-01');
+		insert into riwayat_pendidikan
+			(nama_sekolah, pns_id,  nip,  created_at,   updated_at) values
+			('UI',         'id_1g', '1g', '2000-01-01', '2000-01-01'),
+			('UI',         'id_1h', '1h', '2000-01-01', '2000-01-01');
 	`
 	db := dbtest.New(t, dbmigrations.FS)
 	_, err := db.Exec(context.Background(), dbData)
@@ -2453,7 +2459,7 @@ func Test_handler_usulanPerubahanData(t *testing.T) {
 			},
 		},
 		{
-			name:          "ok: rollback on usulan perubahan data should not sync perubahan data",
+			name:          "ok: rollback on usulan perubahan data should not CREATE record",
 			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1f")}},
 			requestBody: `{
 				"action": "CREATE",
@@ -2513,6 +2519,200 @@ func Test_handler_usulanPerubahanData(t *testing.T) {
 						"negara_sekolah":        []any{nil, nil},
 					},
 					"action":     "CREATE",
+					"status":     "Diusulkan",
+					"catatan":    nil,
+					"read_at":    nil,
+					"created_at": "{created_at}",
+					"updated_at": "{updated_at}",
+					"deleted_at": nil,
+				},
+			},
+		},
+		{
+			name:          "ok: rollback on usulan perubahan data should not UPDATE record",
+			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1g")}},
+			requestBody: `{
+				"action": "UPDATE",
+				"data_id": "6",
+				"data": {
+					"tingkat_pendidikan_id": 1,
+					"nama_sekolah": "UI",
+					"tahun_lulus": 2020,
+					"nomor_ijazah": "UI.01"
+				}
+			}`,
+			doRollback:           true,
+			wantResponsePostCode: http.StatusNoContent,
+			wantResponseGetBody: `{
+				"data": [
+					{
+						"id":         {id},
+						"jenis_data": "riwayat-pendidikan",
+						"action":     "UPDATE",
+						"status":     "Diusulkan",
+						"catatan":    "",
+						"data_id":    "6",
+						"perubahan_data": {
+							"tingkat_pendidikan_id": [ null, 1       ],
+							"jenjang_pendidikan":    [ null, "TP 1"  ],
+							"pendidikan_id":         [ null, null    ],
+							"jurusan":               [ null, null    ],
+							"nama_sekolah":          [ "UI", "UI"    ],
+							"tahun_lulus":           [ null, 2020    ],
+							"nomor_ijazah":          [ null, "UI.01" ],
+							"gelar_depan":           [ null, null    ],
+							"gelar_belakang":        [ null, null    ],
+							"tugas_belajar":         [ null, null    ],
+							"negara_sekolah":        [ null, null    ]
+						}
+					}
+				],
+				"meta": {"limit": 10, "offset": 0, "total": 1}
+			}`,
+			wantDBSvcRows: dbtest.Rows{
+				{
+					"id":                    int32(6),
+					"tingkat_pendidikan_id": nil,
+					"pendidikan_id":         nil,
+					"no_ijazah":             nil,
+					"nama_sekolah":          "UI",
+					"tahun_lulus":           nil,
+					"gelar_depan":           nil,
+					"gelar_belakang":        nil,
+					"tugas_belajar":         nil,
+					"pendidikan_pertama":    nil,
+					"pendidikan_terakhir":   nil,
+					"negara_sekolah":        nil,
+					"diakui_bkn":            nil,
+					"status_satker":         nil,
+					"status_biro":           nil,
+					"tanggal_lulus":         nil,
+					"file_base64":           nil,
+					"s3_file_id":            nil,
+					"keterangan_berkas":     nil,
+					"pns_id_3":              nil,
+					"pendidikan_id_3":       nil,
+					"pns_id":                "id_1g",
+					"nip":                   "1g",
+					"created_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":            nil,
+				},
+			},
+			wantDBUsulanRows: dbtest.Rows{
+				{
+					"id":         "{id}",
+					"nip":        "1g",
+					"jenis_data": "riwayat-pendidikan",
+					"data_id":    "6",
+					"perubahan_data": map[string]any{
+						"tingkat_pendidikan_id": []any{nil, float64(1)},
+						"jenjang_pendidikan":    []any{nil, "TP 1"},
+						"pendidikan_id":         []any{nil, nil},
+						"jurusan":               []any{nil, nil},
+						"nama_sekolah":          []any{"UI", "UI"},
+						"tahun_lulus":           []any{nil, float64(2020)},
+						"nomor_ijazah":          []any{nil, "UI.01"},
+						"gelar_depan":           []any{nil, nil},
+						"gelar_belakang":        []any{nil, nil},
+						"tugas_belajar":         []any{nil, nil},
+						"negara_sekolah":        []any{nil, nil},
+					},
+					"action":     "UPDATE",
+					"status":     "Diusulkan",
+					"catatan":    nil,
+					"read_at":    nil,
+					"created_at": "{created_at}",
+					"updated_at": "{updated_at}",
+					"deleted_at": nil,
+				},
+			},
+		},
+		{
+			name:          "ok: rollback on usulan perubahan data should not DELETE record",
+			requestHeader: http.Header{"Authorization": []string{apitest.GenerateAuthHeader("1h")}},
+			requestBody: `{
+				"action": "DELETE",
+				"data_id": "7"
+			}`,
+			doRollback:           true,
+			wantResponsePostCode: http.StatusNoContent,
+			wantResponseGetBody: `{
+				"data": [
+					{
+						"id":         {id},
+						"jenis_data": "riwayat-pendidikan",
+						"action":     "DELETE",
+						"status":     "Diusulkan",
+						"catatan":    "",
+						"data_id":    "7",
+						"perubahan_data": {
+							"tingkat_pendidikan_id": [ null, null ],
+							"jenjang_pendidikan":    [ null, null ],
+							"pendidikan_id":         [ null, null ],
+							"jurusan":               [ null, null ],
+							"nama_sekolah":          [ "UI", null ],
+							"tahun_lulus":           [ null, null ],
+							"nomor_ijazah":          [ null, null ],
+							"gelar_depan":           [ null, null ],
+							"gelar_belakang":        [ null, null ],
+							"tugas_belajar":         [ null, null ],
+							"negara_sekolah":        [ null, null ]
+						}
+					}
+				],
+				"meta": {"limit": 10, "offset": 0, "total": 1}
+			}`,
+			wantDBSvcRows: dbtest.Rows{
+				{
+					"id":                    int32(7),
+					"tingkat_pendidikan_id": nil,
+					"pendidikan_id":         nil,
+					"no_ijazah":             nil,
+					"nama_sekolah":          "UI",
+					"tahun_lulus":           nil,
+					"gelar_depan":           nil,
+					"gelar_belakang":        nil,
+					"tugas_belajar":         nil,
+					"pendidikan_pertama":    nil,
+					"pendidikan_terakhir":   nil,
+					"negara_sekolah":        nil,
+					"diakui_bkn":            nil,
+					"status_satker":         nil,
+					"status_biro":           nil,
+					"tanggal_lulus":         nil,
+					"file_base64":           nil,
+					"s3_file_id":            nil,
+					"keterangan_berkas":     nil,
+					"pns_id_3":              nil,
+					"pendidikan_id_3":       nil,
+					"pns_id":                "id_1h",
+					"nip":                   "1h",
+					"created_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"updated_at":            time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC).Local(),
+					"deleted_at":            nil,
+				},
+			},
+			wantDBUsulanRows: dbtest.Rows{
+				{
+					"id":         "{id}",
+					"nip":        "1h",
+					"jenis_data": "riwayat-pendidikan",
+					"data_id":    "7",
+					"perubahan_data": map[string]any{
+						"tingkat_pendidikan_id": []any{nil, nil},
+						"jenjang_pendidikan":    []any{nil, nil},
+						"pendidikan_id":         []any{nil, nil},
+						"jurusan":               []any{nil, nil},
+						"nama_sekolah":          []any{"UI", nil},
+						"tahun_lulus":           []any{nil, nil},
+						"nomor_ijazah":          []any{nil, nil},
+						"gelar_depan":           []any{nil, nil},
+						"gelar_belakang":        []any{nil, nil},
+						"tugas_belajar":         []any{nil, nil},
+						"negara_sekolah":        []any{nil, nil},
+					},
+					"action":     "DELETE",
 					"status":     "Diusulkan",
 					"catatan":    nil,
 					"read_at":    nil,

@@ -22,6 +22,28 @@ where rg.deleted_at is null and rg.pns_nip = @pns_nip::varchar
 order by rg.tmt_golongan desc
 limit $1 offset $2;
 
+-- name: GetRiwayatKepangkatan :one
+select
+    rg.id,
+    rg.jenis_kp_id,
+    jkp.nama as nama_jenis_kp,
+    rg.golongan_id,
+    g.nama as nama_golongan,
+    g.nama_pangkat as nama_golongan_pangkat,
+    rg.tmt_golongan,
+    rg.sk_nomor,
+    rg.sk_tanggal,
+    rg.mk_golongan_tahun,
+    rg.mk_golongan_bulan,
+    rg.no_bkn,
+    rg.tanggal_bkn,
+    rg.jumlah_angka_kredit_tambahan,
+    rg.jumlah_angka_kredit_utama
+from riwayat_golongan rg
+left join ref_jenis_kenaikan_pangkat jkp on rg.jenis_kp_id = jkp.id and jkp.deleted_at is null
+left join ref_golongan g on rg.golongan_id = g.id and g.deleted_at is null
+where rg.pns_nip = @pns_nip::varchar and rg.id = @id and rg.deleted_at is null;
+
 -- name: CountRiwayatKepangkatan :one
 select count(*) from riwayat_golongan rg
 where rg.deleted_at is null and rg.pns_nip = @pns_nip::varchar;
