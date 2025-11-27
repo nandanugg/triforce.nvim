@@ -79,3 +79,13 @@ set
     file_base64 = $1,
     updated_at = now()
 where id = @id and nip = @nip::varchar and deleted_at is null;
+
+-- name: UpdateRiwayatPendidikanNamaNipByNIP :exec
+UPDATE riwayat_pendidikan
+SET     
+    nip = @nip_baru::varchar,
+    updated_at = now()
+WHERE nip = @nip::varchar AND deleted_at IS NULL
+AND (
+    (@nip_baru::varchar IS NOT NULL AND @nip_baru::varchar IS DISTINCT FROM nip)
+);

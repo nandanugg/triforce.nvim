@@ -1834,6 +1834,28 @@ paths:
                 properties:
                   data:
                     $ref: "#/components/schemas/dataPegawai"
+    put:
+      tags:
+        - Admin Pegawai Aktif
+      summary: Update pegawai aktif.
+      description: Update pegawai aktif berdasarkan NIP.
+      operationId: adminUpdatePegawaiAktif
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - name: nip
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/pegawai"
+      responses:
+        "204":
+          description: Sukses.
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "404":
+          $ref: "#/components/responses/notFound"
   /v1/admin/pegawai/{nip}/keluarga:
     get:
       tags:
@@ -7338,6 +7360,140 @@ components:
               - tanggal_lahir
               - status_pernikahan_id
               - hubungan
+    pegawai:
+      required: true
+      content:
+        application/json:
+          schema:
+            additionalProperties: false
+            properties:
+              nama:
+                type: string
+                maxLength: 100
+              gelar_depan:
+                type: string
+                maxLength: 50
+              gelar_belakang:
+                type: string
+                maxLength: 50
+              nip:
+                type: string
+                maxLength: 50
+              jenis_kelamin:
+                type: string
+                enum: ["M", "F"]
+              nik:
+                type: string
+                maxLength: 20
+              nomor_kk:
+                type: string
+                maxLength: 20
+              tempat_lahir_id:
+                type: string
+                maxLength: 50
+              tanggal_lahir:
+                type: string
+                format: date
+              tingkat_pendidikan_id:
+                type: integer
+              pendidikan_id:
+                type: string
+                nullable: true
+              status_pernikahan_id:
+                type: integer
+              agama_id:
+                type: integer
+                nullable: true
+              jenis_pegawai_id:
+                type: integer
+              masa_kerja_golongan:
+                type: string
+                example: "10 Tahun 6 Bulan"
+              jenis_jabatan_id:
+                type: integer
+              jabatan_id: 
+                type: string
+              unit_organisasi_id:
+                type: string
+              lokasi_kerja_id:
+                type: string
+              golongan_ruang_awal_id:
+                type: integer
+              golongan_ruang_akhir_id:
+                type: integer
+              tmt_golongan:
+                type: string
+                format: date
+              nomor_sk_asn:
+                type: string
+                maxLength: 100
+              tmt_asn:
+                type: string
+                format: date
+              status_pns:
+                type: string
+                enum: ["PNS", "CPNS"]
+              email_dikbud:
+                type: string
+                maxLength: 200
+              email_pribadi:
+                type: string
+                maxLength: 200
+              alamat:
+                type: string
+                maxLength: 300
+              no_hp:
+                type: string
+                maxLength: 20
+              no_kontak_darurat:
+                type: string
+                maxLength: 20
+              nomor_surat_dokter:
+                type: string
+                maxLength: 100
+              tanggal_surat_dokter:
+                type: string
+                format: date
+              nomor_surat_bebas_narkoba:
+                type: string
+                maxLength: 100
+              tanggal_surat_bebas_narkoba:
+                type: string
+                format: date
+              nomor_catatan_polisi:
+                type: string
+                maxLength: 100
+              tanggal_catatan_polisi:
+                type: string
+                format: date
+              akte_kelahiran:
+                type: string
+                maxLength: 100
+              nomor_bpjs:
+                type: string
+                maxLength: 100
+              npwp:
+                type: string
+                maxLength: 100
+              tanggal_npwp:
+                type: string
+                format: date
+              nomor_taspen:
+                type: string
+                maxLength: 100
+              mk_bulan:
+                type: integer
+              mk_tahun:
+                type: integer
+              mk_bulan_swasta:
+                type: integer
+              mk_tahun_swasta:
+                type: integer
+            required:
+              - nama
+              - nip
+              - nik
+              - email_dikbud
     riwayatHukumanDisiplin:
       required: true
       content:

@@ -1260,6 +1260,27 @@ func (q *Queries) UpdateKorektorSuratKeputusanByID(ctx context.Context, arg Upda
 	return err
 }
 
+const updateRiwayatSuratKeputusanNamaNipPemrosesByNIP = `-- name: UpdateRiwayatSuratKeputusanNamaNipPemrosesByNIP :exec
+UPDATE riwayat_surat_keputusan
+SET
+    nip_pemroses = $1::varchar,
+    updated_at = now()
+WHERE nip_pemroses = $2::varchar AND deleted_at IS NULL
+AND (
+        ($1::varchar IS NOT NULL AND $1::varchar IS DISTINCT FROM nip_pemroses)
+    )
+`
+
+type UpdateRiwayatSuratKeputusanNamaNipPemrosesByNIPParams struct {
+	NipBaru string `db:"nip_baru"`
+	Nip     string `db:"nip"`
+}
+
+func (q *Queries) UpdateRiwayatSuratKeputusanNamaNipPemrosesByNIP(ctx context.Context, arg UpdateRiwayatSuratKeputusanNamaNipPemrosesByNIPParams) error {
+	_, err := q.db.Exec(ctx, updateRiwayatSuratKeputusanNamaNipPemrosesByNIP, arg.NipBaru, arg.Nip)
+	return err
+}
+
 const updateStatusSuratKeputusanByID = `-- name: UpdateStatusSuratKeputusanByID :exec
 UPDATE 
     surat_keputusan
@@ -1291,5 +1312,50 @@ func (q *Queries) UpdateStatusSuratKeputusanByID(ctx context.Context, arg Update
 		arg.Catatan,
 		arg.ID,
 	)
+	return err
+}
+
+const updateSuratKeputusanNamaNipPemilikByNIP = `-- name: UpdateSuratKeputusanNamaNipPemilikByNIP :exec
+UPDATE surat_keputusan
+SET 
+    nip_sk = $1::varchar,
+    nama_pemilik_sk = $2::varchar,
+    updated_at = now()
+WHERE nip_sk = $3::varchar AND deleted_at IS NULL
+AND (
+    ($1::varchar IS NOT NULL AND $1::varchar IS DISTINCT FROM nip_sk)
+    OR ($2::varchar IS NOT NULL AND $2::varchar IS DISTINCT FROM nama_pemilik_sk)
+)
+`
+
+type UpdateSuratKeputusanNamaNipPemilikByNIPParams struct {
+	NipBaru string `db:"nip_baru"`
+	Nama    string `db:"nama"`
+	Nip     string `db:"nip"`
+}
+
+func (q *Queries) UpdateSuratKeputusanNamaNipPemilikByNIP(ctx context.Context, arg UpdateSuratKeputusanNamaNipPemilikByNIPParams) error {
+	_, err := q.db.Exec(ctx, updateSuratKeputusanNamaNipPemilikByNIP, arg.NipBaru, arg.Nama, arg.Nip)
+	return err
+}
+
+const updateSuratKeputusanNipPemrosesByNIP = `-- name: UpdateSuratKeputusanNipPemrosesByNIP :exec
+UPDATE surat_keputusan
+SET 
+    nip_pemroses = $1::varchar,
+    updated_at = now()
+WHERE nip_pemroses = $2::varchar AND deleted_at IS NULL
+AND (
+    ($1::varchar IS NOT NULL AND $1::varchar IS DISTINCT FROM nip_pemroses)
+)
+`
+
+type UpdateSuratKeputusanNipPemrosesByNIPParams struct {
+	NipBaru string `db:"nip_baru"`
+	Nip     string `db:"nip"`
+}
+
+func (q *Queries) UpdateSuratKeputusanNipPemrosesByNIP(ctx context.Context, arg UpdateSuratKeputusanNipPemrosesByNIPParams) error {
+	_, err := q.db.Exec(ctx, updateSuratKeputusanNipPemrosesByNIP, arg.NipBaru, arg.Nip)
 	return err
 }

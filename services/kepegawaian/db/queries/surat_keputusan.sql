@@ -485,3 +485,35 @@ JOIN pegawai p on p.nik = lrs.nik and p.deleted_at is null
 WHERE 
     lrs.deleted_at IS NULL AND (sqlc.narg('status')::int2 IS NULL OR lrs.status = sqlc.narg('status')::int2)
     AND (sqlc.narg('nik')::varchar IS NULL OR p.nik = sqlc.narg('nik')::varchar);
+
+-- name: UpdateRiwayatSuratKeputusanNamaNipPemrosesByNIP :exec
+UPDATE riwayat_surat_keputusan
+SET
+    nip_pemroses = @nip_baru::varchar,
+    updated_at = now()
+WHERE nip_pemroses = @nip::varchar AND deleted_at IS NULL
+AND (
+        (@nip_baru::varchar IS NOT NULL AND @nip_baru::varchar IS DISTINCT FROM nip_pemroses)
+    );
+
+-- name: UpdateSuratKeputusanNamaNipPemilikByNIP :exec
+UPDATE surat_keputusan
+SET 
+    nip_sk = @nip_baru::varchar,
+    nama_pemilik_sk = @nama::varchar,
+    updated_at = now()
+WHERE nip_sk = @nip::varchar AND deleted_at IS NULL
+AND (
+    (@nip_baru::varchar IS NOT NULL AND @nip_baru::varchar IS DISTINCT FROM nip_sk)
+    OR (@nama::varchar IS NOT NULL AND @nama::varchar IS DISTINCT FROM nama_pemilik_sk)
+);
+
+-- name: UpdateSuratKeputusanNipPemrosesByNIP :exec
+UPDATE surat_keputusan
+SET 
+    nip_pemroses = @nip_baru::varchar,
+    updated_at = now()
+WHERE nip_pemroses = @nip::varchar AND deleted_at IS NULL
+AND (
+    (@nip_baru::varchar IS NOT NULL AND @nip_baru::varchar IS DISTINCT FROM nip_pemroses)
+);

@@ -119,3 +119,66 @@ select
 FROM pegawai
 LEFT JOIN ref_lokasi on ref_lokasi.id = pegawai.tempat_lahir_id and ref_lokasi.deleted_at is null
 where nip_baru = @nip::varchar and pegawai.deleted_at is null;
+
+-- name: UpdateDataPegawai :exec
+UPDATE pegawai
+SET
+    gelar_depan = @gelar_depan::varchar,
+    nama = @nama::varchar,
+    gelar_belakang = @gelar_belakang::varchar,
+    nip_baru = @nip_baru::varchar,
+    jenis_kelamin = @jenis_kelamin::varchar,
+    nik = @nik::varchar,
+    kk = @kk::varchar,
+    tempat_lahir_id = @tempat_lahir_id::varchar,
+    tanggal_lahir = @tanggal_lahir::date,
+    tingkat_pendidikan_id = @tingkat_pendidikan_id::int2,
+    pendidikan_id = @pendidikan_id::varchar,
+    jenis_kawin_id = @jenis_kawin_id::int2,
+    agama_id = @agama_id::int2,
+    jenis_pegawai_id = @jenis_pegawai_id::int2,
+    masa_kerja = @masa_kerja::varchar,
+    jenis_jabatan_id = @jenis_jabatan_id::int2,
+    jabatan_instansi_id = @jabatan_id::varchar,
+    unor_id = @unor_id::varchar,
+    lokasi_kerja_id = @lokasi_kerja_id::varchar,
+    gol_awal_id = @gol_awal_id::int2,
+    gol_id = @gol_id::int2,
+    tmt_golongan = @tmt_golongan::date,
+    tmt_pns = @tmt_pns::date,
+    no_sk_cpns = @no_sk_cpns::varchar,
+    status_cpns_pns = @status_cpns_pns::varchar,
+    email_dikbud = @email_dikbud::varchar,
+    email = @email::varchar,
+    alamat = @alamat::varchar,
+    no_hp = @no_hp::varchar,
+    no_darurat = @no_darurat::varchar,
+    no_surat_dokter = @no_surat_dokter::varchar,
+    tanggal_surat_dokter = @tanggal_surat_dokter::date,
+    no_bebas_narkoba = @no_bebas_narkoba::varchar,
+    tanggal_bebas_narkoba = @tanggal_bebas_narkoba::date,
+    no_catatan_polisi = @no_catatan_polisi::varchar,
+    tanggal_catatan_polisi = @tanggal_catatan_polisi::date,
+    akte_kelahiran = @akte_kelahiran::varchar,
+    bpjs = @bpjs::varchar,
+    npwp = @npwp::varchar,
+    tanggal_npwp = @tanggal_npwp::date,
+    no_taspen = @no_taspen::varchar,
+    updated_at = now(),
+    pns_id = @pns_id::varchar,
+    mk_bulan = @mk_bulan::int2,
+    mk_tahun = @mk_tahun::int2,
+    mk_bulan_swasta = @mk_bulan_swasta::int2,
+    mk_tahun_swasta = @mk_tahun_swasta::int2
+WHERE nip_baru = @nip::varchar AND deleted_at IS NULL;
+
+-- name: UpdateTTDPegawaiNIPByNIP :exec
+UPDATE pegawai_ttd
+SET 
+    nip = @nip_baru::varchar,
+    updated_at = now()
+WHERE nip = @nip::varchar
+AND (
+    (@nip_baru::varchar IS NOT NULL AND @nip_baru::varchar IS DISTINCT FROM nip)
+);
+    

@@ -208,12 +208,16 @@ type Querier interface {
 	ListUnreadUsulanPerubahanDataByNIP(ctx context.Context, arg ListUnreadUsulanPerubahanDataByNIPParams) ([]ListUnreadUsulanPerubahanDataByNIPRow, error)
 	MarkAsReadUsulanPerubahanData(ctx context.Context, arg MarkAsReadUsulanPerubahanDataParams) error
 	UpdateAnak(ctx context.Context, arg UpdateAnakParams) (int64, error)
+	UpdateAnakNIPByNIP(ctx context.Context, arg UpdateAnakNIPByNIPParams) error
 	UpdateBerkasRiwayatSertifikasiByIDAndNIP(ctx context.Context, arg UpdateBerkasRiwayatSertifikasiByIDAndNIPParams) (int64, error)
 	UpdateBerkasSuratKeputusanSignedByID(ctx context.Context, arg UpdateBerkasSuratKeputusanSignedByIDParams) error
+	UpdateDataPegawai(ctx context.Context, arg UpdateDataPegawaiParams) error
 	UpdateJenisKenaikanPangkat(ctx context.Context, arg UpdateJenisKenaikanPangkatParams) (UpdateJenisKenaikanPangkatRow, error)
 	UpdateKorektorSuratKeputusanByID(ctx context.Context, arg UpdateKorektorSuratKeputusanByIDParams) error
 	UpdateOrangTua(ctx context.Context, arg UpdateOrangTuaParams) (int64, error)
+	UpdateOrangTuaNIPByNIP(ctx context.Context, arg UpdateOrangTuaNIPByNIPParams) error
 	UpdatePasangan(ctx context.Context, arg UpdatePasanganParams) (int64, error)
+	UpdatePasanganNIPByNIP(ctx context.Context, arg UpdatePasanganNIPByNIPParams) error
 	UpdateRefAgama(ctx context.Context, arg UpdateRefAgamaParams) (UpdateRefAgamaRow, error)
 	UpdateRefGolongan(ctx context.Context, arg UpdateRefGolonganParams) (UpdateRefGolonganRow, error)
 	UpdateRefJabatan(ctx context.Context, arg UpdateRefJabatanParams) (UpdateRefJabatanRow, error)
@@ -223,19 +227,40 @@ type Querier interface {
 	UpdateRefJenisSatker(ctx context.Context, arg UpdateRefJenisSatkerParams) (UpdateRefJenisSatkerRow, error)
 	UpdateRefPendidikan(ctx context.Context, arg UpdateRefPendidikanParams) (string, error)
 	UpdateRefTingkatPendidikan(ctx context.Context, arg UpdateRefTingkatPendidikanParams) (UpdateRefTingkatPendidikanRow, error)
+	UpdateRiwayatAsesmenNamaNipByPNSID(ctx context.Context, arg UpdateRiwayatAsesmenNamaNipByPNSIDParams) error
+	UpdateRiwayatAsesmenNineBoxNamaNipByPNSID(ctx context.Context, arg UpdateRiwayatAsesmenNineBoxNamaNipByPNSIDParams) error
 	UpdateRiwayatHukumanDisiplin(ctx context.Context, arg UpdateRiwayatHukumanDisiplinParams) (int64, error)
+	UpdateRiwayatHukumanDisiplinNamaNipByPNSID(ctx context.Context, arg UpdateRiwayatHukumanDisiplinNamaNipByPNSIDParams) error
 	UpdateRiwayatJabatan(ctx context.Context, arg UpdateRiwayatJabatanParams) (int64, error)
+	UpdateRiwayatJabatanNamaNipByPNSID(ctx context.Context, arg UpdateRiwayatJabatanNamaNipByPNSIDParams) error
 	UpdateRiwayatKenaikanGajiBerkala(ctx context.Context, arg UpdateRiwayatKenaikanGajiBerkalaParams) (int64, error)
+	UpdateRiwayatKenaikanGajiBerkalaNamaNipByPNSID(ctx context.Context, arg UpdateRiwayatKenaikanGajiBerkalaNamaNipByPNSIDParams) error
 	UpdateRiwayatKepangkatan(ctx context.Context, arg UpdateRiwayatKepangkatanParams) (int64, error)
+	UpdateRiwayatKepangkatanNamaNipByPNSID(ctx context.Context, arg UpdateRiwayatKepangkatanNamaNipByPNSIDParams) error
+	UpdateRiwayatKinerjaNamaNipByPNSID(ctx context.Context, arg UpdateRiwayatKinerjaNamaNipByPNSIDParams) error
+	UpdateRiwayatPelatihanFungsionalNamaNipByNIP(ctx context.Context, arg UpdateRiwayatPelatihanFungsionalNamaNipByNIPParams) error
 	UpdateRiwayatPelatihanSIASN(ctx context.Context, arg UpdateRiwayatPelatihanSIASNParams) (int64, error)
+	UpdateRiwayatPelatihanSIASNNamaNipByPNSID(ctx context.Context, arg UpdateRiwayatPelatihanSIASNNamaNipByPNSIDParams) error
 	UpdateRiwayatPelatihanStruktural(ctx context.Context, arg UpdateRiwayatPelatihanStrukturalParams) (int64, error)
+	UpdateRiwayatPelatihanStrukturalNamaNipByPNSID(ctx context.Context, arg UpdateRiwayatPelatihanStrukturalNamaNipByPNSIDParams) error
+	UpdateRiwayatPelatihanTeknisNIPByPNSID(ctx context.Context, arg UpdateRiwayatPelatihanTeknisNIPByPNSIDParams) error
 	UpdateRiwayatPendidikan(ctx context.Context, arg UpdateRiwayatPendidikanParams) (int64, error)
+	UpdateRiwayatPendidikanNamaNipByNIP(ctx context.Context, arg UpdateRiwayatPendidikanNamaNipByNIPParams) error
 	UpdateRiwayatPenghargaan(ctx context.Context, arg UpdateRiwayatPenghargaanParams) (int64, error)
 	UpdateRiwayatPenghargaanBerkas(ctx context.Context, arg UpdateRiwayatPenghargaanBerkasParams) (int64, error)
+	UpdateRiwayatPenghargaanNamaNipByNIP(ctx context.Context, arg UpdateRiwayatPenghargaanNamaNipByNIPParams) error
 	UpdateRiwayatPenugasan(ctx context.Context, arg UpdateRiwayatPenugasanParams) (int64, error)
+	UpdateRiwayatPenugasanNamaNipByNIP(ctx context.Context, arg UpdateRiwayatPenugasanNamaNipByNIPParams) error
+	UpdateRiwayatPindahUnitKerjaNamaNipByNIP(ctx context.Context, arg UpdateRiwayatPindahUnitKerjaNamaNipByNIPParams) error
 	UpdateRiwayatSertifikasiByIDAndNIP(ctx context.Context, arg UpdateRiwayatSertifikasiByIDAndNIPParams) (int64, error)
+	UpdateRiwayatSertifikasiNamaNipByNIP(ctx context.Context, arg UpdateRiwayatSertifikasiNamaNipByNIPParams) error
+	UpdateRiwayatSuratKeputusanNamaNipPemrosesByNIP(ctx context.Context, arg UpdateRiwayatSuratKeputusanNamaNipPemrosesByNIPParams) error
+	UpdateRiwayatUjiKompetensiNamaNipByNIP(ctx context.Context, arg UpdateRiwayatUjiKompetensiNamaNipByNIPParams) error
 	UpdateStatusSuratKeputusanByID(ctx context.Context, arg UpdateStatusSuratKeputusanByIDParams) error
 	UpdateStatusUsulanPerubahanData(ctx context.Context, arg UpdateStatusUsulanPerubahanDataParams) error
+	UpdateSuratKeputusanNamaNipPemilikByNIP(ctx context.Context, arg UpdateSuratKeputusanNamaNipPemilikByNIPParams) error
+	UpdateSuratKeputusanNipPemrosesByNIP(ctx context.Context, arg UpdateSuratKeputusanNipPemrosesByNIPParams) error
+	UpdateTTDPegawaiNIPByNIP(ctx context.Context, arg UpdateTTDPegawaiNIPByNIPParams) error
 	UpdateTemplate(ctx context.Context, arg UpdateTemplateParams) (UpdateTemplateRow, error)
 	UpdateUnitKerja(ctx context.Context, arg UpdateUnitKerjaParams) (UpdateUnitKerjaRow, error)
 	UploadBerkasRiwayatHukumanDisiplin(ctx context.Context, arg UploadBerkasRiwayatHukumanDisiplinParams) (int64, error)

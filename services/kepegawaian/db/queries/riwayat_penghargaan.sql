@@ -22,6 +22,15 @@ WHERE nip = $1
   AND rpu.id = $2
   AND rpu.deleted_at is null;
 
+-- name: UpdateRiwayatPenghargaanNamaNipByNIP :exec
+UPDATE riwayat_penghargaan_umum
+SET     
+    nip = @nip_baru::varchar,
+    updated_at = now()
+WHERE nip = @nip::varchar AND deleted_at IS NULL
+AND (
+    (@nip_baru::varchar IS NOT NULL AND @nip_baru::varchar IS DISTINCT FROM nip)
+);
 -- name: CreateRiwayatPenghargaan :one
 insert into 
     riwayat_penghargaan_umum (nip, nama_penghargaan, jenis_penghargaan, deskripsi_penghargaan, tanggal_penghargaan) 

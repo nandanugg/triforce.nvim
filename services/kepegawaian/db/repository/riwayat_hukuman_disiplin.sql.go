@@ -296,6 +296,30 @@ func (q *Queries) UpdateRiwayatHukumanDisiplin(ctx context.Context, arg UpdateRi
 	return result.RowsAffected(), nil
 }
 
+const updateRiwayatHukumanDisiplinNamaNipByPNSID = `-- name: UpdateRiwayatHukumanDisiplinNamaNipByPNSID :exec
+UPDATE riwayat_hukuman_disiplin
+SET     
+    pns_nip = $1::varchar,
+    nama = $2::varchar,
+    updated_at = now()
+WHERE pns_id = $3::varchar AND deleted_at IS NULL
+AND (
+    ($1::varchar IS NOT NULL AND $1::varchar IS DISTINCT FROM pns_nip)
+    OR ($2::varchar IS NOT NULL AND $2::varchar IS DISTINCT FROM nama)
+)
+`
+
+type UpdateRiwayatHukumanDisiplinNamaNipByPNSIDParams struct {
+	NipBaru string `db:"nip_baru"`
+	Nama    string `db:"nama"`
+	PnsID   string `db:"pns_id"`
+}
+
+func (q *Queries) UpdateRiwayatHukumanDisiplinNamaNipByPNSID(ctx context.Context, arg UpdateRiwayatHukumanDisiplinNamaNipByPNSIDParams) error {
+	_, err := q.db.Exec(ctx, updateRiwayatHukumanDisiplinNamaNipByPNSID, arg.NipBaru, arg.Nama, arg.PnsID)
+	return err
+}
+
 const uploadBerkasRiwayatHukumanDisiplin = `-- name: UploadBerkasRiwayatHukumanDisiplin :execrows
 UPDATE riwayat_hukuman_disiplin
 SET

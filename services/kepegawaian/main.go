@@ -85,7 +85,7 @@ func main() {
 	jenissatker.RegisterRoutes(e, dbRepository, mwAuth)
 	keluarga.RegisterRoutes(e, dbRepository, mwAuth)
 	template.RegisterRoutes(e, dbRepository, mwAuth)
-	pegawai.RegisterRoutes(e, dbRepository, mwAuth)
+	pegawai.RegisterRoutes(e, dbRepository, db, mwAuth)
 	pendidikan.RegisterRoutes(e, dbRepository, mwAuth)
 	riwayatasesmenninebox.RegisterRoutes(e, dbRepository, mwAuth)
 	riwayathukumandisiplin.RegisterRoutes(e, dbRepository, mwAuth)

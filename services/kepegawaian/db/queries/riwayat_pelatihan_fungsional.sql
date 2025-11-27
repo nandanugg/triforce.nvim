@@ -23,3 +23,13 @@ WHERE rf.nip_baru = $1
 -- name: GetBerkasRiwayatPelatihanFungsional :one
 select file_base64 from riwayat_diklat_fungsional
 where nip_baru = $1 and id = $2 and deleted_at is null;
+
+-- name: UpdateRiwayatPelatihanFungsionalNamaNipByNIP :exec
+UPDATE riwayat_diklat_fungsional
+SET     
+    nip_baru = @nip_baru::varchar,
+    updated_at = now()
+WHERE nip_baru = @nip::varchar AND deleted_at IS NULL
+AND (
+    (@nip_baru::varchar IS NOT NULL AND @nip_baru::varchar IS DISTINCT FROM nip_baru)
+);

@@ -102,3 +102,24 @@ func (q *Queries) ListRiwayatPelatihanFungsional(ctx context.Context, arg ListRi
 	}
 	return items, nil
 }
+
+const updateRiwayatPelatihanFungsionalNamaNipByNIP = `-- name: UpdateRiwayatPelatihanFungsionalNamaNipByNIP :exec
+UPDATE riwayat_diklat_fungsional
+SET     
+    nip_baru = $1::varchar,
+    updated_at = now()
+WHERE nip_baru = $2::varchar AND deleted_at IS NULL
+AND (
+    ($1::varchar IS NOT NULL AND $1::varchar IS DISTINCT FROM nip_baru)
+)
+`
+
+type UpdateRiwayatPelatihanFungsionalNamaNipByNIPParams struct {
+	NipBaru string `db:"nip_baru"`
+	Nip     string `db:"nip"`
+}
+
+func (q *Queries) UpdateRiwayatPelatihanFungsionalNamaNipByNIP(ctx context.Context, arg UpdateRiwayatPelatihanFungsionalNamaNipByNIPParams) error {
+	_, err := q.db.Exec(ctx, updateRiwayatPelatihanFungsionalNamaNipByNIP, arg.NipBaru, arg.Nip)
+	return err
+}

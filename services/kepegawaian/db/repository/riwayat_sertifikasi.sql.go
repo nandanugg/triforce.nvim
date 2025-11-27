@@ -183,3 +183,24 @@ func (q *Queries) UpdateRiwayatSertifikasiByIDAndNIP(ctx context.Context, arg Up
 	}
 	return result.RowsAffected(), nil
 }
+
+const updateRiwayatSertifikasiNamaNipByNIP = `-- name: UpdateRiwayatSertifikasiNamaNipByNIP :exec
+UPDATE riwayat_sertifikasi
+SET     
+    nip = $1::varchar,
+    updated_at = now()
+WHERE nip = $2::varchar AND deleted_at IS NULL
+AND (
+    ($1::varchar IS NOT NULL AND $1::varchar IS DISTINCT FROM nip)
+)
+`
+
+type UpdateRiwayatSertifikasiNamaNipByNIPParams struct {
+	NipBaru string `db:"nip_baru"`
+	Nip     string `db:"nip"`
+}
+
+func (q *Queries) UpdateRiwayatSertifikasiNamaNipByNIP(ctx context.Context, arg UpdateRiwayatSertifikasiNamaNipByNIPParams) error {
+	_, err := q.db.Exec(ctx, updateRiwayatSertifikasiNamaNipByNIP, arg.NipBaru, arg.Nip)
+	return err
+}

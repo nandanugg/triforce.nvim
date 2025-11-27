@@ -305,3 +305,180 @@ func (q *Queries) ListPegawaiAktif(ctx context.Context, arg ListPegawaiAktifPara
 	}
 	return items, nil
 }
+
+const updateDataPegawai = `-- name: UpdateDataPegawai :exec
+UPDATE pegawai
+SET
+    gelar_depan = $1::varchar,
+    nama = $2::varchar,
+    gelar_belakang = $3::varchar,
+    nip_baru = $4::varchar,
+    jenis_kelamin = $5::varchar,
+    nik = $6::varchar,
+    kk = $7::varchar,
+    tempat_lahir_id = $8::varchar,
+    tanggal_lahir = $9::date,
+    tingkat_pendidikan_id = $10::int2,
+    pendidikan_id = $11::varchar,
+    jenis_kawin_id = $12::int2,
+    agama_id = $13::int2,
+    jenis_pegawai_id = $14::int2,
+    masa_kerja = $15::varchar,
+    jenis_jabatan_id = $16::int2,
+    jabatan_instansi_id = $17::varchar,
+    unor_id = $18::varchar,
+    lokasi_kerja_id = $19::varchar,
+    gol_awal_id = $20::int2,
+    gol_id = $21::int2,
+    tmt_golongan = $22::date,
+    tmt_pns = $23::date,
+    no_sk_cpns = $24::varchar,
+    status_cpns_pns = $25::varchar,
+    email_dikbud = $26::varchar,
+    email = $27::varchar,
+    alamat = $28::varchar,
+    no_hp = $29::varchar,
+    no_darurat = $30::varchar,
+    no_surat_dokter = $31::varchar,
+    tanggal_surat_dokter = $32::date,
+    no_bebas_narkoba = $33::varchar,
+    tanggal_bebas_narkoba = $34::date,
+    no_catatan_polisi = $35::varchar,
+    tanggal_catatan_polisi = $36::date,
+    akte_kelahiran = $37::varchar,
+    bpjs = $38::varchar,
+    npwp = $39::varchar,
+    tanggal_npwp = $40::date,
+    no_taspen = $41::varchar,
+    updated_at = now(),
+    pns_id = $42::varchar,
+    mk_bulan = $43::int2,
+    mk_tahun = $44::int2,
+    mk_bulan_swasta = $45::int2,
+    mk_tahun_swasta = $46::int2
+WHERE nip_baru = $47::varchar AND deleted_at IS NULL
+`
+
+type UpdateDataPegawaiParams struct {
+	GelarDepan           string      `db:"gelar_depan"`
+	Nama                 string      `db:"nama"`
+	GelarBelakang        string      `db:"gelar_belakang"`
+	NipBaru              string      `db:"nip_baru"`
+	JenisKelamin         string      `db:"jenis_kelamin"`
+	Nik                  string      `db:"nik"`
+	Kk                   string      `db:"kk"`
+	TempatLahirID        string      `db:"tempat_lahir_id"`
+	TanggalLahir         pgtype.Date `db:"tanggal_lahir"`
+	TingkatPendidikanID  int16       `db:"tingkat_pendidikan_id"`
+	PendidikanID         string      `db:"pendidikan_id"`
+	JenisKawinID         int16       `db:"jenis_kawin_id"`
+	AgamaID              int16       `db:"agama_id"`
+	JenisPegawaiID       int16       `db:"jenis_pegawai_id"`
+	MasaKerja            string      `db:"masa_kerja"`
+	JenisJabatanID       int16       `db:"jenis_jabatan_id"`
+	JabatanID            string      `db:"jabatan_id"`
+	UnorID               string      `db:"unor_id"`
+	LokasiKerjaID        string      `db:"lokasi_kerja_id"`
+	GolAwalID            int16       `db:"gol_awal_id"`
+	GolID                int16       `db:"gol_id"`
+	TmtGolongan          pgtype.Date `db:"tmt_golongan"`
+	TmtPns               pgtype.Date `db:"tmt_pns"`
+	NoSkCpns             string      `db:"no_sk_cpns"`
+	StatusCpnsPns        string      `db:"status_cpns_pns"`
+	EmailDikbud          string      `db:"email_dikbud"`
+	Email                string      `db:"email"`
+	Alamat               string      `db:"alamat"`
+	NoHp                 string      `db:"no_hp"`
+	NoDarurat            string      `db:"no_darurat"`
+	NoSuratDokter        string      `db:"no_surat_dokter"`
+	TanggalSuratDokter   pgtype.Date `db:"tanggal_surat_dokter"`
+	NoBebasNarkoba       string      `db:"no_bebas_narkoba"`
+	TanggalBebasNarkoba  pgtype.Date `db:"tanggal_bebas_narkoba"`
+	NoCatatanPolisi      string      `db:"no_catatan_polisi"`
+	TanggalCatatanPolisi pgtype.Date `db:"tanggal_catatan_polisi"`
+	AkteKelahiran        string      `db:"akte_kelahiran"`
+	Bpjs                 string      `db:"bpjs"`
+	Npwp                 string      `db:"npwp"`
+	TanggalNpwp          pgtype.Date `db:"tanggal_npwp"`
+	NoTaspen             string      `db:"no_taspen"`
+	PnsID                string      `db:"pns_id"`
+	MkBulan              int16       `db:"mk_bulan"`
+	MkTahun              int16       `db:"mk_tahun"`
+	MkBulanSwasta        int16       `db:"mk_bulan_swasta"`
+	MkTahunSwasta        int16       `db:"mk_tahun_swasta"`
+	Nip                  string      `db:"nip"`
+}
+
+func (q *Queries) UpdateDataPegawai(ctx context.Context, arg UpdateDataPegawaiParams) error {
+	_, err := q.db.Exec(ctx, updateDataPegawai,
+		arg.GelarDepan,
+		arg.Nama,
+		arg.GelarBelakang,
+		arg.NipBaru,
+		arg.JenisKelamin,
+		arg.Nik,
+		arg.Kk,
+		arg.TempatLahirID,
+		arg.TanggalLahir,
+		arg.TingkatPendidikanID,
+		arg.PendidikanID,
+		arg.JenisKawinID,
+		arg.AgamaID,
+		arg.JenisPegawaiID,
+		arg.MasaKerja,
+		arg.JenisJabatanID,
+		arg.JabatanID,
+		arg.UnorID,
+		arg.LokasiKerjaID,
+		arg.GolAwalID,
+		arg.GolID,
+		arg.TmtGolongan,
+		arg.TmtPns,
+		arg.NoSkCpns,
+		arg.StatusCpnsPns,
+		arg.EmailDikbud,
+		arg.Email,
+		arg.Alamat,
+		arg.NoHp,
+		arg.NoDarurat,
+		arg.NoSuratDokter,
+		arg.TanggalSuratDokter,
+		arg.NoBebasNarkoba,
+		arg.TanggalBebasNarkoba,
+		arg.NoCatatanPolisi,
+		arg.TanggalCatatanPolisi,
+		arg.AkteKelahiran,
+		arg.Bpjs,
+		arg.Npwp,
+		arg.TanggalNpwp,
+		arg.NoTaspen,
+		arg.PnsID,
+		arg.MkBulan,
+		arg.MkTahun,
+		arg.MkBulanSwasta,
+		arg.MkTahunSwasta,
+		arg.Nip,
+	)
+	return err
+}
+
+const updateTTDPegawaiNIPByNIP = `-- name: UpdateTTDPegawaiNIPByNIP :exec
+UPDATE pegawai_ttd
+SET 
+    nip = $1::varchar,
+    updated_at = now()
+WHERE nip = $2::varchar
+AND (
+    ($1::varchar IS NOT NULL AND $1::varchar IS DISTINCT FROM nip)
+)
+`
+
+type UpdateTTDPegawaiNIPByNIPParams struct {
+	NipBaru string `db:"nip_baru"`
+	Nip     string `db:"nip"`
+}
+
+func (q *Queries) UpdateTTDPegawaiNIPByNIP(ctx context.Context, arg UpdateTTDPegawaiNIPByNIPParams) error {
+	_, err := q.db.Exec(ctx, updateTTDPegawaiNIPByNIP, arg.NipBaru, arg.Nip)
+	return err
+}
