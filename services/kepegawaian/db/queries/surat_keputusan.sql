@@ -172,6 +172,22 @@ WHERE
     AND fds.file_id = @id::varchar;
 
 -- name: ListKoreksiSuratKeputusanByPNSID :many
+WITH RECURSIVE unit_kerja_children AS (
+    SELECT uk.id, uk.diatasan_id, 1 as depth
+    FROM ref_unit_kerja uk
+    WHERE uk.id = sqlc.narg('unit_kerja_id')::VARCHAR
+      AND sqlc.narg('unit_kerja_id')::VARCHAR IS NOT NULL
+      AND uk.deleted_at IS NULL
+
+    UNION ALL
+
+    SELECT uk.id, uk.diatasan_id, ukc.depth + 1
+    FROM ref_unit_kerja uk
+    JOIN unit_kerja_children ukc ON uk.diatasan_id = ukc.id
+    WHERE uk.deleted_at IS NULL
+      AND ukc.depth < 10
+)
+
 SELECT
     fds.file_id,
     p.nama as nama_pemilik_sk,
@@ -190,17 +206,17 @@ LEFT JOIN ref_unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
 LEFT JOIN ref_golongan g ON p.gol_id = g.id AND g.deleted_at IS NULL
 LEFT JOIN ref_jabatan rj on p.jabatan_instansi_id = rj.kode_jabatan and rj.deleted_at is null
 WHERE fdc.deleted_at IS NULL
-    AND (sqlc.narg('unit_kerja_id')::VARCHAR IS NULL
-        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.id
-        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_1
-        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_2
-        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_3
-        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_4)
+    AND (
+        sqlc.narg('unit_kerja_id')::VARCHAR IS NULL
+        OR p.unor_id IN (
+            SELECT id FROM unit_kerja_children
+        )
+    )
     AND (sqlc.narg('nama_pemilik')::VARCHAR IS NULL OR p.nama ILIKE '%' || sqlc.narg('nama_pemilik')::VARCHAR || '%')
     AND (sqlc.narg('nip_pemilik')::VARCHAR IS NULL OR fds.nip_sk = sqlc.narg('nip_pemilik')::VARCHAR)
     AND (sqlc.narg('golongan_id')::INTEGER IS NULL OR p.gol_id = sqlc.narg('golongan_id')::INTEGER)
     AND (sqlc.narg('jabatan_id')::VARCHAR IS NULL OR p.jabatan_instansi_id = sqlc.narg('jabatan_id')::VARCHAR)
-    AND (sqlc.narg('kategori_sk')::VARCHAR is NULL OR fds.kategori ILIKE '%' || sqlc.narg('kategori_sk')::VARCHAR || '%')
+    AND (sqlc.narg('kategori_sk')::VARCHAR IS NULL OR fds.kategori ILIKE '%' || sqlc.narg('kategori_sk')::VARCHAR || '%')
     AND (sqlc.narg('no_sk')::VARCHAR IS NULL OR fds.no_sk ILIKE '%' || sqlc.narg('no_sk')::VARCHAR || '%')
     AND (
         sqlc.narg('status_koreksi')::integer[] IS NULL
@@ -212,24 +228,40 @@ ORDER BY fds.created_at DESC
 LIMIT $1 OFFSET $2;
 
 -- name: CountKoreksiSuratKeputusanByPNSID :one
-select
+WITH RECURSIVE unit_kerja_children AS (
+    SELECT uk.id, uk.diatasan_id, 1 as depth
+    FROM ref_unit_kerja uk
+    WHERE uk.id = sqlc.narg('unit_kerja_id')::VARCHAR
+      AND sqlc.narg('unit_kerja_id')::VARCHAR IS NOT NULL
+      AND uk.deleted_at IS NULL
+
+    UNION ALL
+
+    SELECT uk.id, uk.diatasan_id, ukc.depth + 1
+    FROM ref_unit_kerja uk
+    JOIN unit_kerja_children ukc ON uk.diatasan_id = ukc.id
+    WHERE uk.deleted_at IS NULL
+      AND ukc.depth < 10
+)
+
+SELECT
     count(1) as total
 FROM koreksi_surat_keputusan fdc
 JOIN surat_keputusan fds ON fds.file_id = fdc.file_id AND fds.deleted_at IS NULL
 JOIN pegawai p ON fds.nip_sk = p.nip_baru AND p.deleted_at IS NULL
 LEFT JOIN ref_unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
 WHERE fdc.deleted_at IS NULL
-    AND (sqlc.narg('unit_kerja_id')::VARCHAR IS NULL
-        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.id
-        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_1
-        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_2
-        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_3
-        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_4)
+    AND (
+        sqlc.narg('unit_kerja_id')::VARCHAR IS NULL
+        OR p.unor_id IN (
+            SELECT id FROM unit_kerja_children
+        )
+    )
     AND (sqlc.narg('nama_pemilik')::VARCHAR IS NULL OR p.nama ILIKE '%' || sqlc.narg('nama_pemilik')::VARCHAR || '%')
     AND (sqlc.narg('nip_pemilik')::VARCHAR IS NULL OR fds.nip_sk = sqlc.narg('nip_pemilik')::VARCHAR)
     AND (sqlc.narg('golongan_id')::INTEGER IS NULL OR p.gol_id = sqlc.narg('golongan_id')::INTEGER)
     AND (sqlc.narg('jabatan_id')::VARCHAR IS NULL OR p.jabatan_instansi_id = sqlc.narg('jabatan_id')::VARCHAR)
-    AND (sqlc.narg('kategori_sk')::VARCHAR is NULL OR fds.kategori ILIKE '%' || sqlc.narg('kategori_sk')::VARCHAR || '%')
+    AND (sqlc.narg('kategori_sk')::VARCHAR IS NULL OR fds.kategori ILIKE '%' || sqlc.narg('kategori_sk')::VARCHAR || '%')
     AND (sqlc.narg('no_sk')::VARCHAR IS NULL OR fds.no_sk ILIKE '%' || sqlc.narg('no_sk')::VARCHAR || '%')
     AND (
         sqlc.narg('status_koreksi')::integer[] IS NULL
@@ -342,6 +374,22 @@ INSERT INTO riwayat_surat_keputusan (
 );  
 
 -- name: ListTandaTanganSuratKeputusanByPNSID :many
+WITH RECURSIVE unit_kerja_children AS (
+    SELECT uk.id, uk.diatasan_id, 1 as depth
+    FROM ref_unit_kerja uk
+    WHERE uk.id = sqlc.narg('unit_kerja_id')::VARCHAR
+      AND sqlc.narg('unit_kerja_id')::VARCHAR IS NOT NULL
+      AND uk.deleted_at IS NULL
+
+    UNION ALL
+
+    SELECT uk.id, uk.diatasan_id, ukc.depth + 1
+    FROM ref_unit_kerja uk
+    JOIN unit_kerja_children ukc ON uk.diatasan_id = ukc.id
+    WHERE uk.deleted_at IS NULL
+      AND ukc.depth < 10
+)
+
 SELECT
     fds.file_id,
     p.nama as nama_pemilik_sk,
@@ -359,12 +407,12 @@ LEFT JOIN ref_unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
 LEFT JOIN ref_golongan g ON p.gol_id = g.id AND g.deleted_at IS NULL
 LEFT JOIN ref_jabatan rj on p.jabatan_instansi_id = rj.kode_jabatan and rj.deleted_at is null
 WHERE fds.deleted_at IS NULL
-    AND (sqlc.narg('unit_kerja_id')::VARCHAR IS NULL
-        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.id
-        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_1
-        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_2
-        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_3
-        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_4)
+    AND (
+        sqlc.narg('unit_kerja_id')::VARCHAR IS NULL
+        OR p.unor_id IN (
+            SELECT id FROM unit_kerja_children
+        )
+    )
     AND (sqlc.narg('nama_pemilik')::VARCHAR IS NULL OR p.nama ILIKE '%' || sqlc.narg('nama_pemilik')::VARCHAR || '%')
     AND (sqlc.narg('nip_pemilik')::VARCHAR IS NULL OR fds.nip_sk = sqlc.narg('nip_pemilik')::VARCHAR)
     AND (sqlc.narg('golongan_id')::INTEGER IS NULL OR p.gol_id = sqlc.narg('golongan_id')::INTEGER)
@@ -372,33 +420,49 @@ WHERE fds.deleted_at IS NULL
     AND (sqlc.narg('kategori_sk')::VARCHAR is NULL OR fds.kategori ILIKE '%' || sqlc.narg('kategori_sk')::VARCHAR || '%')
     AND (sqlc.narg('no_sk')::VARCHAR IS NULL OR fds.no_sk ILIKE '%' || sqlc.narg('no_sk')::VARCHAR || '%')
     AND fds.status_koreksi = 1 
-    and (sqlc.narg('status_ttd')::integer is NULL or fds.status_ttd = sqlc.narg('status_ttd')::integer)
+    AND (sqlc.narg('status_ttd')::integer is NULL OR fds.status_ttd = sqlc.narg('status_ttd')::integer)
     AND fds.ttd_pegawai_id = @pns_id::varchar
     AND fds.ds_ok = true
 ORDER BY fds.created_at DESC
 LIMIT $1 OFFSET $2;
 
 -- name: CountTandaTanganSuratKeputusanByPNSID :one
-select
+WITH RECURSIVE unit_kerja_children AS (
+    SELECT uk.id, uk.diatasan_id, 1 as depth
+    FROM ref_unit_kerja uk
+    WHERE uk.id = sqlc.narg('unit_kerja_id')::VARCHAR
+      AND sqlc.narg('unit_kerja_id')::VARCHAR IS NOT NULL
+      AND uk.deleted_at IS NULL
+
+    UNION ALL
+
+    SELECT uk.id, uk.diatasan_id, ukc.depth + 1
+    FROM ref_unit_kerja uk
+    JOIN unit_kerja_children ukc ON uk.diatasan_id = ukc.id
+    WHERE uk.deleted_at IS NULL
+      AND ukc.depth < 10
+)
+
+SELECT
     count(1) as total
 FROM surat_keputusan fds
 JOIN pegawai p ON fds.nip_sk = p.nip_baru AND p.deleted_at IS NULL
 LEFT JOIN ref_unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
 WHERE fds.deleted_at IS NULL
-    AND (sqlc.narg('unit_kerja_id')::VARCHAR IS NULL
-        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.id
-        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_1
-        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_2
-        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_3
-        OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_4)
+    AND (
+        sqlc.narg('unit_kerja_id')::VARCHAR IS NULL
+        OR p.unor_id IN (
+            SELECT id FROM unit_kerja_children
+        )
+    )
     AND (sqlc.narg('nama_pemilik')::VARCHAR IS NULL OR p.nama ILIKE '%' || sqlc.narg('nama_pemilik')::VARCHAR || '%')
     AND (sqlc.narg('nip_pemilik')::VARCHAR IS NULL OR fds.nip_sk = sqlc.narg('nip_pemilik')::VARCHAR)
     AND (sqlc.narg('golongan_id')::INTEGER IS NULL OR p.gol_id = sqlc.narg('golongan_id')::INTEGER)
     AND (sqlc.narg('jabatan_id')::VARCHAR IS NULL OR p.jabatan_instansi_id = sqlc.narg('jabatan_id')::VARCHAR)
-    AND (sqlc.narg('kategori_sk')::VARCHAR is NULL OR fds.kategori ILIKE '%' || sqlc.narg('kategori_sk')::VARCHAR || '%')
+    AND (sqlc.narg('kategori_sk')::VARCHAR IS NULL OR fds.kategori ILIKE '%' || sqlc.narg('kategori_sk')::VARCHAR || '%')
     AND (sqlc.narg('no_sk')::VARCHAR IS NULL OR fds.no_sk ILIKE '%' || sqlc.narg('no_sk')::VARCHAR || '%')
     AND fds.status_koreksi = 1 
-    and (sqlc.narg('status_ttd')::integer is NULL or fds.status_ttd = sqlc.narg('status_ttd')::integer)
+    AND (sqlc.narg('status_ttd')::integer IS NULL OR fds.status_ttd = sqlc.narg('status_ttd')::integer)
     AND fds.ttd_pegawai_id = @pns_id::varchar
     AND fds.ds_ok = true;
 

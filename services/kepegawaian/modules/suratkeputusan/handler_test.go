@@ -2018,6 +2018,49 @@ func Test_handler_listKoreksi(t *testing.T) {
 			}`,
 		},
 		{
+			name:          "ok belum dikoreksi with params unit kerja tengah",
+			requestPath:   "/v1/koreksi-surat-keputusan",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestQuery: url.Values{
+				"status":        []string{"Belum Dikoreksi"},
+				"unit_kerja_id": []string{"unor-2"},
+			},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data" : [
+				{
+						"id_sk": "sk-003",
+						"jabatan_pemilik": "",
+						"nama_pemilik": "pemilik_sk",
+						"nip_pemilik": "123456789",
+						"kategori_sk": "Kenaikan Gaji",
+						"no_sk": "SK-003/2024",
+						"tanggal_sk": "2024-03-10",
+						"unit_kerja": "Bawah - Tengah - Paling Atas",
+						"nama_golongan_pemilik": "I/a",
+						"pangkat_golongan_pemilik": "Juru Muda"
+					},
+					{
+						"id_sk": "sk-004",
+						"jabatan_pemilik": "",
+						"nama_pemilik": "pemilik_sk",
+						"nip_pemilik": "123456789",
+						"kategori_sk": "Kenaikan Gaji",
+						"no_sk": "SK-004/2024",
+						"tanggal_sk": "2024-03-10",
+						"unit_kerja": "Bawah - Tengah - Paling Atas",
+						"nama_golongan_pemilik": "I/a",
+						"pangkat_golongan_pemilik": "Juru Muda"
+					}
+				],
+				"meta": {
+					"limit": 10,
+					"offset": 0,
+					"total": 2
+				}
+			}`,
+		},
+		{
 			name:             "error: auth header tidak valid",
 			requestPath:      "/v1/koreksi-surat-keputusan",
 			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
@@ -3199,6 +3242,37 @@ func Test_handler_listTandatangan(t *testing.T) {
 						"unit_kerja": "Bawah 2",
 						"nama_golongan_pemilik": "I/b",
 						"pangkat_golongan_pemilik": "Juru Muda Tingkat I"
+					}
+				],
+				"meta": {
+					"limit": 10,
+					"offset": 0,
+					"total": 1
+				}
+			}`,
+		},
+		{
+			name:          "ok belum ditandatangan: with unor parent",
+			requestPath:   "/v1/tanda-tangan-surat-keputusan",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestQuery: url.Values{
+				"status":        []string{"Belum Ditandatangan"},
+				"unit_kerja_id": []string{"unor-2"},
+			},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `{
+				"data": [
+					{
+						"id_sk": "sk-003",
+						"jabatan_pemilik": "",
+						"nama_pemilik": "pemilik_sk",
+						"nip_pemilik": "123456789",
+						"kategori_sk": "Kenaikan Gaji",
+						"no_sk": "SK-003/2024",
+						"tanggal_sk": "2024-03-10",
+						"unit_kerja": "Bawah - Tengah - Paling Atas",
+						"nama_golongan_pemilik": "I/a",
+						"pangkat_golongan_pemilik": "Juru Muda"
 					}
 				],
 				"meta": {
