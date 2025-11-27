@@ -1721,6 +1721,156 @@ paths:
       responses:
         "204":
           description: Berhasil dihapus (soft delete)
+  /v1/admin/pegawai/ppnpn:
+    get:
+      tags:
+        - Admin Pegawai Aktif
+      summary: List Pegawai PPNPN
+      description: Listing pegawai PPNPN dari sisi admin
+      operationId: adminListPegawaiPPNPN
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+        - name: keyword
+          in: query
+          schema:
+            type: string
+            description: Kata kunci untuk pencarian pegawai berdasarkan nama / NIP
+        - name: unit_id
+          in: query
+          schema:
+            type: string
+            description: ID unit kerja untuk memfilter pegawai sesuai unit kerjanya
+        - name: golongan_id
+          in: query
+          schema:
+            type: integer
+            format: int32
+            description: ID golongan untuk memfilter pegawai sesuai golongannya
+        - name: jabatan_id
+          in: query
+          schema:
+            type: string
+            description: ID jabatan untuk memfilter pegawai sesuai jabatannya
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: ["PNS", "CPNS", "MPP"]
+            description: Status pegawai untuk memfilter data
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        pns_id:
+                          type: string
+                        nip:
+                          type: string
+                        nama:
+                          type: string
+                        gelar_depan:
+                          type: string
+                        gelar_belakang:
+                          type: string
+                        golongan:
+                          type: string
+                        jabatan:
+                          type: string
+                        unit_kerja:
+                          type: string
+                        status:
+                          type: string
+                        photo:
+                          type: string
+                          nullable: true
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+  /v1/admin/pegawai/nonaktif:
+    get:
+      tags:
+        - Admin Pegawai Aktif
+      summary: List Pegawai Non Aktif
+      description: Listing pegawai non aktif dari sisi admin
+      operationId: adminListPegawaiNonAktif
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+        - name: keyword
+          in: query
+          schema:
+            type: string
+            description: Kata kunci untuk pencarian pegawai berdasarkan nama / NIP
+        - name: unit_id
+          in: query
+          schema:
+            type: string
+            description: ID unit kerja untuk memfilter pegawai sesuai unit kerjanya
+        - name: golongan_id
+          in: query
+          schema:
+            type: integer
+            format: int32
+            description: ID golongan untuk memfilter pegawai sesuai golongannya
+        - name: jabatan_id
+          in: query
+          schema:
+            type: string
+            description: ID jabatan untuk memfilter pegawai sesuai jabatannya
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: ["PNS", "CPNS", "MPP"]
+            description: Status pegawai untuk memfilter data
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        pns_id:
+                          type: string
+                        nip:
+                          type: string
+                        nama:
+                          type: string
+                        gelar_depan:
+                          type: string
+                        gelar_belakang:
+                          type: string
+                        golongan:
+                          type: string
+                        jabatan:
+                          type: string
+                        unit_kerja:
+                          type: string
+                        status:
+                          type: string
+                        photo:
+                          type: string
+                          nullable: true
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
   /v1/admin/pegawai:
     get:
       tags:
@@ -1758,12 +1908,6 @@ paths:
           schema:
             type: string
             enum: ["PNS", "CPNS", "MPP"]
-            description: Status pegawai untuk memfilter data
-        - name: tipe
-          in: query
-          schema:
-            type: string
-            enum: ["aktif", "ppnpn", "nonaktif"]
             description: Status pegawai untuk memfilter data
       responses:
         "200":
