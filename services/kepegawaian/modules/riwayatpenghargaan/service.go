@@ -2,8 +2,10 @@ package riwayatpenghargaan
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -12,12 +14,14 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/db"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/lib/typeutil"
 	repo "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/db/repository"
+	upd "gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/usulanperubahandata"
 )
 
 type repository interface {
 	ListRiwayatPenghargaan(ctx context.Context, arg repo.ListRiwayatPenghargaanParams) ([]repo.ListRiwayatPenghargaanRow, error)
 	CountRiwayatPenghargaan(ctx context.Context, nip string) (int64, error)
 	GetBerkasRiwayatPenghargaan(ctx context.Context, arg repo.GetBerkasRiwayatPenghargaanParams) (pgtype.Text, error)
+	GetRiwayatPenghargaan(ctx context.Context, arg repo.GetRiwayatPenghargaanParams) (repo.GetRiwayatPenghargaanRow, error)
 	DeleteRiwayatPenghargaan(ctx context.Context, arg repo.DeleteRiwayatPenghargaanParams) (int64, error)
 	CreateRiwayatPenghargaan(ctx context.Context, arg repo.CreateRiwayatPenghargaanParams) (int32, error)
 	UpdateRiwayatPenghargaan(ctx context.Context, arg repo.UpdateRiwayatPenghargaanParams) (int64, error)
@@ -150,4 +154,112 @@ func (s *service) delete(ctx context.Context, id int32, nip string) (bool, error
 		return false, nil
 	}
 	return true, nil
+}
+
+// GeneratePerubahanData implements usulanperubahandata.ServiceInterface
+func (s *service) GeneratePerubahanData(ctx context.Context, nip, action, dataID string, requestData json.RawMessage) ([]byte, error) {
+	var data usulanPerubahanData
+	if action == upd.ActionUpdate || action == upd.ActionDelete {
+		id, err := strconv.ParseInt(dataID, 10, 32)
+		if err != nil {
+			return nil, api.NewMultiError([]error{errors.New("invalid data ID")})
+		}
+
+		prevData, err := s.repo.GetRiwayatPenghargaan(ctx, repo.GetRiwayatPenghargaanParams{
+			Nip: nip,
+			ID:  int32(id),
+		})
+		if err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				return nil, api.NewMultiError([]error{errors.New("data riwayat penghargaan tidak ditemukan")})
+			}
+			return nil, err
+		}
+
+		data.JenisPenghargaan[0] = prevData.JenisPenghargaan
+		data.NamaPenghargaan[0] = prevData.NamaPenghargaan
+		data.Deskripsi[0] = prevData.DeskripsiPenghargaan
+		data.Tanggal[0] = db.Date(prevData.TanggalPenghargaan.Time)
+	}
+
+	if action == upd.ActionCreate || action == upd.ActionUpdate {
+		var req upsertParams
+		if err := json.Unmarshal(requestData, &req); err != nil {
+			return nil, err
+		}
+
+		_, valid := s.validateJenisPenghargaan(req.JenisPenghargaan)
+		if !valid {
+			return nil, NewError(ErrJenisPenghargaanInvalid, req.JenisPenghargaan)
+		}
+
+		data.JenisPenghargaan[1] = pgtype.Text{String: req.JenisPenghargaan, Valid: true}
+		data.NamaPenghargaan[1] = pgtype.Text{String: req.NamaPenghargaan, Valid: true}
+		data.Deskripsi[1] = pgtype.Text{String: req.Deskripsi, Valid: req.Deskripsi != ""}
+		data.Tanggal[1] = req.Tanggal
+	}
+
+	bytes, err := json.Marshal(data)
+	if err != nil {
+		return nil, err
+	}
+	return bytes, nil
+}
+
+// SyncPerubahanData implements usulanperubahandata.ServiceInterface
+func (*service) SyncPerubahanData(ctx context.Context, sqlcTx *repo.Queries, nip, action, dataID string, perubahanData []byte) error {
+	var data usulanPerubahanData
+	if action == upd.ActionCreate || action == upd.ActionUpdate {
+		if err := json.Unmarshal(perubahanData, &data); err != nil {
+			return fmt.Errorf("json unmarshal: %w", err)
+		}
+	}
+
+	switch action {
+	case upd.ActionCreate:
+		if _, err := sqlcTx.CreateRiwayatPenghargaan(ctx, repo.CreateRiwayatPenghargaanParams{
+			Nip:                  pgtype.Text{String: nip, Valid: true},
+			NamaPenghargaan:      data.NamaPenghargaan[1],
+			JenisPenghargaan:     data.JenisPenghargaan[1],
+			DeskripsiPenghargaan: data.Deskripsi[1],
+			TanggalPenghargaan:   data.Tanggal[1].ToPgtypeDate(),
+		}); err != nil {
+			return fmt.Errorf("repo create: %w", err)
+		}
+
+	case upd.ActionUpdate:
+		id, err := strconv.ParseInt(dataID, 10, 32)
+		if err != nil {
+			return fmt.Errorf("invalid data ID: %w", err)
+		}
+
+		if _, err := sqlcTx.UpdateRiwayatPenghargaan(ctx, repo.UpdateRiwayatPenghargaanParams{
+			ID:                   int32(id),
+			Nip:                  pgtype.Text{String: nip, Valid: true},
+			NamaPenghargaan:      data.NamaPenghargaan[1],
+			JenisPenghargaan:     data.JenisPenghargaan[1],
+			DeskripsiPenghargaan: data.Deskripsi[1],
+			TanggalPenghargaan:   data.Tanggal[1].ToPgtypeDate(),
+		}); err != nil {
+			return fmt.Errorf("repo update: %w", err)
+		}
+
+	case upd.ActionDelete:
+		id, err := strconv.ParseInt(dataID, 10, 32)
+		if err != nil {
+			return fmt.Errorf("invalid data ID: %w", err)
+		}
+
+		if _, err := sqlcTx.DeleteRiwayatPenghargaan(ctx, repo.DeleteRiwayatPenghargaanParams{
+			ID:  int32(id),
+			Nip: nip,
+		}); err != nil {
+			return fmt.Errorf("repo delete: %w", err)
+		}
+
+	default:
+		return errors.New("unimplemented action")
+	}
+
+	return nil
 }

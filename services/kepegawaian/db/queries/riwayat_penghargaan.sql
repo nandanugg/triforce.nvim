@@ -22,6 +22,18 @@ WHERE nip = $1
   AND rpu.id = $2
   AND rpu.deleted_at is null;
 
+-- name: GetRiwayatPenghargaan :one
+SELECT
+    id,
+    jenis_penghargaan,
+    nama_penghargaan,
+    deskripsi_penghargaan,
+    tanggal_penghargaan
+FROM riwayat_penghargaan_umum
+WHERE nip = @nip::varchar
+  AND id = @id
+  AND deleted_at is null;
+
 -- name: UpdateRiwayatPenghargaanNamaNipByNIP :exec
 UPDATE riwayat_penghargaan_umum
 SET     
