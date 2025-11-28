@@ -200,6 +200,631 @@ func Test_handler_getProfile(t *testing.T) {
 	}
 }
 
+func Test_handler_listAdminNonAktif(t *testing.T) {
+	t.Parallel()
+
+	dbData := `
+		insert into ref_unit_kerja
+			(id,  diatasan_id, nama_unor, nama_jabatan,    pemimpin_pns_id, deleted_at) values
+			('unor-1', null, 'Paling Atas', 'Atasan 1', null, null),
+			('unor-2', 'unor-1', 'Tengah', 'Atasan 2', null, null),
+			('unor-3', 'unor-2', 'Bawah', 'Atasan 3', null, null),
+			('unor-4', 'unor-1', 'Tengah deleted', 'Atasan 4', null, now()),
+			('unor-5', 'unor-4', 'Bawah 2', 'Atasan 5', null, null);
+		INSERT INTO ref_kedudukan_hukum (id, nama, is_pegawai_aktif, deleted_at) VALUES
+			(1, 'Aktif', true, NULL),
+			(2, 'Masa Persiapan Pensiun', true, NULL),
+			(3, 'Aktif deleted', true, NOW()),
+			(99, 'Pensiun', false, NULL);
+
+		INSERT INTO ref_jabatan (id,kode_jabatan, nama_jabatan, deleted_at) VALUES
+			(1,'JBT-001', 'Analis Kebijakan Madya', NULL),
+			(2,'JBT-002', 'Kepala Subbagian Perencanaan', NULL),
+			(3,'JBT-003', 'Staf Administrasi Umum', NOW());
+
+		INSERT INTO ref_golongan (id, nama, deleted_at) VALUES
+			(10, 'III/a', NULL),
+			(11, 'III/b', NULL),
+			(12, 'III/c', NOW());
+
+		INSERT INTO pegawai (pns_id, status_pegawai, nip_baru, nama, gelar_depan, gelar_belakang, gol_id, jabatan_instansi_id, unor_id, kedudukan_hukum_id, status_cpns_pns, deleted_at, foto) VALUES
+			(1001, 1, '199001012022031001', 'Budi Santoso', 'Drs.', 'M.Pd.', 10, 'JBT-001', 'unor-1', 99, 'PNS', NULL, 'foto.png'),
+			(1002, 3, '198903152022041002', 'Siti Aminah', NULL, 'S.Sos.', 11, 'JBT-002', 'unor-2', 1,'CPNS', NULL, 'foto1.png'),
+			(1003, 3, '198812312020121003', 'Andi Rahman', NULL, NULL, 10, 'JBT-001', 'unor-3', 2,'P', NULL, 'foto2.png'),
+			(1004, 3, '199505052022051004', 'Lina Pratiwi', NULL, NULL, 10, 'JBT-001', 'unor-4', 3, 'PNS', NULL, 'foto3.png'),
+			(1005, 3, '199707072022061005', 'Rizky Fauzan', NULL, NULL, 10, 'JBT-003', 'unor-5', 1, 'C', NULL, NULL),
+			(1006, 3, '199808082022071006', 'Sari Dewi', NULL, NULL, 12, 'JBT-001', 'unor-1', 1, 'PNS', NULL, 'foto4.png'),
+			(1007, 3, '199709092022081007', 'Agung Herkules', NULL, NULL, 12, 'JBT-001', 'unor-1', 1, 'PNS', NOW(), NULL),
+			(1008, 3, '198710102022081008', 'Rini Sukmawati', NULL, NULL, 12, 'JBT-001', 'unor-1', 1, '1', NULL, NULL),
+			(1009, 1, '198810102022081008', 'Sarjo', NULL, NULL, 12, 'JBT-001', 'unor-1', 99, '1', NULL, 'foto5.png');
+	`
+	pgxconn := dbtest.New(t, dbmigrations.FS)
+	_, err := pgxconn.Exec(context.Background(), dbData)
+	require.NoError(t, err)
+
+	e, err := api.NewEchoServer(docs.OpenAPIBytes)
+	require.NoError(t, err)
+
+	authSvc := apitest.NewAuthService(api.Kode_Pegawai_Read)
+	RegisterRoutes(e, sqlc.New(pgxconn), pgxconn, api.NewAuthMiddleware(authSvc, apitest.Keyfunc))
+
+	authHeader := []string{apitest.GenerateAuthHeader("123456789")}
+	tests := []struct {
+		name             string
+		requestHeader    http.Header
+		requestQuery     url.Values
+		wantResponseCode int
+		wantResponseBody string
+	}{
+		{
+			name:             "ok",
+			requestHeader:    http.Header{"Authorization": authHeader},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `
+			{
+				"data": [
+					{
+						"pns_id": "1003",
+						"gelar_belakang": "",
+						"gelar_depan": "",
+						"golongan": "III/a",
+						"jabatan": "Analis Kebijakan Madya",
+						"nama": "Andi Rahman",
+						"nip": "198812312020121003",
+						"status": "MPP",
+						"unit_kerja": "Bawah - Tengah - Paling Atas",
+						"photo": "foto2.png"
+					},
+					{
+						"pns_id": "1001",
+						"gelar_belakang": "M.Pd.",
+						"gelar_depan": "Drs.",
+						"golongan": "III/a",
+						"jabatan": "Analis Kebijakan Madya",
+						"nama": "Budi Santoso",
+						"nip": "199001012022031001",
+						"status": "PNS",
+						"unit_kerja": "Paling Atas",
+						"photo": "foto.png"
+					},
+					{
+						"pns_id": "1008",
+						"gelar_belakang": "",
+						"gelar_depan": "",
+						"golongan": "",
+						"jabatan": "Analis Kebijakan Madya",
+						"nama": "Rini Sukmawati",
+						"nip": "198710102022081008",
+						"status": "1",
+						"unit_kerja": "Paling Atas",
+						"photo": null
+					},
+					{
+						"pns_id": "1005",
+						"gelar_belakang": "",
+						"gelar_depan": "",
+						"golongan": "III/a",
+						"jabatan": "",
+						"nama": "Rizky Fauzan",
+						"nip": "199707072022061005",
+						"status": "CPNS",
+						"unit_kerja": "Bawah 2",
+						"photo": null
+					},
+					{
+						"pns_id": "1006",
+						"gelar_belakang": "",
+						"gelar_depan": "",
+						"golongan": "",
+						"jabatan": "Analis Kebijakan Madya",
+						"nama": "Sari Dewi",
+						"nip": "199808082022071006",
+						"status": "PNS",
+						"unit_kerja": "Paling Atas",
+						"photo": "foto4.png"
+					},
+					{
+						"pns_id": "1009",
+						"gelar_belakang": "",
+						"gelar_depan": "",
+						"golongan": "",
+						"jabatan": "Analis Kebijakan Madya",
+						"nama": "Sarjo",
+						"nip": "198810102022081008",
+						"status": "1",
+						"unit_kerja": "Paling Atas",
+						"photo": "foto5.png"
+					},
+					{
+						"pns_id": "1002",
+						"gelar_belakang": "S.Sos.",
+						"gelar_depan": "",
+						"golongan": "III/b",
+						"jabatan": "Kepala Subbagian Perencanaan",
+						"nama": "Siti Aminah",
+						"nip": "198903152022041002",
+						"status": "CPNS",
+						"unit_kerja": "Tengah - Paling Atas",
+						"photo": "foto1.png"
+					}
+				],
+				"meta": {
+					"limit": 10,
+					"offset": 0,
+					"total": 7
+				}
+			}`,
+		},
+		{
+			name:          "ok with limit offset",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestQuery: url.Values{
+				"limit":  []string{"2"},
+				"offset": []string{"1"},
+			},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `
+			{
+				"data": [
+					{
+						"pns_id": "1001",
+						"gelar_belakang": "M.Pd.",
+						"gelar_depan": "Drs.",
+						"golongan": "III/a",
+						"jabatan": "Analis Kebijakan Madya",
+						"nama": "Budi Santoso",
+						"nip": "199001012022031001",
+						"status": "PNS",
+						"unit_kerja": "Paling Atas",
+						"photo": "foto.png"
+					},
+					{
+						"pns_id": "1008",
+						"gelar_belakang": "",
+						"gelar_depan": "",
+						"golongan": "",
+						"jabatan": "Analis Kebijakan Madya",
+						"nama": "Rini Sukmawati",
+						"nip": "198710102022081008",
+						"status": "1",
+						"unit_kerja": "Paling Atas",
+						"photo": null
+					}
+				],
+				"meta": {
+					"limit": 2,
+					"offset": 1,
+					"total": 7
+				}
+			}`,
+		},
+		{
+			name:          "ok with keyword nama",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestQuery: url.Values{
+				"keyword": []string{"Siti"},
+			},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `
+			{
+				"data": [
+					{
+						"pns_id": "1002",
+						"gelar_belakang": "S.Sos.",
+						"gelar_depan": "",
+						"golongan": "III/b",
+						"jabatan": "Kepala Subbagian Perencanaan",
+						"nama": "Siti Aminah",
+						"nip": "198903152022041002",
+						"status": "CPNS",
+						"unit_kerja": "Tengah - Paling Atas",
+						"photo": "foto1.png"
+					}
+				],
+				"meta": {
+					"limit": 10,
+					"offset": 0,
+					"total": 1
+				}
+			}`,
+		},
+		{
+			name:          "ok with keyword nip",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestQuery: url.Values{
+				"keyword": []string{"199"},
+			},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `
+			{
+				"data": [
+					{
+						"pns_id": "1001",
+						"gelar_belakang": "M.Pd.",
+						"gelar_depan": "Drs.",
+						"golongan": "III/a",
+						"jabatan": "Analis Kebijakan Madya",
+						"nama": "Budi Santoso",
+						"nip": "199001012022031001",
+						"status": "PNS",
+						"unit_kerja": "Paling Atas",
+						"photo": "foto.png"
+					},
+					{
+						"pns_id": "1005",
+						"gelar_belakang": "",
+						"gelar_depan": "",
+						"golongan": "III/a",
+						"jabatan": "",
+						"nama": "Rizky Fauzan",
+						"nip": "199707072022061005",
+						"status": "CPNS",
+						"unit_kerja": "Bawah 2",
+						"photo": null
+					},
+					{
+						"pns_id": "1006",
+						"gelar_belakang": "",
+						"gelar_depan": "",
+						"golongan": "",
+						"jabatan": "Analis Kebijakan Madya",
+						"nama": "Sari Dewi",
+						"nip": "199808082022071006",
+						"status": "PNS",
+						"unit_kerja": "Paling Atas",
+						"photo": "foto4.png"
+					}
+				],
+				"meta": {
+					"limit": 10,
+					"offset": 0,
+					"total": 3
+				}
+			}`,
+		},
+		{
+			name:          "ok with unor",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestQuery: url.Values{
+				"unor_id": []string{"unor-1"},
+			},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `
+			{
+				"data": [
+					{
+						"pns_id": "1003",
+						"gelar_belakang": "",
+						"gelar_depan": "",
+						"golongan": "III/a",
+						"jabatan": "Analis Kebijakan Madya",
+						"nama": "Andi Rahman",
+						"nip": "198812312020121003",
+						"status": "MPP",
+						"unit_kerja": "Bawah - Tengah - Paling Atas",
+						"photo": "foto2.png"
+					},
+					{
+						"pns_id": "1001",
+						"gelar_belakang": "M.Pd.",
+						"gelar_depan": "Drs.",
+						"golongan": "III/a",
+						"jabatan": "Analis Kebijakan Madya",
+						"nama": "Budi Santoso",
+						"nip": "199001012022031001",
+						"status": "PNS",
+						"unit_kerja": "Paling Atas",
+						"photo": "foto.png"
+					},
+					{
+						"pns_id": "1008",
+						"gelar_belakang": "",
+						"gelar_depan": "",
+						"golongan": "",
+						"jabatan": "Analis Kebijakan Madya",
+						"nama": "Rini Sukmawati",
+						"nip": "198710102022081008",
+						"status": "1",
+						"unit_kerja": "Paling Atas",
+						"photo": null
+					},
+					{
+						"pns_id": "1005",
+						"gelar_belakang": "",
+						"gelar_depan": "",
+						"golongan": "III/a",
+						"jabatan": "",
+						"nama": "Rizky Fauzan",
+						"nip": "199707072022061005",
+						"status": "CPNS",
+						"unit_kerja": "Bawah 2",
+						"photo": null
+					},
+					{
+						"pns_id": "1006",
+						"gelar_belakang": "",
+						"gelar_depan": "",
+						"golongan": "",
+						"jabatan": "Analis Kebijakan Madya",
+						"nama": "Sari Dewi",
+						"nip": "199808082022071006",
+						"status": "PNS",
+						"unit_kerja": "Paling Atas",
+						"photo": "foto4.png"
+					},
+					{
+						"pns_id": "1009",
+						"gelar_belakang": "",
+						"gelar_depan": "",
+						"golongan": "",
+						"jabatan": "Analis Kebijakan Madya",
+						"nama": "Sarjo",
+						"nip": "198810102022081008",
+						"status": "1",
+						"unit_kerja": "Paling Atas",
+						"photo": "foto5.png"
+					},
+					{
+						"pns_id": "1002",
+						"gelar_belakang": "S.Sos.",
+						"gelar_depan": "",
+						"golongan": "III/b",
+						"jabatan": "Kepala Subbagian Perencanaan",
+						"nama": "Siti Aminah",
+						"nip": "198903152022041002",
+						"status": "CPNS",
+						"unit_kerja": "Tengah - Paling Atas",
+						"photo": "foto1.png"
+					}
+				],
+				"meta": {
+					"limit": 10,
+					"offset": 0,
+					"total": 7
+				}
+			}`,
+		},
+		{
+			name:          "ok with golonganID",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestQuery: url.Values{
+				"golongan_id": []string{"11"},
+			},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `
+			{
+				"data": [
+					{
+						"pns_id": "1002",
+						"gelar_belakang": "S.Sos.",
+						"gelar_depan": "",
+						"golongan": "III/b",
+						"jabatan": "Kepala Subbagian Perencanaan",
+						"nama": "Siti Aminah",
+						"nip": "198903152022041002",
+						"status": "CPNS",
+						"unit_kerja": "Tengah - Paling Atas",
+						"photo": "foto1.png"
+					}
+				],
+				"meta": {
+					"limit": 10,
+					"offset": 0,
+					"total": 1
+				}
+			}`,
+		},
+		{
+			name:          "ok with status PNS",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestQuery: url.Values{
+				"status": []string{"PNS"},
+			},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `
+			{
+				"data": [
+					{
+						"pns_id": "1001",
+						"gelar_belakang": "M.Pd.",
+						"gelar_depan": "Drs.",
+						"golongan": "III/a",
+						"jabatan": "Analis Kebijakan Madya",
+						"nama": "Budi Santoso",
+						"nip": "199001012022031001",
+						"status": "PNS",
+						"unit_kerja": "Paling Atas",
+						"photo": "foto.png"
+					},
+					{
+						"pns_id": "1006",
+						"gelar_belakang": "",
+						"gelar_depan": "",
+						"golongan": "",
+						"jabatan": "Analis Kebijakan Madya",
+						"nama": "Sari Dewi",
+						"nip": "199808082022071006",
+						"status": "PNS",
+						"unit_kerja": "Paling Atas",
+						"photo": "foto4.png"
+					}
+				],
+				"meta": {
+					"limit": 10,
+					"offset": 0,
+					"total": 2
+				}
+			}`,
+		},
+		{
+			name:          "ok with status CPNS",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestQuery: url.Values{
+				"status": []string{"CPNS"},
+			},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `
+			{
+				"data": [
+					{
+						"pns_id": "1005",
+						"gelar_belakang": "",
+						"gelar_depan": "",
+						"golongan": "III/a",
+						"jabatan": "",
+						"nama": "Rizky Fauzan",
+						"nip": "199707072022061005",
+						"status": "CPNS",
+						"unit_kerja": "Bawah 2",
+						"photo": null
+					},
+					{
+						"pns_id": "1002",
+						"gelar_belakang": "S.Sos.",
+						"gelar_depan": "",
+						"golongan": "III/b",
+						"jabatan": "Kepala Subbagian Perencanaan",
+						"nama": "Siti Aminah",
+						"nip": "198903152022041002",
+						"status": "CPNS",
+						"unit_kerja": "Tengah - Paling Atas",
+						"photo": "foto1.png"
+					}
+				],
+				"meta": {
+					"limit": 10,
+					"offset": 0,
+					"total": 2
+				}
+			}`,
+		},
+		{
+			name:          "ok with status MPP",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestQuery: url.Values{
+				"status": []string{"MPP"},
+			},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `
+			{
+				"data": [
+					{
+						"pns_id": "1003",
+						"gelar_belakang": "",
+						"gelar_depan": "",
+						"golongan": "III/a",
+						"jabatan": "Analis Kebijakan Madya",
+						"nama": "Andi Rahman",
+						"nip": "198812312020121003",
+						"status": "MPP",
+						"unit_kerja": "Bawah - Tengah - Paling Atas",
+						"photo": "foto2.png"
+					}
+				],
+				"meta": {
+					"limit": 10,
+					"offset": 0,
+					"total": 1
+				}
+			}`,
+		},
+		{
+			name:          "ok empty with random unor",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestQuery: url.Values{
+				"unit_id": []string{"random-unor"},
+			},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `
+			{
+				"data": [],
+				"meta": {
+					"limit": 10,
+					"offset": 0,
+					"total": 0
+				}
+			}`,
+		},
+		{
+			name:          "ok with all filter",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestQuery: url.Values{
+				"status":      []string{"PNS"},
+				"unit_id":     []string{"unor-1"},
+				"golongan_id": []string{"10"},
+				"jabatan_id":  []string{"JBT-001"},
+				"keyword":     []string{"19"},
+			},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `
+			{
+				"data": [
+					{
+						"pns_id": "1001",
+						"gelar_belakang": "M.Pd.",
+						"gelar_depan": "Drs.",
+						"golongan": "III/a",
+						"jabatan": "Analis Kebijakan Madya",
+						"nama": "Budi Santoso",
+						"nip": "199001012022031001",
+						"status": "PNS",
+						"unit_kerja": "Paling Atas",
+						"photo": "foto.png"
+					}
+				],
+				"meta": {
+					"limit": 10,
+					"offset": 0,
+					"total": 1
+				}
+			}`,
+		},
+		{
+			name:          "ok empty data with all filter",
+			requestHeader: http.Header{"Authorization": authHeader},
+			requestQuery: url.Values{
+				"status":      []string{"PNS"},
+				"unit_id":     []string{"unor-1"},
+				"golongan_id": []string{"10"},
+				"jabatan_id":  []string{"JBT-010"},
+				"keyword":     []string{"19"},
+			},
+			wantResponseCode: http.StatusOK,
+			wantResponseBody: `
+			{
+				"data": [],
+				"meta": {
+					"limit": 10,
+					"offset": 0,
+					"total": 0
+				}
+			}`,
+		},
+		{
+			name:             "error: invalid token",
+			requestHeader:    http.Header{"Authorization": []string{"Bearer some-token"}},
+			wantResponseCode: http.StatusUnauthorized,
+			wantResponseBody: `{"message": "token otentikasi tidak valid"}`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			req := httptest.NewRequest(http.MethodGet, "/v1/admin/pegawai/nonaktif", nil)
+			req.URL.RawQuery = tt.requestQuery.Encode()
+			req.Header = tt.requestHeader
+			rec := httptest.NewRecorder()
+
+			e.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.wantResponseCode, rec.Code)
+			assert.JSONEq(t, tt.wantResponseBody, rec.Body.String())
+			assert.NoError(t, apitest.ValidateResponseSchema(rec, req, e))
+		})
+	}
+}
+
 func Test_handler_listAdminPPPK(t *testing.T) {
 	t.Parallel()
 

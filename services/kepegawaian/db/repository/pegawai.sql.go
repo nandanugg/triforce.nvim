@@ -139,7 +139,8 @@ FROM pegawai p
 	LEFT JOIN ref_unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
 	JOIN ref_kedudukan_hukum
 	    ON ref_kedudukan_hukum.id = p.kedudukan_hukum_id AND ref_kedudukan_hukum.deleted_at IS NULL
-WHERE p.status_pegawai = 3
+WHERE p.id is not null 
+	AND p.status_pegawai = 3
 	AND ($1::varchar is null or ref_kedudukan_hukum.nama = $1::varchar)
 	AND (
 	    $2::VARCHAR IS NULL
@@ -448,7 +449,7 @@ SELECT
 	ref_jabatan.nama_jabatan AS jabatan,
 	ref_kedudukan_hukum.nama as nama_kedudukuan_hukum
 FROM pegawai p
-	LEFT JOIN ref_unit_kerja as uk ON p.unor_id = uk.id
+	LEFT JOIN ref_unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
 	JOIN ref_kedudukan_hukum
 	    ON ref_kedudukan_hukum.id = p.kedudukan_hukum_id AND ref_kedudukan_hukum.deleted_at IS NULL
 	LEFT JOIN ref_jabatan
@@ -456,7 +457,7 @@ FROM pegawai p
 	LEFT JOIN ref_golongan ref_golongan_akhir
 	    ON ref_golongan_akhir.id = p.gol_id AND ref_golongan_akhir.deleted_at IS NULL
 WHERE p.id is not null
-  AND (p.kedudukan_hukum_id = '99' or p.status_pegawai = '3')
+	AND (p.kedudukan_hukum_id = '99' or p.status_pegawai = 3)
 	AND ($3::varchar is null or ref_kedudukan_hukum.nama = $3::varchar)
 	AND (
 	    $4::VARCHAR IS NULL
