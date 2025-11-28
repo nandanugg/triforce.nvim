@@ -57,6 +57,96 @@ func (h *handler) getProfile(c echo.Context) error {
 	})
 }
 
+type listAdminNonAktifRequest struct {
+	api.PaginationRequest
+	Keyword    string `query:"keyword"`
+	UnitID     string `query:"unit_id"`
+	GolonganID int32  `query:"golongan_id"`
+	JabatanID  string `query:"jabatan_id"`
+	Status     string `query:"status"`
+}
+
+type listAdminNonAktifResponse struct {
+	Data []pegawai          `json:"data"`
+	Meta api.MetaPagination `json:"meta"`
+}
+
+func (h *handler) listAdminNonAktif(c echo.Context) error {
+	var req listAdminNonAktifRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	ctx := c.Request().Context()
+	data, count, err := h.service.adminListPegawaiNonAktif(ctx, adminListPegawaiParams{
+		limit:      req.Limit,
+		offset:     req.Offset,
+		keyword:    req.Keyword,
+		unitID:     req.UnitID,
+		golonganID: req.GolonganID,
+		jabatanID:  req.JabatanID,
+		status:     req.Status,
+	})
+	if err != nil {
+		slog.ErrorContext(ctx, "Error getting data list pegawai aktif.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, listAdminNonAktifResponse{
+		Data: data,
+		Meta: api.MetaPagination{
+			Total:  count,
+			Limit:  req.Limit,
+			Offset: req.Offset,
+		},
+	})
+}
+
+type listAdminPPPKRequest struct {
+	api.PaginationRequest
+	Keyword    string `query:"keyword"`
+	UnitID     string `query:"unit_id"`
+	GolonganID int32  `query:"golongan_id"`
+	JabatanID  string `query:"jabatan_id"`
+	Status     string `query:"status"`
+}
+
+type listAdminPPPKResponse struct {
+	Data []pegawai          `json:"data"`
+	Meta api.MetaPagination `json:"meta"`
+}
+
+func (h *handler) listAdminPPPK(c echo.Context) error {
+	var req listAdminPPPKRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	ctx := c.Request().Context()
+	data, count, err := h.service.adminListPegawaiPPPK(ctx, adminListPegawaiParams{
+		limit:      req.Limit,
+		offset:     req.Offset,
+		keyword:    req.Keyword,
+		unitID:     req.UnitID,
+		golonganID: req.GolonganID,
+		jabatanID:  req.JabatanID,
+		status:     req.Status,
+	})
+	if err != nil {
+		slog.ErrorContext(ctx, "Error getting data list pegawai aktif.", "error", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, listAdminPPPKResponse{
+		Data: data,
+		Meta: api.MetaPagination{
+			Total:  count,
+			Limit:  req.Limit,
+			Offset: req.Offset,
+		},
+	})
+}
+
 type listAdminRequest struct {
 	api.PaginationRequest
 	Keyword    string `query:"keyword"`

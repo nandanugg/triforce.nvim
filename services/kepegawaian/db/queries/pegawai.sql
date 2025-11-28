@@ -99,7 +99,7 @@ WHERE
     )
     AND pegawai.deleted_at IS NULL;
 
--- name: ListPegawaiPPNPN :many
+-- name: ListPegawaiPPPK :many
 SELECT 
 	p.pns_id,
 	p.nip_baru AS nip,
@@ -114,7 +114,7 @@ SELECT
 	ref_jabatan.nama_jabatan AS jabatan,
 	ref_kedudukan_hukum.nama as nama_kedudukuan_hukum
 FROM pegawai p
-	LEFT JOIN ref_unit_kerja as uk ON p.unor_id = ruk.id
+	LEFT JOIN ref_unit_kerja as uk ON p.unor_id = uk.id
 	JOIN ref_kedudukan_hukum
 	    ON ref_kedudukan_hukum.id = p.kedudukan_hukum_id AND ref_kedudukan_hukum.deleted_at IS NULL
 	LEFT JOIN ref_jabatan
@@ -131,12 +131,17 @@ WHERE p.status_pegawai = 3
 	    OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_3
 	    OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_4
 	)
-	AND sqlc.narg('keyword')::VARCHAR IS NULL 
-		OR (
-		    pegawai.nama ILIKE '%' || sqlc.narg('keyword')::VARCHAR || '%'
-		    OR pegawai.nip_baru ILIKE '%' || sqlc.narg('keyword')::VARCHAR || '%'
-		)
-	AND sqlc.narg('nip')::VARCHAR IS NULL OR p.nip_baru = sqlc.narg('nip')::VARCHAR
+	AND (
+	    sqlc.narg('keyword')::VARCHAR IS NULL
+	    OR (
+		p.nama ILIKE '%' || sqlc.narg('keyword')::VARCHAR || '%'
+		OR p.nip_baru ILIKE '%' || sqlc.narg('keyword')::VARCHAR || '%'
+	    )
+	)
+	AND (
+		sqlc.narg('nip')::VARCHAR IS NULL
+		OR p.nip_baru = sqlc.narg('nip')::VARCHAR
+	)
 	AND ( sqlc.narg('golongan_id')::INTEGER IS NULL OR p.gol_id = sqlc.narg('golongan_id')::INTEGER )
 	AND ( sqlc.narg('jabatan_id')::VARCHAR IS NULL OR p.jabatan_instansi_id = sqlc.narg('jabatan_id')::VARCHAR )
 	AND (
@@ -147,9 +152,10 @@ WHERE p.status_pegawai = 3
 ORDER BY p.nama ASC
 LIMIT $1 OFFSET $2;
 
--- name: CountPegawaiPPNPN :one
+-- name: CountPegawaiPPPK :one
 SELECT COUNT(1)
 FROM pegawai p
+	LEFT JOIN ref_unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
 	JOIN ref_kedudukan_hukum
 	    ON ref_kedudukan_hukum.id = p.kedudukan_hukum_id AND ref_kedudukan_hukum.deleted_at IS NULL
 WHERE p.status_pegawai = 3
@@ -162,21 +168,24 @@ WHERE p.status_pegawai = 3
 	    OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_3
 	    OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_4
 	)
-	AND sqlc.narg('keyword')::VARCHAR IS NULL 
-		OR (
-		    pegawai.nama ILIKE '%' || sqlc.narg('keyword')::VARCHAR || '%'
-		    OR pegawai.nip_baru ILIKE '%' || sqlc.narg('keyword')::VARCHAR || '%'
-		)
-	AND sqlc.narg('nip')::VARCHAR IS NULL OR p.nip_baru = sqlc.narg('nip')::VARCHAR
+	AND (
+	    sqlc.narg('keyword')::VARCHAR IS NULL
+	    OR (
+		p.nama ILIKE '%' || sqlc.narg('keyword')::VARCHAR || '%'
+		OR p.nip_baru ILIKE '%' || sqlc.narg('keyword')::VARCHAR || '%'
+	    )
+	)
+	AND (
+		sqlc.narg('nip')::VARCHAR IS NULL
+		OR p.nip_baru = sqlc.narg('nip')::VARCHAR
+	)
 	AND ( sqlc.narg('golongan_id')::INTEGER IS NULL OR p.gol_id = sqlc.narg('golongan_id')::INTEGER )
 	AND ( sqlc.narg('jabatan_id')::VARCHAR IS NULL OR p.jabatan_instansi_id = sqlc.narg('jabatan_id')::VARCHAR )
 	AND (
 		sqlc.narg('status_pns')::varchar[] IS NULL
 		OR ( p.status_cpns_pns = ANY(sqlc.narg('status_pns')::VARCHAR[]) AND ref_kedudukan_hukum.nama <> @mpp::varchar )
 	    )
-	AND p.deleted_at IS NULL
-ORDER BY p.nama ASC
-LIMIT $1 OFFSET $2;
+	AND p.deleted_at IS NULL;
 
 -- name: ListPegawaiNonAktif :many
 SELECT 
@@ -193,7 +202,7 @@ SELECT
 	ref_jabatan.nama_jabatan AS jabatan,
 	ref_kedudukan_hukum.nama as nama_kedudukuan_hukum
 FROM pegawai p
-	LEFT JOIN ref_unit_kerja as uk ON p.unor_id = ruk.id
+	LEFT JOIN ref_unit_kerja as uk ON p.unor_id = uk.id
 	JOIN ref_kedudukan_hukum
 	    ON ref_kedudukan_hukum.id = p.kedudukan_hukum_id AND ref_kedudukan_hukum.deleted_at IS NULL
 	LEFT JOIN ref_jabatan
@@ -211,12 +220,17 @@ WHERE p.id is not null
 	    OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_3
 	    OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_4
 	)
-	AND sqlc.narg('keyword')::VARCHAR IS NULL 
-		OR (
-		    pegawai.nama ILIKE '%' || sqlc.narg('keyword')::VARCHAR || '%'
-		    OR pegawai.nip_baru ILIKE '%' || sqlc.narg('keyword')::VARCHAR || '%'
-		)
-	AND sqlc.narg('nip')::VARCHAR IS NULL OR p.nip_baru = sqlc.narg('nip')::VARCHAR
+	AND (
+	    sqlc.narg('keyword')::VARCHAR IS NULL
+	    OR (
+		p.nama ILIKE '%' || sqlc.narg('keyword')::VARCHAR || '%'
+		OR p.nip_baru ILIKE '%' || sqlc.narg('keyword')::VARCHAR || '%'
+	    )
+	)
+	AND (
+		sqlc.narg('nip')::VARCHAR IS NULL
+		OR p.nip_baru = sqlc.narg('nip')::VARCHAR
+	)
 	AND ( sqlc.narg('golongan_id')::INTEGER IS NULL OR p.gol_id = sqlc.narg('golongan_id')::INTEGER )
 	AND ( sqlc.narg('jabatan_id')::VARCHAR IS NULL OR p.jabatan_instansi_id = sqlc.narg('jabatan_id')::VARCHAR )
 	AND (
@@ -230,6 +244,7 @@ LIMIT $1 OFFSET $2;
 -- name: CountPegawaiNonAktif :one
 SELECT COUNT(1)
 FROM pegawai p
+	LEFT JOIN ref_unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
 	JOIN ref_kedudukan_hukum
 	    ON ref_kedudukan_hukum.id = p.kedudukan_hukum_id AND ref_kedudukan_hukum.deleted_at IS NULL
 WHERE p.id is not null
@@ -243,21 +258,24 @@ WHERE p.id is not null
 	    OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_3
 	    OR sqlc.narg('unit_kerja_id')::VARCHAR = uk.eselon_4
 	)
-	AND sqlc.narg('keyword')::VARCHAR IS NULL 
-		OR (
-		    pegawai.nama ILIKE '%' || sqlc.narg('keyword')::VARCHAR || '%'
-		    OR pegawai.nip_baru ILIKE '%' || sqlc.narg('keyword')::VARCHAR || '%'
-		)
-	AND sqlc.narg('nip')::VARCHAR IS NULL OR p.nip_baru = sqlc.narg('nip')::VARCHAR
+	AND (
+	    sqlc.narg('keyword')::VARCHAR IS NULL
+	    OR (
+		p.nama ILIKE '%' || sqlc.narg('keyword')::VARCHAR || '%'
+		OR p.nip_baru ILIKE '%' || sqlc.narg('keyword')::VARCHAR || '%'
+	    )
+	)
+	AND (
+		sqlc.narg('nip')::VARCHAR IS NULL
+		OR p.nip_baru = sqlc.narg('nip')::VARCHAR
+	)
 	AND ( sqlc.narg('golongan_id')::INTEGER IS NULL OR p.gol_id = sqlc.narg('golongan_id')::INTEGER )
 	AND ( sqlc.narg('jabatan_id')::VARCHAR IS NULL OR p.jabatan_instansi_id = sqlc.narg('jabatan_id')::VARCHAR )
 	AND (
 		sqlc.narg('status_pns')::varchar[] IS NULL
 		OR ( p.status_cpns_pns = ANY(sqlc.narg('status_pns')::VARCHAR[]) AND ref_kedudukan_hukum.nama <> @mpp::varchar )
 	    )
-	AND p.deleted_at IS NULL
-ORDER BY p.nama ASC
-LIMIT $1 OFFSET $2;
+	AND p.deleted_at IS NULL;
 
 
 -- name: GetPegawaiPNSIDByNIP :one

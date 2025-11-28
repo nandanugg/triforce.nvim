@@ -38,9 +38,6 @@ const (
 	statusKedudukanHukumMPP = "Masa Persiapan Pensiun"
 	statusPNSLabel          = "PNS"
 	statusCPNSLabel         = "CPNS"
-	tipePegawaiAktif        = "aktif"
-	tipePegawaiPPNPN        = "ppnpn"
-	tipePegawaiNonAktif     = "nonaktif"
 )
 
 var (

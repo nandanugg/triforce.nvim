@@ -72,39 +72,41 @@ func (q *Queries) CountPegawaiAktif(ctx context.Context, arg CountPegawaiAktifPa
 const countPegawaiNonAktif = `-- name: CountPegawaiNonAktif :one
 SELECT COUNT(1)
 FROM pegawai p
+	LEFT JOIN ref_unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
 	JOIN ref_kedudukan_hukum
 	    ON ref_kedudukan_hukum.id = p.kedudukan_hukum_id AND ref_kedudukan_hukum.deleted_at IS NULL
 WHERE p.id is not null
   AND (p.kedudukan_hukum_id = '99' or p.status_pegawai = '3')
-	AND ($3::varchar is null or ref_kedudukan_hukum.nama = $3::varchar)
+	AND ($1::varchar is null or ref_kedudukan_hukum.nama = $1::varchar)
 	AND (
-	    $4::VARCHAR IS NULL
-	    OR $4::VARCHAR = uk.id
-	    OR $4::VARCHAR = uk.eselon_1
-	    OR $4::VARCHAR = uk.eselon_2
-	    OR $4::VARCHAR = uk.eselon_3
-	    OR $4::VARCHAR = uk.eselon_4
+	    $2::VARCHAR IS NULL
+	    OR $2::VARCHAR = uk.id
+	    OR $2::VARCHAR = uk.eselon_1
+	    OR $2::VARCHAR = uk.eselon_2
+	    OR $2::VARCHAR = uk.eselon_3
+	    OR $2::VARCHAR = uk.eselon_4
 	)
-	AND $5::VARCHAR IS NULL 
-		OR (
-		    pegawai.nama ILIKE '%' || $5::VARCHAR || '%'
-		    OR pegawai.nip_baru ILIKE '%' || $5::VARCHAR || '%'
-		)
-	AND $6::VARCHAR IS NULL OR p.nip_baru = $6::VARCHAR
-	AND ( $7::INTEGER IS NULL OR p.gol_id = $7::INTEGER )
-	AND ( $8::VARCHAR IS NULL OR p.jabatan_instansi_id = $8::VARCHAR )
 	AND (
-		$9::varchar[] IS NULL
-		OR ( p.status_cpns_pns = ANY($9::VARCHAR[]) AND ref_kedudukan_hukum.nama <> $10::varchar )
+	    $3::VARCHAR IS NULL
+	    OR (
+		p.nama ILIKE '%' || $3::VARCHAR || '%'
+		OR p.nip_baru ILIKE '%' || $3::VARCHAR || '%'
+	    )
+	)
+	AND (
+		$4::VARCHAR IS NULL
+		OR p.nip_baru = $4::VARCHAR
+	)
+	AND ( $5::INTEGER IS NULL OR p.gol_id = $5::INTEGER )
+	AND ( $6::VARCHAR IS NULL OR p.jabatan_instansi_id = $6::VARCHAR )
+	AND (
+		$7::varchar[] IS NULL
+		OR ( p.status_cpns_pns = ANY($7::VARCHAR[]) AND ref_kedudukan_hukum.nama <> $8::varchar )
 	    )
 	AND p.deleted_at IS NULL
-ORDER BY p.nama ASC
-LIMIT $1 OFFSET $2
 `
 
 type CountPegawaiNonAktifParams struct {
-	Limit       int32       `db:"limit"`
-	Offset      int32       `db:"offset"`
 	StatusHukum pgtype.Text `db:"status_hukum"`
 	UnitKerjaID pgtype.Text `db:"unit_kerja_id"`
 	Keyword     pgtype.Text `db:"keyword"`
@@ -117,8 +119,6 @@ type CountPegawaiNonAktifParams struct {
 
 func (q *Queries) CountPegawaiNonAktif(ctx context.Context, arg CountPegawaiNonAktifParams) (int64, error) {
 	row := q.db.QueryRow(ctx, countPegawaiNonAktif,
-		arg.Limit,
-		arg.Offset,
 		arg.StatusHukum,
 		arg.UnitKerjaID,
 		arg.Keyword,
@@ -133,41 +133,43 @@ func (q *Queries) CountPegawaiNonAktif(ctx context.Context, arg CountPegawaiNonA
 	return count, err
 }
 
-const countPegawaiPPNPN = `-- name: CountPegawaiPPNPN :one
+const countPegawaiPPPK = `-- name: CountPegawaiPPPK :one
 SELECT COUNT(1)
 FROM pegawai p
+	LEFT JOIN ref_unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
 	JOIN ref_kedudukan_hukum
 	    ON ref_kedudukan_hukum.id = p.kedudukan_hukum_id AND ref_kedudukan_hukum.deleted_at IS NULL
 WHERE p.status_pegawai = 3
-	AND ($3::varchar is null or ref_kedudukan_hukum.nama = $3::varchar)
+	AND ($1::varchar is null or ref_kedudukan_hukum.nama = $1::varchar)
 	AND (
-	    $4::VARCHAR IS NULL
-	    OR $4::VARCHAR = uk.id
-	    OR $4::VARCHAR = uk.eselon_1
-	    OR $4::VARCHAR = uk.eselon_2
-	    OR $4::VARCHAR = uk.eselon_3
-	    OR $4::VARCHAR = uk.eselon_4
+	    $2::VARCHAR IS NULL
+	    OR $2::VARCHAR = uk.id
+	    OR $2::VARCHAR = uk.eselon_1
+	    OR $2::VARCHAR = uk.eselon_2
+	    OR $2::VARCHAR = uk.eselon_3
+	    OR $2::VARCHAR = uk.eselon_4
 	)
-	AND $5::VARCHAR IS NULL 
-		OR (
-		    pegawai.nama ILIKE '%' || $5::VARCHAR || '%'
-		    OR pegawai.nip_baru ILIKE '%' || $5::VARCHAR || '%'
-		)
-	AND $6::VARCHAR IS NULL OR p.nip_baru = $6::VARCHAR
-	AND ( $7::INTEGER IS NULL OR p.gol_id = $7::INTEGER )
-	AND ( $8::VARCHAR IS NULL OR p.jabatan_instansi_id = $8::VARCHAR )
 	AND (
-		$9::varchar[] IS NULL
-		OR ( p.status_cpns_pns = ANY($9::VARCHAR[]) AND ref_kedudukan_hukum.nama <> $10::varchar )
+	    $3::VARCHAR IS NULL
+	    OR (
+		p.nama ILIKE '%' || $3::VARCHAR || '%'
+		OR p.nip_baru ILIKE '%' || $3::VARCHAR || '%'
+	    )
+	)
+	AND (
+		$4::VARCHAR IS NULL
+		OR p.nip_baru = $4::VARCHAR
+	)
+	AND ( $5::INTEGER IS NULL OR p.gol_id = $5::INTEGER )
+	AND ( $6::VARCHAR IS NULL OR p.jabatan_instansi_id = $6::VARCHAR )
+	AND (
+		$7::varchar[] IS NULL
+		OR ( p.status_cpns_pns = ANY($7::VARCHAR[]) AND ref_kedudukan_hukum.nama <> $8::varchar )
 	    )
 	AND p.deleted_at IS NULL
-ORDER BY p.nama ASC
-LIMIT $1 OFFSET $2
 `
 
-type CountPegawaiPPNPNParams struct {
-	Limit       int32       `db:"limit"`
-	Offset      int32       `db:"offset"`
+type CountPegawaiPPPKParams struct {
 	StatusHukum pgtype.Text `db:"status_hukum"`
 	UnitKerjaID pgtype.Text `db:"unit_kerja_id"`
 	Keyword     pgtype.Text `db:"keyword"`
@@ -178,10 +180,8 @@ type CountPegawaiPPNPNParams struct {
 	Mpp         string      `db:"mpp"`
 }
 
-func (q *Queries) CountPegawaiPPNPN(ctx context.Context, arg CountPegawaiPPNPNParams) (int64, error) {
-	row := q.db.QueryRow(ctx, countPegawaiPPNPN,
-		arg.Limit,
-		arg.Offset,
+func (q *Queries) CountPegawaiPPPK(ctx context.Context, arg CountPegawaiPPPKParams) (int64, error) {
+	row := q.db.QueryRow(ctx, countPegawaiPPPK,
 		arg.StatusHukum,
 		arg.UnitKerjaID,
 		arg.Keyword,
@@ -448,7 +448,7 @@ SELECT
 	ref_jabatan.nama_jabatan AS jabatan,
 	ref_kedudukan_hukum.nama as nama_kedudukuan_hukum
 FROM pegawai p
-	LEFT JOIN ref_unit_kerja as uk ON p.unor_id = ruk.id
+	LEFT JOIN ref_unit_kerja as uk ON p.unor_id = uk.id
 	JOIN ref_kedudukan_hukum
 	    ON ref_kedudukan_hukum.id = p.kedudukan_hukum_id AND ref_kedudukan_hukum.deleted_at IS NULL
 	LEFT JOIN ref_jabatan
@@ -466,12 +466,17 @@ WHERE p.id is not null
 	    OR $4::VARCHAR = uk.eselon_3
 	    OR $4::VARCHAR = uk.eselon_4
 	)
-	AND $5::VARCHAR IS NULL 
-		OR (
-		    pegawai.nama ILIKE '%' || $5::VARCHAR || '%'
-		    OR pegawai.nip_baru ILIKE '%' || $5::VARCHAR || '%'
-		)
-	AND $6::VARCHAR IS NULL OR p.nip_baru = $6::VARCHAR
+	AND (
+	    $5::VARCHAR IS NULL
+	    OR (
+		p.nama ILIKE '%' || $5::VARCHAR || '%'
+		OR p.nip_baru ILIKE '%' || $5::VARCHAR || '%'
+	    )
+	)
+	AND (
+		$6::VARCHAR IS NULL
+		OR p.nip_baru = $6::VARCHAR
+	)
 	AND ( $7::INTEGER IS NULL OR p.gol_id = $7::INTEGER )
 	AND ( $8::VARCHAR IS NULL OR p.jabatan_instansi_id = $8::VARCHAR )
 	AND (
@@ -555,7 +560,7 @@ func (q *Queries) ListPegawaiNonAktif(ctx context.Context, arg ListPegawaiNonAkt
 	return items, nil
 }
 
-const listPegawaiPPNPN = `-- name: ListPegawaiPPNPN :many
+const listPegawaiPPPK = `-- name: ListPegawaiPPPK :many
 SELECT 
 	p.pns_id,
 	p.nip_baru AS nip,
@@ -570,7 +575,7 @@ SELECT
 	ref_jabatan.nama_jabatan AS jabatan,
 	ref_kedudukan_hukum.nama as nama_kedudukuan_hukum
 FROM pegawai p
-	LEFT JOIN ref_unit_kerja as uk ON p.unor_id = ruk.id
+	LEFT JOIN ref_unit_kerja as uk ON p.unor_id = uk.id
 	JOIN ref_kedudukan_hukum
 	    ON ref_kedudukan_hukum.id = p.kedudukan_hukum_id AND ref_kedudukan_hukum.deleted_at IS NULL
 	LEFT JOIN ref_jabatan
@@ -587,12 +592,17 @@ WHERE p.status_pegawai = 3
 	    OR $4::VARCHAR = uk.eselon_3
 	    OR $4::VARCHAR = uk.eselon_4
 	)
-	AND $5::VARCHAR IS NULL 
-		OR (
-		    pegawai.nama ILIKE '%' || $5::VARCHAR || '%'
-		    OR pegawai.nip_baru ILIKE '%' || $5::VARCHAR || '%'
-		)
-	AND $6::VARCHAR IS NULL OR p.nip_baru = $6::VARCHAR
+	AND (
+	    $5::VARCHAR IS NULL
+	    OR (
+		p.nama ILIKE '%' || $5::VARCHAR || '%'
+		OR p.nip_baru ILIKE '%' || $5::VARCHAR || '%'
+	    )
+	)
+	AND (
+		$6::VARCHAR IS NULL
+		OR p.nip_baru = $6::VARCHAR
+	)
 	AND ( $7::INTEGER IS NULL OR p.gol_id = $7::INTEGER )
 	AND ( $8::VARCHAR IS NULL OR p.jabatan_instansi_id = $8::VARCHAR )
 	AND (
@@ -604,7 +614,7 @@ ORDER BY p.nama ASC
 LIMIT $1 OFFSET $2
 `
 
-type ListPegawaiPPNPNParams struct {
+type ListPegawaiPPPKParams struct {
 	Limit       int32       `db:"limit"`
 	Offset      int32       `db:"offset"`
 	StatusHukum pgtype.Text `db:"status_hukum"`
@@ -617,7 +627,7 @@ type ListPegawaiPPNPNParams struct {
 	Mpp         string      `db:"mpp"`
 }
 
-type ListPegawaiPPNPNRow struct {
+type ListPegawaiPPPKRow struct {
 	PnsID               string      `db:"pns_id"`
 	Nip                 pgtype.Text `db:"nip"`
 	Nama                pgtype.Text `db:"nama"`
@@ -632,8 +642,8 @@ type ListPegawaiPPNPNRow struct {
 	NamaKedudukuanHukum pgtype.Text `db:"nama_kedudukuan_hukum"`
 }
 
-func (q *Queries) ListPegawaiPPNPN(ctx context.Context, arg ListPegawaiPPNPNParams) ([]ListPegawaiPPNPNRow, error) {
-	rows, err := q.db.Query(ctx, listPegawaiPPNPN,
+func (q *Queries) ListPegawaiPPPK(ctx context.Context, arg ListPegawaiPPPKParams) ([]ListPegawaiPPPKRow, error) {
+	rows, err := q.db.Query(ctx, listPegawaiPPPK,
 		arg.Limit,
 		arg.Offset,
 		arg.StatusHukum,
@@ -649,9 +659,9 @@ func (q *Queries) ListPegawaiPPNPN(ctx context.Context, arg ListPegawaiPPNPNPara
 		return nil, err
 	}
 	defer rows.Close()
-	var items []ListPegawaiPPNPNRow
+	var items []ListPegawaiPPPKRow
 	for rows.Next() {
-		var i ListPegawaiPPNPNRow
+		var i ListPegawaiPPPKRow
 		if err := rows.Scan(
 			&i.PnsID,
 			&i.Nip,
