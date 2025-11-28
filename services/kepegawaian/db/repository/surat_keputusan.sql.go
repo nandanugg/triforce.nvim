@@ -35,24 +35,40 @@ func (q *Queries) CountAntreanKoreksiSuratKeputusanByNIP(ctx context.Context, ni
 }
 
 const countKoreksiSuratKeputusanByPNSID = `-- name: CountKoreksiSuratKeputusanByPNSID :one
-select
+WITH RECURSIVE unit_kerja_children AS (
+    SELECT uk.id, uk.diatasan_id, 1 as depth
+    FROM ref_unit_kerja uk
+    WHERE uk.id = $1::VARCHAR
+      AND $1::VARCHAR IS NOT NULL
+      AND uk.deleted_at IS NULL
+
+    UNION ALL
+
+    SELECT uk.id, uk.diatasan_id, ukc.depth + 1
+    FROM ref_unit_kerja uk
+    JOIN unit_kerja_children ukc ON uk.diatasan_id = ukc.id
+    WHERE uk.deleted_at IS NULL
+      AND ukc.depth < 10
+)
+
+SELECT
     count(1) as total
 FROM koreksi_surat_keputusan fdc
 JOIN surat_keputusan fds ON fds.file_id = fdc.file_id AND fds.deleted_at IS NULL
 JOIN pegawai p ON fds.nip_sk = p.nip_baru AND p.deleted_at IS NULL
 LEFT JOIN ref_unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
 WHERE fdc.deleted_at IS NULL
-    AND ($1::VARCHAR IS NULL
-        OR $1::VARCHAR = uk.id
-        OR $1::VARCHAR = uk.eselon_1
-        OR $1::VARCHAR = uk.eselon_2
-        OR $1::VARCHAR = uk.eselon_3
-        OR $1::VARCHAR = uk.eselon_4)
+    AND (
+        $1::VARCHAR IS NULL
+        OR p.unor_id IN (
+            SELECT id FROM unit_kerja_children
+        )
+    )
     AND ($2::VARCHAR IS NULL OR p.nama ILIKE '%' || $2::VARCHAR || '%')
     AND ($3::VARCHAR IS NULL OR fds.nip_sk = $3::VARCHAR)
     AND ($4::INTEGER IS NULL OR p.gol_id = $4::INTEGER)
     AND ($5::VARCHAR IS NULL OR p.jabatan_instansi_id = $5::VARCHAR)
-    AND ($6::VARCHAR is NULL OR fds.kategori ILIKE '%' || $6::VARCHAR || '%')
+    AND ($6::VARCHAR IS NULL OR fds.kategori ILIKE '%' || $6::VARCHAR || '%')
     AND ($7::VARCHAR IS NULL OR fds.no_sk ILIKE '%' || $7::VARCHAR || '%')
     AND (
         $8::integer[] IS NULL
@@ -215,26 +231,42 @@ func (q *Queries) CountTandaTanganSuratKeputusanAntreanByPNSID(ctx context.Conte
 }
 
 const countTandaTanganSuratKeputusanByPNSID = `-- name: CountTandaTanganSuratKeputusanByPNSID :one
-select
+WITH RECURSIVE unit_kerja_children AS (
+    SELECT uk.id, uk.diatasan_id, 1 as depth
+    FROM ref_unit_kerja uk
+    WHERE uk.id = $1::VARCHAR
+      AND $1::VARCHAR IS NOT NULL
+      AND uk.deleted_at IS NULL
+
+    UNION ALL
+
+    SELECT uk.id, uk.diatasan_id, ukc.depth + 1
+    FROM ref_unit_kerja uk
+    JOIN unit_kerja_children ukc ON uk.diatasan_id = ukc.id
+    WHERE uk.deleted_at IS NULL
+      AND ukc.depth < 10
+)
+
+SELECT
     count(1) as total
 FROM surat_keputusan fds
 JOIN pegawai p ON fds.nip_sk = p.nip_baru AND p.deleted_at IS NULL
 LEFT JOIN ref_unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
 WHERE fds.deleted_at IS NULL
-    AND ($1::VARCHAR IS NULL
-        OR $1::VARCHAR = uk.id
-        OR $1::VARCHAR = uk.eselon_1
-        OR $1::VARCHAR = uk.eselon_2
-        OR $1::VARCHAR = uk.eselon_3
-        OR $1::VARCHAR = uk.eselon_4)
+    AND (
+        $1::VARCHAR IS NULL
+        OR p.unor_id IN (
+            SELECT id FROM unit_kerja_children
+        )
+    )
     AND ($2::VARCHAR IS NULL OR p.nama ILIKE '%' || $2::VARCHAR || '%')
     AND ($3::VARCHAR IS NULL OR fds.nip_sk = $3::VARCHAR)
     AND ($4::INTEGER IS NULL OR p.gol_id = $4::INTEGER)
     AND ($5::VARCHAR IS NULL OR p.jabatan_instansi_id = $5::VARCHAR)
-    AND ($6::VARCHAR is NULL OR fds.kategori ILIKE '%' || $6::VARCHAR || '%')
+    AND ($6::VARCHAR IS NULL OR fds.kategori ILIKE '%' || $6::VARCHAR || '%')
     AND ($7::VARCHAR IS NULL OR fds.no_sk ILIKE '%' || $7::VARCHAR || '%')
     AND fds.status_koreksi = 1 
-    and ($8::integer is NULL or fds.status_ttd = $8::integer)
+    AND ($8::integer IS NULL OR fds.status_ttd = $8::integer)
     AND fds.ttd_pegawai_id = $9::varchar
     AND fds.ds_ok = true
 `
@@ -592,6 +624,22 @@ func (q *Queries) ListAntreanKoreksiSuratKeputusanByNIP(ctx context.Context, arg
 }
 
 const listKoreksiSuratKeputusanByPNSID = `-- name: ListKoreksiSuratKeputusanByPNSID :many
+WITH RECURSIVE unit_kerja_children AS (
+    SELECT uk.id, uk.diatasan_id, 1 as depth
+    FROM ref_unit_kerja uk
+    WHERE uk.id = $3::VARCHAR
+      AND $3::VARCHAR IS NOT NULL
+      AND uk.deleted_at IS NULL
+
+    UNION ALL
+
+    SELECT uk.id, uk.diatasan_id, ukc.depth + 1
+    FROM ref_unit_kerja uk
+    JOIN unit_kerja_children ukc ON uk.diatasan_id = ukc.id
+    WHERE uk.deleted_at IS NULL
+      AND ukc.depth < 10
+)
+
 SELECT
     fds.file_id,
     p.nama as nama_pemilik_sk,
@@ -610,17 +658,17 @@ LEFT JOIN ref_unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
 LEFT JOIN ref_golongan g ON p.gol_id = g.id AND g.deleted_at IS NULL
 LEFT JOIN ref_jabatan rj on p.jabatan_instansi_id = rj.kode_jabatan and rj.deleted_at is null
 WHERE fdc.deleted_at IS NULL
-    AND ($3::VARCHAR IS NULL
-        OR $3::VARCHAR = uk.id
-        OR $3::VARCHAR = uk.eselon_1
-        OR $3::VARCHAR = uk.eselon_2
-        OR $3::VARCHAR = uk.eselon_3
-        OR $3::VARCHAR = uk.eselon_4)
+    AND (
+        $3::VARCHAR IS NULL
+        OR p.unor_id IN (
+            SELECT id FROM unit_kerja_children
+        )
+    )
     AND ($4::VARCHAR IS NULL OR p.nama ILIKE '%' || $4::VARCHAR || '%')
     AND ($5::VARCHAR IS NULL OR fds.nip_sk = $5::VARCHAR)
     AND ($6::INTEGER IS NULL OR p.gol_id = $6::INTEGER)
     AND ($7::VARCHAR IS NULL OR p.jabatan_instansi_id = $7::VARCHAR)
-    AND ($8::VARCHAR is NULL OR fds.kategori ILIKE '%' || $8::VARCHAR || '%')
+    AND ($8::VARCHAR IS NULL OR fds.kategori ILIKE '%' || $8::VARCHAR || '%')
     AND ($9::VARCHAR IS NULL OR fds.no_sk ILIKE '%' || $9::VARCHAR || '%')
     AND (
         $10::integer[] IS NULL
@@ -1107,6 +1155,22 @@ func (q *Queries) ListTandaTanganSuratKeputusanAntreanByPNSID(ctx context.Contex
 }
 
 const listTandaTanganSuratKeputusanByPNSID = `-- name: ListTandaTanganSuratKeputusanByPNSID :many
+WITH RECURSIVE unit_kerja_children AS (
+    SELECT uk.id, uk.diatasan_id, 1 as depth
+    FROM ref_unit_kerja uk
+    WHERE uk.id = $3::VARCHAR
+      AND $3::VARCHAR IS NOT NULL
+      AND uk.deleted_at IS NULL
+
+    UNION ALL
+
+    SELECT uk.id, uk.diatasan_id, ukc.depth + 1
+    FROM ref_unit_kerja uk
+    JOIN unit_kerja_children ukc ON uk.diatasan_id = ukc.id
+    WHERE uk.deleted_at IS NULL
+      AND ukc.depth < 10
+)
+
 SELECT
     fds.file_id,
     p.nama as nama_pemilik_sk,
@@ -1124,12 +1188,12 @@ LEFT JOIN ref_unit_kerja uk ON p.unor_id = uk.id AND uk.deleted_at IS NULL
 LEFT JOIN ref_golongan g ON p.gol_id = g.id AND g.deleted_at IS NULL
 LEFT JOIN ref_jabatan rj on p.jabatan_instansi_id = rj.kode_jabatan and rj.deleted_at is null
 WHERE fds.deleted_at IS NULL
-    AND ($3::VARCHAR IS NULL
-        OR $3::VARCHAR = uk.id
-        OR $3::VARCHAR = uk.eselon_1
-        OR $3::VARCHAR = uk.eselon_2
-        OR $3::VARCHAR = uk.eselon_3
-        OR $3::VARCHAR = uk.eselon_4)
+    AND (
+        $3::VARCHAR IS NULL
+        OR p.unor_id IN (
+            SELECT id FROM unit_kerja_children
+        )
+    )
     AND ($4::VARCHAR IS NULL OR p.nama ILIKE '%' || $4::VARCHAR || '%')
     AND ($5::VARCHAR IS NULL OR fds.nip_sk = $5::VARCHAR)
     AND ($6::INTEGER IS NULL OR p.gol_id = $6::INTEGER)
@@ -1137,7 +1201,7 @@ WHERE fds.deleted_at IS NULL
     AND ($8::VARCHAR is NULL OR fds.kategori ILIKE '%' || $8::VARCHAR || '%')
     AND ($9::VARCHAR IS NULL OR fds.no_sk ILIKE '%' || $9::VARCHAR || '%')
     AND fds.status_koreksi = 1 
-    and ($10::integer is NULL or fds.status_ttd = $10::integer)
+    AND ($10::integer is NULL OR fds.status_ttd = $10::integer)
     AND fds.ttd_pegawai_id = $11::varchar
     AND fds.ds_ok = true
 ORDER BY fds.created_at DESC
