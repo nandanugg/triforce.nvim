@@ -37,6 +37,7 @@ tags:
   - name: Ref Jenis Pegawai
   - name: Ref Jenis Penghargaan
   - name: Ref Jenis Satker
+  - name: Ref Lokasi
   - name: Ref Status Pernikahan
   - name: Ref Template
   - name: Ref Tingkat Pendidikan
@@ -5242,6 +5243,32 @@ paths:
                       $ref: "#/components/schemas/jenisSatker"
                   meta:
                     $ref: "#/components/schemas/metaPagination"
+  /v1/lokasi:
+    get:
+      tags:
+        - Ref Lokasi
+      summary: Lihat daftar lokasi.
+      description: >-
+        Lihat daftar lokasi dari user yang login.
+      operationId: listLokasi
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items: 
+                      $ref: "#/components/schemas/lokasi"
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
   /v1/log-surat-keputusan:
     get:
       tags:
@@ -8060,6 +8087,17 @@ components:
         tahun:
           type: integer
           nullable: true
+    lokasi:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        nama:
+          type: string
+      required:
+        - id
+        - nama
     keluarga:
       type: object
       additionalProperties: false
