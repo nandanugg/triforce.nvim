@@ -227,16 +227,16 @@ func Test_handler_listAdminPPPK(t *testing.T) {
 			(11, 'III/b', NULL),
 			(12, 'III/c', NOW());
 
-		INSERT INTO pegawai (pns_id, nip_baru, nama, gelar_depan, gelar_belakang, gol_id, jabatan_instansi_id, unor_id, kedudukan_hukum_id, status_cpns_pns, deleted_at, foto) VALUES
-			(1001, '199001012022031001', 'Budi Santoso', 'Drs.', 'M.Pd.', 10, 'JBT-001', 'unor-1', 1, 'PNS', NULL, 'foto.png'),
-			(1002, '198903152022041002', 'Siti Aminah', NULL, 'S.Sos.', 11, 'JBT-002', 'unor-2', 1,'CPNS', NULL, 'foto1.png'),
-			(1003, '198812312020121003', 'Andi Rahman', NULL, NULL, 10, 'JBT-001', 'unor-3', 2,'P', NULL, 'foto2.png'),
-			(1004, '199505052022051004', 'Lina Pratiwi', NULL, NULL, 10, 'JBT-001', 'unor-4', 3, 'PNS', NULL, 'foto3.png'),
-			(1005, '199707072022061005', 'Rizky Fauzan', NULL, NULL, 10, 'JBT-003', 'unor-5', 1, 'C', NULL, NULL),
-			(1006, '199808082022071006', 'Sari Dewi', NULL, NULL, 12, 'JBT-001', 'unor-1', 1, 'PNS', NULL, 'foto4.png'),
-			(1007, '199709092022081007', 'Agung Herkules', NULL, NULL, 12, 'JBT-001', 'unor-1', 1, 'PNS', NOW(), NULL),
-			(1008, '198710102022081008', 'Rini Sukmawati', NULL, NULL, 12, 'JBT-001', 'unor-1', 1, '1', NULL, NULL),
-			(1009, '198810102022081008', 'Sarjo', NULL, NULL, 12, 'JBT-001', 'unor-1', 4, '1', NULL, 'foto5.png');
+		INSERT INTO pegawai (pns_id, status_pegawai, nip_baru, nama, gelar_depan, gelar_belakang, gol_id, jabatan_instansi_id, unor_id, kedudukan_hukum_id, status_cpns_pns, deleted_at, foto) VALUES
+			(1001, 3, '199001012022031001', 'Budi Santoso', 'Drs.', 'M.Pd.', 10, 'JBT-001', 'unor-1', 1, 'PNS', NULL, 'foto.png'),
+			(1002, 3, '198903152022041002', 'Siti Aminah', NULL, 'S.Sos.', 11, 'JBT-002', 'unor-2', 1,'CPNS', NULL, 'foto1.png'),
+			(1003, 3, '198812312020121003', 'Andi Rahman', NULL, NULL, 10, 'JBT-001', 'unor-3', 2,'P', NULL, 'foto2.png'),
+			(1004, 3, '199505052022051004', 'Lina Pratiwi', NULL, NULL, 10, 'JBT-001', 'unor-4', 3, 'PNS', NULL, 'foto3.png'),
+			(1005, 3, '199707072022061005', 'Rizky Fauzan', NULL, NULL, 10, 'JBT-003', 'unor-5', 1, 'C', NULL, NULL),
+			(1006, 3, '199808082022071006', 'Sari Dewi', NULL, NULL, 12, 'JBT-001', 'unor-1', 1, 'PNS', NULL, 'foto4.png'),
+			(1007, 3, '199709092022081007', 'Agung Herkules', NULL, NULL, 12, 'JBT-001', 'unor-1', 1, 'PNS', NOW(), NULL),
+			(1008, 3, '198710102022081008', 'Rini Sukmawati', NULL, NULL, 12, 'JBT-001', 'unor-1', 1, '1', NULL, NULL),
+			(1009, 3, '198810102022081008', 'Sarjo', NULL, NULL, 12, 'JBT-001', 'unor-1', 4, '1', NULL, 'foto5.png');
 	`
 	pgxconn := dbtest.New(t, dbmigrations.FS)
 	_, err := pgxconn.Exec(context.Background(), dbData)
@@ -264,30 +264,6 @@ func Test_handler_listAdminPPPK(t *testing.T) {
 			{
 				"data": [
 					{
-						"pns_id": "1001",
-						"gelar_belakang": "M.Pd.",
-						"gelar_depan": "Drs.",
-						"golongan": "III/a",
-						"jabatan": "Analis Kebijakan Madya",
-						"nama": "Budi Santoso",
-						"nip": "199001012022031001",
-						"status": "PNS",
-						"unit_kerja": "Paling Atas",
-						"photo" : "foto.png"
-					},
-					{
-						"pns_id": "1002",
-						"gelar_belakang": "S.Sos.",
-						"gelar_depan": "",
-						"golongan": "III/b",
-						"jabatan": "Kepala Subbagian Perencanaan",
-						"nama": "Siti Aminah",
-						"nip": "198903152022041002",
-						"status": "CPNS",
-						"unit_kerja": "Tengah - Paling Atas",
-						"photo": "foto1.png"
-					},
-					{
 						"pns_id": "1003",
 						"gelar_belakang": "",
 						"gelar_depan": "",
@@ -298,6 +274,30 @@ func Test_handler_listAdminPPPK(t *testing.T) {
 						"status": "MPP",
 						"unit_kerja": "Bawah - Tengah - Paling Atas",
 						"photo": "foto2.png"
+					},
+					{
+						"pns_id": "1001",
+						"gelar_belakang": "M.Pd.",
+						"gelar_depan": "Drs.",
+						"golongan": "III/a",
+						"jabatan": "Analis Kebijakan Madya",
+						"nama": "Budi Santoso",
+						"nip": "199001012022031001",
+						"status": "PNS",
+						"unit_kerja": "Paling Atas",
+						"photo": "foto.png"
+					},
+					{
+						"pns_id": "1008",
+						"gelar_belakang": "",
+						"gelar_depan": "",
+						"golongan": "",
+						"jabatan": "Analis Kebijakan Madya",
+						"nama": "Rini Sukmawati",
+						"nip": "198710102022081008",
+						"status": "1",
+						"unit_kerja": "Paling Atas",
+						"photo": null
 					},
 					{
 						"pns_id": "1005",
@@ -324,22 +324,34 @@ func Test_handler_listAdminPPPK(t *testing.T) {
 						"photo": "foto4.png"
 					},
 					{
-						"pns_id": "1008",
+						"pns_id": "1009",
 						"gelar_belakang": "",
 						"gelar_depan": "",
 						"golongan": "",
 						"jabatan": "Analis Kebijakan Madya",
-						"nama": "Rini Sukmawati",
-						"nip": "198710102022081008",
+						"nama": "Sarjo",
+						"nip": "198810102022081008",
 						"status": "1",
 						"unit_kerja": "Paling Atas",
-						"photo": null
+						"photo": "foto5.png"
+					},
+					{
+						"pns_id": "1002",
+						"gelar_belakang": "S.Sos.",
+						"gelar_depan": "",
+						"golongan": "III/b",
+						"jabatan": "Kepala Subbagian Perencanaan",
+						"nama": "Siti Aminah",
+						"nip": "198903152022041002",
+						"status": "CPNS",
+						"unit_kerja": "Tengah - Paling Atas",
+						"photo": "foto1.png"
 					}
 				],
 				"meta": {
 					"limit": 10,
 					"offset": 0,
-					"total": 6
+					"total": 7
 				}
 			}`,
 		},
@@ -355,34 +367,34 @@ func Test_handler_listAdminPPPK(t *testing.T) {
 			{
 				"data": [
 					{
-						"pns_id": "1002",
-						"gelar_belakang": "S.Sos.",
-						"gelar_depan": "",
-						"golongan": "III/b",
-						"jabatan": "Kepala Subbagian Perencanaan",
-						"nama": "Siti Aminah",
-						"nip": "198903152022041002",
-						"status": "CPNS",
-						"unit_kerja": "Tengah - Paling Atas",
-						"photo": "foto1.png"
-					},
-					{
-						"pns_id": "1003",
-						"gelar_belakang": "",
-						"gelar_depan": "",
+						"pns_id": "1001",
+						"gelar_belakang": "M.Pd.",
+						"gelar_depan": "Drs.",
 						"golongan": "III/a",
 						"jabatan": "Analis Kebijakan Madya",
-						"nama": "Andi Rahman",
-						"nip": "198812312020121003",
-						"status": "MPP",
-						"unit_kerja": "Bawah - Tengah - Paling Atas",
-						"photo": "foto2.png"
+						"nama": "Budi Santoso",
+						"nip": "199001012022031001",
+						"status": "PNS",
+						"unit_kerja": "Paling Atas",
+						"photo": "foto.png"
+					},
+					{
+						"pns_id": "1008",
+						"gelar_belakang": "",
+						"gelar_depan": "",
+						"golongan": "",
+						"jabatan": "Analis Kebijakan Madya",
+						"nama": "Rini Sukmawati",
+						"nip": "198710102022081008",
+						"status": "1",
+						"unit_kerja": "Paling Atas",
+						"photo": null
 					}
 				],
 				"meta": {
 					"limit": 2,
 					"offset": 1,
-					"total": 6
+					"total": 7
 				}
 			}`,
 		},
@@ -481,6 +493,18 @@ func Test_handler_listAdminPPPK(t *testing.T) {
 			{
 				"data": [
 					{
+						"pns_id": "1003",
+						"gelar_belakang": "",
+						"gelar_depan": "",
+						"golongan": "III/a",
+						"jabatan": "Analis Kebijakan Madya",
+						"nama": "Andi Rahman",
+						"nip": "198812312020121003",
+						"status": "MPP",
+						"unit_kerja": "Bawah - Tengah - Paling Atas",
+						"photo": "foto2.png"
+					},
+					{
 						"pns_id": "1001",
 						"gelar_belakang": "M.Pd.",
 						"gelar_depan": "Drs.",
@@ -493,28 +517,16 @@ func Test_handler_listAdminPPPK(t *testing.T) {
 						"photo": "foto.png"
 					},
 					{
-						"pns_id": "1002",
-						"gelar_belakang": "S.Sos.",
-						"gelar_depan": "",
-						"golongan": "III/b",
-						"jabatan": "Kepala Subbagian Perencanaan",
-						"nama": "Siti Aminah",
-						"nip": "198903152022041002",
-						"status": "CPNS",
-						"unit_kerja": "Tengah - Paling Atas",
-						"photo": "foto1.png"
-					},
-					{
-						"pns_id": "1003",
+						"pns_id": "1008",
 						"gelar_belakang": "",
 						"gelar_depan": "",
-						"golongan": "III/a",
+						"golongan": "",
 						"jabatan": "Analis Kebijakan Madya",
-						"nama": "Andi Rahman",
-						"nip": "198812312020121003",
-						"status": "MPP",
-						"unit_kerja": "Bawah - Tengah - Paling Atas",
-						"photo": "foto2.png"
+						"nama": "Rini Sukmawati",
+						"nip": "198710102022081008",
+						"status": "1",
+						"unit_kerja": "Paling Atas",
+						"photo": null
 					},
 					{
 						"pns_id": "1005",
@@ -541,22 +553,34 @@ func Test_handler_listAdminPPPK(t *testing.T) {
 						"photo": "foto4.png"
 					},
 					{
-						"pns_id": "1008",
+						"pns_id": "1009",
 						"gelar_belakang": "",
 						"gelar_depan": "",
 						"golongan": "",
 						"jabatan": "Analis Kebijakan Madya",
-						"nama": "Rini Sukmawati",
-						"nip": "198710102022081008",
+						"nama": "Sarjo",
+						"nip": "198810102022081008",
 						"status": "1",
 						"unit_kerja": "Paling Atas",
-						"photo": null
+						"photo": "foto5.png"
+					},
+					{
+						"pns_id": "1002",
+						"gelar_belakang": "S.Sos.",
+						"gelar_depan": "",
+						"golongan": "III/b",
+						"jabatan": "Kepala Subbagian Perencanaan",
+						"nama": "Siti Aminah",
+						"nip": "198903152022041002",
+						"status": "CPNS",
+						"unit_kerja": "Tengah - Paling Atas",
+						"photo": "foto1.png"
 					}
 				],
 				"meta": {
 					"limit": 10,
 					"offset": 0,
-					"total": 6
+					"total": 7
 				}
 			}`,
 		},
@@ -643,18 +667,6 @@ func Test_handler_listAdminPPPK(t *testing.T) {
 			{
 				"data": [
 					{
-						"pns_id": "1002",
-						"gelar_belakang": "S.Sos.",
-						"gelar_depan": "",
-						"golongan": "III/b",
-						"jabatan": "Kepala Subbagian Perencanaan",
-						"nama": "Siti Aminah",
-						"nip": "198903152022041002",
-						"status": "CPNS",
-						"unit_kerja": "Tengah - Paling Atas",
-						"photo": "foto1.png"
-					},
-					{
 						"pns_id": "1005",
 						"gelar_belakang": "",
 						"gelar_depan": "",
@@ -665,6 +677,18 @@ func Test_handler_listAdminPPPK(t *testing.T) {
 						"status": "CPNS",
 						"unit_kerja": "Bawah 2",
 						"photo": null
+					},
+					{
+						"pns_id": "1002",
+						"gelar_belakang": "S.Sos.",
+						"gelar_depan": "",
+						"golongan": "III/b",
+						"jabatan": "Kepala Subbagian Perencanaan",
+						"nama": "Siti Aminah",
+						"nip": "198903152022041002",
+						"status": "CPNS",
+						"unit_kerja": "Tengah - Paling Atas",
+						"photo": "foto1.png"
 					}
 				],
 				"meta": {

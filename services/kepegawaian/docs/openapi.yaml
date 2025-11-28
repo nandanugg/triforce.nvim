@@ -1735,7 +1735,7 @@ paths:
       responses:
         "204":
           description: Berhasil dihapus (soft delete)
-  /v1/admin/pegawai/ppnpn:
+  /v1/admin/pegawai/pppk:
     get:
       tags:
         - Admin Pegawai Aktif
