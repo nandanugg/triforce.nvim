@@ -108,7 +108,6 @@ type listAdminPPPKRequest struct {
 	UnitID     string `query:"unit_id"`
 	GolonganID int32  `query:"golongan_id"`
 	JabatanID  string `query:"jabatan_id"`
-	Status     string `query:"status"`
 }
 
 type listAdminPPPKResponse struct {
@@ -130,7 +129,6 @@ func (h *handler) listAdminPPPK(c echo.Context) error {
 		unitID:     req.UnitID,
 		golonganID: req.GolonganID,
 		jabatanID:  req.JabatanID,
-		status:     req.Status,
 	})
 	if err != nil {
 		slog.ErrorContext(ctx, "Error getting data list pegawai aktif.", "error", err)

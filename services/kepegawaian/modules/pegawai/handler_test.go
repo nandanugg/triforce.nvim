@@ -1240,48 +1240,6 @@ func Test_handler_listAdminPPPK(t *testing.T) {
 			}`,
 		},
 		{
-			name:          "ok with status PNS",
-			requestHeader: http.Header{"Authorization": authHeader},
-			requestQuery: url.Values{
-				"status": []string{"PNS"},
-			},
-			wantResponseCode: http.StatusOK,
-			wantResponseBody: `
-			{
-				"data": [
-					{
-						"pns_id": "1001",
-						"gelar_belakang": "M.Pd.",
-						"gelar_depan": "Drs.",
-						"golongan": "III/a",
-						"jabatan": "Analis Kebijakan Madya",
-						"nama": "Budi Santoso",
-						"nip": "199001012022031001",
-						"status": "PNS",
-						"unit_kerja": "Paling Atas",
-						"photo": "foto.png"
-					},
-					{
-						"pns_id": "1006",
-						"gelar_belakang": "",
-						"gelar_depan": "",
-						"golongan": "",
-						"jabatan": "Analis Kebijakan Madya",
-						"nama": "Sari Dewi",
-						"nip": "199808082022071006",
-						"status": "PNS",
-						"unit_kerja": "Paling Atas",
-						"photo": "foto4.png"
-					}
-				],
-				"meta": {
-					"limit": 10,
-					"offset": 0,
-					"total": 2
-				}
-			}`,
-		},
-		{
 			name:          "ok with status CPNS",
 			requestHeader: http.Header{"Authorization": authHeader},
 			requestQuery: url.Values{

@@ -184,8 +184,6 @@ func (s *service) adminListPegawaiPPPK(ctx context.Context, arg adminListPegawai
 		GolonganID:  pgtype.Int4{Valid: arg.golonganID != 0, Int32: arg.golonganID},
 		JabatanID:   pgtype.Text{Valid: arg.jabatanID != "", String: arg.jabatanID},
 		StatusHukum: pgtype.Text{Valid: statusHukum != "", String: statusHukum},
-		StatusPns:   getStatusPNSDB(arg.status),
-		Mpp:         statusKedudukanHukumMPP,
 	})
 	if err != nil {
 		return nil, 0, fmt.Errorf("[pegawai-adminListPegawaiPPPK] repo ListPegawaiPPPK: %w", err)

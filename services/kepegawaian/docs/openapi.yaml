@@ -1768,12 +1768,6 @@ paths:
           schema:
             type: string
             description: ID jabatan untuk memfilter pegawai sesuai jabatannya
-        - name: status
-          in: query
-          schema:
-            type: string
-            enum: ["PNS", "CPNS", "MPP"]
-            description: Status pegawai untuk memfilter data
       responses:
         "200":
           description: Sukses.
