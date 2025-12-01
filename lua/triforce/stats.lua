@@ -33,10 +33,10 @@ function Stats.default_stats()
     current_streak = 0, ---@type integer Current consecutive day streak
     longest_streak = 0, ---@type integer Longest ever streak
     db_path = vim.fs.joinpath(vim.fn.stdpath('data'), 'triforce_stats.json'), ---@type string
-    last_activity = os.time(),
-    idle_threshold = 60,
-    session_active = false,
-    current_session_stats = nil, ---@type Stats|nil
+    last_activity = os.time(), ---@type integer the time of the last activity
+    idle_threshold = 60, ---@type integer the seconds before the session timer pauses
+    session_active = false, ---@type boolean Wether the session is active or paused
+    current_session_stats = nil, ---@type Stats|nil Current session stats
   }
 
   return stats
@@ -308,9 +308,11 @@ function Stats.end_session(stats, deduct_idle_time)
   if deduct_idle_time and duration > stats.idle_threshold then
     duration = duration - stats.idle_threshold
   end
-  
+
   -- Sanity check to prevent negative time
-  if duration < 0 then duration = 0 end
+  if duration < 0 then
+    duration = 0
+  end
 
   stats.time_coding = stats.time_coding + duration
   stats.last_session_start = 0
@@ -514,8 +516,10 @@ Stats.load()
 
 -- 1. TRACK ACTIVITY
 local function update_activity()
-  if not Stats.current_session_stats then return end
-  
+  if not Stats.current_session_stats then
+    return
+  end
+
   local stats = Stats.current_session_stats
   stats.last_activity = os.time()
 
@@ -525,15 +529,15 @@ local function update_activity()
   end
 end
 
-local group = vim.api.nvim_create_augroup("TriforceTracking", { clear = true })
+local group = vim.api.nvim_create_augroup('TriforceTracking', { clear = true })
 
-vim.api.nvim_create_autocmd({ "CursorMoved", "InsertCharPre" }, {
+vim.api.nvim_create_autocmd({ 'CursorMoved', 'InsertCharPre' }, {
   group = group,
   callback = update_activity, -- No I/O here!
 })
 
 -- 2. HANDLE EXIT (Save on quit)
-vim.api.nvim_create_autocmd("VimLeavePre", {
+vim.api.nvim_create_autocmd('VimLeavePre', {
   group = group,
   callback = function()
     -- Stop the timer
@@ -555,27 +559,31 @@ vim.api.nvim_create_autocmd("VimLeavePre", {
 -- 3. BACKGROUND TIMER (Check for idle)
 Stats._timer = uv.new_timer()
 
-Stats._timer:start(1000, 1000, vim.schedule_wrap(function()
-  local stats = Stats.current_session_stats
-  
-  -- Guard clause: If stats aren't loaded or session is already inactive, do nothing
-  if not stats or not stats.session_active then
-    return
-  end
+Stats._timer:start(
+  1000,
+  1000,
+  vim.schedule_wrap(function()
+    local stats = Stats.current_session_stats
 
-  local now = os.time()
-  -- Calculate how long since the last actual keypress/movement
-  local time_since_activity = now - stats.last_activity
+    -- Guard clause: If stats aren't loaded or session is already inactive, do nothing
+    if not stats or not stats.session_active then
+      return
+    end
 
-  if time_since_activity >= stats.idle_threshold then
-    -- User is idle. End the session.
-    -- Pass 'true' to deduct the idle threshold from the total time
-    Stats.end_session(stats, true)
-    
-    -- Sync to disk now that the session has paused
-    Stats.save(stats)
-  end
-end))
+    local now = os.time()
+    -- Calculate how long since the last actual keypress/movement
+    local time_since_activity = now - stats.last_activity
+
+    if time_since_activity >= stats.idle_threshold then
+      -- User is idle. End the session.
+      -- Pass 'true' to deduct the idle threshold from the total time
+      Stats.end_session(stats, true)
+
+      -- Sync to disk now that the session has paused
+      Stats.save(stats)
+    end
+  end)
+)
 
 return Stats
 -- vim:ts=2:sts=2:sw=2:et:ai:si:sta:
