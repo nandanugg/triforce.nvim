@@ -44,7 +44,10 @@ Lualine.config = {
   session_time = {
     icon = '', ---@type string|'' Nerd Font clock icon
     show_duration = true, ---@type boolean Show time duration
-    format = 'short', ---@type 'short'|'long' 'short' (`2h 34m`) or 'long' (`2:34:12`)
+    -- 'human'   = 1h 20m
+    -- 'digital' = 01:20:30 (Smart: shows MM:SS if < 1h, HH:MM:SS if > 1h)
+    -- 'clock'   = 01:20    (Strict: always HH:MM, no seconds)
+    format = 'digital', ---@type 'human'|'digital'|'clock'
   },
 
   ---Total time component config (Lifetime Stats)
@@ -52,7 +55,7 @@ Lualine.config = {
   total_time = {
     icon = '󰔟', ---@type string|'󰔟' Nerd Font history/watch icon
     show_duration = true, ---@type boolean Show time duration
-    format = 'short', ---@type 'short'|'long'
+    format = 'human', ---@type 'human'|'digital'|'clock'
   },
 }
 
@@ -99,32 +102,45 @@ end
 
 ---Format time duration
 ---@param seconds integer Total seconds
----@param format 'short'|'long'
+---@param format 'human'|'digital'|'clock'
 ---@return string formatted
 local function format_time(seconds, format)
   util.validate({
     seconds = { seconds, { 'number' } },
     format = { format, { 'string' } },
   })
-  format = vim.list_contains({ 'short', 'long' }, format) and format or 'long'
-
-  if seconds < 60 then
-    return (format == 'short' and '%ds' or '0:00:%02d'):format(seconds)
+  
+  -- Default to digital if invalid format provided
+  if not vim.list_contains({ 'human', 'digital', 'clock' }, format) then
+    format = 'digital'
   end
 
   local hours = math.floor(seconds / 3600)
   local minutes = math.floor((seconds % 3600) / 60)
-  local fmt
-  local items
-  if format == 'long' then
-    fmt, items = '%d:%02d:%02d', { hours, minutes, seconds % 60 }
-  elseif hours > 0 then
-    fmt, items = '%dh %dm', { hours, minutes }
-  else
-    fmt, items = '%dm', { minutes }
-  end
+  local secs = seconds % 60
 
-  return fmt:format(unpack(items))
+  -- 1. Human Readable (e.g. "1h 20m" or "45s")
+  if format == 'human' then
+    if hours > 0 then
+      return ('%dh %dm'):format(hours, minutes)
+    elseif minutes > 0 then
+      return ('%dm'):format(minutes)
+    else
+      return ('%ds'):format(secs)
+    end
+  
+  -- 2. Strict Clock (e.g. "01:20" - always HH:MM)
+  elseif format == 'clock' then
+    return ('%02d:%02d'):format(hours, minutes)
+
+  -- 3. Digital (e.g. "05:30" or "01:20:15" - Smart MM:SS or HH:MM:SS)
+  else
+    if hours > 0 then
+      return ('%02d:%02d:%02d'):format(hours, minutes, secs)
+    else
+      return ('%02d:%02d'):format(minutes, secs)
+    end
+  end
 end
 
 ---Level component - Shows level and XP progress
