@@ -37,6 +37,7 @@ tags:
   - name: Ref Jenis Pegawai
   - name: Ref Jenis Penghargaan
   - name: Ref Jenis Satker
+  - name: Ref Lokasi
   - name: Ref Status Pernikahan
   - name: Ref Template
   - name: Ref Tingkat Pendidikan
@@ -5392,6 +5393,32 @@ paths:
                       $ref: "#/components/schemas/jenisSatker"
                   meta:
                     $ref: "#/components/schemas/metaPagination"
+  /v1/lokasi:
+    get:
+      tags:
+        - Ref Lokasi
+      summary: Lihat daftar lokasi.
+      description: >-
+        Lihat daftar lokasi dari user yang login.
+      operationId: listLokasi
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items: 
+                      $ref: "#/components/schemas/lokasi"
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
   /v1/log-surat-keputusan:
     get:
       tags:
@@ -6758,6 +6785,138 @@ paths:
                       type: string
                     data:
                       $ref: "#/components/schemas/riwayatPendidikanRequest"
+                  required:
+                    - action
+                    - data_id
+                    - data
+                - title: DELETE
+                  type: object
+                  additionalProperties: false
+                  properties:
+                    action:
+                      type: string
+                      enum: ["DELETE"]
+                    data_id:
+                      type: string
+                  required:
+                    - action
+                    - data_id
+      responses:
+        "204":
+          description: Sukses.
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "409":
+          $ref: "#/components/responses/conflict"
+  /v1/usulan-perubahan-data/riwayat-penghargaan:
+    get:
+      tags:
+        - Riwayat Penghargaan
+        - Usulan Perubahan Data
+      summary: Lihat daftar usulan perubahan data riwayat penghargaan pegawai.
+      description: Lihat daftar usulan perubahan data riwayat penghargaan pegawai.
+      operationId: listUsulanPerubahanDataRiwayatPenghargaan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/offset"
+      responses:
+        "200":
+          description: Sukses.
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/usulanPerubahanDataDefault'
+                        - type: object
+                          properties:
+                            perubahan_data:
+                              type: object
+                              additionalProperties: false
+                              properties:
+                                jenis_penghargaan:
+                                  $ref: '#/components/schemas/beforeAfterString'
+                                nama_penghargaan:
+                                  $ref: '#/components/schemas/beforeAfterString'
+                                deskripsi:
+                                  $ref: '#/components/schemas/beforeAfterString'
+                                tanggal:
+                                  $ref: '#/components/schemas/beforeAfterDate'
+                  meta:
+                    $ref: "#/components/schemas/metaPagination"
+    post:
+      tags:
+        - Riwayat Penghargaan
+        - Usulan Perubahan Data
+      summary: Usulan perubahan data riwayat penghargaan pegawai.
+      description: Usulan perubahan data riwayat penghargaan pegawai.
+      operationId: createUsulanPerubahanDataRiwayatPenghargaan
+      parameters:
+        - $ref: "#/components/parameters/authRequired"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - title: CREATE
+                  type: object
+                  additionalProperties: false
+                  properties:
+                    action:
+                      type: string
+                      enum: ["CREATE"]
+                    data:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        jenis_penghargaan:
+                          type: string
+                        nama_penghargaan:
+                          type: string
+                        deskripsi:
+                          type: string
+                        tanggal:
+                          type: string
+                          format: date
+                      required:
+                        - jenis_penghargaan
+                        - nama_penghargaan
+                        - tanggal
+                  required:
+                    - action
+                    - data
+                - title: UPDATE
+                  type: object
+                  additionalProperties: false
+                  properties:
+                    action:
+                      type: string
+                      enum: ["UPDATE"]
+                    data_id:
+                      type: string
+                    data:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        jenis_penghargaan:
+                          type: string
+                        nama_penghargaan:
+                          type: string
+                        deskripsi:
+                          type: string
+                        tanggal:
+                          type: string
+                          format: date
+                      required:
+                        - jenis_penghargaan
+                        - nama_penghargaan
+                        - tanggal
                   required:
                     - action
                     - data_id
@@ -8210,6 +8369,17 @@ components:
         tahun:
           type: integer
           nullable: true
+    lokasi:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        nama:
+          type: string
+      required:
+        - id
+        - nama
     keluarga:
       type: object
       additionalProperties: false

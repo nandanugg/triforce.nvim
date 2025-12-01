@@ -24,6 +24,7 @@ import (
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/jenispenghargaan"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/jenissatker"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/keluarga"
+	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/lokasi"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/pegawai"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/pendidikan"
 	"gitlab.com/wartek-id/matk/nexus/nexus-be/services/kepegawaian/modules/riwayatasesmenninebox"
@@ -84,7 +85,7 @@ func main() {
 	jenispenghargaan.RegisterRoutes(e, dbRepository, mwAuth)
 	jenissatker.RegisterRoutes(e, dbRepository, mwAuth)
 	keluarga.RegisterRoutes(e, dbRepository, mwAuth)
-	template.RegisterRoutes(e, dbRepository, mwAuth)
+	lokasi.RegisterRoutes(e, dbRepository, mwAuth)
 	pegawai.RegisterRoutes(e, dbRepository, db, mwAuth)
 	pendidikan.RegisterRoutes(e, dbRepository, mwAuth)
 	riwayatasesmenninebox.RegisterRoutes(e, dbRepository, mwAuth)
@@ -98,11 +99,12 @@ func main() {
 	riwayatpelatihanstruktural.RegisterRoutes(e, dbRepository, mwAuth)
 	riwayatpelatihanteknis.RegisterRoutes(e, dbRepository, mwAuth)
 	riwayatpendidikan.RegisterRoutes(e, dbRepository, mwAuth, svcRoute)
-	riwayatpenghargaan.RegisterRoutes(e, dbRepository, mwAuth)
+	riwayatpenghargaan.RegisterRoutes(e, dbRepository, mwAuth, svcRoute)
 	riwayatpenugasan.RegisterRoutes(e, dbRepository, mwAuth)
 	riwayatsertifikasi.RegisterRoutes(e, dbRepository, mwAuth)
-	suratkeputusan.RegisterRoutes(e, dbRepository, db, mwAuth, bsreClient)
 	statuspernikahan.RegisterRoutes(e, dbRepository, mwAuth)
+	suratkeputusan.RegisterRoutes(e, dbRepository, db, mwAuth, bsreClient)
+	template.RegisterRoutes(e, dbRepository, mwAuth)
 	tingkatpendidikan.RegisterRoutes(e, dbRepository, mwAuth)
 	unitkerja.RegisterRoutes(e, dbRepository, mwAuth)
 

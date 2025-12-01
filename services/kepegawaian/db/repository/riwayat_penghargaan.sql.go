@@ -91,6 +91,45 @@ func (q *Queries) GetBerkasRiwayatPenghargaan(ctx context.Context, arg GetBerkas
 	return file_base64, err
 }
 
+const getRiwayatPenghargaan = `-- name: GetRiwayatPenghargaan :one
+SELECT
+    id,
+    jenis_penghargaan,
+    nama_penghargaan,
+    deskripsi_penghargaan,
+    tanggal_penghargaan
+FROM riwayat_penghargaan_umum
+WHERE nip = $1::varchar
+  AND id = $2
+  AND deleted_at is null
+`
+
+type GetRiwayatPenghargaanParams struct {
+	Nip string `db:"nip"`
+	ID  int32  `db:"id"`
+}
+
+type GetRiwayatPenghargaanRow struct {
+	ID                   int32       `db:"id"`
+	JenisPenghargaan     pgtype.Text `db:"jenis_penghargaan"`
+	NamaPenghargaan      pgtype.Text `db:"nama_penghargaan"`
+	DeskripsiPenghargaan pgtype.Text `db:"deskripsi_penghargaan"`
+	TanggalPenghargaan   pgtype.Date `db:"tanggal_penghargaan"`
+}
+
+func (q *Queries) GetRiwayatPenghargaan(ctx context.Context, arg GetRiwayatPenghargaanParams) (GetRiwayatPenghargaanRow, error) {
+	row := q.db.QueryRow(ctx, getRiwayatPenghargaan, arg.Nip, arg.ID)
+	var i GetRiwayatPenghargaanRow
+	err := row.Scan(
+		&i.ID,
+		&i.JenisPenghargaan,
+		&i.NamaPenghargaan,
+		&i.DeskripsiPenghargaan,
+		&i.TanggalPenghargaan,
+	)
+	return i, err
+}
+
 const listRiwayatPenghargaan = `-- name: ListRiwayatPenghargaan :many
 SELECT
     id,
