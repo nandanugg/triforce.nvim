@@ -13,6 +13,7 @@ local initial_time_coding = nil
 ---@class Triforce.Lualine.Config
 Lualine.config = {
   ---Level component config
+  ---@class Triforce.Lualine.Config.Level
   level = {
     prefix = 'Lv.',
     show_level = true,
@@ -23,11 +24,15 @@ Lualine.config = {
     bar_chars = { filled = '█', empty = '░' },
   },
 
+  ---Achievements component config
+  ---@class Triforce.Lualine.Config.Achievements
   achievements = {
     icon = '',
     show_count = true,
   },
 
+  ---Streak component config
+  ---@class Triforce.Lualine.Config.Streak
   streak = {
     icon = '',
     show_days = true,
@@ -46,6 +51,7 @@ Lualine.config = {
   },
 
   ---Total time component config (Lifetime Stats)
+  ---@class Triforce.Lualine.Config.TotalTime
   total_time = {
     icon = '󰔟',
     show_duration = true,
@@ -64,7 +70,9 @@ end
 ---@return Stats|nil stats
 local function get_stats()
   local ok, triforce = pcall(require, 'triforce')
-  if not ok then return end
+  if not ok then
+    return
+  end
 
   local stats = triforce.get_stats()
 
@@ -78,7 +86,9 @@ end
 
 -- ... [create_progress_bar function remains the same] ...
 local function create_progress_bar(current, max, length, chars)
-  if max == 0 then return chars.empty:rep(length) end
+  if max == 0 then
+    return chars.empty:rep(length)
+  end
   local filled = math.min(math.floor((current / max) * length), length)
   return chars.filled:rep(filled) .. chars.empty:rep(length - filled)
 end
@@ -95,14 +105,21 @@ local function format_time(seconds, format)
   local secs = seconds % 60
 
   if format == 'human' then
-    if hours > 0 then return ('%dh %dm'):format(hours, minutes)
-    elseif minutes > 0 then return ('%dm'):format(minutes)
-    else return ('%ds'):format(secs) end
+    if hours > 0 then
+      return ('%dh %dm'):format(hours, minutes)
+    elseif minutes > 0 then
+      return ('%dm'):format(minutes)
+    else
+      return ('%ds'):format(secs)
+    end
   elseif format == 'clock' then
     return ('%02d:%02d'):format(hours, minutes)
   else
-    if hours > 0 then return ('%02d:%02d:%02d'):format(hours, minutes, secs)
-    else return ('%02d:%02d'):format(minutes, secs) end
+    if hours > 0 then
+      return ('%02d:%02d:%02d'):format(hours, minutes, secs)
+    else
+      return ('%02d:%02d'):format(minutes, secs)
+    end
   end
 end
 
@@ -110,7 +127,9 @@ end
 function Lualine.level(opts)
   -- (Same as previous code)
   local stats = get_stats()
-  if not stats then return '' end
+  if not stats then
+    return ''
+  end
   local config = vim.tbl_deep_extend('force', Lualine.config.level, opts or {})
   -- XP Logic...
   local stats_module = require('triforce.stats')
@@ -118,37 +137,61 @@ function Lualine.level(opts)
   local xp_for_next = stats_module.xp_for_next_level(stats.level)
   local xp_needed = xp_for_next - xp_for_current
   local xp_progress = stats.xp - xp_for_current
-  
+
   local parts = {}
-  if config.show_level then table.insert(parts, not config.prefix and tostring(stats.level) or (config.prefix .. stats.level)) end
-  if config.show_bar then table.insert(parts, create_progress_bar(xp_progress, xp_needed, config.bar_length, config.bar_chars)) end
-  if config.show_percent then table.insert(parts, ('%d%%'):format(math.floor(xp_progress / xp_needed) * 100)) end
-  if config.show_xp then table.insert(parts, ('%d/%d'):format(xp_progress, xp_needed)) end
+  if config.show_level then
+    table.insert(parts, not config.prefix and tostring(stats.level) or (config.prefix .. stats.level))
+  end
+  if config.show_bar then
+    table.insert(parts, create_progress_bar(xp_progress, xp_needed, config.bar_length, config.bar_chars))
+  end
+  if config.show_percent then
+    table.insert(parts, ('%d%%'):format(math.floor(xp_progress / xp_needed) * 100))
+  end
+  if config.show_xp then
+    table.insert(parts, ('%d/%d'):format(xp_progress, xp_needed))
+  end
   return table.concat(parts, ' ')
 end
 
 function Lualine.achievements(opts)
   local stats = get_stats()
-  if not stats then return '' end
+  if not stats then
+    return ''
+  end
   local config = vim.tbl_deep_extend('force', Lualine.config.achievements, opts or {})
   local all_achievements = require('triforce.achievement').get_all_achievements(stats)
   local unlocked = 0
-  for _, _ in ipairs(stats.achievements or {}) do unlocked = unlocked + 1 end
+  for _, _ in ipairs(stats.achievements or {}) do
+    unlocked = unlocked + 1
+  end
   local parts = {}
-  if config.icon ~= '' then table.insert(parts, config.icon) end
-  if config.show_count then table.insert(parts, ('%d/%d'):format(unlocked, #all_achievements)) end
+  if config.icon ~= '' then
+    table.insert(parts, config.icon)
+  end
+  if config.show_count then
+    table.insert(parts, ('%d/%d'):format(unlocked, #all_achievements))
+  end
   return table.concat(parts, ' ')
 end
 
 function Lualine.streak(opts)
   local stats = get_stats()
-  if not stats then return '' end
+  if not stats then
+    return ''
+  end
   local streak = stats.current_streak or 0
-  if streak == 0 then return '' end
+  if streak == 0 then
+    return ''
+  end
   local config = vim.tbl_deep_extend('force', Lualine.config.streak, opts or {})
   local parts = {}
-  if config.icon ~= '' then table.insert(parts, config.icon) end
-  if config.show_days then table.insert(parts, tostring(streak)) end
+  if config.icon ~= '' then
+    table.insert(parts, config.icon)
+  end
+  if config.show_days then
+    table.insert(parts, tostring(streak))
+  end
   return table.concat(parts, ' ')
 end
 
@@ -242,3 +285,4 @@ end
 
 return Lualine
 -- vim:ts=2:sts=2:sw=2:et:ai:si:sta:
+
