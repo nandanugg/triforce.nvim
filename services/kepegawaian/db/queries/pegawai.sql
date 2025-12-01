@@ -179,10 +179,6 @@ WHERE p.id is not null
 	)
 	AND ( sqlc.narg('golongan_id')::INTEGER IS NULL OR p.gol_id = sqlc.narg('golongan_id')::INTEGER )
 	AND ( sqlc.narg('jabatan_id')::VARCHAR IS NULL OR p.jabatan_instansi_id = sqlc.narg('jabatan_id')::VARCHAR )
-	AND (
-		sqlc.narg('status_pns')::varchar[] IS NULL
-		OR ( p.status_cpns_pns = ANY(sqlc.narg('status_pns')::VARCHAR[]) AND ref_kedudukan_hukum.nama <> @mpp::varchar )
-	    )
 	AND p.deleted_at IS NULL;
 
 -- name: ListPegawaiNonAktif :many

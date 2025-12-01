@@ -163,10 +163,6 @@ WHERE p.id is not null
 	)
 	AND ( $5::INTEGER IS NULL OR p.gol_id = $5::INTEGER )
 	AND ( $6::VARCHAR IS NULL OR p.jabatan_instansi_id = $6::VARCHAR )
-	AND (
-		$7::varchar[] IS NULL
-		OR ( p.status_cpns_pns = ANY($7::VARCHAR[]) AND ref_kedudukan_hukum.nama <> $8::varchar )
-	    )
 	AND p.deleted_at IS NULL
 `
 
@@ -177,8 +173,6 @@ type CountPegawaiPPPKParams struct {
 	Nip         pgtype.Text `db:"nip"`
 	GolonganID  pgtype.Int4 `db:"golongan_id"`
 	JabatanID   pgtype.Text `db:"jabatan_id"`
-	StatusPns   []string    `db:"status_pns"`
-	Mpp         string      `db:"mpp"`
 }
 
 func (q *Queries) CountPegawaiPPPK(ctx context.Context, arg CountPegawaiPPPKParams) (int64, error) {
@@ -189,8 +183,6 @@ func (q *Queries) CountPegawaiPPPK(ctx context.Context, arg CountPegawaiPPPKPara
 		arg.Nip,
 		arg.GolonganID,
 		arg.JabatanID,
-		arg.StatusPns,
-		arg.Mpp,
 	)
 	var count int64
 	err := row.Scan(&count)
