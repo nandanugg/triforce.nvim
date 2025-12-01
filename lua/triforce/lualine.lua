@@ -6,6 +6,7 @@ local util = require('triforce.util')
 --- - achievements
 --- - streak
 --- - session time
+--- - total time
 ---@class Triforce.Lualine
 local Lualine = {}
 
@@ -38,12 +39,20 @@ Lualine.config = {
     show_days = true, ---@type boolean Show number of days
   },
 
-  ---Session time component config
+  ---Session time component config (Current Session)
   ---@class Triforce.Lualine.Config.SessionTime
   session_time = {
     icon = '', ---@type string|'' Nerd Font clock icon
     show_duration = true, ---@type boolean Show time duration
     format = 'short', ---@type 'short'|'long' 'short' (`2h 34m`) or 'long' (`2:34:12`)
+  },
+
+  ---Total time component config (Lifetime Stats)
+  ---@class Triforce.Lualine.Config.TotalTime
+  total_time = {
+    icon = '󰔟', ---@type string|'󰔟' Nerd Font history/watch icon
+    show_duration = true, ---@type boolean Show time duration
+    format = 'short', ---@type 'short'|'long'
   },
 }
 
@@ -268,9 +277,45 @@ function Lualine.session_time(opts)
   return table.concat(parts, ' ')
 end
 
+---Total time component - Shows lifetime accumulated time
+---@param opts Triforce.Lualine.Config.TotalTime|nil Component-specific options
+---@return string component
+function Lualine.total_time(opts)
+  util.validate({ opts = { opts, { 'table', 'nil' }, true } })
+
+  local stats = get_stats()
+  if not stats then
+    return ''
+  end
+
+  local config = vim.tbl_deep_extend('force', Lualine.config.total_time, opts or {})
+
+  -- Calculate TOTAL duration (Historical + Current Session)
+  local total_duration = stats.time_coding or 0
+  
+  -- If we are currently coding, we must add the live session time 
+  -- because stats.time_coding is only updated when the session ends/saves.
+  if stats.session_active and stats.last_session_start > 0 then
+    total_duration = total_duration + (os.time() - stats.last_session_start)
+  end
+
+  -- Build component
+  local parts = {} ---@type string[]
+  
+  if config.icon ~= '' then
+    table.insert(parts, config.icon)
+  end
+
+  if config.show_duration then
+    table.insert(parts, format_time(total_duration, config.format))
+  end
+
+  return table.concat(parts, ' ')
+end
+
 ---Convenience function to get all components at once
 ---@param opts Triforce.Lualine.Config|nil Configuration for all components
----@return Triforce.Lualine.Config components Table with level, achievements, streak, session_time functions
+---@return Triforce.Lualine.Config components Table with level, achievements, streak, session_time, total_time functions
 function Lualine.components(opts)
   util.validate({ opts = { opts, { 'table', 'nil' }, true } })
 
@@ -280,6 +325,7 @@ function Lualine.components(opts)
     achievements = Lualine.achievements,
     streak = Lualine.streak,
     session_time = Lualine.session_time,
+    total_time = Lualine.total_time,
   }
 end
 
