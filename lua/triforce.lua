@@ -47,9 +47,6 @@ local Triforce = {
       -- Time before the session timer freezes and stops counting
       idle_threshold = 60, ---@type integer
 
-      -- Time format for UI/Profile ('digital', 'clock', 'human')
-      time_format = 'digital', ---@type 'digital'|'clock'|'human'
-
       ---Notification configuration
       ---@class TriforceConfig.Notifications
       notifications = {
