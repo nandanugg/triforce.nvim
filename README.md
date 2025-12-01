@@ -211,6 +211,8 @@ require('triforce').setup({
 | `notifications.level_up`     | `boolean`       | `true`                          | Show level up notifications           |
 | `notifications.achievements` | `boolean`       | `true`                          | Show achievement notifications        |
 | `auto_save_interval`         | `number`        | `300`                           | Auto-save interval in seconds         |
+| `idle_threshold`             | `number`        | `60`                            | Time before the timer stops
+| `time_format`                | `string`        | `digital`                       | lualine time format ('digital', 'clock', 'human')
 | `keymap.show_profile`        | `string\|nil`   | `nil`                           | Keymap for opening profile            |
 | `custom_languages`           | `table\|nil`    | `nil`                           | Custom language definitions           |
 | `level_progression`          | `table\|nil`    | [See below](#level-progression) | Custom XP requirements per level tier |
