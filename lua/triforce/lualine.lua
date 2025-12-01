@@ -13,27 +13,27 @@ Lualine.config = {
   ---Level component config
   ---@class Triforce.Lualine.Config.Level
   level = {
-    prefix = 'Lv.',
-    show_level = true,
-    show_bar = true,
-    show_percent = false,
-    show_xp = false,
-    bar_length = 8,
-    bar_chars = { filled = '█', empty = '░' },
+    prefix = 'Lv.', ---@type string Text prefix before level number
+    show_level = true, ---@type boolean Show level number
+    show_bar = true, ---@type boolean Show progress bar
+    show_percent = false, ---@type boolean Show percentage
+    show_xp = false, ---@type boolean Show XP numbers (current/needed)
+    bar_length = 8, ---@type integer Length of progress bar
+    bar_chars = { filled = '█', empty = '░' }, ---@type { filled: string, empty: string } Bar characters
   },
 
   ---Achievements component config
   ---@class Triforce.Lualine.Config.Achievements
   achievements = {
-    icon = '',
-    show_count = true,
+    icon = '', ---@type string|'' Nerd Font trophy icon
+    show_count = true, ---@type boolean Show unlocked/total count
   },
 
   ---Streak component config
   ---@class Triforce.Lualine.Config.Streak
   streak = {
-    icon = '',
-    show_days = true,
+    icon = '', ---@type string|'' Nerd Font flame icon
+    show_days = true, ---@type boolean Show number of days
   },
 
   ---Session time component config (Current Session)
@@ -84,6 +84,11 @@ local function get_env()
 end
 
 ---Generate progress bar
+---@param current number Current value
+---@param max number Maximum value
+---@param length integer Bar length
+---@param chars table<string, string> Characters for filled and empty
+---@return string bar
 local function create_progress_bar(current, max, length, chars)
   if max == 0 then
     return chars.empty:rep(length)
@@ -285,6 +290,9 @@ function Lualine.total_time(opts)
   return table.concat(parts, ' ')
 end
 
+---Convenience function to get all components at once
+---@param opts Triforce.Lualine.Config|nil Configuration for all components
+---@return Triforce.Lualine.Config components Table with level, achievements, streak, session_time functions
 function Lualine.components(opts)
   util.validate({ opts = { opts, { 'table', 'nil' }, true } })
   Lualine.setup(opts)
