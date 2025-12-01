@@ -295,14 +295,24 @@ end
 
 ---End the current session
 ---@param stats Stats
-function Stats.end_session(stats)
+function Stats.end_session(stats, deduct_idle_time)
   util.validate({ stats = { stats, { 'table' } } })
 
   if not stats.session_active then
     return
   end
 
-  stats.time_coding = stats.time_coding + (os.time() - stats.last_session_start)
+  local now = os.time()
+  local duration = now - stats.last_session_start
+
+  if deduct_idle_time and duration > stats.idle_threshold then
+    duration = duration - stats.idle_threshold
+  end
+  
+  -- Sanity check to prevent negative time
+  if duration < 0 then duration = 0 end
+
+  stats.time_coding = stats.time_coding + duration
   stats.last_session_start = 0
   stats.session_active = false
 end
@@ -502,13 +512,6 @@ end
 -- Initialize the cache immediately
 Stats.load()
 
--- Create a throttled save function (optional, but good safety)
--- This ensures we don't lose data if Neovim crashes, 
--- but we don't write every second.
-local function autosave()
-  Stats.save()
-end
-
 -- 1. TRACK ACTIVITY
 local function update_activity()
   if not Stats.current_session_stats then return end
@@ -519,9 +522,6 @@ local function update_activity()
   -- If we were inactive, resume the session instantly in memory
   if not stats.session_active then
     Stats.start_session(stats)
-    -- We only save to disk here to mark the session start, 
-    -- which doesn't happen often.
-    Stats.save(stats) 
   end
 end
 
@@ -536,28 +536,41 @@ vim.api.nvim_create_autocmd({ "CursorMoved", "InsertCharPre" }, {
 vim.api.nvim_create_autocmd("VimLeavePre", {
   group = group,
   callback = function()
+    -- Stop the timer
+    if Stats._timer then
+      Stats._timer:stop()
+      Stats._timer:close()
+      Stats._timer = nil
+    end
+
     -- Ensure session is ended cleanly
     if Stats.current_session_stats then
-      Stats.end_session(Stats.current_session_stats)
+      -- Standard end session (no deduction needed as this is a manual quit)
+      Stats.end_session(Stats.current_session_stats, false)
       Stats.save(Stats.current_session_stats)
     end
   end,
 })
 
 -- 3. BACKGROUND TIMER (Check for idle)
-local timer = uv.new_timer()
-timer:start(1000, 1000, vim.schedule_wrap(function()
+Stats._timer = uv.new_timer()
+
+Stats._timer:start(1000, 1000, vim.schedule_wrap(function()
   local stats = Stats.current_session_stats
+  
+  -- Guard clause: If stats aren't loaded or session is already inactive, do nothing
   if not stats or not stats.session_active then
     return
   end
 
   local now = os.time()
-  local idle = now - stats.last_activity
+  -- Calculate how long since the last actual keypress/movement
+  local time_since_activity = now - stats.last_activity
 
-  if idle >= stats.idle_threshold then
-    -- User is idle: End the session in memory
-    Stats.end_session(stats)
+  if time_since_activity >= stats.idle_threshold then
+    -- User is idle. End the session.
+    -- Pass 'true' to deduct the idle threshold from the total time
+    Stats.end_session(stats, true)
     
     -- Sync to disk now that the session has paused
     Stats.save(stats)
