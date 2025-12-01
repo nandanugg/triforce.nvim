@@ -33,6 +33,10 @@ function Stats.default_stats()
     current_streak = 0, ---@type integer Current consecutive day streak
     longest_streak = 0, ---@type integer Longest ever streak
     db_path = vim.fs.joinpath(vim.fn.stdpath('data'), 'triforce_stats.json'), ---@type string
+    last_activity = os.time(),
+    idle_threshold = 60,
+    session_active = false,
+    current_session_stats = nil, ---@type Stats|nil
   }
 
   return stats
@@ -70,7 +74,12 @@ end
 
 ---Load stats from disk
 ---@return Stats merged
-function Stats.load()
+function Stats.load(force)
+  -- Return in-memory cache if it exists and we aren't forcing a reload
+  if Stats.current_session_stats and not force then
+    return Stats.current_session_stats
+  end
+
   local path = get_stats_path()
 
   -- Check if file exists
@@ -135,6 +144,7 @@ function Stats.load()
     merged.level = calculated_level
   end
 
+  Stats.current_session_stats = merged
   return merged
 end
 
@@ -142,6 +152,8 @@ end
 ---@param stats Stats|nil
 ---@return boolean success
 function Stats.save(stats)
+  -- If no specific stats passed, save the current cached session
+  local stats_to_save = stats or Stats.current_session_stats
   util.validate({ stats = { stats, { 'table', 'nil' }, true } })
   if not stats then
     return false
@@ -272,10 +284,13 @@ end
 ---Start a new session
 ---@param stats Stats
 function Stats.start_session(stats)
+  if stats.session_active then
+    return
+  end
   util.validate({ stats = { stats, { 'table' } } })
-
-  stats.sessions = stats.sessions + 1
+  stats.session_active = true
   stats.last_session_start = os.time()
+  stats.sessions = stats.sessions + 1
 end
 
 ---End the current session
@@ -283,12 +298,13 @@ end
 function Stats.end_session(stats)
   util.validate({ stats = { stats, { 'table' } } })
 
-  if stats.last_session_start <= 0 then
+  if not stats.session_active then
     return
   end
 
-  stats.time_coding = stats.time_coding - stats.last_session_start + os.time()
+  stats.time_coding = stats.time_coding + (os.time() - stats.last_session_start)
   stats.last_session_start = 0
+  stats.session_active = false
 end
 
 ---Get current date in YYYY-MM-DD format
@@ -482,6 +498,71 @@ function Stats.export_to_md(stats, target)
   uv.fs_write(fd, data)
   uv.fs_close(fd)
 end
+
+-- Initialize the cache immediately
+Stats.load()
+
+-- Create a throttled save function (optional, but good safety)
+-- This ensures we don't lose data if Neovim crashes, 
+-- but we don't write every second.
+local function autosave()
+  Stats.save()
+end
+
+-- 1. TRACK ACTIVITY
+local function update_activity()
+  if not Stats.current_session_stats then return end
+  
+  local stats = Stats.current_session_stats
+  stats.last_activity = os.time()
+
+  -- If we were inactive, resume the session instantly in memory
+  if not stats.session_active then
+    Stats.start_session(stats)
+    -- We only save to disk here to mark the session start, 
+    -- which doesn't happen often.
+    Stats.save(stats) 
+  end
+end
+
+local group = vim.api.nvim_create_augroup("TriforceTracking", { clear = true })
+
+vim.api.nvim_create_autocmd({ "CursorMoved", "InsertCharPre" }, {
+  group = group,
+  callback = update_activity, -- No I/O here!
+})
+
+-- 2. HANDLE EXIT (Save on quit)
+vim.api.nvim_create_autocmd("VimLeavePre", {
+  group = group,
+  callback = function()
+    -- Ensure session is ended cleanly
+    if Stats.current_session_stats then
+      Stats.end_session(Stats.current_session_stats)
+      Stats.save(Stats.current_session_stats)
+    end
+  end,
+})
+
+-- 3. BACKGROUND TIMER (Check for idle)
+local timer = uv.new_timer()
+timer:start(1000, 1000, vim.schedule_wrap(function()
+  local stats = Stats.current_session_stats
+  if not stats or not stats.session_active then
+    return
+  end
+
+  local now = os.time()
+  local idle = now - stats.last_activity
+
+  if idle >= stats.idle_threshold then
+    -- User is idle: End the session in memory
+    Stats.end_session(stats)
+    
+    -- Sync to disk now that the session has paused
+    Stats.save(stats)
+  end
+end))
 
 return Stats
 -- vim:ts=2:sts=2:sw=2:et:ai:si:sta:
