@@ -42,6 +42,14 @@ local Triforce = {
       enabled = true, ---@type boolean
       ---Enable gamification features (stats, XP, achievements)
       gamification_enabled = true, ---@type boolean
+
+      -- Inactive timer threshold in seconds (default: 60)
+      -- Time before the session timer freezes and stops counting
+      idle_threshold = 60, ---@type integer
+
+      -- Time format for UI/Profile ('digital', 'clock', 'human')
+      time_format = 'digital', ---@type 'digital'|'clock'|'human'
+
       ---Notification configuration
       ---@class TriforceConfig.Notifications
       notifications = {
@@ -109,6 +117,10 @@ function Triforce.setup(opts)
   end
 
   local stats_module = require('triforce.stats')
+
+  if Triforce.config.idle_threshold then
+    stats_module.config.idle_threshold = Triforce.config.idle_threshold
+  end
 
   -- Apply custom level progression to stats module
   if Triforce.config.level_progression then

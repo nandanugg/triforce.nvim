@@ -5,8 +5,6 @@ local util = require('triforce.util')
 local Lualine = {}
 
 -- STATE: Track the time coding value when Neovim first loaded.
--- This allows us to calculate "Session Time" as "Time since I opened Neovim"
--- even if we take breaks.
 local initial_time_coding = nil
 
 ---Default configuration for lualine components
@@ -55,7 +53,7 @@ Lualine.config = {
   total_time = {
     icon = '󰔟',
     show_duration = true,
-    format = 'human',
+    format = 'human', ---@type 'human'|'digital'|'clock'
   },
 }
 
@@ -66,12 +64,13 @@ function Lualine.setup(opts)
   Lualine.config = vim.tbl_deep_extend('force', Lualine.config, opts or {})
 end
 
----Get current stats safely and initialize baseline
+---Get current stats AND global config safely
 ---@return Stats|nil stats
-local function get_stats()
+---@return TriforceConfig|nil config
+local function get_env()
   local ok, triforce = pcall(require, 'triforce')
   if not ok then
-    return
+    return nil, nil
   end
 
   local stats = triforce.get_stats()
@@ -81,10 +80,10 @@ local function get_stats()
     initial_time_coding = stats.time_coding or 0
   end
 
-  return stats
+  return stats, triforce.config
 end
 
--- ... [create_progress_bar function remains the same] ...
+---Generate progress bar
 local function create_progress_bar(current, max, length, chars)
   if max == 0 then
     return chars.empty:rep(length)
@@ -93,7 +92,7 @@ local function create_progress_bar(current, max, length, chars)
   return chars.filled:rep(filled) .. chars.empty:rep(length - filled)
 end
 
--- ... [format_time function remains the same] ...
+---Format time duration
 local function format_time(seconds, format)
   -- Default to digital if invalid format provided
   if not vim.list_contains({ 'human', 'digital', 'clock' }, format) then
@@ -123,15 +122,19 @@ local function format_time(seconds, format)
   end
 end
 
--- ... [Lualine.level, achievements, streak remain the same] ...
+---Level component - Shows level and XP progress
+---@param opts Triforce.Lualine.Config.Level|nil Component-specific options
+---@return string component
 function Lualine.level(opts)
-  -- (Same as previous code)
-  local stats = get_stats()
+  util.validate({ opts = { opts, { 'table', 'nil' }, true } })
+
+  local stats = get_env()
   if not stats then
     return ''
   end
+
   local config = vim.tbl_deep_extend('force', Lualine.config.level, opts or {})
-  -- XP Logic...
+
   local stats_module = require('triforce.stats')
   local xp_for_current = stats_module.xp_for_next_level(stats.level - 1)
   local xp_for_next = stats_module.xp_for_next_level(stats.level)
@@ -151,20 +154,28 @@ function Lualine.level(opts)
   if config.show_xp then
     table.insert(parts, ('%d/%d'):format(xp_progress, xp_needed))
   end
+
   return table.concat(parts, ' ')
 end
 
+---Achievements component - Shows unlocked achievement count
+---@param opts Triforce.Lualine.Config.Achievements|nil Component-specific options
+---@return string component
 function Lualine.achievements(opts)
-  local stats = get_stats()
+  util.validate({ opts = { opts, { 'table', 'nil' }, true } })
+
+  local stats = get_env()
   if not stats then
     return ''
   end
+
   local config = vim.tbl_deep_extend('force', Lualine.config.achievements, opts or {})
   local all_achievements = require('triforce.achievement').get_all_achievements(stats)
   local unlocked = 0
   for _, _ in ipairs(stats.achievements or {}) do
     unlocked = unlocked + 1
   end
+
   local parts = {}
   if config.icon ~= '' then
     table.insert(parts, config.icon)
@@ -172,11 +183,17 @@ function Lualine.achievements(opts)
   if config.show_count then
     table.insert(parts, ('%d/%d'):format(unlocked, #all_achievements))
   end
+
   return table.concat(parts, ' ')
 end
 
+---Streak component - Shows current coding streak
+---@param opts Triforce.Lualine.Config.Streak|nil Component-specific options
+---@return string|'' component
 function Lualine.streak(opts)
-  local stats = get_stats()
+  util.validate({ opts = { opts, { 'table', 'nil' }, true } })
+
+  local stats = get_env()
   if not stats then
     return ''
   end
@@ -184,6 +201,7 @@ function Lualine.streak(opts)
   if streak == 0 then
     return ''
   end
+
   local config = vim.tbl_deep_extend('force', Lualine.config.streak, opts or {})
   local parts = {}
   if config.icon ~= '' then
@@ -192,50 +210,45 @@ function Lualine.streak(opts)
   if config.show_days then
     table.insert(parts, tostring(streak))
   end
+
   return table.concat(parts, ' ')
 end
 
 ---Session time component - Shows time spent in THIS Neovim instance
----Pauses when idle, resumes when active.
 ---@param opts Triforce.Lualine.Config.SessionTime|nil Component-specific options
 ---@return string component
 function Lualine.session_time(opts)
   util.validate({ opts = { opts, { 'table', 'nil' }, true } })
 
-  local stats = get_stats()
+  local stats, global_config = get_env()
   if not stats then
     return ''
   end
 
   local config = vim.tbl_deep_extend('force', Lualine.config.session_time, opts or {})
 
-  -- 1. Calculate the real-time "Lifetime" coding duration
+  local fmt = (opts and opts.format) or (global_config and global_config.time_format) or config.format
+
   local current_lifetime_coding = stats.time_coding or 0
   if stats.session_active and stats.last_session_start > 0 then
-    -- Add the partial uncommitted time from the current burst
     current_lifetime_coding = current_lifetime_coding + (os.time() - stats.last_session_start)
   end
 
-  -- 2. Subtract the baseline (time when we opened Neovim)
-  -- This gives us "Time spent coding since I opened this window"
   local session_duration = math.max(0, current_lifetime_coding - (initial_time_coding or 0))
 
-  -- 3. Determine Icon (Active vs Paused)
   local icon
   if stats.session_active then
-    icon = config.status_icons.active -- Clock
+    icon = config.status_icons.active
   else
-    icon = config.status_icons.paused -- Pause
+    icon = config.status_icons.paused
   end
 
-  -- Build component
   local parts = {}
   if icon ~= '' then
     table.insert(parts, icon)
   end
-
   if config.show_duration then
-    table.insert(parts, format_time(session_duration, config.format))
+    table.insert(parts, format_time(session_duration, fmt))
   end
 
   return table.concat(parts, ' ')
@@ -247,14 +260,15 @@ end
 function Lualine.total_time(opts)
   util.validate({ opts = { opts, { 'table', 'nil' }, true } })
 
-  local stats = get_stats()
+  local stats, global_config = get_env()
   if not stats then
     return ''
   end
 
   local config = vim.tbl_deep_extend('force', Lualine.config.total_time, opts or {})
 
-  -- Calculate TOTAL duration (Historical + Current Session)
+  local fmt = (opts and opts.format) or (global_config and global_config.time_format) or config.format
+
   local total_duration = stats.time_coding or 0
   if stats.session_active and stats.last_session_start > 0 then
     total_duration = total_duration + (os.time() - stats.last_session_start)
@@ -265,7 +279,7 @@ function Lualine.total_time(opts)
     table.insert(parts, config.icon)
   end
   if config.show_duration then
-    table.insert(parts, format_time(total_duration, config.format))
+    table.insert(parts, format_time(total_duration, fmt))
   end
 
   return table.concat(parts, ' ')
@@ -285,4 +299,3 @@ end
 
 return Lualine
 -- vim:ts=2:sts=2:sw=2:et:ai:si:sta:
-

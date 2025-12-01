@@ -12,7 +12,10 @@ local Stats = {
     tier_2 = { min_level = 11, max_level = 20, xp_per_level = 500 }, -- Levels 11-20: 500 XP each
     tier_3 = { min_level = 21, max_level = math.huge, xp_per_level = 1000 }, -- Levels 21+: 1000 XP each
   },
-  db_path = nil, ---@type string|nil
+  config = {
+    idle_threshold = 60,
+  },
+  db_path = nil, ---@type string|nil,
 }
 
 ---@return Stats stats
@@ -34,7 +37,7 @@ function Stats.default_stats()
     longest_streak = 0, ---@type integer Longest ever streak
     db_path = vim.fs.joinpath(vim.fn.stdpath('data'), 'triforce_stats.json'), ---@type string
     last_activity = os.time(), ---@type integer the time of the last activity
-    idle_threshold = 60, ---@type integer the seconds before the session timer pauses
+    idle_threshold = Stats.config.idle_threshold, ---@type integer the seconds before the session timer pauses
     session_active = false, ---@type boolean Wether the session is active or paused
     current_session_stats = nil, ---@type Stats|nil Current session stats
   }
