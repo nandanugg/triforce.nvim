@@ -8071,6 +8071,7 @@ components:
                 minLength: 1
               deskripsi:
                 type: string
+                maxLength: 1300
               tanggal:
                 type: string
                 format: date
