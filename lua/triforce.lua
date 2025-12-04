@@ -92,10 +92,17 @@ local Triforce = {
   end,
 }
 
+---@param silent? boolean
 ---@return boolean gamified
-function Triforce.has_gamification()
+function Triforce.has_gamification(silent)
+  util.validate({ silent = { silent, { 'boolean', 'nil' }, true } })
+
+  silent = silent ~= nil and silent or false
+
   if not Triforce.config.gamification_enabled then
-    vim.notify('Gamification is not enabled in config', WARN)
+    if not silent then
+      vim.notify('Gamification is not enabled in config', WARN)
+    end
     return false
   end
 
@@ -141,7 +148,7 @@ function Triforce.setup(opts)
     })
   end
 
-  if Triforce.config.gamification_enabled then
+  if Triforce.has_gamification(true) then
     require('triforce.tracker').setup()
   end
 end
